@@ -1,5 +1,5 @@
-\newcommand{\graphPath}[1]{graphs/#1}
-\input{graphs/evalRes}
+\newcommand{\graphPath}[1]{aosd13/graphs/#1}
+\input{aosd13/graphs/evalRes}
 \section{Evaluation}
 \label{sec:evaluation}
 
@@ -67,7 +67,7 @@ In Figure~\ref{fig:measurements-overview}, we provide an overview of the setup.
 
 \begin{figure}
 	\centering
-		\includegraphics[width=\linewidth]{graphs/measurements-overview}
+		\includegraphics[width=\linewidth]{aosd13/graphs/measurements-overview}
 	\caption{Measurement Setup: Overview}
 	\label{fig:measurements-overview}
 \end{figure}
@@ -76,7 +76,7 @@ In Figure~\ref{fig:measurements-overview}, we provide an overview of the setup.
 \subsection{Experimental Units}
 
 
-\input{graphs/queryTables}
+\input{aosd13/graphs/queryTables}
 
 As experimental units, we sampled a set of queries on code structures from FindBugs 2.0~\citep{DBLP:journals/sigplan/HovemeyerP04}. FindBugs is a popular bug-finding tool for Java Bytecode available as open source. To detect instances of bug patterns, it queries a structural in-memory representation of a code base (extracted from bytecode).
 Concretely, a single loop traverses each class and invokes all visitors (implemented as listeners) on each element of the class. Many visitors, in turn, perform activities concerning multiple bug detectors which are fused together. An extreme example is that, in FindBugs, query \queryRUNFINALIZERSONEXIT{} is defined in class \code{DumbMethods} together with other 41 bug detectors for distinct types of bugs.
@@ -137,7 +137,7 @@ We first measured the construction cost of these indexes:
 \begin{center}
 \begin{tabular}{l*{1}{r@{}c@{}l}}\toprule
 Index&\multicolumn{3}{c}{Elapsed time (ms)}\\\midrule
-\input{graphs/indexes}
+\input{aosd13/graphs/indexes}
 \bottomrule
 \end{tabular}
 \end{center}
