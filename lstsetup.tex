@@ -1,4 +1,3 @@
-
 % From http://tihlde.org/~eivindw/latex-listings-for-scala/
 % "define" Scala
 %Keyword list taken from the scaladoc definition.
@@ -9,7 +8,7 @@
 	  match,new,null,object,override,package,private,protected,%
 	  return,sealed,super,this,throw,trait,true,try,type,%
 	  val,var,while,with,yield},
-  otherkeywords={=>,<-,<\%,<:,>:,\#,@},
+  otherkeywords={=>,<-,<\%,<:,>:,\#,@,scala>},
   sensitive=true,
   morecomment=[l]{//},
   morecomment=[n]{/*}{*/},
@@ -29,7 +28,6 @@
     stringstyle=\ttfamily, % typewriter type for strings
     mathescape=true,%
     escapechar=£,%
-    firstnumber=0,%
     numberstyle=\tiny,%
 }
 
@@ -37,15 +35,16 @@
 \lstset{%
 %columns=fullflexible,		% enable kerning, lose column alignment.
 showstringspaces=false, %
-breakindent=2ex,   % Two chars (hopefully)
-breaklines,
-breakatwhitespace,
-breakautoindent=true,
+breaklines=false,
+breakatwhitespace=false,
+breakautoindent=false,
 keepspaces
 %keepspaces was described at: http://tex.stackexchange.com/questions/41954/listings-bug-space-after-literate-replacement-lost-with-spaceflexible-fullflexi
 }
 
 \newcommand{\codesize}{\footnotesize}
+
+% Command for in-text code snippets, if needed.
 \newcommand{\code}[1]{%
     \lstinline[basicstyle=\codesize\ttfamily]^#1^}
 
