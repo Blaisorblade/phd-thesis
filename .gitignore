@@ -1,3 +1,13 @@
+*.xls
+*.xlsx
+*.pptx
+*.docx
+*.txt
+*.csv
+*.r
+*.ps
+*.bat
+
 ## Mine:
 comment.cut
 *.pdf
