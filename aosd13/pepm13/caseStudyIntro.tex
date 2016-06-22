@@ -1,0 +1,106 @@
+Programmers
+are often concerned with domain-specific optimizations which distract them from the problem at hand and should instead be automated.
+Consider for instance the following piece of Scala code, which maps two functions over a collection of integers \code{v}:
+
+\begin{lstlisting}
+v.map(x => x + 1).map(x => x * 3)
+\end{lstlisting}
+
+Exploiting algebraic identities, we can optimize such code using collections.
+For instance, the two map operations above can be fused into a single one to avoid constructing an intermediate collection:
+
+\begin{lstlisting}
+v.map(x => (x + 1) * 3)
+\end{lstlisting}
+
+This optimization is specific to the domain of collections. In general, domain-specific optimizations are typically not performed by compilers or virtual machines, because they require domain knowledge
+about the behavior and invariants of the code, something which is beyond the capabilities of general-purpose static analysis. For instance, the 
+optimization above is only behavior-preserving, if the functions mapped over the collection do not perform order-dependent side effects,
+%\pg{TR: static analysis could allow optimizing this example. Also discuss map fusion in related work.}
+which is complex to determine in general. Namely, verifying that a function is pure requires verifying that all the invoked functions are also pure, but already understanding which functions are invoked can be difficult, especially when late-bound function calls are involved.
+% I wrote 'late-bound function calls' instead of 'virtual method calls' to include the same problem in functional programs.
+
+Nowadays, mostly programmers have to perform domain-specific optimizations by hand. In our example, this does not seem too bad; but 
+when considering further optimizations, such as indexing, reordering and fusion of filters, and computing hash joins
+instead of Cartesian products, then it becomes clear that hand-coding such optimizations can lead to complicated
+and redundant code, because the same optimization patterns are applied again and again. Hand-coding such optimizations also tends to lead to brittle and \emph{non-modular} code. For instance, consider a program which 
+computes \code{w = v.map(x => x + 1)}, only to pass \code{w} to another function which computes
+\code{z = w.map(x => x * 3)}. If \code{w} is not used further, it gets built just to be transformed again. Again, we would like to apply map fusion, but this time the code crosses modularity boundaries. Hence, in a modular structure, a developer might not even see optimization potential.
+In contrast, an automated domain-specific optimizer can inline the function to fuse code from different modules together
+ and spot cross-module optimization opportunities.
+%\pg{TR: Maybe connect to inlining?}
+%\pg{Have a forward reference, in the paper summary, with a more detailed explanation of the problem.}
+
+Such optimizations are not possible within most ordinary collections API, such as the Scala collections API~\cite{odersky2009fighting}, because they
+do not reify queries on collections. Instead, each API function is defined compositionally in terms
+of the meaning of the other API functions.
+We regard the Scala collections API as a \emph{domain-specific embedded language} (DSEL); this style of compositional DSL implementation by libraries is often
+called \emph{shallow embedding}%
+%~\chk{add reference} %PG: I know it's crazy, but nobody gives a reference for this term.
+. The alternative, which we pursue, is a \emph{deep embedding} of the DSL, where programs written in the DSL (in our case: 
+queries on collections) are reified as data or, more specifically, as abstract syntax trees, which can be subject to non-compositional semantics. Among others, they can then be analyzed, optimized, transformed, interpreted, or compiled.
+
+In this paper we present \LoS, a deep embedding of the Scala collections DSEL with the goal of supporting more flexible semantics and especially automatic optimization.
+We chose to use the Scala language and its collections DSEL because (i) Scala has several features that make it an attractive host language for DSL embedding \citep{Odersky11book} and (ii) because it has a particularly sophisticated collections library with precisely-typed interfaces \citep{odersky2009fighting}, which makes it particularly challenging to embed the library deeply.
+
+%We target Scala collections DSEL because improved support for DSL embedding is among Scala design goals.
+
+\input{caseStudyGoals}
+
+Overall, we make the following contributions:
+
+
+\begin{itemize}
+\item We illustrate modularity limitations when manipulating collections, caused by the lack of domain-specific optimizations. Conversely, we illustrate how domain-specific optimizations lead to more readable and more modular code~(Sec.~\ref{sec:motivation}).
+\item We present the design~(Sec.~\ref{sec:solution}) and implementation~(Sec.~\ref{sec:implementation}) of \LoS, an embedded DSL for queries on collections in Scala.
+\item We discuss how Scala supports expressing the interface~(Section~\ref{sec:intfScala}).
+%\LoS\ makes heavy usage of advanced Scala features to preserve the ``look and feel'' of native Scala queries
+% and is hence a significant showcase for these features~(Sec.~\ref{sec:implementation}).
+ \item We evaluate \LoS\ by re-implementing several code analyses of the Findbugs tool~\citep{DBLP:journals/sigplan/HovemeyerP04}.
+ The resulting code is shorter and/or more efficient, in some cases by orders of magnitude~(Sec.~\ref{sec:evaluation}).
+ \item We discuss the degree to which \LoS\ fulfills our original design goal and extract lessons for
+ both future DSL developers and general-purpose language designers. %\chk{none of these abbreviations was introducted.} %DSL was introduced, I avoid GPL
+% In particular, we propose areas in which the support of Scala
+% for embedding DSLs should be improved~(Sec.~\ref{sec:discussion}).
+\end{itemize}
+
+% PG: I integrated the outline into the contribution list, I like it better.
+%The remainder of this work is structured as follows. First, we discuss related work. 
+%In Sec.~\ref{sec:intro} we give an informal overview of \LoS. Sec.~\ref{sec:implementation} describes the implementation of \LoS. Sec.~\ref{sec:evaluation} presents the result of our evaluation. Sec.~\ref{sec:discussion} reflects on the results and discusses implications for object- and meta-language design. Sec.~\ref{sec:concl} concludes.
+
+%%%%%%%%
+% %Keep the intro within the first page, or however short.
+% %
+% %Detail more about DSLs in general later, not in the intro.
+% %
+% %1 parag. DSL + embedding are important to reduce the abstraction gap and …. (citations). (Domain-level developers are mentioned up to here.)
+% %2 parag. ds-optims are important
+% %3. => deep embedding  (multiple semantics as a side point). Scala is tailored for this even for deep embedding (lots of citations).
+% %4. We want to do a case study embedding collections, because it's critical case study, challenges developers (?) and tools (mostly languages), and can hugely benefit from optimizations.
+% %(I don't talk so much any more about developers; this is a challenge for the DSL developer anyway).
+% %(Only later mention error reporting and the domain-level developer (ie. user))
+% %5. = Sec. 1.1 (intro to the case study): shorten. Our goal is to embed a Scala-like collection API similarly to \LINQ\ without [hacking the compiler] and optimizing it.
+% %% This might be enough to discuss \LINQ\ only at the end.
+% %6. Mention FindBugs as evaluation goal.
+% %7. We did it and we report novel encoding, experience on this (anticipate conclusions shortly). (Some performance numbers would also be good). "In selected cases, we yield a speedup of …". (I can be more honest here but shortly).
+% %8. list of contributions
+% %No outline, unless it fits within the contributions.
+% % Note: here or later, we could distinguish between domain-specific compiler extensions and more general ones.
+
+% % Good paragraph
+
+% One of the design goals for this DSEL is that embedded queries should be
+% as close as possible to their native equivalent, to simplify
+% transforming a native query into an embedded one. Ideally, querying a
+% ``smart'' collection instead of a native one should be enough to ensure
+% to produce a representation of the query instead of executing it;
+% however, a query representation needs to be then converted explicitly to
+% its result. However, Scala does not support natively expression trees,
+% which are used in C\# to achieve this goal. We instead provide an
+% emulation for them, based on user-defined implicit conversions, which we
+% later describe. The surface syntax is quite close to Scala in many
+% regards, but some areas show significant limitations; in other cases,
+% providing a usable surface syntax is made more complex by limitations of
+% Scala's type inference; one of our goals is to not require the user to
+% supply more type annotations than it would need if expression trees were
+% natively supported.

@@ -1,0 +1,286 @@
+In this section we discuss the degree to which \LoS\ fulfilled our original design goals, and the conclusions
+for host and domain-specific language design.
+
+\subsection{What worked well}
+Several features of Scala contributed greatly to the success we achieved. With implicit conversions, the lifting can be made mostly transparent. The advanced type system features were quite helpful to make the expression tree representation typed. The fact that for-comprehensions are desugared \emph{before} type inference and type checking was also a prerequisite for automatic lifting. The syntactic expressiveness and uniformity of Scala, in particular the fact that custom types can have the same look-and-feel as primitive types, were also vital to lift expressions on primitive types.
+
+%\subsection{What did not work so well; limitations}
+\subsection{Limitations}
+\label{sec:limitations}
+Despite these positive experiences and our experimental success, our embedding has a few significant limitations.
+
+The first limitation is that we only lift a subset of Scala, and some interesting features are missing.
+We do not support \emph{statements} in nested blocks in our queries, but this could be implemented reusing techniques from Delite~\citep{Rompf11BBlocks}.
+%\smartParagraph{Virtualized pattern matching}
+More importantly for queries, \emph{pattern matching} cannot be supported by deep embedding similar to ours. In contrast to for-comprehension syntax, pattern matching is desugared only \emph{after} type checking \cite{Emir07Patterns}, which prevents us from lifting pattern matching notation. More specifically, because an extractor \cite{Emir07Patterns} cannot return the representation of a result value (say \code{Exp[Boolean]}) to later evaluate; it must produce its final result at pattern matching time. There is initial work on ``virtualized pattern matching''\footnote{\url{http://stackoverflow.com/questions/8533826/what-is-scalas-experimental-virtual-pattern-matcher}}, and we hope to use this feature in future work.
+
+We also experienced problems with operators that cannot be overloaded, such as \code{==} or \code{if-else} and with lifting methods in \code{scala.Any}, which forced us to provide alternative syntax for these features in queries. The  Scala-virtualized project \citep{Moors12Virtualized} aims to address these limitations; unfortunately, it advertises no change on the other problems we found, which we subsequently detail.
+
+%Pattern matching cannot be virtualized as-is, 
+
+It would also be desirable if we could enforce the absence of side effects in queries, but since Scala, like most practical programming languages except Haskell, does not track side effects in the type system this does not seem to be possible. 
+%However, we believe that the advantages of purely functional queries are a more desirable interface.
+
+Finally, compared to \emph{lightweight modular staging}~\citep{rompf2010lightweight} (the foundation of Delite) and to polymorphic embedding~\citep{hofer08polymorphic}, we have less static checking for some programming errors when writing queries; the recommended way to use Delite is to write a DSEL program in one trait, in terms of the DSEL interface only, and combine it with the implementation in another trait. In polymorphic embedding, the DSEL program is a function of the specific implementation (in this case, semantics).
+Either approach ensures that the DSL program is \emph{parametric} in the implementation, and hence cannot refer to details of a specific implementation.
+However, we judged the syntactic overhead for the programmer to be too high to use those techniques -- in our implementation we rely on encapsulation and on dynamic checks at query construction time to achieve similar guarantees.
+
+The choice of interpreting expressions turned out to be a significant performance limitation. It could likely be addressed by using Delite and lightweight modular staging instead, but we wanted to experiment with how far we can get \emph{within} the language in a well-typed setting.
+
+%The first is 
+%\pg{We don't support pattern matching in the user interface.}
+
+\subsection{What did not work so well: Scala type inference}
+\label{sec:ScalaLessons}
+
+%\pg{Continue:
+%When implementing our library, we often struggled against limitations and bugs in the Scala compiler, especially regarding type inference and its interaction with implicit resolution. Scala's type inference is not complete.
+%%, hence it does not guarantee 
+%%When using implicit conversions to encode 
+%}
+%\pg{Examples: nested constructors; shadowing of functions; pattern matching in the optimizer}.
+%\pg{Our expression trees are only partially typed - discuss limitations of the optimizer.}
+%
+%\pg{as soon as we try supporting nesting tuples such as \code{((a, b), c}, we face again type inference bugs, for which this time we found no reasonable workaround which does not affect surface syntax. The conversion above accepts a pair of expression trees; we can write a more general conversion which accepts a pair of values \emph{implicitly convertible} to expression trees, so that \code{asExp((a, b), c)} would have type \code{Exp[((A, B), C)]}, but the compiler cannot make use of this conversion\footnote{We reported \url{https://issues.scala-lang.org/browse/SI-5651}, probably a dup of \url{https://issues.scala-lang.org/browse/SI-3346}.}}.
+%
+%
+%\pg{Discuss that type inference constrains library design.}
+
+%\pg{Move discussion of type inference to the discussion Section}
+%%However, Scala only features \emph{local} type inference; one often needs to consider the type inference algorithm when writing method signatures, especially for higher-order methods, to ensure that the client code does not need redundant type annotations.
+%
+%Since \code{map} is part of the collection DSEL, and since for-comprehensions are desugared to expressions using \code{map}, we need to lift this method carefully. Clients should not need extra type annotations for using the lifted version; moreover, we want to receive a reified version of the parameter.
+%
+%%one can often write type signatures to ensure that it works.
+%
+%In this example, type inference can consider the type of \code{map}, unify \code{T} with \code{String} and \code{T => U} with the type of \code{str => str + "!"}. Type inference deduces that \code{str} must also have type \code{T = String}, and can then typecheck the function body and deduce that its return type, \code{U}, is also \code{String}. 
+
+
+%\pg{The interpretation overhead is higher than we expected, both with and without HOAS; maybe better JIT compilers could help?}
+%\pg{We do not reject inadequate object programs at compile time, but only when queries are built.}
+
+
+%\pg{One of the additional goal was to have our optimization work within the language visible to the user. We didn't succeed so much, for various reasons; on the other hand, this seems orthogonal to the meta-goals of the paper, and our failure does not seem to be insightful.}
+
+%In our optimizer, we initially wanted to keep the language quite close to the user language. That however was not possible.
+%We plan reusing different approaches to query optimization, based on monoid homomorphisms. On the other hand, different semantics might require the original language structure.
+
+%% Collections interface.
+%\smartParagraph{Limitations and discussion.}
+%
+%However, instead of just lifting those methods from \code{TraversableLike}, we modified them slightly. These differences, however, do not limit the ability to write queries with our framework, as we will illustrate.\pg{Any supporting evidence?}
+%This is not due to a limitation of our approach; we experimented with lifting the original signatures faithfully, but in the end abandoned this attempt because of opposing design goals for the interface of our DSEL:
+%\begin{itemize}
+%\item expressions in the Scala collections DSEL have an accurate static type, and we want to preserve that accuracy by making the lifting as faithful as possible;
+%\item we want our expression trees to support different semantics reasonably well, including interpretation and optimization.
+%\item we want to minimize the amount of code we need, and have minimal coupling to the collection library. For instance, the framework should support new implementation of dictionaries with as few changes as possible to the framework.
+%\end{itemize}
+%Furthermore, an additional non-functional constraint is that we need an interface which type inference understands.
+%
+%These three goals are opposing and we cannot reach all of them at the same time. In the end, we make the following choices.
+%\begin{itemize}
+%%\item We only support purely functional interfaces, to simplify optimizations. \pg{Probably comment this out, already said.}
+%\item We only support \code{Traversable[T]} and its subtypes. Some optimizations are unsafe for more generic collection types.
+%For instance, we do not support iterators (whose interface relies on side effects), nor do we support \code{FilterMonadic[T, Repr]}.
+%Additionally, this excludes support for parallel collections, which is left however for future work.
+%\item For instance, we want to have just a single type of node to represent \code{flatMap} operations, and not a different one for each kind of collection, hence we lift \code{TraversableLike}. On the other hand, to make our optimizations safe, we only consider collections which are subtype of \code{Traversable[T]}. As a consequence, \code{withFilter} returns the representation of a new concrete collection, instead of a proxy of type \code{Exp[FilterMonadic[T, Repr]]}, and thus has the semantics of \code{filter}; the two semantics are however indistinguishable at run time in absence of side effects.
+%Moreover, restricting to subtype of \code{Traversable[T]} implies excluding iterators, which however lack a purely functional interface; support for parallel collections instead is left as future work.
+%\item We currently only support a subset of methods (only the ones we ever needed), to be able to provide different semantics more easily.
+%\end{itemize}
+
+%%% implicit conversions
+%However, with the definitions so far, expressions such as \code{"bar" + x} cannot yet be lifted. To make this expression typecheck, the compiler should transform it to
+%\code{expToStringOps(pure("bar")) + x} by chaining two implicit conversions. However, the rules for implicit conversions in Scala explicitly disallow this transformation, to avoid different implicit conversions to chain in unintended ways.
+
+%\citet[Ch.~21]{Odersky11book} explain how one can selectively allow chaining of implicit conversions.
+%We could modify \code{expToStringOps(Exp[String])} to accept any parameter which can be converted to \code{Exp[String]}, together with
+%such an implicit conversion, as follows:
+%\begin{lstlisting}
+%implicit def expToStringOps[T](x: T)
+%    (implicit conv: T => Exp[String]) =
+%    new StringOps(conv(x))
+%\end{lstlisting}
+%However, this does not work due to hard-to-fix bugs in Scala type inference\footnote{The problem is demonstrated at \url{https://gist.github.com/2146097}; the bug report is available at \url{https://issues.scala-lang.org/browse/SI-3346}.}.
+%Hence we need to write a new implicit conversion, chaining those two conversions explicitly:
+%
+%\begin{lstlisting}
+%implicit def toStringOps(t: String) = expToStringOps(pure(t)) 
+%\end{lstlisting}
+
+
+%\smartParagraph{Functions}
+%Functions can be lifted similarly to methods. For a function \code{f} with parameter types \code{A1}, \ldots, \code{An} and result type \code{R}, one can provide an overload of \code{f} with parameter types \code{Exp[A1]}, \ldots, \code{Exp[An]} and result type \code{Exp[R]} which creates an expression node representing the function call.
+%This also extends to constructors of case classes, like \code{BookData} in the examples above. However, this function shadows the original one. While the ambiguity could be resolved by overload resolution, it is not, hence we need to import the new function only in a restricted scope.
+%\pg{Should I say more here?}
+%
+%\smartParagraph{Implicit conversions}
+%We also need to lift implicit conversions: Whenever values of type \code{T} can be converted to type \code{U}, we want that also values of type \code{Exp[T]} can be converted to type \code{Exp[U]}, to keep the behavior of lifted code similar. We can do so similarly to how we lift a function, but since implicit names do not appear in user code normally, we can choose a different name and avoid shadowing problems.
+%
+%\pg{Should I say more here?}
+
+%The following implicit conversion should be enough to lift at once all implicit conversions:
+%\begin{lstlisting}
+%implicit def liftConv[T, U](t: Exp[T])(implicit conv: T => U): Exp[U] = //...
+%\end{lstlisting}
+%However, the Scala compiler is not able to use this implicit conversion, for unclear reasons (we believe because of some type inference bug).
+%Hence for each implicit conversion we need to define a lifting.
+%\pg{This and the previous ones are bugs which I could workaround rather easily; later I have a bug which I cannot workaround.}
+
+% I wanted to show this code, which does run into a known bug, but it does not do the right thing.
+%\begin{lstlisting}
+%implicit def pure[T, U <% T](t: U): Exp[T] = Const(t)
+%\end{lstlisting}
+
+%One such context is:
+%\begin{lstlisting}
+%def asExp[T](t: Exp[T]) = t
+%\end{lstlisting}
+%Note that \code{asExp} is an identity function, but restricted to expression trees; this triggers the Scala compiler to use an implicit resolution if needed. Standard rules for implicit resolution apply, which select the implicit conversion with the most specific type. Hence, while \code{pure((a, b))} would produce \code{Const((a, b))} with type \code{Exp[(Exp[A], Exp[B])]}, 
+%\code{asExp((a, b))} produces \code{LiftTuple2(a, b)} with type \code{Exp[(A, B)]}, that is a representation of \code{(a, b)}, as desired.
+%
+%
+%\pg{Actually, the problem shows up with any two nested constructors of this kind.}
+%
+%DSEL programs need to resort to calling \code{asExp} extremely rarely, because operations of the DSEL already provide the needed context; but as soon as we try supporting nesting tuples such as \code{((a, b), c}, we face again type inference bugs, for which this time we found no reasonable workaround which does not affect surface syntax. The conversion above accepts a pair of expression trees; we can write a more general conversion which accepts a pair of values \emph{implicitly convertible} to expression trees, so that \code{asExp((a, b), c)} would have type \code{Exp[((A, B), C)]}, but the compiler cannot make use of this conversion\footnote{We reported \url{https://issues.scala-lang.org/browse/SI-5651}, probably a dup of \url{https://issues.scala-lang.org/browse/SI-3346}.}.
+%The problem generalizes to any two nested generic constructors.
+%
+%We observe that these limitations of type inference make its behavior hard to predict and hinder DSL embedding. We discuss this point further in Sec.~\ref{sec:ScalaLessons}.
+
+
+%\subsubsection{Lessons about Scala}
+%\pg{Make the line of thought explicit.}
+When implementing our library, we often struggled against limitations and bugs in the Scala compiler, especially regarding type inference and its interaction with implicit resolution, and we were often constrained by its limitations. Not only Scala's type inference is not complete, but we learned that its behavior is only specified by the behavior of the current implementation: in many cases where there is a clear desirable solution, type inference fails or finds an incorrect substitution which leads to a type error. Hence we cannot distinguish, in the discussion, the Scala language from its implementation.
+We regard many of Scala's type inference problems as bugs, and reported them as such when no previous bug report existed, as noted in the rest of this section. Some of them are long-standing issues, others of them were accepted, for other ones we received no feedback yet at the time of this writing, and another one was already closed as WONTFIX, indicating that a fix would be possible but have excessive complexity for the time being.\footnote{\url{https://issues.scala-lang.org/browse/SI-2551}}.
+
+\smartParagraph{Overloading}
+The code in Fig.~\ref{fig:reifiedQuery} uses the lifted \code{BookData} constructor. Two definitions of \code{BookData} are available, with signatures \code{BookData(String, String, Int)} and \code{BookData(Exp[String], Exp[String], Exp[Int])}, and it seems like the Scala compiler should be able to choose which one to apply using overload resolution. This however is not supported simply because the two functions are defined in different scopes\footnote{\url{https://issues.scala-lang.org/browse/SI-2551}}, hence importing \code{BookData(Exp[String], Exp[String], Exp[Int])} shadows locally the original definition.
+%\pg{Resume}
+% function of type \code{}
+% are reported as bugs; some of them were already acknowledged, others were found to be already known.
+%During our work we reported many of the bugs we found; we provide links to the ones which are still not addressed and which support 
+%\pg{Say something about bugs found.}
+
+%defined 
+%apparently the only description of its behavior 
+
+%We found various limitations of type inference for Scala.
+%Note that we identify the language and its implementation in the following, since type inference is not specified, hence Scala's type inference is de facto specified by its only implementation.
+
+\smartParagraph{Type inference vs implicit resolution}
+The interaction between type inference and implicit resolution is a hard problem, and Scalac has also many bugs, but the current situation requires further research; for instance, there is not even a specification for the behavior of type inference\footnote{\url{https://issues.scala-lang.org/browse/SI-5298?focusedCommentId=55971##comment-55971}, reported by us.}.
+
+As a consequence, to the best of our knowledge some properties of type inference have not been formally established.
+For instance, a reasonable user expectation is that removing a call to an implicit conversion does not alter the program, if it is the only implicit conversion with the correct type in scope, or if it is more specific than the others~\citep[Ch. 21]{Odersky11book}. This is not always correct, because removing the implicit conversion reduces the information available for the type inference algorithm; we observed multiple cases\footnote{\url{https://issues.scala-lang.org/browse/SI-5592}, reported by us.} where type inference becomes unable to figure out enough information about the type to trigger implicit conversion.
+
+We also consider significant that Scala 2.8 required making both type inference and implicit resolution more powerful, specifically in order to support the collection library~\citep[Sec 21.7]{Moors10TCP,Odersky11book}; further extensions would be possible and desirable.
+For instance, if type inference were extended with higher-order unification\footnote{\url{https://issues.scala-lang.org/browse/SI-2712}}~\citep{Pfenning88}, it would better support a part of our DSL interface (not discussed in this paper) by removing the need for type annotations.
+%\pg{That's type indexing, to describe earlier}.
+
+%We believe that as long as such problems are addressed in a ad-hoc way, users will be at a disadvantage in their ability to \emph{grow their language} in a seamless way~\citep{Steele99Growing}. \pg{This sounds cool, should go to the conclusions.}
+% See commit d66fec6d4081ebf3a34a766f6c8203199c1c6f1f and Lifting.groupBySelImpl, add a bug report with these examples.
+
+%Additionally, overloading is a second-class citizen in Scala - as long as it is there, one needs some support for it.
+%It is also required to use it in some cases!
+
+\smartParagraph{Nested pattern matches for GADTs in Scala}
+Writing a typed decomposition for \code{Exp} requires pattern-matching support for generalized algebraic datatypes (GADTs). We found that support for GADTs in Scala is currently insufficient. \citet{Emir07Patterns} define the concept of \emph{typecasing}, essentially a form of pattern-matching limited to non-nested patterns, and demonstrate that Scala supports typecasing on GADTs in Scala by demonstrating a typed evaluator; however, typecasing is rather verbose for deep patterns, since one has to nest multiple pattern-matching expressions.
+When using normal pattern matches, instead, the support for GADT seems much weaker.\footnote{Due to bug \url{https://issues.scala-lang.org/browse/SI-5298?focusedCommentId=56840##comment-56840}, reported by us.}
+% seems hard to get the same level of support.
+Hence one has to choose between support for GADT and the convenience of nested pattern matching.
+A third alternative is to ignore or disable compiler warnings, but we did not consider this option. \pg{I would add that: ``Apparently this was instead the option chosen for Scala-virtualized~\citep{Moors12Virtualized}'', but I'd like to ask Adriaan first.}
+
+% Should we write that it still does not work? No; I found no bug in the example which does not work, but a problem with the case class I wrote.
+
+% XXX in fact, I now managed to prove manually something that the compiler does not get.
+
+%It works to some extent, but only if the GADT does not use parametrized types, that is if generics are not involved. When generics are involved, erasure kicks in; moreover, one would often need to write non-linear type patterns, because the GADT definition implies different types to be equal.
+%Finally, if I write two conditions on the same value in a pattern match, the typing refinement from one does not extend to the other (which correctly follows from the language definition). This however makes it impossible to nest multiple patterns.
+%\pg{We tested with -unchecked warnings enabled - Scala-virtualized-tutorial disables this flag to shut up the warnings.}
+
+% Ask Tillmann. That's somewhat true, but it's extremely hard to argue.
+%The type-class pattern: in Haskell type-class resolution cannot happen locally inside a generic function; in Scala instead it can, even if for some instantiations a more precise instance might be available. This can lead to imprecise types, unless the programmer carefully figures out the implicit parameter which it needs to accept.
+
+\smartParagraph{Implicit conversions do not chain}
+While implicit conversions by default do not chain, it is sometimes convenient to allow chaining selectively.
+For instance, let us assume a context such that \code{a: Exp[A]}, \code{b: Exp[B]} and \code{c: Exp[C]}.
+In this context, let us consider again how we lift tuples. We have seen that the expression \code{(a, b)} has type \code{(Exp[A], Exp[B])} but can be converted to \code{Exp[(A, B)]} through an implicit conversion. Let us now consider \emph{nested} tuples, like \code{((a, b), c)}: it has type \code{((Exp[A], Exp[B]), Exp[C])}, hence the previous conversion cannot be applied to this expression.
+
+\citet[Ch.~21]{Odersky11book} describe a pattern which can address this goal. Using this pattern, to lift pairs, we must write an implicit conversion from pairs of elements which can be \emph{implicitly converted} to expressions. Instead of requiring
+\code{(Exp[A], Exp[B])}, the implicit conversion should require \code{(A, B)} with the condition that \code{A} can be converted to \code{Exp[A']} and \code{B} to \code{Exp[B']}. This conversion solves the problem if applied explicitly,
+but the compiler refuses to apply it implicitly, again because of type inference issues\footnote{\url{https://issues.scala-lang.org/browse/SI-5651}, reported by us.}.
+
+Because of this type inference limitations, we failed to provide support for reifying code like \code{((a, b), c)}\footnote{One could of course write a specific implicit conversions for \emph{this} case; however, \code{(a, (b, c))} requires already a different implicit conversion, and there are infinite ways to nest pairs, let alone tuples of bounded arity.}.
+%Hence, we did not find a way to support nested tuples like 
+
+%For instance
+%but as soon as we try supporting nesting tuples such as \code{((a, b), c},
+%we face again type inference bugs, for which this time we found no reasonable workaround which does not affect surface syntax.
+
+%having implicit parameters.
+%\code{Exp[((A, B), C)]}
+
+%The implicit conversion we described accepts a pair of expression trees; we can write a more general conversion which accepts a pair of values \emph{implicitly convertible} to expression trees, so that \code{asExp((a, b), c)} would have type \code{Exp[((A, B), C)]}, but the compiler cannot make use of this conversion\footnote{\url{https://issues.scala-lang.org/browse/SI-5651}, reported by us.}.
+%
+%%to selectively allow chaining of implicit conversions.
+%
+%An implicit conversion can request another one as parameter
+%\pg{but that often does not work (again) because of issues with type inference.}
+%The problem generalizes to any two nested generic constructors.
+
+
+\smartParagraph{Error messages for implicit conversions}
+The enrich-my-library pattern has the declared goal to allow to extend existing libraries \emph{transparently}. However, implementation details shine however through when a user program using this feature contains a type error. When invoking a method would require an implicit conversion which is not applicable, the compiler often just reports that the method is not available. The recommended approach to debugging such errors is to manually add the missing implicit conversion and investigating the type error~\citep[Ch.~21.8]{Odersky11book}, but this destroys the transparency of the approach when creating or modifying code.
+\pg{Is our suggestion helpful? Is our complaint helpful without the suggestion?} We believe this could be solved in principle by research on error reporting: the compiler could automatically insert all implicit conversions enabling the method calls and report corresponding errors, even if at some performance cost.
+%In principle, this same step could be performed by the compiler automatically to improve error reporting,
+
+
+%Pimped methods are distinct from built-in methods, and the distinction is often too apparent.
+
+\subsection{Lessons for language embedders}
+Various domains, such as the one considered in our case study, allow powerful domain-specific optimizations. Such optimizations often are hard to express in a compositional way, hence they cannot be performed while building the query but must be expressed as global optimizations passes.
+For those domains, deep embedding is key to allow significant optimizations.
+%\footnote{The alert reader knows that any function on an inductive data type can be made compositional by representing more of the input in the output, but later this extra content must be removed anyway.}
+On the other hand, deep embedding requires to implement an interpreter or a compiler.
+
+On the one hand, interpretation overhead is significant in Scala, even when
+using HOAS to take advantage of the metalevel implementation of argument access.
+%Even when using an interpreter, however, the overhead can be compensated by the benefits for the user of the DSEL, which can write more declarative and modular queries, without paying an excessive cost because of interpretation.
+%However, we believe that domain-specific optimizations enable the benefits for modularity are significant.
+
+Instead of interpreting a program, one can compile a DSEL program to Scala and load it, as done by \citet{Rompf11BBlocks};
+while we are using this approach, the disadvantage is the compilation delay,
+especially for Scala whose compilation process is complex and time-consuming.
+Possible alternatives include generating bytecode directly or combining
+interpretation and compilations similarly to tiered JIT compilers, where only
+code which is executed often is compiled. We plan to investigate such
+alternatives in future work.
+%\ko{Mention the possibility to use Delite to get rid of interpretative overhead}
+
+% Can we make this subclaim? We didn't use a final encoding.
+%in Haskell, instead, one can often reduce the overhead relying on the inliner.
+
+%\subsection{Lessons for Scala} % and other host languages?
+%\subsection{Future work}
+%As part of future work we plan to add support for memoization~\citep{elliott03compiling} and \emph{incremental view maintenance} to \LoS~\citep{GlucheGrust97Incr}.
+%
+%%Our prototype of the optimizer is only intended to demonstrate the usefulness of our deep embedding, and is thus not itself optimized. We plan to improve 
+%%Optimizing fast queries is often slower than evaluating the unoptimized version, but that is only a limitation of the implementation.
+%
+%A more complete optimizer would require common-subexpression elimination~\citep{elliott03compiling,rompf2010lightweight} and a more powerful inliner~\citep{Peyton-Jones02}~\pg{I implemented inlining as hoped}, but those issues are out of scope in this paper; we plan to integrate existing techniques in future work.
+%
+%%In fact, optimizing the code in Fig.~\ref{fig:reifiedQuery} requires instead that common subexpressions are massively inlined.
+%
+%%As discussed,
+%The optimizer transforms a value of type \code{Exp[T]} to another value of type \code{Exp[T]}, but in our current implementation this is not checked at compile-time, since we use type coercions to get the correct result type. This is often due to limitations in the Scala type-checker - for instance, the GADTs problems mentioned before. In other cases, we would need a well-typed substitution function, which is not easy in non-dependently-typed languages~\pg{add citation?}.
+%We plan to investigate different approaches to solve
+%this problem, so that the meta-language implementation can guarantee complete type-safety and not only for interpretation (as in \LoS),
+%but also for optimizations.
+%Implementing more typed transformations.
+
+%It could be nice to integrate this with some (transparent) support for
+%persistence (orthogonal persistence?), like Hibernate, to get an
+%embedded database library. If a remoting library could then support
+%remote clients, we would then have a complete DBMS. However, numerous
+%research challenges exist for something like this.
+
+% vim: set ft=tex:

@@ -1,0 +1,17 @@
+% Research on shortcut deforestation~\citep{Wadler90deforest,Gill93shortcut},
+% stream fusion~\citep{Coutts07stream} and supercompilation~\citep{mitchell10rethinking} focuses on better
+% general-purpose optimizers able to perform deforestation, that is reduce or eliminate the use of intermediate lists or data structures in the optimized program.
+% However, most of this work is restricted to purely functional languages, and it does not generalize to arbitrary domain-specific optimizations.
+
+% Some general-purpose optimizers allow specifying additional rewrite rules to support domain-specific optimizations, but the expressive power is typically too restrictive for the optimizations we consider (not allowing to express side conditions) or too hard to harness effectively. We refer to \citet{Jones01playingby} for a discussion of the issues and of related work.
+
+
+%Scala provides for-comprehensions as a convenient concrete syntax for queries that is desugared into method calls on collection objects. The concrete syntax of both the Scala Collections API and of {\LoS} is based on for-comprehensions.
+%
+%Scala-virtualized~\citep{Moors12Virtualized} extends the Scala compiler to provide better support for reification of queries. In
+%standard Scala, one cannot redefine, for instance, the meaning of the \code{if} expression and of the \code{Any.==} operator; Scala-virtualized provides specific support for those, similarly to how for-comprehensions are handled in standard Scala.
+%%We will discuss in Sec.~\ref{sec:limitations} to which degree Scala-virtualized addresses the problems we identified.
+%%% \pg{This Scala-specific stuff maybe goes out of related work (it's not papers) and in the discussion section. Or maybe we should discuss related work on deep embedding via macro systems or something similar?}
+%%% Project Kepler\footnote{\url{http://scalamacros.org/}} is investigating macro support for Scala and describes deep embedding as a potential application.
+%%% \pg{I realized that expression trees are similar to what macros receive.}
+

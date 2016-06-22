@@ -1,0 +1,750 @@
+%\section{The DSEL interface: embedding Scala expressions}
+% Scala-virtualized has no polymorphic lift, unlike us.
+% 2. Embedding collections into Scala
+% When does one need asSquopt?
+To optimize a query as described in the previous section, {\LoS} needs to reify, optimize and execute queries. 
+Our implementation assigns responsibility for these steps to three main components: A generic library for reification and execution of general Scala expressions, a more specialized library for reification and execution of query operators, and a dedicated query optimizer.
+Queries need then to be executed through either compilation (already discussed in
+Sec.~\ref{sec:execution}) or interpretation (to discuss in Sec.~\ref{sec:interpretation}).
+We describe the implementation in more detail in the rest of this section. The full implementation is also available online\footnote{\url{http://www.informatik.uni-marburg.de/~pgiarrusso/SQuOpt}}.
+%\url{https://github.com/Blaisorblade/SQuOpt}.
+
+A core idea of {\LoS} is to reify Scala code as a data structure in memory. A programmer could directly create instances of that data structure, but we also provide a more convenient interface based on advanced Scala features such as implicit conversions and type inference. That interface allows to automatically reify code with a minimum of programmer annotations, as shown in the examples in Sec.~\ref{sec:solution}. Since this is a case study on Scala's support for deep embedding of DSLs, we also describe in this section how Scala supports our task. In particular, we report on techniques we used and issues we faced.
+
+%\pg{Somewhere: Contrast a bit with LMS - we are more open, provide less compile-time safety, etc.; motivate differences. This section risks being boring, explain why it is not.}
+\subsection{Representing expression trees}
+\label{subsec:repexptrees}
+In the previous section, we have seen that expressions that would have type \code{T} in a native Scala query are reified and have type \code{Exp[T]} in \LoS. The generic type \code{Exp[T]} is the base for our reification of Scala expression as expression trees, that is, as data structures in memory. We provide a subclass of \code{Exp[T]} for every different form of expression we want to reify. For example, in Fig.~\ref{fig:query} the expression \code{author.firstName + " " + author.lastName} must be reified even though it is not collection-related, for otherwise the optimizer could not see whether \code{author} is used. Knowing this is needed for instance to remove variables which are bound but not used. Hence, this expression is reified as \code{StringConcat(StringConcat(AuthorFirstName(author), Const(" ")), AuthorLastName(author))}. This example uses the constructors of the following subclasses of \code{Exp[T]} to create the expression tree.
+
+\begin{lstlisting}
+case class Const[T](t: T) extends Exp[T]
+
+case class StringConcat(str1: Exp[String],
+                        str2: Exp[String])
+  extends Exp[String]
+
+case class AuthorFirstName(t: Exp[Author])
+  extends Exp[String]
+
+case class AuthorLastName(t: Exp[Author])
+  extends Exp[String]
+\end{lstlisting}
+
+Expression nodes additionally implement support code for tree traversals to support optimizations, which we omit here.
+
+This representation of expression trees is well-suited for a representation of the structure of expressions in memory and also for pattern matching (which is automatically supported for case classes in Scala), but inconvenient for query writers. In fact, in Fig.~\ref{fig:reifiedQuery}, we have seen that {\LoS} provides a much more convenient front-end: The programmer writes almost the usual code for type \code{T} and {\LoS} converts it automatically to \code{Exp[T]}.
+
+\subsection{Lifting first-order expressions}
+
+We call the process of converting from \code{T} to \code{Exp[T]} \emph{lifting}. Here we describe how we lift first-order expressions -- Scala expressions that do
+not contain anonymous function definitions.
+
+To this end, consider again the fragment \code{author.firstName + " " + author.lastName}, now in the context of the {\LoS}-enabled query in Fig.~\ref{fig:reifiedQuery}. It looks like a normal Scala expression, even syntactically unchanged from Fig.~\ref{fig:query}. However, evaluating that code in the context of Fig.~\ref{fig:reifiedQuery} does not concatenate any strings, but creates an expression tree instead. Although the code looks like the same expression, it has a different \emph{type}, \code{Exp[String]} instead of \code{String}. This difference in the type is caused by the context: The variable \code{author} is now bound in a {\LoS}-enabled query and therefore has type \code{Exp[Author]} instead of \code{Author}. We can still access the \code{firstName} field of \code{author}, because expression trees of type \code{Exp[T]} provide the same interface as values of type \code{T}, except that all operations return expressions trees instead of values.
+
+To understand how an expression tree of type \code{Exp[T]} can have the same interface as a value of type \code{T}, we consider two expression trees \code{str1} and \code{str2} of type \code{Exp[String]}. The implementation of lifting differs depending on the kind of expression we want to lift.
+
+\smartParagraph{Method calls and operators}
+In our example, the operator \code{+} should be available on \code{Exp[String]}, but not on \code{Exp[Boolean]}, because \code{+} is available on \code{String} but not on \code{Boolean}.
+Furthermore, we want \code{str1 + str2} to have type \code{Exp[String]} and to evaluate not to a string concatenation but to a call of \code{StringConcat}, that is, to an expression tree which \emph{represents} \code{str1 + str2}. This is a somewhat unusual requirement, because usually, the interface of a generic type does not depend on the type parameters.
+
+To provide such operators and to encode expression trees, we use \emph{implicit conversions} in a similar style as \citet{rompf2010lightweight}. Scala allows to make expressions of a type \code{T} implicitly convertible to a different type \code{U}. To this end, one must declare an \emph{implicit conversion function} having type \code{T => U}. Calls to such functions will be inserted by the compiler when required to fix a type mismatch between an expression of type \code{T} and a context expecting a value of type \code{U}. In addition, a method call \code{e.m(args)} can trigger the conversion of \code{e} to a type where the method \code{m} is present\footnote{For the exact rules, see \citet[Ch.~21]{Odersky11book} and \citet{ScalaRef}.}. Similarly, an operator usage, as in \code{str1 + str2}, can also trigger an implicit conversion: an expression using an operator, like \code{str1 + str2}, is desugared to the method call \code{str1.+(str2)}, which can trigger an implicit conversion from \code{str1} to a type providing the \code{+} method. Therefore from now on we do not distinguish between operators and methods.
+
+To provide the method \code{+} on \code{Exp[String]}, we define an implicit conversion from \code{Exp[String]} to a new type providing a \code{+} method which creates the appropriate expression node.
+\begin{lstlisting}
+implicit def expToStringOps(t: Exp[String]) =
+  new StringOps(t)
+class StringOps(t: Exp[String]) {
+  def +(that: Exp[String]): Exp[String] =
+    StringConcat(t, that)
+}
+\end{lstlisting}
+This is an example of the well-known Scala \emph{enrich-my-library pattern}\footnote{Also known as \emph{pimp-my-library} pattern.}~\citep{OderskyPimpLib}.
+ 
+With these declarations in scope, the Scala compiler rewrites \code{str1 + str2} to
+\code{expToStringOps(str1).+(str2)}, which evaluates to \code{StringConcat(str1, str2)} as desired.
+Note that the implicit conversion function \code{expToStringOps} is not applicable to \code{Exp[Boolean]} because it explicitly specifies the receiver of the \code{+}-call to have type \code{Exp[String]}.
+In other words, expressions like \code{str1 + str2} are now \emph{lifted} on the level of expression trees in a type-safe way. For brevity, we refer to the defined operator as \code{Exp[String].+}.
+
+\smartParagraph{Literal values}
+However, a string concatenation might also include constants, as in \code{str1 + "foo"} or \code{"bar" + str1}.
+To lift \code{str1 + "foo"}, we introduce a lifting for constants which wraps them in a \code{Const} node:
+
+\begin{lstlisting}
+implicit def pure[T](t: T): Exp[T] = Const(t)
+\end{lstlisting}
+%Since this conversion evaluates its argument and does not preserve its structure, it is only appropriate for atomic expressions.
+
+The compiler will now rewrite \code{str1 + "foo"} to \code{expToStringOps(str1) + pure("foo")}.
+%Since \code{Exp[String].+} requires an argument of type \code{Exp[String]} but \code{"foo"} has type \code{String},
+%the compiler wraps \code{"foo"} with a call to \code{pure}. Hence
+Similarly, \code{author. firstName + " " + author.lastName} is rewritten to \code{(expToStringOps(author.firstName) + pure(" ")) + author.lastName}.
+Note how the implicit conversions cooperate successfully to lift the expression.
+
+Analogously, it would be convenient if the similar expression \code{"bar" + str1} would be rewritten to \code{expToStringOps(pure("bar")) + str1}, but this is not the case, because implicit coercions are not chained automatically in Scala.
+Instead, we have to manually chain existing implicit conversions into a new one:
+\begin{lstlisting}
+implicit def toStringOps(t: String) = expToStringOps(pure(t)) 
+\end{lstlisting}
+so that \code{"bar" + str1} is rewritten to \code{toStringOps("bar") + str1}.
+
+\smartParagraph{User-defined methods}
+Calls of user-defined methods like \code{author.firstName} are lifted the same way as calls to built-in methods such as string concatenation shown earlier. For the running example, the following definitions are necessary to lift the methods from \code{Author} to \code{Exp[Author]}.
+
+\begin{lstlisting}
+package schema.squopt
+
+implicit def expToAuthorOps(t: Exp[Author]) =
+  new AuthorOps(t)
+implicit def toAuthorOps(t: Author) =
+  expToAuthorOps(pure(t))
+class AuthorOps(t: Exp[Author]) {
+  def firstName: Exp[String] = AuthorFirstName(t)
+  def lastName: Exp[String] = AuthorLastName(t)
+}
+\end{lstlisting}
+
+\code{Author} is not part of {\LoS} or the standard Scala library but an application-specific class, hence it is not possible
+to pre-define the necessary lifting code as part of {\LoS}. Instead, the application programmer needs to provide this code to connect {\LoS} to his application. To support the application programmer with this tedious task, we provide a code generator which discovers the interface of a class through reflection on its compiled version and generates the boilerplate code such as the one above for \code{Author}. It also generates 
+the application-specific expression tree types such as \code{AuthorFirstName} as shown in Sec.~\ref{subsec:repexptrees}.
+In general, query writers need to generate and import the boilerplate lifting code for all application-specific types they want to use in a {\LoS} query.
+
+If desired, we can exclude some methods to \emph{restrict} the language supported in our deeply embedded programs. For instance \LoS{} requires the user to write side-effect-free queries, hence we do not lift methods which perform side effects.
+
+Using similar techniques, we can also lift existing functions and implicit conversions.
+
+
+
+\smartParagraph{Tuples and other generic constructors}
+The techniques presented above for the lifting of method calls rely on overloading the name of the method with a signature that involves \code{Exp}. Implicit resolution (for method calls) will then choose our lifted version of the function or method to satisfy the typing requirements of the context or arguments of the call. Unfortunately, this technique does not work for tuple constructors, which, in Scala, are not resolved like ordinary calls. Instead, support for tuple types is hard-wired into the language, and tuples are always created by the predefined tuple constructors.
+
+For example, the expression \code{(str1, str2)} will always call Scala's built-in \code{Tuple2} constructor and correspondingly have type \code{(Exp[String], Exp[String])}. We would prefer that it calls a lifting function and produces an expression tree of type \code{Exp[(String, String)]} instead.
+
+Even though we cannot intercept the call to \code{Tuple2}, we can add an implicit conversion to be called \emph{after} the tuple is constructed.
+
+\begin{lstlisting}
+implicit def tuple2ToTuple2Exp[A1, A2]
+    (tuple: (Exp[A1], Exp[A2])): LiftTuple2[A1, A2] =
+  LiftTuple2[A1, A2](tuple._1, tuple._2)
+case class LiftTuple2[A1, A2](t1: Exp[A1], t2: Exp[A2]) extends Exp[(A1, A2)]
+\end{lstlisting}
+
+We generate such conversions for different arities with a code generator. These conversions will be used only when the context requires an expression tree. Note that this technique is only applicable because tuples are generic and support arbitrary components, including expression trees.
+
+In fact, we use the same technique also for other generic constructors to avoid problems associated with shadowing of constructor functions. For example, an implicit conversion is used to lift \code{Seq[Exp[T]]} to \code{Exp[Seq[T]]}: code like \code{Seq(str1, str2)} first constructs a sequence of expression trees and then wraps the result with an expression node that describes a sequence.
+%In fact, we use the same technique also for other generic constructors to avoid problems associated with shadowing of constructor functions. For example, an implicit conversion is used to convert \code{Seq[Exp[T]]} to \code{Exp[Seq[T]]}, that is to convert a sequence of expression trees and then converting this to an expression tree that describes a sequence. \tr{Is this really what happens?}
+
+\smartParagraph{Subtyping}
+So far, we have seen that for each first-order method \code{m} operating on instances of \code{T}, we can create a corresponding method which operates on \code{Exp[T]}. If the method accepts parameters having types \code{A1, ..., An} and has return type \code{R}, the corresponding lifted method will accept parameters having types \code{Exp[A1], ..., Exp[An]} and return type \code{Exp[R]}. However, \code{Exp[T]} also needs to support all methods that \code{T} inherits from its super-type \code{S}. To ensure this, we declare the type constructor \code{Exp} to be \emph{covariant} in its type parameter, so that \code{Exp[T]} correctly inherits the liftings from \code{Exp[S]}. This works even with the enrich-my-library pattern because implicit resolution respects subtyping in an appropriate way.
+
+\smartParagraph{Limitations of Lifting}
+Lifting methods of \code{Any} or \code{AnyRef} (Scala types at the root of the inheritance hierarchy) is not possible with this technique: \code{Exp[T]} inherits such methods and makes them directly available, hence the compiler will not insert an implicit conversion. Therefore, it is not possible to lift expressions such as \code{x == y}; rather, we have to rely on developer discipline to use \code{==\#} and \code{!=\#} instead of \code{==} and \code{!=}.
+
+An expression like \code{"foo" + "bar" + str1} is converted to \code{toStringOps("foo" + "bar") + str1}; hence, part of the expression is evaluated before being reified. This is harmless here since we want \code{"foo" + "bar"} to be evaluated at compile-time, that is constant-folded, but in other cases it is preferable to prevent the constant folding. We will see later examples where queries on collections are evaluated before reification, defeating the purpose of our framework, and how we work around those.
+
+\subsection{Lifting higher-order expressions}
+\label{sec:lifting-ho}
+We have shown how to lift first-order expressions; however, the interface of collections also uses higher-order methods, that is, methods that accept functions as parameters, and we need to lift them as well to reify the complete collection DSEL. For instance, the \code{map} method applies a function to each element of a collection. In this subsection, we describe how we reify such expressions of function type.
+
+\smartParagraph{Higher-order abstract syntax}
+To represent functions, we have to represent the bound variables in the function bodies. For example, a reification of \code{str => str + "!"} needs to reify the variable \code{str} of type \code{String} in the body of the anonymous function. This reification should retain the information where \code{str} is bound. We achieve this by representing bound variables using \emph{higher-order abstract syntax} (HOAS)~\citep{Pfenning88hoas}, that is, we represent them by variables bound at the meta level. To continue the example, the above function is reified as \code{(str: Exp[String]) => str + "!"}. Note how the type of \code{str} in the body of this version is \code{Exp[String]}, because \code{str} is a reified variable now. Correspondingly, the expression \code{str + "!"} is lifted as described in the previous subsection. 
+
+With all operations in the function body automatically lifted, the only remaining syntactic difference between normal and lifted functions is the type annotation for the function's parameter. Fortunately, Scala's \emph{local type inference} can usually deduce the argument type from the context, for example, from the signature of the \code{map} operation being called. Type inference plays a dual role here: First, it allows the query writer to leave out the annotation, and second, it triggers lifting in the function body by requesting a lifted function instead of a normal function. This is how in Fig.~\ref{fig:reifiedQuery}, a single call to \code{asSquopt} triggers lifting of the overall query.
+
+Note that reified functions have type \code{Exp[A] => Exp[B]} instead of the more regular \code{Exp[A => B]}. We chose the former over the latter to support Scala's syntax for anonymous functions and for-comprehensions which is hard-coded to produce or consume instances of the pre-defined \code{A => B} type. We have to reflect this irregularity in the lifting of methods and functions by treating the types of higher-order arguments accordingly.
+
+\smartParagraph{User-defined methods, revised}
+We can now extend the lifting of signatures for methods or functions from the previous subsection to the general case, that is, the case of higher-order functions. We lift a method or function with signature
+\begin{lstlisting}
+def m[A1, $...$, An](a1: T1, $...$, an: Tn): R
+\end{lstlisting}
+to a method or function with the following signature.
+\begin{lstlisting}
+def m[A1, $...$, An](a1: $\ExpWrap\llbracket$T1$\rrbracket$, $...$, an: $\ExpWrap\llbracket$Tn$\rrbracket$): $\ExpWrap\llbracket$R$\rrbracket$
+\end{lstlisting}
+As before, the definition of the lifted method or function will return an expression node representing the call. If the original was a function, the lifted version is also defined as a function. If the original was a method on type \code{T}, then the lifted version is enriched onto \code{T}.
+
+The type transformation $\ExpWrap$ converts the argument and return types of the method or function to be lifted. For most types, $\ExpWrap$ just wraps the type in the \code{Exp} type constructor, but function types are treated specially: $\ExpWrap$ recursively descends into function types to convert their arguments separately. Overall, $\ExpWrap$ behaves as follows.
+
+\begin{lstlisting}
+$\ExpWrap\llbracket$(A1, ... , An) => R]$\rrbracket$ =
+  ($\ExpWrap\llbracket$A1$\rrbracket$, $...$ , $\ExpWrap\llbracket$An$\rrbracket$ => $\ExpWrap\llbracket$R$\rrbracket$
+$\ExpWrap\llbracket$A$\rrbracket$ = Exp[A]
+\end{lstlisting}
+
+We can use this extended definition of method lifting to  implement \code{map} lifting for \code{Lists}, that is, a method with signature \code{Exp[List[T]].map(Exp[T] => Exp[U])}:
+
+\begin{lstlisting}
+implicit def expToListOps[T](coll: Exp[List[T]]) = 
+  new ListOps(coll)
+implicit def toListOps[T](coll: List[T]) = 
+  expToListOps(coll)
+class ListOps(coll: Exp[List[T]]) {
+  def map[U](f: Exp[T] => Exp[U]) =
+    ListMapNode(coll, Fun(f))
+}
+case class ListMapNode[T, U](coll: Exp[List[T]], mapping: Exp[T => U]) extends Exp[List[U]]
+\end{lstlisting}
+
+Note how \code{map}'s parameter \code{f} has type \code{Exp[T] => Exp[U]} as necessary to enable Scala's syntax for anonymous functions and automatic lifting of the function body. This implementation would work for queries on lists, but does not support other collection types or queries where the collection type changes. We show in Sec.~\ref{subsec:collections} how {\LoS} integrates with such advanced features of the Scala Collection DSEL.
+
+%\pg{Discuss this elsewhere? Better?}
+%Note, moreover, that while the interface of our representation is
+%well-typed and type-safe, its internals are well-typed but not
+%automatically type-safe; in other words, the compiler does not guarantee
+%that our code is safe, because in the implementation we rely on erasure
+%and employ casts. We thus need to prove separately that the
+%implementation is type-safe. However, this is common to most other
+%implementations of expression trees, which rely on an untyped core tree
+%wrapped through a phantom type.
+
+\subsection{Lifting collections}
+\label{subsec:collections}
+In this subsection, we first explain how for-comprehensions are desugared to calls to library functions, allowing an external library to give them a different meaning. We summarize afterwards needed information about the subset of the Scala collection DSEL that we reify. Then we present how we perform this reification.
+We finally present the reification of the running example (Fig.~\ref{fig:reifiedQuery}).
+
+%\section*{How for-comprehensions work}
+
+%\tr{These technical details used to be in Section 3. Some of them are needed in later parts of the paper and should be moved there. The rest should be removed together with this section}
+
+\smartParagraph{For-comprehensions}
+As we have seen, an idiomatic encoding in Scala of queries on collections are for-comprehensions. Although Scala is an impure functional language and supports side-effectful for-comprehensions, only pure queries are supported in our framework, because this enables or simplifies many domain-specific analyses. Hence we will restrict our attention to pure queries.
+
+The Scala compiler desugars for-comprehensions into calls to three collection methods, \code{map}, \code{flatMap} and \code{withFilter}, which we explain shortly; the query in Fig.~\ref{fig:query} is desugared to the code in Fig.~\ref{fig:desugaredQuery}.
+\begin{figure}
+\begin{center}
+\begin{lstlisting}
+val records = books.
+  withFilter(book => book.publisher == "Pearson Education").
+  flatMap(book => book.authors.
+  map(author => BookData(book.title,
+    author.firstName + " " + author.lastName,
+    book.authors.size - 1)))
+\end{lstlisting}
+\end{center}
+\caption{Desugaring of code in Fig.~\ref{fig:query}.}
+\label{fig:desugaredQuery}
+\end{figure}
+
+The compiler performs type inference and type checking on a for-comprehension only \emph{after} desugaring it; this affords some freedom for the types of \code{map}, \code{flatMap} and \code{withFilter} methods.
+
+\smartParagraph{The Scala Collection DSEL}
+A Scala collection containing elements of type \code{T} implements the trait \code{Traversable[T]}.
+%where \code{Traversable} is a type constructor applied to the type parameter \code{T} (similarly to Java generics);
+On an expression \code{coll} of type \code{Traversable[T]} one can invoke methods declared (in first approximation) as follows:
+\begin{lstlisting}
+def map[U](f: T => U): Traversable[U]
+def flatMap[U](f: T => Traversable[U]): Traversable[U]
+def withFilter[U](p: T => Boolean): Traversable[T].
+\end{lstlisting}
+
+For a Scala collection \code{coll}, the expression \code{coll.map(f)} applies \code{f} to each element of \code{coll}, collects the results in a new collection and returns it; \code{coll.flatMap(f)} applies \code{f} to each element of \code{coll}, concatenates the results in a new collection and returns it; \code{coll.withFilter(p)} produces a collection containing the elements of \code{coll} which satisfy the predicate \code{p}.
+
+However, Scala supports many different collection types, and this complicates the actual types of these methods. Each collection can further implement subtraits like \code{Seq[T] <: Traversable[T]} (for sequences), \code{Set[T] <: Traversable[T]} (for sets) and \code{Map[K, V] <: Traversable[(K, V)]} (for dictionaries); for each such trait, different implementations are provided.
+
+One consequence of this syntactic desugaring is that a single for-comprehension can operate over different collection types%
+%\footnote{In Haskell 98, instead, this is not possible.}%
+. The type of the result depends essentially on the type of the root collection, that is \code{books} in the example above. The example above can hence be altered to produce a sequence rather than a set by simply converting the root collection to another type:
+\begin{lstlisting}
+val recordsSeq = for {
+   book <- books£\textbf{.toSeq}£
+   if book.publisher == "Pearson Education"
+   author <- book.authors
+  } yield BookData(book.title,
+    author.firstName + " " + author.lastName,
+    book.authors.size - 1)
+\end{lstlisting}
+
+\smartParagraph{Precise static typing}
+The Scala collections DSEL achieves precise static typing while avoiding code duplication~\citep{odersky2009fighting}. Precise static typing is necessary because the return type of a query operation can depend on subtle details of the base collection and query arguments. 
+To return the most specific static type, the Scala collection DSL defines a type-level relation between the source collection type, the element type for the transformed collection, and the type for the resulting collection. The relation is encoded through the concept pattern~\citep{Oliveira10TCOI}, i.e., through a type-class-style trait \code{CanBuildFrom[From, Elem, To]}, and elements of the relation are expressed as implicit instances.
+
+For example, a finite map can be treated as a set of pairs so that mapping a function from pairs to pairs over it produces another finite map. This behavior is encoded in an instance of type \code{CanBuildFrom[Map[K, V], (K1, V1), Map[K1, V1]}. The \code{Map[K, V]} is the type of the base collection, \code{(K1, V1)} is the return type of the function, and \code{Map[K1, V1]} is the return type of the map operation.
+
+It is also possible to map some other function over the finite map, but the result will be a general collection instead of a finite map. This behavior is described by an instance of type \code{CanBuildFrom[Traversable[T], U, Traversable[U]}. Note that this instance is also applicable to finite maps, because \code{Map} is a subclass of \code{Traversable}. Together, these two instances describe how to compute the return type of mapping over a finite map.
+
+\smartParagraph{Code reuse}
+Even though these two use cases for mapping over a finite map have different return types, they are implemented as a single method that uses its implicit \code{CanBuildFrom} parameter to compute both the static type and the dynamic representation of its result. So the Scala Collections DSEL provides precise typing without code duplication. In our deep embedding, we want to preserve this property.
+
+\code{CanBuildFrom} is used in the implementation of \code{map}, \code{flatMap} and \code{withFilter}. To further increase reuse, the implementations are provided in a helper trait \code{TraversableLike[T, Repr]}, with the following signatures:
+
+\begin{lstlisting}
+def map[U](f: T => U)
+  (implicit cbf: CanBuildFrom[Repr, U, That]): That
+def flatMap[U](f: T => Traversable[U])
+  (implicit cbf: CanBuildFrom[Repr, U, That]): That
+def withFilter[U](p: T => Boolean): Repr.
+\end{lstlisting}
+
+The \code{Repr} type parameter represents the specific type of the receiver of the method call.
+
+\smartParagraph{The lifting}
+The basic idea is to use the enrich-my-library pattern to lift collection methods from \code{TraversableLike[T, Repr]} to \code{TraversableLikeOps[T, Repr]}:
+\begin{lstlisting}
+implicit def expToTraversableLikeOps[T, Repr]
+  (v: Exp[TraversableLike[T, Repr]]) =
+  new TraversableLikeOps[T, Repr](v)
+\end{lstlisting}
+
+However, given the design of the collection library, every instance of \code{TraversableLike[T, Repr]} is also an instance of both \code{Traversable[T]} and \code{Repr}; to take advantage of this during interpretation and optimization, we need to restrict the type of \code{expToTraversableLikeOps}, getting the following conversion:\footnote{Due to type inference bugs, the actual implicit conversion needs to be slightly more complex, to mention \code{T} directly in the argument type. We reported the bug at \url{https://issues.scala-lang.org/browse/SI-5298}.}
+
+%We use enrich-my-library again with an implicit conversion to \code{TraversableLikeOps[T, Repr]}, shown later, which corresponds to
+%\code{TraversableLike[T, Repr]}.
+%We provide an implicit conversion to \code{TraversableLikeOps[T, Repr]} from \code{Exp[Repr]} for any type \code{Repr} which is a subtype of \code{TraversableLike[T, Repr]} and \code{Traversable[T]} (for some element type \code{T}). This can be expressed as:
+\begin{lstlisting}
+implicit def expToTraversableLikeOps
+  [T, Repr <: Traversable[T]
+                with TraversableLike[T, Repr]]
+  (v: Exp[Repr]) =
+    new TraversableLikeOps[T, Repr](v)
+\end{lstlisting}
+
+The query operations are defined in class \code{TraversableLikeOps[T, Repr]}; a few examples are shown in Fig.~\ref{fig:liftTrav}.%
+\footnote{Similar liftings are introduced for traits similar to \code{TraversableLike}, like \code{SeqLike}, \code{SetLike}, \code{MapLike}, and so on.}
+
+Note how the lifted query operations use \code{CanBuildFrom} to compute the same static return type as the corresponding non-lifted query operation would compute. This reuse of type-level machinery allows {\LoS} to provide the same interface as the Scala Collections DSEL.
+
+\smartParagraph{Code reuse, revisited}
+We already saw how we could reify \code{List[T].map} through a specific expression node, \code{ListMapNode}. However, this approach would require generating many variants for different collections with slightly different types; writing an optimizer able to handle all such variations would be unfeasible because of the amount of code duplication required.
+Instead, by reusing Scala type-level machinery, we obtain a reification which is statically typed and at the same time avoids code duplication in both our lifting and our optimizer, and in general in all possible consumers of our reification, making them feasible to write.
+
+%Moreover, we successfully avoided introducing expression nodes like.
+%\pg{Reconnect with \code{ListMapNode}; now reflow.}
+%Finally, all invocations of a method, for instance \code{map}, are represented by instances a single class \code{MapNode} and not of multiple variants like \code{ListMapNode} with slightly different types,
+
+%hence the optimizer will have to identify only a single type of expression nodes when transforming invocations of \code{flatMap}.
+%In other words, we managed to avoid code duplication not only
+
+\begin{figure}
+\begin{center}
+\begin{lstlisting}
+class TraversableLikeOps[T, Repr <: Traversable[T]
+        with TraversableLike[T, Repr]](t: Exp[Repr]) {
+  val t: Exp[Repr]
+  def withFilter(f: Exp[T] => Exp[Boolean]): Exp[Repr] =
+    Filter(this.t, FuncExp(f))
+  def map[U, That <: TraversableLike[U, That]]
+         (f: Exp[T] => Exp[U])
+         (implicit c: CanBuildFrom[Repr, U, That]):
+         Exp[That] =
+    MapNode(this.t, FuncExp(f))
+  //... other methods ...
+}
+//definitions of MapNode, Filter omitted.
+\end{lstlisting}
+\end{center}
+\caption{Lifting \code{TraversableLike}}
+\label{fig:liftTrav}
+\end{figure}
+
+%\pg{Walkthrough the reification of the running example.}
+\pg{Discuss asSquopt if possible! Start from the commented out paragraph I added; otherwise, remove the dangling pointer to here from before.}
+%\smartParagraph{When to use \code{asSquopt}}
+%We explained that to use \LoS, one must alter the query by calling \code{.asSquopt} on the collections we iterate upon; however, our examples omitted such calls in a non-obvious way.
+%\code{asSquopt} converts a value of type \code{T} into \code{Exp[T]}, hence we need not call it on expressions. In Fig.~\ref{fig:reifiedQuery}, this is why we do not write \code{book.authors.asSquopt} but only \code{book.authors}: \code{book} has type \code{Exp[Book]}, hence \code{book.authors} has type \code{Exp[Seq[T]]}.
+%
+%An issue is that if we instead omit calls to \code{asSquopt}, the query will be accepted, but it will not be reified completely, losing optimization potential.
+%Let us consider a completely artifical query:
+%%I cannot use ==# nor book1 in the inner filter, that's why the query is artificial.
+%\begin{lstlisting}
+%val dupBooksQuery = for {
+%  book1 <- books
+%  book2 <- books
+%  if book2.title.contains("bar")
+%} yield (book1, book2)
+%\end{lstlisting}
+%
+%Let us consider an incorrect lifting where we \emph{omit} a call to \code{asSquopt}:
+%\begin{lstlisting}
+%val dupBooksQuery = for {
+%  book1 <- books.asSquopt
+%  book2 <- books //.asSquopt
+%  if book2.title.contains("bar")
+%} yield (book1, book2)
+%\end{lstlisting}
+%
+%These two lines are in fact a valid for-comprehension, which however does not involve any variable of type \code{Exp[T]}.
+%\begin{lstlisting}
+%  book2 <- books //.asSquopt
+%  if book2.title.contains("bar")
+%\end{lstlisting}
+%
+%\pg{This is the reference - this code is shown before}
+%Hence this fragment can be evaluated without inserting any implicit conversion, similarly to how \code{"a" + "b" + str1} is evaluated as \code{toStringOps("a" + "b") + str1} in previous sections.
+%\begin{lstlisting}
+%books.asSquopt.
+%flatMap((book1: Exp[String]) => pure(books.//asSquopt.
+%withFilter((book2: String) => book2.title.contains("bar")))
+%.map(book2 => (book1, book2)))
+%\end{lstlisting}
+%
+
+%Instances of \code{CanBuildFrom[From, Elem, To]} also provide a concrete interface to creating collections of type \code{To}. Scala allows changing the variance of generics; appropriate variance annotations on \code{CanBuildFrom} ensure that generic instances can be used also for more specific collections; hence, for instance, \code{CanBuildFrom[Map[Int, Int], Int, Traversable[Int]} is superfluous and \code{CanBuildFrom[Traversable[(Int, Int)], Int, Traversable[Int]} is sufficient.
+%%\pg{Revise maybe the discussion of variance}
+
+%To return the most specific dynamic type, instances of \code{CanBuildFrom} delegate construction of the new collection to the existing one. For example, recall that if \code{m} has type \code{Map[Int, Int]} then \code{m.map \{ case (x, y) => (x, y + 1)\}} has static type \code{Map[Int, Int]}. Upcasting \code{m} to a more generic collection of type \code{Traversable[(Int, Int)]} before invoking \code{map} will only change the static type of the result, not the dynamic one.
+
+%\pg{\code{withFilter} actually returns \code{FilterMonadic[T, Repr]}, while in the embedding we do not and we want to explain why.}
+%\section{Embedding the collection API}
+%In this section, we describe how we implement the collection-specific portion of the language interface of our DSEL.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Methods from \code{Traversable[T]} are defined in \code{TraversableLike[T, Repr]}. \code{Repr} identifies the current collection; so \code{Traversable[T]} extends \code{TraversableLike[T, Traversable[T]]}, while \code{Set[T]} extends \code{TraversableLike[T, Set[T]]}.
+%We thus lift methods by defining \code{TraversableLikeOps[T, Repr]}; we further define collection classes like \code{TraversableOps[T]} which extends \code{TraversableLikeOps[T, Traversable[T]}, and similarly for major Scala collection interfaces (e.g. \code{SetOps[T], SeqOps[T], MapOps[K, V]}), excluding mutable ones. Finally, we define implicit conversions to these classes.
+%\pg{Try defining a single, general implicit conversion for TraversableLike, and additional one only for extra operators. This worked!}
+
+%\pg{The following text is too abstract yet, but I need to write it down to clarify my ideas.}
+%This subsection discusses how we lift operations on collections. We could apply the techniques in the previous sections directly, but three opposing design goals inform the design of our lifting:
+%\begin{itemize}
+%\item expressions in the Scala collections DSEL have an accurate static type~\citep{odersky2009fighting}, and we want to preserve that accuracy;
+%\item we want our expression trees to be reasonably simple to transform; we want to have just a single type of node to represent \code{flatMap} operations, and not a different one for each kind of collection.
+%\item we want to minimize the amount of code we need, and have minimal coupling to the collection library. For instance, the framework should support new implementation of dictionaries with as few changes as possible to the framework.
+%\end{itemize}
+%Furthermore, an additional non-functional constraint is that we need an interface which type inference understands.
+%
+%These three goals are opposing and we cannot reach all of them at the same time. In the end, we make the following compromises.
+%\begin{itemize}
+%\item We only support \code{Traversable[T]} and its subtypes. Some optimizations are unsafe for more generic collection types.
+%For instance, we do not support iterators (whose interface relies on side effects), nor do we support \code{FilterMonadic[T, Repr]}.
+%Additionally, this excludes support for parallel collections, which is left however for future work.
+%\item We only support some operations yet (but the rest is left to future work).
+%\item We do not support side-effectful interfaces.
+%\end{itemize}
+
+%\pg{Among other things, explain Coll[Exp[T]] -> Exp[Coll[T]], which I find a bit ingenious.}
+
+%% PG: perhaps do say something more about indexes
+%\subsection{Representing indexes: The indexBy operator}
+
+%Indexes do not require special support; they are encoded through the
+%\code{TraversableLike[T, Repr].indexBy[K](f: T => K): Map[K, Coll]} operator. A query of the form:
+%
+%\begin{lstlisting}
+%coll withFilter (x => f(x) ==# y)
+%\end{lstlisting}
+%is semantically equivalent to a query which builds an index first with
+%the result of applying \code{f} to elements of \code{coll}, and then
+%selecting the entry for \code{y}:
+%
+%\begin{lstlisting}
+%coll indexBy f apply y
+%\end{lstlisting}
+%What the optimizer does is (a variant of common subexpression
+%elimination) between the resulting query and the keys of a map existing
+%precomputed expressions. A repository contains a map from queries to
+%their evaluated results (XXX: it should be incrementally maintained
+%queries!).
+%
+%%XXX: show a query that we can help using indexing.
+%
+%%\subsection{Indexes for nested objects}
+%
+%Queries often traverse multiple objects, and more complex index
+%organizations are needed.
+%We reuse path indexes~\citep{Bertino89}.
+%
+\subsection{Interpretation}
+\label{sec:interpretation}
+
+After optimization, {\LoS} needs to interpret the optimized expression trees to perform the query. Therefore, the trait \code{Exp[T]} declares an \code{def interpret(): T} method, and each expression node overrides it appropriately to implement a mostly standard typed, tagless~\citep{carette09finally}, environment-based interpreter. The interpreter computes a value of type \code{T} from an expression tree of type \code{Exp[T]}. This design allows query writers to extend the interpreter to handle application-specific operations. In fact, the lifting generator described in Sec.~\ref{sec:lifting-ho} automatically generates appropriate definitions of \code{interpret} for the lifted operations. 
+
+For example, the interpretation of string concatenation is simply string concatenation, as shown in the following fragment of the interpreter. Note that type-safety of the interpreter is checked automatically by the Scala compiler when it compiles the fragments.
+
+\begin{lstlisting}
+case class StringConcat(str1: Exp[String],
+    str2: Exp[String]) extends Exp[String] {
+  def interpret() = str1.interpret() + str2.interpret()
+}
+\end{lstlisting}
+
+The subset of Scala we reify roughly corresponds to a typed lambda calculus with subtyping and type constructors. It does not include constructs for looping or recursion, so it should be strongly normalizing as long as application programmers do not add expression nodes with non-terminating interpretations. However, query writers can use the host language to create a reified expression of infinite size. This should not be an issue if {\LoS} is used as a drop-in replacement for the Scala Collection DSEL.
+
+During optimization, nodes of the expression tree might get duplicated, and the
+interpreter could, in principle, observe this sharing and treat the expression
+tree as a DAG, to avoid recomputing results. Currently, we do not exploit this,
+unlike during compilation.
+
+%it will prevent us from writing the following type-unsafe code:
+
+%\begin{lstlisting}
+%//Fix indent
+%case class MapNode[T, Repr <: Traversable[T], U, That](base: Exp[Repr], f: FuncExp[T, U])
+%                          (implicit c: CanBuildFrom[Repr, U, That]) extends Exp[That](base, f) {
+%  override def interpret() = base.interpret() map f.interpret()
+%}
+%\end{lstlisting}
+%
+%Because of the incorrect type bound \code{Repr <: Traversable[T]}, this implementation of \code{interpret()} returns \code{Traversable[U]} instead of \code{That}; we need instead the more specific bound \code{Repr <: TraversableLike[T, Repr]} to get the correct return type.
+%
+%We implement an environment-based
+%interpreter operating on the FOAS representation of functions, but the implementation is simplified because variable bindings have globally unique IDs, hence shadowing does not occur.
+%
+%%The current environment is not passed as a parameter to \code{interpret()}; instead, the stack of environments is maintained explicitly, similarly to the SECD machine \pg{Tillmann: citation to Landin's paper or to a textbook}. 
+%%We implement static scoping, hence when we create an object-language closure we save the current environment in the returned closure.
+%%Thanks to Scala's support for closures, we can simply represent an object-level closure through a meta-level closure.
+%
+%Lookup in an environment only fails when \code{interpret()} is called on open terms. We throw then an exception to signal an error of the client programmer.
+%\code{TypedVar} is not available to the client, so the programmer cannot construct open terms directly.
+%In fact such an error is only possible when constructing representations of \emph{exotic} terms, that is terms which do not represent valid programs in the object language.
+%An example of exotic term is \code{Fun[String, String](str => str.interpret())} because of the call to \code{interpret()}; when evaluating it the conversion to FOAS will execute \code{str.interpret()} which will fail.
+%To report such errors as early as possible, we perform the conversion to FOAS eagerly, that is when constructing the expression tree.
+%%%Hence the error will be reported at run time.
+%%Hence such errors are reported before the expression tree is evaluated, when it is first constructed.
+%\pg{Tillmann: should I say ``at staging time''?}
+
+%\pg{Revise this part again, after we have a running example of a query.}
+
+\subsection{Optimization}
+%\pg{This example can now be optimized, the improvements took circa 3-4 hours.
+%What's difficult is not at all going from Fig.~\ref{fig:titleFilterho1} to Fig.~\ref{fig:titleFilterho2}, it is just the 'inlining' steps, which seems to contain tons of intermediate normalization steps between other optimizations, fusion between filters and maps, and so on.
+%Moreover, we need to perform inlining even when it causes work duplication, but the new optimizer seems to not behave worse on the evaluation data, even though it often replicates what it should not replicate; I tuned it to avoid inlining let expressions introduced explicitly by the user, but even before it didn't damage performance too much.
+%The description of the optimizer should probably reflect the kind of needed steps, and cite also the paper on the Haskell inliner for future work.}
+%
+
+\label{subsec:transf}
+%\pg{Our object-language is some sort of typed lambda-calculus; our internal representation is a DAG}.
+
+%\pg{(Tillmann) Our optimizer is implemented as part of our library and transforms queries to optimized ones at run time.}
+Our optimizer is structured as a pipeline of different transformations on a single intermediate representation, constituted by our expression trees.
+Each phase of the pipeline, and the pipeline as a whole, produce a new expression having the same type as the original one.
+Most of our transformations express simple rewrite rules with or without side conditions, which are applied on expression trees from the bottom up and are implemented using Scala's support for pattern matching~\citep{Emir07Patterns}.
+
+%\pg{The main exception is indexing, which is a complex rewrite rule which is applied only if an index of a certain structure exists.}
+%It is built by composing several purely functional type-preserving transformations,
+%which use pattern matching to locate subqueries which can be optimized;
+
+%Our optimizer is simply a function which, when applied on an expression tree, produces a new expression tree of the same type;
+%that is, it is a purely functional type-preserving transformation.
+
+%Since the optimizer is executed during the application run time, it does not need to perform inlining across different functions of the user program to have access to the complete representation of the query.
+Some optimizations, like filter hoisting (which we applied manually to produce the code in Fig.~\ref{fig:titleFilterho2}),
+are essentially domain-specific and can improve complexity of a query. To enable such optimizations to trigger, however, one needs often to perform inlining-like transformations and to simplify the result. Inlining-related transformation can for instance produce code like \code{(x, y)._1}, which we simplify to \code{x}, reducing abstraction overhead but also (more importantly) making syntactically clear that the result does not depend on \code{y}, hence might be computed before \code{y} is even bound. This simplification extends to user-defined product types; with definitions in Fig.~\ref{fig:schema} code like \code{BookData(book.title, ...).title} is simplified to \code{book.title}.
+%: their constructors
+
+We have implemented thus optimizations of three classes:
+\begin{itemize}
+\item general-purpose simplifications, like inlining, compile-time beta-reduction, constant folding and reassociation on primitive types, and other simplifications\footnote{Beta-reduction and simplification are run in a fixpoint loop~\citep{Peyton-Jones02}. Termination is guaranteed because our language does not admit general recursion.}; 
+\item domain-specific simplifications, whose main goal is still to enable more important optimizations;
+\item domain-specific optimizations which can change the complexity class of a query, such as filter hoisting, hash-join transformation or indexing.
+\end{itemize}
+
+\pg{Clarify the following paragraph. Just explain the optimizations properly in the ICSE submission.}
+Among domain-specific simplifications, we implement a few described in the context of the monoid comprehension calculus~\citep{Grust96Translating,Grust99PhD}, such as query unnesting and fusion of bulk operators. Query unnesting allows to \emph{unnest} a for comprehension nested inside another, and produce a single for-comprehension.
+Furthermore, we can fuse different collection operations together: collection operators like \code{map}, \code{flatMap} and \code{withFilter} can be expressed as folds producing new collections which can be combined.
+Scala for-comprehension are however more general than monoid comprehensions\footnote{For instance, a for-comprehension producing a list cannot iterate over a set.}, hence to ensure safety of some optimizations we need some additional side conditions\footnote{For instance, consider a for-comprehension producing a set and nested inside another producing a list. This comprehension does not correspond to a valid monoid comprehension (see previous footnote), and query unnesting does not apply here: if we unnested the inner comprehension into the outer one, we would not perform duplicate elimination on the inner comprehension, affecting the overall result.}.
+
+%\pg{Select and integrate what needed.}
+\smartParagraph{Manipulating functions}
+%\subsection*{More about functions.}
+%\tr{This material is left over from Sec. 4.3. It is partly needed in later sections and needs to be moved there.}
+To be able to inspect a HOAS function body \code{funBody: Exp[S] => Exp[T]}, like \code{str => str + "!"}, we convert it to \emph{first-order} abstract syntax (FOAS), that is to an expression tree of type \code{Exp[T]}.
+To this end, we introduce a representation of variables and a generator of fresh ones; since variable names are auto-generated, they are internally represented simply as integers instead of strings for efficiency.
+
+To convert \code{funBody} from HOAS to FOAS we apply it to a fresh variable \code{v} of type \code{TypedVar[S]}, obtaining a first-order representation of the function body, having type \code{Exp[T]}, and containing occurrences of \code{v}.
+
+This transformation is hidden into the constructor \code{Fun}, which converts \code{Exp[S] => Exp[T]}, a representation of an expression with one free variable, to \code{Exp[S => T]}, a representation of a function.
+
+\begin{lstlisting}
+case class App[S, T](f: Exp[S => T], t: Exp[S]) extends Exp[T]
+def Fun[-S, +T](f: Exp[S] => Exp[T]): Exp[S => T] = {
+  val v = Fun.gensym[S]()
+  FOASFun(funBody(v), v)
+}
+case class FOASFun[S, T](val foasBody: Exp[T], v: TypedVar[S]) extends Exp[S => T]
+implicit def app[S, T](f: Exp[S => T]): Exp[S] => Exp[T] =
+  arg => App(f, arg)
+\end{lstlisting}
+
+Conversely, function applications are represented using the constructor \code{App}; an implicit conversion allows \code{App} to be inserted implicitly. Whenever \code{f} can be applied to \code{arg} and \code{f} is an expression tree, the compiler will convert \code{f(arg)} to \code{app(f)(arg)}, that is \code{App(f, arg)}.
+
+%Since HOAS does not allow reifying variable names, we introduce a thread-safe generator of fresh ones, \code{Fun.gensym[S](): TypedVar[S]}
+
+%\begin{lstlisting}
+%def toFOAS[S, T](funBody: Exp[S] => Exp[T]) = 
+%\end{lstlisting}
+In our example, \code{Fun(str => str + "!")} produces \code{FOASFun(StringConcat(TypedVar[String](1), Const("!")), TypedVar[String](1))}%
+%: since an unbound variable appears here, this can be easily recognized as an open term
+.
+
+\pg{Comment back in the following discussion, if it can be made good.}
+%We use a FOAS representation internally because converting back to HOAS is expensive, and because converting to FOAS removes abstraction overhead by \emph{normalizing} the produced term. Consider the following excerpt from the implementation of map fusion:
+%\begin{lstlisting}
+%case MapOp(MapOp(coll, f), g) =>
+%  coll.map(f.andThen(g))
+%\end{lstlisting}
+%The above code pattern-matches on expressions like \code{coll.map(f).map(g)}, and produces a new expression tree which performs a single map fusion. \code{andThen} implements function composition, hence \code{f.andThen(g)} has the same semantics as \code{x => g(f(x))}. However, \code{f.andThen(g)} produces a new closure referring to \code{f} and \code{g}, hence introduces some abstraction overhead. However, \code{map} will convert the function \code{f.andThen(g)} to FOAS, and this will beta-reduce \code{f}, \code{g} and \code{andThen} only once to produce a new term in normal form.\footnote{In other words, we remove abstraction overhead using \emph{normalization-by-evaluation}~\citep{Berger91NormByEval}.}
+
+Since we auto-generate variable names, it is easiest to implement represent variable occurrences using the Barendregt convention, where bound variables must always be globally unique; we must be careful to perform renaming after beta-reduction to restore this invariant~\citep[Ch.~6]{Pierce02TAPL}.
+
+We can now easily implement substitution and beta-reduction and through that, as shown before, enable other optimizations to trigger more easily and speedup queries.
+
+%Since we always generate fresh variable names,
+%variable names are globally unique and their manipulation becomes simpler; in particular, no shadowing occurs in FOAS open terms that we inspect, and there is no need to make substitution capture-avoiding.
+
+%We show in Sec.~\ref{subsec:transf} how we implement the inverse conversion from FOAS to HOAS in terms of substitution. We can thus choose which representation to use for the task at hand; again in Sec.~\ref{subsec:transf} we show that supporting transformation and efficient interpretation requires internally using a FOAS representation.
+
+%Values of function type (of type \code{S => T}) can be additionally lifted through \code{pure}: in this case, however, inspecting function bodies is not possible. We will show later why the inability to inspect such expressions does not make optimizations unsafe; it makes optimizations less effective because the optimizer will not be able to rewrite the bodies of such functions.
+
+%\pg{XXX}
+%To enable a query writer to apply representations of functions, we lift function application through an implicit conversion%
+%%\footnote{The actual implementation tries to perform beta-reduction if possible.\ko{Footnote confusing without further motivation why we want to do this. Drop it?}}
+%:
+%\begin{lstlisting}
+%implicit def app[S, T](f: Exp[S => T]): Exp[S] => Exp[T] =
+%  arg => App(f, arg)
+%\end{lstlisting}
+%The compiler will convert \code{f(arg)} to \code{app(f)(arg)} whenever \code{f} has type \code{Exp[S => T]} and \code{arg} has type \code{Exp[S]}; \code{app} will return a metalevel function which will be applied to \code{arg}.
+%\pg{Maybe at this point also discuss \code{fmap}; maybe instead discuss it in the section about equality.}
+
+
+% to ensure that optimizations are unsafe.
+% and fusion of different collection operations.\footnote{Adapting the work requires \pg{resume}.}
+
+%%\pg{This example can be dropped if needed.}
+%%Let us now understand how our running example was optimized. Composing Fig.~\ref{fig:query} and Fig.~\ref{fig:titleFilter} manually yields Fig.~\ref{fig:titleFilterho1}, but automating this transformation requires several steps.
+%%
+%%\begin{figure}
+%%\begin{center}
+%%\begin{lstlisting}
+%%val res =
+%%    for {
+%%        record <- (for {
+%%            book <- books
+%%            if book.publisher == "Pearson Education"
+%%            author <- book.authors
+%%        } yield BookData(book.title,
+%%                 author.firstName + " " +
+%%                 author.lastName,
+%%                 book.authors.size - 1))
+%%        if record.title.contains("Principles")
+%%    } yield (record.title, record.authorName)
+%%\end{lstlisting}
+%%%//Desugaring:
+%%%val res = (books.
+%%%  withFilter(book => book.publisher == "Pearson Education").
+%%%  flatMap(book => book.authors.
+%%%  map(author => BookData(book.title,
+%%%    author.firstName + " " + author.lastName,
+%%%    book.authors.size - 1)))).
+%%%    withFilter(record => record.title.contains("Principles")).
+%%%    map(record => (record.title, record.authorName))
+%%\end{center}
+%%\caption{Input to the optimizer for the example in Fig.~\ref{fig:reifiedQuery}%, together with its desugaring
+%%.}
+%%\label{fig:inlinedDesQuery}
+%%\end{figure}
+%%
+%%\begin{itemize}
+%%\item Deep embedding in this style inlines all meta-language function application~\citep{elliott03compiling}, resulting in the code in Fig.~\ref{fig:inlinedDesQuery};
+%%\item the code above contains a nested for-comprehension which we unnest;
+%%\item \code{record} is used in the filter \code{if record.title.contains(keyword)} but its value also depends on \code{author}, hence the filter cannot be hoisted. Therefore we rewrite the filtering step to a monoid homomorphism and fuse it and other uses of \code{record} with the producer of \code{record};
+%%\item in the resulting code, the simplifier reduces code like \code{BookData(book.title, ...).title} to \code{book.title}, since \code{BookData} is just a product type;
+%%%\pg{\code{BookData} is not known to the optimizer};
+%%%\footnote{The \code{ExpProduct} trait tags expression nodes which represent products and is used for tuples and case classes. Projection from tuples are similarly tagged, hence the optimizer reduces \code{(a, b)._1} to \code{a}.}
+%%\item at this point we isolate again the filtering step; the filter is now \code{if book.title.contains(keyword)}, and the optimized code is (essentially) the reification of the code shown in Fig.~\ref{fig:titleFilterho1};
+%%\item now the body of the filter does not depend any more on \code{author}, hence it can be finally lifted.
+%%\end{itemize}
+
+%\pg{Drop this discussion if possible, but it's referenced from Sec. 3.}
+%Several of the optimization need to inspect the complete reification of the query.
+%For instance, only by inspecting \code{if book.title.contains(keyword)} the optimizer knows that \code{author} is not among its free variables.
+%When optimizing functions, part of the query (the function argument, here \code{keyword})
+%is however supplied only during function application and is hence unknown at optimization time;
+%if we could substitute \code{author.name} for \code{keyword},
+%we could observe the difference between the unoptimized query and the optimized one.
+%However, that substitution is not possible since substitution is capture-avoiding.
+%Optimizations are therefore still safe on open terms.
+
+%The optimizations we implement are not novel, hence we discuss mainly the transformation framework and typing issues.
+
+% Implementation of the optimizer.
+%%\pg{Insert an example of a transformation, like map fusion, before discussing the traversal scheme, to explain that it is completely generic.}
+%%A specific transformation is expressed as a function which transforms expression trees to expression trees, having type \code{Exp[_] => Exp[_]}. Following \citet{elliott03compiling}, we apply these transformations from the bottom-up; in contrast to \citeauthor{elliott03compiling}, few optimizations are done during construction.
+%%\pg{reconnect here}
+%%Instead, the traversal scheme is completely generic:
+%%\begin{lstlisting}
+%%trait Exp[+T] {
+%%    def transform(transformer: Exp[_] => Exp[_]): Exp[T] = {
+%%        val transformedChilds = for (c <- children) yield c.transform(transformer)
+%%        val newself = genericConstructor(transformedChilds)
+%%        transformer(newself).asInstanceOf[Exp[T]]
+%%    }
+%%}
+%%\end{lstlisting}
+%%The above code recurses on the subterms (returned by \code{Exp[T].subterms: Seq[Exp[_]]}) passing the given \code{transformer}, builds a transformed version of the current node with \code{Exp[T].genericConstructor(v: Seq[Exp[_]]): Exp[T]} and finally applies the transformation on the current node. The implementations of these methods are mostly boilerplate but they can be abstracted to a great degree thanks to some helper classes, such that the complete implementation for instance of \code{StringConcat} is just:
+%%\begin{lstlisting}
+%%case class StringConcat(str1: Exp[String], str2: Exp[String]) extends Arity2OpExp[String, String, String, StringConcat](str1, str2) {
+%%  def interpret() = str1.interpret() + str2.interpret()
+%%  def copy(str1: Exp[String], str2: Exp[String]) = StringConcat(str1, str2)
+%%}
+%%\end{lstlisting}
+%%
+%%
+%%Note that not all members of an expression node are subterms. For instance, the only member of a \code{Const[T]} node is a value of type \code{T}, not an expression which can be further transformed, hence \code{Const} has no children, and \code{genericConstructor} simply returns the same node.
+%%\pg{Problems with pattern matching and types? Problem with typing the substitution function?}
+%%
+%%%To allow implementing the visit,
+%%%\code{Exp[T].nodeArity: Int} represents the arity \code{ar} of an expression node \code{n}.
+%%%\code{Exp[T].subterms: Seq[Exp[_]]} returns \code{ar} subterms of an expression node,
+%%%and \code{Exp[T].genericConstructor(v: Seq[Exp[_]]): Exp[T]} accepts a sequence of length \code{ar}, containing possibly transformed children, and builds the transformed version of the current node.
+%%
+%%Even if transformations must preserve the type of the transformed expression tree, this is not visible from the type of \code{transformer}, hence we need to cast the result of the transformation. We made such a pragmatic choice because it is extremely hard to prove that a transformation has type \code{Exp[T] => Exp[T]} in general.
+%%
+%%
+%%
+%%\pg{Discuss alpha-equality of functions, normalization.}
+%%%\pg{We follow \citet{elliott03compiling} and transform expressions from the bottom up.}
+%%
+%%%\pg{We follow \citet{elliott03compiling} and transform expressions from the bottom up. We use pattern matching to implement transformations...}
+%%
+%%\pg{Mention the substitution function, which is simple because of no shadowing. We also need to show it to explain why we need to use FOAS.}
+%%
+%%\pg{To have constant-time optimizations, we compare collections within Const nodes by identity; to do so, we have a more specific version of \code{pure} for collections.}
+%%
+
+
+
+% \pg{For now comment out normalization by evaluation.}
+%\subsection{Normalization by evaluation}
+%\pg{Explain why we always convert to FOAS immediately and relate that to normalization by evaluation.}
+
+%\pg{Text from the sec. on collections. This problem shows up only during optimization. Describe it then.}
+%A problematic issue is that implicit resolution happens at compile-time based on the static type, like overload resolution. Consider hence code like the following:
+%\begin{lstlisting}
+%def collTransformer[T](coll: Traversable[T], f: T => T): Traversable[T] = coll.map(f).map(f)
+%\end{lstlisting}
+%Different implicits will be passed to \code{map} when writing \code{collTransformer(coll, f)} or \code{coll.map(f).map(f)}; if \code{coll} has type \code{Map[Int, Int]}, the first expression will have type \code{Traversable[(Int, Int)]} while the second \code{Map[Int, Int]}. Luckily, Scala collections guarantee that those two expressions will have the same run-time behavior, and will have in particular the same dynamic type. \pg{Resume}.
+%
+%, using \emph{normalization by evaluation}~\citep{Berger91NormByEval}.
+%HOAS-to-FOAS conversion is always done for three reasons:
+
+%\begin{itemize}
+%\item
+%  it removes the interpretative overhead due, e.g., to function
+%  composition and so on (see also higher), through \emph{normalization
+%  by evaluation}~\citep{Berger91NormByEval}. \pg{See also ``Building blocks for
+%  performance oriented DSLs'', where they do the same kind of trick to
+%  remove overhead from higher-order functions, even though they do not
+%  cite normalization by evaluation.}
+% \pg{it is not appropriate
+%  to cite Danvy's paper here, since \emph{their} normalization by
+%  evaluation is not what we need}.
+%\item
+%  it catches early some exotic terms, which call \code{interpret()} in their body \pg{more precise definition - you can call interpret on closed terms, only not on open terms; and you need to say open terms in a specific way, so that \code{Fun[String, String](str1 => str1.interpret()))}, in \code{str1.interpret()}, \code{str1} is not bound!} --
+%  \code{interpret()} will be called on open terms and throw an
+%  exception when recursing on \code{TypedVar[S]} terms.
+%\pg{Resume incorporating notes here.}
+%%(there's a  citation for that in Tillmann's TSR paper or in the ``Boxes go  bananas'' paper)
+%\item
+%  a FOAS representation allows inspecting, transforming and optimizing function
+%  bodies.
+%\end{itemize}
+%What is not possible efficiently, to the best of our knowledge, is to
+%convert FOAS back to HOAS. Given \code{e: Exp[T]} containing
+%\code{v: TypedVar[S]}, the body can be expressed as
+%\code{(x: Exp[S]) => e.substVar(v, x)}, which
+%performs explicit substitution at run time.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../aosd13-extended"
+%%% End:

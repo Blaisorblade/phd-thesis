@@ -1,0 +1,395 @@
+\documentclass[preprint,authoryear,10pt]{sigplanconf}
+\usepackage[utf8]{inputenc}
+\usepackage[unicode=true]{hyperref}
+\usepackage{stmaryrd}
+\usepackage{tikz}
+\usepackage{booktabs}
+\newcommand{\graphPath}[1]{#1}
+\input{../macros} %XXX remove ASAP.
+%\newcommand{\LoS}{\textsc{SQuOpt}} % Scala Query Optimizer % Try to get Squaw?
+
+\usepackage{comment}
+\includecomment{extraEval}
+
+\bibliographystyle{abbrvnat}
+
+\hypersetup{breaklinks=true, pdfborder={0 0 0}}
+\begin{document}
+\section{Evaluation}
+\label{sec:evaluation}
+This file simply typesets the benchmark results analyzed through R.
+%%introduction
+%With \LoS, we explored domain-specific embedding and domain-specific optimizations. Our key goals were to write modular and efficient queries. In this section, we demonstrate the potential of \LoS\ regarding 
+%%compactness and 
+%\emph{efficiency} by implementing queries and measuring their performance. We show that interpretation overhead is comparably moderate, whereas our optimizations can improve performance of some queries by orders of magnitude.
+%
+%%evaluation strategy
+%Throughout the paper, we have already shown several compact queries for which our optimizations increase performance significantly compared to a naive execution, because the optimizations change the complexity class of the query. In this manner, we could construct many additional queries. However, to get a more realistic evaluation of%
+%%compactness and
+%efficiency, we decided to perform an experiment with existing real-world queries.
+%
+%%general process
+%We set up an experiment as follows. First, we selected a set of existing real-world queries specified and implemented independently from our work (reference implementation). Second, we reimplemented these queries as queries on Scala collections (base implementation). Finally, we modified those queries to use \LoS\ and interpret them without and with optimizations (SQ and \LoS\ implementations).
+%%To judge compactness, we compare the reference implementation with the SQ implementations.
+%To judge efficiency, we conducted rigorous performance measurements to determine the interpretative overhead (relative performance difference between implementations base and SQ) and the optimization speedup (relative performance difference between implementations base and \LoS).
+
+\input{queryTables}
+%As experimental units, we sampled a set of queries on code structures from Findbugs 2.0~\citep{DBLP:journals/sigplan/HovemeyerP04}. Findbugs is a popular bug-finding tool for Java Bytecode available as open source. To detect bug patterns,
+%%such as [example], %PG: reinsert a specific example if helpful; we have a table listing the queries.
+%Findbugs performs queries that traverse a structural in-memory representation of a code base (extracted from bytecode). %, but perform little other computation. 
+%We selected queries from Findbugs, because they represent typical non-trivial queries on in-memory collections. Using convenience sampling, we selected 11~queries from over 300~queries in Findbugs as listed in Table~\ref{table:implemented-analyses}.\footnote{We primarily selected queries that could be implemented directly on top of a representation of the Java bytecode and which do not require additional helper structures except from the class hierarchy and repository of all class files. Additionally, we  selected queries with different characteristics, for instance, queries that primarily looked for declarations of classes, methods, or fields with specific properties (such as ``equals'' methods where the parameter is a strict subtype of Object or declarations of protected fields in final classes). Additionally, we implemented queries that inspect the type hierarchy and queries that required analyzing methods implementation.
+%} 
+%During sampling we did not evaluate the optimization potential of the queries; so, we expect that only some queries will benefit from optimization; we argue that such a sample gives a more representative picture of \LoS.
+%
+%%\pg{Omit - this only showcases BAT, not our code. Show our implementation instead.}
+%\begin{figure}
+%\begin{center}
+%\begin{lstlisting}
+%for {
+%  cf <- classFiles
+%  m @ Method(_, "equals", MethodDescriptor(Seq(cf.thisClass), BooleanType), _) <- cf.methods 
+%  if m.isAbstract
+%} yield (cf, m)
+%\end{lstlisting}
+%\pg{Show the commented out \LoS\ version of this code - it's in the paper source, commented out}
+%%import BATLifting._
+%%for {
+%%  classFile <- classFiles.asSmart
+%%  method <- classFile.methods
+%%  if method.isAbstract && method.name ==# "equals" && method.descriptor.returnType ==# BooleanType
+%%  parameterTypes <- Let(method.descriptor.parameterTypes)
+%%  if parameterTypes.length ==# 1 && parameterTypes(0) ==# classFile.thisClass
+%%} yield (classFile, method)
+%\end{center}
+%\caption{Find covariant \code{equals} methods.}
+%\label{fig:covariant-equals}
+%\end{figure}
+%
+%
+%%reimplementation
+%We implemented the analyses following the specifications given in the Findbugs documentation. Instead of using a hierarchy of visitors as the original implementations of the queries in Findbugs, we wrote the queries as for-comprehensions in Scala on an in-memory representation created by the Scala toolkit BAT.\footnote{\url{http://github.com/Delors/BAT}} 
+%BAT in particular provides comprehensive support for 
+%writing queries against Java bytecode in an idiomatic way.
+%We exemplify an analysis in Fig.~\ref{fig:covariant-equals}: It detects all co-variant \code{equals} methods in a project by iterating over all class files (line 2) and all methods, searching for methods named ``\code{equals}'', returning a boolean value, that define a single parameter of the type of the current class. 
+%% We tested the implementations to ensure that they yield equivalent results. \pg{Did we?}
+%% THE QUERIES _WILL_ RETURN DIFFERENT RESULTS.
+%
+%%\subsection{Compactness}
+%%\LoS\ are compact compared to hand-optimized queries because standard optimizations are performed by the optimizer.
+%%They are also more reusable because hand-optimized queries must, due to optimization, often inline subqueries  
+%%that could otherwise be reused in other queries.
+%%\chk{this is a very general claim, that we could have made (and have made?) in the introduction. can we back this up here?} \pg{I didn't have time to back it up as I wanted, by changing my queries.}
+%%
+%%\chk{I also have problems with the rest of this subsection. So you want to explain that the LoS implementation is actually more compact (as claimed in the paragraph above). However as the only example, you show some code fragment, for which you claim it is not more compact. Instead you then start discussing why they might have chosen visitors and claim they are clumsy(sic!). This is not convincing. The example says little about compactness overall. You either need a more convincing story here, or I'd rather remove the entire compactness discussion and only evaluate performance.}\pg{Klaus, can you take a look at this comment? I'd suggest to replace compactness with some other word; I'll probably have to drop the line count anyway.}
+%%One way of demonstrating compactness is by comparing our queries to the original Findbugs implementation of same query. 
+%%In Fig.~\ref{fig:findbugs}, we list the implementation of a very simple analysis in Findbugs.
+%%From this excerpt, we see that queries are implemented
+%%as visitors over the syntax trees. In Fig.~\ref{fig:squopt}, we list the corresponding definition in \LoS.
+%%In this example, the \LoS\ code is not much more compact, because the Findbugs implementation is not optimized 
+%%(which is why we can achieve an order-of-magnitude speedup by indexing, as we will discuss later), but 
+%%the example illustrates a different shortcoming of visitor-based definitions of analyses: Non-local information
+%%must be maintained in a clumsy way by the visitor, as illustrated by the usage of the {\tt classContext} variable.
+%%This style of visitor organization also makes it hard to compose analyses, say, by joining the information of two analyses or building 
+%%a high-level analysis on top of a low-level analysis.
+%%
+%%The reason why this architecture was chosen by the Findbugs implementors is presumably that
+%%many analyses can be computed within a single traversal of the bytecode; running more analyses in a single traversal, instead of different traversals, makes better use of memory caches.
+%%%many analyses can easily be computed in parallel, that is,
+%%%and the analysis for different classes can be executed in parallel. 
+%%Thanks to indexing, \LoS\ offers the potential to achieve similar benefits without being constrained by inflexible implementations of analyses as visitors.
+%%
+%%%main argument is that our queries are compact as shown in example.
+%%%
+%%%reuse between queries possible
+%%%
+%%%modularity
+%%%
+%%%Java implementation consists of nontrivial visitor code.
+%%%direct comparison not objective, because... We still argue... All our queries on web page.
+%%%
+%%%potentially this paper might be helpful for argument \url{http://www.springerlink.com/content/w60444612306qp54/}
+
+%\subsection{Efficiency}
+\paragraph{Measurement Setup.}
+\input{evalRes}
+\input{evalResLos}
+%To measure performance, we executed the queries on the preinstalled JDK class library (\texttt{rt.jar}), containing 58M of uncompressed Java bytecode.
+%Previously, we also performed a preliminary evaluation on the much smaller ScalaTest library, getting comparable results, which we hence do not discuss.
+%Experiments were run on a Intel Core i7-2600, 3.40 GHz, with 8 GHz of RAM, running Scientific Linux release 6.2. We used the preinstalled Sun's Java Runtime Environment v1.6.0\_22 and Scala 2.9.1.
+%%/usr/lib/jvm/jre-1.6.0-openjdk.x86_64/lib/rt.jar
+%%[the entire JDK].
+%
+%%We compared \LoS\ vs Findbugs by measuring \emph{startup performance}~\citep{Georges07rigorousJavaPerformance}, that is the performance of running the queries only once.
+%
+%%TODO: change the methodology.
+%We perform performance measurements as follows (inspired by the guidelines recommended by \citet{Georges07rigorousJavaPerformance}).
+%%For each query, we measure the different implementations and the optimization time.
+%We consider benchmarks one at a time.
+%To warm up the virtual machine, we execute the current benchmark 100 times to ensure that it was JIT-compiled.
+%Subsequently, we measured the runtime of 50 benchmark executions, running the garbage collector between each two invocations. We computed the average and the standard deviation of those 50 runs; the latter was at most \MaxDevExp\%.
+%We repeated the above process over all benchmarks within a single JVM invocation.
+%Finally, we repeated the entire process three times, because runtime can differ between different JVM invocations. We report the average and standard deviation between the means of the three JVM invocations.
+%
+%At the beginning of each JVM invocation, all the bytecode to analyze is loaded in memory and converted into BAT's representation.
+%After this step, to support optimizations, we build three indexes to speed up navigation over the queried data, in this case the bytecode of JDK classes.
+%%The implementations are shown in Fig.~\ref{fig:indexes}.
+%We choose which indexes to implement using guidance from \LoS{} itself; during optimizations, \LoS{} reports which indexes he could have applied to the given query. Among those, we tried to select indexes giving a reasonable compromise between construction cost and optimization speedup.
+%
+%The first index maps any method name to the corresponding methods (together with containing classes), and is used by many different queries.
+%The second index maps any exception type to exception handlers catching them (together with the containing method bodies, methods and class).
+%The third index allows to look for occurrences of bytecode instructions of a given type; it maps any type of bytecode instruction (like \code{INVOKESTATIC}, \code{INVOKEVIRTUAL} and so on) to its occurrences.
+%
+%\begin{figure}
+%\begin{center}
+%\begin{lstlisting}
+%val methodNameIdx: Exp[Map[String, Seq[(ClassFile, Method)]]] = (for {
+%  classFile <- classFiles.asSmart
+%  method <- classFile.methods
+%} yield (classFile, method)).groupBy(_._2.name)
+%
+%val excHandlerTypeIdx: Exp[Map[ObjectType, Traversable[(ClassFile, Method, Code, ExceptionHandler)]]] = (for {
+%  classFile <- classFiles.asSmart if classFile.isClassDeclaration
+%  method <- classFile.methods
+%  body <- method.body
+%  exceptionHandler <- body.exceptionHandlers
+%} yield (classFile, method, body, exceptionHandler)) groupBy (_._4.catchType)
+%
+%type QueryAnd[+T] = ((ClassFile, Method, Code), T)
+%val typeIdxBase: Exp[Seq[QueryAnd[Instruction]]] = for {
+%  classFile <- classFiles.asSmart
+%  method <- classFile.methods
+%  body <- method.body
+%  instruction <- body.instructions
+%} yield (asExp((classFile, method, body)), instruction)
+%val typeIdx: Exp[TypeMapping[Seq, QueryAnd, Instruction]] = typeIdxBase.groupByTupleType2
+%\end{lstlisting}
+%\end{center}
+%\caption{Index definitions}
+%\label{fig:indexes}
+%\end{figure}
+
+We measured how much time was required to construct
+%these
+indexes. For comparison, we also present the time needed for loading the bytecode processed:
+\begin{center}
+\begin{tabular}{l*{1}{r@{}c@{}l}}\toprule
+Name&\multicolumn{3}{c}{Elapsed time}\\\midrule
+\input{indexes}
+\bottomrule
+\end{tabular}
+\end{center}
+
+Below we measure in all cases the pure query time. We discuss the runtime overhead of the optimizer itself separately below.
+
+%ChK:
+\paragraph{Base vs.\ reference implementation.}
+%Before actually comparing between the different Scala implementations (base, SQ, and \LoS), we first ensured that the base implementation is comparable to the original Findbugs implementation. A direct comparison between the Findbugs reference implementation and any of our Scala implementations is not possible in a rigorous and fair manner. Due to very different implementation strategies and different language, we performed only a rough comparison.
+
+
+We set out to compare \LoS\ to FindBugs.
+Therefore, we measured \emph{startup performance}~\citep{Georges07rigorousJavaPerformance}, that is the performance of running the queries only once, to minimize the effect of compiler optimizations.
+%We setup our \LoS-based analyses to only perform optimization and run the optimized query. To setup FindBugs we manually disabled all unrelated bug detectors \pg{ME: please check.}; we also made the modified Findbugs source code available.
+%The Scala implementations of the queries perform roughly similarly to the original Findbugs queries, as shown in this table:
+%(\avgRealTimeLos{}$\pm$\avgRealSdLos{} instead of \avgRealTimeFb{}$\pm$\avgRealSdFb{} seconds to execute all queries).
+
+%\begin{table*}
+\begin{center}
+\begin{tabular}{l*{2}{r@{}c@{}l}rrl}\toprule
+Name&\multicolumn{3}{c}{Elapsed time (s)}&\multicolumn{3}{c}{CPU time (s)}\\\midrule
+\input{table2}
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+
+%However, direct comparison between the Findbugs reference implementation and any of our Scala implementations is not possible in a rigorous and fair manner.
+
+%Findbugs bug detectors are not fully modularized, therefore we cannot reasonably isolate the implementation of the 11~selected queries from support code. Furthermore, the architecture of the implementation has many differences that affect performance, including the use of multithreading. Finally, after implementing the queries according to Findbugs specifications, we discovered that the FindBugs implementation of an analysis does not always match its specification. We use this comparison only to set the scene and ensure that our base implementations are roughly comparable.
+%Instead of comparing with Findbugs, we focus on performance differences between the Scala implementations base, SQ, and \LoS\ to determine interpretation overhead and optimization speedup.
+
+\paragraph{Interpretative overhead and optimization potential.}
+We present the results of our benchmarks in Table~\ref{table:performance}. We see that, in its current implementation, \LoS\ causes an interpretation overhead between
+\minInterpOver{}x and \maxInterpOver{}x.
+%\chk{X}x and \chk{Y}x \pg{(more or less) between 1.2x and 5x}.
+%As expected, not all queries benefit from optimizations; in 4 out of 11 no optimization could be applied, in one case the optimization was not effective enough to overcome the interpretative overhead. However, 6 out of 11 queries are significantly faster with optimizations, in two queries even by several orders of magnitude.
+%
+%We analyze the behavior of a few queries after optimization, to understand why their runtime has improved. We choose to present the 2 queries with the smallest improvements,
+%\code{GC_CALL} and \code{RUN_FINALIZERS_ON_EXIT}, and the two queries with the biggest improvements, \code{DONT_CATCH_IMSE} and \code{FINALIZER_NOT_PROTECTED}.
+%
+%%We analyze transformations performed on a few of the queries which were optimized,
+%After optimization, \code{GC_CALL} uses the instruction type index to find all occurrences of invocation opcodes (\code{INVOKESTATIC} and \code{INVOKEVIRTUAL}); after this step the query looks, among those invocations, for the ones targeting \code{runFinalizersOnExit}. Since  invocation opcodes are quite frequent, the used index is not very specific, hence it allows for little speedup, only 2.6x. However no other index applies to this query, and our framework does not maintain any selectivity statistics on indexes to predict these effects.
+%
+%The behavior of \code{RUN_FINALIZERS_ON_EXIT} is very similar to the previous one -- the main difference is that it looks only for \code{INVOKESTATIC} opcodes, and this might improve the selectivity of the index, explaining the greater speedup factor achieved (9.2x).
+%
+%After optimization, \code{FINALIZER_NOT_PROTECTED} uses the method index to find \code{finalize} methods, and for each result verifies a few conditions on the signature; hence its speedup is very high, namely 198.3x. The method index fits very well to this query but is also used by other ones.
+%
+%After optimization, \code{DONT_CATCH_IMSE} becomes simply an index lookup on the index for exception handlers, looking for handlers of \code{IllegalMonitorStateException}; its speedup is thus extremely high (2935.8x). This speedup relies on an index which is specific for this kind of query, and building this index is slower than executing the unoptimized query. On the other hand, building this index is entirely appropriate in a situation where similar queries are extremely common. Similar considerations apply to usage of indexing in general, similarly to what happens in databases.
+%%\pg{Explain the results a bit more: which queries benefited the most from which optimizations etc.}
+%
+%\paragraph{Optimization overhead}
+%The current implementation of the optimizer is not yet optimized for speed.
+%We however evaluate
+%whether our optimizations are already worth their runtime cost, even when the optimized query is run only once.
+%We show in Table~\ref{table:performance} the time spent for optimization (Optimiz. time); furthermore, for each query we sum the time spent for optimization with the runtime of the optimized query, compare against with the baseline performance and present the ratio (OS-Opt).
+%The optimization time is approximately independent from the baseline performance or the achieved speedup, and varies between \minOptimTime{} ms and \maxOptimTime{} ms.
+%If we include optimization time, 4 queries are still faster than the baseline, even if by a smaller margin. By looking at their baseline performance, we recognize that 3 out of these 4 queries run for much longer than other, hence for them the optimization overhead can be amortized more easily.
+
+%\pg{Defend the cost of indexes}
+
+%\paragraph{Summary}
+%
+%As we have seen, we experience a significant interpretation overhead; however, it is moderate in comparison with the potential speedups that our optimizer can achieve. Since this is a preliminary implementation, we believe our evaluation shows great potential.
+%Out of 11 queries, optimization affords for 6 of them significant speedups ranging from a 2.6x factor to a 2935x factor; for 4 of them, the speedups are great enough to offset the cost of optimizations even through a single query invocation.
+%
+%These speedups depend however on the application of indexes; one must always consider the costs of creating an index are offset by the speedups achieved, and hence whether building the index is appropriate.
+%%but our optimizations can improve performance of some queries by orders of magnitude.
+%%\pg{Mention indexes}
+%
+%
+%%\subsection{Previous Evaluation Section Content (unchanged)}
+%
+%
+%
+%
+%%To get a good understanding of the impact of using our query DSEL and its optimizer, we have evaluated its runtime performance and memory usage by means of executing a set of different, real world queries over an object-oriented representation of Java Bytecode. These queries all share the property that they primarily traverse the generated representation to locate specific elements in the bytecode. They do not do any other significant computations. The list of queries is given in table~\ref{table:implemented-analyses}. All queries re-implement corresponding bug detectors available in the Java tool Findbugs~\citep{DBLP:journals/sigplan/HovemeyerP04}. In our case, the object-oriented representation of the Java bytecode is provided by the Scala toolkit BAT\footnote{\url{http://github.com/Delors/BAT}}. BAT in particular provides comprehensive support for % pattern-matching to facilitate writing analyses against Java bytecode. 
+%%writing queries against Java bytecode in an idiomatic way.
+%%An example analysis is shown in Fig.~\ref{fig:covariant-equals}. It detects all co-variant equals methods in a project by iterating over all class files (line 2) and all methods in search for methods named ``equals'' that define a single parameter of the type of the current class and which returns a boolean value. 
+%
+%%All of the queries are self-contained and only require as input the list of all class files and the project's class hierarchy. The latter is calculated before the first analysis is executed and then used by all analyses that require type hierarchy information. For example, those that test for the  implementation of the Comparable interface (NOT\_CLONEABLE, NO\_CLONE). This approach greatly facilitates modular reasoning about each query.
+%%
+%%To enable a preliminary assessment of the expressive power of the approach, we list in Table~\ref{table:implemented-analyses} the number of lines of code for each implemented query. I-LoC is the number of lines of code required to implement the analysis when we use all Scala features (in particular pattern-matching). F-LoC is the number of lines of code of the analysis after rewriting the query for the use with our current framework. However, as stated previously\mei{CHECK!} with the release of the next major version of Scala, our framework can be adapted to optimize queries written using the ``ideal'' syntax. However, the implemented queries only required between XX and YY lines of code which demonstrates that this approach facilitates concise query definitions. Though the detectors implemented by Findbugs in general require roughly the same number of lines of code, the approach employed by Findbugs -- each bug detector is basically a Visitor class
+%%%~\citep{GOF:DesignPatterns} % Do insert the citation, please
+%%-- does make a direct comparison at this level meaningless. However, the implementations are arguably less modular as each detector depends on one or more other visitors  which furthermore need to be executed in a specific order.
+
+% These colors match with the definitions in plotdata.r!
+
+
+
+%Questions to be answered by the evaluation:
+%\begin{enumerate}
+%\item When does the use of the framework pays-off? I.e., when is an optimized query actually faster than a ``non-smart'' collection? To answer this question we did run all queries against projects of increasing size.
+%\item What is the maximum performance benefit that we can get?
+%\item What is the impact on the memory usage (some information need to be cached)?
+%\end{enumerate}
+
+%\begin{figure*}
+%\begin{lstlisting}[language=Java]
+%public class DontCatchIllegalMonitorStateException extends PreorderVisitor implements Detector {
+%    BugReporter bugReporter;
+%    ClassContext classContext;
+%    public DontCatchIllegalMonitorStateException(BugReporter bugReporter) {
+%        this.bugReporter = bugReporter;
+%    }
+%
+%    @Override
+%    public void visit(CodeException obj) {
+%        int type = obj.getCatchType();
+%        if (type == 0) return;
+%        String name = getConstantPool().constantToString(getConstantPool().getConstant(type));
+%        if (name.equals("java.lang.IllegalMonitorStateException"))
+%            bugReporter.reportBug(...);
+%    }
+%
+%    public void visitClassContext(ClassContext classContext) {
+%        this.classContext = classContext;
+%        classContext.getJavaClass().accept(this);
+%    }
+%
+%    public void report() { /*empty*/ }
+%}
+%\end{lstlisting}
+%\caption{Checker in Findbugs to detect catches of ``IllegalMonitorStateExceptions'' }
+%\label{fig:findbugs}
+%\end{figure*}  
+%%%%% REPORT BUG CODE: new BugInstance(this, "IMSE_DONT_CATCH_IMSE", HIGH_PRIORITY).addClassAndMethod(this).addSourceLine(this.classContext, this, obj.getHandlerPC())
+%
+%\begin{figure*}
+%\begin{lstlisting}[language=Scala]
+%for {classFile <- classFiles.asSmartCollection if classFile.isClassDeclaration
+%     method <- classFile.methods
+%     body <- method.body
+%     exceptionHandler <- body.exceptionHandlers 
+%     if exceptionHandler.catchType ==# ObjectType("java/lang/IllegalMonitorStateException")
+%} yield (classFile, method))
+%\end{lstlisting}      
+%\caption{Checker using \LoS\ to detect catches of ``IllegalMonitorStateExceptions''}
+%\label{fig:squopt}
+%\end{figure*}      
+
+%% PG: I commented out the example below because our code is more modular but not so much better, and because our implementation code is clearly different - it has less checks than FindBugs, because we don't filter out any known false positives.
+%				&& !getDottedClassName().startsWith("java.lang")
+%				&& !getMethodName().startsWith("gc") && !getMethodName().endsWith("gc")) {
+
+%\begin{figure*}
+%\begin{lstlisting}[language=Java]
+%public class DumbMethods extends OpcodeStackDetector {
+%	private final BugReporter bugReporter;
+%
+%	public DumbMethods(BugReporter bugReporter) {
+%		this.bugReporter = bugReporter;
+%	}
+%
+%	@Override
+%	public void sawOpcode(int seen) {
+%		if (seen == INVOKESTATIC && getClassConstantOperand().equals("java/lang/System")
+%				&& getNameConstantOperand().equals("runFinalizersOnExit") || seen == INVOKEVIRTUAL
+%				&& getClassConstantOperand().equals("java/lang/Runtime")
+%				&& getNameConstantOperand().equals("runFinalizersOnExit")) {
+%			bugReporter.reportBug(new BugInstance(this, "DM_RUN_FINALIZERS_ON_EXIT", HIGH_PRIORITY)
+%					.addClassAndMethod(this).addSourceLine(this));
+%		}
+%		if (((seen == INVOKESTATIC && getClassConstantOperand().equals("java/lang/System")) || (seen == INVOKEVIRTUAL && getClassConstantOperand()
+%				.equals("java/lang/Runtime")))
+%				&& getNameConstantOperand().equals("gc")
+%				&& getSigConstantOperand().equals("()V")
+%				&& !getDottedClassName().startsWith("java.lang")
+%				&& !getMethodName().startsWith("gc") && !getMethodName().endsWith("gc")) {
+%			bugReporter.reportBug(new BugInstance(this, "DM_GC", HIGH_PRIORITY).addClassAndMethod(
+%					this).addSourceLine(this));
+%		}
+%	}
+%}
+%\end{lstlisting}      
+%\caption{Findbugs - non-modular implementation of checkers (this is a stripped-down variant of these checkers! The actual DumbMethods Detector is over 1000LoC)}
+%\end{figure*} 
+%
+%
+%\begin{figure*}
+%\begin{lstlisting}[language=Scala]
+%
+%    for {
+%        classFile <- classFiles.asSmartCollection
+%        method <- classFile.methods
+%        body <- method.body
+%        instruction <- body.instructions.typeFilter[INVOKESTATIC]
+%        if instruction.name ==# "runFinalizersOnExit"
+%        desc <- Let(instruction.methodDescriptor)
+%        recv <- instruction.declaringClass.ifInstanceOf[ObjectType]
+%        if (recv.className ==# "java/lang/System" || recv.className ==# "java/lang/Runtime") &&
+%          desc ==# MethodDescriptor(Seq(BooleanType), VoidType)
+%      } yield (classFile, method, instruction)
+%
+%      for {
+%        classFile <- classFiles.asSmartCollection
+%        method <- classFile.methods
+%        body <- method.body
+%        instruction <- body.instructions.typeCase(
+%          when[INVOKESTATIC](instr =>
+%            instr.declaringClass ==# ObjectType("java/lang/System") && instr.name ==# "gc" && instr.methodDescriptor ==# NoArgNoRetMethodDesc, identity),
+%          when[INVOKEVIRTUAL](instr =>
+%            instr.declaringClass ==# ObjectType("java/lang/Runtime") && instr.name ==# "gc" && instr.methodDescriptor ==# NoArgNoRetMethodDesc, identity))
+%      } yield (classFile, method, instruction)
+%\end{lstlisting}      
+%\caption{Scala}
+%\end{figure*} 
+
+
+%We verified correctness of our implementation and of the transformation described, and performed microbenchmarks to verify the speedups; many of them, like the hash-join transformation, change the complexity class of the query, hence a microbenchmark can provide arbitrary speedup by setting parameter values suitably. Hence we do not report on these results.
+%
+%We instead translate some simple bug detectors taken from FindBugs to Scala, and report the size of the code needed in the two cases\mei{This is more a statement about the expressiveness of Scala than a statement about \LoS}; we then convert the queries to use our framework, and measure the performance overhead due to the deep embedding and the interpretation overhead; we apply our optimizations and measure the speedup we get.
+%Since we did not implement a complete query optimizer, we select only a few favorable but real-world examples.
+
+\bibliography{../Bibs/DB,../Bibs/ProgLang,../Bibs/SoftEng}
+\end{document}
+% vim: set tw=0:

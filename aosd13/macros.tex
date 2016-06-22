@@ -1,0 +1,53 @@
+% Macros not so specific to this paper project
+\input{lstpackages}
+
+\usepackage{ifxetex}
+
+\ifxetex
+\usepackage{fontspec}
+\setmonofont{DejaVu Sans Mono}
+\else
+\usepackage{eurosym}
+\usepackage[utf8]{inputenc}
+\DeclareUnicodeCharacter{20AC}{\euro}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.88]{beramono} % http://wbillingsley.blogspot.de/2008/06/latex-monospace-bold-computer-modern.html
+\fi
+
+\usepackage{fixltx2e}[2005/12/01]
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{stmaryrd}
+\usepackage{booktabs}
+
+% Load hyperref as last package
+% (http://www.tex.ac.uk/cgi-bin/texfaq2html?label=hyperdupdest), except for
+% bookmark (which would otherwise load hyperref with other options).
+\begin{forNonBeamer}
+\usepackage[unicode=true]{hyperref}
+\end{forNonBeamer}
+\usepackage{bookmark}
+
+\input{lstsetup}
+
+\def\theColorRed{red}
+
+\newcommand{\mynote}[2]{}
+\begin{todo}
+\renewcommand{\mynote}[2]
+    { \textcolor{\theColorRed}{
+     {\bfseries\sffamily\scriptsize#1}
+     {\small$\blacktriangleright$\textsf{\emph{#2}}$\blacktriangleleft$}}}
+\end{todo}
+
+\newcommand{\TODO}{\mynote}
+\newcommand{\pg}{\TODO{PG}}
+\newcommand{\yc}[1]{{\def\theColorRed{blue}\mynote{YC}{#1}}}
+\newcommand{\tr}{\TODO{TR}}
+\newcommand{\ko}{\TODO{KO}}
+\newcommand{\chk}{\TODO{CK}}
+\newcommand{\mei}{\TODO{ME}}
+\newcommand{\rmi}{\TODO{RM}}
+
+\input{customMacros}

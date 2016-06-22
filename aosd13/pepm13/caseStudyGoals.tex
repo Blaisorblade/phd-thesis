@@ -1,0 +1,29 @@
+While the basic idea of deep embedding is well known, it is not obvious how to realize deep embedding
+when considering the following additional goals:
+
+\begin{itemize}
+\item To support users adopting \LoS, a generic \LoS\ query should share the ``look and feel'' of the ordinary collections API: In particular, query syntax should remain mostly unchanged. In our case, we want to preserve  Scala's \emph{for-comprehension}\footnote{Also known as \emph{for expressions}~\citep[Ch.~23]{Odersky11book}.} syntax and its notation
+ for anonymous functions.
+ %IDE services for native Scala queries (such as syntax highlighting or
+ %reference resolving) should also work with \LoS\ queries.
+ % Paolo: That seems irrelevant, this is guaranteed by all deep embeddings.
+ \item Again to support users adopting \LoS, a generic \LoS\ query should not only share the syntax of the ordinary collections API; it should also be well-typed if and only if the corresponding ordinary query is well-typed.
+ This is particularly challenging in the Scala collections
+ library due to its deep integration with advanced type-system features, such as higher-kinded generics
+ and implicit objects~\citep{odersky2009fighting}. For instance, calling \code{map} on a \code{List} will return a \code{List}, and calling \code{map} on a \code{Set}
+ will return a \code{Set}. Hence the object-language representation and the
+ transformations thereof should be as ``typed'' as possible. This precludes, among others, a first-order
+ representation of object-language variables as strings.
+ \item \LoS\ should be interoperable with ordinary Scala code and Scala collections. For instance, it should
+ be possible to call normal non-reified functions within a \LoS\ query, or mix native Scala queries and \LoS\ queries.
+%KO: commented this out because we now have the RW section early
+%\item \LINQ\ also reifies queries by relying on built-in support for deep embedding (in the form of expression trees); we want instead to express deep embedding as a library using general-purpose language constructs of more general applicability.
+ \item The performance of \LoS\ queries should be reasonable even without optimizations. A non-optimized \LoS\ query
+ should not be dramatically slower than a native Scala query. Furthermore, it should be possible to create new queries at run time and execute them without excessive overhead.
+ This goal limits the options of applicable interpretation or compilation techniques.
+\end{itemize}
+\chk{these goals are not really justified, but that may be too late to change}
+ 
+We think that these challenges characterize deep embedding of queries on collections as a \emph{critical} case study~\citep{flyvbjerg06five} for DSL embedding.
+That is, it is so challenging that embedding techniques successfully used in this case are likely to be successful on a broad range of other DSLs.
+From the case study, we report the successes and failures of achieving these goals in \LoS. 

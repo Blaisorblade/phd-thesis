@@ -1,0 +1,52 @@
+\begin{abstract}
+The collections API of a programming language forms an embedded domain-specific language to express queries and operations
+on collections. Unfortunately, the ordinary style of implementing such APIs does not allow automatic domain-specific
+analyses and optimizations such as fusion of collection traversals, usage of indexing, or reordering of filters.
+Performance-critical code using collections must instead be hand-optimized, leading to non-modular, brittle, 
+and redundant code.
+
+We propose \LoS, the Scala Query Optimizer---a \emph{deep embedding} of the Scala collections API
+that allows such analyses and optimizations to be defined and executed within Scala, without relying on external tools 
+or compiler extensions. \LoS\ provides the same ``look and feel'' (syntax and static typing guarantees) as the standard collections API.
+We evaluate \LoS\ by re-implementing several code analyses of the Findbugs tool using \LoS{} and demonstrate that \LoS\ can
+reconcile modularity and efficiency in real-world applications.
+
+Overall, we present the collections APIs as a critical case study
+for DSEL-implementation techniques. From it, we extract lessons about the design of embedded DSLs and host-language design for 
+effective and type-safe embedding and optimizations. 
+
+%% Trying to follow Kent Beck's idea (http://www.sigplan.org/oopsla/oopsla96/how93.html).
+%% Domain-specific abstractions are not part of general-purpose languages. Such abstractions are important to close the abstraction gap between a solution to a problem and its encoding as a program. Domain-specific embedded languages support such abstractions but are only part of the solution: support for meta-programming on the embedded language is also essential, to support more powerful abstractions and to allow domain-specific optimizations.
+%%we argue that reifying programs in the embedded language is to support metaprogramming and domain-specific optimizations can be crucial.
+%% To investigate support for this requirements, we consider Scala, a language intended to support DSEL engineering, and present a case study on a query DSL for collections: without changes to the compiler, we reify queries on Scala collections while preserving typing and show how to implement algebraic optimizations to provide order-of-magnitude speed-ups and make declarative queries efficient; finally we extract lessons about how the host language supports the development of our DSEL.
+%% Finally we discuss lessons for DSEL developers and for programming languages.
+%
+%%Deeply embedded domain-specific languages are a worthwhile approach
+%%Domain-specific embedded languages
+%
+%%Queries over collections need to be efficient, and to this end they are often optimized by hand instead of
+%%being specified in a declarative way. Database optimizers free the developer from manual optimizations of queries
+%%over databases, but are often not applied to collections. Employing the same techniques for queries over collections
+%%allow to improve performance, to make queries more compact and readable, or both.
+%%
+%%We implement a deeply-embedded DSEL for queries over collections in Scala, close to native query operators,
+%%implement a few significant optimizations, and demonstrate their usefulness over bug-finding queries on source code
+%%extracted from FindBugs.
+\end{abstract}
+
+\begin{oopsla}
+% Klaus: Let's forget about these things until the paper gets accepted
+%\category{CR-number}{subcategory}{third-level}
+
+\category{H.2.3}{Database Management}{Languages}[Query languages]
+%\category{D.3.3}{Programming Languages}{Language Constructs and Features}
+\category{D.1.1}{Programming Techniques}{Applicative (Functional) Programming}
+\category{D.1.5}{Programming Techniques}{Object-oriented Programming}
+
+\terms
+Design, Performance, Languages
+
+\keywords
+%keyword1, keyword2
+Deep embedding, query languages, optimization, modularity
+\end{oopsla}

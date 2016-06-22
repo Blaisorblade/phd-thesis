@@ -1,0 +1,18 @@
+\documentclass{../sig-alternate}
+\usepackage[margin=0cm,a5paper,landscape]{geometry}
+\usepackage{fontspec}
+\setromanfont{Optima}
+\input{../macros}
+
+\newcommand{\graphPath}[1]{#1}
+\begin{document}
+
+\newcommand{\tablerowsize}{\small}
+
+\begin{table*}[tb]
+\input{\graphPath{EvalSummaryTable}}
+\\
+Average performance ratios.
+\end{table*}
+
+\end{document}

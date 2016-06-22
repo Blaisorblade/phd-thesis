@@ -1,0 +1,98 @@
+
+
+%selecting queries
+%\begin{table*}
+%\begin{tabular}{ll}\toprule
+%Identifier & Description \\ \midrule
+%PROTECTED\_FIELD % Findbugs: CI\_CONFUSED\_INHERITANCE
+%%	& % Idealized: 4
+%	& Class is final but declares protected field \\
+%NO\_CLONE % Findbugs: CN\_IDOM
+%%	& % Idealized: 9
+%	&  Class implements Cloneable but does not define or use clone method \\
+%SUPER\_CLONE\_MISSING % Findbugs: CN\_IDIOM\_NO\_SUPER\_CALL
+%%	& % Idealized: 11
+%	& The clone method does not call super.clone() \\
+%NOT\_CLONEABLE % Findbugs: CN\_IMPLEMENTS\_CLONE\_BUT\_NOT\_CLONEABLE
+%%	& % Idealized: 5
+%	& Class defines clone() but doesn't implement Cloneable\\
+%COVARIANT\_COMPARETO % Findbugs CO\_ABSTRACT\_SELF \& CO\_SELF\_NO\_OBJECT 
+%%	& % Idealized: 7
+%	& Covariant compareTo() method defined\\
+%GC\_CALL % Findbugs:  DM\_GC
+%%	& % Idealized: 12
+%	& Explicit garbage collection; extremely dubious except in benchmarking code\\
+%RUN\_FINALIZERS\_ON\_EXIT % Findbugs DM\_RUN\_FINALIZERS\_ON\_EXIT
+%%	& % Idealized: 12
+%	& Method invokes dangerous method runFinalizersOnExit\\
+%COVARIANT\_EQUALS %Findbugs: EQ\_ABSTRACT\_SELF 
+%%	& % Idealized: 4
+%	& Abstract class defines covariant equals() method \\
+%FINALIZER\_NOT\_PROTECTED % Findbugs: FI_PUBLIC_SHOULD_BE_PROTECTED
+%%	& % Idealized: 6
+%	& Finalizer should be protected, not public\\
+%%NO\_SUITABLE\_CONSTRUCTOR% Findbugs: SE\_NO\_SUITABLE\_CONSTRUCTOR 
+%%	& % Idealized: 7
+%%	& Class is Serializable but its superclass doesn't define a void constructor\\
+%UNUSED\_PRIVATE\_FIELD % Findbugs: UUF\_UNUSED\_FIELD 
+%%	& % Idealized: 23
+%	& The value of a private field is not read\\
+%DONT\_CATCH\_IMSE  %Findbugs: IMSE\_DONT\_CATCH\_IMSE 
+%%	& % Idealized: 5
+%	& Dubious catching of IllegalMonitorStateException \\\bottomrule
+%\end{tabular}
+%\nocaptionrule\caption{Implemented Analyses}
+%\label{table:implemented-analyses}
+%\end{table*}
+
+\begin{table}
+\begin{tabular}{p{7cm}r}\toprule
+Abstraction & Used \\ \midrule
+% calculate class hierarchy & 5 \\
+All fields in all class files	& 4\\
+All methods in all class files	& 3\\
+All method bodies in all class files	& 3\\
+All instructions in all method bodies and their bytecode index	& 5\\
+Sliding window (size $n$) over all instructions (and their index) &	3\\
+\bottomrule
+\end{tabular}\\
+\nocaptionrule\caption{Description of abstractions removed during hand-optimization and number of queries where the abstraction is used (and optimized away).}
+\label{table:implemented-abstractions}
+\end{table}
+
+\newcommand{\captionEvalTable}{%
+As in in Sec.~\ref{sec:implemenationsandspeedups}, (1) denotes the modular Scala
+implementation, (2) the hand-optimized Scala one, and ($3^-$), ($3^o$), ($3^x$)
+refer to the {\LoS} implementation when run, respectively, without
+optimizations, with optimizations, with optimizations and indexing.
+Queries marked with the $R$ superscript were selected by random sampling.}
+\newcommand{\tablerowsize}{\scriptsize}
+\begin{table*}[tb]
+\centering
+\input{\graphPath{EvalTable}}
+\nocaptionrule\caption{Performance results. \captionEvalTable}
+\label{table:performance}
+\end{table*}
+
+\begin{table*}[tb]
+\centering
+\input{\graphPath{EvalSummaryTable}}
+\nocaptionrule\caption{Average performance ratios.
+This table summarizes all interesting performance ratios across all queries,
+using the geometric mean~\citep{Fleming86}.
+The meaning of speedups is discussed in Sec.~\ref{sec:implemenationsandspeedups}.}
+\label{table:performanceAvg}
+\end{table*}
+
+\begin{extraEval}
+\begin{table*}[tb]
+\centering
+\begin{tabular}{l*{3}{r@{}c@{}l}r*{2}{r@{}c@{}l}}\toprule
+Name&\multicolumn{3}{c}{Base impl.\ (in ms)}&\multicolumn{3}{c}{Modular impl}&\multicolumn{3}{c}{Optimiz.\ time}&IS&\multicolumn{3}{c}{OS}&\multicolumn{3}{c}{OS-Opt}\\\midrule
+\input{\graphPath{table}}
+\bottomrule
+\end{tabular}
+\nocaptionrule\caption{Old performance results table}
+\label{table:performanceOld}
+\end{table*}
+\end{extraEval}

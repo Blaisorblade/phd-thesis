@@ -1,0 +1,55 @@
+
+% From http://tihlde.org/~eivindw/latex-listings-for-scala/
+% "define" Scala
+%Keyword list taken from the scaladoc definition.
+\lstdefinelanguage{scala}{
+  morekeywords={%
+	  abstract,case,catch,class,def,do,else,extends,%
+	  false,final,finally,for,forSome,if,implicit,import,lazy,%
+	  match,new,null,object,override,package,private,protected,%
+	  return,sealed,super,this,throw,trait,true,try,type,%
+	  val,var,while,with,yield},
+  otherkeywords={=>,<-,<\%,<:,>:,\#,@},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[n]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]"""
+}[keywords,comments,strings]
+
+% activate the language and predefine settings
+\lstset{%
+    language=Scala,%
+    tabsize=2,%
+    basicstyle=\scriptsize\ttfamily,%
+    commentstyle=\itshape,%
+    keywordstyle=\bfseries,%
+    identifierstyle=,% nothing
+    stringstyle=\ttfamily, % typewriter type for strings
+    mathescape=true,%
+    escapechar=£,%
+    firstnumber=0,%
+    numberstyle=\tiny,%
+}
+
+%Setup whitespace in listings
+\lstset{%
+%columns=fullflexible,		% enable kerning, lose column alignment.
+showstringspaces=false, %
+breakindent=2ex,   % Two chars (hopefully)
+breaklines,
+breakatwhitespace,
+breakautoindent=true,
+keepspaces
+%keepspaces was described at: http://tex.stackexchange.com/questions/41954/listings-bug-space-after-literate-replacement-lost-with-spaceflexible-fullflexi
+}
+
+\newcommand{\codesize}{\footnotesize}
+\newcommand{\code}[1]{%
+    \lstinline[basicstyle=\codesize\ttfamily]^#1^}
+
+% I use ^ as the only decent alternative - not-ASCII characters don't work in this setup (probably because of UTF-8).}
+% literate programming: replace some operators by nicer equivalents.
+%{==}{{$\equiv$}}1 {!=}{{$\neq$}}1
+\lstset{literate={{<-}{{$\gets$}}1 {<=}{{$\leq$}}1 {>=}{{$\geq$}}1 { => }{{$\Rightarrow$}}1 { -> }{{$\rightarrow$}}1 {...}{{\ldots} }2}}
