@@ -1,0 +1,30 @@
+% Emacs, this is -*- latex -*-!
+\begin{figure}
+
+\centering
+
+\lstinputlisting[language=scala,
+firstline=10,
+escapechar=|,
+literate=
+{=>}{$\Rightarrow\,$}2
+{>=}{$\ge\;$}2
+{<-}{$\leftarrow\;$}2
+{!=}{$\ne\;$}2
+{Abelian-group-based}{\text{Abelian-group-based }}1
+{<}{$<$}2
+{bag1}{{bag$_1$}}4
+{bag2}{{bag$_2$}}4
+{value1}{{value$_1$}}6
+{value2}{{value$_2$}}6
+{dict1}{{dict$_1$}}5
+{dict2}{{dict$_2$}}5
+{v1}{{v$_1$}}2
+{v2}{{v$_2$}}2
+{???}{$\ldots$}3
+]{mapReduce.scala}
+\caption{A Scala implementation of primitives for bags and maps.
+In the code, we call $\boxplus$, $\boxminus$ and $e$ respectively \emph{merge}, \emph{inverse}, and \emph{zero}.
+We also omit the relatively standard primitives.\pg{Can we now move this code to an appendix, since we explain so much in text?}}
+\label{fig:primitives}
+\end{figure}

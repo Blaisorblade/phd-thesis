@@ -1,0 +1,280 @@
+% Macros specific to this paper project
+
+% Macros for terms, types and values
+%
+% Naming Convention:
+%   \UPPERCASE -- single keyword
+%   \Mixed     -- term constructor
+%
+% All term constructors have a starred form to add parentheses.
+%
+% Example:
+%
+%   \App{\Lam*{x}{\Var{x}}}{\Lit{42}}  gives  (λx.x) 42
+
+\DeclareMathAlphabet{\mathcal}{OT1}{pzc}{m}{it}
+
+\newcommand{\Keyword}[1]{\textbf{#1}}
+\newcommand{\Term}[1]{\mathit{#1}}
+
+
+% Lists
+
+\NewDocumentCommand{\List}{sm}{\Parens#1{\overline{#2}}}
+
+% Helper for optional subscripts and superscripts
+
+\NewDocumentCommand{\Index}{sm}{\IfValueTF{#2}{\IfBooleanTF{#1}{^}{_}{#2}}{}}
+
+% \DIFF          for   ⊖
+% \Diff{u}{v}    for   u ⊖ v
+
+% Deprecated:
+% \APPLY         for   ⊕
+% \Apply{dv}{v}  for   v ⊕ dv
+%
+% New:
+% \UPDATE        for   ⊕
+% \Update{v}{dv} for   v ⊕ dv.
+\NewDocumentCommand{\DIFF}{o}{\ominus\Index{#1}}
+\NewDocumentCommand{\UPDATE}{o}{\oplus\Index{#1}}
+%Deprecated alias.
+\let\APPLY\UPDATE
+
+\NewDocumentCommand{\Upd}{sm}{\Parens#1{#2 \UPDATE \D #2}}
+
+\NewDocumentCommand{\Diff}{somm}{\Parens#1{#3 \DIFF[#2] #4}}
+
+\NewDocumentCommand{\Update}{somm}{\Parens#1{#3 \UPDATE[#2] #4}}
+% Deprecated variant. Beware of the copy and paste!
+\NewDocumentCommand{\Apply}{somm}{\Parens#1{#4 \UPDATE[#2] #3}}
+
+\NewDocumentCommand{\WideDiff}{somm}{\Parens#1{#3 \;\;\DIFF[#2]\;\; #4}}
+\NewDocumentCommand{\WideApply}{somm}{\Parens#1{#4 \;\;\APPLY[#2]\;\; #3}}
+\NewDocumentCommand{\COMPOSE}{}{\circ}
+\NewDocumentCommand{\Compose}{smm}{\Parens#1{#2 \COMPOSE #3}}
+
+\NewDocumentCommand{\NIL}{}{\mathbf{0}}
+\NewDocumentCommand{\Nil}{om}{\NIL_{#2}}
+
+\NewDocumentCommand{\ChangeStruct}{m}{\widehat{#1}}
+
+%http://tex.stackexchange.com/a/163831/1340
+\usepackage{stackengine}
+\NewDocumentCommand{\Doe}{}{\mathrel{\stackon[1pt]{$=$}{$\scriptscriptstyle\Delta$}}}
+%{\ensuremath{\overset{\scriptscriptstyle\GD}{=}}}
+%{\triangleq}
+
+\NewDocumentCommand{\MAP}{}{\Term{map}}
+
+\NewDocumentCommand{\Xs}{}{\Term{xs}}
+\NewDocumentCommand{\Ys}{}{\Term{ys}}
+\NewDocumentCommand{\Zs}{}{\Term{zs}}
+\NewDocumentCommand{\Program}{}{\Term{grand\_total}}
+\NewDocumentCommand{\ProgramBody}{}{\Lam{\Xs}{\Lam{\Ys}{\FOLD~(+)~0~(\Merge\Xs\Ys)}}}
+\NewDocumentCommand{\Derivative}{}{\Term{grand\_total'}}
+\NewDocumentCommand{\Output}{}{\Term{output}}
+
+\NewDocumentCommand{\DXs}{}{\Term{dxs}}
+\NewDocumentCommand{\DYs}{}{\Term{dys}}
+\NewDocumentCommand{\DZs}{}{\Term{dzs}}
+\NewDocumentCommand{\DOutput}{}{\Term{doutput}}
+
+% Semantic brackets
+% \mean t       for   ⟦t⟧
+% \mean[\Gr]t   for   ⟦t⟧ ρ
+% \mean*[\Gr]t  for   (⟦t⟧ ρ)
+\NewDocumentCommand{\mean}{soomo}{\Parens#1{%
+\left\llbracket\,#4\,\right\rrbracket\IfNoValueTF{#5}{}{^{#5}}\IfNoValueTF{#2}{}{\;#2}\IfNoValueTF{#3}{}{\;#3}}}
+
+% Environment update
+% \update x v \Gr   for   ρ[x ↦ v]
+% \update* x v \Gr  for   (ρ[x ↦ v])
+\NewDocumentCommand{\update}{smmm}{\Parens#1{#4[#2\mapsto#3]}}
+
+% \D x   for  dx
+%
+% Warning: \D x typesets dx as a single word, unlike dx.
+% See discussion of mathit in, e.g.,
+% http://tex.stackexchange.com/a/58108/1340.
+\NewDocumentCommand{\D}{m}{\Term{d#1}}
+
+% \Old f for  f_old
+\NewDocumentCommand{\Old}{m}{#1_{\textrm{old}}}
+\NewDocumentCommand{\New}{m}{#1_{\textrm{new}}}
+
+\NewDocumentCommand{\APPFun}{}{\Keyword{app}}
+\NewDocumentCommand{\IF}{}{\mathop{\Keyword{if}}}
+\NewDocumentCommand{\THEN}{}{\mathbin{\Keyword{then}}}
+\NewDocumentCommand{\ELSE}{}{\mathbin{\Keyword{else}}}
+\NewDocumentCommand{\TRUE}{}{\Keyword{true}}
+\NewDocumentCommand{\FALSE}{}{\Keyword{false}}
+\NewDocumentCommand{\BAG}{}{\mathop{\Keyword{Bag}}}
+\NewDocumentCommand{\MERGE}{}{\Term{merge}}
+\NewDocumentCommand{\NAT}{}{\Keyword{Nat}}
+\NewDocumentCommand{\INT}{}{\Keyword{Int}}
+\NewDocumentCommand{\BOOL}{}{\Keyword{Bool}}
+\NewDocumentCommand{\DERIVE}{}{\mathcal{Derive}}
+\NewDocumentCommand{\EVAL}{}{\mathcal{Eval}}
+\NewDocumentCommand{\DOM}{}{D}
+\NewDocumentCommand{\NEGATE}{}{\Term{negate}}
+\NewDocumentCommand{\CHANGE}{o}{\Delta\Index{#1}}
+\NewDocumentCommand{\BASE}{}{\mathop{\Keyword{Base}}}
+
+\NewDocumentCommand{\Parens}{mm}{\IfBooleanTF#1{\left(#2\right)}{#2}}
+
+\NewDocumentCommand{\Fun}{smm}{\Parens#1{#2 \to #3}}
+\NewDocumentCommand{\Base}{sO{}}{\Parens#1{\App\BASE{#2}}}
+\NewDocumentCommand{\Bag}{sO{}}{\Parens#1{\IfValueTF{#1}{\App\BAG{#2}}{\BAG}}}
+\NewDocumentCommand{\Nat}{s}{\Parens#1{\NAT}}
+\NewDocumentCommand{\Int}{s}{\Parens#1{\INT}}
+
+\NewDocumentCommand{\Set}{m}{\left\lbrace\left\lbrace#1\right\rbrace\right\rbrace}
+
+\NewDocumentCommand{\APP}{}{\;}
+\NewDocumentCommand{\App}{smm}{\Parens#1{#2\;#3}}
+\NewDocumentCommand{\Lam}{smm}{\Parens#1{\lambda#2.\ #3}}
+\NewDocumentCommand{\Var}{sm}{\Parens#1{#2}}
+\NewDocumentCommand{\Const}{sm}{\Parens#1{#2}}
+\NewDocumentCommand{\Lit}{sm}{\Parens#1{#2}}
+\NewDocumentCommand{\Add}{smm}{\Parens#1{#2 + #3}}
+\NewDocumentCommand{\Minus}{sm}{\Parens#1{- #2}}
+\NewDocumentCommand{\Bool}{s}{\Parens#1{\BOOL}}
+\NewDocumentCommand{\True}{s}{\Parens#1{\TRUE}}
+\NewDocumentCommand{\False}{s}{\Parens#1{\FALSE}}
+\NewDocumentCommand{\If}{smmm}{\Parens#1{\IF #2 \THEN #3 \ELSE #4}}
+\NewDocumentCommand{\Empty}{s}{\Parens#1{\emptyset}}
+\NewDocumentCommand{\BagLit}{m}{\left\lbrace#1\right\rbrace}
+\NewDocumentCommand{\SINGLETON}{}{\Term{singleton}}
+\NewDocumentCommand{\Singleton}{sm}{\Parens#1{\App\SINGLETON{#2}}}
+\NewDocumentCommand{\INSERT}{}{\Term{insert}}
+\NewDocumentCommand{\Insert}{smm}{\Parens#1{\App{\App\INSERT{#2}}{#3}}}
+\NewDocumentCommand{\Merge}{smm}{\Parens#1{\App{\App\MERGE {#2}}{#3}}}
+\NewDocumentCommand{\Map}{smm}{\Parens#1{\App{\CMap{#2}}{#3}}}
+\NewDocumentCommand{\CMap}{sm}{\Parens#1{\App{\MAP}{#2}}}
+\NewDocumentCommand{\FLATMAP}{}{\Term{flatmap}}
+\NewDocumentCommand{\Flatmap}{smm}{\Parens#1{\App{\App\FLATMAP{#2}}{#3}}}
+\NewDocumentCommand{\Sum}{sm}{\Parens#1{\App{\Term{sum}}{#2}}}
+\NewDocumentCommand{\Negate}{sm}{\Parens#1{\App{\NEGATE}{#2}}}
+\NewDocumentCommand{\DELETE}{}{\Term{delete}}
+\NewDocumentCommand{\Delete}{smm}
+  {\Parens#1{\App{\App{\App{\DELETE}{#2}}{\Term{from}}}{#3}}}
+
+\NewDocumentCommand{\Change}{som}{\Parens#1{\CHANGE[#2]#3}}
+
+\NewDocumentCommand{\Eval}{m}{\mean{#1}}
+\NewDocumentCommand{\EvalWith}{smm}{\Parens#1{\mean[#3]{#2}}}
+\NewDocumentCommand{\EvalInc}{m}{\mean{#1}[\GD]}
+\NewDocumentCommand{\EvalIncWith}{smmm}{\Parens#1{\mean[#3][#4]{#2}[\GD]}}
+
+% For special situations.
+\NewDocumentCommand{\EvalIncSmash}{m}{\mean{#1}[\smash{\GD}\!\!\!]}
+\NewDocumentCommand{\EvalIncSmashWith}{smmm}{\Parens#1{\mean[#3][#4]{#2}[\smash{\GD}\!\!\!]}}
+
+
+\NewDocumentCommand{\EvalConst}{sm}{\Parens#1{\mean{#2}[\text{const}]}}
+\NewDocumentCommand{\EvalIncConst}{sm}{\Parens#1{\mean{#2}[\text{$\GD$ const}]}}
+\NewDocumentCommand{\EvalBase}{sm}{\Parens#1{\mean{#2}[\text{base}]}}
+\NewDocumentCommand{\Derive}{sm}{\Parens#1{\DERIVE(#2)}}
+\NewDocumentCommand{\DeriveConst}{sm}{\Parens#1{\DERIVE_{\text{const}}(#2)}}
+\NewDocumentCommand{\Dom}{m}{\DOM_{#1}}
+
+\NewDocumentCommand{\Append}{smm}{\Parens#1{#2 , #3}}
+\NewDocumentCommand{\HasType}{smm}{\Parens#1{#2 : #3}}
+\NewDocumentCommand{\HasTypeAligned}{mm}{#1 & : #2}
+\NewDocumentCommand{\EmptyContext}{}{\varepsilon}
+\NewDocumentCommand{\Extend}{sO{\Gamma}mm}{\Parens#1{\Append{#2}{\HasType{#3}{#4}}}}
+\NewDocumentCommand{\Typing}{O{\Gamma}mm}{#1 \vdash \HasType{#2}{#3}}
+\NewDocumentCommand{\ConstTyping}{mm}{\Vdash \HasType{#1}{#2}}
+
+\NewDocumentCommand{\HasValue}{smm}{\Parens#1{#2 = #3}}
+% I'm not sure I like the implementation of \EmptyEnv, please fill in a better one.
+\NewDocumentCommand{\EmptyEnv}{}{\varnothing}
+\NewDocumentCommand{\ExtendEnv}{sO{\rho}mm}{\Parens#1{\Append{#2}{\HasValue{#3}{#4}}}}
+
+\NewDocumentCommand{\Rule}{O{}mm}{\inferrule{#2}{#3}\;\textsc{#1}}
+\NewDocumentCommand{\Axiom}{O{}m}{\Rule[#1]{\hbox{}}{#2}}
+
+\NewDocumentCommand{\IMPLEMENTS}{oo}{\sim\Index{#1}\Index*{#2}}
+\NewDocumentCommand{\Implements}{soomm}{\Parens#1{#4\IMPLEMENTS[#2][#3] #5}}
+
+% This is often inlined, so it can't be changed easily.
+\NewDocumentCommand{\DeltaType}{m}{\GD #1}
+
+\NewDocumentCommand{\DeltaContext}{m}{\GD #1}
+
+% Proof-embedded domains and set of validity proofs
+\NewDocumentCommand{\PD}{}{E}
+\NewDocumentCommand{\VP}{}{V}
+\NewDocumentCommand{\Pd}{m}{\PD_{\GD#1}}
+\NewDocumentCommand{\Vp}{mm}{\VP[#1,#2]}
+\NewDocumentCommand{\Vt}{mmm}{\VP_{#1}[#2,#3]}
+
+\newenvironment{syntax}
+{\[\begin{tabular}{>{$}r<{$}@{\;}>{$}c<{$}@{\;}>{$}l<{$}@{\qquad}l}}
+{\end{tabular}\]}
+
+\NewDocumentCommand{\FramedSignature}{m}
+  {\fbox{\(#1\)}}
+
+\NewDocumentCommand{\RightFramedSignature}{m}
+  {\vbox{\hfill\FramedSignature{#1}}}
+
+\NewDocumentEnvironment{typing}{o}
+{\IfValueTF{#1}{\RightFramedSignature{#1}}{}
+ \begin{mathpar}}
+{\end{mathpar}}
+
+\newenvironment{signature}
+{\begin{tabular}{>{$}c<{$}@{$\hbox{}:\hbox{}$}>{$}l<{$}@{\qquad}l}}
+{\end{tabular}}
+
+% Proofs by case analysis
+% Usage:
+% \Case t = \Lam x s: Lorem ipsum dolor sit amet.
+% \Case t = \App {t_0} {t_1}: Consectetur, adipisci velit.
+\def\Case#1:{\smallbreak\noindent\textit{Case} $#1$:\par}
+
+% Separation between groups of equations
+\newdimen\eqsep
+\eqsep=1em
+
+% refering to items
+\def\itref#1{(\ref{#1})}
+
+% HISTOGRAM EXAMPLE
+\NewDocumentCommand{\HISTOGRAM}{}{\Term{histogram}}
+\NewDocumentCommand{\WORDCOUNT}{}{\Term{wordcount}}
+\NewDocumentCommand{\HASHMAP}{}{\Keyword{Map}}
+\NewDocumentCommand{\HashMap}{mm}{\App{\App\HASHMAP{#1}}{#2}}
+\NewDocumentCommand{\DOCUMENT}{}{\Keyword{Document}}
+\NewDocumentCommand{\DOCUMENTID}{}{\Keyword{ID}}
+\NewDocumentCommand{\WORD}{}{\Keyword{Word}}
+% bags defined somewhere above
+% foldbag
+\NewDocumentCommand{\FOLD}{}{\Term{fold}}
+\NewDocumentCommand{\FOLDBAG}{}{\Term{foldBag}}
+\NewDocumentCommand{\FoldBag}{smm}{\Parens#1{\App{\App\FOLDBAG {#2}}{#3}}}
+
+\NewDocumentCommand{\ABELIAN}{}{\Keyword{AbelianGroup}}
+\NewDocumentCommand{\Abelian}{sm}{\Parens#1{\App\ABELIAN{#2}}}
+\NewDocumentCommand{\ABELIANCONS}{}{\Term{abelianGroup}}
+% maps
+\NewDocumentCommand{\LIFTGROUP}{}{\Term{liftGroup}}
+\NewDocumentCommand{\MAKEMAP}{}{\Term{singletonMap}}
+\NewDocumentCommand{\FOLDMAP}{}{\Term{foldMap}}
+\NewDocumentCommand{\LOOKUP}{}{\Term{lookup}}
+%
+\NewDocumentCommand{\MAYBE}{}{\Keyword{Maybe}}
+\NewDocumentCommand{\Maybe}{sm}{\Parens#1{\App\MAYBE{#2}}}
+
+% a series of indentations for the derivative of the running example
+\newcommand\DeriveProgramEnv{
+\def\zero{\hspace{1.375em}}
+\def\one{\hspace{2.75em}}
+\def\two{\hspace{5em}}
+\def\three{\hspace{8.5em}}}
+
+\NewDocumentEnvironment{examples}{}
+  {\paragraph{Examples}}
+  {\QED}

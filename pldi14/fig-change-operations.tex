@@ -1,0 +1,13 @@
+% Emacs, this is -*- latex -*-!
+\begin{figure}
+\begin{signature}
+\CHANGE  & \Fun{\ast}{\ast}
+         & the type of changes\\[0.5ex]
+\APPLY   & \Fun{\tau}{\Fun{\Change{\tau}}{\tau}}
+         & update a value with a change\\
+\DIFF    & \Fun{\tau}{\Fun{\tau}{\Change{\tau}}}
+         & the change between two values\\
+\end{signature}
+\caption{Erased change structures on simple types.}
+\label{fig:change-operations}
+\end{figure}

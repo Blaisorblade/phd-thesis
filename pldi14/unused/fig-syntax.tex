@@ -1,0 +1,25 @@
+% Emacs, this is -*- latex -*-!
+
+
+
+\begin{figure}
+\pg{Fixme, constant terms contain no argument subterms!}
+\begin{syntax}
+\beta & ::= & \\
+     &  |  & \Int             & Integers\\
+     &  |  & \Bag{\tau}        & Generalized bags of integers\\[\eqsep]
+
+c    & ::= & \\
+     &  |  & \Lit{n}          & Literal numbers\\
+     &  |  & \Add{t}{t}   & Addition\\
+     &  |  & \Minus{t}        & Integer negation\\
+     &  |  & \Singleton{t}
+                              & Singleton bags\\
+     &  |  & \Union{t}{t} & Bag union\\
+     &  |  & \Negate{t}       & Bag negation\\
+     &  |  & \Map{t}{t}   & Mapping over a bag\\
+     &  |  & \Sum{t}          & Sum of elements of a bag
+\end{syntax}
+\caption{Plugin syntax.}
+\label{fig:plug-syntax}
+\end{figure}

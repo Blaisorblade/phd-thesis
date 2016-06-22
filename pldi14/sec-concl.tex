@@ -1,0 +1,47 @@
+\section{Conclusions and future work}
+\label{sec:concl}
+\label{ssec:future}
+We have presented \ILC, an approach to lifting incremental computations
+on first-order programs to incremental computations on higher-order
+programs. We have presented a machine-checked correctness proof 
+of a formalization of \ILC\ and an initial experimental evaluation
+in the form of an implementation, a sample plugin for maps and bags,
+and a non-trivial example that was incrementalized successfully and
+efficiently. 
+
+Our work opens several avenues of future work. Our current implementation
+is not efficient on derivatives that are not self-maintainable.
+However, as discussed
+(Sec.~\ref{ssec:self-maint}), we will study how
+to memoize intermediate results to address this limitation. Our next
+step will be to develop language plugins which
+have efficient non-self-maintainable primitives.
+
+Another area of future work is adding support for algebraic data
+types (including recursive types), polymorphism, subtyping, general recursion
+and other collection types. While support for algebraic data
+types could subsume support for specific collections, many
+collections have additional algebraic properties that enable faster
+incrementalization (like bags). Even lists (which have fewer algebraic properties)
+can benefit from special support~\citep{Maier2013}.
+
+Moreover, we intend to apply \ILC{} to optimize queries on
+collections in the context of the \textsc{SQuOpt}
+project~\citep{GiarrussoAOSD13}, which was a motivation for this
+work; in particular, \textsc{SQuOpt} can automatically rewrite
+queries to use database-style indexes, and \ILC{} enables
+updating those indexes when input data changes.
+
+\begin{oldSec}
+Our derivatives accept arbitrary changes for all inputs. We plan
+to stage the code that updates the inputs through lightweight
+modular staging~\citep{rompf2010lightweight}, analyze it to
+predict changes and specialize the derivative to the result of
+this analysis. For instance, if we need to update $\Term{f} \;
+\Term{bag}$ after $\Term{bagNew} = \Term{insert} \; \Term{el} \;
+\Term{bagOld}$, we can infer that $\Term{dbag}$ is an insertion
+and specialize $f'$ to such a change.
+\end{oldSec}
+
+Finally, we intend to perform a full and thorough experimental evaluation
+to demonstrate that \ILC\ can incrementalize large-scale practical programs.

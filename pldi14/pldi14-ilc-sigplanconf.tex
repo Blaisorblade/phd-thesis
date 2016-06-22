@@ -1,0 +1,164 @@
+% Emacs, this is -*- latex -*-!
+% Ensure that arXiv processes this as PDF.
+\pdfoutput=1
+
+\documentclass{sigplanconf}
+
+\input{packages}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SIGPLANconf-specific setup
+%
+% amsthm conflicts with LLNCS.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amsthm,listings,fixfoot}
+\input{lstsetup}
+
+
+% The next package must be loaded last.
+% It adds the \cref{label} command, producing Eq./Sec./whatever followed by the reference.
+\usepackage[capitalise]{cleveref}
+
+\crefname{section}{Sec.}{Sec.}
+\crefname{subsection}{Sec.}{Sec.}
+\crefname{subsubsection}{Sec.}{Sec.}
+
+
+% Theorems, lemmas, corollaries
+% Typeset in roman to avoid known TeX feature
+% (bad spacing between italic text and math formulas)
+%
+% Numbering:
+% Theorem 3.1. It always rains.
+% Lemma 3.2. If it rains, then the weather is bad.
+% Corollary 3.3. The weather is always bad.
+%
+% http://tex.stackexchange.com/a/67251
+\theoremstyle{definition}
+\input QED
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+
+\begin{oldSec}
+\newtheorem{parameter}[theorem]{Plugin Requirement}
+\end{oldSec}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Enumerations inside theorem environments
+%
+% (cannot be in macros.tex because of \crefname)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newlist{subdefinition}{enumerate}{1}
+\setlist*[subdefinition]{label=(\alph*), ref=\arabic{section}.\arabic{theorem}\alph*}
+\crefname{subdefinitioni}{Property}{Properties}
+\Crefname{subdefinitioni}{Property}{Properties}
+
+\newlist{subparameter}{enumerate}{1}
+\setlist*[subparameter]{label=(\alph*), ref=\arabic{section}.\arabic{theorem}\alph*}
+\crefname{subparameteri}{Plugin Requirement}{Plugin Requirements}
+\Crefname{subparameteri}{Plugin Requirement}{Plugin Requirements}
+
+\newlist{subtheorem}{enumerate}{1}
+\setlist*[subtheorem]{label=(\alph*), ref=\arabic{section}.\arabic{theorem}\alph*}
+\crefname{subtheoremi}{Theorem}{Theorems}
+\Crefname{subtheoremi}{Theorem}{Theorems}
+
+% Our project
+\newcommand{\ILC}{I{\TitleLambda}C}
+
+\begin{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Paper information in SIGPLANconf-style
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\conferenceinfo{PLDI '14}{June 9--11, 2014, Edinburgh, UK}
+\copyrightyear{2014}
+\copyrightdata{[to be supplied]}
+
+\title{A Theory of Changes for Higher-Order Languages}
+\subtitle{Incrementalizing {\TitleLambda}-Calculi by Static Differentiation}
+
+% Alternatives:
+%
+% (Incremental Computation for | Incrementalizing) (the Lambda
+% Calculus | (Higher-Order | First-Class) Functions)
+
+\iftoggle{names}{%
+\newcommand{\unimarburg}{Philipps-Universität Marburg}
+\authorinfo{Yufei Cai}
+           {\unimarburg}{}
+\authorinfo{Paolo G. Giarrusso}
+           {\unimarburg}{}
+\authorinfo{Tillmann Rendel}
+           {\unimarburg}{}
+\authorinfo{Klaus Ostermann}
+           {\unimarburg}{}
+}{%
+\authorinfo{}
+           {}{}
+}
+
+\maketitle
+
+\begin{abstract}
+\input{sec-abstract}
+\keywords
+Incremental computation, first-class functions, performance, Agda, formalization
+\end{abstract}
+
+% TODO: Readd in camera-ready version, usually not needed before.
+%\category{CR-number}{subcategory}{third-level}
+%
+%\terms
+%term1, term2
+%
+%\keywords
+% Keywords.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Paper body
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Invariant: Each inclusion corresponds to a top-level section.
+\input{sec-intro}
+
+\input{sec-change-theory}
+\input{sec-differentiate}
+\input{sec-practice}
+
+\input{sec-rw}
+\input{sec-concl}
+
+% Temporarily omitted as part of the double-blind review process.
+\iftoggle{names}{
+\acks
+\input{acks}
+}{}
+
+\bibliographystyle{abbrvnat}
+
+% The bibliography should be embedded for camera-ready submission, not
+% for now.
+
+\bibliography{../../Bibs/ProgLang,../../Bibs/DB,../../Bibs/own,../../Bibs/SoftEng}
+
+\appendix
+\begin{oldSec}
+\input{sec-STLC-correct}
+\end{oldSec}
+
+\begin{oldSec}
+\input{sec-informal}
+\end{oldSec}
+
+\begin{oldSec}
+\input{sec-formal}
+\end{oldSec}
+
+
+\end{document}

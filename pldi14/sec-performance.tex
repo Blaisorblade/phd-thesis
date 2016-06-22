@@ -1,0 +1,210 @@
+% Emacs, this is -*- latex -*-!
+
+\subsection{Self-maintainability}
+\label{sec:performance-cons}
+\label{ssec:self-maint}
+
+\begin{oldSec}
+On its own, deriving $\Gl$-abstractions, applications and
+variables (\cref{fig:correctness:derive}) does not improve performance.
+It only relates the computations embodied in the primitives in
+an incremental and higher-order setting, and provides a method to
+generalize the vast quantity of research on first-order incremental
+computation in the field of databases.
+Our first approach toward performance gain is based on the idea of \emph{self-maintainable uses of primitives};
+other approaches are certainly feasible. We did not formalize the
+optimizations or prove them correct.
+\end{oldSec}
+
+In databases, a self-maintainable view~\citep{Gupta99MMV} is a function that can
+update its result from input changes alone, without looking at
+the actual input. By analogy, we call a derivative
+\emph{self-maintainable} if it uses no
+base parameters, only their changes. Self-maintainable derivatives
+describe efficient incremental computations: since they do not
+use their base input, their running time does not have to depend on the input
+size.
+
+\begin{examples}
+$\Derive{\MERGE} = \Lam {x\; \D x\; y \; \D y}{\Merge{\D x}{\D y}}$
+is self-maintainable with the
+change structure $\ChangeStruct{\Bag{S}}$ described in
+\cref{ssec:change-structures}, because it does not use the base
+inputs $x$ and $y$.
+Other derivatives are self-maintainable only in certain contexts.
+The derivative of element-wise function application
+$\App*{\App\MAP f}{\mathit{xs}}$ ignores the original
+value of the bag $\mathit{xs}$ if the changes to
+%
+$f$ are always nil, because the underlying primitive $\FOLDBAG$
+is self-maintainable in this case (as discussed in next section).
+%
+We take advantage of this by implementing a specialized
+derivative for $\FOLDBAG$.
+
+We have seen in \cref{ssec:differentiation} that $\Derivative$
+needlessly recomputes $\Merge\Xs\Ys$. However, the result is a
+base input to $\FOLD'$.
+%
+In next section, we'll replace $\FOLD'$ by a self-maintainable
+derivative (based again on $\FOLDBAG$) and will avoid this
+recomputation.
+\end{examples}
+
+%% Rationale for previous statement. Too complicated; left out.
+%deriving a closed term without primitives yields a term that is
+%self-maintainable whenever its higher-order arguments receive
+%self-maintainable changes.
+%The default rule $\Derive{c} = \Diff c c$ does not yield
+%self-maintainable derivatives, because $\DIFF$ and $\APPLY$ use
+%the input~$x$ in a significant way (\cref{fig:diff-apply}).
+%However,
+
+To conservatively predict whether a derivative is going to be
+self-maintainable (and thus efficient), one can inspect whether
+the program restricts itself to (conditionally) self-maintainable
+primitives, like $\MERGE$ (always) or $\MAP \APP f$ (only if $\D
+f$ is nil, which is guaranteed when $f$ is a closed term).
+
+%% From the author response.
+%It is possible to give a conservative approximation of whether a program's derivative is self-maintainable:
+%If the original program only uses primitives with fully
+%self-maintainable derivatives, the derivative of the program will
+%be self-maintainable, too. We can syntactically approximate full
+%self-maintainability of a primitive by checking whether the code
+%of its derivative uses the $x$ variable (in addition to $\D x$) \pg{bind x! What about multiple arguments?}. For
+%instance, the derivative of $\MERGE$ uses only $\D x$ and $\D y$, never $x$
+%or $y$, and is hence fully self-maintainable. The derivative of
+%$\FOLDBAG$ uses both $f$ and $\D f$; it is only self-maintainable
+%sometimes (when df is the nil change).
+
+\begin{oldSec}
+Sometimes we can safely replace the derivative of a primitive by
+a self-maintainable term, in which case we call it a
+\emph{self-maintainable use of a primitive.}
+Terms have self-maintainable derivatives if they use
+primitives in a self-maintainable manner.
+
+\pg{As Klaus points out, this is not true until we fix the set of
+  changes - discussed in \#265. So we should specify the set of
+  changes, or use a different example. We should also motivate
+  it.}
+%
+\pg{Agreed: Convert to bags and to our running example, using foldBag.}
+To illustrate, suppose $\MAP$ is a primitive of sets of
+integers,
+and changes to sets consist of insertions and deletions only.
+The term
+\[
+\Lam x {\Map {\Lam*n {n + 1}} x}
+\]
+contains a self-maintainable use of $\MAP$, because any change to
+the input set~$x$, say $\{\App\INSERT5, \App\DELETE7\}$, can be
+converted to an output change, say $\{\App\INSERT6,
+\App\DELETE8\}$, without looking at $x$ itself. The use of $\MAP$
+in the following term is not self-maintainable:
+\[
+\Lam x {\Map {\Lam*n {n + \Sum* x}} x}.
+\]
+Even one insertion to the input set~$x$ generates a sweeping
+change over all elements of the output set that is impossible to
+express in terms of insertions and deletions without knowledge of $x$.
+
+\pg{Before this, show that some of our primitives are
+  self-maintainable, and some are self-maintainable if some
+  inputs are nil.}
+Our prototype optimization framework proceeds in two steps.
+\begin{enumerate}
+\item A static analysis identifies when changes are guaranteed to be nil.
+\item During the differentiation transformation, $\DERIVE$
+selects an appropriate self-maintainable function whenever possible,
+considering the results of the static analysis.
+\end{enumerate}
+Due to space constraint, we cannot go into details of those
+steps.
+%
+\yc{link to code}
+%
+\end{oldSec}
+
+To avoid recomputing base arguments for self-maintainable derivatives
+(which never need them), we
+currently employ lazy evaluation.  Since we could use standard techniques for dead-code
+elimination~\citep{Appel97} instead, laziness is not central to our
+approach.
+
+A significant restriction is that not-self-maintainable derivatives can require expensive computations to supply their base
+arguments, which can be expensive to compute. Since they are also
+computed while running the base program, one could reuse the previously
+computed value through memoization or extensions of static
+caching (as discussed in \cref{ssec:staticmemo}). We leave implementing these optimizations for future work. As a consequence,
+our current implementation delivers good results only if
+most derivatives are self-maintainable.
+
+\begin{oldSec} % ID=Appel97
+\pg{Do not remove without universal agreement. I don't think the paper can avoid discussing this aspect. }
+One important issue is left. In a call-by-value
+implementation of lambda calculus, running the program
+\[
+\Derive{\App{s}{t}} = \App{\App{\Derive{s}}{t}}{\Derive{t}}
+\]
+computes $t$
+again, even though it was computed in the base program, thus
+leading to wasteful repeated computation.
+However, we claim this is a simpler problem to solve.
+Three possibilities arise:
+\begin{enumerate}
+\item $t$ is very cheap to compute (for instance, it is a
+  literal), so the problem does not occur.
+\item $t$ is passed to a function which does not use it, hence
+  we can avoid computing it using separate optimization steps, by
+  executing the derivative with a lazy semantics (as done in our
+  benchmarks) or (we expect) by using known techniques for
+  interprocedural dead-code elimination~\citep{Appel97}.
+\item Otherwise, since the term $t$
+  was already computed while running the base
+  program, we can save its value for use in the derivative.
+  Approaches to
+  implement this include memoization~\pg{cite} and extensions of
+  static caching (as discussed in Sec.~\ref{sec:rw}).
+  We leave investigating the different
+  approaches to future work.
+\end{enumerate}
+\end{oldSec}
+
+\begin{oldSec} % ID=Gupta99MMV
+We next analyze when $t$ is going to be unused.
+Inspecting the definition of $\DERIVE$ shows that only derivatives of (functions
+containing) primitives can use $t$. For instance,
+$\Derive{\Lam{x}{x}} = \Lam{x}{\Lam{\D x}{\D x}}$ does not use its
+base input $x$, because $\Derive{x} = \D x$.
+\pg{Make this more tentative. Remove 'prove'.}
+It's easy to prove
+by induction that if derivatives of primitives appearing in $s$
+do not use their base input, neither does $s$.\footnote{Function
+  changes coming from outside the program are not covered by this
+  proof and are possible counterexamples.}
+
+We term primitives whose derivative does not use their base input
+self-maintainable, by analogy with the database concept of
+self-maintainable views~\citep{Gupta99MMV}. \ko{Give example of 
+self-maintainable and non-self-maintainable primitive}. 
+We then extend this to programs: a
+closed program is self-maintainable if its result does not depend
+on base inputs or base intermediate results.
+%
+For programs which do not depend on functions as parameters (and
+whose derivatives hence do not have function changes as
+parameters), it should be straightforward to prove that being
+self-maintainable is equivalent to only using self-maintainable
+primitives.
+
+Hence, we can argue informally that if a program only uses
+self-maintainable primitives, its derivative will not recompute
+base intermediate results (except if they are computed for
+unrelated reasons). In our case study (Sec.~\ref{sec:eval}),
+such derivatives are already
+extremely efficient.
+
+\pg{This should be somehow better integrated in the rest of the section.}
+\end{oldSec}

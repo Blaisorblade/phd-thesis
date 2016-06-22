@@ -1,0 +1,180 @@
+\begin{figure*}
+  \small
+
+  \NewDocumentCommand{\Subcaption}{mm}
+    {\subfigure[\label{#1}{#2}]{\rule{\linewidth}{0pt}}\vspace{0.8cm}}
+
+  \NewDocumentCommand{\Align}{m}
+    {{\begin{align*}#1\end{align*}}\vspace*{-0.8cm}}
+
+  \centering
+  \begin{tabular}{p{0.25\linewidth}p{0.40\linewidth}p{0.25\linewidth}}
+    \hfill
+    \FramedSignature{\Change{\Gt}}
+    &
+    \hfill
+    \FramedSignature{\D v, \D f \in \Change[\Gt]{v}}
+    &
+    \hfill
+    \FramedSignature{v, f \in \Eval{\Gt}}
+    \\
+    \Align{
+      \Change{\iota}
+        & = \ldots\\
+      \Change{\Fun*{\Gs}{\Gt}}
+        & = \Gs \to
+            \Change{\Gs} \to
+            \Change{\Gt}
+    }
+    &
+    \Align{
+      \Change[\iota]{v}
+        & = \ldots \subseteq \Eval{\Change{\Gi}}\\
+      \Change[\Fun*{\Gs}{\Gt}]{f}
+        & = \left\{ \D f \in \HasType*{x}{\Eval{\Gs}} \to
+            \Change[\Gs]{x} \to
+            \Change[\Gt]{\App*{f}{x}} \mid \right.\\
+        & \left.\qquad
+          \App{\Apply*[A \to B]{\D f}{f}}{\Apply*[A]{\D a}{a}}
+          = \Apply[B]{\App{\App{\D f}{a}}{\D a}}{\App{f}{a}}
+        \right\}
+    }
+    &
+    \Align{
+      \Eval{\iota}
+        & = \ldots\\
+      \Eval{\Fun{\Gs}{\Gt}}
+        & = \Eval{\Gs} \to \Eval{\Gt}
+    }
+    \\
+    \Subcaption{fig:correctness:change-types}{
+      Change types.
+    }
+    &
+    \Subcaption{fig:correctness:changes}{
+      Change values.
+    }
+    &
+    \Subcaption{fig:correctness:values}{
+      Standard values.
+    }
+    \\
+    \hfill
+    \FramedSignature{\Change{\GG}}
+    &
+    \hfill
+    \FramedSignature{\D \Gr \in \Change[\GG]{\Gr}}
+    &
+    \hfill
+    \FramedSignature{\Gr \in \Eval{\GG}}
+    \\
+    \Align{
+      \Change{\EmptyContext}
+        & = \EmptyContext \\
+      \Change{\Extend*{x}{\Gt}}
+        & = \Extend[\Change{\GG}]{\D x}{\Change{\Gt}}
+    }
+    &
+    \Align{
+      \Change[\EmptyContext]{\EmptyEnv}
+        & = \left\{ \EmptyEnv \right\} \\
+      \Change[\Extend*{x}{\Gt}]{\ExtendEnv*{x}{v}}
+        & = \left\{ \ExtendEnv*[\D \Gr]{\D x}{\D v} \mid \D \Gr \in \Change[\GG]{\Gr} \land \D v \in \Change[\Gt]{v} \right\}
+    }
+    &
+    \Align{
+      \Eval{\EmptyContext}
+        & = \left\{ \EmptyEnv \right\} \\
+      \Eval{\Extend{x}{\Gt}}
+        & = \left\{ \ExtendEnv*{x}{v} \mid \Gr \in \Eval{\GG} \land v \in \Eval{\Gt}\right\}
+    }
+    \\
+    \Subcaption{fig:correctness:change-contexts}{
+      Change contexts.
+    }
+    &
+    \Subcaption{fig:correctness:change-environments}{
+      Change environments.
+    }
+    &
+    \Subcaption{fig:correctness:environments}{
+      Standard environments.\pg{Fix overfull hbox!}
+    }
+    \\
+    \hfill
+    \FramedSignature{\Change{t}}
+    &
+    \hfill
+    \FramedSignature{\EvalIncSmashWith{t}{\Gr}{\D \Gr}}
+    &
+    \hfill
+    \FramedSignature{\EvalWith{t}{\Gr}}
+    \\
+    \Align{
+      \Derive{\Const{c}}
+        & = \ldots\\
+      \Derive{\Lam{x}{t}}
+        & = \lambda x\;\D x.\ \Derive{t}\\
+      \Derive{\App{s}{t}}
+        & = \App{\App{\Derive{s}}{t}}{\Derive{t}}\\
+      \Derive{\Var{x}}
+        & = \Var{\D x}
+    }
+    &
+    \Align{
+      \EvalIncSmashWith{c}{\rho}{\D \rho}
+        & = \ldots\\
+      \EvalIncSmashWith{\Lam{x}{t}}{\rho}{\D \rho}
+        & = \lambda v\;\D v.\ 
+                   \EvalIncSmashWith
+                   {t}
+                   {\ExtendEnv*{x}{v}}
+                   {\ExtendEnv*[\D \rho]{\D x}{\D v}}\\
+      \EvalIncSmashWith{\App{s}{t}}{\rho}{\D \rho}
+        & = \App
+                   {\App
+                     {\EvalIncSmashWith*{s}{\rho}{\D \rho}}
+                     {\EvalWith*{t}{\rho}}}
+                   {\EvalIncSmashWith*{t}{\rho}{\D \rho}}\\
+      \EvalIncSmashWith{x}{\Gr}{\D \Gr}
+        & = \textit{lookup $\D x$ in $\D \Gr$}
+    }
+    &
+    \Align{
+      \EvalWith{c}{\rho}
+        & =\ldots\\
+      \EvalWith{\Lam{x}{t}}{\rho}
+        & = \lambda v.\ \EvalWith{t}{\ExtendEnv*{x}{v}}\\
+      \EvalWith{\App{s}{t}}{\rho}
+        & = \App{\EvalWith*{s}{\rho}}{\EvalWith*{t}{\rho}}\\
+      \EvalWith{x}{\Gr}
+        & = \textit{lookup $x$ in $\Gr$}
+    }
+    \\
+    \Subcaption{fig:correctness:derive}{
+      Differentiation.
+    }
+    &
+    \Subcaption{fig:correctness:change-evaluation}{
+      Differential evaluation.
+    }
+    &
+    \Subcaption{fig:correctness:evaluation}{
+      Standard evaluation.
+    }
+  \end{tabular}
+
+  \caption{Standard and differential behavior of the simply-typed
+    $\lambda$-calculus.
+    %
+    The left column defines differentiation as a source-to-source
+    transformation.
+    %
+    The right column defines the standard semantics of the
+    simply-typed lambda calculus.
+    %
+    The middle column connects these artifacts via a differential
+    semantics that maps $\Gl$-terms to the derivative of their
+    standard semantics.}
+  \label{fig:correctness}
+\end{figure*}

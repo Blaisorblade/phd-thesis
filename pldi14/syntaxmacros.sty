@@ -1,0 +1,157 @@
+% General macros
+\newcommand\fresh[2]{#1 \# #2}
+\newcommand\rem[1]{\textit{#1}}
+\newcommand\figsubtitle[1]{\hfill\fbox{#1}}
+\newcommand\rulename[1]{\textsc{\textcolor{gray}{[#1]}}}
+\newcommand\ruletitle[1]{\multicolumn{3}{l}{\rulename{#1}}\vspace{0.1cm}}
+\newcommand\side[1]{\multicolumn{3}{l}{\hspace{.5cm}#1}}
+\newcommand\nextline{\\[-0.7em]}
+\newcommand\beforeside{\\[-0.5em]}
+\newcommand\tquote[1]{\llbracket #1 \rrbracket}
+
+\newcommand\many[1]{\overline{#1}}
+\newcommand\tx{x}
+\newcommand\tdx{dx}
+\newcommand\ty{y}
+\newcommand\tdy{dy}
+\newcommand\tf{f}
+\newcommand\tdf{df}
+\newcommand\subst[2]{[#1 \mapsto #2]}
+
+\newcommand\equivvalues[2]{#1 \equiv #2}
+
+% Source language
+%%%%%%%%%%%%%%%%%
+\newcommand\source{\lambda_{AL}}
+
+% Metavariables
+\newcommand\sprogram{p}
+\newcommand\sfdef{d_f}
+\newcommand\sterm{t}
+\newcommand\sdef{d}
+\newcommand\sclosedvalue{v}
+\newcommand\sclosure[2]{#1[#2]}
+\newcommand\pushdef[1]{\uparrow #1}
+\newcommand\svdef{d_v}
+\newcommand\sectx{E}
+\newcommand\sdectx{dE}
+\newcommand\sconst{\textbf{c}}
+
+% Constructions
+\newcommand\appsym{{\scriptstyle @}}
+\newcommand\dappsym{{\scriptstyle @}}
+\newcommand\slam[2]{\lambda #1. #2}
+\newcommand\sapp[2]{#1\, #2}
+\newcommand\slet[2]{\textbf{let}\;#1\;\textbf{in}\;#2}
+\newcommand\sectxhole{[]}
+\newcommand\sectxapp[2]{#1[#2]}
+
+% Relations
+\newcommand\sreduces{\rightarrow}
+
+% Metafunction
+\newcommand\senterapp[4]{\textrm{call}_s(#1, #2, #3, #4)}
+\newcommand\sectxlookup[2]{#1(#2)}
+\newcommand\sdelta[2]{\delta_{#1} (#2)}
+
+% Target language
+%%%%%%%%%%%%%%%%%
+\newcommand\target{i\lambda_{AL}}
+
+% Metavariables
+\newcommand\tprogram{P}
+\newcommand\tfdef{D_f}
+\newcommand\tterm{M}
+\newcommand\tdterm{dM}
+\newcommand\tdef{D}
+\newcommand\tddef{dD}
+\newcommand\tclosedvalue{V}
+\newcommand\tcloseddvalue{dV}
+\newcommand\tvdef{D_v}
+\newcommand\tectx{F}
+\newcommand\tcache{C}
+\newcommand\tupdcache{U}
+\newcommand\tchange[2]{#1 \oplus #2}
+\newcommand\tcachedclosedvalues{V_c}
+\newcommand\tconst{\textbf{c}}
+\newcommand\tdconst{\textbf{dc}}
+\newcommand\tclosure[2]{#1[#2]}
+
+% Constructions
+\newcommand\tlam[2]{\lambda #1. #2}
+\newcommand\tapp[2]{#1\,#2}
+\newcommand\tdapp[3]{#1\, #2\, #3}
+\newcommand\tlet[2]{\textbf{let}\,#1\;\textbf{in}\,#2}
+\newcommand\tectxhole{[]}
+\newcommand\tectxapp[2]{#1[#2]}
+
+\newcommand\tcachex{c}
+\newcommand\tcachey{c'}
+\newcommand\tcacheid[3]{c^{#1}_{#2#3}} % actually, using ``f xs'' as subscript is confusing.
+\newcommand\tcachecons[2]{#1\,#2}
+\newcommand\temptycache{\bullet}
+
+% Relations
+\newcommand\treduces{\rightarrow}
+
+% Metafunction
+\newcommand\tmakecache[2]{\textrm{evalCache} (#1, #2)}
+\newcommand\tupdatecache[2]{\textrm{updateCache} (#1, #2)}
+\newcommand\tenterapp[4]{\textrm{call}_t(#1, #2, #3, #4)}
+\newcommand\tenterdapp[5]{\textrm{call}_d(#1, #2, #3, #4, #5)}
+\newcommand\tectxlookup[2]{#1(#2)}
+\newcommand\tdelta[2]{\delta_{#1} (#2)}
+\newcommand\tpushcache[2]{#1 \downarrow #2}
+
+% Transformation
+%%%%%%%%%%%%%%%%
+
+\newcommand\compile[1]{\mathcal{C}\tquote{#1}}
+\newcommand\icompile[1]{\imark{\mathcal{C}}\tquote{#1}}
+\newcommand\compileterm[2]{\mathcal{C}_{#1}\tquote{#2}}
+\newcommand\derive[2]{\mathcal{D}_{#1}\tquote{#2}}
+\newcommand\iderive[1]{\imark{\mathcal{D}}\tquote{#1}}
+
+% Intermediate language
+%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand\intermediate{d\lambda_{AL}}
+
+% Metavariables
+\newcommand\imark[1]{{\ensuremath #1^\iota}}
+\newcommand\iprogram{\imark{P}}
+\newcommand\ifuncdef{\imark{D_f}}
+\newcommand\iterm{\imark{M}}
+\newcommand\idterm{\imark{dM}}
+\newcommand\idef{\imark{D}}
+\newcommand\iddef{\imark{dD}}
+\newcommand\iclosedvalue{\imark{V}}
+\newcommand\icloseddvalue{\imark{dV}}
+\newcommand\ivdef{\imark{D_v}}
+\newcommand\iectx{\imark{F}}
+\newcommand\iconst{\imark{\textbf{c}}}
+\newcommand\idconst{\imark{\textbf{dc}}}
+
+% Constructions
+\newcommand\iclosure[2]{#1[#2]}
+\newcommand\ichange[2]{#1 \oplus #2}
+\newcommand\ilam[2]{\lambda #1. #2}
+\newcommand\iapp[2]{#1\,#2}
+\newcommand\idapp[2]{#1\, #2}
+\newcommand\ilet[2]{\textbf{let}\,#1\,\textbf{in}\,#2}
+\newcommand\iectxhole{[]}
+\newcommand\iectxapp[2]{#1[#2]}
+
+% Relations
+\newcommand\ireduces{\rightarrow}
+
+% Metafunction
+\newcommand\ienterapp[4]{\textrm{call}_t(#1, #2, #3, #4)}
+\newcommand\ienterdapp[5]{\textrm{call}_d(#1, #2, #3, #4, #5)}
+\newcommand\iectxlookup[2]{#1(#2)}
+\newcommand\idelta[2]{\delta_{#1} (#2)}
+
+\newcommand\compileectx[2]{\mathcal{C}_\oplus \tquote{#1}\,\tquote{#2}}
+\newcommand\simulatechange[1]{\mathcal{H}{\tquote{#1}}}
+
+\newcommand\icompileectx[2]{\imark{\mathcal{C}}_\oplus \tquote{#1}\,\tquote{#2}}
+\newcommand\isimulatechange[1]{\imark{\mathcal{H}}{\tquote{#1}}}

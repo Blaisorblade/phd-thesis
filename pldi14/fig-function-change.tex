@@ -1,0 +1,18 @@
+% Emacs, this is -*- latex -*-!
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\tikzset{y=2cm}
+\path
+(-90:1)node(fv)  {$\App {\Old f} {\Old x}$}
+( 90:1)node(f'v'){$\App{\Apply*{\D f} {\Old f}} {\Apply*{\D x} {\Old x}}$}
+;
+\draw[-stealth](fv)--(f'v')
+node[pos=.5,right]{$\App{\App{\D f}{\Old x}}{\D x}$};
+\end{tikzpicture}
+\caption{Functional changes react to input changes and produce
+the difference between the new function on the new input and the
+old function on the old input:
+$\GD(\Gs\r\Gt)=\Gs\r\GD\Gs\r\GD\Gt$.}
+\label{fig:function-change}
+\end{figure}

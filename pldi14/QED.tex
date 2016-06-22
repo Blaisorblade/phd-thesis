@@ -1,0 +1,18 @@
+% Emacs, this is -*- latex -*-!
+% http://tex.stackexchange.com/a/66157
+\usepackage{etoolbox}
+\makeatletter
+\DeclareRobustCommand{\QED}{%
+  \ifmmode
+    \eqno \def\@badmath{$$}%$$
+    \let\eqno\relax \let\leqno\relax \let\veqno\relax
+    \hbox{\openbox}%
+  \else
+    \leavevmode\unskip\penalty9999 \hbox{}\nobreak\hfill
+    \quad\hbox{\openbox}%
+  \fi
+}
+\def\qedAligned{\tag*{\hbox{\openbox}}\gdef\qed{}}
+\gdef\qed{\QED\gdef\qed{}}
+\patchcmd{\@endtheorem}{\endtrivlist}{\qed\gdef\qed{\QED\gdef\qed{}}\endtrivlist}{}{}
+\makeatother

@@ -1,0 +1,39 @@
+% Emacs, this is -*- latex -*-!
+\section{Notes on mechanized formalization}
+\label{sec:formal}
+
+The mechanization of our proof uses the Agda
+proof assistant~\citep{agda-head}.
+
+Agda is an implementation of intensional Martin-Löf type theory.
+For our proofs, we need to postulate that equality of functions is
+extensional; this postulate is known to be consistent with Agda's
+type theory~\citep{Hofmann96}, hence it is safe to assume in Agda%
+\footnote{\url{http://permalink.gmane.org/gmane.comp.lang.agda/2343}}.
+
+Moreover, we postulate a few standard axioms on the
+implementation of bags, to avoid proving correct an
+implementation of bags, or needing to account for different
+values representing the same bag (such different values typically
+arise when implementing bags as search tree).
+
+We formalize the simply-typed lambda calculus we presented using
+typed de Brujin indexes to handle binding, because it takes well
+advantage of Agda's support for type refinement in pattern
+matching. On top of that, we implement a HOAS-like frontend, that
+we use for writing specific terms.
+The domains for our denotational
+semantics are Agda types, and semantic values are simply Agda
+values---in other words, we give a denotational semantics in
+terms of type theory.
+%
+This allows us to state the specification of differentiation
+directly in the semantic domain, and take advantage of Agda's
+support for equational reasoning between Agda functions.
+
+The main technical difference with the presentation we have given
+is that we actually use dependent types to define change
+structures: $\Change{v}$ is the \emph{type} of changes valid for
+$v$. Moreover, we work in proof-relevant mathematics, so that for
+instance $\Change[\Fun*{\Gs}{\Gt}]{f}$ is a $\Sigma$-type, that
+is a dependent pair containing a value and a proof.

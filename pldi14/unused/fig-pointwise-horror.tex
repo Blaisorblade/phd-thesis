@@ -1,0 +1,24 @@
+% Emacs, this is -*- latex -*-!
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\tikzset{y=2cm}\tikzset{x=2cm}
+\path
+(-90:1)node(fv)  {$\App{\Old f}{\Old x}$}
+(  0:1)node(f'v) {$\App{\Apply*{\D f}{\Old f}}{\Old x}$}
+(180:1)node(fv') {$\App{\Old f}{\Apply*{\D x}{\Old x}}$}
+( 90:1)node(f'v'){$\Apply*{\D f}f(\Apply{\D v}v)$}
+;
+\draw[-stealth](fv)--(fv')node[pos=.5,left]
+{incrementalized $\Old f$ on $\D x$~\null};
+\draw[-stealth](fv)--(f'v)node[pos=.5,right]
+{\null~$\App{\D f}{\Old x}$};
+\draw[-stealth,dashed](f'v)--(f'v')node[pos=.5,right]
+{\null~incrementalized $\Apply*{\D f}{\Old f}$ on $\D x$};
+\draw[-stealth,dashed](fv')--(f'v')node[pos=.5,left]
+{$\App{\D f}\Apply*{\D x}{\Old x}$~\null};
+\end{tikzpicture}
+\caption{Limitation of pointwise changes to functions:
+$\Change*{\Fun\Gs\Gt}=\Fun\Gs{\Change\Gt}$.}
+\label{fig:pointwise-horror}
+\end{figure}

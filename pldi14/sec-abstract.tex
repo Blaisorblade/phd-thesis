@@ -1,0 +1,33 @@
+% Emacs, this is -*- latex -*-!
+If the result of an expensive computation is invalidated by a small
+change to the input, the old result
+should be updated incrementally instead of reexecuting the whole computation.
+We incrementalize programs through
+their \emph{derivative}. A derivative maps
+changes in the program's input directly to changes in the program's
+output, without reexecuting the original program. We present a
+program transformation taking programs to their
+derivatives, which is fully static and automatic, supports first-class
+functions, and produces derivatives amenable to standard
+optimization.
+
+We prove the program transformation correct in Agda for a
+family of simply-typed $\lambda$-calculi, parameterized by base
+types and primitives. A precise interface specifies what is
+required to incrementalize the chosen primitives.
+
+We investigate performance by a case study: We implement in Scala the
+program transformation, a plugin and improve performance of a nontrivial program by
+orders of magnitude.
+
+% \pg{Failed attempt at four-sentence abstract. Our paper isn't that cool yet. Hmpf!}
+% \pg{I submitted what's above for now. But maybe we should still try to have
+% something like this?}
+% Results of expensive computations are often recomputed from scratch when
+% the input changes. Often, this wastes time because changes are
+% small and the output could be updated much faster; writing
+% code performing efficient updates by hand is error-prone. We propose
+% a program transformation taking a program to its
+% \emph{derivative}, mapping changes to inputs to changes to
+% outputs, often more efficiently, and we perform case studies
+% showing significant performance improvements.

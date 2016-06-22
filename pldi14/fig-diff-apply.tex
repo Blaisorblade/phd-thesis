@@ -1,0 +1,12 @@
+% Emacs, this is -*- latex -*-!
+\begin{figure}
+\begin{align*}
+\Change{\Fun* \Gs \Gt} &= \Fun{\Gs}{\Fun{\Change\Gs}{\Change\Gt}}\\
+\DIFF_{\Fun{\Gs}{\Gt}} & = \Lam{g\ f\ x\ \D x}
+  {\Diff{\App*g{\Apply*{\D x}{x}}}{\App*f x}}\\
+\APPLY_{\Fun{\Gs}{\Gt}} & = \Lam{f\ \D f\ x}
+  {\Apply{\App*{\App{\D f}{x}}{\Diff*xx}}{\App*f x}}
+\end{align*}
+\caption{The erased change structures for function types.}
+\label{fig:diff-apply}
+\end{figure}

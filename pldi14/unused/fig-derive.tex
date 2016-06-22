@@ -1,0 +1,25 @@
+% Emacs, this is -*- latex -*-!
+\begin{figure}
+\begin{align*}
+\Derive{\Lit n}
+& = \Lit0\\
+\Derive{\Add{t_1}{t_2}}
+& = \Add{\Derive{t_1}}{\Derive{t_2}}\\
+\Derive{\Minus t}
+& = \Minus{\Derive t}\\
+\Derive{\Singleton{n_1,\ldots,n_m}}
+& = \Singleton{}\\
+\Derive{\Union{t_1}{t_2}}
+& = \Union{\Derive{t_1}}{\Derive{t_2}}\\
+\Derive{\Negate t}
+& = \Negate{\Derive t}\\
+\Derive{\Map{t_1}{t_2}}
+& = {\Map*{\Apply*{\Derive{t_1}}{t_1}}
+          {\Apply*{\Derive{t_2}}{t_2}}}\\
+&\,\DIFF\, {\Map*{t_1}{t_2}}\\
+\Derive{\Sum t}
+& = {\Sum{\Derive t}}
+\end{align*}
+\caption{Derivation.}\pg{reference the function part in the appendix~\ref{sec:STLC-correct}. }
+\label{fig:plug-derive}
+\end{figure}
