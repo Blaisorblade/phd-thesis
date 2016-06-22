@@ -22,6 +22,9 @@
 \newtoggle{todos}
 \newtoggle{submit}
 
+% Should we exclude proofs?
+\newtoggle{noproofs}
+
 % Comment out \toggletrue to reenable draft mode, with TODOs etc.
 \togglefalse{submit}
 \toggletrue{submit}
@@ -43,4 +46,18 @@
   \allowdisplaybreaks[1]
   %\sloppy
   \raggedbottom
+}
+
+% Introduce environment oldSec for material which we commented out but might
+% still have bits to save:
+\excludecomment{oldSec}
+% Replace the above line with:
+%\includecomment{oldSec}
+% to comment those sections back in.
+\iftoggle{noproofs}{
+\excludecomment{optionalproof}
+\excludecomment{optionallemma}
+}{
+\newenvironment{optionalproof}{\begin{proof}}{\end{proof}}
+\newenvironment{optionallemma}{\begin{lemma}}{\end{lemma}}
 }
