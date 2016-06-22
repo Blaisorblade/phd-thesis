@@ -1,0 +1,44 @@
+% Ensure that arXiv processes this as PDF.
+\pdfoutput=1
+
+\documentclass{book}
+\usepackage{natbib}
+\usepackage{comment}
+\bibliographystyle{abbrvnat}
+\input{packages}
+\input{macros}
+
+\usepackage{amsthm}
+\usepackage{listings,fixfoot}
+\input{aosd13/lstsetup}
+
+\input{aosd13/customMacros}
+%\input{pldi14/macros}
+%\input{macros_part2}
+% from pldi14
+\newcommand{\ILC}{ILC}
+% from aosd13
+\usepackage{comment}
+\excludecomment{extraEval}
+\includecomment{techrep}
+\excludecomment{nontechrep}
+\excludecomment{todos}
+\includecomment{forNonBeamer}
+
+\title{PhD Thesis}
+\author{Paolo G. Giarrusso}
+\begin{document}
+\maketitle
+\chapter{Intro}
+\chapter{Reifying collection queries}
+
+\input{aosd13/graphs/evalResLos}
+\input{aosd13/paperBody}
+\input{aosd13/aosd13-extended-appendixes}
+
+\bibliography{Bibs/DB,Bibs/ProgLang,Bibs/SoftEng,Bibs/own}
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

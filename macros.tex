@@ -1,0 +1,35 @@
+% Emacs, this is -*- latex -*-!
+\usepackage[scaled=0.88]{beramono} % http://wbillingsley.blogspot.de/2008/06/latex-monospace-bold-computer-modern.html
+\usepackage{color}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{stmaryrd}
+\usepackage{eurosym}
+\usepackage{booktabs}
+
+% Load hyperref as last package
+% (http://www.tex.ac.uk/cgi-bin/texfaq2html?label=hyperdupdest), except for
+% bookmark (which would otherwise load hyperref with other options).
+\usepackage[unicode=true]{hyperref}
+\usepackage{bookmark}
+
+% Comments
+\iftoggle{todos}{%
+\newcommand{\mynote}[2]{
+  \textcolor{red}
+  {
+  {\bfseries\sffamily\scriptsize#1}
+  {\small$\blacktriangleright$\textsf{\emph{#2}}$\blacktriangleleft$}}}
+}{%
+\newcommand{\mynote}[2]{}
+}
+
+\newcommand{\todo}{\mynote}
+
+\newcommand{\tr}{\todo{TR}}
+\newcommand{\pg}{\todo{PG}}
+\newcommand{\ko}{\todo{KO}}
+\newcommand{\yc}{\todo{YC}}
+\newcommand{\chk}{\todo{CK}}
+\newcommand{\mei}{\todo{ME}}
+\newcommand{\rmi}{\todo{RM}}

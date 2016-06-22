@@ -1,0 +1,46 @@
+% Emacs, this is -*- latex -*-!
+\usepackage{amsmath}
+\usepackage{comment}
+\usepackage[shortlabels]{enumitem}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{tikz}
+\usepackage{ucs}
+\usepackage{xparse}
+\usepackage{microtype}
+\usepackage{subfigure}
+
+% This package allows hyphenation of compound words. Use \-/
+% instead of - as hyphen to allow hyphenation elsewhere. Use \=/
+% to additionally specify that hyphenation right after the dash
+% is forbidden. However, this package with this setting redefines
+% \- and \=!
+
+%\usepackage[shortcuts]{extdash}
+
+\usepackage{etoolbox} %For newtoggle
+\newtoggle{todos}
+\newtoggle{submit}
+
+% Comment out \toggletrue to reenable draft mode, with TODOs etc.
+\togglefalse{submit}
+\toggletrue{submit}
+
+% Show empty space at page ends, to ease squeezing space.
+% Should remove before submission.
+%\raggedbottom
+
+\iftoggle{submit}{
+  % For submission. These settings shouldn't be altered.
+  \togglefalse{todos}
+  \allowdisplaybreaks[1]
+}{
+  % For development, feel free to tune if needed.
+  \togglefalse{todos}
+  %\toggletrue{todos}
+
+  % Allow reasonable looks without huge cost, during development.
+  \allowdisplaybreaks[1]
+  %\sloppy
+  \raggedbottom
+}
