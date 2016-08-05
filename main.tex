@@ -64,6 +64,24 @@
 \input{pldi14/sec-informal}
 \end{oldSec}
 
+\chapter{Incrementalizing more programs}
+\pg{Only a sketch for now}
+
+While the basic framework we presented is significant, applying it in practice
+to incrementalize programs is hard because of a few problems.
+\begin{enumerate}
+\item The incremental computation does not have accesss to intermediate results from the original computation.
+\item Since function changes are represented as functions, the derivative cannot
+  test if a function change is nil. In fact, while a function change can replace
+  a function with an arbitrary other function, actual changes often simply
+  replace a closure with another closure using the same code but closing over a
+  changed environment.
+\item Applying a derivative to a nil change always produce a nil change, but we
+  never take advantage of this to optimize derivatives, except sometimes at
+  compile time.
+\item We do not support change composition.
+\end{enumerate}
+
 
 \bibliography{Bibs/DB,Bibs/ProgLang,Bibs/SoftEng,Bibs/own}
 \end{document}
