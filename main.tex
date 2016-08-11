@@ -76,12 +76,17 @@ to incrementalize programs is hard because of a few problems.
   a function with an arbitrary other function, actual changes often simply
   replace a closure with another closure using the same code but closing over a
   changed environment.
+\end{enumerate}
+
+A few other annoyances
+\begin{enumerate}
 \item Applying a derivative to a nil change always produce a nil change, but we
   never take advantage of this to optimize derivatives, except sometimes at
   compile time.
 \item We do not support change composition.
+\item Change structures must provide a difference operation, even though most
+  often we are not supposed to use it.
 \end{enumerate}
-
 
 \bibliography{Bibs/DB,Bibs/ProgLang,Bibs/SoftEng,Bibs/own}
 \end{document}
