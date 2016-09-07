@@ -24,6 +24,7 @@ comment.cut
 *.fot
 *.cb
 *.cb2
+*.ptb
 
 ## Intermediate documents:
 *.dvi
