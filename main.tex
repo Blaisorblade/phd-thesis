@@ -32,6 +32,57 @@
 \begin{document}
 \maketitle
 \chapter{Intro}
+
+% \section{}
+Efficient queries are written either as declarative database queries that are
+optimized by database optimizers, or as manually optimized programs using
+collection libraries. Compare maintaining anagraphic data for a population
+as either a relational database or a collection:
+\begin{itemize}
+\item If the population data is maintained as a database, a programmer that needs to
+  look up quickly people by age, can just add an index and keep the lookup query
+  unchanged; the index is then automatically maintained.
+\item If the population data is maintained as an in-memory collection, adding an
+  index requires modifying by hand queries to reuse it for maximum performance,
+  and ensuring all changes to population data update the index to maintain
+  correctness. This is error-prone and violations are common \pg{XXX}, even if
+  there is quite some research on the problem.
+\end{itemize}
+Modern libraries offer high-level APIs for manipulating (in-memory) collections;
+equivalently, such an API is an embedded domain-specific language (EDSL).
+Collection operations are typically executed directly; however, they can instead
+construct a query representation that can then be optimized.
+
+To optimize queries we can transfer techniques known from both databases and
+programming languages. Incrementalizing arbitrary queries, however, is a much
+harder problem in general.
+
+\section{Our design for incrementalizing queries}
+We designed our incrementalization system by abstracting from needs for
+collection APIs.
+\begin{itemize}
+\item collection APIs are typically higher-order. This allows further
+  flexibility compared to first-order query languages: in particular we can
+  design new operators in terms of existing ones.
+\item many collection types support equations that can be used for optimization.
+  For instance
+\end{itemize}
+
+\subsection{Domain-specific}
+Special optimizations are possible because many collection datatypes, equality
+is not purely structural. Two lists are equal if they are structurally equal.
+But two sets are equal if they have the same elements, which does not imply they
+are structurally equal.\footnote{\pg{Cool but not necessarily appropriate here.}
+  Technically, the datatypes are not freely generated and their signatures
+  contain further equations.}
+%
+A general-purpose optimizer cannot exploit this to return a structurally
+different set with ``the same meaning'', but a domain-specific optimizer can be
+instructed to do so.
+
+Taking this into account we were led to design our incrementalization system to
+allow domain-specific support from the start.
+
 \chapter{Reifying collection queries}
 
 \input{aosd13/graphs/evalResLos}
@@ -66,6 +117,8 @@
 \end{oldSec}
 
 
+\pg{Plan for things that complete the original paper's story: add them by
+  revising that text and in that chapter.}
 
 \bibliography{Bibs/DB,Bibs/ProgLang,Bibs/SoftEng,Bibs/own}
 \end{document}

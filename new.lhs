@@ -28,12 +28,15 @@ to incrementalize programs is hard because of a few problems.
   changed environment.
 \end{enumerate}
 
-A few other annoyances
+A few other annoyances include:
 \begin{enumerate}
 \item Applying a derivative to a nil change always produce a nil change, but we
   never take advantage of this to optimize derivatives, except sometimes at
   compile time.
-\item We do not support change composition.
+\item No support change composition: there is no direct way to compose a
+  sequence of changes |dx1, dx2, dx3, ...| across |x0, x1, x2, x3, ...| and
+  produce a single change, except by applying all those changes and computing a
+  difference with |x0 `oplus` dx1 `oplus` dx2 `oplus` dx3|.
 \item Change structures must provide a difference operation, even though most
   often we are not supposed to use it.
 \end{enumerate}
@@ -47,6 +50,29 @@ functions are defunctionalized as well.
 
 In this chapter, we show how to systematically incrementalize such
 defunctionalized programs by systematic program transformation.
+
+\subsection{Avoiding the closed-world assumption}
+\pg{Move this somewhere better.}
+
+\pg{cite Uroboro.}
+
+Defunctionalization as usually defined can only be performed on a closed
+program. Using open algebraic datatypes can lift this restriction, though
+usually at the cost of exhaustiveness checking.
+
+Representing changes as data instead of functions is not a goal per se. Rather,
+our goal is defining other primitive operations on function changes beyond
+application, and that is not possible if function changes are represented as
+functions. However, this problem could also be solved by representing function
+changes as more general \emph{codata} using copatterns. Codata generalize
+functions; while functions can only be \emph{observed} by applying them to an
+argument, codata can support further observations. Moreover, when defining
+codata using copatterns, the codata definition fixes a set of observations,
+while new generators can be defined in the entire program, similarly to how
+functions can be defined in a whole programs.
+
+Hence we could potentially represent changes as codata. We leave this for future
+work.
 
 \section{Setup}
 \pg{Clarify how we use Haskell} We encode ILC by manually writing Haskell code,
