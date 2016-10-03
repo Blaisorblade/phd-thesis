@@ -6,10 +6,116 @@
 \input{packages}
 \input{macros}
 \usepackage{amsthm}
+\usepackage{cleveref}
+
+\theoremstyle{definition}
+% http://tex.stackexchange.com/a/67251
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
 
 %include polycode.fmt
 %include forall.fmt
 \begin{document}
+
+\chapter{A theory of changes}
+
+% From PLDI14 contribution.
+In this chapter, we present a novel mathematical theory of changes and
+derivatives, which is more general than other work in the field because changes
+are first-class entities and they are distinct from base values.
+
+Unless specified otherwise, our chapter is not concerned with the syntax of an
+object language, but with simple sets of values.
+%
+Later we will use such sets for a standard set-theoretic semantics of a typed,
+total language, hence we in this chapter we will not account for non-termination
+through domain theory or other means.
+%
+When defining functions we will use uniformly Haskell-style notation even for
+situations where it is unusual.
+
+\section{Generalizing the calculus of finite differences}
+%format f_d = "\Delta f"
+%format `dot` = "\cdot"
+% Revise terminology.
+Our theory generalizes the calculus of finite difference. If |f| is a real
+function, one can define its \emph{finite difference}, that is a function |f_d|
+such that |f_d a da = f (a + da) - f a|. The calculus of finite differences
+shows defines theorems that in many cases allow computing a closed formula for
+|f_d| given a closed formula for |f|. For instance, if |f x = 2 `dot` x|, one
+can verify its finite difference is |f_d x dx = 2 `dot` (x + dx) - 2 `dot` x = 2
+`dot` dx|.
+
+However, this calculus is usually defined for real functions, and it is not
+immediate how to generalize it beyond groups. On the other hand, many useful
+types do not form a group: for instance, lists of integers don't form a group
+but only a monoid. Moreover, it's hard to represent list changes simply through
+a list: how do we specify which elements were inserted (and where), which were
+removed and which were subjected to change themselves?
+
+Hence, we define a more general algebraic structure, where the set of values and the set
+of changes are allowed to be distinct.
+
+\section{Change structures}
+%format Nat = "\mathbb{N}"
+%format Int = "\mathbb{Z}"
+%format v1
+%format v2
+%format `oplus` = "\oplus"
+%format `ominus` = "\ominus"
+
+To generalize the definition of a finite difference |f_d a da = f (a + da) - f
+a|, we need at least two operations:
+\begin{itemize}
+\item one to \emph{update} a value |a| with a change |da|, which we write |a
+  `oplus` da|,
+\item and one to construct a change representing the \emph{difference} between
+  two values |a| and |b|, which we write |b `ominus` a|.
+\end{itemize}
+
+As already discussed, we'll need to allow (in general)
+distinct sets of values and changes. Hence we give the following
+\begin{definition}[Change structures, first version]
+  \label{def:change-struct-bad-1}
+  A change structure is a tuple |(V, DV, `oplus`, `ominus`)| where
+  \begin{itemize}
+  \item |V| is the set of values;
+  \item |DV| is the set of changes;
+  \item |`oplus`| is a function of type |V -> DV -> V|;
+  \item |`ominus`| is a function of type |V -> V -> V|;
+  \item all |v1, v2 `elem` V| satisfy |v1 `oplus` (v2 `ominus` v1) = v2|.
+  \end{itemize}
+\end{definition}
+
+Each group induces a change structure where values and changes are represented
+by group elements, update can be implemented by addition |+|, and difference is
+implemented by subtraction |-|, that is, by |b - a = b + (- a)|, where |-|
+represents the group inverse operation. Since integers form a group under
+addition, we can define a change structure on integers where |V = DV = Int|,
+|`oplus` = +| and |`ominus` = -|.
+
+However, \cref{def:change-struct-bad-1} is not general enough for our goals. In
+many examples, we need to associate different sets of changes to each base value
+|v `elem` V|.
+
+% Consider a set of values, for instance the set of natural numbers
+% |Nat|. A change |dv| for |v1 `elem` Nat| should
+% describe the difference between |v1| and another natural |v2 `elem` Nat|.
+% We do not define changes directly, but we
+% specify operations which must be defined on them. They are:
+% \begin{itemize}
+% \item We can \emph{update} a base value |v1| with a
+%   change |dv| to obtain an updated or \emph{new} value
+%   |v2|. We write |v2 = v1 `oplus` dv|.
+% \item We can compute a change between two arbitrary
+%   values |v1| and |v2| of the set we are considering.
+%   We write |dv = v2 `ominus` v1|.
+% \end{itemize}
+
+
+% and they are defined also for functions.
 
 %%%
 %%% XXX Integrate properly in rest of document. Will be possible.
@@ -209,4 +315,5 @@ derApplyDFun1 (P _f _env) (DP (Replace newF) newEnv) = oreplace (newF newEnv)
 \end{code}
 
 This is enabled by defunctionalizing both base functions and changes.
+\bibliography{Bibs/DB,Bibs/ProgLang,Bibs/SoftEng,Bibs/own}
 \end{document}
