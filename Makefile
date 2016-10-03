@@ -13,3 +13,4 @@ rest: $(OTHER).pdf
 	latexmk -pv $*
 %.tex: %.lhs
 	lhs2TeX -o $@ $<
+.PRECIOUS: %.tex
