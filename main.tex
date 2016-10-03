@@ -33,6 +33,9 @@
 \maketitle
 \chapter{Intro}
 
+A program manipulating collections of data will often perform queries on those
+collections. These collections can be big, so query execution can be expensive
+and warrant considerable optimization effort.
 % \section{}
 Efficient queries are written either as declarative database queries that are
 optimized by database optimizers, or as manually optimized programs using
@@ -41,7 +44,7 @@ as either a relational database or a collection:
 \begin{itemize}
 \item If the population data is maintained as a database, a programmer that needs to
   look up quickly people by age, can just add an index and keep the lookup query
-  unchanged; the index is then automatically maintained.
+  unchanged; the index can then be automatically maintained.
 \item If the population data is maintained as an in-memory collection, adding an
   index requires modifying by hand queries to reuse it for maximum performance,
   and ensuring all changes to population data update the index to maintain
@@ -50,6 +53,11 @@ as either a relational database or a collection:
 \end{itemize}
 Modern libraries offer high-level APIs for manipulating (in-memory) collections;
 equivalently, such an API is an embedded domain-specific language (EDSL).
+Compared to SQL, an EDSL will typically have first-class support for using
+arbitrary user-defined functions in queries, because it will allow .
+
+\pg{Examples!}
+
 Collection operations are typically executed directly; however, they can instead
 construct a query representation that can then be optimized.
 
@@ -58,7 +66,7 @@ programming languages. Incrementalizing arbitrary queries, however, is a much
 harder problem in general.
 
 \section{Our design for incrementalizing queries}
-We designed our incrementalization system by abstracting from needs for
+We designed our incrementalization system by abstracting from needs and ideas for
 collection APIs.
 \begin{itemize}
 \item collection APIs are typically higher-order. This allows further
