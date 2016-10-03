@@ -79,7 +79,8 @@ As already discussed, we'll need to allow (in general)
 distinct sets of values and changes. Hence we give the following
 \begin{definition}[Change structures, first version]
   \label{def:change-struct-bad-1}
-  A change structure is a tuple |(V, DV, `oplus`, `ominus`)| where
+  A change structure over a set |V| is a tuple |(V, DV, `oplus`, `ominus`)|
+  where
   \begin{itemize}
   \item |V| is the set of values;
   \item |DV| is the set of changes;
@@ -98,7 +99,8 @@ addition, we can define a change structure on integers where |V = DV = Int|,
 
 However, \cref{def:change-struct-bad-1} is not general enough for our goals. In
 many examples, we need to associate different sets of changes to each base value
-|v `elem` V|.
+|v `elem` V|. This is required for instance to define a change structure over
+the set of naturals.
 
 % Consider a set of values, for instance the set of natural numbers
 % |Nat|. A change |dv| for |v1 `elem` Nat| should
