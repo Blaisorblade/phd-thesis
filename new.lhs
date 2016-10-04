@@ -17,6 +17,26 @@
 
 %include polycode.fmt
 %include forall.fmt
+
+%format Nat = "\mathbb{N}"
+%format Int = "\mathbb{Z}"
+%format v1
+%format v2
+% XXX
+%format `oplus` = "\oplus"
+%format `ominus` = "\ominus"
+%format oplus = "(\oplus)"
+%format ominus = "(\ominus)"
+
+%format f0
+%format f1
+%format a0
+%format a1
+%format a2
+%format da0
+%format da1
+%format da2
+
 \begin{document}
 
 \chapter{A theory of changes}
@@ -59,15 +79,6 @@ Hence, we define a more general algebraic structure, where the set of values and
 of changes are allowed to be distinct.
 
 \section{Change structures}
-%format Nat = "\mathbb{N}"
-%format Int = "\mathbb{Z}"
-%format v1
-%format v2
-% XXX
-%format `oplus` = "\oplus"
-%format `ominus` = "\ominus"
-%format oplus = "(\oplus)"
-%format ominus = "(\ominus)"
 
 \paragraph{A first definition attempt}
 To generalize the definition of a finite difference |f_d a da = f (a + da) - f
@@ -297,15 +308,6 @@ all input changes turn out to be nil. This was not possible in PLDI'14, because
 nil function changes could not be detected at runtime, only at compile time.
 
 \subsection{Supporting function composition}
-
-%format f0
-%format f1
-%format a0
-%format a1
-%format a2
-%format da0
-%format da1
-%format da2
 
 Imagine, in the setting of PLDI'14 extended with change composition, applying
 one function change |df| to a composed argument change |da1 `ocompose` da2|,
