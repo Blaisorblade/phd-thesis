@@ -22,12 +22,14 @@
 %format Int = "\mathbb{Z}"
 %format v1
 %format v2
-% XXX
-%format `oplus` = "\oplus"
-%format `ominus` = "\ominus"
+
+%format `oplus` = "\oplus "
+%format `ominus` = "\ominus "
 %format oplus = "(\oplus)"
 %format ominus = "(\ominus)"
 
+%format `such` = "\mid"
+%format ^ = " "
 %format f0
 %format f1
 %format a0
@@ -37,6 +39,18 @@
 %format da1
 %format da2
 
+%format x0
+%format x1
+%format x2
+%format x3
+
+%format dx0
+%format dx1
+%format dx2
+%format dx3
+
+%format Dt = "\Delta"
+%format DV = "\Delta V"
 \begin{document}
 
 \chapter{A theory of changes}
@@ -46,10 +60,14 @@ In this chapter, we present a novel mathematical theory of changes and
 derivatives, which is more general than other work in the field because changes
 are first-class entities and they are distinct from base values.
 
+\paragraph{Conventions}
 Unless specified otherwise, our chapter is not concerned with the syntax of an
 object language, but with simple sets of values.
 %
-Later we will use such sets for a standard set-theoretic semantics of a typed,
+In fact, while our discussion will be informal, our formalization of this
+chapter is done using a type-theoretic metalanguage.
+%
+Later we will use such sets for a type-theoretic semantics of a typed,
 total language, hence we in this chapter we will not account for non-termination
 through domain theory or other means.
 %
@@ -96,14 +114,16 @@ distinct sets of values and changes. Hence we give the following definition.
   \label{def:change-struct-bad-1}
   A change structure over a set |V| is a tuple |(V, DV, `oplus`, `ominus`)|
   where
-  \begin{itemize}
+  \begin{enumerate}
   \item |V| is the set of values;
   \item |DV| is the set of changes;
   \item |`oplus`| is a function of type |V -> DV -> V|;
   \item |`ominus`| is a function of type |V -> V -> V|;
   \item all |v1, v2 `elem` V| satisfy |v1 `oplus` (v2 `ominus` v1) = v2|.
+    \label{def:update-diff-bad-1}
   \item all |v `elem` V, dv `elem` DV| satisfy |(v `oplus` dv) `ominus` v = dv|.
-  \end{itemize}
+    \label{def:diff-update-bad-1}
+  \end{enumerate}
 \end{definition}
 
 Each group induces a change structure where values and changes are represented
@@ -113,7 +133,7 @@ represents the group inverse operation. Since integers form a group under
 addition, we can define a change structure on integers where |V = DV = Int|,
 |oplus = (+)| and |ominus = (-)|. % Add bags?
 
-\paragraph{A problem: change structure for naturals}
+\paragraph{Trying to define a change structure for naturals}
 However, \cref{def:change-struct-bad-1} is not general enough for our goals. In
 many examples, we need to associate different sets of changes to each base value
 |v `elem` V|. For instance, let us try to turn our change structure for integers
@@ -122,46 +142,119 @@ into a change structure for naturals, that is having |Nat| as set of base values
 v1| To represent, for instance, |0 `ominus` 5| we still want to use |-5|, so it
 seems we should keep using |Int| as set of changes |DV = Int|. But with these
 definitions, updating a value |v `elem` V| with a change |dv `elem` DV| might
-produce a result outside of |V|: for instance, |5 `oplus` (-6) = 5 + (-6) = -1|.
-In other words, we can't define an appropriate total function |`oplus`: V -> DV
--> V|.
+produce a result outside of |V|: for instance, with |v = 5, dv = -6|, we have |5
+`oplus` (-6) = 5 + (-6) = -1|.
+
+To produce a correct change structure for naturals, addressing this problem, we
+can have |`oplus`| saturate on underflow, that is, produce 0 instead of a
+negative number:
+\begin{code}
+  v `oplus` dv = if v + dv < 0 then 0 else v + dv
+\end{code}
+However, this definition violates \cref{def:diff-update-bad-1}, that is |(v
+`oplus` dv) `ominus` v = dv|: if |v = 1| and |dv = -2|, then |(v `oplus` dv)
+`ominus` v = -1 /= -2 = dv|.
+
+In other words, it's not clear how to define an appropriate total function
+|`oplus`: V -> DV -> V| for a change structure for naturals.
+
+More in general, with this definition, we can update a value |v1| with changes
+that cannot be of the form |v2 `ominus` v1| for any |v1|, and the update is
+always supposed to produce a value |v2|, even for changes that are not \emph{valid}
+for |v1|.
+\pg{Refine reference}
+%
+Later chapters show that invalid changes are an especially serious problem for
+changes on functions, but for now we refrain from discussing such examples in
+more detail; we only point out that invalid changes have been a major problem
+while developing the theory of ILC.
+%
+\pg{Have more examples why that's bad.} We could allow the update operation to
+be partial.
+%
+However, partial operations would complicate algebraic
+reasoning on change structures, so we choose a different solution.
 % Further discussion of the issues.
 
-
+\paragraph{An alternative definition}
 To ensure we can make |`oplus`| and |`ominus`| total, we propose an alternative
 definition, where we have not one but multiple sets of changes, one for each
 base value.
+
+\pg{Make sure that we've stated our metalanguage is type theory.}
 \begin{definition}[Change structures, second version]
   \label{def:change-struct-bad-2}
-  % XXX adapt
-  A change structure over a set |V| is a tuple |(V, DV, `oplus`, `ominus`)|
+  \pg{Use subdefinition to allow citations, here and before.}
+  A change structure over a set |V| is a tuple |(V, Dt, `oplus`, `ominus`)|
   where
-  \begin{itemize}
+  \begin{enumerate}
   \item |V| is the set of values;
-  \item |DV| is the set of changes;
-  \item |`oplus`| is a function of type |V -> DV -> V|;
-  \item |`ominus`| is a function of type |V -> V -> V|;
+  \item |Dt| is a family of sets of changes, indexed by |V|; that is, for each
+    |v `elem` V|, |Dt v| is a set, called the \emph{change set} of |v|;
+  \item |`oplus`| is a function of type |(v : V) -> Dt v -> V|;
+  \item |`ominus`| is a function of type |V -> (v1 : V) -> Dt v1|;
   \item all |v1, v2 `elem` V| satisfy |v1 `oplus` (v2 `ominus` v1) = v2|.
-  \item all |v `elem` V, dv `elem` DV| satisfy |(v `oplus` dv) `ominus` v = dv|.
-  \end{itemize}
+    \label{def:update-diff-bad-2}
+  \item all |v `elem` V, dv `elem` Dt v| satisfy |(v `oplus` dv) `ominus` v = dv|.
+    \label{def:diff-update-bad-2}
+  \end{enumerate}
 \end{definition}
 
-% Consider a set of values, for instance the set of natural numbers
-% |Nat|. A change |dv| for |v1 `elem` Nat| should
-% describe the difference between |v1| and another natural |v2 `elem` Nat|.
-% We do not define changes directly, but we
-% specify operations which must be defined on them. They are:
-% \begin{itemize}
-% \item We can \emph{update} a base value |v1| with a
-%   change |dv| to obtain an updated or \emph{new} value
-%   |v2|. We write |v2 = v1 `oplus` dv|.
-% \item We can compute a change between two arbitrary
-%   values |v1| and |v2| of the set we are considering.
-%   We write |dv = v2 `ominus` v1|.
-% \end{itemize}
+This definition is flexible enough to allow defining a change structure for
+integers; we simply set |V = Nat, Dt v = {dv `such` v + dv >= 0}, oplus =
+(+), ominus = (-)|.
 
+We could formalize an equivalent definition by having a single set |DV| and a
+relation |R| between values |v `elem` V| and changes |dv `elem` DV| that are
+\emph{valid} for `v`. From such a validity relation, we can define |Dt v| as |{dv `such` R(v, dv)}|.
 
-% and they are defined also for functions.
+\pg{Discuss the source and destination of a change here?}
+\paragraph{Change equality}
+Our new definition of change strucctures in \cref{def:change-struct-bad-2} is
+still arguably too restrictive for some scenarios. The problem is that
+\cref{def:diff-update-bad-2} asks for |dv| to be equal to |(v `oplus` dv)
+`ominus` v|; in general we might need to allow those two changes to simply be
+equivalent in a suitable sense, as we next explain.
+
+As a motivating example, we can consider defining a change structure for
+sequences. We can define a change as a sequence of atomic changes, and each
+atomic change can insert an element after a given position or remove the element
+at a given position.
+
+This defition is over-simplified, but will be sufficient
+for our example; we'll later see a better version of this change structure, as defined by
+
+We can represent the set of all changes (ignoring the base value) as the
+following Haskell datatype:
+
+\begin{code}
+data AtomicSeqChange a
+  = Insert Int a
+  | Delete Int
+type SeqChange a = [AtomicSeqChange a]
+\end{code}
+
+Note that even though we use Haskell syntax, we ignore nontermination, so we
+interpret the above definition as true strict algebraic datatypes, as we'd do in
+a strict language, instead of allowing nonterminating values as one usually does
+in a lazy language like Haskell. And we use this syntax to refer to values in
+the semantics of |SeqChange a|.
+
+We can then say that a change |dv| is valid for a base sequence |v| if applying
+the atomic changes that |dv| contains never refers to an out-of-bounds index. As
+explained, we can then define |Dt v| as the set of changes that are valid with
+respect to |v|. We can then define a function for change application
+implementing the algorithm discussed.
+\pg{Write down |`oplus`|}
+
+While we have not specified an implementation of |`ominus`|, we can see that in
+many cases several return values are equally valid because several changes have
+the same effect. For instance, if |v = [1, 2, 3]| both |dv1 = [Delete 0, Insert
+0 1]| and |dv2 = []| are changes from |v| to |v|, that is, both satisfy |v
+`oplus` dv = v|. So which should be the return value of |v `ominus` v|? Applying
+\cref{def:diff-update-bad-2} gives us |dv1 = (v `oplus` dv1) `ominus` v = v
+`ominus` v = (v `oplus` dv2) `ominus` v = dv2|, hence |dv1 = dv2| which is
+absurd.
 
 %%%
 %%% XXX Integrate properly in rest of document. Will be possible.
