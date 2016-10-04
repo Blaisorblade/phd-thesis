@@ -63,9 +63,13 @@ of changes are allowed to be distinct.
 %format Int = "\mathbb{Z}"
 %format v1
 %format v2
+% XXX
 %format `oplus` = "\oplus"
 %format `ominus` = "\ominus"
+%format oplus = "(\oplus)"
+%format ominus = "(\ominus)"
 
+\paragraph{A first definition attempt}
 To generalize the definition of a finite difference |f_d a da = f (a + da) - f
 a|, we need at least two operations:
 \begin{itemize}
@@ -76,7 +80,7 @@ a|, we need at least two operations:
 \end{itemize}
 
 As already discussed, we'll need to allow (in general)
-distinct sets of values and changes. Hence we give the following
+distinct sets of values and changes. Hence we give the following definition.
 \begin{definition}[Change structures, first version]
   \label{def:change-struct-bad-1}
   A change structure over a set |V| is a tuple |(V, DV, `oplus`, `ominus`)|
@@ -87,6 +91,7 @@ distinct sets of values and changes. Hence we give the following
   \item |`oplus`| is a function of type |V -> DV -> V|;
   \item |`ominus`| is a function of type |V -> V -> V|;
   \item all |v1, v2 `elem` V| satisfy |v1 `oplus` (v2 `ominus` v1) = v2|.
+  \item all |v `elem` V, dv `elem` DV| satisfy |(v `oplus` dv) `ominus` v = dv|.
   \end{itemize}
 \end{definition}
 
@@ -95,12 +100,40 @@ by group elements, update can be implemented by addition |+|, and difference is
 implemented by subtraction |-|, that is, by |b - a = b + (- a)|, where |-|
 represents the group inverse operation. Since integers form a group under
 addition, we can define a change structure on integers where |V = DV = Int|,
-|`oplus` = +| and |`ominus` = -|.
+|oplus = (+)| and |ominus = (-)|. % Add bags?
 
+\paragraph{A problem: change structure for naturals}
 However, \cref{def:change-struct-bad-1} is not general enough for our goals. In
 many examples, we need to associate different sets of changes to each base value
-|v `elem` V|. This is required for instance to define a change structure over
-the set of naturals.
+|v `elem` V|. For instance, let us try to turn our change structure for integers
+into a change structure for naturals, that is having |Nat| as set of base values
+(|V = Nat|). We still have |v `oplus` dv = v + dv| and |v2 `ominus` v1 = v2 -
+v1| To represent, for instance, |0 `ominus` 5| we still want to use |-5|, so it
+seems we should keep using |Int| as set of changes |DV = Int|. But with these
+definitions, updating a value |v `elem` V| with a change |dv `elem` DV| might
+produce a result outside of |V|: for instance, |5 `oplus` (-6) = 5 + (-6) = -1|.
+In other words, we can't define an appropriate total function |`oplus`: V -> DV
+-> V|.
+% Further discussion of the issues.
+
+
+To ensure we can make |`oplus`| and |`ominus`| total, we propose an alternative
+definition, where we have not one but multiple sets of changes, one for each
+base value.
+\begin{definition}[Change structures, second version]
+  \label{def:change-struct-bad-2}
+  % XXX adapt
+  A change structure over a set |V| is a tuple |(V, DV, `oplus`, `ominus`)|
+  where
+  \begin{itemize}
+  \item |V| is the set of values;
+  \item |DV| is the set of changes;
+  \item |`oplus`| is a function of type |V -> DV -> V|;
+  \item |`ominus`| is a function of type |V -> V -> V|;
+  \item all |v1, v2 `elem` V| satisfy |v1 `oplus` (v2 `ominus` v1) = v2|.
+  \item all |v `elem` V, dv `elem` DV| satisfy |(v `oplus` dv) `ominus` v = dv|.
+  \end{itemize}
+\end{definition}
 
 % Consider a set of values, for instance the set of natural numbers
 % |Nat|. A change |dv| for |v1 `elem` Nat| should
