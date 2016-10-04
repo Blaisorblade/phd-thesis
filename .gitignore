@@ -12,6 +12,9 @@
 comment.cut
 *.pdf
 
+## From lhs2TeX docs
+new.tex
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
