@@ -64,9 +64,14 @@ In this chapter, we present and motivate a mathematical theory of changes and
 derivatives, which is more general than other work in the field because changes
 are first-class entities and they are distinct from base values.
 
+This theory introduces change structures as an abstraction of operations
+required on changes; while we introduce this abstraction as a mathematical one,
+we anticipate using this abstraction also in code. \pg{Clarify this
+  thought, too philosophical as phrased.}
+
 We introduced the first version of this theory in a previous paper
 \citep{CaiEtAl2014ILC}, but in this chapter we will elaborate more on its
-motivation and design, and present later variants.
+motivation and design, and present later evolutions of this definition.
 
 \paragraph{Conventions}
 Unless specified otherwise, our chapter is not concerned with the syntax of an
@@ -184,7 +189,7 @@ However, partial operations would complicate algebraic
 reasoning on change structures, so we choose a different solution.
 % Further discussion of the issues.
 
-\paragraph{An alternative definition}
+\paragraph{A better definition: parameterizing change sets by base value}
 To ensure we can make |`oplus`| and |`ominus`| total, we propose an alternative
 definition, where we have not one but multiple sets of changes, one for each
 base value.
@@ -218,7 +223,31 @@ relation |R| between values |v `elem` V| and changes |dv `elem` DV| that are
 |{dv `such` R(v, dv)}|.
 
 \paragraph{Change structures as graphs}
-\pg{Discuss the source and destination of a change here?}
+Now that change sets are parameterized over base values, we can introduce a
+different perspective on changes: we can regard a change structure |(V, Dt,
+`oplus`, `ominus`)| as a graph, where the set of vertices coincides with the set
+of values |V|, and a change |dv `elem` Dt v| correspond to an edge from |v| to
+|v `oplus` dv|.
+
+%format Dt'
+%format `oplus2` = `oplus` "_{2}"
+%format `ominus2` = `ominus` "_{2}"
+
+This requires change sets to be disjoint. However, given an arbitrary change
+structure |(V, Dt, `oplus`, `ominus`)|, we can always construct another change
+structure with disjoint change sets |(V, Dt', `oplus2`, `ominus2`)|, where |Dt'
+v = (v, Dt v)|, that is, where changes contain their base value. |v `oplus2` (v,
+dv) = v `oplus` dv|, |v2 `ominus2` v1 = (v1, v2 `ominus` v1)|.
+
+\pg{Add some drawing.}
+
+Once change sets are disjoint, we can define a combined set of changes |DV| and
+operations that map a change to its \emph{source} |src: DV -> V|, and its
+\emph{destination} |dst: DV -> V|; if |dv `elem` Dt v|, then |src dv = v| and
+|dst dv = v `oplus` dv|.
+
+We can also define |`oplus`| in terms of |dst|, as |v `oplus` dv = dst dv|,
+hence turning |`oplus`| into a derived operation.
 
 \paragraph{From change equality to change equivalence}
 Our new definition of change structures in \cref{def:change-struct-bad-2} is
@@ -240,10 +269,10 @@ We can represent the set of all changes (ignoring the base value) as the
 following Haskell datatype:
 
 \begin{code}
-data AtomicSeqChange a
-  = Insert Int a
-  | Delete Int
-type SeqChange a = [AtomicSeqChange a]
+data  AtomicSeqChange a
+  =   Insert  Int a
+  |   Delete  Int
+type  SeqChange a = [AtomicSeqChange a]
 \end{code}
 
 Note that even though we use Haskell syntax, we ignore nontermination, so we
@@ -268,10 +297,10 @@ the same effect. For instance, if |v = [1, 2, 3]| both |dv1 = [Delete 0, Insert
 `ominus` v = (v `oplus` dv2) `ominus` v = dv2|, hence |dv1 = dv2| which is
 absurd.
 
-We can avoid this problem by
-
-Instead of requiring changes to be equal, we require then changes to be
-equivalent
+Instead of requiring changes to be equal in \cref{def:diff-update-bad-2}, we
+require then changes to be simply equivalent; we define two changes to be
+equivalent if they have the same source and the same destination.
+\pg{Show that this is an equivalence relation.}
 %%%
 %%% XXX Integrate properly in rest of document. Will be possible.
 %%%
