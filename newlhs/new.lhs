@@ -39,6 +39,10 @@
 %format da1
 %format da2
 
+%format dv0
+%format dv1
+%format dv2
+
 %format x0
 %format x1
 %format x2
@@ -56,9 +60,13 @@
 \chapter{A theory of changes}
 
 % From PLDI14 contribution.
-In this chapter, we present a novel mathematical theory of changes and
+In this chapter, we present and motivate a mathematical theory of changes and
 derivatives, which is more general than other work in the field because changes
 are first-class entities and they are distinct from base values.
+
+We introduced the first version of this theory in a previous paper
+\citep{CaiEtAl2014ILC}, but in this chapter we will elaborate more on its
+motivation and design, and present later variants.
 
 \paragraph{Conventions}
 Unless specified otherwise, our chapter is not concerned with the syntax of an
@@ -206,12 +214,15 @@ integers; we simply set |V = Nat, Dt v = {dv `such` v + dv >= 0}, oplus =
 
 We could formalize an equivalent definition by having a single set |DV| and a
 relation |R| between values |v `elem` V| and changes |dv `elem` DV| that are
-\emph{valid} for `v`. From such a validity relation, we can define |Dt v| as |{dv `such` R(v, dv)}|.
+\emph{valid} for `v`. From such a validity relation, we can define |Dt v| as
+|{dv `such` R(v, dv)}|.
 
+\paragraph{Change structures as graphs}
 \pg{Discuss the source and destination of a change here?}
-\paragraph{Change equality}
-Our new definition of change strucctures in \cref{def:change-struct-bad-2} is
-still arguably too restrictive for some scenarios. The problem is that
+
+\paragraph{From change equality to change equivalence}
+Our new definition of change structures in \cref{def:change-struct-bad-2} is
+still arguably too restrictive for some scenarios:
 \cref{def:diff-update-bad-2} asks for |dv| to be equal to |(v `oplus` dv)
 `ominus` v|; in general we might need to allow those two changes to simply be
 equivalent in a suitable sense, as we next explain.
@@ -221,8 +232,9 @@ sequences. We can define a change as a sequence of atomic changes, and each
 atomic change can insert an element after a given position or remove the element
 at a given position.
 
-This defition is over-simplified, but will be sufficient
-for our example; we'll later see a better version of this change structure, as defined by
+This defition is over-simplified, but will be sufficient for our example; we'll
+later see a better version of this change structure, as defined by
+\citet{Firsov2016purely}.
 
 We can represent the set of all changes (ignoring the base value) as the
 following Haskell datatype:
@@ -256,6 +268,10 @@ the same effect. For instance, if |v = [1, 2, 3]| both |dv1 = [Delete 0, Insert
 `ominus` v = (v `oplus` dv2) `ominus` v = dv2|, hence |dv1 = dv2| which is
 absurd.
 
+We can avoid this problem by
+
+Instead of requiring changes to be equal, we require then changes to be
+equivalent
 %%%
 %%% XXX Integrate properly in rest of document. Will be possible.
 %%%
