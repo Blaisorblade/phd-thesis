@@ -27,6 +27,8 @@
 %format `ominus` = "\ominus "
 %format oplus = "(\oplus)"
 %format ominus = "(\ominus)"
+%format `ocompose` = "\circledcirc "
+%format ocompose = "(\circledcirc)"
 
 %format `such` = "\mid"
 %format ^ = " "
@@ -38,6 +40,9 @@
 %format da0
 %format da1
 %format da2
+%format db0
+%format db1
+%format db2
 
 %format dv0
 %format dv1
@@ -383,8 +388,6 @@ Let's rememeber our basic interface to change structures:
 class ChangeStruct t where
   type Dt t = r | r -> t
   oplus :: t -> Dt t -> t
-  -- Absorption law:
-  -- x `oplus` oreplace y = y
   oreplace :: t -> Dt t
 
 class ChangeStruct t => OnilChangeStruct t where
@@ -394,6 +397,8 @@ class ChangeStruct t => OnilChangeStruct t where
 class ChangeStruct t => NilChangeStruct t where
   nil :: t -> Dt t
 \end{code}
+
+Let's also recall the \emph{absorption law}, |x `oplus` oreplace y = y|.
 
 Crucially, changes to type |t| are represented as type |Dt t|, and this
 interface does \emph{not} require that change structures support a difference
