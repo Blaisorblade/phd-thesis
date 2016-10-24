@@ -232,7 +232,7 @@ function (corresponding to $\SINGLETON$) and an abelian group
 If $g$ is a group,
 these equations specify $\App{\FOLDBAG} g$ precisely~\citep{GlucheGrust97Incr}.
 %
-Moreover, the first three equations mean that $\FoldBag{g}{f}$ is \emph{abelian group
+Moreover, the first three equations mean that $\FoldBag{g}{f}$ is the \emph{abelian group
   homomorphism} between the abelian group on bags and the group
 $g$ (because those equations coincide with the definition).
 %
@@ -276,11 +276,11 @@ To define $\Term{GroupChange}$, we need a suitable erased change
 structure on $\Gt$, such that $\UPDATE$ will be equivalent to
 $\boxplus$. Since there might be multiple groups on $\Gt$, we
 \emph{allow the changes to specify a group}, and have
-$\UPDATE$ delegate to $\boxplus$:
+$\UPDATE$ delegate to $\boxplus$ (which we extract by pattern-matching on the group):
 \begin{align*}
 & \Change{\Gt} = \Term{Replace}\; \Gt \mid \Term{GroupChange} \Abelian*{\Gt} \Gt \\
 & \Update{v}{(\Term{Replace} \; u)} = u\\
-& \Update{v}{(\Term{GroupChange} \; (\bullet, \Term{inverse}, \Term{zero})\; dv)} = v \bullet dv\\
+& \Update{v}{(\Term{GroupChange} \; (\boxplus, \Term{inverse}, \Term{zero})\; dv)} = v \boxplus dv\\
 & \Diff{v}{u} = \Term{Replace}\; v
 \end{align*}
 That is, a change between two values is either simply the new
