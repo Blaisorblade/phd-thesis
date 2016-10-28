@@ -306,6 +306,13 @@ Instead of requiring changes to be equal in \cref{def:diff-update-bad-2}, we
 require then changes to be simply equivalent; we define two changes to be
 equivalent if they have the same source and the same destination.
 \pg{Show that this is an equivalence relation.}
+
+\section{Relaxing the definition}
+\subsection{Example: monoid changes}
+If we stop requiring |odiff|, then suddenly we can build the construction of
+change structures out of groups to build change structures out of monoids.
+
+\pg{Resume!}
 %%%
 %%% XXX Integrate properly in rest of document. Will be possible.
 %%%
