@@ -65,8 +65,9 @@
 \chapter{A theory of changes}
 
 % From PLDI14 contribution.
-In this chapter, we present and motivate a mathematical theory of changes and
-derivatives, which is more general than other work in the field because changes
+In this chapter, we present and motivate a mathematical theory of \emph{changes} and
+\emph{derivatives}.
+This theory is more general than other work in the field because changes
 are first-class entities and they are distinct from base values.
 
 This theory introduces change structures as an abstraction of operations
@@ -187,17 +188,21 @@ changes on functions, but for now we refrain from discussing such examples in
 more detail; we only point out that invalid changes have been a major problem
 while developing the theory of ILC.
 %
-\pg{Have more examples why that's bad.} We could allow the update operation to
-be partial.
+\pg{Have more examples why that's bad.} We could allow the update operation
+|`oplus`| to fail, that is be a partial function.
 %
 However, partial operations would complicate algebraic
 reasoning on change structures, so we choose a different solution.
 % Further discussion of the issues.
 
-\paragraph{A better definition: parameterizing change sets by base value}
-To ensure we can make |`oplus`| and |`ominus`| total, we propose an alternative
-definition, where we have not one but multiple sets of changes, one for each
-base value.
+\paragraph{A better definition: parameterizing change sets by base values}
+Instead of making change operation |`oplus`| a partial function, we can alter
+the definition of change structures and restrict the domain of |`oplus`|,
+excluding inputs where it would fail, making it a total function. We propose
+such an alternative definition. To ensure |v `oplus` dv| succeeds, we require
+|dv| to be a valid change for |v|. Different |v| in |V| are associated to
+different sets of valid changes; Hence, instead of having a single set of
+changes |DV|, for each value |v \in V| we have a set of changes |Dt v|.
 
 \pg{Make sure that we've stated our metalanguage is type theory.}
 \begin{definition}[Change structures, second version]
@@ -219,7 +224,7 @@ base value.
 \end{definition}
 
 This definition is flexible enough to allow defining a change structure for
-integers; we simply set |V = Nat, Dt v = {dv `such` v + dv >= 0}, oplus =
+naturals; we simply set |V = Nat, Dt v = {dv `such` v + dv >= 0}, oplus =
 (+), ominus = (-)|.
 
 We could formalize an equivalent definition by having a single set |DV| and a
