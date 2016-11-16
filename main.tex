@@ -31,31 +31,46 @@
 \author{Paolo G. Giarrusso}
 \begin{document}
 \maketitle
+\section*{Abstract}
+% Programs manipulating data collections require
+
+% \begin{abstract}
+% \end{abstract}
 \chapter{Intro}
 
-A program manipulating collections of data will often query those
-collections.\pg{Add examples.}
-These collections can be big, so query execution can be expensive
-and warrant considerable optimization effort.
+A program manipulating collections of data will often query those collections.
+For instance, a program manipulating anagraphic data about German citizens might
+need to compute their average age or other anagraphic information. These
+collections can be big, so query execution can be expensive and warrant
+considerable optimization effort. Moreover, when input data changes, we often
+want to obtain the results of a query for the new input without rerunning that
+query from scratch.
+
 % \section{}
-Efficient queries are written either as declarative database queries that are
-optimized by database optimizers, or as manually optimized programs using
+Efficient queries are classically written either as declarative database queries that are
+optimized by database optimizers, or as manually optimized code using
 collection libraries. Compare maintaining anagraphic data for a population
 as either a relational database or a collection:
 \begin{itemize}
-\item If the population data is maintained as a database, a programmer that needs to
-  look up quickly people by age, can just add an index and keep the lookup query
-  unchanged; the index can then be automatically maintained.
+\item If the population data is maintained by a database management system
+  (DBMS), a programmer that needs to look up quickly people by age, can just add
+  an index and keep the lookup query unchanged. When the data is updated, the
+  DBMS can adapt the index to the new changes, that is, it can \emph{incrementally} update the
+  index automatically.
+  Maintaining indexes adds possible to
+  One can then experiment with different sets of indexes and workloads
 \item If the population data is maintained as an in-memory collection, adding an
-  index requires modifying by hand queries to reuse it for maximum performance,
-  and ensuring all changes to population data update the index to maintain
-  correctness. This is error-prone and violations are common \pg{XXX}, even if
-  there is quite some research on the problem.
+  index requires modifying by hand queries to reuse it for maximum performance.
+  Experimenting and ensuring all changes to population data update the index to
+  maintain correctness. This is error-prone, and while there is a considerable
+  amount of research on this problem\pg{cite}, incorrect update code is common.
 \end{itemize}
 Modern libraries offer high-level APIs for manipulating (in-memory) collections;
 equivalently, such an API is an embedded domain-specific language (EDSL).
-Compared to SQL, an EDSL will typically have first-class support for using
-arbitrary user-defined functions in queries, because it will allow .
+
+Compared to SQL, EDSL queries will typically be able to use user-defined
+functions in queries. Moreover, the author of EDSL queries can enjoy abstraction
+mechanisms from the underlying language.
 
 \pg{Examples!}
 
