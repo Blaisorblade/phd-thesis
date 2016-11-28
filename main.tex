@@ -36,76 +36,116 @@
 
 % \begin{abstract}
 % \end{abstract}
-\chapter{Intro}
+\chapter{Introduction}
 
-A program manipulating collections of data will often query those collections.
-For instance, a program manipulating anagraphic data about German citizens might
-need to compute their average age or other anagraphic information. These
-collections can be big, so query execution can be expensive and warrant
-considerable optimization effort. Moreover, when input data changes, we often
-want to obtain the results of a query for the new input without rerunning that
-query from scratch.
+Many program perform queries on collections of data, and for non-trivial amounts
+of data it is useful to execute the queries efficiently. When the data is
+updated often enough, it can also be useful to update the results of some
+queries \emph{incrementally} whenever the input changes, so that up-to-date
+results are quickly available, even for queries that are expensive to execute.
 
-% \section{}
-Efficient queries are classically written either as declarative database queries that are
-optimized by database optimizers, or as manually optimized code using
-collection libraries. Compare maintaining anagraphic data for a population
-as either a relational database or a collection:
+For instance, a program manipulating anagraphic data about citizens of a country
+might need to compute statistics on them, such as their average age, and update
+those statistics when the set of citizens changes.
+
+Traditional relational database management systems (RDBMS) support both queries
+optimization and (in quite a few cases) incremental update of query results
+(called there \emph{incremental view maintenance}).
+
+However, often queries are executed on collections of data that are not stored
+in a database, but in collections manipulated by some program. Moving in-memory
+data to RDBMSs, typically does not improve
+performance~\citep{Stonebraker07,Rompf2015functional}, and reusing database
+optimizers is not trivial.
+
+Moreover, many programming languages are far more expressive than RBDMSs.
+Typical RDBMS can only manipulate SQL relations, that is multisets (or bags) of
+tuples (or sometimes sets of tuples, after duplicate elimination). Typical
+programming languages (PL) support also arbitrarily nested lists and maps of
+data, and allow programmers to define new data types with few restrictions; a
+typical PL will also allow a far richer set of operations than SQL.
+
+However, typical PL do not apply typical database optimizations to collection
+queries, and if queries are incrementalized, this is often done by hand, even
+though code implementing incremental query is error-prone and
+hard-to-maintain~\citep{Salvaneschi13reactive}.
+
+What's worse, some of these manual optimizations are best done over the whole
+program. For instance, adding an index on some collection can speed up looking
+for some information, but each index must be maintained incrementally when the
+underlying data changes. Depending on the actual queries and updates performed
+on the collection, and on how often they happen, it might turn out that updating
+an index takes more time than the index saves; hence the choice of which indexes
+to enable depends on the whole program. However, adding/removing an index
+requires updating all PL queries to use it, while RDBMS queries can use an index
+transparently.
+
+Therefore, in this thesis we propose techniques for optimizing collection
+queries and executing them incrementally.
+
+We consider the problem for functional programming languages such as Haskell or
+Scala, and we consider collection queries written using the APIs of their
+collection libraries, which we treat as an embedded domain-specific language (EDSL). Such
+APIs (or DSLs) contain powerful operators on collections such as \texttt{map}\pg{update
+  style to be uniform with the one from lhs2TeX}, which are higher-order, that
+is they take as arguments arbitrary functions in the host language that we must
+also handle.
+
+Therefore, our optimizations and incrementalizations must handle programs in
+higher-order EDSLs that can contain arbitrary code in the host language. Hence,
+many of our optimizations will focus on properties of our collection EDSL, but
+will need to handle host language code. We restrict the problem to purely
+functional programs (without mutation or other side effects, including
+non-termination), because such programs can be more ``declarative'' and because
+avoiding side effects can enable more powerful optimization and simplify the
+work of the optimizer at the same time.
+
+In particular, this thesis is divided into two parts:
 \begin{itemize}
-\item If the population data is maintained by a database management system
-  (DBMS), a programmer that needs to look up quickly people by age, can just add
-  an index and keep the lookup query unchanged. When the data is updated, the
-  DBMS can adapt the index to the new changes, that is, it can \emph{incrementally} update the
-  index automatically.
-  Maintaining indexes adds possible to
-  One can then experiment with different sets of indexes and workloads
-\item If the population data is maintained as an in-memory collection, adding an
-  index requires modifying by hand queries to reuse it for maximum performance.
-  Experimenting and ensuring all changes to population data update the index to
-  maintain correctness. This is error-prone, and while there is a considerable
-  amount of research on this problem\pg{cite}, incorrect update code is common.
+\item we first describe, in Chapter 2, work on optimizing collection queries by static program transformation.
+\item in the remaining chapters, we describe work on incrementalizing programs
+  by static program transformation. This thesis presents the first approach that
+  handles higher-order programs by using program transformation; hence, while
+  our main examples use collection queries, we phrase the work in terms of
+  $\lambda$-calculi with unspecified primitives.
 \end{itemize}
-Modern libraries offer high-level APIs for manipulating (in-memory) collections;
-equivalently, such an API is an embedded domain-specific language (EDSL).
+% Modern libraries offer high-level APIs for manipulating (in-memory) collections;
+% equivalently, such an API is an embedded domain-specific language (EDSL).
 
-Compared to SQL, EDSL queries will typically be able to use user-defined
-functions in queries. Moreover, the author of EDSL queries can enjoy abstraction
-mechanisms from the underlying language.
+% Compared to SQL, EDSL queries will typically be able to use user-defined
+% functions in queries. Moreover, the author of EDSL queries can enjoy abstraction
+% mechanisms from the underlying language.
 
-\pg{Examples!}
+% \pg{Examples!}
 
-Collection operations are typically executed directly; however, they can instead
-construct a query representation that can then be optimized.
+% Collection operations are typically executed directly; however, they can instead
+% construct a query representation that can then be optimized.
 
-To optimize queries we can transfer techniques known from both databases and
-programming languages. Incrementalizing arbitrary queries, however, is a much
-harder problem in general.
+% \section{Our design for incrementalizing queries}
+% We designed our incrementalization system by abstracting from needs and ideas for
+% collection APIs.
+% \begin{itemize}
+% \item collection APIs are typically higher-order. This allows further
+%   flexibility compared to first-order query languages: in particular we can
+%   design new operators in terms of existing ones.
+% \item many collection types support equations that can be used for optimization.
+%   For instance
+% \end{itemize}
 
-\section{Our design for incrementalizing queries}
-We designed our incrementalization system by abstracting from needs and ideas for
-collection APIs.
-\begin{itemize}
-\item collection APIs are typically higher-order. This allows further
-  flexibility compared to first-order query languages: in particular we can
-  design new operators in terms of existing ones.
-\item many collection types support equations that can be used for optimization.
-  For instance
-\end{itemize}
+% \subsection{Domain-specific}
+% Special optimizations are possible because many collection datatypes, equality
+% is not purely structural. Two lists are equal if they are structurally equal.
+% But two sets are equal if they have the same elements, which does not imply they
+% are structurally equal.\footnote{\pg{Cool but not necessarily appropriate here.}
+%   Technically, the datatypes are not freely generated and their signatures
+%   contain further equations.}
+% %
+% A general-purpose optimizer cannot exploit this to return a structurally
+% different set with ``the same meaning'', but a domain-specific optimizer can be
+% instructed to do so.
 
-\subsection{Domain-specific}
-Special optimizations are possible because many collection datatypes, equality
-is not purely structural. Two lists are equal if they are structurally equal.
-But two sets are equal if they have the same elements, which does not imply they
-are structurally equal.\footnote{\pg{Cool but not necessarily appropriate here.}
-  Technically, the datatypes are not freely generated and their signatures
-  contain further equations.}
-%
-A general-purpose optimizer cannot exploit this to return a structurally
-different set with ``the same meaning'', but a domain-specific optimizer can be
-instructed to do so.
-
-Taking this into account we were led to design our incrementalization system to
-allow domain-specific support from the start.
+% Taking this into account we were led to design our incrementalization system to
+% allow domain-specific support from the start.
 
 \chapter{Reifying collection queries}
 
