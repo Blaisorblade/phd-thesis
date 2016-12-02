@@ -16,7 +16,7 @@
 PAPER_NAME = thesis-main
 PDF_NAME=$(PAPER_NAME).pdf
 # Sources that will be watched for changes.
-sources=$(wildcard *.tex) $(wildcard Bibs/*.bib)
+sources=$(shell find . -name '*.tex') $(wildcard Bibs/*.bib)
 INTERM_PRODUCTS=newlhs/new.tex mylhs2tex.sty
 
 all:	open
@@ -31,11 +31,12 @@ else
   REDIR=> /dev/null
 endif
 
+.PHONY: FORCE
 %.tex: %.lhs
 	lhs2TeX -o $*.tex $*.lhs
 mylhs2tex.sty: mylhs2tex.lhs
 	lhs2TeX -o $@ $<
-%.pdf: %.tex $(sources) $(INTERM_PRODUCTS)
+%.pdf: %.tex $(INTERM_PRODUCTS) FORCE
 	latexmk $* $(REDIR)
 
 .PRECIOUS: %.tex
