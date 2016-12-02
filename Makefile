@@ -1,4 +1,4 @@
-MAIN=main
+MAIN=thesis-main
 
 LATEXMK=latexmk -e '$$pdf_previewer = "./open.sh %S"; $$pdf_update_command = "./open.sh %S";'
 all: main rest
