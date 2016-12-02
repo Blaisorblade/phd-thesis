@@ -6,12 +6,3 @@ main:
 	$(LATEXMK) $(MAIN)
 demon:
 	$(LATEXMK) -pvc $(MAIN)
-
-OTHER=new
-rest: $(OTHER).pdf
-
-%.pdf: %.tex
-	$(LATEXMK) -pv $*
-%.tex: %.lhs
-	lhs2TeX -o $@ $<
-.PRECIOUS: %.tex
