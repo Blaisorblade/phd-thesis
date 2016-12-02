@@ -106,7 +106,7 @@ Overall, our main contributions are the following:
 In this section, we show how the absense of collection-specific optimizations
 forces programmers to trade modularity against performance, which motivates our design of {\LoS} to resolve this conflict.
 
-As our running example through the paper, we consider representing and querying a simple in-memory bibliography. A book has, in our schema, a title, a publisher and a list of authors. Each author, in turn, has a first and last name. We represent authors and books as instances of the Scala classes \code{Author} and \code{Book} shown in Fig.~\ref{fig:schema}. The class declarations list the type of each field: Titles, publishers, and first and last names are all stored in fields of type \code{String}. The list of authors is stored in a field of type \code{Seq[Author]}, that is, a sequence of authors -- something that would be more complex to model in a relational database.
+As our running example through the chapter, we consider representing and querying a simple in-memory bibliography. A book has, in our schema, a title, a publisher and a list of authors. Each author, in turn, has a first and last name. We represent authors and books as instances of the Scala classes \code{Author} and \code{Book} shown in Fig.~\ref{fig:schema}. The class declarations list the type of each field: Titles, publishers, and first and last names are all stored in fields of type \code{String}. The list of authors is stored in a field of type \code{Seq[Author]}, that is, a sequence of authors -- something that would be more complex to model in a relational database.
 The code fragment also defines a collection of books named \code{books}.
 \begin{figure}[t]
 \centering
@@ -596,7 +596,7 @@ make \texttt{scalac} emit a static type error.
 
 \section{Related Work}
 \label{sec:relwork}
-This paper builds on prior work on language-integrated queries, query optimization, techniques for DSL embedding, and other works on code querying.
+This chapter builds on prior work on language-integrated queries, query optimization, techniques for DSL embedding, and other works on code querying.
 
 \smartParagraph{Language-Integrated Queries}
 Microsoft's Language-Integrated Query technology (\LINQ)~\citep{Meijer:2006:LRO:1142473.1142552,Bierman:2007:LTF:1297027.1297063} is similar to our work in that it also
@@ -658,7 +658,7 @@ Sec.~\ref{sec:motivation}), nor distinguishes statically between different kinds
 collections, such as \code{Set} or \code{Seq}.
 Based on Ferry, ScalaQL~\citep{JOT:issue_2010_07/article3} extends Scala with a compiler-plugin to integrate a query language on top of a relational database. The work by \citet{Spiewak09scalaql:language-integrated} is
  unrelated to~\citep{JOT:issue_2010_07/article3} but also called ScalaQL\@. It is similar to our approach in that it also 
-proposes to reify queries based on for-comprehensions, but it is not clear from the paper how the reification 
+proposes to reify queries based on for-comprehensions, but it is not clear from their paper how the reification
 works.\footnote{We contacted the authors; they were not willing to provide more details or the sources of their approach.}
 
 
@@ -687,8 +687,9 @@ for further improvement of our work by incorporating more advanced optimizations
 \smartParagraph{Scala and DSL Embedding}
 \label{sec:rwdsl}
 Technically, our implementation of \LoS\ is a deep embedding of a part of the Scala collections API~\citep{odersky2009fighting}.
-Deep embeddings were pionereed by \citet{Leijen99DSEC} and \citet{elliott03compiling}. The technical
-details of the embedding are not the main topic of this paper; we are using some of the 
+Deep embeddings were pionereed by \citet{Leijen99DSEC} and \citet{elliott03compiling}. \pg{This makes no sense for the thesis.}
+The technical
+details of the embedding are not the main topic of this chapter; we are using some of the
 Scala techniques presented by \citet{rompf2010lightweight} for using implicits and for
 adding infix operators to a type. Similar to \citet{rompf2010lightweight}, we also 
 use the Scala compiler on-the-fly. A plausible alternative backend for \LoS\ would
