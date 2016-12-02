@@ -1,16 +1,17 @@
 MAIN=main
 
+LATEXMK=latexmk -e '$$pdf_previewer = "./open.sh %S"; $$pdf_update_command = "./open.sh %S";'
 all: main rest
 main:
-	latexmk $(MAIN)
+	$(LATEXMK) $(MAIN)
 demon:
-	latexmk -pvc $(MAIN)
+	$(LATEXMK) -pvc $(MAIN)
 
 OTHER=new
 rest: $(OTHER).pdf
 
 %.pdf: %.tex
-	latexmk -pv $*
+	$(LATEXMK) -pv $*
 %.tex: %.lhs
 	lhs2TeX -o $@ $<
 .PRECIOUS: %.tex

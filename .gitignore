@@ -13,7 +13,7 @@ comment.cut
 *.pdf
 
 ## From lhs2TeX docs
-new.tex
+newlhs/new.tex
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

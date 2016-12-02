@@ -18,7 +18,7 @@ PAPERNAME = new
 sources=$(PAPERNAME).lhs $(wildcard *.tex) $(wildcard ../Bibs/*.bib)
 
 all:	open
-OPEN = open
+OPEN = ./open.sh
 open: $(PAPERNAME).pdf
 	$(OPEN) $<
 
