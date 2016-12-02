@@ -69,7 +69,7 @@ later show equivalent to \cref{thm:incrementalization}.
       $\App{f}{a} \UPDATE \App{\App{\D f}{a}}{\D a} =
       {\App{f}{\TheNewValue}}
       \UPDATE
-      \App{\App{\D f}{\TheNewValue}}{\Nil{\TheNewValue}}$
+      \App{\App{\D f}{\TheNewValue}}{\NilC{\TheNewValue}}$
   \end{subdefinition}
   for all values $a \in A$ and corresponding changes $\D a \in
   \Change[A]{a}$.
@@ -92,7 +92,7 @@ $\Fun{\Bag S}{\Bag S}$.
 The set
 $\Change[\Fun{\Bag S}{\Bag S}] f$ contains ``changes'' to $f$,
 namely all binary bag functions $df$ satisfying
-(b): $\D{f}~a~\D{a}=\D{f}\APP\Upd*{a}\APP\Nil{\Upd*{a}}= \D{f}~(\MERGE~a~\D{a})~\Empty$.
+(b): $\D{f}~a~\D{a}=\D{f}\APP\Upd*{a}\APP\NilC{\Upd*{a}}= \D{f}~(\MERGE~a~\D{a})~\Empty$.
 Such binary functions include
 $\MERGE$ and all constant functions.
 
@@ -101,7 +101,7 @@ namely all binary bag functions $\D{id}$ satisfying
 (b):
 $\Term{id}\APP a \UPDATE \D{id} \APP a \APP \D{a} =
 \Term{id} \APP \Upd*{a} \UPDATE \D{id} \APP \Upd*{a} \APP
-\Nil{\Upd*{a}}$, which simplifies to
+\NilC{\Upd*{a}}$, which simplifies to
 $\MERGE~a~(\D{id}~a~\D{a})=
 \MERGE~(\MERGE~a~\D{a})~(\D{id}~(\MERGE~a~\D{a})~\Empty)$.
 Neither $\MERGE$ nor any constant function is a change to
@@ -125,7 +125,7 @@ similarly to a distributive law.
   %
   \begin{alignat*}{5}
     &\App{(\Update[A \to B]{f&&}{\D f})}{&&v}
-      && = \Update[B]{\App{f}{v}&&}{\App{\App{\D f}{v}}{\Nil[A]{v}}}\\
+      && = \Update[B]{\App{f}{v}&&}{\App{\App{\D f}{v}}{\NilC[A]{v}}}\\
     &\App{\App{(\Diff[A \to B]{f_2&&}{f_1})}{&&v}}{\D v}
       && = \Diff[B]{\App{f_2}{\Update*[A]{v}{\D v}}&&}{\App{f_1}{v}}\qedAligned
   \end{alignat*}
@@ -164,11 +164,11 @@ similarly to a distributive law.
               {\App{f_1}{a_2}}\\
   & \quad = \Apply[B]
               {\Diff*[B]
-                {\App{f_2}{\Apply*{\Nil[B]{a_2}}{a_2}}}
+                {\App{f_2}{\Apply*{\NilC[B]{a_2}}{a_2}}}
                 {\App{f_1}{a_2}}}
               {\App{f_1}{a_2}}\\
   & \quad = \Apply[B]
-              {\App{\App{\Diff*[A \to B]{f_2}{f_1}}{a_2}}{\Nil{a_2}}}
+              {\App{\App{\Diff*[A \to B]{f_2}{f_1}}{a_2}}{\NilC{a_2}}}
               {\App{f_1}{a_2}}
   \end{align*}
   by
@@ -201,10 +201,10 @@ in fact lifted change structures to function spaces.
   \begin{align*}
     & \App{\Apply*[A \to B]{\Diff*[A \to B]{f_2}{f_1}}{f_1}}{a}\\
     & \quad = \Apply[B]
-                {\App{\App{\Diff*[A \to B]{f_2}{f_1}}{a}}{\Nil[A]{a}}}
+                {\App{\App{\Diff*[A \to B]{f_2}{f_1}}{a}}{\NilC[A]{a}}}
                 {\App{f_1}{a}}\\
     & \quad = \Apply[B]
-                {\Diff*[B]{\App{f_2}{\Apply*[A]{a}{\Nil[A]{a}}}}{\App{f_1}{a}}}
+                {\Diff*[B]{\App{f_2}{\Apply*[A]{a}{\NilC[A]{a}}}}{\App{f_1}{a}}}
                 {\App{f_1}{a}}\\
     & \quad = \Apply[B]
                 {\Diff*[B]{\App{f_2}{a}}{\App{f_1}{a}}}
@@ -240,7 +240,7 @@ $\App{\Apply*{\D f}{f}}{\Apply*{\D a}{a}}$:
   Let $f$, $a$, $\D f$ and $\D a$ be arbitrary, as in the statement. Then
   \begin{align*}
     & \App{\Apply*[A \to B]{\D f}{f}}{\Apply*[A]{\D a}{a}}\\
-    & \quad = \Apply[B]{\App{\App{\D f}{\TheNewValue}}{\Nil{\TheNewValue}}}{\App{f}{\TheNewValue}}\\
+    & \quad = \Apply[B]{\App{\App{\D f}{\TheNewValue}}{\NilC{\TheNewValue}}}{\App{f}{\TheNewValue}}\\
     & \quad = \Apply[B]{\App{\App{\D f}{a}}{\D a}}{\App{f}{a}}
   \end{align*}
   by
@@ -292,11 +292,11 @@ Using then the incrementalization theorem, we can show that a function change si
 
 One can also compute a pointwise change from a function change:
 %In particular, a pointwise change can be obtained from a function
-%change by substituting to $da$ a nil change $\Nil{a}$. The result of
-%$\App{\App{f'}{\Old{a}}}{\Nil{a}}$ is also a nil change (by
+%change by substituting to $da$ a nil change $\NilC{a}$. The result of
+%$\App{\App{f'}{\Old{a}}}{\NilC{a}}$ is also a nil change (by
 %\cref{thm:deriv-nil}), and $\New{a} = \Old{a}$, so we obtain:
 \[
-  \Update{\App {f} {a}}{\App{\App{\D f}{a}}{\Nil{a}}}
+  \Update{\App {f} {a}}{\App{\App{\D f}{a}}{\NilC{a}}}
 = \App{f}{a} \UPDATE \App{\nabla f}{a}
 \]
 
@@ -304,7 +304,7 @@ One can also compute a pointwise change from a function change:
 %\begin{align*}
 %  & \Update{\App {\Old{f}} {\Old{a}}}{\App{\App{\D f}{\Old{a}}}{\D a}} \\
 %= & \App{\Old{f}}{\New{a}} \UPDATE \App{\nabla f}{\New{a}} \\
-%= & \App{\Old{f}}{\New{a}} \UPDATE \App{\App{\D f}{\New{a}}}{\Nil{\New{a}}}
+%= & \App{\Old{f}}{\New{a}} \UPDATE \App{\App{\D f}{\New{a}}}{\NilC{\New{a}}}
 %\end{align*}
 %
 %The above discussion was informal. To formalize it, we must
@@ -372,7 +372,7 @@ derivative (see \cref{def:derivatives}):
 \begin{theorem}[Nil changes are derivatives]
   \label{thm:nil-is-derivative}
   Given change structures $\ChangeStruct{A}$ and $\ChangeStruct{B}$ and a function $f \in A \to B$,
-  the change $\Nil[A \to B]{f}$ is the derivative $f'$ of $f$.
+  the change $\NilC[A \to B]{f}$ is the derivative $f'$ of $f$.
 \end{theorem}
 
 \begin{optionalproof}
@@ -380,8 +380,8 @@ derivative (see \cref{def:derivatives}):
   $\D a \in \Change[A]{a}$. Then
   \begin{align*}
     & \App{f}{\Apply*[A]{\D a}{a}}\\
-    & \quad = \App{\Apply*[A \to B]{\Nil[A \to B]{f}}{f}}{\Apply*[A]{\D a}{a}}\\
-    & \quad = \Apply[B]{\App{\App{\Nil[A]{f}}{a}}{\D a}}{\App{f}{a}}
+    & \quad = \App{\Apply*[A \to B]{\NilC[A \to B]{f}}{f}}{\Apply*[A]{\D a}{a}}\\
+    & \quad = \Apply[B]{\App{\App{\NilC[A]{f}}{a}}{\D a}}{\App{f}{a}}
   \end{align*}
   holds by \cref{thm:update-nil,thm:incrementalization}, as
   required for derivatives by \cref{def:derivatives}.

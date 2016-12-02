@@ -227,14 +227,14 @@ A particularly important change is the \emph{nil change} of a value:
   Given a change structure $\ChangeStruct{V}$ and a value $v \in V$, the change
   $\Diff{v}{v}$ is the nil change for $v$.
   \[
-    \Nil{v} = \Diff{v}{v} \qed
+    \NilC{v} = \Diff{v}{v} \qed
   \]
 \end{definition}
 The nil change for a value does indeed not change it.
-\begin{lemma}[Behavior of $\NIL$]
+\begin{lemma}[Behavior of $\NILC$]
   \label{thm:update-nil}
   Given a change structure $\ChangeStruct{V}$ and a value $v \in V$,
-  $\Apply{\Nil{v}}{v} = v$.
+  $\Apply{\NilC{v}}{v} = v$.
 \end{lemma}
 
 \begin{optionalproof}
@@ -259,12 +259,12 @@ change.%
   the following lemma. See \cref{sec:change-eq} for a corrected
   statement.}
 %
-\begin{lemma}[Behavior of derivatives on $\NIL$]
+\begin{lemma}[Behavior of derivatives on $\NILC$]
   \label{thm:deriv-nil}
   Given change structures $\ChangeStruct{A}$ and
   $\ChangeStruct{B}$, a function $f \in A \to B$, an element $a$
   of $A$, and the derivative $f'$ of $f$, we have
-  $\App{\App{f'}{a}}{\Nil{a}} = \Nil{\App* f a}$.
+  $\App{\App{f'}{a}}{\NilC{a}} = \NilC{\App* f a}$.
 \end{lemma}
 
 \begin{examples}

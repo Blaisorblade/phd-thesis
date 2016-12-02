@@ -190,7 +190,7 @@ of $\Eval{c}$.
                   {\App
                     {\EvalIncWith*{\Lam{x}{t_1}}{\Gr}{\D \Gr}}
                     {v}}
-                  {\Nil[\Gt _1]{v}}}
+                  {\NilC[\Gt _1]{v}}}
                 {\App
                   {\EvalWith*{\Lam{x}{t_1}}{\Gr}}
                   {v}}\\
@@ -198,26 +198,26 @@ of $\Eval{c}$.
                 {\EvalIncWith
                   {t_1}
                   {\ExtendEnv*[\Gr]{x}{v}}
-                  {\ExtendEnv*[\D \Gr]{\D x}{\Nil{v}}}}
+                  {\ExtendEnv*[\D \Gr]{\D x}{\NilC{v}}}}
                 {\EvalWith
                   {t_1}
                   {\ExtendEnv*[\Gr]{x}{v}}}\\
     & \quad = \EvalWith
                 {t_1}
                 {\Apply*
-                  {\ExtendEnv*[\D \Gr]{\D x}{\Nil{v}}}
+                  {\ExtendEnv*[\D \Gr]{\D x}{\NilC{v}}}
                   {\ExtendEnv*[\Gr]{x}{v}}}\\
     & \quad = \EvalWith
                 {t_1}
                 {\ExtendEnv*
                   [\Apply{\D \Gr}{\Gr}]
                   {x}
-                  {\Apply{\Nil{v}}{v}}}\\
+                  {\Apply{\NilC{v}}{v}}}\\
     & \quad = \App
                 {\EvalWith*
                   {\Lam{x}{t_1}}
                   {\Apply*{\D \Gr}{\Gr}}}
-                {\Apply*{\Nil{v}}{v}}\\
+                {\Apply*{\NilC{v}}{v}}\\
     & \quad = \App
                 {\EvalWith*
                   {\Lam{x}{t_1}}

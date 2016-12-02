@@ -225,7 +225,7 @@ function (corresponding to $\SINGLETON$) and an abelian group
   \App{\FoldBag{g}{f}}{b_1} \displaybreak[0]\\
 &  \App{\FoldBag {g @ (\_, \boxplus, \boxminus, e)}{f}}{\Negate* b}
    && = \boxminus \; \App*{\FoldBag{g}{f}}{b}\displaybreak[0]\\
-&  \App{\FoldBag {g @ (\_, \boxplus, \boxminus, e)}{f}}{\Singleton*{v}}
+&  \App{\FoldBag {g @ (\_, \boxplus, \boxminus, e)}{f}}{\SingletonT*{v}}
    &&= \App{f}{v}
 \end{alignat*}
 %
@@ -490,7 +490,7 @@ These are the primitives on maps.
   {\Fun\Gk{\Fun\Gi{\HashMap\Gk\Gi}}}
 \\
 \HasTypeAligned\LOOKUP
-  {\Fun\Gk{\Fun{\Map\Gk\Gi}{\Maybe\Gi}}}
+  {\Fun\Gk{\Fun{\MapT\Gk\Gi}{\Maybe\Gi}}}
 \\
 \HasTypeAligned\LIFTGROUP
   \Fun{\Abelian\Gi}{\Abelian{\HashMap\Gk\Gi}}
@@ -504,7 +504,7 @@ These are the primitives on maps.
 
 \begin{definition}[Semantics of map primitives]~
 \begin{subdefinition}
-\item $\Eval{\Map\Gk\Gi}$ is the set of partial functions from
+\item $\Eval{\MapT\Gk\Gi}$ is the set of partial functions from
 $\Eval\Gk$ to $\Eval\Gi$ defined only at a finite number of
 points.
 \item $\MAKEMAP$ evaluates to the function that converts a
@@ -641,7 +641,7 @@ operations listed in \cref{fig:change-operations}).
 The update operator $\Apply{\D x}{x}$ updates a value $x$ with a
 change $\D x$. The difference operator $\Diff{y}{x}$ computes the
 change from $x$ to $y$.
-And the nil change operator $\Nil{x}$
+And the nil change operator $\NilC{x}$
 denotes the change that updates the value $x$ into itself.
 
 In fact, if $\tau$ forms a group $\langle \tau, 0, +, -\rangle$,
@@ -688,7 +688,7 @@ the functions from \cref{fig:change-operations}
 and equations (or axioms):
 \begin{align*}
 \Apply{\Diff*{s₂}{s₁}}{s₁} &= s₂\\
-\Apply{\Nil{s}}{s} &= s\\
+\Apply{\NilC{s}}{s} &= s\\
 \end{align*}
 \pg{Check which ones we have already proven.}
 

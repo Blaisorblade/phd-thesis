@@ -96,7 +96,7 @@ integers,
 and changes to sets consist of insertions and deletions only.
 The term
 \[
-\Lam x {\Map {\Lam*n {n + 1}} x}
+\Lam x {\MapT {\Lam*n {n + 1}} x}
 \]
 contains a self-maintainable use of $\MAP$, because any change to
 the input set~$x$, say $\{\App\INSERT5, \App\DELETE7\}$, can be
@@ -104,7 +104,7 @@ converted to an output change, say $\{\App\INSERT6,
 \App\DELETE8\}$, without looking at $x$ itself. The use of $\MAP$
 in the following term is not self-maintainable:
 \[
-\Lam x {\Map {\Lam*n {n + \Sum* x}} x}.
+\Lam x {\MapT {\Lam*n {n + \Sum* x}} x}.
 \]
 Even one insertion to the input set~$x$ generates a sweeping
 change over all elements of the output set that is impossible to

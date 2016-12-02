@@ -51,11 +51,9 @@
 
 \NewDocumentCommand{\WideDiff}{somm}{\Parens#1{#3 \;\;\DIFF[#2]\;\; #4}}
 \NewDocumentCommand{\WideApply}{somm}{\Parens#1{#4 \;\;\APPLY[#2]\;\; #3}}
-\NewDocumentCommand{\COMPOSE}{}{\circ}
-\NewDocumentCommand{\Compose}{smm}{\Parens#1{#2 \COMPOSE #3}}
 
-\NewDocumentCommand{\NIL}{}{\mathbf{0}}
-\NewDocumentCommand{\Nil}{om}{\NIL_{#2}}
+\NewDocumentCommand{\NILC}{}{\mathbf{0}}
+\NewDocumentCommand{\NilC}{om}{\NILC_{#2}}
 
 \NewDocumentCommand{\ChangeStruct}{m}{\widehat{#1}}
 
@@ -140,17 +138,17 @@
 \NewDocumentCommand{\Add}{smm}{\Parens#1{#2 + #3}}
 \NewDocumentCommand{\Minus}{sm}{\Parens#1{- #2}}
 \NewDocumentCommand{\Bool}{s}{\Parens#1{\BOOL}}
-\NewDocumentCommand{\True}{s}{\Parens#1{\TRUE}}
-\NewDocumentCommand{\False}{s}{\Parens#1{\FALSE}}
+\NewDocumentCommand{\TrueT}{s}{\Parens#1{\TRUE}}
+\NewDocumentCommand{\FalseT}{s}{\Parens#1{\FALSE}}
 \NewDocumentCommand{\If}{smmm}{\Parens#1{\IF #2 \THEN #3 \ELSE #4}}
 \NewDocumentCommand{\Empty}{s}{\Parens#1{\emptyset}}
 \NewDocumentCommand{\BagLit}{m}{\left\lbrace#1\right\rbrace}
 \NewDocumentCommand{\SINGLETON}{}{\Term{singleton}}
-\NewDocumentCommand{\Singleton}{sm}{\Parens#1{\App\SINGLETON{#2}}}
+\NewDocumentCommand{\SingletonT}{sm}{\Parens#1{\App\SINGLETON{#2}}}
 \NewDocumentCommand{\INSERT}{}{\Term{insert}}
-\NewDocumentCommand{\Insert}{smm}{\Parens#1{\App{\App\INSERT{#2}}{#3}}}
+\NewDocumentCommand{\InsertT}{smm}{\Parens#1{\App{\App\INSERT{#2}}{#3}}}
 \NewDocumentCommand{\Merge}{smm}{\Parens#1{\App{\App\MERGE {#2}}{#3}}}
-\NewDocumentCommand{\Map}{smm}{\Parens#1{\App{\CMap{#2}}{#3}}}
+\NewDocumentCommand{\MapT}{smm}{\Parens#1{\App{\CMap{#2}}{#3}}}
 \NewDocumentCommand{\CMap}{sm}{\Parens#1{\App{\MAP}{#2}}}
 \NewDocumentCommand{\FLATMAP}{}{\Term{flatmap}}
 \NewDocumentCommand{\Flatmap}{smm}{\Parens#1{\App{\App\FLATMAP{#2}}{#3}}}

@@ -32,12 +32,12 @@ what we know about this change equivalence.
 Using this relation, we can state a correct version of
 \cref{thm:deriv-nil}:
 
-\begin{lemma}[Behavior of derivatives on $\NIL$]
+\begin{lemma}[Behavior of derivatives on $\NILC$]
   \label{thm:deriv-nil-2}
   Given change structures $\ChangeStruct{A}$ and
   $\ChangeStruct{B}$, a function $f \in A \to B$, an element $a$
   of $A$, and the derivative $f'$ of $f$, we have
-  $\App{\App{f'}{a}}{\Nil{a}} \Doe \Nil{\App* f a}$.
+  $\App{\App{f'}{a}}{\NilC{a}} \Doe \NilC{\App* f a}$.
 \end{lemma}
 
 Moreover, we have a number of lemmas about delta-observational
@@ -56,8 +56,8 @@ equivalence.
   that complement \cref{def:update-diff}.
 
 \begin{align*}
-\Update x \D{x} = x &\Leftrightarrow \D{x} \Doe \Nil{x}\\
-\Diff x x &\Doe \Nil {x}\\
+\Update x \D{x} = x &\Leftrightarrow \D{x} \Doe \NilC{x}\\
+\Diff x x &\Doe \NilC {x}\\
 \Diff {\Update*{x}{\D{x}}} x &\Doe \D{x}
 \end{align*}
 \end{lemma}
@@ -87,7 +87,7 @@ precise and proving it are efforts left for future work.
 \begin{lemma}[Derivatives are unique up to d.o.e.]
   If two function changes $\D{f}_1, \D{f}_2$ are derivatives for
   $f$, then they're d.o.e. to each other and to $f$'s nil change:
-  $\D{f}_1 \Doe \Nil{f} \Doe \D{f}_2$.
+  $\D{f}_1 \Doe \NilC{f} \Doe \D{f}_2$.
 \end{lemma}
 We only have such an uniqueness theorem up to d.o.e., not to
 standard equality, since multiple d.o.e. changes can be
