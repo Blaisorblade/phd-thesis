@@ -1,1 +1,2 @@
-%include lhs2TeX.fmt
+%include polycode.fmt
+%include forall.fmt

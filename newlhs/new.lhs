@@ -1,20 +1,3 @@
-\documentclass{book}
-
-\usepackage{natbib}
-\usepackage{comment}
-\bibliographystyle{abbrvnat}
-\input{packages}
-\input{macros}
-\usepackage{amsthm}
-\usepackage{cleveref}
-
-\theoremstyle{definition}
-% http://tex.stackexchange.com/a/67251
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{definition}[theorem]{Definition}
-
 %include polycode.fmt
 %include forall.fmt
 
@@ -60,7 +43,6 @@
 
 %format Dt = "\Delta"
 %format DV = "\Delta V"
-\begin{document}
 
 \chapter{A theory of changes}
 
@@ -543,5 +525,3 @@ derApplyDFun1 (P _f _env) (DP (Replace newF) newEnv) = oreplace (newF newEnv)
 \end{code}
 
 This is enabled by defunctionalizing both base functions and changes.
-\bibliography{Bibs/DB,Bibs/ProgLang,Bibs/SoftEng,Bibs/own}
-\end{document}
