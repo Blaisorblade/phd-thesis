@@ -13,9 +13,8 @@
 # If you suspect stale build products, then `make fresh`.
 
 # Name of the main build product.
-# XXX add underscore
-PAPERNAME = thesis-main
-PDF_NAME=$(PAPERNAME).pdf
+PAPER_NAME = thesis-main
+PDF_NAME=$(PAPER_NAME).pdf
 # Sources that will be watched for changes.
 sources=$(wildcard *.tex) $(wildcard Bibs/*.bib)
 INTERM_PRODUCTS=newlhs/new.tex mylhs2tex.sty
@@ -44,8 +43,8 @@ mylhs2tex.sty: mylhs2tex.lhs
 # Remove lhs2TeX and LaTeX build products.
 clean:
 	rm -f \
-	$(PAPERNAME).aux $(PAPERNAME).bbl $(PAPERNAME).blg $(PAPERNAME).log \
-	$(PAPERNAME).pdf $(PAPERNAME).ptb $(PAPERNAME).toc $(INTERM_PRODUCTS)
+	$(PAPER_NAME).aux $(PAPER_NAME).bbl $(PAPER_NAME).blg $(PAPER_NAME).log \
+	$(PAPER_NAME).pdf $(PAPER_NAME).ptb $(PAPER_NAME).toc $(INTERM_PRODUCTS)
 
 fresh:
 	make clean
