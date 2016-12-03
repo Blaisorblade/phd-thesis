@@ -294,50 +294,48 @@ require then changes to be simply equivalent; we define two changes to be
 equivalent if they have the same source and the same destination.
 \pg{Show that this is an equivalence relation.}
 
+\pg{Insert addendum on change equivalence from paper.}
 \section{Relaxing the definition}
 \subsection{Example: monoid changes}
 If we stop requiring |odiff|, then suddenly we can build the construction of
 change structures out of groups to build change structures out of monoids.
 
 \pg{Resume!}
-%%%
-%%% XXX Integrate properly in rest of document. Will be possible.
-%%%
 
-\chapter{Incrementalizing programs}
+% \chapter{Incrementalizing programs}
 
-\chapter{Incrementalizing primitives}
-\section{A generalized group fold}
-\pg{Status: very tentative}
-We have discussed how groups can induce change structures in one way (with
-change type |da| equal to base type |a| and with the support of the group).%
-\footnote{Technically, to consider a group on programs, we need to use groups in
-  the syntactic category of types and programs.}
+% \chapter{Incrementalizing primitives}
+% \section{A generalized group fold}
+% \pg{Status: very tentative}
+% We have discussed how groups can induce change structures in one way (with
+% change type |da| equal to base type |a| and with the support of the group).%
+% \footnote{Technically, to consider a group on programs, we need to use groups in
+%   the syntactic category of types and programs.}
 
-A more general way takes a group uses a base type |a|, a group |G = (da, +, -,
-e)|, and a function |`oplus` : a -> da -> a| and defines a change structure
-where:
-\begin{itemize}
-\item the change type is constantly |da| for all elements of |a|;
-\item the associative change composition operation |`ocompose` : da -> da -> da|
-  is given by the group operation |+|;
-\item the nil change is the neutral group element |e|;
-\item change application is given by |`oplus`|.
-\end{itemize}
+% A more general way takes a group uses a base type |a|, a group |G = (da, +, -,
+% e)|, and a function |`oplus` : a -> da -> a| and defines a change structure
+% where:
+% \begin{itemize}
+% \item the change type is constantly |da| for all elements of |a|;
+% \item the associative change composition operation |`ocompose` : da -> da -> da|
+%   is given by the group operation |+|;
+% \item the nil change is the neutral group element |e|;
+% \item change application is given by |`oplus`|.
+% \end{itemize}
 
-In such a change structure we obtain a few peculiar extra members:
-\begin{itemize}
-\item the unary group inverse operation |-| doubles as a change negation
-  operation, such that |dx `ocompose` (- dx) = nil|.
-\end{itemize}
+% In such a change structure we obtain a few peculiar extra members:
+% \begin{itemize}
+% \item the unary group inverse operation |-| doubles as a change negation
+%   operation, such that |dx `ocompose` (- dx) = nil|.
+% \end{itemize}
 
-We can additionally require an operation |elLift: A -> DA| lifting elements to changes.
+% We can additionally require an operation |elLift: A -> DA| lifting elements to changes.
 
-Given such a change structure, we can define a \emph{group fold} over a
-collection type constructor |T|: |groupFold: (Group da, ChangeStruct a da) => (a
--> da) -> T a -> da|. Such an operation would generalize the one used by
-\citet{CaiEtAl2014ILC}, dropping the requirement that |a = da|. Thanks to change negation, a
-derivative |dgroupFold| could react to the removal of collection elements.
+% Given such a change structure, we can define a \emph{group fold} over a
+% collection type constructor |T|: |groupFold: (Group da, ChangeStruct a da) => (a
+% -> da) -> T a -> da|. Such an operation would generalize the one used by
+% \citet{CaiEtAl2014ILC}, dropping the requirement that |a = da|. Thanks to change negation, a
+% derivative |dgroupFold| could react to the removal of collection elements.
 
 \chapter{Incrementalizing more programs}
 \pg{Only a sketch for now}
