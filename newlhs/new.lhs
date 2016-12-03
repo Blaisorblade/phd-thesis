@@ -115,7 +115,7 @@ distinct sets of values and changes. Hence we give the following definition.
   \label{def:change-struct-bad-1}
   A change structure over a set |V| is a tuple |(V, DV, `oplus`, `ominus`)|
   where
-  \begin{enumerate}
+  \begin{subdefinition}
   \item |V| is the set of values;
   \item |DV| is the set of changes;
   \item |`oplus`| is a function of type |V -> DV -> V|;
@@ -124,7 +124,7 @@ distinct sets of values and changes. Hence we give the following definition.
     \label{def:update-diff-bad-1}
   \item all |v `elem` V, dv `elem` DV| satisfy |(v `oplus` dv) `ominus` v = dv|.
     \label{def:diff-update-bad-1}
-  \end{enumerate}
+  \end{subdefinition}
 \end{definition}
 
 Each group induces a change structure where values and changes are represented
@@ -189,10 +189,9 @@ changes |DV|, for each value |v \in V| we have a set of changes |Dt v|.
 \pg{Make sure that we've stated our metalanguage is type theory.}
 \begin{definition}[Change structures, second version]
   \label{def:change-struct-bad-2}
-  \pg{Use subdefinition to allow citations, here and before.}
   A change structure over a set |V| is a tuple |(V, Dt, `oplus`, `ominus`)|
   where
-  \begin{enumerate}
+  \begin{subdefinition}
   \item |V| is the set of values;
   \item |Dt| is a family of sets of changes, indexed by |V|; that is, for each
     |v `elem` V|, |Dt v| is a set, called the \emph{change set} of |v|;
@@ -202,7 +201,7 @@ changes |DV|, for each value |v \in V| we have a set of changes |Dt v|.
     \label{def:update-diff-bad-2}
   \item all |v `elem` V, dv `elem` Dt v| satisfy |(v `oplus` dv) `ominus` v = dv|.
     \label{def:diff-update-bad-2}
-  \end{enumerate}
+  \end{subdefinition}
 \end{definition}
 
 This definition is flexible enough to allow defining a change structure for

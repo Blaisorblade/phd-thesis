@@ -19,7 +19,10 @@
 % http://tex.stackexchange.com/a/67251
 \theoremstyle{definition}
 \input{pldi14/QED}
-\newtheorem{theorem}{Theorem}[section]
+\newtheorem{theorem}{Theorem}
+% http://tex.stackexchange.com/a/45358/1340
+% \numberwithin{section}{chapter} % From AMS Author FAQ (http://www.ams.org/faq?class_id=561), makes no difference?
+\numberwithin{theorem}{section}
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{definition}[theorem]{Definition}
@@ -35,16 +38,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newlist{subdefinition}{enumerate}{1}
-\setlist*[subdefinition]{label=(\alph*), ref=\arabic{section}.\arabic{theorem}\alph*}
+\setlist*[subdefinition]{label=(\alph*), ref=\arabic{chapter}.\arabic{section}.\arabic{theorem}\alph*}
 \crefname{subdefinitioni}{Property}{Properties}
 \Crefname{subdefinitioni}{Property}{Properties}
 
 \newlist{subparameter}{enumerate}{1}
-\setlist*[subparameter]{label=(\alph*), ref=\arabic{section}.\arabic{theorem}\alph*}
+\setlist*[subparameter]{label=(\alph*), ref=\arabic{chapter}.\arabic{section}.\arabic{theorem}\alph*}
 \crefname{subparameteri}{Plugin Requirement}{Plugin Requirements}
 \Crefname{subparameteri}{Plugin Requirement}{Plugin Requirements}
 
 \newlist{subtheorem}{enumerate}{1}
-\setlist*[subtheorem]{label=(\alph*), ref=\arabic{section}.\arabic{theorem}\alph*}
+\setlist*[subtheorem]{label=(\alph*), ref=\arabic{chapter}.\arabic{section}.\arabic{theorem}\alph*}
 \crefname{subtheoremi}{Theorem}{Theorems}
 \Crefname{subtheoremi}{Theorem}{Theorems}
