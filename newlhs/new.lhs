@@ -13,6 +13,8 @@
 %format `ocompose` = "\circledcirc "
 %format ocompose = "(\circledcirc)"
 
+%format `doe` = "\Doe"
+
 %format `such` = "\mid"
 %format ^ = " "
 %format f0
@@ -240,7 +242,7 @@ operations that map a change to its \emph{source} |src: DV -> V|, and its
 We can also define |`oplus`| in terms of |dst|, as |v `oplus` dv = dst dv|,
 hence turning |`oplus`| into a derived operation.
 
-\paragraph{From change equality to change equivalence}
+\subsection{From change equality to change equivalence}
 Our new definition of change structures in \cref{def:change-struct-bad-2} is
 still arguably too restrictive for some scenarios:
 \cref{def:diff-update-bad-2} asks for |dv| to be equal to |(v `oplus` dv)
@@ -290,11 +292,72 @@ absurd.
 
 Instead of requiring changes to be equal in \cref{def:diff-update-bad-2}, we
 require then changes to be simply equivalent; we define two changes to be
-equivalent if they have the same source and the same destination.
-\pg{Show that this is an equivalence relation.}
+equivalent if they have the same source and the same destination. In other
+words, if we have two changes |dv1, dv2|, valid for |v|, that is |dv1, dv2: Dt
+v|, then they are equivalent |dv1 `doe` dv2| if and only if |v `oplus` dv1 = v
+`oplus` dv2|.
 
-\pg{Insert addendum on change equivalence from paper.}
-\section{Relaxing the definition}
+Maybe surprisingly, if we replace change equality with change equivalence in
+\cref{def:diff-update-bad-2}, we get a corollary of the rest of the definition!
+
+Indeed, \cref{def:diff-update-bad-2} becomes |(v `oplus` dv) `ominus` v `doe`
+dv|, which we can prove as follows.
+\begin{lemma}
+  \label{def:diff-update-lemma-bad-2}
+  Given a change structure |(V, Dt, `oplus`, `ominus`)| satisfying definition \cref{def:change-struct-bad-2}, but not necessarily \cref{def:diff-update-bad-2}, we can prove for any |v: V| and |dv : Dt v| that
+  |(v `oplus` dv) `ominus` v `doe` dv|.
+\end{lemma}
+\begin{proof}
+Since both sides are changes for |v|, the thesis is equivalent to |v `oplus` ((v
+`oplus` dv) `ominus` v) = v `oplus` dv|.
+
+To prove our thesis, we remember that thanks to \cref{def:update-diff-bad-2},
+for any |v1, v2 : V| we have |v1 `oplus` (v2 `ominus` v1) = v2|. We can take |v1
+= v|, |v2 = v `oplus` dv| and obtain |v `oplus` ((v `oplus` dv) `ominus` v) = v
+`oplus` dv|, which is exactly our thesis.
+\end{proof}
+
+Therefore we can drop \cref{def:diff-update-bad-2} from the definition, obtaining the following definitions and lemma:
+\begin{definition}[Change structures]
+  \label{def:change-struct}
+  A change structure over a set |V| is a tuple |(V, Dt, `oplus`, `ominus`)|
+  where
+  \begin{subdefinition}
+  \item |V| is the set of values;
+  \item |Dt| is a family of sets of changes, indexed by |V|; that is, for each
+    |v `elem` V|, |Dt v| is a set, called the \emph{change set} of |v|;
+  \item |`oplus`| is a function of type |(v : V) -> Dt v -> V|;
+  \item |`ominus`| is a function of type |V -> (v1 : V) -> Dt v1|;
+  \item all |v1, v2 `elem` V| satisfy |v1 `oplus` (v2 `ominus` v1) = v2|.
+    \label{def:update-diff}
+  \end{subdefinition}
+\end{definition}
+
+\begin{definition}[Delta-observational equivalence]
+  Given a change structure $\ChangeStruct{V}$, a value $v \in V$,
+  and two changes $\D v_1, \D v_2 \in \Change{v}$, if and only if
+  $\Update{v}{\D v_1} = \Update{v}{\D v_2}$ we say that $\D v_1$
+  is delta-observationally equivalent (d.o.e.) to $\D v_2$, and
+  we write $\D v_1 \Doe \D v_2$.
+\end{definition}
+
+\begin{lemma}
+  \label{def:diff-update-lemma}
+  Given a change structure |(V, Dt, `oplus`, `ominus`)| satisfying definition
+  \cref{def:change-struct}, we can prove for any |v: V| and |dv : Dt v| that |(v
+  `oplus` dv) `ominus` v `doe` dv|.
+\end{lemma}
+\begin{proof}
+  The same as in \cref{def:diff-update-lemma-bad-2}.
+\end{proof}
+
+\pg{Show that this is an equivalence relation by incorporating paper appendix.}
+
+\section{Relaxing the definition: removing |`ominus`|}
+\pg{Maybe move to a subsequent chapter?}
+It is often useful to consider variants of the original definition with fewer
+operations.
+
 \subsection{Example: monoid changes}
 If we stop requiring |odiff|, then suddenly we can build the construction of
 change structures out of groups to build change structures out of monoids.
