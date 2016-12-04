@@ -1,4 +1,7 @@
 % Emacs, this is -*- latex -*-!
+%include polycode.fmt
+%include changes.fmt
+
 %\section{Changes as First-Class Values}
 \section{A theory of changes}
 \label{sec:1st-order-changes}

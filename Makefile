@@ -16,8 +16,10 @@
 PAPER_NAME = thesis-main
 PDF_NAME=$(PAPER_NAME).pdf
 # Sources that will be watched for changes.
-sources=$(shell find . -name '*.tex') $(wildcard Bibs/*.bib) newlhs/new.lhs
-INTERM_PRODUCTS=newlhs/new.tex mylhs2tex.sty
+lhsSources=newlhs/new.lhs pldi14/sec-change-theory.lhs
+lhsCompiled=newlhs/new.tex pldi14/sec-change-theory.tex
+sources=$(shell find . -name '*.tex') $(wildcard Bibs/*.bib) $(lhsSources)
+INTERM_PRODUCTS=mylhs2tex.sty $(lhsCompiled)
 
 all:	open
 OPEN = ./open.sh
