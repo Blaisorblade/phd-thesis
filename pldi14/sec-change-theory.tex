@@ -119,7 +119,11 @@ The following definition sums up the discussion so far:
   \begin{subdefinition}
   \item $V$ is a set, called the \emph{base set}.
   \item Given $v \in V$, $\Change{v}$ is a set, called the \emph{change set}.
-  \item Given $v \in V$ and $\D v \in \Change{v}$, $\Apply{\D v}{v} \in V$.
+  \item Given $v \in V$ and $\D v \in \Change{v}$,
+    $\Apply{\D v}{v} \in V$. We also call $v$ the \emph{base
+      value} of the change, or its \emph{source}; we call
+    $\Apply{\D v}{v}$ the \emph{updated value} of the change, or
+    its \emph{destination}/\emph{target}.
     \label{def:update}
   \item Given $u, v \in V$, $\Diff{u}{v} \in \Change{v}$.
     \label{def:diff}
@@ -128,13 +132,6 @@ The following definition sums up the discussion so far:
     \label{def:update-diff}
   \end{subdefinition}
 \end{definition}
-
-One might expect a further assumption that
-$\Diff{\Apply*{\D v}{v}}{v} = \D v$. While it does hold
-for the change structure of $\mathbb{N}$, it is not needed in general.
-This means that multiple changes can represent the difference between
-the same two base values. Throughout our theory, we only discuss equality of
-base values, not of changes.
 
 \paragraph{Notation}
 We overload operators $\CHANGE$, $\DIFF$ and $\UPDATE$ to refer
@@ -146,6 +143,60 @@ $\Update{\Update{v}{dv_1}}{dv_2}$ means $\Update{\Update*{v}{dv_1}}{dv_2}$.
 We assign precedence to function application over
 $\UPDATE$ and $\DIFF$, that is, $\Update{\App{f}{a}}{\App{\App{g}{a}}{\D a}}$ means
 $\Update{\App*{f}{a}}{\App*{\App{g}{a}}{\D a}}$.
+
+\paragraph{Change equivalence}
+One might expect, in the definition of change structures
+(\cref{def:change-struct}), the additional assumption that
+$\Diff{\Apply*{\D v}{v}}{v} = \D v$. While this assumption holds
+for the change structure of $\mathbb{N}$, there are sensible
+examples of change structures where this assumption is not valid.
+In fact, we can have multiple changes between the same source and
+target. \pg{Add example on lists.} Therefore, we define an
+equivalence among such changes that we call \emph{change
+  equivalence}. When it is clear we are talking about changes, we
+will also say that two changes are equivalent to mean that they
+are change-equivalent. The definition of change equivalence is as
+follows:
+
+\begin{definition}[Change equivalence]
+  Given a change structure $\ChangeStruct{V}$, a value $v \in V$,
+  and two changes $\D v_1, \D v_2$ having $v$ as source, that is,
+  such that $\D v_1, \D v_2\in \Change{v}$, we say that $\D v_1$
+  is change-equivalent to $\D v_2$ and write
+  $\D v_1 \Doe \D v_2$, if and only if these changes share,
+  beyond the source $v$, also their target, that is, if and only
+  if $\Update{v}{\D v_1} = \Update{v}{\D v_2}$.
+\end{definition}
+
+\begin{lemma}
+  \label{def:diff-update-lemma}
+  Given a change structure |chs(V) = (V, Dt, `oplus`, `ominus`)|,
+  for any base value |v `elem` V| and for any change |dv| valid
+  for |v| (that is, |dv `elem` Dt v| \pg{readd ^ to Dt}), we have |(v `oplus` dv)
+  `ominus` v `doe` dv|.
+\end{lemma}
+\begin{proof}
+Since both sides are changes for |v|, the thesis is equivalent to |v `oplus` ((v
+`oplus` dv) `ominus` v) = v `oplus` dv|.
+
+To prove our thesis, we remember that thanks to \cref{def:update-diff},
+for any |v1, v2 : V| we have |v1 `oplus` (v2 `ominus` v1) = v2|. We can take |v1
+= v|, |v2 = v `oplus` dv| and obtain |v `oplus` ((v `oplus` dv) `ominus` v) = v
+`oplus` dv|, which is exactly our thesis.
+\end{proof}
+
+Change equivalence is indeed an equivalence relation, as stated
+in the following lemma:
+\begin{lemma}[Change equivalence is indeed an equivalence relation]
+  For any change structure |chs(V)| and for any base value |v
+  `elem` V|, change equivalence is an equivalence relation
+  (reflexive, symmetric, transitive) among elements of |Dt v|.
+\end{lemma}
+
+As we will see, each valid operations in our theory will respect
+change equivalence: equivalent changes will be mapped to
+equivalent changes or to equal values.
+\pg{Add example: however, different changes might have different values.}
 
 \begin{examples}
 We demonstrate a change structure on \emph{bags with signed
@@ -220,8 +271,34 @@ integers, namely $\ChangeStruct{\mathbb{Z}} = (\mathbb{Z},
 \Lam*{v} {\mathbb{Z}}, +, -)$.
 \end{examples}
 
-\paragraph{Nil changes and derivatives}
-A particularly important change is the \emph{nil change} of a value:
+\subsubsection{Derivatives}
+After defining change structures, we can define more formally
+derivatives of functions, using a variant of
+\cref{eq:correctness}.
+
+\begin{definition}[Derivatives]
+  \label{def:derivatives}
+  Given change structures $\ChangeStruct{A}$ and $\ChangeStruct{B}$ and a function $f \in A \to
+  B$ on the change sets of these change structures, we call a binary function $f'$ a \emph{derivative} of $f$ if
+  for all values $a \in A$ and corresponding changes $\D a \in
+  \Change[A]{a}$,
+  \[\App{f}{\Apply*{\D a}{a}} = \Apply{\App{\App{f'}{a}}{\D a}}{\App{f}{a}}\text{.}\qed\]
+\end{definition}
+
+Here we are defining derivatives of mathematical functions, but
+we will use them to define the meaning of derivatives of
+programs. Intuitively, once we define a suitable set-theoretic
+denotational semantics for programs, and a program transformation
+that takes a program |f| to its derivative |f'|, we will ensure
+that our semantics takes a program derivative |[[f']]| to a
+derivative of the semantics of the base program |[[f]]|.
+
+\pg{Point out here that derivatives respect change equivalence.}
+\subsubsection{Nil changes and derivatives}
+A change can have equal source and target, in which case we call
+it a \emph{nil change}. We use $\DIFF$ to associate, to each
+value, a distinguished nil change.
+\pg{Rewrite}
 \begin{definition}[Nil change]
   \label{def:nil-change}
   Given a change structure $\ChangeStruct{V}$ and a value $v \in V$, the change
@@ -230,41 +307,26 @@ A particularly important change is the \emph{nil change} of a value:
     \NilC{v} = \Diff{v}{v} \qed
   \]
 \end{definition}
-The nil change for a value does indeed not change it.
+A nil change for a value does indeed not change it.
 \begin{lemma}[Behavior of $\NILC$]
   \label{thm:update-nil}
   Given a change structure $\ChangeStruct{V}$ and a value $v \in V$,
   $\Apply{\NilC{v}}{v} = v$.
 \end{lemma}
 
-\begin{optionalproof}
+\begin{proof}
 Follows from \cref{def:update-diff,def:nil-change}.
-\end{optionalproof}
-
-\pg{Maybe should move this before nil changes?}
-After defining change structures, we can restate the definition of derivatives from \cref{eq:correctness}.
-
-\begin{definition}[Derivatives]
-  \label{def:derivatives}
-  Given change structures $\ChangeStruct{A}$ and $\ChangeStruct{B}$ and a function $f \in A \to
-  B$ on the change sets of these change structures, we call a binary function $f'$ the \emph{derivative} of $f$ if
-  for all values $a \in A$ and corresponding changes $\D a \in
-  \Change[A]{a}$,
-  \[\App{f}{\Apply*{\D a}{a}} = \Apply{\App{\App{f'}{a}}{\D a}}{\App{f}{a}}\text{.}\qed\]
-\end{definition}
+\end{proof}
 
 Applying a derivative to a value and its nil change gives a nil
-change.%
-\footnote{Post-print note: There's a small technical mistake in
-  the following lemma. See \cref{sec:change-eq} for a corrected
-  statement.}
+change.
 %
 \begin{lemma}[Behavior of derivatives on $\NILC$]
   \label{thm:deriv-nil}
   Given change structures $\ChangeStruct{A}$ and
   $\ChangeStruct{B}$, a function $f \in A \to B$, an element $a$
   of $A$, and the derivative $f'$ of $f$, we have
-  $\App{\App{f'}{a}}{\NilC{a}} = \NilC{\App* f a}$.
+  $\App{\App{f'}{a}}{\NilC{a}} \Doe \NilC{\App* f a}$.
 \end{lemma}
 
 \begin{examples}
