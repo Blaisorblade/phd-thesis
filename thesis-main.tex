@@ -55,11 +55,11 @@ optimization and (in quite a few cases) incremental update of query results
 
 However, often queries are executed on collections of data that are not stored
 in a database, but in collections manipulated by some program. Moving in-memory
-data to RDBMSs, typically does not improve
+data to RDBMSs typically does not improve
 performance~\citep{Stonebraker07,Rompf2015functional}, and reusing database
 optimizers is not trivial.
 
-Moreover, many programming languages are far more expressive than RBDMSs.
+Moreover, many programming languages are far more expressive than RDBMSs.
 Typical RDBMS can only manipulate SQL relations, that is multisets (or bags) of
 tuples (or sometimes sets of tuples, after duplicate elimination). Typical
 programming languages (PL) support also arbitrarily nested lists and maps of
@@ -87,8 +87,7 @@ queries and executing them incrementally.
 We consider the problem for functional programming languages such as Haskell or
 Scala, and we consider collection queries written using the APIs of their
 collection libraries, which we treat as an embedded domain-specific language (EDSL). Such
-APIs (or DSLs) contain powerful operators on collections such as \texttt{map}\pg{update
-  style to be uniform with the one from lhs2TeX}, which are higher-order, that
+APIs (or DSLs) contain powerful operators on collections such as $\Varid{map}$, which are higher-order, that
 is they take as arguments arbitrary functions in the host language that we must
 also handle.
 
@@ -103,7 +102,7 @@ work of the optimizer at the same time.
 
 In particular, this thesis is divided into two parts:
 \begin{itemize}
-\item we first describe, in Chapter 2, work on optimizing collection queries by static program transformation.
+\item we first describe, in \cref{sec:ch-aosd13}, work on optimizing collection queries by static program transformation.
 \item in the remaining chapters, we describe work on incrementalizing programs
   by static program transformation. This thesis presents the first approach that
   handles higher-order programs by using program transformation; hence, while
@@ -149,6 +148,7 @@ In particular, this thesis is divided into two parts:
 % allow domain-specific support from the start.
 
 \chapter{Reifying collection queries}
+\label{sec:ch-aosd13}
 
 \input{aosd13/graphs/evalResLos}
 \input{aosd13/paperBody}

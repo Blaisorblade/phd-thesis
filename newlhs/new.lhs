@@ -53,6 +53,7 @@ In this chapter, we present and motivate a mathematical theory of \emph{changes}
 \emph{derivatives}.
 This theory is more general than other work in the field because changes
 are first-class entities and they are distinct from base values.
+\pg{Add motivating application.}
 
 This theory introduces change structures as an abstraction of operations
 required on changes; while we introduce this abstraction as a mathematical one,
@@ -61,7 +62,8 @@ we anticipate using this abstraction also in code. \pg{Clarify this
 
 We introduced the first version of this theory in a previous paper
 \citep{CaiEtAl2014ILC}, but in this chapter we will elaborate more on its
-motivation and design, and present later evolutions of this definition.
+motivation and design. Moreover, we will present later evolutions of this
+definition, which were needed in further applications.
 
 \paragraph{Conventions}
 Unless specified otherwise, our chapter is not concerned with the syntax of an
@@ -242,6 +244,8 @@ operations that map a change to its \emph{source} |src: DV -> V|, and its
 We can also define |`oplus`| in terms of |dst|, as |v `oplus` dv = dst dv|,
 hence turning |`oplus`| into a derived operation.
 
+\pg{What's the point? Does this belong here?}
+
 \subsection{From change equality to change equivalence}
 Our new definition of change structures in \cref{def:change-struct-bad-2} is
 still arguably too restrictive for some scenarios:
@@ -319,7 +323,8 @@ for any |v1, v2 : V| we have |v1 `oplus` (v2 `ominus` v1) = v2|. We can take |v1
 
 Therefore we can drop \cref{def:diff-update-bad-2} from the definition, obtaining the following definitions and lemma:
 \begin{definition}[Change structures]
-  \label{def:change-struct}
+  % -intro distinguishes this label from the one in the copy of the paper.
+  \label{def:change-struct-intro}
   A change structure over a set |V| is a tuple |(V, Dt, `oplus`, `ominus`)|
   where
   \begin{subdefinition}
@@ -329,7 +334,7 @@ Therefore we can drop \cref{def:diff-update-bad-2} from the definition, obtainin
   \item |`oplus`| is a function of type |(v : V) -> Dt v -> V|;
   \item |`ominus`| is a function of type |V -> (v1 : V) -> Dt v1|;
   \item all |v1, v2 `elem` V| satisfy |v1 `oplus` (v2 `ominus` v1) = v2|.
-    \label{def:update-diff}
+    \label{def:update-diff-intro}
   \end{subdefinition}
 \end{definition}
 
@@ -344,7 +349,7 @@ Therefore we can drop \cref{def:diff-update-bad-2} from the definition, obtainin
 \begin{lemma}
   \label{def:diff-update-lemma}
   Given a change structure |(V, Dt, `oplus`, `ominus`)| satisfying definition
-  \cref{def:change-struct}, we can prove for any |v: V| and |dv : Dt v| that |(v
+  \cref{def:change-struct-intro}, we can prove for any |v: V| and |dv : Dt v| that |(v
   `oplus` dv) `ominus` v `doe` dv|.
 \end{lemma}
 \begin{proof}
