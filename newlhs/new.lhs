@@ -17,6 +17,7 @@
 
 %format `such` = "\mid"
 %format ^ = " "
+%format ^^ = "\;"
 %format f0
 %format f1
 %format a0
@@ -188,7 +189,7 @@ excluding inputs where it would fail, making it a total function. We propose
 such an alternative definition. To ensure |v `oplus` dv| succeeds, we require
 |dv| to be a valid change for |v|. Different |v| in |V| are associated to
 different sets of valid changes; Hence, instead of having a single set of
-changes |DV|, for each value |v \in V| we have a set of changes |Dt v|.
+changes |DV|, for each value |v `elem` V| we have a set of changes |Dt ^ v|.
 
 \pg{Make sure that we've stated our metalanguage is type theory.}
 \begin{definition}[Change structures, second version]
@@ -198,24 +199,24 @@ changes |DV|, for each value |v \in V| we have a set of changes |Dt v|.
   \begin{subdefinition}
   \item |V| is the set of values;
   \item |Dt| is a family of sets of changes, indexed by |V|; that is, for each
-    |v `elem` V|, |Dt v| is a set, called the \emph{change set} of |v|;
-  \item |`oplus`| is a function of type |(v : V) -> Dt v -> V|;
-  \item |`ominus`| is a function of type |V -> (v1 : V) -> Dt v1|;
+    |v `elem` V|, |Dt ^ v| is a set, called the \emph{change set} of |v|;
+  \item |`oplus`| is a function of type |(v : V) -> Dt ^ v -> V|;
+  \item |`ominus`| is a function of type |V -> (v1 : V) -> Dt ^ v1|;
   \item all |v1, v2 `elem` V| satisfy |v1 `oplus` (v2 `ominus` v1) = v2|.
     \label{def:update-diff-bad-2}
-  \item all |v `elem` V, dv `elem` Dt v| satisfy |(v `oplus` dv) `ominus` v = dv|.
+  \item all |v `elem` V, dv `elem` Dt ^ v| satisfy |(v `oplus` dv) `ominus` v = dv|.
     \label{def:diff-update-bad-2}
   \end{subdefinition}
 \end{definition}
 
 This definition is flexible enough to allow defining a change structure for
-naturals; we simply set |V = Nat, Dt v = {dv `such` v + dv >= 0}, oplus =
+naturals; we simply set |V = Nat, Dt ^ v = {dv `such` v + dv >= 0}, oplus =
 (+), ominus = (-)|.
 
 We could formalize an equivalent definition by having a single set |DV| and a
 relation |R| between values |v `elem` V| and changes |dv `elem` DV| that are
-\emph{valid} for `v`. From such a validity relation, we can define |Dt v| as
-|{dv `such` R(v, dv)}|.
+\emph{valid} for |v|. From such a validity relation, we can define |Dt ^ v| as
+|{dv `such` R(v, dv)}|. \pg{We elaborate on this later.}
 
 \paragraph{Change structures as graphs}
 Now that change sets are parameterized over base values, we can introduce a
@@ -237,8 +238,8 @@ dv) = v `oplus` dv|, |v2 `ominus2` v1 = (v1, v2 `ominus` v1)|.
 \pg{Add some drawing.}
 
 Once change sets are disjoint, we can define a combined set of changes |DV| and
-operations that map a change to its \emph{source} |src: DV -> V|, and its
-\emph{destination} |dst: DV -> V|; if |dv `elem` Dt v|, then |src dv = v| and
+operations |src, dst : DV -> V| that map a change to its \emph{source} and its
+\emph{destination}: If |dv `elem` Dt v|, then |src dv = v| and
 |dst dv = v `oplus` dv|.
 
 We can also define |`oplus`| in terms of |dst|, as |v `oplus` dv = dst dv|,
@@ -515,21 +516,21 @@ polymorphism.
 Let's rememeber our basic interface to change structures:
 \begin{code}
 class ChangeStruct t where
-  type Dt t = r | r -> t
-  oplus :: t -> Dt t -> t
-  oreplace :: t -> Dt t
+  type Dt^t = r | r -> t
+  oplus :: t -> Dt^t -> t
+  oreplace :: t -> Dt^t
 
 class ChangeStruct t => OnilChangeStruct t where
   -- Proxy is used to encode explicit type application.
-  onil :: Proxy t -> Dt t
+  onil :: Proxy t -> Dt^t
 
 class ChangeStruct t => NilChangeStruct t where
-  nil :: t -> Dt t
+  nil :: t -> Dt^t
 \end{code}
 
 Let's also recall the \emph{absorption law}, |x `oplus` oreplace y = y|.
 
-Crucially, changes to type |t| are represented as type |Dt t|, and this
+Crucially, changes to type |t| are represented as type |Dt^t|, and this
 interface does \emph{not} require that change structures support a difference
 operation, or that all changes are representable.
 
@@ -555,7 +556,7 @@ ILC requires support for function changes because the environment can change.
 Hence we start by representing function changes through environment changes.
 
 \begin{code}
-data DFun1 a b = forall env . DP (Dt env) (Code env a b)
+data DFun1 a b = forall env . DP (Dt^env) (Code env a b)
 \end{code}
 
 In fact, we can also replace a function value by another one with different
@@ -566,7 +567,7 @@ associated environment, that is, simply support a replacement change.
 Next, we add support for derivatives and function changes. We can start by
 simply adding a derivative for |applyFun1|:
 \begin{code}
-applyDFun1 :: (Fun1 a b) -> (DFun1 a b) -> a -> Dt a -> Dt b
+applyDFun1 :: (Fun1 a b) -> (DFun1 a b) -> a -> Dt^a -> Dt^b
 applyDFun1 = undefined
 \end{code}
 
@@ -601,8 +602,8 @@ the base function; we can then combine that derivative with an updated
 environment. \pg{continue and clarify}
 % Why are these methods around?
 % \begin{code}
-% derPreDFun1 :: (ChangeStruct a, NilChangeStruct env) => Code env a b -> env -> Dt env -> a -> Dt a -> Dt b
-% derPostDFun1 :: (ChangeStruct a, NilChangeStruct env) => Code env a b -> env -> Dt env -> a -> Dt a -> Dt b
+% derPreDFun1 :: (ChangeStruct a, NilChangeStruct env) => Code env a b -> env -> Dt^env -> a -> Dt^a -> Dt^b
+% derPostDFun1 :: (ChangeStruct a, NilChangeStruct env) => Code env a b -> env -> Dt^env -> a -> Dt^a -> Dt^b
 % \end{code}
 
 \subsection{Replacing functions without necessarily recomputing}
@@ -617,7 +618,7 @@ is not a replacement one:
 
 \begin{code}
 derApplyDFun1 :: (ChangeStruct a, NilChangeStruct env) =>
-  Code env a b -> env -> DCode env a b -> Dt env -> a -> Dt a -> Dt b
+  Code env a b -> env -> DCode env a b -> Dt^env -> a -> Dt^a -> Dt^b
 derApplyDFun1 (P Add1 _()) (DP (Replace Add2) ()) = +1 -- As a change
 ...
 derApplyDFun1 (P _f _env) (DP (Replace newF) newEnv) = oreplace (newF newEnv)
