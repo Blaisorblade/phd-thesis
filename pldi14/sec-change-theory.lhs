@@ -175,7 +175,7 @@ follows:
   \label{def:diff-update-lemma}
   Given a change structure |chs(V) = (V, Dt, `oplus`, `ominus`)|,
   for any base value |v `elem` V| and for any change |dv| valid
-  for |v| (that is, |dv `elem` Dt v| \pg{readd ^ to Dt}), we have |(v `oplus` dv)
+  for |v| (that is, |dv `elem` Dt^v|), we have |(v `oplus` dv)
   `ominus` v `doe` dv|.
 \end{lemma}
 \begin{proof}
@@ -183,7 +183,7 @@ Since both sides are changes for |v|, the thesis is equivalent to |v `oplus` ((v
 `oplus` dv) `ominus` v) = v `oplus` dv|.
 
 To prove our thesis, we remember that thanks to \cref{def:update-diff},
-for any |v1, v2 : V| we have |v1 `oplus` (v2 `ominus` v1) = v2|. We can take |v1
+for any |v1, v2 `elem` V| we have |v1 `oplus` (v2 `ominus` v1) = v2|. We can take |v1
 = v|, |v2 = v `oplus` dv| and obtain |v `oplus` ((v `oplus` dv) `ominus` v) = v
 `oplus` dv|, which is exactly our thesis.
 \end{proof}
