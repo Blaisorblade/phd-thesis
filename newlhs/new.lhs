@@ -338,7 +338,7 @@ Therefore we can drop \cref{def:diff-update-bad-2} from the definition, obtainin
   \end{subdefinition}
 \end{definition}
 
-\begin{definition}[Delta-observational equivalence]
+\begin{definition}[Change equivalence]
   Given a change structure $\ChangeStruct{V}$, a value $v \in V$,
   and two changes $\D v_1, \D v_2 \in \Change{v}$, if and only if
   $\Update{v}{\D v_1} = \Update{v}{\D v_2}$ we say that $\D v_1$
@@ -356,9 +356,43 @@ Therefore we can drop \cref{def:diff-update-bad-2} from the definition, obtainin
   The same as in \cref{def:diff-update-lemma-bad-2}.
 \end{proof}
 
-\pg{Show that this is an equivalence relation by incorporating paper appendix.}
+Change equivalence is very well-behaved, as shown in the following lemmas.
 
-\section{Relaxing the definition: removing |`ominus`|}
+\begin{lemma}[Change equivalence is indeed an equivalence relation]
+  For any $x \in X$ with a change structure on $X$, d.o.e. is an
+  equivalence relation (reflexive, symmetric, transitive) among
+  elements of $\Change{x}$.
+\end{lemma}
+
+Moreover, all operations that our theory defines respect change equivalence.
+\pg{Introduce derivatives}
+% Once we introduce further definitions
+
+\pg{Introduce needed notation}
+\begin{lemma}[Identities using change equivalence]
+  Using d.o.e. we can state additional algebraic equivalences,
+  that complement \cref{def:update-diff}.
+
+\begin{align*}
+\Update v \D{v} = x &\Leftrightarrow \D{v} \Doe \NilC{v}\\
+\Diff v v &\Doe \NilC {v}\\
+\end{align*}
+\end{lemma}
+
+\pg{We can't yet really say programs at this point!}
+% That is, in all simple contexts that we can construct, two
+% equivalent changes will behave indistinguishably. In fact, for programs that
+% only use changes as changes (without looking at their
+% implementation details), we conjecture that d.o.e. changes are
+% observationally equivalent. However, making this conjecture
+% precise and proving it are efforts left for future work.
+
+\pg{Introduce derivatives before!}
+
+\section{Evolving change structures}
+In this section we describe variants of the basic definition of change structures.
+
+\subsection{Relaxing the definition: removing |`ominus`|}
 \pg{Maybe move to a subsequent chapter?}
 It is often useful to consider variants of the original definition with fewer
 operations.
