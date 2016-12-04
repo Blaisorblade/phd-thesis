@@ -14,6 +14,7 @@
 %format ocompose = "(\circledcirc)"
 
 %format `doe` = "\Doe"
+%format chs (v) = "\ChangeStruct{" v "}"
 
 %format `such` = "\mid"
 %format ^ = " "
@@ -118,13 +119,13 @@ As already discussed, we'll need to allow (in general)
 distinct sets of values and changes. Hence we give the following definition.
 \begin{definition}[Change structures, first version]
   \label{def:change-struct-bad-1}
-  A change structure over a set |V| is a tuple |(V, DV, `oplus`, `ominus`)|
+  A change structure over a set |V| is a tuple |chs(V) = (V, DV, `oplus`, `ominus`)|
   where
   \begin{subdefinition}
   \item |V| is the set of values;
   \item |DV| is the set of changes;
   \item |`oplus`| is a function of type |V -> DV -> V|;
-  \item |`ominus`| is a function of type |V -> V -> V|;
+  \item |`ominus`| is a function of type |V -> V -> DV|;
   \item all |v1, v2 `elem` V| satisfy |v1 `oplus` (v2 `ominus` v1) = v2|.
     \label{def:update-diff-bad-1}
   \item all |v `elem` V, dv `elem` DV| satisfy |(v `oplus` dv) `ominus` v = dv|.
@@ -194,7 +195,7 @@ changes |DV|, for each value |v `elem` V| we have a set of changes |Dt ^ v|.
 \pg{Make sure that we've stated our metalanguage is type theory.}
 \begin{definition}[Change structures, second version]
   \label{def:change-struct-bad-2}
-  A change structure over a set |V| is a tuple |(V, Dt, `oplus`, `ominus`)|
+  A change structure over a set |V| is a tuple |chs(V) = (V, Dt, `oplus`, `ominus`)|
   where
   \begin{subdefinition}
   \item |V| is the set of values;
@@ -326,7 +327,7 @@ Therefore we can drop \cref{def:diff-update-bad-2} from the definition, obtainin
 \begin{definition}[Change structures]
   % -intro distinguishes this label from the one in the copy of the paper.
   \label{def:change-struct-intro}
-  A change structure over a set |V| is a tuple |(V, Dt, `oplus`, `ominus`)|
+  A change structure over a set |V| is a tuple |chs(V) = (V, Dt, `oplus`, `ominus`)|
   where
   \begin{subdefinition}
   \item |V| is the set of values;
@@ -340,16 +341,16 @@ Therefore we can drop \cref{def:diff-update-bad-2} from the definition, obtainin
 \end{definition}
 
 \begin{definition}[Change equivalence]
-  Given a change structure $\ChangeStruct{V}$, a value $v \in V$,
-  and two changes $\D v_1, \D v_2 \in \Change{v}$, if and only if
-  $\Update{v}{\D v_1} = \Update{v}{\D v_2}$ we say that $\D v_1$
-  is delta-observationally equivalent (d.o.e.) to $\D v_2$, and
-  we write $\D v_1 \Doe \D v_2$.
+  Given a change structure $\ChangeStruct{V}$, a value $v \in V$, and two
+  changes $\D v_1, \D v_2 \in \Change{v}$, we say that $\D v_1$ is
+  \emph{change-equivalent} (or simply equivalent, when there is no ambiguity) to
+  $\D v_2$, and we write $\D v_1 \Doe \D v_2$ if and only if
+  $\Update{v}{\D v_1} = \Update{v}{\D v_2}$.
 \end{definition}
 
 \begin{lemma}
   \label{def:diff-update-lemma}
-  Given a change structure |(V, Dt, `oplus`, `ominus`)| satisfying definition
+  Given a change structure |chs(V) = (V, Dt, `oplus`, `ominus`)| satisfying definition
   \cref{def:change-struct-intro}, we can prove for any |v: V| and |dv : Dt v| that |(v
   `oplus` dv) `ominus` v `doe` dv|.
 \end{lemma}
@@ -360,7 +361,7 @@ Therefore we can drop \cref{def:diff-update-bad-2} from the definition, obtainin
 Change equivalence is very well-behaved, as shown in the following lemmas.
 
 \begin{lemma}[Change equivalence is indeed an equivalence relation]
-  For any $x \in X$ with a change structure on $X$, d.o.e. is an
+  For any $x \in X$ with a change structure on $X$, change equivalence is an
   equivalence relation (reflexive, symmetric, transitive) among
   elements of $\Change{x}$.
 \end{lemma}
@@ -371,7 +372,7 @@ Moreover, all operations that our theory defines respect change equivalence.
 
 \pg{Introduce needed notation}
 \begin{lemma}[Identities using change equivalence]
-  Using d.o.e. we can state additional algebraic equivalences,
+  Using change equivalence we can state additional algebraic equivalences,
   that complement \cref{def:update-diff}.
 
 \begin{align*}
@@ -384,7 +385,7 @@ Moreover, all operations that our theory defines respect change equivalence.
 % That is, in all simple contexts that we can construct, two
 % equivalent changes will behave indistinguishably. In fact, for programs that
 % only use changes as changes (without looking at their
-% implementation details), we conjecture that d.o.e. changes are
+% implementation details), we conjecture that equivalent changes are
 % observationally equivalent. However, making this conjecture
 % precise and proving it are efforts left for future work.
 

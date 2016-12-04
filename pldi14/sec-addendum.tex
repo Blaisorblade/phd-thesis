@@ -1,4 +1,4 @@
-\section{Addendum: change equality}
+\section{Change equivalence}
 \label{sec:change-eq}
 
 \pg{restructure}
@@ -10,23 +10,25 @@ our theory, we only discuss equality of base values, not of
 changes.''
 
 However, by that time, we had formalized in Agda the correct
-equivalence relation to use on change, that we call
-delta-observational equivalence (d.o.e.). Intuitively, two
-changes are d.o.e. if using them as changes gives the same
+equivalence relation to use on change, that we call change
+equivalence. Intuitively, two changes are
+\emph{change-equivalent} if using them as changes gives the same
 observations, as long as we only observe base values and not
 changes themselves; below we show the theorems that we have
 proved in Agda and that substantiate this intuition, at least to
-a great extent.
+a great extent. When it is clear we are talking about changes, we
+will also say that two changes are equivalent to mean that they
+are change-equivalent.
 
 In this section, we
 state the corrected version of \cref{thm:deriv-nil}, and explain
 what we know about this change equivalence.
 
-\begin{definition}[Delta-observational equivalence]
+\begin{definition}[Change equivalence]
   Given a change structure $\ChangeStruct{V}$, a value $v \in V$,
   and two changes $\D v_1, \D v_2 \in \Change{v}$, if and only if
   $\Update{v}{\D v_1} = \Update{v}{\D v_2}$ we say that $\D v_1$
-  is delta-observationally equivalent (d.o.e.) to $\D v_2$, and
+  is change-equivalent to $\D v_2$, and
   we write $\D v_1 \Doe \D v_2$.
 \end{definition}
 
@@ -41,19 +43,19 @@ Using this relation, we can state a correct version of
   $\App{\App{f'}{a}}{\NilC{a}} \Doe \NilC{\App* f a}$.
 \end{lemma}
 
-Moreover, we have a number of lemmas about delta-observational
+Moreover, we have a number of lemmas about change
 equivalence.
 
 \pg{Revise statements for clarity.}
 
-\begin{lemma}[D.o.e. is an equivalence]
-  For any $x \in X$ with a change structure on $X$, d.o.e. is an
+\begin{lemma}[Change equivalence is an equivalence]
+  For any $x \in X$ with a change structure on $X$, change equivalence is an
   equivalence relation (reflexive, symmetric, transitive) among
   elements of $\Change{x}$.
 \end{lemma}
 
-\begin{lemma}[Identities using d.o.e.]
-  Using d.o.e. we can state additional algebraic equivalences,
+\begin{lemma}[Identities using change equivalence]
+  Using change equivalence we can state additional algebraic equivalences,
   that complement \cref{def:update-diff}.
 
 \begin{align*}
@@ -63,7 +65,7 @@ equivalence.
 \end{align*}
 \end{lemma}
 
-\begin{lemma}[Function change application preserves d.o.e.]
+\begin{lemma}[Function change application preserves change equivalence]
   For each $x \in X$, with a change structure on $X$, changes
   $\D{x}_1, \D{x}_2 \in \Change{x}$, for each $f \in X \to Y$,
 with a change structure on $Y$, and changes
@@ -72,25 +74,25 @@ $\D{x}_1 \Doe \D{x}_2$ imply
 $\D{f}_1~x~\D{x}_1 \Doe \D{f}_2~x~\D{x}_2$.
 \end{lemma}
 
-That is, in all simple contexts that we can construct, two d.o.e.
+That is, in all simple contexts that we can construct, two equivalent
 changes will behave indistinguishably. In fact, for programs that
 only use changes as changes (without looking at their
-implementation details), we conjecture that d.o.e. changes are
+implementation details), we conjecture that equivalent changes are
 observationally equivalent. However, making this conjecture
 precise and proving it are efforts left for future work.
 
-\begin{lemma}[Extensionality for d.o.e.]
+\begin{lemma}[Extensionality for change equivalence]
   If two function changes $\D{f}_1, \D{f}_2$ behave equally when
   applied to arbitrary type-correct inputs $x$,
   $\D{x}_1, \D{x}_2 \in \Change{x}$, then $\D{f}_1 \Doe \D{f}_2$.
 \end{lemma}
 
-\begin{lemma}[Derivatives are unique up to d.o.e.]
+\begin{lemma}[Derivatives are unique up to change equivalence]
   If two function changes $\D{f}_1, \D{f}_2$ are derivatives for
-  $f$, then they're d.o.e. to each other and to $f$'s nil change:
+  $f$, then they're change equivalence to each other and to $f$'s nil change:
   $\D{f}_1 \Doe \NilC{f} \Doe \D{f}_2$.
 \end{lemma}
-We only have such an uniqueness theorem up to d.o.e., not to
-standard equality, since multiple d.o.e. changes can be
+We only have such an uniqueness theorem up to change equivalence, not to
+standard equality, since multiple equivalent changes can be
 different.
 % XXX continue: Transcribe lemmas from Base.Change.Equivalence

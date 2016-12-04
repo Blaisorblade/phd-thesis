@@ -14,7 +14,7 @@ A change structure on a set $V$ is given by:
   with all the changes, and a function mapping them to their source.
 \item\label{subdef:dst} A function $\Term{dst} : \GD V → V$ mapping a change to
   its destination value. If two changes share source and destination, we say
-  they are \emph{delta-observationally equivalent}, or for short,
+  they are \emph{change-equivalent}, or for short,
   \emph{equivalent}, and we write $\Doe$.
 \item\label{subdef:nil} A function $\Term{nil} : V → \GD V$ mapping a value to
   its nil change, such that $\Term{src} \cdot \Term{nil} = \Term{Id}$ and
