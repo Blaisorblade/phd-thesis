@@ -220,10 +220,13 @@ relation |R| between values |v `elem` V| and changes |dv `elem` DV| that are
 |{dv `such` R(v, dv)}|. \pg{We elaborate on this later.}
 
 \paragraph{Change structures as graphs}
+\pg{What's the point? Does this belong here? Show it later when we add other
+  operations, so we can say that changes form a category?}
+
 Now that change sets are parameterized over base values, we can introduce a
 different perspective on changes: we can regard a change structure |(V, Dt,
 `oplus`, `ominus`)| as a graph, where the set of vertices coincides with the set
-of values |V|, and a change |dv `elem` Dt v| correspond to an edge from |v| to
+of values |V|, and a change |dv `elem` Dt ^ v| correspond to an edge from |v| to
 |v `oplus` dv|.
 
 %format Dt'
@@ -233,20 +236,20 @@ of values |V|, and a change |dv `elem` Dt v| correspond to an edge from |v| to
 This requires change sets to be disjoint. However, given an arbitrary change
 structure |(V, Dt, `oplus`, `ominus`)|, we can always construct another change
 structure with disjoint change sets |(V, Dt', `oplus2`, `ominus2`)|, where |Dt'
-v = (v, Dt v)|, that is, where changes contain their base value. |v `oplus2` (v,
+v = (v, Dt ^ v)|, that is, where changes contain their base value. |v `oplus2` (v,
 dv) = v `oplus` dv|, |v2 `ominus2` v1 = (v1, v2 `ominus` v1)|.
 
 \pg{Add some drawing.}
 
 Once change sets are disjoint, we can define a combined set of changes |DV| and
 operations |src, dst : DV -> V| that map a change to its \emph{source} and its
-\emph{destination}: If |dv `elem` Dt v|, then |src dv = v| and
-|dst dv = v `oplus` dv|.
+\emph{destination}: If, using the original definition, we have that |dv `elem`
+Dt v|, then |dv| is also part of the combined set of changes (|dv `elem` DV|),
+and its source and destination are given by |src dv = v| and |dst dv = v `oplus`
+dv|.
 
 We can also define |`oplus`| in terms of |dst|, as |v `oplus` dv = dst dv|,
-hence turning |`oplus`| into a derived operation.
-
-\pg{What's the point? Does this belong here?}
+hence turning |`oplus`| into a derived operation and |dst| into a primitive one.
 
 \subsection{From change equality to change equivalence}
 Our new definition of change structures in \cref{def:change-struct-bad-2} is
