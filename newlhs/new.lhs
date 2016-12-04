@@ -1,52 +1,5 @@
 %include polycode.fmt
-%include forall.fmt
-
-%format Nat = "\mathbb{N}"
-%format Int = "\mathbb{Z}"
-%format v1
-%format v2
-
-%format `oplus` = "\oplus "
-%format `ominus` = "\ominus "
-%format oplus = "(\oplus)"
-%format ominus = "(\ominus)"
-%format `ocompose` = "\circledcirc "
-%format ocompose = "(\circledcirc)"
-
-%format `doe` = "\Doe"
-%format chs (v) = "\ChangeStruct{" v "}"
-
-%format `such` = "\mid"
-%format ^ = " "
-%format ^^ = "\;"
-%format f0
-%format f1
-%format a0
-%format a1
-%format a2
-%format da0
-%format da1
-%format da2
-%format db0
-%format db1
-%format db2
-
-%format dv0
-%format dv1
-%format dv2
-
-%format x0
-%format x1
-%format x2
-%format x3
-
-%format dx0
-%format dx1
-%format dx2
-%format dx3
-
-%format Dt = "\Delta"
-%format DV = "\Delta V"
+%include changes.fmt
 
 \chapter{A theory of changes}
 
