@@ -310,8 +310,11 @@ Indeed, \cref{def:diff-update-bad-2} becomes |(v `oplus` dv) `ominus` v `doe`
 dv|, which we can prove as follows.
 \begin{lemma}
   \label{def:diff-update-lemma-bad-2}
-  Given a change structure |(V, Dt, `oplus`, `ominus`)| satisfying definition \cref{def:change-struct-bad-2}, but not necessarily \cref{def:diff-update-bad-2}, we can prove for any |v: V| and |dv : Dt v| that
-  |(v `oplus` dv) `ominus` v `doe` dv|.
+  Given a change structure |chs(V) = (V, Dt, `oplus`, `ominus`)| satisfying definition
+  \cref{def:change-struct-bad-2}, but not necessarily
+  \cref{def:diff-update-bad-2}, we can prove for any base value |v `elem` V| and
+  for any change |dv| cvalid for |v| (that is, |dv `elem` Dt v|) that |(v
+  `oplus` dv) `ominus` v `doe` dv|.
 \end{lemma}
 \begin{proof}
 Since both sides are changes for |v|, the thesis is equivalent to |v `oplus` ((v
@@ -349,9 +352,10 @@ Therefore we can drop \cref{def:diff-update-bad-2} from the definition, obtainin
 \end{definition}
 
 \begin{lemma}
-  \label{def:diff-update-lemma}
+  \label{def:diff-update-lemma-intro}
   Given a change structure |chs(V) = (V, Dt, `oplus`, `ominus`)| satisfying definition
-  \cref{def:change-struct-intro}, we can prove for any |v: V| and |dv : Dt v| that |(v
+  \cref{def:change-struct-intro}, we can prove for any base value |v `elem` V| and
+  for any change |dv| cvalid for |v| (that is, |dv `elem` Dt v|) that |(v
   `oplus` dv) `ominus` v `doe` dv|.
 \end{lemma}
 \begin{proof}
