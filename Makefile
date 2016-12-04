@@ -33,7 +33,7 @@ endif
 
 .PHONY: FORCE
 %.tex: %.lhs
-	lhs2TeX -o $*.tex $*.lhs
+	lhs2TeX -P .: -o $*.tex $*.lhs
 mylhs2tex.sty: mylhs2tex.lhs
 	lhs2TeX -o $@ $<
 %.pdf: %.tex $(INTERM_PRODUCTS) FORCE
