@@ -99,15 +99,18 @@ many examples, we need to associate different sets of changes to each base value
 |v `elem` V|. For instance, let us try to turn our change structure for integers
 into a change structure for naturals, that is having |Nat| as set of base values
 (|V = Nat|). We still have |v `oplus` dv = v + dv| and |v2 `ominus` v1 = v2 -
-v1| To represent, for instance, |0 `ominus` 5| we still want to use |-5|, so it
-seems we should keep using |Int| as set of changes |DV = Int|. But with these
-definitions, updating a value |v `elem` V| with a change |dv `elem` DV| might
-produce a result outside of |V|: for instance, with |v = 5, dv = -6|, we have |5
-`oplus` (-6) = 5 + (-6) = -1|.
+v1|. To represent, for instance, |0 `ominus` 5| we still want to use |-5|.
 
-To produce a correct change structure for naturals, addressing this problem, we
-can have |`oplus`| saturate on underflow, that is, produce 0 instead of a
-negative number:
+As a first attempt, it seems we should keep using |Int| as set of changes |DV =
+Int|. But with these definitions, updating a value |v `elem` V| with a change
+|dv `elem` DV| might produce a result outside of |V|: for instance, updating
+base value |v = 5| with change |dv = -6| would give updated base value |5
+`oplus` (-6) = 5 + (-6) = -1|. However, the result |-1| is not a natural, hence
+not a valid base value!
+
+As a second attempt, to address this problem and produce a correct change
+structure for naturals, we can try having |`oplus`| saturate on underflow, that
+is, produce 0 instead of a negative number:
 \begin{code}
   v `oplus` dv = if v + dv < 0 then 0 else v + dv
 \end{code}
@@ -117,13 +120,12 @@ However, this definition violates \cref{def:diff-update-bad-1}, that is |(v
 
 In other words, it's not clear how to define an appropriate total function
 |`oplus`: V -> DV -> V| for a change structure for naturals.
-
 More in general, with this definition, we can update a value |v1| with changes
 that cannot be of the form |v2 `ominus` v1| for any |v1|, and the update is
 always supposed to produce a value |v2|, even for changes that are not \emph{valid}
 for |v1|.
-\pg{Refine reference}
 %
+\pg{Refine reference}
 Later chapters show that invalid changes are an especially serious problem for
 changes on functions, but for now we refrain from discussing such examples in
 more detail; we only point out that invalid changes have been a major problem
