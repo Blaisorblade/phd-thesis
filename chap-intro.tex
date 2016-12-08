@@ -43,19 +43,21 @@ requires updating all PL queries to use it, while RDBMS queries can use an index
 transparently.
 
 Therefore, in this thesis we propose techniques for optimizing collection
-queries and executing them incrementally.
+queries and executing them incrementally.\pg{Refine}
 
 We consider the problem for functional programming languages such as Haskell or
 Scala, and we consider collection queries written using the APIs of their
 collection libraries, which we treat as an embedded domain-specific language (EDSL). Such
-APIs (or DSLs) contain powerful operators on collections such as $\Varid{map}$, which are higher-order, that
+APIs (or DSLs) contain powerful operators on collections such as $\Varid{map}$,\pg{exemplify or take for granted?}
+which are higher-order, that
 is they take as arguments arbitrary functions in the host language that we must
 also handle.
 
 Therefore, our optimizations and incrementalizations must handle programs in
 higher-order EDSLs that can contain arbitrary code in the host language. Hence,
-many of our optimizations will focus on properties of our collection EDSL, but
-will need to handle host language code. We restrict the problem to purely
+many of our optimizations will focus\pg{what's the ``focus'' of an optimization??}
+on properties of our collection EDSL, but
+will need to handle host language code. \pg{What's the focus/flow here?}We restrict the problem to purely
 functional programs (without mutation or other side effects, including
 non-termination), because such programs can be more ``declarative'' and because
 avoiding side effects can enable more powerful optimization and simplify the
