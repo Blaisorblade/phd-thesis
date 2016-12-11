@@ -272,6 +272,46 @@ change structure we have just seen.
 The abelian group on integers induces also a change structure on
 integers, namely $\ChangeStruct{\mathbb{Z}} = (\mathbb{Z},
 \Lam*{v} {\mathbb{Z}}, +, -)$.
+
+% Separate examples more.
+We can also define change structures on sequences; here we show a simple one,
+while more efficient variants appear later.
+
+In Haskell-like notation, if we assume that |Seq a| represents a datatype of
+sequences, we can define a datatype of changes. A change for a sequence |s| is a
+sequence of single changes for |s|; each single change either represents the
+insertion of a new element at some position in |s|, or the removal of an element
+of |s| (identified by its position). We can represent a datatype of changes for
+unspecified sequences, ignoring the requirement of changes to be valid:
+\footnote{We use Haskell notation even though we're discussing mathematical
+  entities, not programs.}
+
+\begin{code}
+data SeqSingleChange a
+  =  Insert { idx :: Int , el :: a }
+  |  Remove { idx :: Int }
+data SeqChange a = Seq (SeqSingleChange a)
+\end{code}
+\pg{Continue/revise}
+\pg{Make sure this does not overlap with other presentation of this change structure.}
+
+% In Agda we can also represent changes to a specified sequence.
+% I started defining this, and it's of course not immediate.
+% \begin{code}
+% data VecSingleChange {a : Set} {n} (v : Vec a n) : Set where
+%   Insert : (idx : Fin (suc n)) -> (el : a) -> VecSingleChange v
+%   Remove : (idx : Fin n) -> VecSingleChange v
+%
+% VecChange : forall {a : Set} {n} -> (v : Vec a n) -> Set
+% VecChange v = List (VecSingleChange v)
+%
+% data SeqSingleChange {a : Set} (s : Vect n a) : Set where
+%   Insert : (idx : Fin (suc n)) -> (el : a) -> SeqSingleChange s
+%   Remove : (idx : Fin n) -> SeqSingleChange s
+% SeqChange : forall {a : Set} {n} -> (s : Vect n a)
+% SeqChange s = Seq (SeqSingleChange s)
+% \end{code}
+
 \end{examples}
 
 \subsubsection{Derivatives}
