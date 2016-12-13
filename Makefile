@@ -17,8 +17,8 @@ PAPER_NAME = thesis-main
 PDF_NAME=$(PAPER_NAME).pdf
 # Sources that will be watched for changes.
 lhsFmt=$(wildcard *.fmt)
-lhsSources=new-stuff.lhs change-theory-reconstruct.lhs pldi14/sec-change-theory.lhs
-lhsCompiled=new-stuff.tex change-theory-reconstruct.tex pldi14/sec-change-theory.tex
+lhsSources=new-stuff.lhs change-theory-reconstruct.lhs pldi14/sec-intro.lhs pldi14/sec-change-theory.lhs
+lhsCompiled=new-stuff.tex change-theory-reconstruct.tex pldi14/sec-intro.tex pldi14/sec-change-theory.tex
 sources=$(shell find . -name '*.tex') $(wildcard Bibs/*.bib) $(lhsSources) $(lhsFmt)
 INTERM_PRODUCTS=mylhs2tex.sty $(lhsCompiled)
 

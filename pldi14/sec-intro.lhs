@@ -1,6 +1,8 @@
 % Emacs, this is -*- latex -*-!
+%include polycode.fmt
+%include changes.fmt
 
-\section{Introduction}
+% \section{Introduction}
 \label{sec:intro}
 
 Incremental computation has a long-standing history in computer
@@ -12,11 +14,11 @@ computation research looks for alternatives that are cheaper in a common scenari
 namely, when the input change is much smaller than the input itself.
 
 For instance, consider the $\Program$ program, which calculates
-the sum of all numbers in collections $\Xs$, $\Ys$.
-\begin{align*}
-\Program & = \ProgramBody\\
-\Output & = \Program~\Set{1,1}~\Set{2,3,4}=11
-\end{align*}
+the sum of all numbers in collections $\Xs$ and $\Ys$.
+\begin{code}
+grand_total  = \ xs ys -> fold (+) 0 (merge xs ys)
+output       = grand_total {{1, 1}} {{2, 3, 4}} = 11
+\end{code}
 With $\Set{\ldots}$ we represent a multiset or \emph{bag}, that is an unordered collection (like a set)
 where elements are allowed to appear more than once (unlike a set).
 Now assume that the input $\Xs$ changes from $\Set{1,1}$ to

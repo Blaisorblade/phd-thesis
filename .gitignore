@@ -15,6 +15,7 @@ comment.cut
 ## lhs2TeX output
 change-theory-reconstruct.tex
 new-stuff.tex
+pldi14/sec-intro.tex
 pldi14/sec-change-theory.tex
 mylhs2tex.sty
 
