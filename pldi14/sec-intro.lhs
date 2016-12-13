@@ -13,35 +13,35 @@ program from scratch on its updated input, incremental
 computation research looks for alternatives that are cheaper in a common scenario:
 namely, when the input change is much smaller than the input itself.
 
-For instance, consider the $\Program$ program, which calculates
-the sum of all numbers in collections $\Xs$ and $\Ys$.
+For instance, consider the $\Program$ program (presented in
+Haskell-like notation), which calculates the sum of all numbers
+in collections |xs| and |ys|.
 \begin{code}
 grand_total  = \ xs ys -> fold (+) 0 (merge xs ys)
 output       = grand_total {{1, 1}} {{2, 3, 4}} = 11
 \end{code}
-With $\Set{\ldots}$ we represent a multiset or \emph{bag}, that is an unordered collection (like a set)
+With |{{...}}| we represent a multiset or \emph{bag}, that is an unordered collection (like a set)
 where elements are allowed to appear more than once (unlike a set).
-Now assume that the input $\Xs$ changes from $\Set{1,1}$ to
-$\Set{1}$, and $\Ys$ changes from $\Set{2,3,4}$ to $\Set{2,3,4,5}$.
-Instead of recomputing $\Output$ from scratch, we could also compute it incrementally. If we have a
+Now assume that the input |xs| changes from |{{1,1}}| to
+|{{1}}|, and |ys| changes from |{{2, 3, 4}}| to |{{2, 3, 4, 5}}|.
+Instead of recomputing |output| from scratch, we could also compute it incrementally. If we have a
 representation for the changes to the inputs (say,
-$\DXs = \Set{\Keyword{remove} \; 1}$,
-$\DYs = \Set{\Keyword{add} \; 5}$), we can compute the new
-result through a function $\Derivative$ that takes the old inputs
-$\Xs = \Set{1,1}$, $\Ys=\Set{2,3,4}$ and the changes $\DXs$,
-$\DYs$ to produce the output change.
+|dxs = {{Remove 1}}| and |dys = {{Add 5}}|), we can compute the new
+result through a function |dgrand_total| that takes the old inputs
+|xs = {{1,1}}| and |ys = {{2, 3, 4}}| and the changes |dxs| and |dys|
+to produce the output change.
 In this case, it would compute the change
-$\Derivative~\Xs~\DXs~\Ys~\DYs = \Keyword{plus} \; 4$,
-which can then be used to update the original output $11$
+|dgrand_total xs dxs ys dys = Plus 4|,
+which can then be used to update the original output |11|
 %
-to yield the updated result $15$. We call $\Derivative$ the \emph{derivative} of $\Program$.
+to yield the updated result |15|. We call |dgrand_total| the \emph{derivative} of |grand_total|.
 It is a function in the
-same language as $\Program$, accepting and producing changes, which
+same language as |grand_total|, accepting and producing changes, which
 are simple first-class values of this language.
 %
-If we increase the size of the original inputs $\Xs$ and $\Ys$, the time
-complexity of $\Program~\Xs~\Ys$ increases linearly, while the time complexity
-of $\Derivative~\Xs~\DXs~\Ys~\DYs$ only depends on the size of $\DXs$ and $\DYs$,
+If we increase the size of the original inputs |xs| and |ys|, the time
+complexity of |grand_total xs ys| increases linearly, while the time complexity
+of |dgrand_total xs dxs ys dys| only depends on the size of |dxs| and |dys|,
 which is smaller both in our example and in general.
 
 To support automatic incrementalization, in this chapter we introduce the \ILC\
@@ -51,14 +51,12 @@ that \emph{differentiates} programs, that is, computes their
 derivatives; $\DERIVE$ guarantees that
 \begin{equation}
   \label{eq:correctness}
-\App{f}{\Apply*{\D a}{a}}
-\cong
-\Apply{\App*{\App{\Derive{f}}{a}}{\D a}}{\App*{f}{a}}.
+  |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
 \end{equation}
 where
 $\cong$ is denotational equality,
-$\D a$ is a change on $a$ and $\Apply{\D a}{a}$ denotes $a$
-updated with change $\D a$, that is, the updated input of $f$.
+|da| is a change on |a| and |a `oplus` da| denotes |a|
+updated with change |da|, that is, the updated input of |f|.
 Hence, we can optimize programs by replacing the left-hand side,
 which recomputes the output from scratch, with the right-hand
 side, which computes the output incrementally using derivatives.
@@ -68,7 +66,7 @@ side, which computes the output incrementally using derivatives.
 %\cref{sec:finite-diff}).
 
 \ILC\ is based on a simply-typed $\Gl$-calculus
-parameterized by \emph{plugins}. A plugin
+parameterized by \emph{language plugins} (or just plugins). A plugin
 defines
 %
 (a) base types and primitive operations, and

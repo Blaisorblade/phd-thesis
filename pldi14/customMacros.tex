@@ -15,7 +15,7 @@
 \DeclareMathAlphabet{\mathcal}{OT1}{pzc}{m}{it}
 
 \newcommand{\Keyword}[1]{\textbf{#1}}
-\newcommand{\Term}[1]{\mathit{#1}}
+\newcommand{\Term}[1]{\Varid{#1}}
 
 
 % Lists
@@ -70,7 +70,7 @@
 \NewDocumentCommand{\Zs}{}{\Term{zs}}
 \NewDocumentCommand{\Program}{}{\Term{grand\_total}}
 \NewDocumentCommand{\ProgramBody}{}{\Lam{\Xs}{\Lam{\Ys}{\FOLD~(+)~0~(\Merge\Xs\Ys)}}}
-\NewDocumentCommand{\Derivative}{}{\Term{grand\_total'}}
+\NewDocumentCommand{\Derivative}{}{\Term{dgrand\_total}}
 \NewDocumentCommand{\Output}{}{\Term{output}}
 
 \NewDocumentCommand{\DXs}{}{\Term{dxs}}
