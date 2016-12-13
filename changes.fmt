@@ -46,3 +46,5 @@
 
 %format Dt = "\Delta"
 %format DV = "\Delta V"
+
+%format eval(t) = "\mean{" t "}"

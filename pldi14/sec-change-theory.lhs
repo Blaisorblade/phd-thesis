@@ -10,7 +10,12 @@ This section introduces a formal concept of changes; this
 concept was already used informally in \cref{eq:correctness} and is central
 to our approach. We first define change structures formally, then construct 
 change structures for functions between change structures,
-and conclude with a theorem that relates function changes to derivatives. 
+and finally show that derivatives are a special case of function changes.
+
+% In this section, we will not consider programs, but simply
+% mathematical functions. In \cref{sec:differentiate} we will apply
+% this theory to functions representing the meaning of programs,
+% but we prefer to develop our theory
 
 \subsection{Change structures}\label{ssec:change-structures}
 Consider a set of values, for instance the set of natural numbers
@@ -147,59 +152,10 @@ We assign precedence to function application over
 $\UPDATE$ and $\DIFF$, that is, $\Update{\App{f}{a}}{\App{\App{g}{a}}{\D a}}$ means
 $\Update{\App*{f}{a}}{\App*{\App{g}{a}}{\D a}}$.
 
-\paragraph{Change equivalence}
-One might expect, in the definition of change structures
-(\cref{def:change-struct}), the additional assumption that
-$\Diff{\Apply*{\D v}{v}}{v} = \D v$. While this assumption holds
-for the change structure of $\mathbb{N}$, there are sensible
-examples of change structures where this assumption is not valid.
-In fact, we can have multiple changes between the same source and
-target. \pg{Add example on lists.} Therefore, we define an
-equivalence among such changes that we call \emph{change
-  equivalence}. When it is clear we are talking about changes, we
-will also say that two changes are equivalent to mean that they
-are change-equivalent. The definition of change equivalence is as
-follows:
-
-\begin{definition}[Change equivalence]
-  Given a change structure $\ChangeStruct{V}$, a value $v \in V$,
-  and two changes $\D v_1, \D v_2$ having $v$ as source, that is,
-  such that $\D v_1, \D v_2\in \Change{v}$, we say that $\D v_1$
-  is change-equivalent to $\D v_2$ and write
-  $\D v_1 \Doe \D v_2$, if and only if these changes share,
-  beyond the source $v$, also their target, that is, if and only
-  if $\Update{v}{\D v_1} = \Update{v}{\D v_2}$.
-\end{definition}
-
-\begin{lemma}
-  \label{def:diff-update-lemma}
-  Given a change structure |chs(V) = (V, Dt, `oplus`, `ominus`)|,
-  for any base value |v `elem` V| and for any change |dv| valid
-  for |v| (that is, |dv `elem` Dt^v|), we have |(v `oplus` dv)
-  `ominus` v `doe` dv|.
-\end{lemma}
-\begin{proof}
-Since both sides are changes for |v|, the thesis is equivalent to |v `oplus` ((v
-`oplus` dv) `ominus` v) = v `oplus` dv|.
-
-To prove our thesis, we remember that thanks to \cref{def:update-diff},
-for any |v1, v2 `elem` V| we have |v1 `oplus` (v2 `ominus` v1) = v2|. We can take |v1
-= v|, |v2 = v `oplus` dv| and obtain |v `oplus` ((v `oplus` dv) `ominus` v) = v
-`oplus` dv|, which is exactly our thesis.
-\end{proof}
-
-Change equivalence is indeed an equivalence relation, as stated
-in the following lemma:
-\begin{lemma}[Change equivalence is indeed an equivalence relation]
-  For any change structure |chs(V)| and for any base value |v
-  `elem` V|, change equivalence is an equivalence relation
-  (reflexive, symmetric, transitive) among elements of |Dt v|.
-\end{lemma}
-
-As we will see, each valid operations in our theory will respect
-change equivalence: equivalent changes will be mapped to
-equivalent changes or to equal values.
-\pg{Add example: however, different changes might have different values.}
+We'll also treat a change between a source and destination as an
+edge between them, and use graph terminology to discuss changes.
+Indeed, a change structure induces a graph with base values as
+vertices and all changes as edges.
 
 \begin{examples}
 We demonstrate a change structure on \emph{bags with signed
@@ -314,30 +270,133 @@ data SeqChange a = Seq (SeqSingleChange a)
 
 \end{examples}
 
-\subsubsection{Derivatives}
+\subsection{Change equivalence}
+\label{sec:changeeeq}
+Next, we formalize when two changes are ``equivalent'', and show
+that a change $\D v$ is equivalent to the difference
+$\Diff{\Apply*{\D v}{v}}{v}$, even though the definition of
+change structure has no such explicit requirement.
+
+We could demand that
+$\Diff{\Apply*{\D v}{v}}{v}$ be equal to $\D v$. On naturals and
+on bags, this would be true. But there are sensible examples of
+change structures where $\D v$ and $\Diff{\Apply*{\D v}{v}}{v}$
+are different changes, even though both go from $v$ to |v `oplus`
+dv|.
+
+In fact, we can have multiple changes between the same source and target. For
+instance, we can go from list |['a', 'b', 'c']| to list |['a', 'b', 'd']| by
+first removing |'c'| and then adding |'d'|, hence through change |[Remove 2,
+Insert 2 'd']|, or by inserting |'d'| and removing |'c'| through either of
+|[Insert 3 'd', Remove 2]| or by |[Insert 2 'd', Remove 3]|.
+
+Therefore, we define an
+equivalence among such changes that we call \emph{change
+  equivalence}. When it is clear we are talking about changes, we
+will also say that two changes are equivalent to mean that they
+are change-equivalent. The definition of change equivalence is as
+follows:
+
+\begin{definition}[Change equivalence]
+  Given a change structure $\ChangeStruct{V}$, a value $v \in V$,
+  and two changes $\D v_1, \D v_2$ having $v$ as source, that is,
+  such that $\D v_1, \D v_2\in \Change{v}$, we say that $\D v_1$
+  is change-equivalent to $\D v_2$ and write
+  $\D v_1 \Doe \D v_2$, if and only if these changes share,
+  beyond the source $v$, also their target, that is, if and only
+  if $\Update{v}{\D v_1} = \Update{v}{\D v_2}$.
+\end{definition}
+
+\begin{lemma}
+  \label{def:diff-update-lemma}
+  Given a change structure |chs(V) = (V, Dt, `oplus`, `ominus`)|,
+  for any base value |v `elem` V| and for any change |dv| valid
+  for |v| (that is, |dv `elem` Dt^v|), we have |(v `oplus` dv)
+  `ominus` v `doe` dv|.
+\end{lemma}
+\begin{proof}
+Since both sides are changes for |v|, the thesis is equivalent to |v `oplus` ((v
+`oplus` dv) `ominus` v) = v `oplus` dv|.
+
+To prove our thesis, we remember that thanks to \cref{def:update-diff},
+for any |v1, v2 `elem` V| we have |v1 `oplus` (v2 `ominus` v1) = v2|. We can take |v1
+= v|, |v2 = v `oplus` dv| and obtain |v `oplus` ((v `oplus` dv) `ominus` v) = v
+`oplus` dv|, which is exactly our thesis.
+\end{proof}
+
+Change equivalence is indeed an equivalence relation, as stated
+in the following lemma:
+\begin{lemma}[Change equivalence is indeed an equivalence relation]
+  For any change structure |chs(V)| and for any base value |v
+  `elem` V|, change equivalence is an equivalence relation
+  (reflexive, symmetric, transitive) among elements of |Dt v|.
+\end{lemma}
+
+As we will see, each valid operations in our theory will respect change
+equivalence: equivalent changes will be mapped to equivalent changes or to equal
+values.\footnote{We expect that, in homotopy type theory, we could use higher
+  inductive types to make change equivalence part of the equality on changes.}
+
+\subsection{Derivatives}
 After defining change structures, we can define more formally
 derivatives of functions, using a variant of
 \cref{eq:correctness}.
 
 \begin{definition}[Derivatives]
   \label{def:derivatives}
-  Given change structures $\ChangeStruct{A}$ and $\ChangeStruct{B}$ and a function $f \in A \to
-  B$ on the change sets of these change structures, we call a binary function $f'$ a \emph{derivative} of $f$ if
-  for all values $a \in A$ and corresponding changes $\D a \in
-  \Change[A]{a}$,
-  \[\App{f}{\Apply*{\D a}{a}} = \Apply{\App{\App{f'}{a}}{\D a}}{\App{f}{a}}\text{.}\qed\]
+  We call binary function |f'| a \emph{derivative} of |f| if
+  \[|f (a `oplus` da) = f a `oplus` f' a da|\text{.}\] holds for all values |a
+  `elem` A| and corresponding changes |da `elem` Dt ^ A|, assuming a function |f
+  `elem` A -> B| and change structures |chs(A)| and |chs(B)| on the domain and
+  codomain of function |f|. \qed
 \end{definition}
 
+This definition implies that |f' a da| is a change for |f a| for any suitable
+base value |a| and change |da|.
+
+Using change equivalence we immediately obtain an alternative characterization of derivatives:
+
+\begin{lemma}[Characterization of derivatives up to change equivalence]
+  \label{lem:derivatives-up-to-doe}
+  A derivative |f'| of function |f `elem` A -> B| can be characterized (up to
+  change equivalence) by |f' a da `doe` f (a `oplus` da) `ominus` f a|.
+\end{lemma}
+\begin{proof}
+  Since |f' v dv| is a change for |f v|, inlining the definition of change
+  equivalence in the thesis gives
+  \[|f a `oplus` f' a da = f a `oplus` (f (a `oplus` da) `ominus` f a)|\] Once
+  we simplify the right-hand side via \cref{def:update-diff}, we're left with
+  \[|f a `oplus` f' a da = f (a `oplus` da)|\]
+  which is the defining property of derivatives.\qed
+\end{proof}
+
+
+\pg{Anticipate this point.}
 Here we are defining derivatives of mathematical functions, but
 we will use them to define the meaning of derivatives of
 programs. Intuitively, once we define a suitable set-theoretic
 denotational semantics for programs, and a program transformation
 that takes a program |f| to its derivative |f'|, we will ensure
-that our semantics takes a program derivative |[[f']]| to a
-derivative of the semantics of the base program |[[f]]|.
+that our semantics takes a program derivative |eval(f')| to a
+derivative of the semantics of the base program |eval(f)|.
 
-\pg{Point out here that derivatives respect change equivalence.}
-\subsubsection{Nil changes and derivatives}
+We immediately verify that derivatives respect change equivalence, as promised
+earlier in \cref{sec:changeeeq}:
+
+\begin{lemma}[Derivatives respect change equivalence]
+  A derivative |f'| of function |f `elem` A -> B| always respects change
+  equivalence, that is, if |dv1 `doe` dv2|, then |f' v dv1 `doe` f' v dv2|, for
+  any value |v `elem` A|, change structure |chs(A)| and changes |dv1, dv2 `elem`
+  Dt v|.
+\end{lemma}
+\begin{proof}
+  By hypothesis changes |dv1| and |dv2| are equivalent, that is |v `oplus` dv1 = v `oplus` dv2|. We
+  prove the thesis directly by equational reasoning using \cref{lem:derivatives-up-to-doe}:
+  \[|f' v dv1 `doe` f (v `oplus` dv1) `ominus` f v = f (v `oplus` dv2) `ominus`
+    f v `doe` f' v dv2|\text{.}\qed\]
+\end{proof}
+
+\subsection{Nil changes and derivatives}
 A change can have equal source and target, in which case we call
 it a \emph{nil change}. We use $\DIFF$ to associate, to each
 value, a distinguished nil change.
