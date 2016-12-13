@@ -109,65 +109,12 @@ using these primitives can be computed. Both our implementation and our correctn
 is parametric in the plugins, hence it is easy to support (and prove correct)
 new plugins.
 
-\section{Chapter contributions}
-This chapter makes the following contributions:
-\begin{itemize}
-\item We present a novel mathematical theory of changes and derivatives, which is more
-  general than other work in the field because changes are
-  first-class entities, they are distinct from base values and
-  they are defined also for functions (\cref{sec:1st-order-changes}).
-  %KO: I think the next sentence cannot be understood at this point.
-  %We introduce changes for complex types, defined compositionally.
-%
-\item We present the first approach to incremental computation for
-pure $\lambda$-calculi by a source-to-source transformation, $\DERIVE$, that requires no run-time
-support. The transformation produces an incremental program in the same language;
-all optimization techniques for the original program are
-applicable to the incremental program as well.
-%KO: commented this out. I think the purity is not important enough
-%to deserve another sentence here, since we only vaguely hint
-%at "further research".
-%Since our incremental programs use no impure features, they are
-%especially amenable to further optimizations, making this approach
-%very suitable for further research.
-%
-% KO: Let's have one bullet point per section. Also, a conjecture
-% sounds like a rather weak contribution
-%\item We argue that incrementalization is efficient on
-%  \emph{self-maintainable programs}, and discuss how further research on
-%  static or dynamic memoization can speed up a larger class of programs (\cref{sec:performance-cons}).
-%  \pg{This contribution references text which is now commented
-%    out. I believe the text should be brought back in.}
-%
-We prove that our incrementalizing transformation $\DERIVE$
-is correct~(\cref{eq:correctness})
-by a machine-checked formalization in Agda~\citep{agda-head}.
-The proof gives insight into the definition of $\DERIVE$: we
-first construct the derivative $\EvalInc{-}$ of the denotational
-semantics of a simply-typed $\lambda$-calculus term, that is, its
-\emph{change semantics}.
-%
-Then, we show that $\DERIVE$ is produced by erasing
-$\EvalInc{-}$ to a simply-typed program (\cref{sec:correctness}).
 
-\item While we focus mainly on the theory of changes
-and derivatives, we also perform a performance case study.
-We implement the derivation transformation in Scala,
-with a plug-in architecture that can be extended with new base
-types and primitives. We define a plugin with support for
-different collection types and use the plugin to 
-incrementalize a variant of the MapReduce programming model~\citep{Lammel07}.
-  Benchmarks show that on this program,
-  incrementalization can reduce asymptotic complexity and can turn $O(n)$
-  performance into $O(1)$, improving running time by over 4
-  orders of magnitude on realistic inputs (\cref{sec:applying}).
-
-\end{itemize}
-Our Agda formalization, Scala implementation and benchmark
-results are available at the URL
-\url{http://inc-lc.github.io/}.
-All lemmas and theorems presented
-in this chapter have been proven in Agda.
-In the chapter, we present an overview of
-the formalization in more human-readable form, glossing over some
-technical details.
+% Our Agda formalization, Scala implementation and benchmark
+% results are available at the URL
+% \url{http://inc-lc.github.io/}.
+% All lemmas and theorems presented
+% in this chapter have been proven in Agda.
+% In the chapter, we present an overview of
+% the formalization in more human-readable form, glossing over some
+% technical details.
