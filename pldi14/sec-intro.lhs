@@ -60,10 +60,6 @@ updated with change |da|, that is, the updated input of |f|.
 Hence, we can optimize programs by replacing the left-hand side,
 which recomputes the output from scratch, with the right-hand
 side, which computes the output incrementally using derivatives.
-% KO: I think this forward references confuses more than it helps.
-%Our approach relates to \emph{finite differencing} but has a more
-%general theory and support for first-class functions (see
-%\cref{sec:finite-diff}).
 
 \ILC\ is based on a simply-typed $\Gl$-calculus
 parameterized by \emph{language plugins} (or just plugins). A plugin
@@ -133,24 +129,6 @@ incrementalize a variant of the MapReduce programming model~\citep{Lammel07}.
   orders of magnitude on realistic inputs (\cref{sec:applying}).
 
 \end{itemize}
-
-% KO: We said all that is in this paragraph before.
-% Our formalization is generic in the set of base types and the set
-% of primitives that operate on these base types. That is, we
-% present only the core of the formalization that deals with
-% function types, lambda abstraction, application and variable
-% references. Base types and primitives on base types have to be
-% added as plugins. The interface between the core formalization
-% and the plugins is formalized as well. It consists of the sets,
-% operations, and lemmas that a plugin has to provide in order to
-% fit into the core formalization. We hope that the generic
-% formalization allows us and other researchers to experiment with
-% different choices of base types, and different incrementalization
-% strategies for these base types.
-
-%We mechanized the formalization, including the separation between
-%core and plugins, in the dependently typed programming language
-%Agda~\cite{agda-head}.
 Our Agda formalization, Scala implementation and benchmark
 results are available at the URL
 \url{http://inc-lc.github.io/}.
@@ -159,6 +137,3 @@ in this chapter have been proven in Agda.
 In the chapter, we present an overview of
 the formalization in more human-readable form, glossing over some
 technical details.
-
-% KO: Old stuff which contains snippets to be integrated in other sections, in 
-% particular Related Work.
