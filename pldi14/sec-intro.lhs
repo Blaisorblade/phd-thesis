@@ -13,9 +13,10 @@ program from scratch on its updated input, incremental
 computation research looks for alternatives that are cheaper in a common scenario:
 namely, when the input change is much smaller than the input itself.
 
-For instance, consider the $\Program$ program (presented in
+\section{A motivating example}
+To understand incrementalization better, consider the $\Program$ program (presented in
 Haskell-like notation), which calculates the sum of all numbers
-in collections |xs| and |ys|.
+in collections |xs| and |ys|:
 \begin{code}
 grand_total  = \ xs ys -> fold (+) 0 (merge xs ys)
 output       = grand_total {{1, 1}} {{2, 3, 4}} = 11
@@ -41,10 +42,11 @@ are simple first-class values of this language.
 %
 If we increase the size of the original inputs |xs| and |ys|, the time
 complexity of |grand_total xs ys| increases linearly, while the time complexity
-of |dgrand_total xs dxs ys dys| only depends on the size of |dxs| and |dys|,
-which is smaller both in our example and in general.
+of |dgrand_total xs dxs ys dys| only depends on the sizes of |dxs| and |dys|,
+which under our assumptions are smaller (just like in our example).
 
-To support automatic incrementalization, in this chapter we introduce the \ILC\
+\section{A program transformation}
+To support automatic incrementalization, in the next chapters we introduce the \ILC\
 (incrementalizing $\Gl$-calculi) framework. We define
 an automatic program transformation $\DERIVE$
 that \emph{differentiates} programs, that is, computes their
@@ -57,11 +59,42 @@ where
 $\cong$ is denotational equality,
 |da| is a change on |a| and |a `oplus` da| denotes |a|
 updated with change |da|, that is, the updated input of |f|.
-Hence, we can optimize programs by replacing the left-hand side,
-which recomputes the output from scratch, with the right-hand
-side, which computes the output incrementally using derivatives.
+\pg{Non-sequitur, this is not proven to be an optimization, not
+  by this equation.}
+Hence, when the derivative is faster than
+recomputation, we can optimize programs by replacing the
+left-hand side, which recomputes the output from scratch, with
+the right-hand side, which computes the output incrementally
+using derivatives, while preserving the program result.
 
-\ILC\ is based on a simply-typed $\Gl$-calculus
+To understand this equation we must also formalize changes for
+functions. That's because \ILC\ applies to higher-order
+languages, where functions can be inputs or outputs. This makes
+\cref{eq:correctness} less trivial to state and prove.
+
+To simplify the formalization we consider, beyond derivatives of
+programs, also derivatives of pure mathematical functions (\cref{sec:1st-order-changes}). We
+distinguish programs and mathematical functions as in
+denotational semantics.%
+\footnote{We avoid however using domain theory. To this end, we
+  restrict attention in our theory to strongly normalizing
+  calculi.}
+%
+We define those with an analogue of
+\cref{eq:correctness}: function |df| is a derivative of |f| if
+and only if
+\begin{equation}
+  \label{eq:correctness-math-funs}
+  |f (a `oplus` da) = (f a) `oplus` (df a da)|
+\end{equation}
+Once we establish a theory of changes and derivatives for
+mathematical functions, we will be able to lift that to programs:
+conceptually, a program function |df| is a derivative of |f| if
+the semantics of |df|, that is |eval(df)|, is the derivative of
+the semantics of |f|, giving us \cref{eq:correctness} from
+\cref{eq:correctness-math-funs}.
+
+\ILC\ considers as object language a simply-typed $\Gl$-calculus
 parameterized by \emph{language plugins} (or just plugins). A plugin
 defines
 %
@@ -76,6 +109,7 @@ using these primitives can be computed. Both our implementation and our correctn
 is parametric in the plugins, hence it is easy to support (and prove correct)
 new plugins.
 
+\section{Chapter contributions}
 This chapter makes the following contributions:
 \begin{itemize}
 \item We present a novel mathematical theory of changes and derivatives, which is more
