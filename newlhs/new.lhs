@@ -4,6 +4,7 @@
 \chapter{A theory of changes}
 
 % From PLDI14 contribution.
+\pg{In this chapter, we motivate more thoroughly our mathematical theory of \emph{changes}.}
 In this chapter, we present and motivate a mathematical theory of \emph{changes} and
 \emph{derivatives}.
 This theory is more general than other work in the field because changes
@@ -117,6 +118,8 @@ is, produce 0 instead of a negative number:
 However, this definition violates \cref{def:diff-update-bad-1}, that is |(v
 `oplus` dv) `ominus` v = dv|: if |v = 1| and |dv = -2|, then |(v `oplus` dv)
 `ominus` v = -1 /= -2 = dv|.
+\pg{However, this axiom is now dropped! To motivate against such definitions, we
+  should argue about implementations of derivatives.}
 
 In other words, it's not clear how to define an appropriate total function
 |`oplus`: V -> DV -> V| for a change structure for naturals.
