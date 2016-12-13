@@ -3,7 +3,7 @@
 %include changes.fmt
 
 %\section{Changes as First-Class Values}
-\section{A theory of changes}
+\section{Formalizing changes}
 \label{sec:1st-order-changes}
 
 This section introduces a formal concept of changes; this

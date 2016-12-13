@@ -355,16 +355,18 @@ Moreover, all operations that our theory defines respect change equivalence.
 
 \pg{Introduce derivatives before!}
 
+\input{pldi14/sec-change-theory}
+
 \section{Evolving change structures}
 In this section we describe variants of the basic definition of change structures.
 
 \subsection{Relaxing the definition: removing |`ominus`|}
-\pg{Maybe move to a subsequent chapter?}
-It is often useful to consider variants of the original definition with fewer
-operations.
+% \pg{Maybe move to a subsequent chapter?}
+% It is often useful to consider variants of the original definition with fewer
+% operations.
 
-\subsection{Example: monoid changes}
-If we stop requiring |odiff|, then suddenly we can build the construction of
-change structures out of groups to build change structures out of monoids.
+% \subsection{Example: monoid changes}
+% If we stop requiring |odiff|, then suddenly we can build the construction of
+% change structures out of groups to build change structures out of monoids.
 
 \pg{Resume!}
