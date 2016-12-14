@@ -89,10 +89,11 @@ and only if
 \end{equation}
 Once we establish a theory of changes and derivatives for
 mathematical functions, we will be able to lift that to programs:
-conceptually, a program function |df| is a derivative of |f| if
+intuitively, a program function |df| is a derivative of |f| if
 the semantics of |df|, that is |eval(df)|, is the derivative of
 the semantics of |f|, giving us \cref{eq:correctness} from
-\cref{eq:correctness-math-funs}.
+\cref{eq:correctness-math-funs}.\footnote{A few technical details
+  complicate the picture, but we'll discuss them later.}
 
 \ILC\ considers as object language a simply-typed $\Gl$-calculus
 parameterized by \emph{language plugins} (or just plugins). A plugin
