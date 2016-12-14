@@ -46,24 +46,24 @@ Using this relation, we can state a correct version of
 Moreover, we have a number of lemmas about change
 equivalence.
 
-\pg{Revise statements for clarity.}
+% \pg{Revise statements for clarity.}
 
-\begin{lemma}[Change equivalence is an equivalence]
-  For any $x \in X$ with a change structure on $X$, change equivalence is an
-  equivalence relation (reflexive, symmetric, transitive) among
-  elements of $\Change{x}$.
-\end{lemma}
+% \begin{lemma}[Change equivalence is an equivalence]
+%   For any $x \in X$ with a change structure on $X$, change equivalence is an
+%   equivalence relation (reflexive, symmetric, transitive) among
+%   elements of $\Change{x}$.
+% \end{lemma}
 
-\begin{lemma}[Identities using change equivalence]
-  Using change equivalence we can state additional algebraic equivalences,
-  that complement \cref{def:update-diff}.
+% \begin{lemma}[Identities using change equivalence]
+%   Using change equivalence we can state additional algebraic equivalences,
+%   that complement \cref{def:update-diff}.
 
-\begin{align*}
-\Update x \D{x} = x &\Leftrightarrow \D{x} \Doe \NilC{x}\\
-\Diff x x &\Doe \NilC {x}\\
-\Diff {\Update*{x}{\D{x}}} x &\Doe \D{x}
-\end{align*}
-\end{lemma}
+% \begin{align*}
+% \Update x \D{x} = x &\Leftrightarrow \D{x} \Doe \NilC{x}\\
+% \Diff x x &\Doe \NilC {x}\\
+% \Diff {\Update*{x}{\D{x}}} x &\Doe \D{x}
+% \end{align*}
+% \end{lemma}
 
 \begin{lemma}[Function change application preserves change equivalence]
   For each $x \in X$, with a change structure on $X$, changes
@@ -73,6 +73,7 @@ $\D{f}_1, \D{f}_2 \in \Change{f}$, then $\D{f}_1 \Doe \D{f}_2$ and
 $\D{x}_1 \Doe \D{x}_2$ imply
 $\D{f}_1~x~\D{x}_1 \Doe \D{f}_2~x~\D{x}_2$.
 \end{lemma}
+This lemma generalizes \cref{thm:deriv-respect-doe}.
 
 That is, in all simple contexts that we can construct, two equivalent
 changes will behave indistinguishably. In fact, for programs that

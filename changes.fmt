@@ -33,6 +33,7 @@
 %format dv0
 %format dv1
 %format dv2
+%format dv3
 
 %format x0
 %format x1
@@ -47,6 +48,8 @@
 %format Dt = "\Delta"
 %format DV = "\Delta V"
 
+%format nil(v) = "\NilC{" v "}"
+%format NIL = "\NILC"
 %format eval(t) = "\mean{" t "}"
 %format derive(t) = "\Derive{" t "}"
 %format `cong` = "\cong"
