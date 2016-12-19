@@ -72,7 +72,7 @@ As already discussed, we'll need to allow (in general)
 distinct sets of values and changes. Hence we give the following definition.
 \begin{definition}[Change structures, first version]
   \label{def:change-struct-bad-1}
-  A change structure over a set |V| is a tuple |chs(V) = (V, DV, `oplus`, `ominus`)|
+  A change structure over a set |V| is a tuple $\chs V = |(V, DV, `oplus`, `ominus`)|$
   where
   \begin{subdefinition}
   \item |V| is the set of values;
@@ -152,7 +152,7 @@ changes |DV|, for each value |v `elem` V| we have a set of changes |Dt ^ v|.
 \pg{Make sure that we've stated our metalanguage is type theory.}
 \begin{definition}[Change structures, second version]
   \label{def:change-struct-bad-2}
-  A change structure over a set |V| is a tuple |chs(V) = (V, Dt, `oplus`, `ominus`)|
+  A change structure over a set |V| is a tuple $\chs V = |(V, Dt, `oplus`, `ominus`)|$
   where
   \begin{subdefinition}
   \item |V| is the set of values;
@@ -270,7 +270,7 @@ Indeed, \cref{def:diff-update-bad-2} becomes |(v `oplus` dv) `ominus` v `doe`
 dv|, which we can prove as follows.
 \begin{lemma}
   \label{def:diff-update-lemma-bad-2}
-  Given a change structure |chs(V) = (V, Dt, `oplus`, `ominus`)| satisfying definition
+  Given a change structure $\chs V = |(V, Dt, `oplus`, `ominus`)|$ satisfying definition
   \cref{def:change-struct-bad-2}, but not necessarily
   \cref{def:diff-update-bad-2}, we can prove for any base value |v `elem` V| and
   for any change |dv| cvalid for |v| (that is, |dv `elem` Dt v|) that |(v
@@ -290,7 +290,7 @@ Therefore we can drop \cref{def:diff-update-bad-2} from the definition, obtainin
 \begin{definition}[Change structures]
   % -intro distinguishes this label from the one in the copy of the paper.
   \label{def:change-struct-intro}
-  A change structure over a set |V| is a tuple |chs(V) = (V, Dt, `oplus`, `ominus`)|
+  A change structure over a set |V| is a tuple $\chs V = |(V, Dt, `oplus`, `ominus`)|$
   where
   \begin{subdefinition}
   \item |V| is the set of values;
@@ -313,9 +313,9 @@ Therefore we can drop \cref{def:diff-update-bad-2} from the definition, obtainin
 
 \begin{lemma}
   \label{def:diff-update-lemma-intro}
-  Given a change structure |chs(V) = (V, Dt, `oplus`, `ominus`)| satisfying definition
+  Given a change structure $\chs V = |(V, Dt, `oplus`, `ominus`)|$ satisfying definition
   \cref{def:change-struct-intro}, we can prove for any base value |v `elem` V| and
-  for any change |dv| cvalid for |v| (that is, |dv `elem` Dt v|) that |(v
+  for any change |dv| valid for |v| (that is, |dv `elem` Dt v|) that |(v
   `oplus` dv) `ominus` v `doe` dv|.
 \end{lemma}
 \begin{proof}

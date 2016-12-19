@@ -120,9 +120,8 @@ The following definition sums up the discussion so far:
   we associate a set of changes $\Change{v}$. But do this consistently.}
 \begin{definition}[Change structures]
   \label{def:change-struct}
-  A tuple $\ChangeStruct{V} = (V, \CHANGE,
-  \UPDATE,
-  \DIFF)$ is a \emph{change structure} (for $V$) if:
+  A tuple $\chs V = |(V, Dt, `oplus`, `ominus`)|$
+  is a \emph{change structure} (for |V|) if:
 
   \begin{subdefinition}
   \item |V| is a set, called the \emph{base set}.
@@ -144,7 +143,7 @@ The following definition sums up the discussion so far:
 We overload operators $\CHANGE$, $\DIFF$ and $\UPDATE$ to refer
 to the corresponding operations of different change structures;
 we will subscript these symbols when needed to prevent ambiguity.
-For any |chs(S)|, we write $S$ for its first component,
+For any $\chs V$, we write |V| for its first component,
 as above. We make |`oplus`| left-associative, that is,
 |v `oplus` dv1 `oplus` dv2| means |(v `oplus` dv1) `oplus` dv2|.
 We assign precedence to function application over
@@ -164,13 +163,13 @@ it a \emph{nil change}.
 \begin{definition}[Nil change]
   \label{def:nil-change-v2}
   A nil change for a value |v| is a change |dv| such that |v `oplus` dv = v|,
-  for any change structure |chs(V)| and value |v `elem` V|.
+  for any change structure $\chs V$ and value |v `elem` V|.
 \end{definition}
 
 We use |`ominus`| to associate, to each value, a distinguished nil change.
 \begin{lemma}[Behavior of $\NILC$]
   Change |v `ominus` v| is a nil change for |v| (that we write |nil(v)|), for any
-  change structure |chs(V)| and value |v `elem` V|:
+  change structure $\chs V$ and value |v `elem` V|:
   \[
     |nil(v) = v `ominus` v| \qed
   \]
@@ -324,7 +323,7 @@ are change-equivalent. The definition of change equivalence is as
 follows:
 
 \begin{definition}[Change equivalence]
-  Given a change structure |chs(V)|, a value |v `elem` V|,
+  Given a change structure $\chs V$, a value |v `elem` V|,
   and two changes |dv1, dv2| having |v| as source
   (|dv1, dv2 `elem` Dt ^ v|), we say that |dv1|
   is change-equivalent (or just equivalent) to |dv2|
@@ -335,7 +334,7 @@ follows:
 
 \begin{lemma}
   \label{def:diff-update-lemma}
-  Given a change structure |chs(V) = (V, Dt, `oplus`, `ominus`)|,
+  Given a change structure $\chs V = |(V, Dt, `oplus`, `ominus`)|$,
   for any base value |v `elem` V| and for any change |dv| valid
   for |v| (that is, |dv `elem` Dt^v|), we have |(v `oplus` dv)
   `ominus` v `doe` dv|.
@@ -353,7 +352,7 @@ for any |v1, v2 `elem` V| we have |v1 `oplus` (v2 `ominus` v1) = v2|. We can tak
 Change equivalence is indeed an equivalence relation, as stated
 in the following lemma:
 \begin{lemma}[Change equivalence is indeed an equivalence relation]
-  For any change structure |chs(V)| and for any base value |v
+  For any change structure $\chs V$ and for any base value |v
   `elem` V|, change equivalence is an equivalence relation
   (reflexive, symmetric, transitive) among elements of |Dt v|.
 \end{lemma}
@@ -376,7 +375,7 @@ in the following lemma:
 
 \begin{lemma}
   Nil changes are equivalent to each other, that is, |v `oplus` dv = v| implies
-  |dv `doe` nil(v)|, for any change structure |chs(V)| and value |v `elem` V|.
+  |dv `doe` nil(v)|, for any change structure $\chs V$ and value |v `elem` V|.
 \end{lemma}
 \begin{proof}
   All nil changes for |v| share the same source and destination |v|, so they're
@@ -397,8 +396,8 @@ derivatives of functions, using a variant of
   We call binary function |f'| a \emph{derivative} of |f| if
   \[|f (a `oplus` da) = f a `oplus` f' a da|\text{.}\] holds for all values |a
   `elem` A| and corresponding changes |da `elem` Dt ^ A|, assuming a function |f
-  `elem` A -> B| and change structures |chs(A)| and |chs(B)| on the domain and
-  codomain of function |f|. \qed
+  `elem` A -> B| and change structures $\chs A$ and $\chs B$ on the domain and
+  codomain of function |f|.\qed
 \end{definition}
 
 This definition implies that |f' a da| is a change for |f a| for any suitable
@@ -448,7 +447,7 @@ earlier in \cref{sec:changeeeq}:
   \label{thm:deriv-respect-doe}
   A derivative |f'| of function |f `elem` A -> B| always respects change
   equivalence, that is, if |dv1 `doe` dv2|, then |f' v dv1 `doe` f' v dv2|, for
-  any value |v `elem` A|, change structure |chs(A)| and changes |dv1, dv2 `elem`
+  any value |v `elem` A|, change structure $\chs A$ and changes |dv1, dv2 `elem`
   Dt v|.
 \end{lemma}
 \begin{proof}
@@ -463,7 +462,7 @@ earlier in \cref{sec:changeeeq}:
   \label{thm:deriv-nil}
   Applying a derivative to a value and its nil change gives a nil change, up to
   change equivalence; formally, we have |df a nil(a) `doe` nil(f a)| for any
-  change structures |chs(A)| and |chs(B)|, function |f `elem` A -> B|, value |a
+  change structures $\chs A$ and $\chs B$, function |f `elem` A -> B|, value |a
   `elem` A|, and |df| derivative of |f|.
 \end{lemma}
 
