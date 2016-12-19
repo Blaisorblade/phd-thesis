@@ -3,10 +3,10 @@
 %include changes.fmt
 
 %\section{Changes as First-Class Values}
-\section{Formalizing changes}
+%\section{Formalizing changes}
 \label{sec:1st-order-changes}
 
-This section introduces a formal concept of changes; this
+This chapter introduces a formal concept of changes; this
 concept was already used informally in \cref{eq:correctness} and is central
 to our approach. We first define change structures formally, then construct 
 change structures for functions between change structures,
@@ -17,7 +17,7 @@ and finally show that derivatives are a special case of function changes.
 % this theory to functions representing the meaning of programs,
 % but we prefer to develop our theory
 
-\subsection{Change structures}\label{ssec:change-structures}
+\section{Change structures}\label{ssec:change-structures}
 Consider a set of values, for instance the set of natural numbers
 $\mathbb{N}$. A change $\D v$ for $v \in \mathbb{N}$ should
 describe the difference between $v$ and another natural $\New{v}
@@ -295,7 +295,7 @@ data SeqChange a = Seq (SeqSingleChange a)
 %
 \end{examples}
 
-\subsection{Change equivalence}
+\section{Change equivalence}
 \label{sec:changeeeq}
 Next, we formalize when two changes are ``equivalent'', and show
 that any change |dv| is equivalent to the difference
@@ -386,7 +386,7 @@ equivalence: equivalent changes will be mapped to equivalent changes or to equal
 values.\footnote{We expect that, in homotopy type theory, we could use higher
   inductive types to make change equivalence part of the equality on changes.}
 
-\subsection{Derivatives}
+\section{Derivatives}
 After defining change structures, we can define more formally
 derivatives of functions, using a variant of
 \cref{eq:correctness}.

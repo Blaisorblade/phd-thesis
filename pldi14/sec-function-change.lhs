@@ -2,7 +2,7 @@
 %include polycode.fmt
 %include changes.fmt
 
-\subsection{Function changes}
+\section{Function changes}
 \label{sec:function-change}
 
 Allowing values to change is useful, but we need to enable also functions to change.
@@ -349,7 +349,7 @@ because a function
 change receives strictly more information than a pointwise
 change, and is therefore more readily optimized.
 
-\subsection{Nil changes are derivatives}
+\section{Nil changes are derivatives}
 
 \cref{thm:incrementalization} tells us about the form an
 incremental program may take. If $\D f$ doesn't change $f$
