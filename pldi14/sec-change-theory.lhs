@@ -92,7 +92,7 @@ their arithmetical difference $x-y$. In this case, the change
 application operator $\APPLY$ would be the normal addition
 operator $+$. With these definitions, thanks to the structure of
 $+$, $\App{\App{\Derive{f}}{\Old{v}}}{\D v}$ can produce its
-result without even using $\Old{v}$, in time $O(|\D v|)$ (we
+result without even using $\Old{v}$, in time $O(||\D v||)$ (we
 explain later how to compute $\Derive{f}$ automatically).
 
 For now, we simply note that we cannot fix $\Change{\Gt} = \Gt \r
@@ -125,30 +125,33 @@ The following definition sums up the discussion so far:
 
   \begin{subdefinition}
   \item |V| is a set, called the \emph{base set}.
+    \label{def:base-set}
   \item |Dt ^ v| is a set, called the \emph{change set}, for any |v `elem` V|.
+    \label{def:change-set}
   \item Value |v `oplus` dv| belongs to V for any |v `elem` V| and |dv `elem` Dt
-    ^ v|. We also call $v$ the \emph{base value} of the change, or its
+    ^ v|. We also call |v| the \emph{base value} of the change, or its
     \emph{source}; we call |v `oplus` dv| the \emph{updated value} of the
     change, or its \emph{destination}/\emph{target}.
     \label{def:update}
-  \item We have |u `ominus` v `elem` Dt ^ v| for any base values |u, v `elem` V|.
+  \item |`ominus`| produces changes: We have |u `ominus` v `elem` Dt ^ v| for any base values |u, v `elem` V|.
     \label{def:diff}
-  \item We have |v `oplus` (u `ominus` v) = u| for any |u, v `elem` V|.
+  \item Change cancellation holds, that is, updating with a difference gives the difference's target: We have |v `oplus` (u `ominus` v) = u| for any |u, v `elem` V|.
     \qed
     \label{def:update-diff}
   \end{subdefinition}
 \end{definition}
 
 \paragraph{Notation}
-We overload operators $\CHANGE$, $\DIFF$ and $\UPDATE$ to refer
+We overload operators |Dt|, |`oplus`| and |`ominus`| to refer
 to the corresponding operations of different change structures;
 we will subscript these symbols when needed to prevent ambiguity.
 For any $\chs V$, we write |V| for its first component,
 as above. We make |`oplus`| left-associative, that is,
 |v `oplus` dv1 `oplus` dv2| means |(v `oplus` dv1) `oplus` dv2|.
 We assign precedence to function application over
-$\UPDATE$ and $\DIFF$, that is, $\Update{\App{f}{a}}{\App{\App{g}{a}}{\D a}}$ means
-$\Update{\App*{f}{a}}{\App*{\App{g}{a}}{\D a}}$.
+|`oplus`| and |`ominus`|, that is,
+|f a `oplus` g a da| means
+|(f a) `oplus` (g a da)|.
 
 \paragraph{Changes as graph edges}
 We'll also treat a change between a source and destination as an
