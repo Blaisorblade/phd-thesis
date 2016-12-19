@@ -391,9 +391,14 @@ change, and is therefore more readily optimized.
 
 \section{Nil changes are derivatives}
 
-\cref{thm:incrementalization} tells us about the form an
-incremental program may take. If $\D f$ doesn't change $f$
-at all, that is, if
+We anticipated that function changes generalize derivatives. It
+turns out that indeed derivatives are special function changes,
+in particular, they are nil changes, and viceversa.
+
+% No clue what this commented out sentence from the paper means.
+% \cref{thm:incrementalization} tells us about the form an
+% incremental program may take.
+If |df| is a nil change for |f|, that is, if
 $
 \Apply{\D f}{f}= f
 $,
@@ -418,13 +423,16 @@ derivative (see \cref{def:derivatives}):
 \begin{optionalproof}
   Let $a \in A$ be an arbitrary value with a corresponding change
   $\D a \in \Change[A]{a}$. Then
-  \begin{align*}
-    & \App{f}{\Apply*[A]{\D a}{a}}\\
-    & \quad = \App{\Apply*[A \to B]{\NilC[A \to B]{f}}{f}}{\Apply*[A]{\D a}{a}}\\
-    & \quad = \Apply[B]{\App{\App{\NilC[A]{f}}{a}}{\D a}}{\App{f}{a}}
-  \end{align*}
-  holds by \cref{thm:update-nil,thm:incrementalization}, as
-  required for derivatives by \cref{def:derivatives}.
+\begin{equational}
+  \begin{code}
+   f (a `oplus` da)
+=  {- because |nil(f)| is a nil change (\cref{thm:update-nil-v2} for $\chs {A \to B}$) -}
+   (f `oplus` (nil(f))) (a `oplus` da)
+=  {- by \cref{thm:incrementalization} on |nil(f)| -}
+   f a `oplus` nil(f) a da
+\end{code}
+\end{equational}
+So |nil(f)| is a derivative of |f| because it satisfies the appropriate \cref{def:derivatives}.
 \end{optionalproof}
 
 \begin{oldSec}
