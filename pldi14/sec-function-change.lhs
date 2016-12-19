@@ -1,4 +1,7 @@
 % Emacs, this is -*- latex -*-!
+%include polycode.fmt
+%include changes.fmt
+
 \subsection{Function changes}
 \label{sec:function-change}
 

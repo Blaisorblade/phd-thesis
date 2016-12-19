@@ -17,6 +17,7 @@ change-theory-reconstruct.tex
 new-stuff.tex
 pldi14/sec-intro.tex
 pldi14/sec-change-theory.tex
+pldi14/sec-function-change.tex
 mylhs2tex.sty
 
 ## Core latex/pdflatex auxiliary files:
