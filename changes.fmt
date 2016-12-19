@@ -9,6 +9,11 @@
 %format `ominus` = "\ominus "
 %format oplus = "(\oplus)"
 %format ominus = "(\ominus)"
+
+%  format `oplusIdx(t)` = "\oplus_{" t "}"
+%format oplusIdx(t) = "\oplus_{" t "}"
+%format ominusIdx(t) = "\ominus_{" t "}"
+
 %format `ocompose` = "\circledcirc "
 %format ocompose = "(\circledcirc)"
 
@@ -20,6 +25,7 @@
 %format ^^ = "\;"
 %format f0
 %format f1
+%format f2
 %format a0
 %format a1
 %format a2
@@ -46,6 +52,7 @@
 %format dx3
 
 %format Dt = "\Delta"
+%format DtIdx(t) = "\Delta_{" t "}"
 %format DV = "\Delta V"
 
 %format (nil(v)) = "\NilC{" v "}"

@@ -5,74 +5,91 @@
 \section{Function changes}
 \label{sec:function-change}
 
-Allowing values to change is useful, but we need to enable also functions to change.
-To understand why, think about the curried function
-$\Program$: it takes $\Xs$ to a function value (closure) knowing the value of $\Xs$.
-Its derivative $\Derivative$ should satisfy
-\begin{align*}
-& \Program~(\Xs \UPDATE \DXs) = \\
-& \Program~\Xs \UPDATE \Derivative~\Xs~\DXs.
-\end{align*}
-That is, $\Derivative$ must take $\Xs$ and its change to a change
+Up to now we described how to model changes for non-function
+values; in this section we model changes for first-class
+functions.
+
+To understand why we must consider function changes, consider the curried function
+|grand_total|: it takes |xs| to a function value (that is, closure) that
+knows the value of |xs|. Its derivative |dgrand_total| should
+satisfy
+\begin{code}
+grand_total (xs `oplus` dxs) =
+grand_total xs `oplus` dgrand_total xs dxs
+\end{code}
+That is, |dgrand_total| must take |xs| and its change to a change
 of a closure; updating the closure with this change must give the
-same result as $\Program~(\Xs \UPDATE \DXs)$, that is a closure
-knowing the value of $\Xs \UPDATE \DXs$.
+same result as |grand_total (xs `oplus` dxs)|, that is a closure
+knowing the value of |xs `oplus` dxs|.
 %
 Similarly, since lambda-calculus functions can also take other
 functions as arguments, derivatives can take function changes as
 arguments.
 
 In this section, we will demonstrate how we can construct change structures
-for functions $f \in A
-\to B$, assuming change structures for $A$ and $B$.
+for functions |f `elem` A -> B|, assuming change structures for |A| and |B|.
 
 \paragraph{Definitions}
-As seen, the derivative of $f$ computes the change of
-$\App f a$ when $a$ becomes $\Upd{a}$. However, also $f$ can
-change: As we'll see in \cref{ssec:differentiation},
-to incrementalize a function application $f \APP a$ we need to compute the difference $\Upd*{f} \APP
-\Upd*{a} \DIFF f \APP a$ without rerunning $\Upd*{f} \APP
-\Upd*{a}$. We compute this difference using function changes,
-and define change structures on functions precisely to make this possible.
-A function change $\D f$ must be a function such that $\Update{\App {f} {a}}{\App{\App{\D f}{a}}{\D a}} = \App
-{\Upd*{f}} {\Upd*{a}}$ (\cref{thm:incrementalization})!
-Since however $\Upd{f}$ can't be defined yet, we impose a
-requirement (\cref{def:function-changes:validity}) that we'll
-later show equivalent to \cref{thm:incrementalization}.
+As discussed, derivatives enable incrementalizing function
+application when function arguments change. When |a| changes to
+|a `oplus` da|, we can compute the change of |f a|
+\emph{incrementally}: That is, instead of computing |f (a `oplus`
+da) `ominus` f a| (which applies |f| on the whole updated input
+and is potentially very slow), we can use the derivative |df|
+and compute |df a da|. We can be sure these changes are
+equivalent (\cref{lem:derivatives-up-to-doe}), and as we'll show
+that using can be much faster.
 
-% Our definition of function changes
-%will guarantee that a function change $\D f$ accepts as arguments
-%the original value ${a}$ and a change for it, $\D a \in \Change{{a}}$, and returns a
-%change for ${a}$ --- in particular, we will ensure that
-%$\Update{\App {f} {{a}}}{\App{\App{\D f}{a}}{\D a}} = \App
-%{\Upd*{f}} {\Upd*{a}}$ (\cref{thm:incrementalization}).
+We represent function changes as binary functions that generalize
+derivatives, so that function changes enable incrementalizing
+function application when both function arguments and functions
+change. When |a| changes to |a `oplus` da| and additionally |f|
+changes to |f `oplus` df|, we can compute the change of |f a|
+\emph{incrementally}: That is, instead of computing |(f `oplus`
+df) (a `oplus` da) `ominus` f a| (which again applies the updated
+function |f `oplus` df| on the whole updated input and is
+potentially very slow), we can use change |df| and compute |df a
+da|. We'll ensure these changes are equivalent
+(\cref{thm:incrementalization})
+\[|df a da `doe` (f `oplus` df) (a `oplus` da)
+  `ominus` f a|\]
+and we'll see that the latter can
+be, again, much faster. We will apply this insight in
+\cref{ssec:differentiation}.
 
-% moreover, we impose an additional condition which
-%will be equivalent to
-%it must be possible to ``flip''
-%an element change $\D a$ from a function change to its associated
-%function:
+However, to guarantee correctness we must place requirements on
+function changes. \Cref{thm:incrementalization} is not true for
+arbitrary functions |df|. Instead, we add it as a requirement in
+the definition of function changes. However, we must define the
+set of function changes \emph{before} we formally define
+|`oplus`| on them, so we need to rephrase
+\cref{thm:incrementalization}. We will define |(f `oplus` df) a|
+as |f a `oplus` df a (nil(a))|, so \cref{thm:incrementalization}
+becomes
+\[|df a da `doe` f (a `oplus` da) `oplus` df (a `oplus` da)
+  (nil(a `oplus` da)) `ominus` f a|\] or, in terms of equality,
+\[|f a `oplus` df a da = f (a `oplus` da) `oplus` df (a `oplus`
+  da) (nil(a `oplus` da))|\text{.}\] We use this equation as part
+of the definition of function changes
+(\cref{def:function-changes:validity}), and which we'll use in
+the proof of \cref{thm:incrementalization}.
 
 \begin{definition}
   \label{def:function-changes:change}
-  Given change structures $\ChangeStruct{A}$ and $\ChangeStruct{B}$ and
-  $f \in A \to B$,
-  the set $\Change[A \to B]{f}$ contains all binary functions $\D
-  f$ such that
-  \NewDocumentCommand{\TheNewValue}{}{\Upd*{a}}
+  The change set |DtIdx(A -> B) f| is defined for any change
+  structures $\chs A$ and $\chs B$ and function |f `elem` A ->
+  B|.
+  This change set contains all binary functions |df| that satisfy the following conditions:
   \begin{subdefinition}
     \item
       \label{def:function-changes:signature}
-      $\App{\App{\D f}{a}}{\D a} \in \Change[B]{\App*{f}{a}}$ and
+      |df a da `elem` DtIdx(B) (f a)| and
     \item
       \label{def:function-changes:validity}
-      $\App{f}{a} \UPDATE \App{\App{\D f}{a}}{\D a} =
-      {\App{f}{\TheNewValue}}
-      \UPDATE
-      \App{\App{\D f}{\TheNewValue}}{\NilC{\TheNewValue}}$
+      |f a `oplus` df a da = f (a `oplus` da) `oplus` df (a `oplus` da) (nil(a `oplus` da))|.
   \end{subdefinition}
-  for all values $a \in A$ and corresponding changes $\D a \in
-  \Change[A]{a}$.
+  for all values |a `elem` A| and corresponding changes
+  |da `elem` DtIdx(A) ^ a|.
 \end{definition}
 
 \begin{examples}
@@ -119,133 +136,156 @@ similarly to a distributive law.
 \begin{definition}[Operations on function changes]
   \label{def:function-changes:update}
   \label{def:function-changes:diff}
-  Given change structures $\ChangeStruct{A}$ and $\ChangeStruct{B}$,
-  the operations $\APPLY[A \to B]$ and $\DIFF[A \to B]$ are
-  defined as follows.
+  Operations |oplusIdx(A -> B)| and |ominusIdx(A -> B)| are defined as follows
+  for all change structures $\chs A$ and $\chs B$:
   %
-  \begin{alignat*}{5}
-    &\App{(\Update[A \to B]{f&&}{\D f})}{&&v}
-      && = \Update[B]{\App{f}{v}&&}{\App{\App{\D f}{v}}{\NilC[A]{v}}}\\
-    &\App{\App{(\Diff[A \to B]{f_2&&}{f_1})}{&&v}}{\D v}
-      && = \Diff[B]{\App{f_2}{\Update*[A]{v}{\D v}}&&}{\App{f_1}{v}}\qedAligned
-  \end{alignat*}
+\begin{code}
+(f   `oplus` df)   v     = f v                `oplus`   df v (nil(v))
+(f2  `ominus` f1)  v dv  = f2 (v `oplus` dv)  `ominus`  f1 v
+\end{code}%
+  % \begin{alignat*}{5}
+  %   &\App{(\Update[A \to B]{f&&}{\D f})}{&&v}
+  %     && = \Update[B]{\App{f}{v}&&}{\App{\App{\D f}{v}}{\NilC[A]{v}}}\\
+  %   &\App{\App{(\Diff[A \to B]{f_2&&}{f_1})}{&&v}}{\D v}
+  %     && = \Diff[B]{\App{f_2}{\Update*[A]{v}{\D v}}&&}{\App{f_1}{v}}\qedAligned
+  % \end{alignat*}
 \end{definition}
 
 
 \begin{optionallemma}
   \label{thm:diff-valid}
-  Given change structures $\ChangeStruct{A}, \ChangeStruct{B}$ and functions $f_1, f_2 \in A
-  \to B$, then $\Diff[A \to B]{f_2}{f_1} \in \Change[A \to B]{f_1}$.
+  Difference |f2 `ominus` f1| belongs to |DtIdx(A -> B) f1|
+  for any change structures $\chs A$, $\chs B$ and functions |f1,
+  f2 `elem` A -> B|.
 \end{optionallemma}
 
 \begin{optionalproof}
   We have to verify the two properties of
-  \cref{def:function-changes:change}. The first follows from
-  \cref{def:diff} for the change structure $\ChangeStruct{B}$. It remains to
-  verify \cref{def:function-changes:validity}.
+  \cref{def:function-changes:change}.
 
-  Let $a_1 \in A$ be an arbitrary value with a corresponding
-  change $\D a \in \Change[A]{a}$, and let $a_2$ be
-  $\Apply{\D a}{a_1}$, then
-  \begin{align*}
-  & \Apply[B]
-      {\App{\App{\Diff*[A \to B]{f_2}{f_1}}{a_1}}{\D a}}
-      {\App{f_1}{a_1}}\\
-  & \quad = \Apply[B]
-               {\Diff*[B]
-                 {\App{f_2}{a_2}}
-                 {\App{f_1}{a_1}}}
-               {\App{f_1}{a_1}}\\
-  & \quad = \App{f_2}{a_2}\\
-  & \quad = \Apply[B]
-              {\Diff*[B]
-                {\App{f_2}{a_2}}
-                {\App{f_1}{a_2}}}
-              {\App{f_1}{a_2}}\\
-  & \quad = \Apply[B]
-              {\Diff*[B]
-                {\App{f_2}{\Apply*{\NilC[B]{a_2}}{a_2}}}
-                {\App{f_1}{a_2}}}
-              {\App{f_1}{a_2}}\\
-  & \quad = \Apply[B]
-              {\App{\App{\Diff*[A \to B]{f_2}{f_1}}{a_2}}{\NilC{a_2}}}
-              {\App{f_1}{a_2}}
-  \end{align*}
-  by
-  \cref{def:function-changes:diff,def:update-diff,thm:update-nil}.
+  We first prove \cref{def:function-changes:signature}. It says that
+  |(f2 `ominus` f1) a da `elem` DtIdx(B) (f1 a)| for any |a `elem` A|. Since
+  |(f2 `ominus` f1) a da| is defined to be |f2 (a `oplus` da) `ominus` f1 a|, the thesis follows from the type of |`ominus`|, that is, \cref{def:diff} for change structure $\chs B$.
+
+  We next prove \cref{def:function-changes:validity}, that is
+  \[|f1 a `oplus` (f2 `ominus` f1) a da = f1 (a `oplus` da) `oplus`
+  (f2 `ominus` f1) (a `oplus` da) (nil(a `oplus` da))|.\]
+
+  For convenience, let us replace |a| by |a1| and |a `oplus` da|
+  by |a2|, where |a1 `elem` A| is an arbitrary value with a
+  corresponding change |da `elem` DtIdx(A) a1|, and |a2| is |a1
+  `oplus` da|. The thesis becomes then:
+  \[|f1 a1 `oplus` (f2 `ominus` f1) a1 da = f1 a2 `oplus` (f2
+    `ominus` f1) a2 (nil(a2))|.\]
+
+  Let |a1 `elem` A| be an arbitrary value with a corresponding
+  change |da `elem` DtIdx(A) a1|, and let |a2| be
+  |a1 `oplus` da|. We prove the thesis by equational reasoning through the following calculation:
+\begin{equational}
+\begin{code}
+   f1 a1 `oplus` (f2 `ominus` f1) a1 da
+=  {- by the definition of |`ominus`| on functions (\cref{def:function-changes:diff}) -}
+   f1 a1 `oplus` (f2 (a1 `oplus` da) `ominus` f1 a1)
+=  {- because |a2 = a1 `oplus` da| -}
+   f1 a1 `oplus` (f2 a2 `ominus` f1 a1)
+=  {- by change cancellation (\cref{def:update-diff}) -}
+   f2 a2
+=  {- again by chance cancellation, in reverse -}
+   f1 a2 `oplus` (f2 a2 `ominus` f1 a2)
+=  {- because |nil(a2)| is a nil change (\cref{thm:update-nil-v2}) -}
+   f1 a2 `oplus` (f2 (a2 `oplus` (nil(a2))) `ominus` f1 a2)
+=  {- by the definition of |`ominus`| on functions (\cref{def:function-changes:diff}) -}
+   f1 a2 `oplus` ((f2 `ominus` f1) a2 (nil(a2)))
+\end{code}
+\end{equational}
 \end{optionalproof}
 
 All these definitions have been carefully set up to ensure that we have
 in fact lifted change structures to function spaces.
 
-
 \begin{theorem}
   \label{thm:func-changestruct}
-  Given change structures $\ChangeStruct{A}$ and $\ChangeStruct{B}$, the tuple $(A \to B, \CHANGE[A
-  \to B], \UPDATE[A \to B], \DIFF[A \to B])$ is a
-  change structure, which we denote by $\ChangeStruct{A} \to \ChangeStruct{B}$.
+  The tuple |(A -> B, DtIdx(A -> B), oplusIdx(A -> B),
+  ominusIdx(A -> B))| is a change structure, which we denote by
+  $\chs A \to \chs B$, for any change structures $\chs A$ and
+  $\chs B$.
 \end{theorem}
 
 \begin{optionalproof}
   We have to verify the five properties of
-  \cref{def:change-struct}. The first two follow by
-  construction. \Cref{def:update} follows from the corresponding
-  property of the change structure $\ChangeStruct{B}$. \Cref{def:diff} is
-  verified in \cref{thm:diff-valid}. It remains to verify
+  \cref{def:change-struct}.
+  \begin{subdefinition}
+  \item |A -> B| is a set (\cref{def:base-set}).
+  \item By construction, |DtIdx(A -> B) f| is a set for any |f
+    `elem` A -> B| (\cref{def:change-set}).
+  \item Next we verify the typing of |`oplus`|: we must show that
+    |f `oplus` df `elem` A -> B|, and this follows because |(f
+    `oplus` df) a = f a `oplus` df a (nil(a)) `elem` B|
+    (\cref{def:update}).
+  \item We proved in \cref{thm:diff-valid} that |`ominus`|
+    produces changes (\cref{def:diff}).
+\item It remains to verify
   \cref{def:update-diff}.
 
-  Let $f_1, f_2 \in A \to B$ be arbitrary functions. We show that
-  $\Apply[A \to B]{\Diff*[A \to B]{f_2}{f_1}}{f_1}$ is
-  extensionally equal to $f_2$. Let $a \in A$ be an arbitrary
-  value, then
-  \begin{align*}
-    & \App{\Apply*[A \to B]{\Diff*[A \to B]{f_2}{f_1}}{f_1}}{a}\\
-    & \quad = \Apply[B]
-                {\App{\App{\Diff*[A \to B]{f_2}{f_1}}{a}}{\NilC[A]{a}}}
-                {\App{f_1}{a}}\\
-    & \quad = \Apply[B]
-                {\Diff*[B]{\App{f_2}{\Apply*[A]{a}{\NilC[A]{a}}}}{\App{f_1}{a}}}
-                {\App{f_1}{a}}\\
-    & \quad = \Apply[B]
-                {\Diff*[B]{\App{f_2}{a}}{\App{f_1}{a}}}
-                {\App{f_1}{a}}\\
-    & \quad = \App{f_2}{a}
-  \end{align*}
-  by the definitions of $\APPLY[A \to B]$ and $\DIFF[A \to B]$,
-  \cref{thm:update-nil} for the change structure $\ChangeStruct{A}$ and
-  \cref{def:update-diff} for the change structure $\ChangeStruct{B}$.
+  Let |f1, f2 `elem` A -> B| be arbitrary functions. Our thesis
+  is that |f1 `oplus` (f2 `ominus` f1) = f2|. We show this
+  equality is extensionally true.\pg{Expand on extensionality in
+    footnote/earlier.} In other words, we show that |(f1 `oplus`
+  (f2 `ominus` f1)) = f2 a| for an arbitrary |a `elem` A|. We
+  prove the thesis by equational reasoning through the following
+  calculation:
+  % $\Apply[A \to B]{\Diff*[A \to B]{f_2}{f_1}}{f_1}$ is
+  % extensionally equal to $f_2$.
+
+\begin{equational}
+\begin{code}
+   (f1 `oplus` (f2 `ominus` f1)) a
+=  {- by the definition of |`oplus`| on functions -}
+   f1 a `oplus` ((f2 `ominus` f1) a (nil(a)))
+=  {- by the definition of |`ominus`| on functions -}
+   f1 a `oplus` (f2 (a `oplus` (nil(a))) `ominus` f1 a)
+=  {- because |nil(a)| is a nil change (\cref{thm:update-nil-v2} for $\chs A$) -}
+   f1 a `oplus` (f2 a `ominus` f1 a)
+=  {- by change cancellation (\cref{def:update-diff} for $\chs B$) -}
+   f2 a
+\end{code}
+\end{equational}
+\end{subdefinition}
 \end{optionalproof}
 
-After defining this change structure, we can talk about $f
-\UPDATE df$. So we can restate \cref{def:function-changes:validity}
-to show that a function change $\D f$ reacts to
-%
-input changes $\D a$ like the incremental version of $f$, that is,
-$\App{\App{\D f}{a}}{\D a}$ computes the change from
-$\App{f}{a}$ to
-$\App{\Apply*{\D f}{f}}{\Apply*{\D a}{a}}$:
+After defining this change structure, as promised we finally restate
+\cref{def:function-changes:validity}: we show that a function
+change |df| reacts to input changes |da| like the incremental
+version of |f|, that is, |df a da| computes the change from |f a|
+to |(f `oplus` df) (a `oplus` da)|:
 
 \begin{theorem}[Incrementalization]
   \label{thm:incrementalization}
-  Given change structures $\ChangeStruct{A}$ and $\ChangeStruct{B}$, a function $f \in A \to B$
-  and a value $a \in A$ with corresponding changes $\D f \in
-  \Change[A \to B]{f}$ and $\D a \in \Change[A]{a}$, we have that
-  \[\App{\Apply*{\D f}{f}}{\Apply*{\D a}{a}}
-  = \Apply{\App{\App{\D f}{a}}{\D a}}{\App{f}{a}}\text{.}\qed\]
+  Given change structures $\chs A$ and $\chs B$, a function |f `elem` A -> B|
+  and a value |a `elem` A| with corresponding changes |df `elem` Dt f| and
+  |da `elem` Dt a|, we have that
+  \[|df a da `doe` (f `oplus` df) (a `oplus` da) `ominus` f a|\]
+  or equivalently
+
+  \[|(f `oplus` df) (a `oplus` da) = f a `oplus` df a da|\text{.}\qed\]
 \end{theorem}
 
 \begin{optionalproof}
   \NewDocumentCommand{\TheNewValue}{}{\Apply*[A]{\D a}{a}}
 
-  Let $f$, $a$, $\D f$ and $\D a$ be arbitrary, as in the statement. Then
-  \begin{align*}
-    & \App{\Apply*[A \to B]{\D f}{f}}{\Apply*[A]{\D a}{a}}\\
-    & \quad = \Apply[B]{\App{\App{\D f}{\TheNewValue}}{\NilC{\TheNewValue}}}{\App{f}{\TheNewValue}}\\
-    & \quad = \Apply[B]{\App{\App{\D f}{a}}{\D a}}{\App{f}{a}}
-  \end{align*}
-  by
-  \cref{def:function-changes:update,def:function-changes:validity}
-  as required.
+  Take arbitrary |f|, |a|, |df| and |da|, as in the statement.
+  The two forms of the thesis are equivalent by
+  \cref{thm:equiv-cancel}. We prove the second form of the thesis
+  by equational reasoning:
+\begin{equational}
+\begin{code}
+   (f `oplus` df) (a `oplus` da)
+=  {- by the definition of |`oplus`| on functions -}
+   f (a `oplus` da) `oplus` df (a `oplus` da) (nil(a `oplus` da))
+=  {- by \cref{def:function-changes:validity} -}
+   f a `oplus` df a da
+\end{code}
+\end{equational}
 \end{optionalproof}
 
 For instance,

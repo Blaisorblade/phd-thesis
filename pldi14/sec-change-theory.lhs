@@ -337,10 +337,10 @@ follows:
 
 \begin{lemma}
   \label{def:diff-update-lemma}
-  Given a change structure $\chs V = |(V, Dt, `oplus`, `ominus`)|$,
-  for any base value |v `elem` V| and for any change |dv| valid
-  for |v| (that is, |dv `elem` Dt^v|), we have |(v `oplus` dv)
-  `ominus` v `doe` dv|.
+  We have |(v `oplus` dv) `ominus` v `doe` dv| for any change
+  structure $\chs V = |(V, Dt, `oplus`, `ominus`)|$, base value
+  |v `elem` V| and change |dv| valid for |v| (that is, |dv `elem`
+  Dt^v|).
 \end{lemma}
 \begin{proof}
 Since both sides are changes for |v|, the thesis is equivalent to |v `oplus` ((v
@@ -350,6 +350,28 @@ To prove our thesis, we remember that thanks to \cref{def:update-diff},
 for any |v1, v2 `elem` V| we have |v1 `oplus` (v2 `ominus` v1) = v2|. We can take |v1
 = v|, |v2 = v `oplus` dv| and obtain |v `oplus` ((v `oplus` dv) `ominus` v) = v
 `oplus` dv|, which is exactly our thesis.
+\end{proof}
+
+With change equivalence we can generalize some rules from high
+school algebra. There, we learn to add or subtract members from
+both sides of an equation: if and only if |a = b| then |a + c = b
++ c| and |a - c = b - c|, so that |a + b = c| is equivalent to |a
+= c - b|. Similarly we have:
+
+\begin{lemma}[Equivalence cancellation]
+  \label{thm:equiv-cancel}
+  |v2 `ominus` v1 `doe` dv| holds if and only if |v2 = v1 `oplus`
+  dv|, for any |v1, v2 `elem` V| and |dv `elem` Dt ^ v1|.
+\end{lemma}
+\begin{proof}
+  We prove both sides of the equivalence separately.
+  First, if |v2 `ominus` v1 `doe` dv|, by definition |v1 `oplus` (v2
+  `ominus` v1) = v1 `oplus` dv|, and canceling on the left side
+  we get |v2 = v1 `oplus` dv| as desired.
+
+  Second, if |v2 = v1 `oplus` dv|, then |v2 `ominus` v1 = (v1
+  `oplus` dv) `ominus` v1 `doe` dv| (using change cancellation in
+  the last step) as desired.
 \end{proof}
 
 Change equivalence is indeed an equivalence relation, as stated
@@ -397,7 +419,7 @@ derivatives of functions, using a variant of
 \begin{definition}[Derivatives]
   \label{def:derivatives}
   We call binary function |df| a \emph{derivative} of |f| if
-  \[|f (a `oplus` da) = f a `oplus` df a da|\text{.}\] holds for all values |a
+  \[|f (a `oplus` da) = f a `oplus` df a da|\] holds for all values |a
   `elem` A| and corresponding changes |da `elem` Dt ^ A|, assuming a function |f
   `elem` A -> B| and change structures $\chs A$ and $\chs B$ on the domain and
   codomain of function |f|.\qed
