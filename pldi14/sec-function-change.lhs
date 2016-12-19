@@ -5,9 +5,6 @@
 \subsection{Function changes}
 \label{sec:function-change}
 
-% moved here to avoid annoying out-of-order figures.
-\input{pldi14/fig-base-derive}
-
 Allowing values to change is useful, but we need to enable also functions to change.
 To understand why, think about the curried function
 $\Program$: it takes $\Xs$ to a function value (closure) knowing the value of $\Xs$.
