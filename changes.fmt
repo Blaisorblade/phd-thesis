@@ -48,7 +48,7 @@
 %format Dt = "\Delta"
 %format DV = "\Delta V"
 
-%format nil(v) = "\NilC{" v "}"
+%format (nil(v)) = "\NilC{" v "}"
 %format NIL = "\NILC"
 %format eval(t) = "\mean{" t "}"
 %format derive(t) = "\Derive{" t "}"
