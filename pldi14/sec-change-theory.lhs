@@ -396,29 +396,29 @@ derivatives of functions, using a variant of
 
 \begin{definition}[Derivatives]
   \label{def:derivatives}
-  We call binary function |f'| a \emph{derivative} of |f| if
-  \[|f (a `oplus` da) = f a `oplus` f' a da|\text{.}\] holds for all values |a
+  We call binary function |df| a \emph{derivative} of |f| if
+  \[|f (a `oplus` da) = f a `oplus` df a da|\text{.}\] holds for all values |a
   `elem` A| and corresponding changes |da `elem` Dt ^ A|, assuming a function |f
   `elem` A -> B| and change structures $\chs A$ and $\chs B$ on the domain and
   codomain of function |f|.\qed
 \end{definition}
 
-This definition implies that |f' a da| is a change for |f a| for any suitable
+This definition implies that |df a da| is a change for |f a| for any suitable
 base value |a| and change |da|.
 
 Using change equivalence we immediately obtain an alternative characterization of derivatives:
 
 \begin{lemma}[Characterization of derivatives up to change equivalence]
   \label{lem:derivatives-up-to-doe}
-  A derivative |f'| of function |f `elem` A -> B| can be characterized (up to
-  change equivalence) by |f' a da `doe` f (a `oplus` da) `ominus` f a|.
+  A derivative |df| of function |f `elem` A -> B| can be characterized (up to
+  change equivalence) by |df a da `doe` f (a `oplus` da) `ominus` f a|.
 \end{lemma}
 \begin{proof}
-  Since |f' v dv| is a change for |f v|, inlining the definition of change
+  Since |df v dv| is a change for |f v|, inlining the definition of change
   equivalence in the thesis gives
-  \[|f a `oplus` f' a da = f a `oplus` (f (a `oplus` da) `ominus` f a)|\] Once
+  \[|f a `oplus` df a da = f a `oplus` (f (a `oplus` da) `ominus` f a)|\] Once
   we simplify the right-hand side via \cref{def:update-diff}, we're left with
-  \[|f a `oplus` f' a da = f (a `oplus` da)|\]
+  \[|f a `oplus` df a da = f (a `oplus` da)|\]
   which is the defining property of derivatives.\qed
 \end{proof}
 
@@ -439,8 +439,8 @@ Here we are defining derivatives of mathematical functions, but
 we will use them to define the meaning of derivatives of
 programs. Intuitively, once we define a suitable set-theoretic
 denotational semantics for programs, and a program transformation
-that takes a program |f| to its derivative |f'|, we will ensure
-that our semantics takes a program derivative |eval(f')| to a
+that takes a program |f| to its derivative |df|, we will ensure
+that our semantics takes a program derivative |eval(df)| to a
 derivative of the semantics of the base program |eval(f)|.
 
 We immediately verify that derivatives respect change equivalence, as promised
@@ -448,16 +448,16 @@ earlier in \cref{sec:changeeeq}:
 
 \begin{lemma}[Derivatives respect change equivalence]
   \label{thm:deriv-respect-doe}
-  A derivative |f'| of function |f `elem` A -> B| always respects change
-  equivalence, that is, if |dv1 `doe` dv2|, then |f' v dv1 `doe` f' v dv2|, for
+  A derivative |df| of function |f `elem` A -> B| always respects change
+  equivalence, that is, if |dv1 `doe` dv2|, then |df v dv1 `doe` df v dv2|, for
   any value |v `elem` A|, change structure $\chs A$ and changes |dv1, dv2 `elem`
   Dt v|.
 \end{lemma}
 \begin{proof}
   By hypothesis changes |dv1| and |dv2| are equivalent, that is |v `oplus` dv1 = v `oplus` dv2|. We
   prove the thesis directly by equational reasoning using \cref{lem:derivatives-up-to-doe}:
-  \[|f' v dv1 `doe` f (v `oplus` dv1) `ominus` f v = f (v `oplus` dv2) `ominus`
-    f v `doe` f' v dv2|\text{.}\qed\]
+  \[|df v dv1 `doe` f (v `oplus` dv1) `ominus` f v = f (v `oplus` dv2) `ominus`
+    f v `doe` df v dv2|\text{.}\qed\]
 \end{proof}
 
 %
