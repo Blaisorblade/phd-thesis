@@ -399,9 +399,7 @@ in particular, they are nil changes, and viceversa.
 % \cref{thm:incrementalization} tells us about the form an
 % incremental program may take.
 If |df| is a nil change for |f|, that is, if
-$
-\Apply{\D f}{f}= f
-$,
+|f `oplus` df = f|,
 then \cref{thm:incrementalization} becomes
 \[
  \App {f} {\Apply* {\D a} {a}}
@@ -416,7 +414,7 @@ derivative (see \cref{def:derivatives}):
 
 \begin{theorem}[Nil changes are derivatives]
   \label{thm:nil-is-derivative}
-  Given change structures $\ChangeStruct{A}$ and $\ChangeStruct{B}$ and a function $f \in A \to B$,
+  Given change structures $\chs A$ and $\chs B$ and a function $f \in A \to B$,
   the change $\NilC[A \to B]{f}$ is the derivative $f'$ of $f$.
 \end{theorem}
 
@@ -429,11 +427,34 @@ derivative (see \cref{def:derivatives}):
 =  {- because |nil(f)| is a nil change (\cref{thm:update-nil-v2} for $\chs {A \to B}$) -}
    (f `oplus` (nil(f))) (a `oplus` da)
 =  {- by \cref{thm:incrementalization} on |nil(f)| -}
-   f a `oplus` nil(f) a da
+   f a `oplus` (nil(f)) a da
 \end{code}
 \end{equational}
 So |nil(f)| is a derivative of |f| because it satisfies the appropriate \cref{def:derivatives}.
 \end{optionalproof}
+
+\begin{theorem}[Derivatives are nil changes]
+  \label{thm:derivative-is-nil}
+  If |df| is a derivative of |f|, then it is also a nil change of
+  |f|, for any change structures $\chs A$ and $\chs B$ and
+  function |f `elem` A -> B|.
+\end{theorem}
+\begin{proof}
+  We show that |f `oplus` df| is extensionally equivalent to |f|.
+  We consider an arbitrary |a `elem` A| and prove the thesis by
+  equational reasoning:
+\begin{equational}
+\begin{code}
+   (f `oplus` df) a
+=  {- by the definition of |`oplus`| on functions -}
+   f a `oplus` df a (nil(a))
+=  {- by the definition of derivatives \cref{def:derivatives} -}
+   f (a `oplus` (nil(a)))
+=  {- because |nil(a)| is a nil change (\cref{thm:update-nil-v2}) -}
+   f a
+\end{code}
+\end{equational}
+\end{proof}
 
 \begin{oldSec}
 \pg{The following two paragraphs are too verbose, and possibly
