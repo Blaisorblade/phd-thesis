@@ -38,6 +38,7 @@
 % derivative |dgroupFold| could react to the removal of collection elements.
 
 \chapter{Incrementalizing more programs}
+\label{ch:inc-more-programs}
 \pg{Only a sketch for now}
 
 While the basic framework we presented is significant, applying it in practice

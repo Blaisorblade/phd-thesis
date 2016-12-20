@@ -712,6 +712,46 @@ providing models implementing them. \pg{Resume}
 %s ⊝ s = nil s
 %(s₁ ⊝ s₂) ∘ (s₂ ⊝ s₃) = s₁ ⊝ s₃
 \end{oldSec}
+\subsection{Benchmarking setup}
+We run object language programs by generating corresponding Scala code.
+To ensure rigorous
+benchmarking~\citep{Georges07rigorousJavaPerformance}, we use the
+Scalameter benchmarking library. To show that the performance
+difference from the baseline is statistically significant, we
+show 99\%-confidence intervals in graphs.
+
+We verify \cref{eq:correctness} experimentally
+by checking that the two sides of the equation always
+evaluate to the same value.
+
+We ran benchmarks on an 8-core Intel Core i7-2600 CPU running at
+3.4 GHz, with 8GB of RAM, running Scientific Linux release 6.4.
+While the benchmark code is single-threaded, the JVM offloads
+garbage collection to other cores. We use the preinstalled
+OpenJDK 1.7.0\_25 and Scala 2.10.2.
+
+\paragraph{Input generation}
+
+Inputs are randomly generated to resemble English words over all
+webpages on the internet: The vocabulary size and the average
+length of a webpage stay relatively the same, while the number of
+webpages grows day by day. To generate a size-$n$ input of type
+$(\HashMap{\Int}{\Bag*[\Int]})$, we generate $n$ random numbers
+between 1 and 1000 and distribute them randomly in $n/1000$ bags.
+Changes are randomly generated to resemble edits. A change has
+50\% probability to delete a random existing number, and has 50\%
+probability to insert a random number at a random location.
+
+\paragraph{Experimental units}
+
+Thanks to \cref{eq:correctness}, both recomputation
+$\App{f}{\Apply*{\D a}{a}}$ and incremental computation
+$\Apply{\App{\App{\Derive{f}}{a}}{\D a}}{\App{f}{a}}$ produce
+the same result. Both programs are written in our object language.
+To show that derivatives are faster, we compare
+these two computations. To compare with recomputation, we measure the
+\emph{aggregated} running time for running the derivative on the change
+and for updating the original output with the result of the derivative.
 
 \subsection{Benchmark results}
 
@@ -719,8 +759,43 @@ Our results show (\cref{fig:graph}) that our program reacts to input changes
 in essentially constant time, as expected, hence orders of magnitude faster than
 recomputation. Constant factors are small enough that the speedup is apparent on realistic input sizes.
 
-For lack of space, details on benchmarking results and inputs
-are available in the extended version of our chapter (Appendix A)\pg{Restructure}.
+\pg{Warning: benchmark results are hardcoded here, copy-pasted
+  from the spreadsheet. Edit with care.}
+
+We present our results in \cref{fig:graph}. As expected, the
+runtime of incremental computation is
+\emph{essentially constant} in the size of the input, while the runtime
+of recomputation is linear in the input size.
+Hence, on our biggest inputs\pg{specify} incremental computation
+is over $10^4$ times faster.
+
+Derivative time is in fact slightly irregular for the first few inputs,
+but this irregularity decreases slowly with increasing warmup
+cycles. In the end, for derivatives we use $10^4$ warmup cycles.
+With fewer warmup cycles, running time for derivatives decreases
+significantly during execution, going from 2.6ms for $n = 1000$ to
+0.2ms for $n = 512000$. Hence, we believe extended warmup is
+appropriate, and the changes do not affect our general
+conclusions. Considering confidence intervals, in our experiments the running
+time for derivatives varies between 0.139ms and 0.378ms.
+
+In our current implementation, the code of the generated
+derivatives can become quite big. For the histogram example
+(which is around 1KB of code), a pretty-print of its derivative
+is around 40KB of code. The function application case in
+\cref{fig:correctness:derive} can lead to a quadratic growth in
+the worst case. More importantly, we realized that our home-grown
+transformation system in some cases performs overly aggressive
+inlining, especially for derivatives, even though this is not
+required for incrementalization, and believe this explains a
+significant part of the problem. Indeed, code blowup problems do
+not currently appear in later experiments (see
+\cref{ch:inc-more-programs}). \pg{Revise forward pointer.}
+
+\paragraph{Summary}
+Our results show that the incrementalized program runs
+in essentially constant time and hence orders of magnitude faster than
+the alternative of recomputation from scratch.
 
 Two important lessons from the evaluations are:
 \begin{itemize}
