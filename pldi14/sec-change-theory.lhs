@@ -318,6 +318,10 @@ first removing |'c'| and then adding |'d'|, hence through change |[Remove 2,
 Insert 2 'd']|, or by inserting |'d'| and removing |'c'| through either of
 |[Insert 3 'd', Remove 2]| or by |[Insert 2 'd', Remove 3]|.
 
+\pg{Explain why we don't just take a quotient. We need to explain
+  earlier what our metatheory's foundation is. Move the footnote
+  on HoTT here.}
+
 Therefore, we define an
 equivalence among such changes that we call \emph{change
   equivalence}. When it is clear we are talking about changes, we
@@ -399,17 +403,21 @@ in the following lemma:
 \end{proof}
 
 \begin{lemma}
+  \label{thm:nil-equivs}
   Nil changes are equivalent to each other, that is, |v `oplus` dv = v| implies
-  |dv `doe` nil(v)|, for any change structure $\chs V$ and value |v `elem` V|.
+  |dv `doe` nil v|, for any change structure $\chs V$ and value |v `elem` V|.
 \end{lemma}
 \begin{proof}
   All nil changes for |v| share the same source and destination |v|, so they're
   equivalent.
 \end{proof}
+
 As we will see, each valid operations in our theory will respect change
 equivalence: equivalent changes will be mapped to equivalent changes or to equal
 values.\footnote{We expect that, in homotopy type theory, we could use higher
   inductive types to make change equivalence part of the equality on changes.}
+See in particular
+\cref{thm:deriv-respect-doe,thm:change-respect-doe}.
 
 \section{Derivatives}
 After defining change structures, we can define more formally
@@ -486,7 +494,7 @@ earlier in \cref{sec:changeeeq}:
 \begin{lemma}[Behavior of derivatives on |NIL|]
   \label{thm:deriv-nil}
   Applying a derivative to a value and its nil change gives a nil change, up to
-  change equivalence; formally, we have |df a nil(a) `doe` nil(f a)| for any
+  change equivalence; formally, we have |df a (nil a) `doe` (nil(f a))| for any
   change structures $\chs A$ and $\chs B$, function |f `elem` A -> B|, value |a
   `elem` A|, and |df| derivative of |f|.
 \end{lemma}

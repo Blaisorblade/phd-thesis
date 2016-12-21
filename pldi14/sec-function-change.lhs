@@ -271,8 +271,6 @@ to |(f `oplus` df) (a `oplus` da)|:
 \end{theorem}
 
 \begin{optionalproof}
-  \NewDocumentCommand{\TheNewValue}{}{\Apply*[A]{\D a}{a}}
-
   Take arbitrary |f|, |a|, |df| and |da|, as in the statement.
   The two forms of the thesis are equivalent by
   \cref{thm:equiv-cancel}. We prove the second form of the thesis
@@ -293,9 +291,9 @@ incrementalizing
 \[
 \APPFun = \Lam{f}{\Lam{x}{\App f x}}
 \]
-with respect to the input changes $\D f$, $\D x$ amounts to
-calling $\D f$ on the original second argument $\Old x$ and on
-the change $\D x$. In other words, incrementalizing $\APPFun$ gives
+with respect to the input changes |df|, |dx| amounts to
+calling |df| on the original second argument $\Old x$ and on
+the change |dx|. In other words, incrementalizing $\APPFun$ gives
 $\Lam{f} {\Lam{\D f} {\Lam{x} {\Lam{\D x} {\App {\App {\D f} x} {\D x}}}}}$.
 \begin{oldSec}
 We hence solve difficulties described in
@@ -414,8 +412,8 @@ derivative (see \cref{def:derivatives}):
 
 \begin{theorem}[Nil changes are derivatives]
   \label{thm:nil-is-derivative}
-  Given change structures $\chs A$ and $\chs B$ and a function $f \in A \to B$,
-  the change $\NilC[A \to B]{f}$ is the derivative $f'$ of $f$.
+  Given change structures $\chs A$ and $\chs B$ and a function |f `elem` A -> B|,
+  the nil change |nil f| is a derivative of |f|.
 \end{theorem}
 
 \begin{optionalproof}
@@ -448,7 +446,7 @@ So |nil(f)| is a derivative of |f| because it satisfies the appropriate \cref{de
    (f `oplus` df) a
 =  {- by the definition of |`oplus`| on functions -}
    f a `oplus` df a (nil(a))
-=  {- by the definition of derivatives \cref{def:derivatives} -}
+=  {- by the definition of derivatives (\cref{def:derivatives}) -}
    f (a `oplus` (nil(a)))
 =  {- because |nil(a)| is a nil change (\cref{thm:update-nil-v2}) -}
    f a
@@ -535,9 +533,11 @@ cannot do any better than recomputation.
 \end{oldSec}
 
 
-In this section, we developed the theory of changes to define
+\section{Chapter conclusion}
+In this chapter, we developed the theory of changes to define
 formally what a derivative is (\cref{def:derivatives}) and to
 recognize that in order to find the derivative of a function, we
-only have to find its nil change
-(\cref{thm:nil-is-derivative}). Next, we want to provide a fully
-automatic method for finding the nil change of a given function.
+only have to find its nil change (\cref{thm:nil-is-derivative}).\pg{This sounds a bit silly, why would that be any easier?}
+
+In the next chapter, we provide a fully
+automatic method for finding the nil change of a given function from its definition.

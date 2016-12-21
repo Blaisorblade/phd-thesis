@@ -60,3 +60,5 @@
 %format eval(t) = "\mean{" t "}"
 %format derive(t) = "\Derive{" t "}"
 %format `cong` = "\cong"
+
+%format nabla = "\nabla"
