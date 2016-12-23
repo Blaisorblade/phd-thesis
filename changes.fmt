@@ -46,6 +46,11 @@
 %format x2
 %format x3
 
+%format df0
+%format df1
+%format df2
+%format df3
+
 %format dx0
 %format dx1
 %format dx2

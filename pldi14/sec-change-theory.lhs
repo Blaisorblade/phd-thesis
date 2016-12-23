@@ -452,6 +452,19 @@ Using change equivalence we immediately obtain an alternative characterization o
   which is the defining property of derivatives.\qed
 \end{proof}
 
+It also follows that a function, in general, can have different
+derivatives. Later, in \cref{thm:deriv-unique}, we show all
+derivatives of the same function are ``equivalent'' in some
+sense.
+%
+Take a function |f `elem` A -> B|, with a derivative |df1|, base
+input |a `elem` A| and change |da `elem` Dt ^ a|. Let |db1| be
+the result of |df1 a da|. Now |db1| is only specified up to
+change equivalence, so if there is a |db2| different but
+equivalent from |db1| (|db2 `doe` db1|, |db2 /= db1|), then we
+can define a different derivative |df2| of |f| that is equal to
+|df1| everywhere except that |df2 a da = db2|. Hence these two
+derivatives are different.
 
 \begin{examples}
 Let |f: Bag S -> Bag S| be the constant function mapping
@@ -491,12 +504,32 @@ earlier in \cref{sec:changeeeq}:
 \end{proof}
 
 %
-\begin{lemma}[Behavior of derivatives on |NIL|]
+Next we can prove that derivatives take nil changes to nil
+changes, \emph{up to change equivalence}. This lemma allows to
+skip calling a derivative on a nil change, and produce a nil
+change directly; this is an important optimization.\pg{revise and find back
+  pointers to this from later.}
+
+\begin{lemma}[Derivatives take nil changes to nil changes]
   \label{thm:deriv-nil}
   Applying a derivative to a value and its nil change gives a nil change, up to
   change equivalence; formally, we have |df a (nil a) `doe` (nil(f a))| for any
   change structures $\chs A$ and $\chs B$, function |f `elem` A -> B|, value |a
   `elem` A|, and |df| derivative of |f|.
 \end{lemma}
+\begin{proof}
+  We prove the thesis |df a (nil a) `doe` (nil(f a))| equationally:
+\begin{equational}
+\begin{code}
+      df a (nil a)
+`doe` {- by the definition of derivatives (\cref{def:derivatives}) -}
+      f (a `oplus` nil a) `ominus` f a
+=     {- because |nil(a)| is a nil change (\cref{thm:update-nil-v2}) -}
+      f a `ominus` f a
+=     {- by the definition of nil changes (\cref{def:nil-change-v2}) -}
+      nil (f a)
+\end{code}
+\end{equational}
+\end{proof}
 
 \input{pldi14/sec-function-change}

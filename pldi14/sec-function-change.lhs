@@ -300,15 +300,86 @@ We hence solve difficulties described in
 section~\ref{ss:pointwise-limit}.
 \end{oldSec}
 
-\paragraph{Understanding function changes}
+\subsection{Function changes and change equivalence}
+
+\pg{Revise}
+We claimed earlier that change equivalence is
+respected by all valid operations in our theory. Here we prove
+that all function changes do preserve this equivalence.
+
+\begin{lemma}[Function change application preserves change equivalence]
+  \label{thm:change-respect-doe}
+  If |df1 `doe` df2| and |dv1 `doe` dv2| then |df1 v dv1 `doe`
+  df2 v dv2|, for any change structures $\chs A$ and $\chs B$,
+  base value |a `elem` A|, function |f `elem` A -> B|, changes
+  |da1, da2 `elem` Dt ^ a| and |df1, df2 `elem` Dt ^ f|.
+\end{lemma}
+\begin{proof}
+  By definition of change equivalence, the thesis |df1 v dv1
+  `doe` df2 v dv2| means that |f v `oplus` df1 v dv1 = f v
+  `oplus` df2 v dv2|.
+  We prove this statement by equational reasoning:
+\begin{equational}
+\begin{code}
+   f v `oplus` df1 v dv1
+=  {- by incrementalization (\cref{thm:incrementalization}) -}
+   (f `oplus` df1) (v `oplus` dv1)
+=  {- since |df1 `doe` df2| and |dv1 `doe` dv2| -}
+   (f `oplus` df2) (v `oplus` dv2)
+=  {- by incrementalization (\cref{thm:incrementalization}) -}
+   f v `oplus` df2 v dv2
+\end{code}
+\end{equational}
+\end{proof}
+This lemma generalizes \cref{thm:deriv-respect-doe}.
+
+We can prove a form of extensionality for function changes:
+function changes are equal if they produce change-equivalent
+changes on allowed inputs.
+\begin{lemma}[Extensionality for change equivalence]
+  For any change structures $\chs A, \chs B$ and base function |f
+  `elem` A -> B|, two function changes |df1, df2 `elem` Dt ^ f|
+  are equivalent (|df1 `doe` df2|) if they behave equivalently when
+  applied to arbitrary inputs |a `elem` A|, |da1, da2 `elem` Dt ^
+  x| (|df1 a da1 `doe` df2 a da2|)
+\end{lemma}
+\begin{proof}
+  The thesis |df1 `doe` df2| means that |f `oplus` df1| is equal
+  to |f `oplus` df2|. We prove this using function
+  extensionality.
+  %
+  Let |a `elem` A| be an arbitrary input, and let us prove that
+  |(f `oplus` df1) a| is equal to |(f `oplus` df2) a|.
+  %
+  First, we apply the hypothesis with |da1 = da2 = (nil a)|
+  (since change equivalence is reflexive), and obtain that |df1 a
+  (nil a) `doe` df2 a (nil a)|, that is |f a `oplus` df1 a (nil
+  a) = f a `oplus` df2 a (nil a)|.
+  Now we can prove the thesis by equational reasoning:
+\begin{equational}
+\begin{code}
+   (f `oplus` df1) a
+=  {- by the definition of |`oplus`| on functions -}
+   f a `oplus` df1 a (nil a)
+=  {- as just shown -}
+   f a `oplus` df2 a (nil a)
+=  {- by the definition of |`oplus`| on functions -}
+   (f `oplus` df2) a {-"\text{.}"-}
+\end{code}
+\end{equational}
+\end{proof}
+
+\subsection{Understanding function changes}
 To understand function changes, we can decompose them
-into two orthogonal concepts. With a function change $\D f$, we can compute at
-once $\App{\App{\D f}{\Old{a}}}{\D a}$, the difference between $\App {\Upd*{f}} {\Upd*{a}}$ and $\App
-{{f}} {{a}}$, even though both the function and its argument change.
-But the effect of those two changes can be described separately.
-We can account for changes to $a$ using $f'$, the derivative of $f$: $\App{{f}} {\Upd*{a}} \DIFF \App{{f}} {{a}} = \App{\App{f'}{{a}}}{\D a}$.
-We can account for changes to $f$ using the \emph{pointwise difference} of two functions, $\nabla
-f = \Lam{a}{\App{\Upd*{f}}{a} \DIFF \App{{f}}{a}}$; in particular, $\Upd*{f} \APP \Upd*{a} \DIFF {f} \APP \Upd*{a} = \nabla f \APP \Upd*{a}$.
+into two orthogonal concepts. With a function change |df|, we can compute at
+once |df a da|, the difference between |(f `oplus` df) (a `oplus` da)| and |f a|,
+even though both the function and its argument change.
+But we can describe separately the effects of the function change and of the argument change.
+We can account for changes to |a| using $f'$, the derivative of |f|:
+|f (a `oplus` da) `ominus` f a `doe` f' a da|.
+We can account for changes to |f| using the \emph{pointwise difference} of two functions,
+|nabla ^ f = \a -> (f `oplus` df) a `ominus` f a|; in particular,
+|(f `oplus` df) (a `oplus` da) `ominus` f (a `oplus` da) = nabla ^ f (a `oplus` da)|.
 Using then the incrementalization theorem, we can show that a function change simply \emph{combines} a derivative with a pointwise change:
 \pg{I don't say ``compose'' because that's overloaded with function composition.}
 %
@@ -322,11 +393,10 @@ Using then the incrementalization theorem, we can show that a function change si
 %show the meaning of a function change $df$ in terms of
 %derivatives and pointwise changes:
 %
-\begin{align*}
-  & \Update{\App {\Old{f}} {\Old{a}}}{\App{\App{\D f}{\Old{a}}}{\D a}} \\
-%= & \App{\New{f}}{\New{a}} = \App{\Old{f}}{\New{a}} \UPDATE \App{\nabla f}{\New{a}} \\
-= & \Update{\App{\Old{f}}{\Old{a}}}{\App{\App{f'}{\Old{a}}}{\D a}} \UPDATE \App{\nabla f}{\New{a}}
-\end{align*}
+\begin{code}
+   f a `oplus` df a da
+=  f a `oplus` f' a da `oplus` nabla ^ f (a `oplus` da)
+\end{code}
 
 One can also compute a pointwise change from a function change:
 %In particular, a pointwise change can be obtained from a function
@@ -389,47 +459,38 @@ change, and is therefore more readily optimized.
 
 \section{Nil changes are derivatives}
 
-We anticipated that function changes generalize derivatives. It
-turns out that indeed derivatives are special function changes,
-in particular, they are nil changes, and viceversa.
-
-% No clue what this commented out sentence from the paper means.
-% \cref{thm:incrementalization} tells us about the form an
-% incremental program may take.
-If |df| is a nil change for |f|, that is, if
-|f `oplus` df = f|,
-then \cref{thm:incrementalization} becomes
-\[
- \App {f} {\Apply* {\D a} {a}}
- =
-\Apply {\App {\App {\D f} {a}} {\D a}} {\App{f}{a}}.
-\]
-It says that $\D f$ computes the change upon the output of $f$ 
-given a change $\D a$ upon the input $a$ of $f$. In
-other words, the nil change to a function is exactly its
-derivative (see \cref{def:derivatives}):
-
+Earlier we suggested informally that function changes generalize derivatives.
+Indeed, derivatives are special function changes.
+In particular, any derivative is a nil change, and any nil change is a derivative.
 
 \begin{theorem}[Nil changes are derivatives]
   \label{thm:nil-is-derivative}
   Given change structures $\chs A$ and $\chs B$ and a function |f `elem` A -> B|,
-  the nil change |nil f| is a derivative of |f|.
+  any nil change |df `elem` Dt ^ f|, in particular |nil f|, is a derivative of |f|.
 \end{theorem}
 
 \begin{optionalproof}
-  Let $a \in A$ be an arbitrary value with a corresponding change
-  $\D a \in \Change[A]{a}$. Then
+  The change |nil f| is a nil change of |f|, so we must only show
+  that any nil change |df| is a derivative of |f|, and it follows
+  as a special case that |nil f| is also a derivative.
+
+  We prove the thesis by showing that |df| satisfies the definition of
+  derivative (\cref{def:derivatives}), that is, by showing that
+  |f (a `oplus` da) = f a `oplus` df a da|.
+  %
+  Let |a `elem` A| be an arbitrary value with a corresponding
+  change |da `elem` Dt ^ a|. Then by equational reasoning:
 \begin{equational}
   \begin{code}
    f (a `oplus` da)
-=  {- because |nil(f)| is a nil change (\cref{thm:update-nil-v2} for $\chs {A \to B}$) -}
-   (f `oplus` (nil(f))) (a `oplus` da)
-=  {- by \cref{thm:incrementalization} on |nil(f)| -}
-   f a `oplus` (nil(f)) a da
+=  {- because df is a nil change -}
+   (f `oplus` df) (a `oplus` da)
+=  {- by \cref{thm:incrementalization} on |df| -}
+   f a `oplus` df a da {-"\text{.}"-}
 \end{code}
 \end{equational}
-So |nil(f)| is a derivative of |f| because it satisfies the appropriate \cref{def:derivatives}.
 \end{optionalproof}
+
 
 \begin{theorem}[Derivatives are nil changes]
   \label{thm:derivative-is-nil}
@@ -449,9 +510,29 @@ So |nil(f)| is a derivative of |f| because it satisfies the appropriate \cref{de
 =  {- by the definition of derivatives (\cref{def:derivatives}) -}
    f (a `oplus` (nil(a)))
 =  {- because |nil(a)| is a nil change (\cref{thm:update-nil-v2}) -}
-   f a
+   f a {-"\text{.}"-}
 \end{code}
 \end{equational}
+\end{proof}
+
+We explained earlier that derivatives of a function can be
+different because they can return different but equivalent
+changes on some inputs; as promised, we now show that all
+derivatives of a function are change-equivalent.
+\begin{lemma}[Derivatives are unique up to change equivalence]
+  \label{thm:deriv-unique}
+  If two function changes |df1, df2| are derivatives for
+  |f|, then they're change equivalence to each other and to |f|'s nil change:
+  |df1 `doe` nil f `doe` df2|, for
+  any change structures $\chs A, \chs B$ and base function |f
+  `elem` A -> B|.
+\end{lemma}
+\begin{proof}
+  Derivatives |df1| and |df2| are nil changes (as just shown in
+  \cref{thm:derivative-is-nil}). Change |nil f| is also a
+  nil change (by \cref{thm:update-nil-v2}). Nil changes are all
+  change equivalent (by \cref{thm:nil-equivs}), that is, we have
+  the thesis |df1 `doe` nil f `doe` df2|.
 \end{proof}
 
 \begin{oldSec}
@@ -539,5 +620,32 @@ formally what a derivative is (\cref{def:derivatives}) and to
 recognize that in order to find the derivative of a function, we
 only have to find its nil change (\cref{thm:nil-is-derivative}).\pg{This sounds a bit silly, why would that be any easier?}
 
-In the next chapter, we provide a fully
-automatic method for finding the nil change of a given function from its definition.
+In the next chapter, we provide a fully automatic method for
+finding the nil change of a given function from its definition.
+We will be exploiting quite a few of the results in this
+chapter.
+
+% In the next chapter, we provide a fully automatic method for
+% finding take the code of a program |t| to its change |Derive(t)|
+% with respect to the changes of its free variables. For closed
+% terms, this will produce the ...
+% ... derivative of a program with respect ...
+% ... nil change of a given function from its definition.
+
+\section{Development history}
+The first presentation of the theory of changes was published by
+\citet{CaiEtAl2014ILC}. This work was a true team effort; I
+started and oversaw the project, contributed the notion of change
+structure and change equivalence; Yufei Cai contributed the
+program transformation and came up with its first correctness
+proofs.\pg{This is compatible with Cai's summary, but to
+  improve.}
+%
+This chapter is a significantly extended and revised version of
+Sec. 2 of that paper. We also fix a small technical mistake:
+While our proof was already fully formalized at publication time,
+at the time the notion of change equivalence did not appear in
+the paper and we tried to only use equality of base values
+instead. In the camera-ready version, Lemma 2.5 was an incorrect
+variant of \cref{thm:deriv-nil}, because it used equality rather
+than change equivalence.
