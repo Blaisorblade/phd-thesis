@@ -320,10 +320,7 @@ instance, we can go from list |['a', 'b', 'c']| to list |['a', 'b', 'd']| by
 first removing |'c'| and then adding |'d'|, hence through change |[Remove 2,
 Insert 2 'd']|, or by inserting |'d'| and removing |'c'| through either of
 |[Insert 3 'd', Remove 2]| or by |[Insert 2 'd', Remove 3]|.
-
-\pg{Explain why we don't just take a quotient. We need to explain
-  earlier what our metatheory's foundation is. Move the footnote
-  on HoTT here.}
+We can also remove and readd all elements.
 
 Therefore, we define an
 equivalence among such changes that we call \emph{change
@@ -415,12 +412,43 @@ in the following lemma:
   equivalent.
 \end{proof}
 
-As we will see, each valid operations in our theory will respect change
-equivalence: equivalent changes will be mapped to equivalent changes or to equal
-values.\footnote{We expect that, in homotopy type theory, we could use higher
+As we will see, each valid operations in our theory (such as
+derivatives) will respect change equivalence: equivalent changes
+will be mapped to equivalent changes or to equal values. See in
+particular \cref{thm:deriv-respect-doe,thm:change-respect-doe}.
+
+\paragraph{Why not quotient change sets}
+\pg{Explain why we don't just take a quotient. We need to explain
+  earlier what our metatheory's foundation is. Move the footnote
+  on HoTT here.}
+\footnote{We expect that, in homotopy type theory, we could use higher
   inductive types to make change equivalence part of the equality on changes.}
-See in particular
-\cref{thm:deriv-respect-doe,thm:change-respect-doe}.
+
+Instead of working explicitly with change sets and change equivalence, we could quotient change sets by change equivalence. \pg{In fact, here we work using setoids.} Then, whenever we define an operation on changes, we would be forced to show it respects change equivalence; here we need to state this as an additional result.
+We avoid quotienting for a few reasons:
+\begin{itemize}
+\item The theory of changes is mechanized in Agda, which is based
+  in intentional Martin-Löf type theory that does not provide
+  quotient types, only setoids (essentially, what we are using),
+  even though we usually hide this aspect. We could use variants
+  of type theory which support quotient types, but it is simpler
+  for us to stick to standard type theory.%
+  \pg{Revise when we describe our mechanization earlier.}
+\item The goal of our theory is to support reasoning on programs,
+  and in programs we do not have the option of working concretely
+  with quotient types.
+\item Processing two equivalent changes can have different
+  performance. Take again the example above: we can go from a
+  base list |v1 = ['a', 'b', 'c']| to another list |v2 = ['a',
+  'b', 'd']| by a change |dv1| that just removes element |'c'|
+  and adds element |'d'|, or by a change |dv2| that removes all
+  elements of |v1| and then adds all elements of |v2|.
+  Derivatives processing changes |dv1| or |dv2| are guaranteed to
+  produce equivalent results, but inspecting |dv1| is faster than
+  inspecting |dv2|, so we expect that also processing |dv1| will
+  be faster than processing |dv2|.
+\end{itemize}
+
 
 \section{Derivatives}
 After defining change structures, we can define more formally
