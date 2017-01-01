@@ -67,3 +67,6 @@
 %format `cong` = "\cong"
 
 %format nabla = "\nabla"
+
+%format (new(v)) = "\New{" v "}"
+%format (old(v)) = "\Old{" v "}"

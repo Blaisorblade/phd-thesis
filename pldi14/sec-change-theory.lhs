@@ -19,34 +19,38 @@ and finally show that derivatives are a special case of function changes.
 
 \section{Change structures}\label{ssec:change-structures}
 Consider a set of values, for instance the set of natural numbers
-$\mathbb{N}$. A change $\D v$ for $v \in \mathbb{N}$ should
-describe the difference between $v$ and another natural $\New{v}
-\in \mathbb{N}$. We do not define changes directly, but we
+|Nat|. A change |dv| for a base value |v `elem` Nat| should
+describe the difference between |v| (the old value, hence also
+|old(v)|) and another natural |new(v) `elem` Nat|.
+We do not define changes directly, but we
 specify operations which must be defined on them. They are:
 \begin{itemize}
-\item We can \emph{update} a base value $v$ with a
-  change $\D v$ to obtain an updated or \emph{new} value
-  $\New{v}$. We write $\New{v} = \Apply{\D v}{v}$.
-\item We can compute a change between two arbitrary
-  values $\Old{v}$ and $\New{v}$ of the set we are considering.
-  We write $\D v = \Diff{\New{v}}{\Old{v}}$.
+\item We can \emph{update} a base value |v1| with a
+  change |dv| to obtain an updated or \emph{new} value
+  |v2|. We write |v2 = v1 `oplus` dv| (or sometimes |new(v) = old(v) `oplus` dv|).
+\item We can obtain a change between two arbitrary
+  values |v1| and |v2| of the set we are considering.
+  We write |dv = v2  `ominus` v1|.
 \end{itemize}
 
-For naturals, it is usual to describe changes using standard
-subtraction and addition. That is, for naturals we can define
-$\Apply{\D v}{v} = v + \D v$ and $\Diff{\New{v}}{\Old{v}} =
-\New{v} - \Old{v}$. To ensure that $\APPLY$ and $\DIFF$ are
-always defined, we need to define the set of changes carefully.
-$\mathbb{N}$ is too small, because subtraction does not always
-produce a natural; the set of integers $\mathbb{Z}$ is instead
+To ensure that |`oplus`| and |`ominus`| are
+always defined, we need to define their domains carefully.
+%
+Consider for instance natural numbers: for them it makes sense to
+describe changes using standard subtraction and addition.
+%
+That is, for naturals we can define
+|v1 `oplus` dv = v1 + dv| and |v2 `ominus` v1 = v2 - v1|.
+But as set of changes we cannot pick |Nat|: it is too small, because subtraction does not always
+produce a natural. We also cannot pick the set of integers |Int|: it is instead
 too big, since adding a natural and an integer does not always
 produce a natural. In fact, we cannot use the same set of all
 changes for all naturals. Hence we must adjust the requirements:
-for each base value $v$ we introduce a set $\Change{v}$ of
-changes for $v$, and require $\Diff{\New{v}}{\Old{v}}$ to produce
-values in $\Change{\Old{v}}$, and $\Apply{\D v}{v}$ to be defined
-for $\D v$ in $\Change{v}$. For natural $v$, we set $\Change{v} =
-\left\{\D v \mid v + \D v \geq 0 \right\}$; $\DIFF$ and $\APPLY$ are
+for each base value |v1| we introduce a set |Dt ^ v1| of
+changes for |v1|, and require |v2 `ominus` v1| to produce
+values in |Dt ^ v1|, and |v1 `oplus` dv| to be defined
+for any |dv| in |Dt ^ v1|. For natural |v1|, we set $|Dt ^ v1| =
+\left\{|dv| \mid |v1 + dv >= 0| \right\}$; |`ominus`| and |`oplus`| are
 then always defined.
 
 \begin{oldSec}
@@ -178,7 +182,6 @@ We use |`ominus`| to associate, to each value, a distinguished nil change.
   \]
   \label{thm:update-nil-v2}
 \end{lemma}
-
 \begin{proof}
   By the definition of nil changes (\cref{def:nil-change-v2}) we need to show
   that |v `oplus` (v `ominus` v) = v|, which follows from
