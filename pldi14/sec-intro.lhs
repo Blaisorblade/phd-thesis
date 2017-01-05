@@ -45,6 +45,114 @@ complexity of |grand_total xs ys| increases linearly, while the time complexity
 of |dgrand_total xs dxs ys dys| only depends on the sizes of |dxs| and |dys|,
 which under our assumptions are smaller (just like in our example).
 
+\subsection{Differentiation}
+\pg{This example is still a bit too complex as written; I'm skipping too many steps.}
+
+To help fix ideas for later discussion, let us show on a simpler
+variant of |grand_total| how the derivative of |grand_total|
+looks like.
+
+For now we consider the
+following program:
+\begin{code}
+grand_total2  = \ xs ys -> sum (merge xs ys)
+output       = grand_total2 {{1, 1}} {{2, 3, 4}} = 11
+\end{code}
+We define derivation as a compositional program transformation,
+so we first compute |derive(merge xs ys)|. To compute its change
+we simply call the derivative of |merge|, that is |dmerge|, and
+apply it to the base inputs and their changes: hence we write
+\[|derive(merge xs ys) = dmerge xs dxs ys dys|.\]
+As we'll
+better see later, we can define function |dmerge| as
+\[|dmerge = \xs dxs ys dys -> merge dxs dys|,\]
+%
+so |derive(merge xs ys)| can be simplified by $\beta$-reduction
+to |merge dxs dys|:
+\begin{code}
+          derive(merge xs ys)
+=         dmerge xs dxs ys dys
+`betaeq`  (\xs dxs ys dys -> merge dxs dys) xs dxs ys dys
+`betaeq`  merge dxs dys
+\end{code}
+
+Let's next derive |sum (merge xs ys)|. First, like above, the
+derivative of |sum zs| would be |dsum zs dzs|, which depends on
+base input |zs| and its change |dzs|. As we'll see, |dsum zs dzs|
+can simply call |sum| on |dzs|, so |dsum zs dzs = sum dzs|. To
+derive |sum (merge xs ys)|, we must call the derivative of |sum|,
+that is |dsum|, on its base argument and its change, so on |merge
+xs ys| and |derive(merge xs ys)|. We can later simplify again by
+$\beta$-reduction and obtain
+\begin{code}
+          derive(sum (merge xs ys))
+=         dsum (merge xs ys) (derive(merge xs ys))
+`betaeq`  sum (derive(merge xs ys))
+=         sum (dmerge xs dxs ys dys)
+`betaeq`  sum (merge dxs dys)
+\end{code}
+
+Here we see the output of differentiation is defined in a bigger
+typing context: while |merge xs ys| only depends on base inputs
+|xs| and |ys|, |derive(merge xs ys)| also depends on their
+changes. This property extends beyond the examples we just saw:
+if a term |t| is defined in context |Gamma|, then the output of
+derivation |derive(t)| is defined in context |Gamma, Dt ^ Gamma|,
+where |Dt ^ Gamma| is a context that binds a change |dx| for each
+base input |x| bound in the context |Gamma|.
+
+Next we must transform |derive(\ xs ys -> sum (merge xs ys))|. Since |derive(sum (merge xs ys))| is defined (ignoring later optimizations) in a context binding |xs, dxs, ys, dys|, deriving |\ xs ys -> sum (merge xs ys)| must bind all those variables.
+
+\begin{code}
+          derive(\ xs ys -> sum (merge xs ys))
+=         \xs dxs ys dys -> derive(sum (merge xs ys))
+`betaeq`  \xs dxs ys dys -> sum (merge dxs dys)
+\end{code}
+
+Next we need to transform the binding of |grand_total2| to its body |b = \ xs ys -> sum (merge xs ys)|. We copy this binding and add a new additional binding from |dgrand_total2| to the derivative of |b|.
+
+\begin{code}
+grand_total2   = \ xs      ys      ->  sum  (merge  xs   ys)
+dgrand_total2  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
+\end{code}
+
+Finally, we need to transform the binding of |output| and its body. By iterating similar steps
+In the end we get:\pg{fill missing steps}
+\begin{code}
+grand_total2   = \ xs      ys      ->  sum  (merge  xs   ys)
+dgrand_total2  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
+output         = grand_total2   {{1, 1}}              {{2, 3, 4}}
+doutput        = dgrand_total2  {{1, 1}} {{Remove 1}} {{2, 3, 4}} {{Add 5}}
+\end{code}
+
+\pg{Integrate this.}
+The transformation is defined by:
+\begin{code}
+  derive(\x -> t) = \x dx -> derive(t)
+  derive(s t) = derive(s) t (derive(t))
+  derive(x) = dx
+  derive(let x = t1 in t2) =
+    let  x = t1
+         dx = derive(t1)
+    in   derive(t2)
+\end{code}
+
+
+\paragraph{Self-maintainability}
+Differentiation does not always produce efficient derivatives
+without further program transformations; in particular,
+derivatives might need to recompute results produced by the base
+program. In the above example, if we don't inline derivatives and
+use $\beta$-reduction to simplify programs, |derive(sum (merge xs
+ys))| is just |dsum (merge xs ys) (derive(merge xs ys))|. A
+direct execution of this program will compute |merge xs ys|,
+taking time linear in the base inputs. \pg{Point out this is
+  self-maintainable!}
+
+% \begin{code}
+%   t ::= t1 t2 | \x -> t | x | c
+% \end{code}
+
 \section{A program transformation}
 To support automatic incrementalization, in the next chapters we introduce the \ILC\
 (incrementalizing $\Gl$-calculi) framework. We define
