@@ -2,8 +2,15 @@
 
 %format Nat = "\mathbb{N}"
 %format Int = "\mathbb{Z}"
+%format Gamma = "\Gamma"
 %format v1
 %format v2
+
+%format t1
+%format t2
+
+%format grand_total2
+%format dgrand_total2
 
 %format `oplus` = "\oplus "
 %format `ominus` = "\ominus "
@@ -63,10 +70,11 @@
 %format (nil(v)) = "\NilC{" v "}"
 %format NIL = "\NILC"
 %format eval(t) = "\mean{" t "}"
-%format derive(t) = "\Derive{" t "}"
+%format (derive(t)) = "\Derive{" t "}"
 %format `cong` = "\cong"
 
 %format nabla = "\nabla"
 
 %format (new(v)) = "\New{" v "}"
 %format (old(v)) = "\Old{" v "}"
+%format `betaeq` = "=_{\beta}"

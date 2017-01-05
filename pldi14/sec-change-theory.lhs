@@ -120,8 +120,6 @@ x}{x}}$.
   this might be OK since we have little space.}
 The following definition sums up the discussion so far:
 
-\pg{Consider less heavyweight phrasing, such as: ``To each $v \in V$
-  we associate a set of changes $\Change{v}$. But do this consistently.}
 \begin{definition}[Change structures]
   \label{def:change-struct}
   A tuple $\chs V = |(V, Dt, `oplus`, `ominus`)|$

@@ -14,7 +14,7 @@ computation research looks for alternatives that are cheaper in a common scenari
 namely, when the input change is much smaller than the input itself.
 
 \section{A motivating example}
-To understand incrementalization better, consider the $\Program$ program (presented in
+To understand incrementalization better, consider the |grand_total| program (presented in
 Haskell-like notation), which calculates the sum of all numbers
 in collections |xs| and |ys|:
 \begin{code}
@@ -26,7 +26,7 @@ where elements are allowed to appear more than once (unlike a set).
 Now assume that the input |xs| changes from |{{1,1}}| to
 |{{1}}|, and |ys| changes from |{{2, 3, 4}}| to |{{2, 3, 4, 5}}|.
 Instead of recomputing |output| from scratch, we could also compute it incrementally. If we have a
-representation for the changes to the inputs (say,
+representation for the changes to the inputs (say, for now,
 |dxs = {{Remove 1}}| and |dys = {{Add 5}}|), we can compute the new
 result through a function |dgrand_total| that takes the old inputs
 |xs = {{1,1}}| and |ys = {{2, 3, 4}}| and the changes |dxs| and |dys|
@@ -35,8 +35,8 @@ In this case, it would compute the change
 |dgrand_total xs dxs ys dys = Plus 4|,
 which can then be used to update the original output |11|
 %
-to yield the updated result |15|. We call |dgrand_total| the \emph{derivative} of |grand_total|.
-It is a function in the
+to yield the updated result |15|. We call |dgrand_total| the \emph{derivative} of |grand_total|, and we call the program transformation producing |dgrand_total| \emph{differentiation} (or, sometimes, simply \emph{derivation}).
+A derivative is a function in the
 same language as |grand_total|, accepting and producing changes, which
 are simple first-class values of this language.
 %
