@@ -224,3 +224,88 @@ derApplyDFun1 (P _f _env) (DP (Replace newF) newEnv) = oreplace (newF newEnv)
 \end{code}
 
 This is enabled by defunctionalizing both base functions and changes.
+
+\section{Mapping changeable functions over sequences}
+
+\pg{By far not done.}
+
+In this section we demonstrate how we can incrementalize by hand |map| and
+|concatMap| over collections, in a way that is compatible with and allows for
+``deep'' changes to single sequence elements.
+
+We assume from previous sections knowledge of:
+\begin{itemize}
+\item cache-passing style
+\item defunctionalized function changes
+\end{itemize}
+
+and assume, for simplicity, the following type of sequence changes:
+\pg{single or atomic?}
+\begin{code}
+data SeqSingleChange a
+  =  Insert    { idx :: Int, x :: a }
+  |  Remove    { idx :: Int }
+  |  ChangeAt  { idx :: Int, dx :: Dt ^ a }
+data SeqChange a = Seq (SeqSingleChange a)
+type Dt (Seq a) = SeqChange a
+\end{code}
+
+Let us incrementalize |ys = map f xs : Seq b|, with |f : a -> b| and |xs : Seq
+a|. We want to compute the output change |dys| when |xs| changes by |dxs| and
+|f| changes by |df|.
+
+If |df| is not a nil change we must apply it to each element of |xs| to compute
+changes to each element of |ys|.\pg{Write definition using change composition.}
+Since looping over |xs| would take linear time,
+we want to avoid it if posssible: we need to detect whether |df| is a nil change
+or not. Sometimes we can detect this statically\pg{reference to section}, but
+more often we only detect this dynamically. So we assume that |Dt (a -> b)|
+supports detecting nil changes via |isNil|.
+
+Let us first assume that |df| is a nil change; let us moreover assume that |dxss
+: Dt (Seq a)| contains only one simple change |dxs : SeqSingleChange a|. If
+|dxs| simply adds or removes an element |x|, we can simply add or remove the
+corresponding element |y = f x| from |ys|.
+%
+Assume now |dxs| changes an element, that is, |dxs = ChangeAt idx dx| where |idx|
+is the index of the changed element |x = xs !! idx|, and |dx : Dt ^ el| is the
+element change. The output change will then be |ChangeAt idx dy| where |dy = df x
+dx|. Producing this change is a self-maintainable process only if |df| is itself
+self-maintainable.
+
+Since |f| might produce intermediate results that are needed by the derivative,
+we should use a cache-passing version of |f|, and adapt |map| accordingly. And
+|df| might not be self-maintainable, so we better make the base input available
+to |dmap| by storing it in a cache for |map|. Hence we use as interface:
+
+\begin{code}
+data MapCache a b cache = ...
+getFc :: MapCache a b cache -> Fun a b cache
+getCaches :: MapCache a b cache -> Seq cache
+mapC :: Fun a b cache -> Seq a -> (Seq b, MapCache a b cache)
+
+dmapC ::
+  DFun a b cache1 cache2 -> Dt (Seq a) ->
+  MapCache a b cache -> (Dt (Seq b), MapCache a b cache)
+\end{code}
+
+So the implementation of |dmapCSingle| for an element change is:
+\pg{typecheck this}
+\begin{code}
+dmapCSingle ::
+  DFun a b cache1 cache2 -> SeqSingleChange a ->
+  MapCache a b cache -> (Dt (Seq b), MapCache a b cache)
+dmapCSingle dfc (ChangeAt idx dx) mapCache1 = (singleton (ChangeAt idx dy), mapCache2)
+  where
+    caches1 = getCaches mapCache1
+    cx1 = caches1 `index` idx
+    (dy, cx2) = dfc dx cx
+    caches2 = update idx cx2 caches1
+    mapCache2 = mapCache1 { getCaches = caches2 }
+\end{code}
+where we assume the following interface for operating on sequences (as supplied by |Data.Seq|):
+\begin{code}
+singleton :: a -> Seq a
+index :: Seq a -> Int -> a
+update :: Int -> a -> Seq a -> Seq a
+\end{code}
