@@ -631,21 +631,3 @@ chapter.
 % terms, this will produce the ...
 % ... derivative of a program with respect ...
 % ... nil change of a given function from its definition.
-
-\section{Development history}
-The first presentation of the theory of changes was published by
-\citet{CaiEtAl2014ILC}. This work was a true team effort; I
-started and oversaw the project, contributed the notion of change
-structure and change equivalence; Yufei Cai contributed the
-program transformation and came up with its first correctness
-proofs.\pg{This is compatible with Cai's summary, but to
-  improve.}
-%
-This chapter is a significantly extended and revised version of
-Sec. 2 of that paper. We also fix a small technical mistake:
-While our proof was already fully formalized at publication time,
-at the time the notion of change equivalence did not appear in
-the paper and we tried to only use equality of base values
-instead. In the camera-ready version, Lemma 2.5 was an incorrect
-variant of \cref{thm:deriv-nil}, because it used equality rather
-than change equivalence.

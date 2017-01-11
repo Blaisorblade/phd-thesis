@@ -6,11 +6,47 @@
 %\section{Formalizing changes}
 \label{sec:1st-order-changes}
 
-This chapter introduces a formal concept of changes; this
-concept was already used informally in \cref{eq:correctness} and is central
-to our approach. We first define change structures formally, then construct 
-change structures for functions between change structures,
-and finally show that derivatives are a special case of function changes.
+\Cref{eq:correctness} talked informally about changes. In this
+chapter we formalize this notion. Since different types call for
+different changes, we specify the interface common to all
+changes. We call any implementation of this interface a
+\emph{change structure}. In this chapter we first define change
+structures formally, then construct change structures for
+functions between change structures, and finally show that
+derivatives are a special case of function changes.
+
+The first presentation of the theory of changes was published by
+\citet{CaiEtAl2014ILC}. This work was a true team effort; I
+started and oversaw the project, contributed the notion of change
+structure and change equivalence; Yufei Cai contributed the
+program transformation and came up with its first correctness
+proofs. This chapter is a significantly extended and revised
+version of Sec. 2 of that paper.%
+\footnote{While our proof was already fully formalized at
+  publication time, at the time the notion of change equivalence
+  did not appear in the paper and we tried to only use equality
+  of base values instead. In the camera-ready version, Lemma 2.5
+  was an incorrect variant of \cref{thm:deriv-nil}, because it
+  used equality rather than change equivalence.}
+
+% \section{Development history}
+% The first presentation of the theory of changes was published by
+% \citet{CaiEtAl2014ILC}. This work was a true team effort; I
+% started and oversaw the project, contributed the notion of change
+% structure and change equivalence; Yufei Cai contributed the
+% program transformation and came up with its first correctness
+% proofs.\pg{This is compatible with Cai's summary, but to
+%   improve.}
+% %
+% This chapter is a significantly extended and revised version of
+% Sec. 2 of that paper. We also fix a small technical mistake:
+% While our proof was already fully formalized at publication time,
+% at the time the notion of change equivalence did not appear in
+% the paper and we tried to only use equality of base values
+% instead. In the camera-ready version, Lemma 2.5 was an incorrect
+% variant of \cref{thm:deriv-nil}, because it used equality rather
+% than change equivalence.
+
 
 % In this section, we will not consider programs, but simply
 % mathematical functions. In \cref{sec:differentiate} we will apply
@@ -415,12 +451,10 @@ derivatives) will respect change equivalence: equivalent changes
 will be mapped to equivalent changes or to equal values. See in
 particular \cref{thm:deriv-respect-doe,thm:change-respect-doe}.
 
-\paragraph{Why not quotient change sets}
+\paragraph{Why not quotient change sets}%
 \pg{Explain why we don't just take a quotient. We need to explain
   earlier what our metatheory's foundation is. Move the footnote
   on HoTT here.}
-\footnote{We expect that, in homotopy type theory, we could use higher
-  inductive types to make change equivalence part of the equality on changes.}
 
 Instead of working explicitly with change sets and change equivalence, we could quotient change sets by change equivalence. \pg{In fact, here we work using setoids.} Then, whenever we define an operation on changes, we would be forced to show it respects change equivalence; here we need to state this as an additional result.
 We avoid quotienting for a few reasons:
@@ -429,8 +463,11 @@ We avoid quotienting for a few reasons:
   in intentional Martin-Löf type theory that does not provide
   quotient types, only setoids (essentially, what we are using),
   even though we usually hide this aspect. We could use variants
-  of type theory which support quotient types, but it is simpler
-  for us to stick to standard type theory.%
+  of type theory which support quotient types (among others,
+  observational type theory and homotopy type theory), but we
+  decided to stick to standard type theory constructions; among
+  other reasons, some formalization techniques we use (such as
+  typed deBrujin indexes) do not work.%
   \pg{Revise when we describe our mechanization earlier.}
 \item The goal of our theory is to support reasoning on programs,
   and in programs we do not have the option of working concretely
@@ -446,7 +483,6 @@ We avoid quotienting for a few reasons:
   inspecting |dv2|, so we expect that also processing |dv1| will
   be faster than processing |dv2|.
 \end{itemize}
-
 
 \section{Derivatives}
 After defining change structures, we can define more formally
