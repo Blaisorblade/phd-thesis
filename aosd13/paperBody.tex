@@ -1,4 +1,4 @@
-\section{Introduction}
+\chapter{Introduction}
 In-memory collections of data often need efficient processing. For on-disk
 data, efficient processing is already provided by database management systems~(DBMS) thanks to
 their query optimizers, which support many optimizations specific to the domain
@@ -224,7 +224,7 @@ val res = titleFilterHandOpt(books,
 % XXX HACK
 %\section{Automatic optimization with \textsc{\textbf{SQuOpt}}}
 % Does not work well
-\section{Automatic optimization with \\SQuOpt}
+\chapter{Automatic optimization with SQuOpt}
 
 \label{sec:solution}
 The goal of {\LoS} is to let programmers write queries modularly and at a high level of abstraction and deal with optimization by a dedicated domain-specific optimizer. In our concrete example,
@@ -357,7 +357,7 @@ of the indexes is modularized in the optimizer.
 
 %\pg{Exemplify join optimization? Better just cite~\citep{Willis06JQL} about it; they don't report great results IIRC, unlike their next version,~\citep{Willis08}.}
 
-\section{Implementation}
+\chapter{Implementing SQuOpt}
 \label{sec:implementation}
 
 After describing how to use {\LoS}, we explain how \LoS{} represents queries internally and optimizes them.
@@ -592,9 +592,28 @@ type \code{Exp[Map[String, Book]]}. Looking up a key of the wrong type, for
 instance by writing \code{idxByPublisher(book)} where \code{book: Book}, will
 make \texttt{scalac} emit a static type error.
 
+\chapter{Collections as a case study}
+\label{sec:caseStudy}
+In this chapter we discuss collections as a \emph{critical} case
+study~\citep{flyvbjerg06five} for deep DSL embedding.
+
+As discussed in the previous chapter, to support optimizations we require a deep embedding of the collections DSL\@.
+
+\input{aosd13/pepm13/caseStudyGoals}
+
+\subsection{Implementation: Expressing the interface in Scala}
+\label{sec:intfScala}
+\input{aosd13/pepm13/caseStudyImpl}
+
 \input{aosd13/Evaluation}
 
-\section{Related work}
+
+\chapter{Discussion}
+\label{sec:discussion}
+\input{aosd13/pepm13/caseStudyDiscussion}
+\pg{TODO: mention discussion with Jacques Carette. Maybe mention that in the technical report only?}
+
+\chapter{Related work}
 \label{sec:relwork}
 This chapter builds on prior work on language-integrated queries, query optimization, techniques for DSL embedding, and other works on code querying.
 
@@ -717,6 +736,18 @@ Since these are special-purpose query languages that are not embedded into a hos
 
 
 
+\chapter{Conclusions}
+
+We have illustrated the tradeoff between performance and modularity for queries on in-memory collections. We have shown that it is possible to design a deep embedding of a version of the collections API which reifies queries and can optimize them at runtime.
+Writing queries using this framework is, except minor syntactic details, the same as writing queries using the collection library, hence the adoption barrier to using our optimizer is low. 
+
+Our evaluation shows that using abstractions in queries introduces a significant
+performance overhead with native Scala code, while \LoS{}, in most cases, makes
+the overhead much more tolerable or removes it completely. Optimizations are not
+sufficient on some queries, but since our optimizer is a proof-of-concept with
+many opportunities for improvement, we believe a more elaborate version will
+achieve even better performance and reduce these limitations.
+
 \section{Future work}
 % As part of future work we plan to add support for \emph{incremental view
 % maintenance}~\citep{GlucheGrust97Incr} to \LoS. This would allow, for instance,
@@ -732,15 +763,3 @@ type-checker cannot verify this statically, because of its limited support for
 GADTs.
 Solving this problem conveniently would allow checking statically that
 transformations are safe and make developing them easier.
-
-\section{Conclusions}
-
-We have illustrated the tradeoff between performance and modularity for queries on in-memory collections. We have shown that it is possible to design a deep embedding of a version of the collections API which reifies queries and can optimize them at runtime.
-Writing queries using this framework is, except minor syntactic details, the same as writing queries using the collection library, hence the adoption barrier to using our optimizer is low. 
-
-Our evaluation shows that using abstractions in queries introduces a significant
-performance overhead with native Scala code, while \LoS{}, in most cases, makes
-the overhead much more tolerable or removes it completely. Optimizations are not
-sufficient on some queries, but since our optimizer is a proof-of-concept with
-many opportunities for improvement, we believe a more elaborate version will
-achieve even better performance and reduce these limitations.
