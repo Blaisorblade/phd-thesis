@@ -12,7 +12,7 @@ We describe the implementation in more detail in the rest of this section. The f
 A core idea of {\LoS} is to reify Scala code as a data structure in memory. A programmer could directly create instances of that data structure, but we also provide a more convenient interface based on advanced Scala features such as implicit conversions and type inference. That interface allows to automatically reify code with a minimum of programmer annotations, as shown in the examples in Sec.~\ref{sec:solution}. Since this is a case study on Scala's support for deep embedding of DSLs, we also describe in this section how Scala supports our task. In particular, we report on techniques we used and issues we faced.
 
 %\pg{Somewhere: Contrast a bit with LMS - we are more open, provide less compile-time safety, etc.; motivate differences. This section risks being boring, explain why it is not.}
-\subsection{Representing expression trees}
+\section{Representing expression trees}
 \label{subsec:repexptrees}
 In the previous section, we have seen that expressions that would have type \code{T} in a native Scala query are reified and have type \code{Exp[T]} in \LoS. The generic type \code{Exp[T]} is the base for our reification of Scala expression as expression trees, that is, as data structures in memory. We provide a subclass of \code{Exp[T]} for every different form of expression we want to reify. For example, in Fig.~\ref{fig:query} the expression \code{author.firstName + " " + author.lastName} must be reified even though it is not collection-related, for otherwise the optimizer could not see whether \code{author} is used. Knowing this is needed for instance to remove variables which are bound but not used. Hence, this expression is reified as \code{StringConcat(StringConcat(AuthorFirstName(author), Const(" ")), AuthorLastName(author))}. This example uses the constructors of the following subclasses of \code{Exp[T]} to create the expression tree.
 
@@ -34,7 +34,7 @@ Expression nodes additionally implement support code for tree traversals to supp
 
 This representation of expression trees is well-suited for a representation of the structure of expressions in memory and also for pattern matching (which is automatically supported for case classes in Scala), but inconvenient for query writers. In fact, in Fig.~\ref{fig:reifiedQuery}, we have seen that {\LoS} provides a much more convenient front-end: The programmer writes almost the usual code for type \code{T} and {\LoS} converts it automatically to \code{Exp[T]}.
 
-\subsection{Lifting first-order expressions}
+\section{Lifting first-order expressions}
 
 We call the process of converting from \code{T} to \code{Exp[T]} \emph{lifting}. Here we describe how we lift first-order expressions -- Scala expressions that do
 not contain anonymous function definitions.
@@ -141,19 +141,19 @@ Lifting methods of \code{Any} or \code{AnyRef} (Scala types at the root of the i
 
 An expression like \code{"foo" + "bar" + str1} is converted to \code{toStringOps("foo" + "bar") + str1}; hence, part of the expression is evaluated before being reified. This is harmless here since we want \code{"foo" + "bar"} to be evaluated at compile-time, that is constant-folded, but in other cases it is preferable to prevent the constant folding. We will see later examples where queries on collections are evaluated before reification, defeating the purpose of our framework, and how we work around those.
 
-\subsection{Lifting higher-order expressions}
+\section{Lifting higher-order expressions}
 \label{sec:lifting-ho}
-We have shown how to lift first-order expressions; however, the interface of collections also uses higher-order methods, that is, methods that accept functions as parameters, and we need to lift them as well to reify the complete collection DSEL. For instance, the \code{map} method applies a function to each element of a collection. In this subsection, we describe how we reify such expressions of function type.
+We have shown how to lift first-order expressions; however, the interface of collections also uses higher-order methods, that is, methods that accept functions as parameters, and we need to lift them as well to reify the complete collection DSEL. For instance, the \code{map} method applies a function to each element of a collection. In this section, we describe how we reify such expressions of function type.
 
 \smartParagraph{Higher-order abstract syntax}
-To represent functions, we have to represent the bound variables in the function bodies. For example, a reification of \code{str => str + "!"} needs to reify the variable \code{str} of type \code{String} in the body of the anonymous function. This reification should retain the information where \code{str} is bound. We achieve this by representing bound variables using \emph{higher-order abstract syntax} (HOAS)~\citep{Pfenning88hoas}, that is, we represent them by variables bound at the meta level. To continue the example, the above function is reified as \code{(str: Exp[String]) => str + "!"}. Note how the type of \code{str} in the body of this version is \code{Exp[String]}, because \code{str} is a reified variable now. Correspondingly, the expression \code{str + "!"} is lifted as described in the previous subsection. 
+To represent functions, we have to represent the bound variables in the function bodies. For example, a reification of \code{str => str + "!"} needs to reify the variable \code{str} of type \code{String} in the body of the anonymous function. This reification should retain the information where \code{str} is bound. We achieve this by representing bound variables using \emph{higher-order abstract syntax} (HOAS)~\citep{Pfenning88hoas}, that is, we represent them by variables bound at the meta level. To continue the example, the above function is reified as \code{(str: Exp[String]) => str + "!"}. Note how the type of \code{str} in the body of this version is \code{Exp[String]}, because \code{str} is a reified variable now. Correspondingly, the expression \code{str + "!"} is lifted as described in the previous section. 
 
 With all operations in the function body automatically lifted, the only remaining syntactic difference between normal and lifted functions is the type annotation for the function's parameter. Fortunately, Scala's \emph{local type inference} can usually deduce the argument type from the context, for example, from the signature of the \code{map} operation being called. Type inference plays a dual role here: First, it allows the query writer to leave out the annotation, and second, it triggers lifting in the function body by requesting a lifted function instead of a normal function. This is how in Fig.~\ref{fig:reifiedQuery}, a single call to \code{asSquopt} triggers lifting of the overall query.
 
 Note that reified functions have type \code{Exp[A] => Exp[B]} instead of the more regular \code{Exp[A => B]}. We chose the former over the latter to support Scala's syntax for anonymous functions and for-comprehensions which is hard-coded to produce or consume instances of the pre-defined \code{A => B} type. We have to reflect this irregularity in the lifting of methods and functions by treating the types of higher-order arguments accordingly.
 
 \smartParagraph{User-defined methods, revised}
-We can now extend the lifting of signatures for methods or functions from the previous subsection to the general case, that is, the case of higher-order functions. We lift a method or function with signature
+We can now extend the lifting of signatures for methods or functions from the previous section to the general case, that is, the case of higher-order functions. We lift a method or function with signature
 \begin{lstlisting}
 def m[A1, $...$, An](a1: T1, $...$, an: Tn): R
 \end{lstlisting}
@@ -197,9 +197,9 @@ Note how \code{map}'s parameter \code{f} has type \code{Exp[T] => Exp[U]} as nec
 %implementations of expression trees, which rely on an untyped core tree
 %wrapped through a phantom type.
 
-\subsection{Lifting collections}
+\section{Lifting collections}
 \label{subsec:collections}
-In this subsection, we first explain how for-comprehensions are desugared to calls to library functions, allowing an external library to give them a different meaning. We summarize afterwards needed information about the subset of the Scala collection DSEL that we reify. Then we present how we perform this reification.
+In this section, we first explain how for-comprehensions are desugared to calls to library functions, allowing an external library to give them a different meaning. We summarize afterwards needed information about the subset of the Scala collection DSEL that we reify. Then we present how we perform this reification.
 We finally present the reification of the running example (Fig.~\ref{fig:reifiedQuery}).
 
 %\section*{How for-comprehensions work}
@@ -393,7 +393,7 @@ class TraversableLikeOps[T, Repr <: Traversable[T]
 %\pg{Try defining a single, general implicit conversion for TraversableLike, and additional one only for extra operators. This worked!}
 
 %\pg{The following text is too abstract yet, but I need to write it down to clarify my ideas.}
-%This subsection discusses how we lift operations on collections. We could apply the techniques in the previous sections directly, but three opposing design goals inform the design of our lifting:
+%This section discusses how we lift operations on collections. We could apply the techniques in the previous sections directly, but three opposing design goals inform the design of our lifting:
 %\begin{itemize}
 %\item expressions in the Scala collections DSEL have an accurate static type~\citep{odersky2009fighting}, and we want to preserve that accuracy;
 %\item we want our expression trees to be reasonably simple to transform; we want to have just a single type of node to represent \code{flatMap} operations, and not a different one for each kind of collection.
@@ -413,7 +413,7 @@ class TraversableLikeOps[T, Repr <: Traversable[T]
 %\pg{Among other things, explain Coll[Exp[T]] -> Exp[Coll[T]], which I find a bit ingenious.}
 
 %% PG: perhaps do say something more about indexes
-%\subsection{Representing indexes: The indexBy operator}
+%\section{Representing indexes: The indexBy operator}
 
 %Indexes do not require special support; they are encoded through the
 %\code{TraversableLike[T, Repr].indexBy[K](f: T => K): Map[K, Coll]} operator. A query of the form:
@@ -436,13 +436,13 @@ class TraversableLikeOps[T, Repr <: Traversable[T]
 %
 %%XXX: show a query that we can help using indexing.
 %
-%%\subsection{Indexes for nested objects}
+%%\section{Indexes for nested objects}
 %
 %Queries often traverse multiple objects, and more complex index
 %organizations are needed.
 %We reuse path indexes~\citep{Bertino89}.
 %
-\subsection{Interpretation}
+\section{Interpretation}
 \label{sec:interpretation}
 
 After optimization, {\LoS} needs to interpret the optimized expression trees to perform the query. Therefore, the trait \code{Exp[T]} declares an \code{def interpret(): T} method, and each expression node overrides it appropriately to implement a mostly standard typed, tagless~\citep{carette09finally}, environment-based interpreter. The interpreter computes a value of type \code{T} from an expression tree of type \code{Exp[T]}. This design allows query writers to extend the interpreter to handle application-specific operations. In fact, the lifting generator described in Sec.~\ref{sec:lifting-ho} automatically generates appropriate definitions of \code{interpret} for the lifted operations. 
@@ -493,7 +493,7 @@ unlike during compilation.
 
 %\pg{Revise this part again, after we have a running example of a query.}
 
-\subsection{Optimization}
+\section{Optimization}
 %\pg{This example can now be optimized, the improvements took circa 3-4 hours.
 %What's difficult is not at all going from Fig.~\ref{fig:titleFilterho1} to Fig.~\ref{fig:titleFilterho2}, it is just the 'inlining' steps, which seems to contain tons of intermediate normalization steps between other optimizations, fusion between filters and maps, and so on.
 %Moreover, we need to perform inlining even when it causes work duplication, but the new optimizer seems to not behave worse on the evaluation data, even though it often replicates what it should not replicate; I tuned it to avoid inlining let expressions introduced explicitly by the user, but even before it didn't damage performance too much.
@@ -534,7 +534,7 @@ Scala for-comprehension are however more general than monoid comprehensions\foot
 
 %\pg{Select and integrate what needed.}
 \smartParagraph{Manipulating functions}
-%\subsection*{More about functions.}
+%\section*{More about functions.}
 %\tr{This material is left over from Sec. 4.3. It is partly needed in later sections and needs to be moved there.}
 To be able to inspect a HOAS function body \code{funBody: Exp[S] => Exp[T]}, like \code{str => str + "!"}, we convert it to \emph{first-order} abstract syntax (FOAS), that is to an expression tree of type \code{Exp[T]}.
 To this end, we introduce a representation of variables and a generator of fresh ones; since variable names are auto-generated, they are internally represented simply as integers instead of strings for efficiency.
@@ -704,7 +704,7 @@ We can now easily implement substitution and beta-reduction and through that, as
 
 
 % \pg{For now comment out normalization by evaluation.}
-%\subsection{Normalization by evaluation}
+%\section{Normalization by evaluation}
 %\pg{Explain why we always convert to FOAS immediately and relate that to normalization by evaluation.}
 
 %\pg{Text from the sec. on collections. This problem shows up only during optimization. Describe it then.}

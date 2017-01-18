@@ -15,7 +15,7 @@ magnitude, especially when indexes are used.
 %%compactness and 
 %\emph{efficiency} by implementing queries and measuring their performance. We show that interpretation overhead is comparably moderate, whereas our optimizations can improve performance of some queries by orders of magnitude.
 
-\subsection{Study Setup}
+\section{Study Setup}
 %evaluation strategy
 Throughout this chapter, we have already shown several compact queries for which our optimizations increase performance significantly compared to a naive execution. Since some optimizations change
 the complexity class of the query (e.g.\ by using an index), so the speedups grow with the size of the data. However, to get a more realistic evaluation of \LoS{}, we decided to perform an experiment with existing real-world queries.
@@ -73,7 +73,7 @@ In Figure~\ref{fig:measurements-overview}, we provide an overview of the setup.
 \end{figure}
 
 
-\subsection{Experimental Units}
+\section{Experimental Units}
 
 
 \input{aosd13/graphs/queryTables}
@@ -162,7 +162,7 @@ val methodNameIdx: Exp[Map[String, Seq[(ClassFile, Method)]]] = (for {
 
 
 
-\subsection{Measurement Setup}
+\section{Measurement Setup}
 To measure performance, we executed the queries on the preinstalled JDK class library (\texttt{rt.jar}), containing 58M of uncompressed Java bytecode.
 We also performed a preliminary evaluation by running queries on the much smaller ScalaTest library, getting comparable results that we hence do not discuss.
 Experiments were run on a 8-core Intel Core i7-2600, 3.40 GHz, with 8 GB of RAM, running Scientific Linux release 6.2.
@@ -175,7 +175,7 @@ In each JVM invocation, we iterate each benchmark until the variations of result
 We report the arithmetic mean of these measurements (and also report the usually low standard deviation on our web page).
 %PG: I had p = 3, k = 50, theta = 0.02, q = 1000, but changed the parameters when running more queries.
 
-\subsection{Results}
+\section{Results}
 
 \smartParagraph{Correctness} We machine-checked that for each query, all variants in Table~\ref{table:performance} agree.
 

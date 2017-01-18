@@ -232,7 +232,7 @@ programmers should be able to write queries similar to the one in Fig.~\ref{fig:
 To allow this, {\LoS} overloads for-comprehensions and other constructs, such as string concatenation with \code{+} and field access \code{book.author}. Our overloads of these constructs reify the query as an expression tree. {\LoS} can then optimize this expression tree and execute the resulting optimized query.
 Programmers explicitly trigger processing by {\LoS}, by adapting their queries as we describe in next subsection.
 
-\subsection{Adapting a Query}
+\section{Adapting a Query}
 \label{subsec:adaptingaquery}
 \begin{figure}
 \centering
@@ -301,7 +301,7 @@ not be sufficient to only reify the calls to the collection API, because the pre
 In general, our automatic optimizer inspects the whole reification of the query implementation to check that optimizations
 do not introduce changes in the overall result of the query and are therefore safe.
 
-\subsection{Indexing}
+\section{Indexing}
 %We reuse path indexes~\citep{Bertino89}.
 %\pg{We have no example which shows a hierarchical index, nor do we say we use
 %path indexes, nor do we cite the paper (citation key Bertino89). Is that OK?}
@@ -370,7 +370,7 @@ We give only a brief overview of our implementation technique; it is described i
 in a technical report that accompanies this paper~\citep{GiarrussoEtAl2012ReifyTR}.
 \end{nontechrep}
 
-\subsection{Expression Trees}
+\section{Expression Trees}
 \label{sec:representation}
 In order to analyze and optimize collection queries at runtime, {\LoS} reifies their syntactic structure as \emph{expression trees}.
 The expression tree reflects the syntax of the query after desugaring, that is, after for-comprehensions have been replaced by API calls.
@@ -466,7 +466,7 @@ evaluating \code{sum} will evaluate \code{square} twice.
 \citet{elliott03compiling} and we avoid this using common-subexpression
 elimination.
 
-\subsection{Optimizations}
+\section{Optimizations}
 
 Our optimizer currently supports several algebraic optimizations.
 Any query and in fact every reified expression can be optimized by calling the \code{optimize} function on it. The ability to optimize reified expressions that are not queries is
@@ -545,7 +545,7 @@ work by us or others; a candidate would be loop hoisting, which moves out of
 loops arbitrary computations not depending on the loop variable (and not just filters).
 With some changes to the optimizer's architecture, it would also be possible to perform cost-based and dynamic optimizations.
 
-\subsection{Query Execution}
+\section{Query Execution}
 \label{sec:execution}
 Calling the \code{eval} method on a query will convert it to executable
 bytecode; this bytecode will be loaded and invoked by using Java reflection.
@@ -601,7 +601,7 @@ As discussed in the previous chapter, to support optimizations we require a deep
 
 \input{aosd13/pepm13/caseStudyGoals}
 
-\subsection{Implementation: Expressing the interface in Scala}
+\section{Implementation: Expressing the interface in Scala}
 \label{sec:intfScala}
 \input{aosd13/pepm13/caseStudyImpl}
 
@@ -617,7 +617,7 @@ As discussed in the previous chapter, to support optimizations we require a deep
 \label{sec:relwork}
 This chapter builds on prior work on language-integrated queries, query optimization, techniques for DSL embedding, and other works on code querying.
 
-\smartParagraph{Language-Integrated Queries}
+\section{Language-Integrated Queries}
 Microsoft's Language-Integrated Query technology (\LINQ)~\citep{Meijer:2006:LRO:1142473.1142552,Bierman:2007:LTF:1297027.1297063} is similar to our work in that it also
 reifies queries on collections to enable analysis and optimization. Such queries can be executed against a variety of backends (such as SQL databases or in-memory objects), and adding new back-ends is supported. Its implementation uses \emph{expression trees}, a compiler-supported
 implicit conversion between expressions and their reification as a syntax tree. There are various major differences, though.
@@ -681,7 +681,7 @@ proposes to reify queries based on for-comprehensions, but it is not clear from 
 works.\footnote{We contacted the authors; they were not willing to provide more details or the sources of their approach.}
 
 
-\smartParagraph{Query Optimization}
+\section{Query Optimization}
 Query optimization on relational data is a long-standing issue in the database community, but there
 are also many works on query optimization on objects~\citep{Fegaras00,Grust99PhD}.
 Compared to these works, we have only implemented a few simple query optimizations, so there is potential
@@ -703,7 +703,7 @@ for further improvement of our work by incorporating more advanced optimizations
 %cross-products using faster equi-joins.
 
 
-\smartParagraph{Scala and DSL Embedding}
+\section{Deep Embeddings in Scala}
 \label{sec:rwdsl}
 Technically, our implementation of \LoS\ is a deep embedding of a part of the Scala collections API~\citep{odersky2009fighting}.
 Deep embeddings were pionereed by \citet{Leijen99DSEC} and \citet{elliott03compiling}. \pg{This makes no sense for the thesis.}
