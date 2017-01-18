@@ -197,7 +197,17 @@ edge between them, and use graph terminology to discuss changes.
 Indeed, a change structure induces a graph with base values as
 vertices and all changes as edges.
 
-\paragraph{Nil changes}
+\paragraph{Change structures using dependent types}
+Using dependent types, as in our mechanized proof, some points of
+the definition become simpler to state.
+\begin{itemize}
+\item |V| is the \emph{base type}.
+\item |Dt : V -> Set| maps elements of the base type to change types.
+\item We can now write type signatures |`oplus` : (v : V) -> Dt ^ v -> V| and
+  |`ominus`: (v2 : V) -> (v1 : V) -> Dt ^ v1|.
+\end{itemize}
+
+\subsection{Nil changes}
 A change can have equal source and target, in which case we call
 it a \emph{nil change}.
 \pg{Rewrite}
