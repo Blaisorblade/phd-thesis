@@ -203,6 +203,7 @@ the semantics of |f|, giving us \cref{eq:correctness} from
 \cref{eq:correctness-math-funs}.\footnote{A few technical details
   complicate the picture, but we'll discuss them later.}
 
+\subsection{Our language}
 \ILC\ considers as object language a simply-typed $\Gl$-calculus
 parameterized by \emph{language plugins} (or just plugins). A plugin
 defines
@@ -218,6 +219,66 @@ using these primitives can be computed. Both our implementation and our correctn
 is parametric in the plugins, hence it is easy to support (and prove correct)
 new plugins.
 
+Of note, our language is strongly normalizing.
+
+\subsection{The meta-language of our proofs}
+In this subsection we describe the meta-language used in our
+correctness proof.
+To prove the correctness of \ILC, we provide a mechanized proof
+in Agda~\citep{agda-head}. Agda is an implementation of
+intensional Martin-Löf type theory.
+
+To make our proofs more accessible, we present them in terms of
+set theory, though for convenience we still use (informally)
+dependently-typed type signatures where useful. The differences
+between set theory and type theory, and the two presentations of
+our formalization, are mostly cosmetic for our purposes:
+\begin{itemize}
+\item We use intuitionistic logic, so we do not use the law of
+  excluded middle.
+\item Unlike set theory, type theory is proof-relevant: that is,
+  proofs are first-class mathematical objects.
+\item Instead of sets, we use types; instead of subsets
+  $\{x \in A \mid P(x)\}$, we must use $\Sigma$-types
+  $\Sigma (x : A) P(x)$ which contain pairs of elements $x$ and
+  proofs they satisfy predicate $P$.
+\item We postulate functional extensionality,
+  that is, functions that give equal results on any equal inputs
+  are equal themselves. This postulate is known to be consistent
+  with Agda's type theory~\citep{Hofmann96}, hence it is safe to
+  assume in Agda%
+  \footnote{\url{http://permalink.gmane.org/gmane.comp.lang.agda/2343}}.
+\end{itemize}
+
+To prove that incrementalization preserves the final results of
+our object-language programs, we need to give it a semantics. To
+this end we use a denotational semantics. Since our object
+language (simply-typed $\Gl$-calculus) is strongly
+normalizing~\citep[Ch. 11]{Pierce02TAPL} and since we do not add
+computational effects, we can eschew use of domain theory or any
+other technique to handle partiality or other effects: The
+domains for our denotational semantics are simply Agda types, and
+semantic values are Agda values---in other words, we give a
+denotational semantics in terms of type
+theory.\footnote{Alternatively, some would call such a semantics
+  a definitional interpreter~\citep{Amin2017}}
+%
+Using denotational semantics allows us to state the specification
+of differentiation directly in the semantic domain, and take
+advantage of Agda's support for equational reasoning for proving
+equalities between Agda functions.
+
+We postulate not only functional extensionality, but also a few
+standard axioms on the implementation of bags, to avoid proving
+correct an implementation of bags, or needing to account for
+different values representing the same bag (such different values
+typically arise when implementing bags as search tree).
+
+To handle binding issues in our object language, our
+formalization uses typed de Brujin indexes, because this
+techniques takes advantage of Agda's support for type refinement
+in pattern matching. On top of that, we implement a HOAS-like
+frontend, that we use for writing specific terms.
 
 % Our Agda formalization, Scala implementation and benchmark
 % results are available at the URL
