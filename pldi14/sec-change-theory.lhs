@@ -199,13 +199,12 @@ vertices and all changes as edges.
 
 \paragraph{Change structures using dependent types}
 Using dependent types, as in our mechanized proof, some points of
-the definition become simpler to state.
-\begin{itemize}
-\item |V| is the \emph{base type}.
-\item |Dt : V -> Set| maps elements of the base type to change types.
-\item We can now write type signatures |`oplus` : (v : V) -> Dt ^ v -> V| and
-  |`ominus`: (v2 : V) -> (v1 : V) -> Dt ^ v1|.
-\end{itemize}
+the definition become simpler to state. In particular, we can now
+write type signatures for |`oplus`| and |`ominus`|, namely
+\begin{code}
+`oplus`   : ^^ (v : V)   ->  Dt ^ v    ->  V
+`ominus`  : ^^ (v2 : V)  ->  (v1 : V)  -> Dt ^ v1
+\end{code}
 
 \subsection{Nil changes}
 A change can have equal source and target, in which case we call
