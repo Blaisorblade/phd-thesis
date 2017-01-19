@@ -1,7 +1,5 @@
 % Emacs, this is -*- latex -*-!
 \begin{figure*}
-\subfigure[Syntax.\label{fig:syntax}]{
-\parbox[b]{0.40\linewidth}{
 \begin{tabular}{>{$}r<{$}@{$\;::=\;$}>{$}c<{$}@{$\;$}>{$}l<{$}@{\quad}>{(}l<{)}}
 \Gi      & \rlap{\ldots} &                       & base types\\
 \Gs, \Gt & \Gi           & \mid \Fun{\Gt}{\Gt}   & types\\
@@ -11,11 +9,11 @@ s, t     & c             & \mid \Lam{x}{t}
                            \mid \App{t}{t}
                            \mid x                & terms
 \end{tabular}
-\vspace{0.5\baselineskip}
-}}\hfill
-\subfigure[Typing.\label{fig:typing}]{
-\parbox[b]{0.58\linewidth}{
-%
+\caption{Our base calculus: Syntax}
+\label{fig:syntax}
+\end{figure*}
+
+\begin{figure*}
 \begin{typing}
 \noindent
 \Rule[Const]
@@ -36,8 +34,6 @@ s, t     & c             & \mid \Lam{x}{t}
    \Typing{t}{\Gs}}
   {\Typing{\App{s}{t}}{\Gt}}
 \end{typing}
-\vspace{-0.25\baselineskip}
-}}
-\caption{Our base calculus.}
-\label{fig:base-calculus}
+\caption{Our base calculus: Typing}
+\label{fig:typing}
 \end{figure*}
