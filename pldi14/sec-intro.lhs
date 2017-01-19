@@ -254,7 +254,7 @@ To prove that incrementalization preserves the final results of
 our object-language programs, we need to give it a semantics. To
 this end we use a denotational semantics. Since our object
 language (simply-typed $\Gl$-calculus) is strongly
-normalizing~\citep[Ch. 11]{Pierce02TAPL} and since we do not add
+normalizing~\citep[Ch. 12]{Pierce02TAPL} and since we do not add
 computational effects, we can eschew use of domain theory or any
 other technique to handle partiality or other effects: The
 domains for our denotational semantics are simply Agda types, and
