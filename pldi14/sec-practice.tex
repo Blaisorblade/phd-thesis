@@ -1,5 +1,5 @@
 % Emacs, this is -*- latex -*-!
-\section{Differentiation in practice}
+\chapter{Differentiation in practice}
 \label{sec:applying}
 
 In practice, successful incrementalization requires both
@@ -10,7 +10,7 @@ differentiation and proof plugins, whereas performance of
 derivatives has to come from careful design and implementation of
 differentiation plugins.
 
-\subsection{The role of differentiation plugins}
+\section{The role of differentiation plugins}
 \label{ssec:methodology}
 Users of our approach need to
 %
@@ -77,7 +77,7 @@ types to the object language.
 
 
   \begin{oldSec}
-\subsection{Methodology}
+\section{Methodology}
 \label{ssec:methodology}
 
 
@@ -123,7 +123,7 @@ operation on maps needed in our case study.
 
 
 
-\subsection{Predicting nil changes}
+\section{Predicting nil changes}
 Handling changes to all inputs can induce excessive overhead in incremental
 programs~\citep{Acar09}. It is also often
 unnecessary; for instance, the function argument of $\Term{fold}$ in 
@@ -141,7 +141,7 @@ we omit details for lack of space.
 
 \input{pldi14/sec-performance}
 
-\subsection{Case study}
+\section{Case study}
 \label{sec:plugins}
 
 
@@ -391,7 +391,7 @@ than recomputation.
 \end{oldSec}
 
 \begin{oldSec}
-\subsubsection{Bags}
+\subsection{Bags}
 
 We apply \citeauthor{GlucheGrust97Incr}'s approach to view
 maintenance based on monoid- and group-homomorphisms
@@ -474,7 +474,7 @@ $G_\tau$.
 \end{subdefinition}
 \end{definition}
 
-\subsubsection{Maps}
+\subsection{Maps}
 
 There is no obvious abelian group structure on maps as there is
 on bags. However, $\HashMap\Gk\Gi$ can be thought of as (possibly
@@ -616,7 +616,7 @@ By the way, we forbid functions in collections because nil
 changes to functions have computation content and can't be
 discarded. [Illustrating example: Klaus's f]
 
-\subsection*{Details}
+\section*{Details}
 
 Listing: base types, their change types, DIFF, UPDATE
 
@@ -712,7 +712,7 @@ providing models implementing them. \pg{Resume}
 %s ⊝ s = nil s
 %(s₁ ⊝ s₂) ∘ (s₂ ⊝ s₃) = s₁ ⊝ s₃
 \end{oldSec}
-\subsection{Benchmarking setup}
+\section{Benchmarking setup}
 We run object language programs by generating corresponding Scala code.
 To ensure rigorous
 benchmarking~\citep{Georges07rigorousJavaPerformance}, we use the
@@ -753,7 +753,7 @@ these two computations. To compare with recomputation, we measure the
 \emph{aggregated} running time for running the derivative on the change
 and for updating the original output with the result of the derivative.
 
-\subsection{Benchmark results}
+\section{Benchmark results}
 
 Our results show (\cref{fig:graph}) that our program reacts to input changes
 in essentially constant time, as expected, hence orders of magnitude faster than

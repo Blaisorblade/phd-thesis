@@ -309,3 +309,7 @@ singleton :: a -> Seq a
 index :: Seq a -> Int -> a
 update :: Int -> a -> Seq a -> Seq a
 \end{code}
+
+\chapter{Static caching}
+\pg{Write it!}
+\chapter{Conclusions}

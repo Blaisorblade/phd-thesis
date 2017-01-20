@@ -613,6 +613,8 @@ cannot do any better than recomputation.
   algebra of changes.}
 \end{oldSec}
 
+\pg{Integrate.}
+\input{pldi14/sec-change-structures}
 
 \section{Chapter conclusion}
 In this chapter, we developed the theory of changes to define

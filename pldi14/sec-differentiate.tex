@@ -2,7 +2,8 @@
 
 
 
-\section{Incrementalizing \TitleLambda{}-calculi}
+\chapter{Static differentiation for simply-typed \TitleLambda{}-calculus}
+%\section{Incrementalizing \TitleLambda{}-calculi}
 \label{sec:differentiate}
 \label{sec:correctness}
 
@@ -10,7 +11,7 @@
 \input{pldi14/fig-base-derive}
 
 \pg{Here we need an example like the one in Sec. 2.2, using the syntactic counterpart to closures, that is open terms.}
-In this section, we show how to incrementalize an arbitrary
+In this chapter, we show how to incrementalize an arbitrary
 program in simply-typed $\Gl$-calculus. To this end, we define
 the source-to-source transformation $\DERIVE$. Using the
 denotational semantics $\Eval{-}$ we define later (in
@@ -50,7 +51,7 @@ correct incrementalization.
 We show an example plugin in our case study
 (\cref{sec:plugins}).
 
-\subsection{Change types and erased change structures}
+\section{Change types and erased change structures}
 \label{ssec:change-types}
 
 \input{pldi14/fig-change-operations}
@@ -99,7 +100,7 @@ structures have ``almost the same'' behavior
 (\cref{sec:differentiate-correct}). We will hence be able to
 apply our theory of changes.
 
-\subsection{Differentiation}
+\section{Differentiation}
 \label{ssec:differentiation}
 % The following should explain the invariant for \DERIVE.
 
@@ -230,7 +231,7 @@ prove that $\DERIVE$ satisfies \cref{eq:correctness}.
 \input{pldi14/sec-correctness}
 
 
-\subsection{Plugins}\label{ssec:plugin}
+\section{Plugins}\label{ssec:plugin}
 
 Both our correctness proof and the differentiation framework (which is the 
 basis for our implementation) are parametric in the plugin. 
