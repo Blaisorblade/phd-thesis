@@ -18,7 +18,7 @@ PDF_NAME=$(PAPER_NAME).pdf
 # Sources that will be watched for changes.
 lhsFmt=$(wildcard *.fmt)
 lhsSources=$(patsubst %,%.lhs,new-stuff change-theory-reconstruct \
-	$(patsubst %,pldi14/%,sec-intro sec-change-theory sec-function-change))
+	$(patsubst %,pldi14/%,sec-intro sec-change-theory sec-function-change sec-differentiate))
 lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 sources=$(shell find . -name '*.tex') $(wildcard Bibs/*.bib) $(lhsSources) $(lhsFmt)
 INTERM_PRODUCTS=mylhs2tex.sty $(lhsCompiled)
