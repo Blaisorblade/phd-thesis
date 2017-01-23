@@ -1,4 +1,6 @@
 % Emacs, this is -*- latex -*-!
+%include polycode.fmt
+%include changes.fmt
 
 \input{pldi14/fig-correctness}
 

@@ -19,6 +19,7 @@ pldi14/sec-intro.tex
 pldi14/sec-change-theory.tex
 pldi14/sec-function-change.tex
 pldi14/sec-differentiate.tex
+pldi14/sec-correctness.tex
 mylhs2tex.sty
 
 ## Core latex/pdflatex auxiliary files:
