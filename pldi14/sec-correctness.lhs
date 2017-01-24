@@ -178,99 +178,54 @@ of $\Eval{c}$.
   $\Typing{t}{\Gt}$. There is one case for each of the typing
   rules in \cref{fig:typing}.
 
-  \Case \Lam{x}{t_1}: In this case, $\Gt = \Fun{\Gs}{\Gt}$
-  and we prove extensional equality of two functions. For an
-  arbitrary value $v \in \Eval{\Gs}$, we have
-  \begin{align*}
-    &         \App
-                {\Apply*
-                  {\EvalIncWith{\Lam{x}{t_1}}{\Gr}{\D \Gr}}
-                  {\EvalWith{\Lam{x}{t_1}}{\Gr}}}
-                {v}\\
-    & \quad = \Apply
-                {\App
-                  {\App
-                    {\EvalIncWith*{\Lam{x}{t_1}}{\Gr}{\D \Gr}}
-                    {v}}
-                  {\NilC[\Gt _1]{v}}}
-                {\App
-                  {\EvalWith*{\Lam{x}{t_1}}{\Gr}}
-                  {v}}\\
-    & \quad = \Apply
-                {\EvalIncWith
-                  {t_1}
-                  {\ExtendEnv*[\Gr]{x}{v}}
-                  {\ExtendEnv*[\D \Gr]{\D x}{\NilC{v}}}}
-                {\EvalWith
-                  {t_1}
-                  {\ExtendEnv*[\Gr]{x}{v}}}\\
-    & \quad = \EvalWith
-                {t_1}
-                {\Apply*
-                  {\ExtendEnv*[\D \Gr]{\D x}{\NilC{v}}}
-                  {\ExtendEnv*[\Gr]{x}{v}}}\\
-    & \quad = \EvalWith
-                {t_1}
-                {\ExtendEnv*
-                  [\Apply{\D \Gr}{\Gr}]
-                  {x}
-                  {\Apply{\NilC{v}}{v}}}\\
-    & \quad = \App
-                {\EvalWith*
-                  {\Lam{x}{t_1}}
-                  {\Apply*{\D \Gr}{\Gr}}}
-                {\Apply*{\NilC{v}}{v}}\\
-    & \quad = \App
-                {\EvalWith*
-                  {\Lam{x}{t_1}}
-                  {\Apply*{\D \Gr}{\Gr}}}
-                {v}
-  \end{align*}
-  by
-  \cref{def:function-changes:update,def:evaluation,def:change-evaluation},
-  the induction hypothesis on $t_1$,
-  \cref{def:change-environments,thm:update-nil}.
-
+  \Case \Lam{x}{t_1}: In this case, $\Gt = \Fun{\Gs}{\Gt_1}$. The
+  thesis states the equality of two functions, and we prove it
+  using extensional function equality: that is, we apply both
+  sides to an arbitrary argument $v \in \Eval{\Gs}$ and prove the
+  results are equal. We have
+\begin{equational}
+\begin{code}
+    (eval(\x -> t1) rho `oplus` evalInc(\x -> t1) rho drho) v
+=   {- by the definition of |`oplus`| on functions (\cref{def:function-changes:update}) -}
+    (eval(\x -> t1) rho v `oplus` evalInc(\x -> t1) rho drho v (nil v))
+=   {- by the definitions of (change) evaluation (\cref{def:evaluation,def:change-evaluation}) -}
+    (eval(t1) (rho, x = v) `oplus` evalInc(t1) (rho, x = v) (drho, dx = (nil v)))
+=   {- by the induction hypothesis on |t1| -}
+    (eval(t1) ((rho, x = v) `oplus` (drho, dx = (nil v))))
+=   {- by the definition of |`oplus`| on environments (\cref{def:change-environments}) -}
+    eval(t1) (rho `oplus` drho, x = v `oplus` (nil v))
+=   {- by the definition of evaluation (again) -}
+    eval(\x -> t1) (rho `oplus` drho) (v `oplus` (nil v))
+=   {- because |nil v| is a nil change (\cref{thm:update-nil-v2,def:nil-change-v2}) -}
+    eval(\x -> t1) (rho `oplus` drho) v
+\end{code}
+\end{equational}
   \Case \App{s}{t_1}: We have
-  \begin{align*}
-    &         \Apply
-                {\EvalIncWith{\App{s}{t_1}}{\Gr}{\D \Gr}}
-                {\EvalWith{\App{s}{t_1}}{\Gr}}\\
-    & \quad = \Apply
-                {\App
-                  {\App
-                    {\EvalIncWith*{s}{\rho}{\D \rho}}
-                    {\EvalWith*{t_1}{\rho}}}
-                  {\EvalIncWith*{t_1}{\rho}{\D \rho}}}
-                {\App
-                  {\EvalWith*{s}{\Gr}}
-                  {\EvalWith*{t_1}{\Gr}}}\\
-    & \quad = \App
-                {\Apply*
-                  {\EvalIncWith{s}{\Gr}{\D \Gr}}
-                  {\EvalWith{s}{\Gr}}}
-                {\Apply*
-                  {\EvalIncWith{t_1}{\Gr}{\D \Gr}}
-                  {\EvalWith{t_1}{\Gr}}}\\
-    & \quad = \App
-                {\EvalWith*{s}{\Apply*{\D \Gr}{\Gr}}}
-                {\EvalWith*{t_1}{\Apply*{\D \Gr}{\Gr}}}\\
-    & \quad = \EvalWith
-                {\App{s}{t_1}}
-                {\Apply*{\D \Gr}{\Gr}}
-  \end{align*}
-  by
-  \cref{def:evaluation,def:change-evaluation,thm:incrementalization}
-  and the induction hypotheses on $s$ and $t_1$.
+\begin{equational}
+\begin{code}
+    eval(s t1) rho `oplus` evalInc(s t1) rho drho
+=   {- by the definitions of (change) evaluation (\cref{def:evaluation,def:change-evaluation}) -}
+    (eval(s) rho) (eval (t1) rho) `oplus` (evalInc(s) rho drho) (eval(t1) rho) (evalInc(t1) rho drho)
+=   {- by incrementalization (\cref{thm:incrementalization}) -}
+    (eval(s) rho `oplus` evalInc(s) rho drho) (eval (t1) rho `oplus` evalInc(t1) rho drho)
+=   {- by the induction hypothesis on |s| and |t1| -}
+    eval(s) (rho `oplus` drho) (eval (t1) (rho `oplus` drho))
+=   {- by the definition of evaluation (again) -}
+    eval(s t1) (rho `oplus` drho)
+\end{code}
+\end{equational}
 
-  \Case \Var{x}: Let $v$ be the entry for $\Var{x}$ in $\Gr$, and
-  let $\D v$ be the entry for $\Var{\D x}$ in $\D \Gr$. We know that
-  these entries exist from $\Typing{\Var{x}}{\Gt}$ with $\Gr \in
-  \Eval{\GG}$ and $\D \Gr \in \Change[\GG]{\Gr}$. The entry for
-  $\Var{x}$ in $\Apply{\D \Gr}{\Gr}$ is $\Apply{\D v}{v}$, so we
+  \Case \Var{x}:
+  Since $\Typing{x}{\Gt}$, we know that the typing assertion $x : \Gt$
+  appears in typing context $\Gamma$, hence the variable $x$ appears also in
+  environment $\Gr$ and variable $\D x$ appears inchange environment $\D\Gr$.
+  Let $v$ be the entry for $\Var{x}$ in $\Gr$ (so that |eval(x) rho = v|), and
+  let $\D v$ be the entry for $\Var{\D x}$ in $\D \Gr$ (so that |evalInc(x) rho
+  drho = dv|). The entry for $\Var{x}$ in $\Apply{\D \Gr}{\Gr}$ is
+  $\Apply{\D v}{v}$ (so that |eval(x) (rho `oplus` drho) = v `oplus` dv|), so we
   have
   \begin{align*}
-    &         \Apply
+    & \quad   \Apply
                 {\EvalIncWith*{\Var{x}}{\Gr}{\D \Gr}}
                 {\EvalWith*{\Var{x}}{\Gr}}\\
     & \quad = \Apply{\D v}{v}\\
@@ -278,37 +233,59 @@ of $\Eval{c}$.
   \end{align*}
   as required.
 
-\pg{Drop arguments here to update the proof!}
-  \Case \Const{c}{\List{t}}: We have
+
+  \Case \Const{c}: For constants, the proof is essentially delegated to plugins. We demand that
+  $\Eval{\Const{c}}$ does not depend on $\Gr$ and that $\EvalInc{\Const{c}}$ does not depend on $\Gr$ and $\D \Gr$.
+  Hence, we simply require that $\EvalInc{\Const{c}}$ is a derivative of $\Eval{\Const{c}}$.
+  \pg{Clear this up.}
+  We have
   \begin{align*}
-    &         \Apply
-                {\EvalIncWith*{\Const{c}{\List{t}}}{\Gr}{\D \Gr}}
-                {\EvalWith*{\Const{c}{\List{t}}}{\Gr}}\\
+    & \quad   \Apply
+                {\EvalIncWith*{\Const{c}}{\Gr}{\D \Gr}}
+                {\EvalWith*{\Const{c}}{\Gr}}\\
     & \quad = \Apply
-                {\EvalIncConst*
-                  {\Const{c}}
-                  {\List*{\EvalWith{t}{\Gr}}}
-                  {\List*{\EvalIncWith{t}{\Gr}{\D \Gr}}}}
-                {\EvalConst*
-                  {\Const{c}}
-                  {\List*{\EvalWith{t}{\Gr}}}}\\
+                {\EvalIncConst
+                  {\Const{c}}}
+                {\EvalConst
+                  {\Const{c}}}\\
     & \quad = \EvalConst
-                {c}
-                {\List*{\EvalIncWith{t}{\Gr}{\D \Gr}}}\\
-    & \quad = \EvalConst
-                {c}
-                {\List*{\EvalWith{t}{\Apply*{\D \Gr}{\Gr}}}}\\
+                {c} \\
     & \quad = \EvalWith
-                {\Const{c}{\List{t}}}
+                {\Const{c}}
                 {\Apply*{\D \Gr}{\Gr}}
   \end{align*}
-  by \cref{def:change-evaluation} and
-  the induction hypotheses on the terms $\List{t}$.
+  by \cref{def:change-evaluation}.
+% \pg{Drop arguments here to update the proof!}
+%   \Case \Const{c}{\List{t}}: We have
+%   \begin{align*}
+%     & \quad   \Apply
+%                 {\EvalIncWith*{\Const{c}{\List{t}}}{\Gr}{\D \Gr}}
+%                 {\EvalWith*{\Const{c}{\List{t}}}{\Gr}}\\
+%     & \quad = \Apply
+%                 {\EvalIncConst*
+%                   {\Const{c}}
+%                   {\List*{\EvalWith{t}{\Gr}}}
+%                   {\List*{\EvalIncWith{t}{\Gr}{\D \Gr}}}}
+%                 {\EvalConst*
+%                   {\Const{c}}
+%                   {\List*{\EvalWith{t}{\Gr}}}}\\
+%     & \quad = \EvalConst
+%                 {c}
+%                 {\List*{\EvalIncWith{t}{\Gr}{\D \Gr}}}\\
+%     & \quad = \EvalConst
+%                 {c}
+%                 {\List*{\EvalWith{t}{\Apply*{\D \Gr}{\Gr}}}}\\
+%     & \quad = \EvalWith
+%                 {\Const{c}{\List{t}}}
+%                 {\Apply*{\D \Gr}{\Gr}}
+%   \end{align*}
+%   by \cref{def:change-evaluation} and
+%   the induction hypotheses on the terms $\List{t}$.
 \end{optionalproof}
 
 \section{Correctness of differentiation}
 \label{sec:differentiate-correct}
-
+\label{sec:erasure}
 \DeclareFixedFootnote{\EmptyEmptyNote}{%
 To evaluate a closed term $t$, we need no environment entries, so
 the empty environment $\EmptyEnv$ suffices:
