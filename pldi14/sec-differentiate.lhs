@@ -3,7 +3,6 @@
 %include changes.fmt
 
 
-
 \chapter{Static differentiation for simply-typed \TitleLambda{}-calculus}
 %\section{Incrementalizing \TitleLambda{}-calculi}
 \label{sec:differentiate}
@@ -29,12 +28,12 @@ It is easy to define derivatives of arbitrary functions as:
 We could implement $\DERIVE$ following the same strategy.
 However, the resulting incremental programs would be no faster
 than recomputation. We cannot do better for arbitrary mathematical functions,
-since they are infinite objects which we cannot fully inspect.
+since they are (in general) infinite objects which we cannot fully inspect.
 %
 \pg{Revise - I reordered sentences to sort them logically with minimal rewriting.}%
 Therefore, we resort to a source-to-source transformation
-on simply-typed $\Gl$-calculus as defined in 
-\cref{fig:syntax,fig:typing}. In this section, we focus on the
+on simply-typed $\Gl$-calculus (STLC).
+We recall the syntax and typing rules of STLC in \cref{fig:syntax,fig:typing}. In this section, we focus on the
 incrementalization of the features that are shared among all
 instances of the plugin interface, that is, function types and the
 associated syntactic forms, $\Gl$-abstraction, application and
@@ -181,44 +180,35 @@ $\Gl$-calculus allows to \emph{glue} the primitives together.
 
 \begin{examples}
 Let us apply the transformation on the program $\Program$ defined
-in \cref{sec:intro}.
-{\DeriveProgramEnv
-\begin{align*}
-&\Program = \ProgramBody\\
-&\Derive\Program=\\
-&\zero
-\Lam{\Xs}{\Lam{\DXs}{}}\Lam{\Ys}{\Lam{\DYs}{}}\\
-&\one
-\FOLD'~(+)~(+')~0~0'\\
-&\two
-(\Merge\Xs\Ys)\\
-&\two
-(\MERGE'~\Xs~\DXs~\Ys~\DYs)
-\end{align*}
-}%
-The names $\FOLD'$, $\MERGE'$, $+'$, $0'$ stand for the
+in \cref{sec:motiv-example} and repeated here:
+\begin{code}
+grand_total  = \ xs ys -> fold (+) 0 (merge xs ys)
+derive(grand_total) =
+  \ xs dxs ys dys ->
+    dfold  (+) (d+) 0 d0
+           (merge xs ys)
+           (dmerge xs dxs ys dys)
+\end{code}
+
+The names |dfold|, |dmerge|, |d+|, |d0| stand for the
 derivatives of the corresponding primitives. The variables
-$\DXs$ and $\DYs$ are systematically named after $\Xs$
-and $\Ys$ to stand for their changes. As we shall see in
+|dxs| and |dys| are systematically named after |xs|
+and |ys| to stand for their changes. As we shall see in
 \cref{ssec:plugin},
-\[
-\MERGE'=\Lam{u}{\Lam{\D u}{\Lam{v}{\Lam{\D v}{\Merge{\D u}{\D v}}}}},
-\]
-so the derivative of $\Program$ is $\beta$-equivalent to
-{\DeriveProgramEnv
-\begin{align*}
-&\zero
-\Lam{\Xs}{\Lam{\DXs}{}}\Lam{\Ys}{\Lam{\DYs}{}}\\
-&\one
-\FOLD'~(+)~(+')~0~0'\\
-&\two
-(\Merge\Xs\Ys)~(\MERGE~\DXs~\DYs).
-\end{align*}}%
-%
+\begin{code}
+dmerge = \ u du v dv -> merge du dv
+\end{code}
+so the derivative of |grand_total| is $\beta$-equivalent to
+\begin{code}
+  \ xs dxs ys dys ->
+    dfold  (+) (d+) 0 d0
+           (merge xs ys)
+           (merge dxs dys)
+\end{code}
 This derivative is inefficient because it needlessly recomputes
-$\Merge\Xs\Ys$. But we still need to inline the derivatives of
+|merge xs ys|. We could save this value while running the base program and reuse it here; we will discuss in \cref{sec:static-caching} why this is a generally valid solution and how to do it. However, remembering results from base programs has some overhead which in this case can be avoided! Indeed, we still need to inline the derivatives of
 $\FOLD$ and other primitives to complete derivation. We'll
-complete the derivation process and see how to avoid this waste in
+complete the derivation process and see how to avoid either recomputation or caching in
 \cref{ssec:self-maint}.
 \end{examples}
 

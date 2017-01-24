@@ -69,10 +69,13 @@
 
 %format (nil(v)) = "\NilC{" v "}"
 %format NIL = "\NILC"
-%format eval(t) = "\mean{" t "}"
+%format eval(t) = "\Eval{" t "}"
+%format evalInc(t) = "\EvalInc{" t "}"
 %format (derive(t)) = "\Derive{" t "}"
 %format `cong` = "\cong"
 
+%format rho = "\rho"
+%format drho = "\D\rho"
 %format nabla = "\nabla"
 
 %format (new(v)) = "\New{" v "}"

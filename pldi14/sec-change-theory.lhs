@@ -557,8 +557,9 @@ we will use them to define the meaning of derivatives of
 programs. Intuitively, once we define a suitable set-theoretic
 denotational semantics for programs, and a program transformation
 that takes a program |f| to its derivative |df|, we will ensure
-that our semantics takes a program derivative |eval(df)| to a
-derivative of the semantics of the base program |eval(f)|.
+that (in essence) our semantics takes a program derivative |eval(df)| to a
+derivative of the semantics of the base program |eval(f)|.%
+\footnote{We say ``in essence'' because of some technical complications discussed in \cref{sec:erasure,def:erasure}.}
 
 We immediately verify that derivatives respect change equivalence, as promised
 earlier in \cref{sec:changeeeq}:

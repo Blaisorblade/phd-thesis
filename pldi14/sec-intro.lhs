@@ -14,6 +14,7 @@ computation research looks for alternatives that are cheaper in a common scenari
 namely, when the input change is much smaller than the input itself.
 
 \section{A motivating example}
+\label{sec:motiv-example}
 To understand incrementalization better, consider the |grand_total| program (presented in
 Haskell-like notation), which calculates the sum of all numbers
 in collections |xs| and |ys|:
