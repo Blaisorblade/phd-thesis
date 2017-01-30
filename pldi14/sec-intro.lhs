@@ -231,7 +231,14 @@ intensional Martin-Löf type theory.
 
 To make our proofs more accessible, we present them in terms of
 set theory, though for convenience we still use (informally)
-dependently-typed type signatures where useful. The differences
+dependently-typed type signatures where useful. For readers
+familiar with type theory, we will also discuss at some points
+relevant differences between the two presentations; however,
+readers unfamiliar with type theory can skip such discussions
+without prejudice.
+
+\paragraph{Type theory versus set theory for our purposes}
+The differences
 between set theory and type theory, and the two presentations of
 our formalization, are mostly cosmetic for our purposes:
 \begin{itemize}
@@ -251,6 +258,7 @@ our formalization, are mostly cosmetic for our purposes:
   \footnote{\url{http://permalink.gmane.org/gmane.comp.lang.agda/2343}}.
 \end{itemize}
 
+\paragraph{A semantics for our object language}
 To prove that incrementalization preserves the final results of
 our object-language programs, we need to give it a semantics. To
 this end we use a denotational semantics. Since our object

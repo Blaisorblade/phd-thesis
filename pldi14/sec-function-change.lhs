@@ -74,7 +74,7 @@ of the definition of function changes
 (\cref{def:function-changes:validity}), and which we'll use in
 the proof of \cref{thm:incrementalization}.
 
-\begin{definition}
+\begin{definition}[Function changes]
   \label{def:function-changes:change}
   The change set |DtIdx(A -> B) f| is defined for any change
   structures $\chs A$ and $\chs B$ and function |f `elem` A ->
@@ -83,14 +83,35 @@ the proof of \cref{thm:incrementalization}.
   \begin{subdefinition}
     \item
       \label{def:function-changes:signature}
+      Typing:
       |df a da `elem` DtIdx(B) (f a)| and
     \item
       \label{def:function-changes:validity}
+      Validity:
       |f a `oplus` df a da = f (a `oplus` da) `oplus` df (a `oplus` da) (nil(a `oplus` da))|.
   \end{subdefinition}
   for all values |a `elem` A| and corresponding changes
   |da `elem` DtIdx(A) ^ a|.
 \end{definition}
+
+\paragraph{Type-theoretic presentation}
+In our type-theoretic formalization, the definition of function
+changes is presented slightly differently.
+\begin{definition}[Function changes, type-theoretically]
+  \label{def:function-changes:change:tt}
+  The change type |DtIdx(A -> B) f| is defined for any change
+  structures $\chs A$ and $\chs B$ and function |f `elem` A ->
+  B|. The change type is a $\Sigma$-type, where
+  each element pairs a binary function |df| having type |(a : A) (da : Dt ^ a) -> Dt ^ (f a)|, together with a proof that |df| satisfies \cref{def:function-changes:validity}. Formally we write:
+  \begin{multline*}
+    |DtIdx(A -> B) f| = \\
+    \textstyle\sum_{|df : (a : A) -> (da : Dt ^ a) -> Dt ^ (f a)|}
+    |forall a da . ^^ f a `oplus` df a da == | \\
+    |f (a `oplus` da) `oplus` df (a `oplus` da) (nil(a `oplus` da))|
+  \end{multline*}
+\end{definition}
+We present this definition to highlight both the type signature of |df| and
+the presence of proofs in function changes.
 
 \begin{examples}
 Suppose $f\in\Fun{\Bag S}{\Bag S}$ and consider a member $\D f$ of
