@@ -261,9 +261,9 @@ in fact lifted change structures to function spaces.
 \begin{equational}
 \begin{code}
    (f1 `oplus` (f2 `ominus` f1)) a
-=  {- by the definition of |`oplus`| on functions -}
+=  {- by the definition of |`oplus`| on functions (\cref{def:function-changes:update}) -}
    f1 a `oplus` ((f2 `ominus` f1) a (nil(a)))
-=  {- by the definition of |`ominus`| on functions -}
+=  {- by the definition of |`ominus`| on functions (\cref{def:function-changes:diff}) -}
    f1 a `oplus` (f2 (a `oplus` (nil(a))) `ominus` f1 a)
 =  {- because |nil(a)| is a nil change (\cref{thm:update-nil-v2} for $\chs A$) -}
    f1 a `oplus` (f2 a `ominus` f1 a)
@@ -299,7 +299,7 @@ to |(f `oplus` df) (a `oplus` da)|:
 \begin{equational}
 \begin{code}
    (f `oplus` df) (a `oplus` da)
-=  {- by the definition of |`oplus`| on functions -}
+=  {- by the definition of |`oplus`| on functions (\cref{def:function-changes:update}) -}
    f (a `oplus` da) `oplus` df (a `oplus` da) (nil(a `oplus` da))
 =  {- by \cref{def:function-changes:validity} -}
    f a `oplus` df a da
@@ -380,11 +380,11 @@ changes on allowed inputs.
 \begin{equational}
 \begin{code}
    (f `oplus` df1) a
-=  {- by the definition of |`oplus`| on functions -}
+=  {- by the definition of |`oplus`| on functions (\cref{def:function-changes:update}) -}
    f a `oplus` df1 a (nil a)
 =  {- as just shown -}
    f a `oplus` df2 a (nil a)
-=  {- by the definition of |`oplus`| on functions -}
+=  {- by the definition of |`oplus`| on functions (\cref{def:function-changes:update}) -}
    (f `oplus` df2) a {-"\text{.}"-}
 \end{code}
 \end{equational}
@@ -526,7 +526,7 @@ In particular, any derivative is a nil change, and any nil change is a derivativ
 \begin{equational}
 \begin{code}
    (f `oplus` df) a
-=  {- by the definition of |`oplus`| on functions -}
+=  {- by the definition of |`oplus`| on functions (\cref{def:function-changes:update}) -}
    f a `oplus` df a (nil(a))
 =  {- by the definition of derivatives (\cref{def:derivatives}) -}
    f (a `oplus` (nil(a)))
