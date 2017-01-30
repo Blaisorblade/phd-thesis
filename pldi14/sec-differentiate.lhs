@@ -42,10 +42,15 @@ variable references.
 The sets of base types and primitive
 constants, as well as the typing rules for primitive constants, are
 on purpose left unspecified and only defined by plugins --- they are \emph{extensions points}.
-Definitions provided by the plugin are replaced, in figures, by ellipses
-(``$\ldots$'').
-Defining different plugins allows to experiment with
-sets of base types, associated primitives and incrementalization strategies.
+%
+We use ellipses (``$\ldots$'') for some extension points, and
+give names to others when needed to refer to them.
+%
+Defining different plugins allows to experiment with sets of base
+types, associated primitives and incrementalization strategies.
+Making plugin requirements explicit clarifies what is required to
+extend the framework beyond our formalization.
+%
 We summarize requirements on plugins in \cref{ssec:plugin}:
 Satisfying these requirements is sufficient to ensure
 correct incrementalization.
@@ -176,8 +181,11 @@ $\D x$.
   \Derive{c} =
   \Diff{c}{c} = \NilC{c} = c'
   \]
-  This definition is inefficient for functional constants; hence plugins must provide derivatives
-  of the primitives they define.
+  This definition is inefficient for functional constants; hence
+  plugins must provide derivatives of the primitives they define.
+  We require plugins to define, for each $\ConstTyping{c}{\tau}$,
+  a closed term $\DeriveConst(c)$ such that
+  $\Typing[\EmptyContext]{\DeriveConst(c)}{\GD \Gt}$.
 \end{itemize}
 
 This might seem deceptively simple. But $\lambda$-calculus only
@@ -245,7 +253,7 @@ provide:
 \begin{itemize}
 \item base types, and for each base type $\Gi$, the erased change structure of $\Gi$ as specified in
 \cref{fig:change-operations},
-\item primitives, and for each primitive $c$, the term $\Derive{c}$.
+\item primitives, and for each primitive $c$, the term $\DeriveConst{c}$.
 \end{itemize}
 \begin{examples}
 With bags of numbers as a primitive type, and a change structure
@@ -268,9 +276,7 @@ For each base type $\Gi$, a proof plugin must provide:
 For each primitive $\HasType c \Gt$, the proof plugin must provide:
 \begin{itemize}
 \item its value $\Eval{c}$ in the domain $\Eval{\Gt}$,
-
-\item its derivative $\EvalIncSmashWith*{c}{\EmptyEnv}{\EmptyEnv}$\EmptyEmptyNote{} in the change set of $\Gt$,
-\item a proof that $\EvalIncSmashWith*{c}{\EmptyEnv}{\EmptyEnv}$ erases to the term $\Derive{c}$.
+\item a proof that |nil(evalConst(c))| erases to the term $\DeriveConst{c}$.
 \end{itemize}
 
 To show that the interface for proof plugins

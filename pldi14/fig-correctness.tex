@@ -123,7 +123,7 @@
     &
     \Align{
       \EvalIncSmashWith{c}{\rho}{\D \rho}
-        & = \ldots\\
+        & = \NilC{\EvalConst{c}}\\
       \EvalIncSmashWith{\Lam{x}{t}}{\rho}{\D \rho}
         & = \lambda v\;\D v.\ 
                    \EvalIncSmashWith
@@ -142,7 +142,7 @@
     &
     \Align{
       \EvalWith{c}{\rho}
-        & =\ldots\\
+        & =\EvalConst{c}\\
       \EvalWith{\Lam{x}{t}}{\rho}
         & = \lambda v.\ \EvalWith{t}{\ExtendEnv*{x}{v}}\\
       \EvalWith{\App{s}{t}}{\rho}

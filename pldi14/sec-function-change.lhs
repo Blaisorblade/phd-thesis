@@ -94,6 +94,10 @@ the proof of \cref{thm:incrementalization}.
   |da `elem` DtIdx(A) ^ a|.
 \end{definition}
 
+We will sometimes introduce function changes |df| by spelling out a function |\x
+dx -> ...|. We must however remember to show that such functions are valid
+function changes.
+
 \paragraph{Type-theoretic presentation}
 In our type-theoretic formalization, the definition of function
 changes is presented slightly differently.

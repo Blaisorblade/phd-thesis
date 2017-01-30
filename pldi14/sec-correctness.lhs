@@ -54,9 +54,9 @@ simply sets. Likewise, we can use functions as the domain of function types.
 Given this domain
 construction, we can now define an evaluation function for
 terms. The plugin has to provide the evaluation function for
-constants. In general, the evaluation function $\Eval{t}$ computes the value of a
-well-typed term $t$ given the values of all free variables in
-$t$. The values of the free variables are provided in an
+constants. In general, the evaluation function |eval(t)| computes the value of a
+well-typed term |t| given the values of all free variables in
+|t|. The values of the free variables are provided in an
 environment.
 
 \begin{definition}[Environments]
@@ -81,6 +81,11 @@ environment.
 
 This is the standard semantics of the simply-typed
 $\Gl$-calculus.
+
+For each constant |c : tau|, the plugin provides |evalConst(c) :
+eval(tau)|, the semantics of |c|; since constants don't contain
+free variables, |evalConst(c)| does not depend on an environment.
+
 We can now specify what it means to incrementalize the
 simply-typed $\Gl$ calculus with respect to this semantics.
 
@@ -149,39 +154,125 @@ environments acting pointwise.
 \end{definition}
 
 At this point, we can define the change semantics of terms and
-prove that $\EvalInc{t}$ it is the derivative of $\Eval{t}$. For
-each constant $c$, the plugin provides $\EvalInc{c}$, the derivative
-of $\Eval{c}$.
+prove that $\EvalInc{t}$ it is the derivative of $\Eval{t}$.
 
 \begin{definition}[Change semantics]
   \label{def:change-evaluation}
-  The function $\EvalInc{t}$ is defined in
+  The function |evalInc(t)| is defined in
   \cref{fig:correctness:change-evaluation}.
 \end{definition}
+% \begin{lemma}
+%   \label{def:change-evaluation-is-change}
+%   Evaluating |evalInc(t) rho drho| results in a change to |eval(t) rho|, for
+%   any well-typed term $\Typing{t}{\Gt}$, for any environment
+%   $\Gr \in \Eval{\GG}$ and environment change
+%   $\D\Gr \in \Delta \Gr$.
+% \end{lemma}
+% \begin{optionalproof}
+  % To show the thesis, we need to prove that
+  % the definition of |evalInc(t)| produces indeed a valid change.
 
+  % We proceed by
+  % structural induction on the typing derivation for
+  % $\Typing{t}{\Gt}$. The only substantial case is for abstraction.
+  % \Case |c|: The thesis is that |evalInc(c) rho drho = nil(eval(c) rho)| is a change for |eval(t) rho|, which is true because |nil(v)| is a change for |v|.
+  % \Case |x|: The thesis is that |evalInc(x) rho drho = \textit{lookup $\D x$ in $\D \Gr$}| is a change for |eval(x) rho = \textit{lookup $x$ in $\Gr$}|. This follows because $\D\Gr$ is a change for $\Gr$.
+
+  % \Case |s t1|: The type |tau| must be |sigma -> tau1|. The thesis is that
+  % \begin{code}
+  %   evalInc(s t1) rho drho = (evalInc(s) rho drho) (eval(t1) rho) (evalInc(t1 rho drho)
+  % \end{code}
+  % is a change for |eval(s t1) rho : eval(sigma) -> eval(tau1)|.
+
+  % First, |evalInc(s) rho drho| is a valid change for |eval(s) rho| by the induction hypothesis, so it has type |Dt ^ (eval(s) rho) = (v : eval(sigma)) -> Dt ^ v -> Dt ^ (eval(s) rho v)|.
+
+  % Second, by the induction hypothesis |evalInc(t1) rho drho| is a
+  % change for |eval(t1) rho|, so |(evalInc(s) rho drho) (eval(t1)
+  % rho) (evalInc(t1 rho drho)| has type |Dt ^ (eval(s) rho
+  % (eval(t1) rho)) = eval(s t1) rho| as desired.
+
+  % \Case \Lam{x}{t_1}: This case is the most interesting. We need to prove that
+  % |eval(\x -> t1) (rho `oplus` drho) (v `oplus` dv) `oplus` evalInc(\x -> t1) (rho `oplus` drho) (nil (rho `oplus` drho)) ≡ eval(\x -> t1) rho `oplus` evalInc(\x -> t1) rho drho|
+
+        % ⟦ t ⟧ (v `oplus` dv • ρ)  `oplus`₍ τ ₎
+        % ⟦ t ⟧Δ (v `oplus` dv • ρ) (nil (v `oplus` dv) • dρ) ==
+        % ⟦ t ⟧ (v • ρ)  `oplus`  ⟦ t ⟧Δ (v • ρ) (dv • dρ)
+
+% \end{optionalproof}
 \begin{lemma}
   \label{lem:change-semantics-correct}
-  Given $\Typing{t}{\Gt}$, $\EvalInc{t}$ is the derivative of $\Eval{t}$.
+  The change semantics $\EvalInc{t}$ is the derivative of the standard semantics $\Eval{t}$ for any well-typed term $t$ with $\Typing{t}{\Gt}$.
+%   Evaluating |evalInc(t) rho drho| results in a change to |eval(t) rho|, for
+%   any well-typed term $\Typing{t}{\Gt}$, for any environment
+%   $\Gr \in \Eval{\GG}$ and environment change
+%   $\D\Gr \in \Delta \Gr$.
 \end{lemma}
 
 \begin{optionalproof}
-\pg{This optional proof is phrased for fully applied constants.}
-  Given a derivation of $\Typing{t}{\Gt}$, an environment $\Gr
-  \in \Eval{\GG}$, and a corresponding change environments $\D
-  \Gr \in \Change[\GG]{\Gr}$, we prove
-  \[
-    \Apply{\EvalIncWith*{t}{\Gr}{\D \Gr}}
-          {\EvalWith*{t}{\Gr}}
-    =
-    \EvalWith{t}{\Apply*{\D \Gr}{\Gr}}
-  \]
-  by induction on the structure of the derivation of
+  We proceed by induction on the structure of the derivation of
   $\Typing{t}{\Gt}$. There is one case for each of the typing
   rules in \cref{fig:typing}.
 
-  \Case \Lam{x}{t_1}: In this case, $\Gt = \Fun{\Gs}{\Gt_1}$. The
-  thesis states the equality of two functions, and we prove it
-  using extensional function equality: that is, we apply both
+  Pick arbitrarily a derivation of $\Typing{t}{\Gt}$, an environment
+  |rho `elem` eval(Gamma)| , and a corresponding change environments
+  |drho `elem` Dt ^ rho|. The thesis has then two parts:
+  \begin{enumerate}
+  \item |evalInc(t) : (rho : eval(Gamma)) -> (drho : Dt ^ rho) -> Dt (eval(t) rho)|, that is |evalInc(t) rho drho| is a change for |eval(t) rho|, and that
+  \item |evalInc(t)| is indeed a derivative for |eval(t)|, hence
+    \begin{code}
+    eval(t) rho `oplus` evalInc(t)^ rho drho = eval(t) (rho `oplus` drho)
+    \end{code}
+  \end{enumerate}
+  The first part ensures |evalInc(t)| has the correct typing to be a derivative.
+  It is proved in Agda simply by typechecking the definition of |evalInc(t)|, in
+  all cases except for |t = \x -> t1|.%
+  %
+  There, |evalInc(t)^ rho drho| is defined as |\v dv -> evalInc(t1)^ (rho, x =
+  v) (drho, dx = dv)|; we must check its validity
+  (\cref{def:function-changes:validity}).
+
+  The two proofs are mutually recursive.
+
+  \Case \Lam{x}{t_1}:
+  In this case, $\Gt = \Fun{\Gs}{\Gt_1}$.
+  We need to prove, first, that |evalInc(\x -> t1) rho drho| is a change for |eval(\x -> t1) rho|. Hence we must show that
+  \begin{code}
+    eval(\x -> t1) rho (v `oplus` dv) `oplus` evalInc(\x -> t1)^ rho drho (v `oplus` dv) (nil (v `oplus` dv)) =
+    eval(\x -> t1) rho v `oplus` evalInc(\x -> t1) rho drho v dv
+  \end{code}
+
+  Since we're proving both parts of the thesis together by mutual induction,
+  we can assume as induction hypothesis that |evalInc(t1)| is a derivative for |eval(t1)|.
+
+  We proceed by equational reasoning:
+\begin{equational}
+  \begin{code}
+    eval(\x -> t1) rho (v `oplus` dv) `oplus` evalInc(\x -> t1)^ rho drho (v `oplus` dv) (nil (v `oplus` dv))
+=   {- by definition of (change) evaluation -}
+    eval(t1) (rho, x = v `oplus` dv) `oplus` evalInc(t1)^ (rho, x = v `oplus` dv) (drho, dx = nil (v `oplus` dv))
+=   {- since |evalInc(t1)| is a derivative of |eval(t1)| -}
+    eval(t1) ((rho, x = v `oplus` dv) `oplus` (drho, dx = nil (v `oplus` dv)))
+=   {- by the definition of |`oplus`| on environments -}
+    eval(t1) (rho `oplus` drho, x = v `oplus` dv `oplus` nil (v `oplus` dv))
+=   {- by properties of nil changes -}
+    eval(t1) (rho `oplus` drho, x = v `oplus` dv)
+=   {- by the definition of |`oplus`| on environments -}
+    eval(t1) ((rho, x = v) `oplus` (drho, dx = dv))
+=   {- since |evalInc(t1)| is a derivative of |eval(t1)| -}
+    eval(t1) (rho, x = v) `oplus` evalInc(t1)^ (rho, x = v) (drho, dx = dv)
+=   {- by definition of (change) evaluation -}
+    eval(\x -> t1) rho v `oplus` evalInc(\x -> t1)^ rho drho v dv
+  \end{code}
+\end{equational}
+
+  Second we must prove that
+  \begin{code}
+    eval(\x -> t1) rho `oplus` evalInc(\x -> t1)^ rho drho =
+    eval(\x -> t1) (rho `oplus` drho)
+  \end{code}
+
+  The thesis states the equality of two functions, and we prove
+  it using extensional function equality: that is, we apply both
   sides to an arbitrary argument $v \in \Eval{\Gs}$ and prove the
   results are equal. We have
 \begin{equational}
@@ -234,28 +325,48 @@ of $\Eval{c}$.
   \end{align*}
   as required.
 
+  \Case \Const{c}: We proceed by computing the derivative of
+  |eval(c)|, that is |nil(eval(c))|, and rewriting it to
+  |evalInc(c)|. Steps use the definitions of (change) evaluation,
+  $\beta\eta$-equality and properties of nil changes.
+  \begin{equational}
+  \begin{code}
+           nil(eval(c))
+    =      {- by definition of nil changes -}
+           eval(c) `ominus` eval(c)
+    =      {- by definition of |`ominus`| on functions -}
+           \rho drho -> eval(c) (rho `oplus` drho) `ominus` eval(c) rho)
+    =      {- by definition of evaluation -}
+           \rho drho -> evalConst(c) `ominus` evalConst(c)
+    `doe`  {- by properties of nil changes -}
+           \rho drho -> nil(evalConst(c))
+    =      {- by definition of change evaluation -}
+           evalInc(c)
+  \end{code}
+\end{equational}
+  Since nil changes are derivatives, |nil(eval(c))| is the derivative of |eval(c)| as desired. This completes the proof.
 
-  \Case \Const{c}: For constants, the proof is essentially delegated to plugins. We demand that
-  $\Eval{\Const{c}}$ does not depend on $\Gr$ and that $\EvalInc{\Const{c}}$ does not depend on $\Gr$ and $\D \Gr$.
-  Hence, we simply require that $\EvalInc{\Const{c}}$ is a derivative of $\Eval{\Const{c}}$.
-  \pg{Clear this up.}
-  We have
-  \begin{align*}
-    & \quad   \Apply
-                {\EvalIncWith*{\Const{c}}{\Gr}{\D \Gr}}
-                {\EvalWith*{\Const{c}}{\Gr}}\\
-    & \quad = \Apply
-                {\EvalIncConst
-                  {\Const{c}}}
-                {\EvalConst
-                  {\Const{c}}}\\
-    & \quad = \EvalConst
-                {c} \\
-    & \quad = \EvalWith
-                {\Const{c}}
-                {\Apply*{\D \Gr}{\Gr}}
-  \end{align*}
-  by \cref{def:change-evaluation}.
+  % For constants, the proof is essentially delegated to plugins. We demand that
+  % $\Eval{\Const{c}}$ does not depend on $\Gr$ and that $\EvalInc{\Const{c}}$ does not depend on $\Gr$ and $\D \Gr$.
+  % Hence, we simply require that $\EvalInc{\Const{c}}$ is a derivative of $\Eval{\Const{c}}$.
+  % \pg{Clear this up.}
+  % We have
+  % \begin{align*}
+  %   & \quad   \Apply
+  %               {\EvalIncWith*{\Const{c}}{\Gr}{\D \Gr}}
+  %               {\EvalWith*{\Const{c}}{\Gr}}\\
+  %   & \quad = \Apply
+  %               {\EvalIncConst
+  %                 {\Const{c}}}
+  %               {\EvalConst
+  %                 {\Const{c}}}\\
+  %   & \quad = \EvalConst
+  %               {c} \\
+  %   & \quad = \EvalWith
+  %               {\Const{c}}
+  %               {\Apply*{\D \Gr}{\Gr}}
+  % \end{align*}
+  % by \cref{def:change-evaluation}.
 % \pg{Drop arguments here to update the proof!}
 %   \Case \Const{c}{\List{t}}: We have
 %   \begin{align*}
@@ -283,6 +394,16 @@ of $\Eval{c}$.
 %   by \cref{def:change-evaluation} and
 %   the induction hypotheses on the terms $\List{t}$.
 \end{optionalproof}
+
+\pg{Examples? Maybe when we introduce evalConst and deriveConst?}
+As readers might have noticed, plugins define the derivatives of
+constants used by the term transformation $\DERIVE$ but not the
+derivatives of constants used by the change semantics. This
+simplifies the mechanized proof without weakening resulting
+theorems.
+To write custom derivatives for the change semantics, we'd have to
+define derivatives in the semantic domain, proving lemmas
+requires proving tedious lemmas
 
 \section{Correctness of differentiation}
 \label{sec:differentiate-correct}
