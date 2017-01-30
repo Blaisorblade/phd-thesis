@@ -138,9 +138,19 @@ $\DeltaContext{\GG}$ contains the corresponding assumption
 $\HasType{\D x}{\DeltaType{\Gt}}$. Hence, $\Derive{t}$ can
 access the change of $x$ by using $\D x$. For simplicity, 
 we assume that the original program contains no variable names
-that start with $\D{}$.
-The definition of $\DERIVE$ will ensure that
-the $\D x$ variables are bound if the original term is closed.
+that start with $\D{}$.%
+%
+\footnote{Alternatively, we could define a mapping from base
+  variables $x$ of the original program to change variables
+  $d(x)$, and use $d(x)$ instead of $\D x$. To produce the
+  intended bindings structure in |derive(t)|, $d$ must be a
+  function that evaluates to a fresh object variable $d(x)$ for
+  each variable $x$, but it must evaluates to the same variable
+  when called with the same input.}
+%
+As a consequence of the above typing rule, if |t| is closed (that
+is, $\Gamma = \emptyset$) then the all the new $\D x$ variables
+will be bound.
 
 Let us analyzes each case of the definition of $\Derive{u}$
 (\cref{fig:correctness:derive}):
