@@ -168,8 +168,6 @@ where
 $\cong$ is denotational equality,
 |da| is a change on |a| and |a `oplus` da| denotes |a|
 updated with change |da|, that is, the updated input of |f|.
-\pg{Non-sequitur, this is not proven to be an optimization, not
-  by this equation.}
 Hence, when the derivative is faster than
 recomputation, we can optimize programs by replacing the
 left-hand side, which recomputes the output from scratch, with
@@ -182,12 +180,11 @@ languages, where functions can be inputs or outputs. This makes
 \cref{eq:correctness} less trivial to state and prove.
 
 To simplify the formalization we consider, beyond derivatives of
-programs, also derivatives of pure mathematical functions (\cref{sec:1st-order-changes}). We
-distinguish programs and mathematical functions as in
-denotational semantics.%
-\footnote{We avoid however using domain theory. To this end, we
-  restrict attention in our theory to strongly normalizing
-  calculi.}
+programs, also derivatives of pure mathematical functions
+(\cref{sec:1st-order-changes}). We distinguish programs and
+mathematical functions as in denotational semantics. We avoid
+however using domain theory. To this end, we restrict attention
+in our theory to strongly normalizing calculi.
 %
 We define those with an analogue of
 \cref{eq:correctness}: function |df| is a derivative of |f| if
@@ -205,7 +202,7 @@ the semantics of |f|, giving us \cref{eq:correctness} from
   complicate the picture, but we'll discuss them later.}
 
 \subsection{Our language}
-\ILC\ considers as object language a simply-typed $\Gl$-calculus
+\ILC\ considers as object language a strongly-normalizing simply-typed $\Gl$-calculus
 parameterized by \emph{language plugins} (or just plugins). A plugin
 defines
 %
@@ -219,8 +216,6 @@ that derivatives for arbitrary simply-typed $\Gl$-calculus expressions
 using these primitives can be computed. Both our implementation and our correctness proof 
 is parametric in the plugins, hence it is easy to support (and prove correct)
 new plugins.
-
-Of note, our language is strongly normalizing.
 
 \subsection{The meta-language of our proofs}
 In this subsection we describe the meta-language used in our

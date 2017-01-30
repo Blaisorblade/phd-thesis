@@ -207,7 +207,7 @@ of $\Eval{c}$.
     eval(s t1) rho `oplus` evalInc(s t1) rho drho
 =   {- by the definitions of (change) evaluation (\cref{def:evaluation,def:change-evaluation}) -}
     (eval(s) rho) (eval (t1) rho) `oplus` (evalInc(s) rho drho) (eval(t1) rho) (evalInc(t1) rho drho)
-=   {- by incrementalization (\cref{thm:incrementalization}) -}
+=   {- by incrementalization on function change |evalInc(s) rho drho| (\cref{thm:incrementalization}) -}
     (eval(s) rho `oplus` evalInc(s) rho drho) (eval (t1) rho `oplus` evalInc(t1) rho drho)
 =   {- by the induction hypothesis on |s| and |t1| -}
     eval(s) (rho `oplus` drho) (eval (t1) (rho `oplus` drho))
@@ -219,7 +219,7 @@ of $\Eval{c}$.
   \Case \Var{x}:
   Since $\Typing{x}{\Gt}$, we know that the typing assertion $x : \Gt$
   appears in typing context $\Gamma$, hence the variable $x$ appears also in
-  environment $\Gr$ and variable $\D x$ appears inchange environment $\D\Gr$.
+  environment $\Gr$ and variable $\D x$ appears in change environment $\D\Gr$.
   Let $v$ be the entry for $\Var{x}$ in $\Gr$ (so that |eval(x) rho = v|), and
   let $\D v$ be the entry for $\Var{\D x}$ in $\D \Gr$ (so that |evalInc(x) rho
   drho = dv|). The entry for $\Var{x}$ in $\Apply{\D \Gr}{\Gr}$ is
@@ -230,7 +230,7 @@ of $\Eval{c}$.
                 {\EvalIncWith*{\Var{x}}{\Gr}{\D \Gr}}
                 {\EvalWith*{\Var{x}}{\Gr}}\\
     & \quad = \Apply{\D v}{v}\\
-    & \quad = \EvalWith{\Var{x}}{\Apply*{\Gr}{\D \Gr}}
+    & \quad = \EvalWith{\Var{x}}{\Apply*{\D \Gr}{\Gr}}
   \end{align*}
   as required.
 
