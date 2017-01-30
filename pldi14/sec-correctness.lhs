@@ -195,9 +195,9 @@ of $\Eval{c}$.
     (eval(t1) ((rho, x = v) `oplus` (drho, dx = (nil v))))
 =   {- by the definition of |`oplus`| on environments (\cref{def:change-environments}) -}
     eval(t1) (rho `oplus` drho, x = v `oplus` (nil v))
-=   {- by the definition of evaluation (again) -}
-    eval(\x -> t1) (rho `oplus` drho) (v `oplus` (nil v))
 =   {- because |nil v| is a nil change (\cref{thm:update-nil-v2,def:nil-change-v2}) -}
+    eval(t1) (rho `oplus` drho, x = v)
+=   {- by the definition of evaluation (again) -}
     eval(\x -> t1) (rho `oplus` drho) v
 \end{code}
 \end{equational}
