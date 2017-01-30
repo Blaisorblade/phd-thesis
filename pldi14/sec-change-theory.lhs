@@ -218,12 +218,12 @@ it a \emph{nil change}.
 
 We use |`ominus`| to associate, to each value, a distinguished nil change.
 \begin{lemma}[Behavior of $\NILC$]
+  \label{thm:update-nil-v2}
   Change |v `ominus` v| is a nil change for |v| (that we write |nil(v)|), for any
   change structure $\chs V$ and value |v `elem` V|:
   \[
     |nil(v) = v `ominus` v| \qed
   \]
-  \label{thm:update-nil-v2}
 \end{lemma}
 \begin{proof}
   By the definition of nil changes (\cref{def:nil-change-v2}) we need to show
