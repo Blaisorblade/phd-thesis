@@ -520,6 +520,21 @@ In particular, any derivative is a nil change, and any nil change is a derivativ
   function |f `elem` A -> B|.
 \end{theorem}
 \begin{proof}
+  We show first that derivative |df| is a valid change for |f|, and second that it is a nil change for |f|.
+  \begin{enumerate}
+  \item We show that |f a `oplus` df a da = f (a `oplus` da) `oplus` df (a `oplus` da) (nil (a `oplus` da))|.
+\begin{equational}
+\begin{code}
+    f (a `oplus` da) `oplus` df (a `oplus` da) (nil (a `oplus` da))
+=   {- because |df| is a derivative of |f| (\cref{def:derivatives}) -}
+    f ((a `oplus` da) `oplus` (nil (a `oplus` da)))
+=   {- because |nil (a `oplus` da)| is a nil change (\cref{thm:update-nil-v2}) -}
+    f (a `oplus` da)
+=   {- because |df| is a derivative of |f| (\cref{def:derivatives}) -}
+    f a `oplus` df a da
+\end{code}
+\end{equational}
+\item
   We show that |f `oplus` df| is extensionally equivalent to |f|.
   We consider an arbitrary |a `elem` A| and prove the thesis by
   equational reasoning:
@@ -534,6 +549,7 @@ In particular, any derivative is a nil change, and any nil change is a derivativ
    f a {-"\text{.}"-}
 \end{code}
 \end{equational}
+\end{enumerate}
 \end{proof}
 
 We explained earlier that derivatives of a function can be
