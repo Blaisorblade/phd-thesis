@@ -50,6 +50,7 @@ simply sets. Likewise, we can use functions as the domain of function types.
   \cref{fig:correctness:values}.
 \end{definition}
 
+\pg{Don't mix semantics and evaluation!!!}
 Given this domain
 construction, we can now define an evaluation function for
 terms. The plugin has to provide the evaluation function for
