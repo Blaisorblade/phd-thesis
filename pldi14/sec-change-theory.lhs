@@ -225,11 +225,11 @@ We use |`ominus`| to associate, to each value, a distinguished nil change.
     |nil(v) = v `ominus` v| \qed
   \]
 \end{lemma}
-\begin{proof}
+\begin{optionalproof}
   By the definition of nil changes (\cref{def:nil-change-v2}) we need to show
   that |v `oplus` (v `ominus` v) = v|, which follows from
   \cref{def:update-diff}.
-\end{proof}
+\end{optionalproof}
 
 \begin{examples}
 We demonstrate a change structure on \emph{bags with signed
@@ -389,7 +389,7 @@ follows:
   |v `elem` V| and change |dv| valid for |v| (that is, |dv `elem`
   Dt^v|).
 \end{lemma}
-\begin{proof}
+\begin{optionalproof}
 Since both sides are changes for |v|, the thesis is equivalent to |v `oplus` ((v
 `oplus` dv) `ominus` v) = v `oplus` dv|.
 
@@ -397,7 +397,7 @@ To prove our thesis, we remember that thanks to \cref{def:update-diff},
 for any |v1, v2 `elem` V| we have |v1 `oplus` (v2 `ominus` v1) = v2|. We can take |v1
 = v|, |v2 = v `oplus` dv| and obtain |v `oplus` ((v `oplus` dv) `ominus` v) = v
 `oplus` dv|, which is exactly our thesis.
-\end{proof}
+\end{optionalproof}
 
 With change equivalence we can generalize some rules from high
 school algebra. There, we learn to add or subtract members from
@@ -410,7 +410,7 @@ both sides of an equation: if and only if |a = b| then |a + c = b
   |v2 `ominus` v1 `doe` dv| holds if and only if |v2 = v1 `oplus`
   dv|, for any |v1, v2 `elem` V| and |dv `elem` Dt ^ v1|.
 \end{lemma}
-\begin{proof}
+\begin{optionalproof}
   We prove both sides of the equivalence separately.
   First, if |v2 `ominus` v1 `doe` dv|, by definition |v1 `oplus` (v2
   `ominus` v1) = v1 `oplus` dv|, and canceling on the left side
@@ -419,7 +419,7 @@ both sides of an equation: if and only if |a = b| then |a + c = b
   Second, if |v2 = v1 `oplus` dv|, then |v2 `ominus` v1 = (v1
   `oplus` dv) `ominus` v1 `doe` dv| (using change cancellation in
   the last step) as desired.
-\end{proof}
+\end{optionalproof}
 
 Change equivalence is indeed an equivalence relation, as stated
 in the following lemma:
@@ -428,7 +428,7 @@ in the following lemma:
   `elem` V|, change equivalence is an equivalence relation
   (reflexive, symmetric, transitive) among elements of |Dt v|.
 \end{lemma}
-\begin{proof}
+\begin{optionalproof}
   The proofs apply the definition of change equality reduces each property to
   the same property for equality.
 
@@ -443,17 +443,17 @@ in the following lemma:
   imply |dv1 `doe` dv3|, because by transitivity of equality |v `oplus` dv1 = v
   `oplus` dv2| and |v `oplus` dv2 = v `oplus` dv3| imply |v `oplus` dv1 = v
   `oplus` dv3|.
-\end{proof}
+\end{optionalproof}
 
 \begin{lemma}
   \label{thm:nil-equivs}
   Nil changes are equivalent to each other, that is, |v `oplus` dv = v| implies
   |dv `doe` nil v|, for any change structure $\chs V$ and value |v `elem` V|.
 \end{lemma}
-\begin{proof}
+\begin{optionalproof}
   All nil changes for |v| share the same source and destination |v|, so they're
   equivalent.
-\end{proof}
+\end{optionalproof}
 
 As we will see, each valid operations in our theory (such as
 derivatives) will respect change equivalence: equivalent changes
@@ -517,14 +517,14 @@ Using change equivalence we immediately obtain an alternative characterization o
   A derivative |df| of function |f `elem` A -> B| can be characterized (up to
   change equivalence) by |df a da `doe` f (a `oplus` da) `ominus` f a|.
 \end{lemma}
-\begin{proof}
+\begin{optionalproof}
   Since |df v dv| is a change for |f v|, inlining the definition of change
   equivalence in the thesis gives
   \[|f a `oplus` df a da = f a `oplus` (f (a `oplus` da) `ominus` f a)|\] Once
   we simplify the right-hand side via \cref{def:update-diff}, we're left with
   \[|f a `oplus` df a da = f (a `oplus` da)|\]
   which is the defining property of derivatives.\qed
-\end{proof}
+\end{optionalproof}
 
 It also follows that a function, in general, can have different
 derivatives. Later, in \cref{thm:deriv-unique}, we show all
@@ -571,12 +571,12 @@ earlier in \cref{sec:changeeeq}:
   any value |v `elem` A|, change structure $\chs A$ and changes |dv1, dv2 `elem`
   Dt v|.
 \end{lemma}
-\begin{proof}
+\begin{optionalproof}
   By hypothesis changes |dv1| and |dv2| are equivalent, that is |v `oplus` dv1 = v `oplus` dv2|. We
   prove the thesis directly by equational reasoning using \cref{lem:derivatives-up-to-doe}:
   \[|df v dv1 `doe` f (v `oplus` dv1) `ominus` f v = f (v `oplus` dv2) `ominus`
     f v `doe` df v dv2|\text{.}\qed\]
-\end{proof}
+\end{optionalproof}
 
 %
 Next we can prove that derivatives take nil changes to nil
@@ -592,7 +592,7 @@ change directly; this is an important optimization.\pg{revise and find back
   change structures $\chs A$ and $\chs B$, function |f `elem` A -> B|, value |a
   `elem` A|, and |df| derivative of |f|.
 \end{lemma}
-\begin{proof}
+\begin{optionalproof}
   We prove the thesis |df a (nil a) `doe` (nil(f a))| equationally:
 \begin{equational}
 \begin{code}
@@ -605,6 +605,6 @@ change directly; this is an important optimization.\pg{revise and find back
       nil (f a)
 \end{code}
 \end{equational}
-\end{proof}
+\end{optionalproof}
 
 \input{pldi14/sec-function-change}

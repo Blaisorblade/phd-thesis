@@ -339,7 +339,7 @@ that all function changes do preserve this equivalence.
   base value |a `elem` A|, function |f `elem` A -> B|, changes
   |da1, da2 `elem` Dt ^ a| and |df1, df2 `elem` Dt ^ f|.
 \end{lemma}
-\begin{proof}
+\begin{optionalproof}
   By definition of change equivalence, the thesis |df1 v dv1
   `doe` df2 v dv2| means that |f v `oplus` df1 v dv1 = f v
   `oplus` df2 v dv2|.
@@ -355,7 +355,7 @@ that all function changes do preserve this equivalence.
    f v `oplus` df2 v dv2
 \end{code}
 \end{equational}
-\end{proof}
+\end{optionalproof}
 This lemma generalizes \cref{thm:deriv-respect-doe}.
 
 We can prove a form of extensionality for function changes:
@@ -368,7 +368,7 @@ changes on allowed inputs.
   applied to arbitrary inputs |a `elem` A|, |da1, da2 `elem` Dt ^
   x| (|df1 a da1 `doe` df2 a da2|)
 \end{lemma}
-\begin{proof}
+\begin{optionalproof}
   The thesis |df1 `doe` df2| means that |f `oplus` df1| is equal
   to |f `oplus` df2|. We prove this using function
   extensionality.
@@ -392,7 +392,7 @@ changes on allowed inputs.
    (f `oplus` df2) a {-"\text{.}"-}
 \end{code}
 \end{equational}
-\end{proof}
+\end{optionalproof}
 
 \subsection{Understanding function changes}
 To understand function changes, we can decompose them
@@ -523,7 +523,7 @@ In particular, any derivative is a nil change, and any nil change is a derivativ
   |f|, for any change structures $\chs A$ and $\chs B$ and
   function |f `elem` A -> B|.
 \end{theorem}
-\begin{proof}
+\begin{optionalproof}
   We show first that derivative |df| is a valid change for |f|, and second that it is a nil change for |f|.
   \begin{enumerate}
   \item We show that |f a `oplus` df a da = f (a `oplus` da) `oplus` df (a `oplus` da) (nil (a `oplus` da))|.
@@ -554,7 +554,7 @@ In particular, any derivative is a nil change, and any nil change is a derivativ
 \end{code}
 \end{equational}
 \end{enumerate}
-\end{proof}
+\end{optionalproof}
 
 We explained earlier that derivatives of a function can be
 different because they can return different but equivalent
@@ -568,13 +568,13 @@ derivatives of a function are change-equivalent.
   any change structures $\chs A, \chs B$ and base function |f
   `elem` A -> B|.
 \end{lemma}
-\begin{proof}
+\begin{optionalproof}
   Derivatives |df1| and |df2| are nil changes (as just shown in
   \cref{thm:derivative-is-nil}). Change |nil f| is also a
   nil change (by \cref{thm:update-nil-v2}). Nil changes are all
   change equivalent (by \cref{thm:nil-equivs}), that is, we have
   the thesis |df1 `doe` nil f `doe` df2|.
-\end{proof}
+\end{optionalproof}
 
 \begin{oldSec}
 \pg{The following two paragraphs are too verbose, and possibly
