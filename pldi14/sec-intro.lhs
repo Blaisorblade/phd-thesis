@@ -6,12 +6,37 @@
 \label{sec:intro}
 
 Incremental computation has a long-standing history in computer
-science~\citep{Ramalingam93}. Often, a program needs to update its
-output efficiently to reflect input
-changes~\citep{Salvaneschi13reactive}. Instead of rerunning such a
-program from scratch on its updated input, incremental
-computation research looks for alternatives that are cheaper in a common scenario:
-namely, when the input change is much smaller than the input itself.
+science~\citep{Ramalingam93}.
+Often, a program needs to update the output of some nontrivial function $f$
+when the input to the computation changes.
+Programmers typically have to choose between a few undesirable options.
+\begin{itemize}
+\item They can call again function $f$ on the updated input and
+  repeat the computation from scratch. This choice guarantees
+  correct results and is easy to implement, but typically wastes
+  computation time. Often, if the updated input is close to the
+  original input, the same result can be computed much faster.
+\item They can write by hand a new function $df$ that updates the
+  output based on input changes, using various techniques.
+  Depending on the complexity of $f$, their ability and effort,
+  this choice can be much more efficient, but takes significant
+  developer time. Moreover, this choice introduces significant
+  potential for bugs, because writing $df$ is hard and because it
+  must be updated when $f$ changes. In actual applications, this
+  complicates code maintenance tasks
+  significantly~\citep{Salvaneschi13reactive}.
+\item They can write the function of interest using
+  domain-specific languages that support incrementalization.
+  Build scripts and associated domain-specific languages are one
+  example. Database query languages are another one.\pg{Mention here limits?}
+\item They can attempt using general-purpose techniques for
+  incrementalizing programs, such as \emph{self-adjusting
+    computation} and variants. Such techniques are
+\end{itemize}
+
+\pg{Continue discussing dependencies minimization and the
+  relation with parallelism. Build scripts might be a good
+  example.}
 
 \section{A motivating example}
 \label{sec:motiv-example}
