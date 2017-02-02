@@ -142,8 +142,8 @@ grand_total2   = \ xs      ys      ->  sum  (merge  xs   ys)
 dgrand_total2  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
 \end{code}
 
-Finally, we need to transform the binding of |output| and its body. By iterating similar steps
-In the end we get:\pg{fill missing steps}
+Finally, we need to transform the binding of |output| and its body. By iterating similar steps,
+in the end we get:\pg{fill missing steps}
 \begin{code}
 grand_total2   = \ xs      ys      ->  sum  (merge  xs   ys)
 dgrand_total2  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
