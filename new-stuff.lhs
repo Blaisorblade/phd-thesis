@@ -313,4 +313,3 @@ update :: Int -> a -> Seq a -> Seq a
 \chapter{Static caching}
 \label{sec:static-caching}
 \pg{Write it!}
-\chapter{Conclusions}

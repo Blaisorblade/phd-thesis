@@ -1,5 +1,5 @@
 % Emacs, this is -*- latex -*-!
-\section{Related work}
+\chapter{Related work}
 \label{sec:rw}
 
 Existing work on incremental computation can be divided into two
@@ -20,7 +20,7 @@ most closely related prior works. \Citet{Ramalingam93}, \citet{Gupta99MMV}
 and \citet{Acar06} discuss further related work.
 
 
-\subsection{Dynamic approaches}
+\section{Dynamic approaches}
 One of the most advanced dynamic approach to incrementalization is
 self-adjusting computation, which has been applied to Standard ML
 and large subsets of C~\citep{Acar09,Hammer11}.
@@ -74,7 +74,7 @@ focused on speeding up reactions to input changes by making them
 incremental on collections. \citet{Willis08} use dynamic techniques
  to incrementalize JQL queries.
 
-\subsection{Static approaches}
+\section{Static approaches}
 \pg{If we discuss partial evaluation, we should compare to
   \citep{Sundaresh91}}
 Static approaches analyze a program at compile-time and produce an
@@ -92,7 +92,7 @@ Our aim is to apply static incrementalization to more expressive languages;
 in particular, \ILC\ supports first-class functions and an open
 set of base types with associated primitive operations.
 
-\subsubsection{Finite differencing}
+\subsection{Finite differencing}
 \label{sec:finite-diff}
 \citet{Paige82FDC} present derivatives for a first-order language
 with a fixed set of primitives.
@@ -116,7 +116,7 @@ but their architecture is still rather restrictive: they lack
 support for function changes and restrict incrementalization to
 self-maintainable views, without hinting at a possible solution.
 
-\subsubsection{Static memoization}
+\subsection{Static memoization}
 \label{ssec:staticmemo}
 \citeauthor{Liu00}'s work~\citep{Liu00} allows to incrementalize a first-order base
 program $f(\Old{x})$ to compute $f(\New{x})$, knowing how
