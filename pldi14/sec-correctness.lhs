@@ -402,8 +402,8 @@ derivatives of constants used by the change semantics. This
 simplifies the mechanized proof without weakening resulting
 theorems.
 To write custom derivatives for the change semantics, we'd have to
-define derivatives in the semantic domain, proving lemmas
-requires proving tedious lemmas
+define derivatives in the semantic domain, which
+requires proving tedious lemmas.
 
 \section{Correctness of differentiation}
 \label{sec:differentiate-correct}

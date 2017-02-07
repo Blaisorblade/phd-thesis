@@ -82,8 +82,13 @@
 %format tau = "\tau"
 %format sigma1 = sigma "_1"
 %format tau1 = tau "_1"
+%format iota = "\iota"
+
+%format valid tau dv v = dv "\;\mathbf{V}_{" tau "}\;" v
 
 %format (new(v)) = "\New{" v "}"
 %format (old(v)) = "\Old{" v "}"
 %format `betaeq` = "=_{\beta}"
 %format == = "\equiv"
+
+%format `and` = "\land"

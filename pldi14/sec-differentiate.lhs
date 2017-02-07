@@ -81,7 +81,7 @@ to update with these changes.
 To work around this limitation of
 our object language, we use a form of \emph{erasure} of dependent types
 to simple types. In \cref{fig:change-operations} and \cref{fig:correctness:change-types}, we
-define change types $\Change{\Gt}$ as an approximate description
+define \emph{change types} $\Change{\Gt}$ as an approximate description
 of change sets $\Change[\Gt]{v}$ (\cref{fig:correctness:changes}). 
 In particular, all changes in $\Change[\Gt]{v}$ correspond to values of terms with type $\Change{\Gt}$,
 but not necessarily the other way around. 
@@ -101,6 +101,8 @@ where $\UPDATE$ and $\DIFF$ are
 families of $\Gl$-terms. 
 
 Erased change structures are not change structures themselves.
+We'll sometimes talk distinguish \emph{syntactic} changes (the erased ones)
+and \emph{semantic} changes.
 However, we will show how change structures and erased changes
 structures have ``almost the same'' behavior
 (\cref{sec:differentiate-correct}). We will hence be able to

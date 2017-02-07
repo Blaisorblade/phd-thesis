@@ -500,7 +500,8 @@ derivatives of functions, using a variant of
 
 \begin{definition}[Derivatives]
   \label{def:derivatives}
-  We call binary function |df| a \emph{derivative} of |f| if
+  We call binary function |df : (a : A) -> (da : Dt ^ a) -> Dt (f a)|
+  a \emph{derivative} of |f| if
   \[|f (a `oplus` da) = f a `oplus` df a da|\] holds for all values |a
   `elem` A| and corresponding changes |da `elem` Dt ^ a|, assuming a function |f
   `elem` A -> B| and change structures $\chs A$ and $\chs B$ on the domain and
