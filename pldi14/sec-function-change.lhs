@@ -394,6 +394,33 @@ changes on allowed inputs.
 \end{equational}
 \end{optionalproof}
 
+\subsubsection{Function changes of curried functions}
+Above we characterized function changes for unary functions.
+Later we will consider curried functions of multiple arguments
+such as |f : A -> B -> C| (for arbitrary types |A|, |B|, |C| with
+associated change structures).
+
+We can use directly the definition to prove a function |df| is a
+function change for |f|, that is somewhat tedious. We can instead
+derive a direct characterization of validity for function
+changes.
+
+All function changes |df| are differences of functions |f `oplus`
+df| and |f| (up to change equivalence). So, if |df| is a valid
+function change, we can deduce that
+\begin{code}
+  df `doe` (f `oplus` df) `ominus` f =
+  \a da -> (f `oplus` df) (a `oplus` da) `ominus` f a =
+  \a da b db -> (f `oplus` df) (a `oplus` da) (b `oplus` db) `ominus` f a b\text{.}
+\end{code}
+or equivalently
+\[|(f `oplus` df) (a `oplus` da) (b `oplus` db) = f a b `oplus` df a da b db|\text{.}\]
+
+If |df| is a derivative of |f|, since |f `oplus` df = f|, we have in particular
+\[|f (a `oplus` da) (b `oplus` db) = f a b `oplus` df a da b db|\text{.}\]
+
+It turns out that those equations suffice to characterize function changes.\pg{Resume.}
+
 \subsection{Understanding function changes}
 To understand function changes, we can decompose them
 into two orthogonal concepts. With a function change |df|, we can compute at
