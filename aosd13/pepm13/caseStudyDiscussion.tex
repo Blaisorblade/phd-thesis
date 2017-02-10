@@ -1,6 +1,29 @@
 In this chapter we discuss the degree to which \LoS\ fulfilled our original design goals, and the conclusions
 for host and domain-specific language design.
 
+\section{Optimization limitations}
+\label{sec:optim-vs-inc}
+\pg{Resume}
+While indexing achieved significant speedups, when indexing does not apply
+speedups are more limited; in comparison, later projects working on collection
+query optimization gave better speedups.
+
+A design goal of this project was to incrementalize optimized queries, and while
+it is easy to incrementalize collection operators such as \texttt{map},
+\texttt{flatMap} or \texttt{filter}, it was much less clear to us how to
+optimize the result of inlining.
+We considered using shortcut fusion, but we did
+not know a good way to incrementalize the resulting programs; later work, as
+described in \cref{part:incr}, clarified what is possible and what not.
+
+Another problem is that most fusion techniques are designed for sequential processing, hence conflict with incrementalization.
+Most fusion techniques generally assume bulk operations scan collections in
+linear order. For instance, shortcut fusion rewrites operators in terms of
+\texttt{foldr}. It is not so clear how to extend them to parallel and
+incremental programs. \pg{Cite Guy Steele talk against cons, and Ingo Maier's
+  incremental library.}
+
+
 \section{Deep embedding}
 \subsection{What worked well}
 Several features of Scala contributed greatly to the success we achieved. With implicit conversions, the lifting can be made mostly transparent. The advanced type system features were quite helpful to make the expression tree representation typed. The fact that for-comprehensions are desugared \emph{before} type inference and type checking was also a prerequisite for automatic lifting. The syntactic expressiveness and uniformity of Scala, in particular the fact that custom types can have the same look-and-feel as primitive types, were also vital to lift expressions on primitive types.
