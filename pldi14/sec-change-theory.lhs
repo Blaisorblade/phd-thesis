@@ -2,6 +2,7 @@
 %include polycode.fmt
 %include changes.fmt
 
+\chapter{A theory of changes}
 %\section{Changes as First-Class Values}
 %\section{Formalizing changes}
 \label{sec:1st-order-changes}
