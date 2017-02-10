@@ -557,6 +557,44 @@ $\Eval{\Change\Gs}$.
 
 \begin{oldSec}
 
+% \section{An alternative logical relation}
+
+% Proofs of change validity hide a logical relation.
+
+% % As we have seen in this proof, we prove validity of function
+% % changes when we introduce new ones.
+
+% % Pre-changes are just the meanings of syntactic changes.
+% To introduce function changes, we must prove their validity. Alternatively, in
+% this section we define pre-changes without validity requirements and treat
+% proofs of validity of a pre-change |dv| for a base value |v| as separate
+% entities.
+% We then adapt the defininition of |`oplus`| to operate on pre-changes.
+% %
+% Validity is now a binary logical relation |valid tau dv v|, where |v :
+% eval(tau)| and |dv : eval (Dt ^ tau)|, defined as follows:
+% \begin{code}
+% valid (sigma -> tau) df f =
+%   forall a da. ^^ valid (sigma) da a ->
+%     (valid (tau) (df a da) (f a) `and`
+%       (f `oplus` df) (a `oplus` da) = f a `oplus` df a da)
+% valid iota dv v = ...
+% \end{code}
+
+% We have a choice between our purely semantics methods and using
+% logical relations and more syntactic methods, because:
+% \begin{itemize}
+% \item we can define function changes to include their validity proofs
+% \item logical relations must be defined by induction on types.
+%   it's unclear how to define a logical relation in type
+%   theory without having an inductive datatype of types (a
+%   universe construction \pg{cite}) to perform induction on
+%   them. So with syntactic methods it would be hard to use a logical relation to
+%   describe validity of changes~\pg{term never
+%     introduced}.
+% \end{itemize}
+
+
 \section{Old contents of this section}
 
 \begin{theorem}[correctness of differentiation]
