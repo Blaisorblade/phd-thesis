@@ -345,6 +345,52 @@ data SeqChange a = Seq (SeqSingleChange a)
 %
 \end{examples}
 
+\section{Derivatives}
+After defining change structures, we can define more formally
+derivatives of functions, using a variant of
+\cref{eq:correctness}.
+
+\begin{definition}[Derivatives]
+  \label{def:derivatives}
+  We call binary function |df : (a : A) -> (da : Dt ^ a) -> Dt (f a)|
+  a \emph{derivative} of |f| if
+  \[|f (a `oplus` da) = f a `oplus` df a da|\] holds for all values |a
+  `elem` A| and corresponding changes |da `elem` Dt ^ a|, assuming a function |f
+  `elem` A -> B| and change structures $\chs A$ and $\chs B$ on the domain and
+  codomain of function |f|.\qed
+\end{definition}
+
+This definition implies that |df a da| is a change for |f a| for any suitable
+base value |a| and change |da|.
+
+
+\begin{examples}
+Let |f: Bag S -> Bag S| be the constant function mapping
+everything to the empty bag. Its derivative
+|df : Bag S -> Bag S -> Bag S| has to ignore its two
+arguments and produce the empty bag in all cases.
+
+Let |id: Bag S -> Bag S| be the identity function between
+bags. Its derivative |did| is defined by
+|did v dv = dv|.
+\end{examples}
+
+\pg{Anticipate this point.}
+Here we are defining derivatives of mathematical functions, but
+we will use them to define the meaning of derivatives of
+programs. Intuitively, once we define a suitable set-theoretic
+denotational semantics for programs, and a program transformation
+that takes a program |f| to its derivative |df|, we will ensure
+that (in essence) our semantics takes a program derivative |eval(df)| to a
+derivative of the semantics of the base program |eval(f)|.%
+\footnote{We say ``in essence'' because of some technical complications discussed in \cref{sec:erasure,def:erasure}.}
+
+
+\input{pldi14/sec-function-change}
+
+\chapter{Change equivalence}
+
+
 \section{Change equivalence}
 \label{sec:changeeeq}
 Next, we formalize when two changes are ``equivalent'', and show
@@ -495,22 +541,6 @@ We avoid quotienting for a few reasons:
 \end{itemize}
 
 \section{Derivatives}
-After defining change structures, we can define more formally
-derivatives of functions, using a variant of
-\cref{eq:correctness}.
-
-\begin{definition}[Derivatives]
-  \label{def:derivatives}
-  We call binary function |df : (a : A) -> (da : Dt ^ a) -> Dt (f a)|
-  a \emph{derivative} of |f| if
-  \[|f (a `oplus` da) = f a `oplus` df a da|\] holds for all values |a
-  `elem` A| and corresponding changes |da `elem` Dt ^ a|, assuming a function |f
-  `elem` A -> B| and change structures $\chs A$ and $\chs B$ on the domain and
-  codomain of function |f|.\qed
-\end{definition}
-
-This definition implies that |df a da| is a change for |f a| for any suitable
-base value |a| and change |da|.
 
 Using change equivalence we immediately obtain an alternative characterization of derivatives:
 
@@ -541,27 +571,6 @@ equivalent from |db1| (|db2 `doe` db1|, |db2 /= db1|), then we
 can define a different derivative |df2| of |f| that is equal to
 |df1| everywhere except that |df2 a da = db2|. Hence these two
 derivatives are different.
-
-\begin{examples}
-Let |f: Bag S -> Bag S| be the constant function mapping
-everything to the empty bag. Its derivative
-|df : Bag S -> Bag S -> Bag S| has to ignore its two
-arguments and produce the empty bag in all cases.
-
-Let |id: Bag S -> Bag S| be the identity function between
-bags. Its derivative |did| is defined by
-|did v dv = dv|.
-\end{examples}
-
-\pg{Anticipate this point.}
-Here we are defining derivatives of mathematical functions, but
-we will use them to define the meaning of derivatives of
-programs. Intuitively, once we define a suitable set-theoretic
-denotational semantics for programs, and a program transformation
-that takes a program |f| to its derivative |df|, we will ensure
-that (in essence) our semantics takes a program derivative |eval(df)| to a
-derivative of the semantics of the base program |eval(f)|.%
-\footnote{We say ``in essence'' because of some technical complications discussed in \cref{sec:erasure,def:erasure}.}
 
 We immediately verify that derivatives respect change equivalence, as promised
 earlier in \cref{sec:changeeeq}:
@@ -609,4 +618,75 @@ change directly; this is an important optimization.\pg{revise and find back
 \end{equational}
 \end{optionalproof}
 
-\input{pldi14/sec-function-change}
+\subsection{Function changes and change equivalence}
+
+\pg{Revise}
+We claimed earlier that change equivalence is
+respected by all valid operations in our theory. Here we prove
+that all function changes do preserve this equivalence.
+
+\begin{lemma}[Function change application preserves change equivalence]
+  \label{thm:change-respect-doe}
+  If |df1 `doe` df2| and |dv1 `doe` dv2| then |df1 v dv1 `doe`
+  df2 v dv2|, for any change structures $\chs A$ and $\chs B$,
+  base value |a `elem` A|, function |f `elem` A -> B|, changes
+  |da1, da2 `elem` Dt ^ a| and |df1, df2 `elem` Dt ^ f|.
+\end{lemma}
+\begin{optionalproof}
+  By definition of change equivalence, the thesis |df1 v dv1
+  `doe` df2 v dv2| means that |f v `oplus` df1 v dv1 = f v
+  `oplus` df2 v dv2|.
+  We prove this statement by equational reasoning:
+\begin{equational}
+\begin{code}
+   f v `oplus` df1 v dv1
+=  {- by incrementalization (\cref{thm:incrementalization}) -}
+   (f `oplus` df1) (v `oplus` dv1)
+=  {- since |df1 `doe` df2| and |dv1 `doe` dv2| -}
+   (f `oplus` df2) (v `oplus` dv2)
+=  {- by incrementalization (\cref{thm:incrementalization}) -}
+   f v `oplus` df2 v dv2
+\end{code}
+\end{equational}
+\end{optionalproof}
+This lemma generalizes \cref{thm:deriv-respect-doe}.
+
+We can prove a form of extensionality for function changes:
+function changes are equal if they produce change-equivalent
+changes on allowed inputs.
+\begin{lemma}[Extensionality for change equivalence]
+  For any change structures $\chs A, \chs B$ and base function |f
+  `elem` A -> B|, two function changes |df1, df2 `elem` Dt ^ f|
+  are equivalent (|df1 `doe` df2|) if they behave equivalently when
+  applied to arbitrary inputs |a `elem` A|, |da1, da2 `elem` Dt ^
+  x| (|df1 a da1 `doe` df2 a da2|)
+\end{lemma}
+\begin{optionalproof}
+  The thesis |df1 `doe` df2| means that |f `oplus` df1| is equal
+  to |f `oplus` df2|. We prove this using function
+  extensionality.
+  %
+  Let |a `elem` A| be an arbitrary input, and let us prove that
+  |(f `oplus` df1) a| is equal to |(f `oplus` df2) a|.
+  %
+  First, we apply the hypothesis with |da1 = da2 = (nil a)|
+  (since change equivalence is reflexive), and obtain that |df1 a
+  (nil a) `doe` df2 a (nil a)|, that is |f a `oplus` df1 a (nil
+  a) = f a `oplus` df2 a (nil a)|.
+  Now we can prove the thesis by equational reasoning:
+\begin{equational}
+\begin{code}
+   (f `oplus` df1) a
+=  {- by the definition of |`oplus`| on functions (\cref{def:function-changes:update}) -}
+   f a `oplus` df1 a (nil a)
+=  {- as just shown -}
+   f a `oplus` df2 a (nil a)
+=  {- by the definition of |`oplus`| on functions (\cref{def:function-changes:update}) -}
+   (f `oplus` df2) a {-"\text{.}"-}
+\end{code}
+\end{equational}
+\end{optionalproof}
+
+\pg{Integrate.}
+\input{pldi14/sec-change-structures}
+
