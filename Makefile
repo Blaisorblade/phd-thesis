@@ -19,7 +19,7 @@ PDF_NAME=$(PAPER_NAME).pdf
 lhsFmt=$(wildcard *.fmt)
 lhsSources=$(patsubst %,%.lhs,new-stuff change-theory-reconstruct \
 	$(patsubst %,pldi14/%,sec-intro sec-change-theory \
-	sec-function-change sec-differentiate sec-correctness))
+	sec-change-equiv sec-function-change sec-differentiate sec-correctness))
 lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 sources=$(shell find . -name '*.tex') $(wildcard Bibs/*.bib) $(lhsSources) $(lhsFmt)
 INTERM_PRODUCTS=mylhs2tex.sty $(lhsCompiled)
