@@ -618,6 +618,27 @@ change directly; this is an important optimization.\pg{revise and find back
 \end{equational}
 \end{optionalproof}
 
+We explained earlier that derivatives of a function can be
+different because they can return different but equivalent
+changes on some inputs; as promised, we now show that all
+derivatives of a function are change-equivalent.
+\begin{lemma}[Derivatives are unique up to change equivalence]
+  \label{thm:deriv-unique}
+  If two function changes |df1, df2| are derivatives for
+  |f|, then they're change equivalence to each other and to |f|'s nil change:
+  |df1 `doe` nil f `doe` df2|, for
+  any change structures $\chs A, \chs B$ and base function |f
+  `elem` A -> B|.
+\end{lemma}
+\begin{optionalproof}
+  Derivatives |df1| and |df2| are nil changes (as just shown in
+  \cref{thm:derivative-is-nil}). Change |nil f| is also a
+  nil change (by \cref{thm:update-nil-v2}). Nil changes are all
+  change equivalent (by \cref{thm:nil-equivs}), that is, we have
+  the thesis |df1 `doe` nil f `doe` df2|.
+\end{optionalproof}
+
+
 \subsection{Function changes and change equivalence}
 
 \pg{Revise}
