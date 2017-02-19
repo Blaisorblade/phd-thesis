@@ -52,6 +52,19 @@
 %format x1
 %format x2
 %format x3
+%format xn = "x_n"
+
+%format as1
+%format as2
+%format xs1
+%format xs2
+%format ys1
+%format ys2
+%format output1
+%format output2
+
+%format u1
+%format u2
 
 %format df0
 %format df1
@@ -76,12 +89,18 @@
 %format `cong` = "\cong"
 
 %format nabla = "\nabla"
+%format emptyCtx = "\EmptyContext"
+%format emptyRho = "\EmptyEnv"
 %format rho = "\rho"
 %format drho = "\D\rho"
+%format rho1
+%format rho2
 %format sigma = "\sigma"
 %format tau = "\tau"
-%format sigma1 = sigma "_1"
-%format tau1 = tau "_1"
+%format sigma1
+%format sigma2
+%format tau1
+%format tau2
 %format iota = "\iota"
 
 %format valid tau dv v = dv "\;\mathbf{V}_{" tau "}\;" v
@@ -90,5 +109,9 @@
 %format (old(v)) = "\Old{" v "}"
 %format `betaeq` = "=_{\beta}"
 %format == = "\equiv"
+%format /- = "\vdash"
 
 %format `and` = "\land"
+
+%format Theta(n) = "\Theta(" n ")"
+%format o(n) = "o(" n ")"
