@@ -238,7 +238,7 @@ incremental version for each primitive. In other words, the plugin
 specifies the primitives and their respective derivatives, and
 \ILC\ can glue together these simple derivatives in such a way
 that derivatives for arbitrary simply-typed $\Gl$-calculus expressions
-using these primitives can be computed. Both our implementation and our correctness proof 
+using these primitives can be computed. Both our implementation and our correctness proof
 is parametric in the plugins, hence it is easy to support (and prove correct)
 new plugins.
 
