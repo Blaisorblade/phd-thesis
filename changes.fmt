@@ -104,6 +104,8 @@
 
 %format valid tau dv v = dv "\;\mathbf{V}_{" tau "}\;" v
 
+%format fromto (tau) (v1) (dv) (v2) = "\validfromto{" tau "}{" v1 "}{" dv "}{" v2 "}"
+
 %format (new(v)) = "\New{" v "}"
 %format (old(v)) = "\Old{" v "}"
 %format `betaeq` = "=_{\beta}"

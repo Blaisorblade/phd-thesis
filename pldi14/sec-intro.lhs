@@ -614,3 +614,219 @@ frontend, that we use for writing specific terms.
 % In the chapter, we present an overview of
 % the formalization in more human-readable form, glossing over some
 % technical details.
+
+\section{A new correctness proof for differentiation}
+
+In this section, we introduce differentiation more formally. We
+prove its correctness to clarify the invariant it satisfies
+(turning valid environment changes into valid output changes).
+
+To support incrementalization, we introduce formally in this
+section (a) a description of changes, and operations on changes,
+parameterized by types; (b) a compositional term-to-term
+transformation called differentiation and written |derive(t)|
+that produces incremental programs.
+
+For each type |tau|, we define a change type |Dt^tau|. A change
+value |dv : eval(Dt^tau)| describes the difference between two
+values |v1, v2 : eval(tau)|.
+
+We will soon introduce an operator |`oplus`|, such that |v1
+`oplus` dv = v2| whenever |dv| is a change between |v1| and |v2|.
+
+Roughly, our goal is that evaluating |derive(t)| (where |t| is a
+well-typed term) maps an environment change |drho| from |rho1| to
+|rho2| into a result change |eval(derive(t)) drho|, going from
+|eval(t) rho1| to |eval(t) rho2|. That is, we would hope for the
+following correctness statement to hold:
+
+\begin{theorem}[Incorrect correctness statement]
+If |Gamma /- t : tau| and |rho1 `oplus` drho = rho2| then
+|(eval(t) rho1) `oplus` (eval(derive(t)) drho) = (eval(t) rho2)|.
+\end{theorem}
+
+However, this statement is too weak to be proven by induction
+(and in fact, it is not correct as is). As we'll see, correctness
+of differentiation requires changes to satisfy some validity
+invariant which are not encoded by change types and not checked
+by |`oplus`|. The above correctness statement does not require
+input changes to be valid, so it does not hold. Moreover, it does
+not claim that the output of differentiation gives a valid
+change, so it is too weak to prove: if |s| is a subterm of |t|,
+using this statement we do not know that |eval(derive(s)) drho|
+evaluates to a valid change.
+%
+To encode invariants relating a change to the values it relates,
+so that incremental programs might rely on such invariants, we
+introduce a notion of \emph{validity}. Typically, change types
+contain values that invalid in some sense, but incremental
+programs will \emph{preserve} validity. In particular, valid
+changes between functions are in turn functions that take valid input
+changes to valid output changes. Hence, we
+formalize validity as a logical relation.
+
+Formally, validity is a logical relation |fromto tau v1 dv v2|,
+relating a change value |dv : eval(Dt^tau)|, a source value |v1 :
+eval(tau)| and a target value |v2 : eval(tau)|. We read |fromto
+tau v1 dv v2| as ``|dv| is valid change from |v1| to
+|v2|''.
+
+Since functions might close over values that change, they might
+change as well. To describe changes of functions, we introduce
+\emph{function changes}.
+A valid function change from |f1| to |f2| (where |f1, f2 :
+eval(sigma -> tau)|) is in turn a function |df| that takes an
+input |a1| and a change |da|, valid from |a1| to |a2|, to a valid
+change from |f1 a1| to |f2 a2|. Function changes do not take
+updated input |a2| as explicit argument, but it is implied by
+|a1| and |da|.
+\begin{align*}
+  |Dt ^ iota| &= \ldots\\
+  |Dt ^ (sigma -> tau)| &= |Dt ^ sigma -> tau -> Dt ^ tau|\\
+  |fromto (sigma -> tau) f1 df f2| &=
+  |forall a1 a2 : eval(sigma), da : eval(Dt ^ sigma) .| \\
+  &\text{if }|fromto (sigma) a1 da a2| \text{ then }
+    |fromto (tau) (f1 a1) (df a1 da) (f2 a2)|
+\end{align*}
+
+We also extend these definitions to environments, defining
+|Dt^Gamma| and |fromto Gamma rho1 drho rho2|.
+
+A valid environment change |drho|, valid from |rho1| to |rho2|, extends environment |rho1| with valid changes for each entry.
+\begin{align*}
+  \Delta\EmptyContext &= \EmptyContext \\
+  \Delta\Extend{x}{\tau} &= \Extend{\Extend[\Delta\Gamma]{x}{\tau}}{\D x : \Delta\tau} \\
+\end{align*}
+%
+\begin{typing}
+  \Axiom
+  {\validfromto{\EmptyContext}{\EmptyContext}{\EmptyContext}{\EmptyContext}}
+  \Rule{|fromto Gamma rho1 drho rho2|\\
+    |fromto tau a1 da a2|}{
+  \validfromto{\Extend{x}{\tau}}
+  {\ExtendEnv*[\rho_1]{x}{a_1}}
+  {\ExtendEnv*[\ExtendEnv[\D\rho]{x}{a_1}]{dx}{\D{a}}}
+  {\ExtendEnv*[\rho_2]{x}{a_2}}}
+\end{typing}
+
+We write differentiation as |derive(t)|. We first give its
+definition and typing.
+
+The transformation is defined by:
+\begin{code}
+  derive(\x -> t) = \x dx -> derive(t)
+  derive(s t) = derive(s) t (derive(t))
+  derive(x) = dx
+\end{code}
+  % derive(^^let x = t1 in t2) =
+  %   let  x = t1
+  %        dx = derive(t1)
+  %   in   derive(t2)
+
+
+\begin{lemma}[Typing of |derive(param)|]
+  If |Gamma /- t : tau| then |Dt ^ Gamma /- derive(t) : Dt ^ tau|.
+\end{lemma}
+\begin{proof}
+  The thesis can be proven by induction on the typing derivation
+  |Gamma /- t : tau|.
+\end{proof}
+
+Evaluating |derive(t)| on well-typed terms maps a valid
+environment change |drho| from |rho1| to |rho2| into a valid
+result change |eval(derive(t)) drho|, going
+from |eval(t) rho1| to |eval(t) rho2|.
+
+\begin{theorem}[Correctness of |derive(param)|]
+  If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
+  |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.
+\end{theorem}
+\begin{proof}
+  By induction on typing derivation |Gamma /- t : tau|.
+  \begin{itemize}
+  \item Case |Gamma /- x : tau|. The thesis follows |fromto tau
+    (eval(x) rho1) (eval(dx) drho) (eval(x) rho2)| because the
+    environment entry for |dx| is a valid change for the
+    environment entry for |x|.
+  \item Case |Gamma /- s t : tau|.
+    By inversion of typing, there is some type |sigma| such that |Gamma /- s : sigma -> tau| and
+    |Gamma /- t : sigma|.
+
+    In essence, to prove the thesis, you can show by induction on
+    |s|, |eval(derive(s)) drho| is a validity-preserving function
+    change |df|, and use induction on |t| to produce a valid
+    input to |df|. The thesis follows by validity preservation,
+    and calculations showing the change has the right source and destination.
+
+    In detail, our thesis is
+    \[|fromto tau (eval(s t) rho1) (eval(derive(s t)) drho) (eval(s t) rho2)|,\]
+    %
+    where |eval(s t) rho = (eval(s) rho) (eval(t) rho)| (for any |rho : eval(Gamma)|)and
+    \begin{equational}
+      \begin{code}
+   eval(derive(s t)) drho
+=  eval(derive(s) t (derive(t))) drho
+=  (eval(derive(s)) drho) (eval(t) drho) (eval(derive(t)) drho)
+=  (eval(derive(s)) drho) (eval(t) rho1) (eval(derive(t)) drho)
+      \end{code}%
+    \end{equational}%
+    The last step relies on |eval(t) drho = eval(t) rho1|.
+    That follows by soundness of weakening:
+    |drho : eval(Dt^Gamma)| extends |rho1 : eval(Gamma)|, and |t|
+    can be typed in context |Gamma|.
+
+    Our thesis becomes
+    \[|fromto tau ((eval(s) rho1) (eval(t) rho1)) ((eval(derive(s)) drho) (eval(t) rho1) (eval(derive(t)) drho)) ((eval(s) rho2) (eval(t) rho2))|.\]
+
+    By the inductive
+    hypothesis on |s| and |t| we have
+    \begin{gather*}
+      |fromto (sigma -> tau) (eval(s) rho1) (eval(derive(s)) drho) (eval(s) rho2)| \\
+      |fromto sigma (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.
+    \end{gather*}
+    Since |s| has function type, its validity means:
+\begin{align*}
+  |fromto (sigma -> tau) (eval(s) rho1) (eval(derive(s)) drho) (eval(s) rho2)| &=
+  |forall a1 a2 : eval(sigma), da : eval(Dt ^ sigma) .|
+  \text{ if }|fromto (sigma) a1 da a2| \text{ then }\\
+    &|fromto (tau) ((eval(s) rho1) a1) ((eval(derive(s)) drho) a1 da) ((eval(s) rho2) a2)|
+\end{align*}
+Instantiating in this statement |fromto (sigma) a1 da a2| by |fromto sigma (eval(t)
+rho1) (eval(derive(t)) drho) (eval(t) rho2)| gives the thesis.
+
+  \item Case |Gamma /- \x -> t : sigma -> tau|. By inversion of typing,
+    |Gamma , x : sigma /- t : tau|.
+    We need to deduce the thesis
+    \[|fromto (sigma -> tau) ((\a1 -> eval(t) (rho1, x = a1))) (\a1 da -> eval(derive(t)) (drho, x = a1, dx = da)) ((\a2 -> eval(t) (rho2, x = a2)))|.\]
+    That is, for any |a1, a2, da| such that |fromto sigma a1 da a2|, we must have
+    \[|fromto tau (eval(t) (rho1, x = a1)) (eval(derive(t))
+      (drho, x = a1, dx = da)) (eval(t) (rho2, x = a2))|.\]
+
+    To do so, take the inductive hypothesis on |t|. Since appropriate environment for |t| must match typing context |Gamma , x : sigma|, the hypothesis can be written as requiring that whenever
+    $
+      \validfromto{\Extend{x}{\sigma}}
+  {\ExtendEnv*[\rho_1]{x}{a_1}}
+  {\ExtendEnv*[\ExtendEnv[\D\rho]{x}{a_1}]{dx}{\D{a}}}
+  {\ExtendEnv*[\rho_2]{x}{a_2}}$, that is |fromto Gamma rho1 drho rho2| and |fromto sigma a1 da a2|,
+    we have
+    \[|fromto tau (eval(t) (rho1, x = a1)) (eval(derive(t))
+      (drho, x = a1, dx = da)) (eval(t) (rho2, x = a2))|.\]
+
+    If we pick the same contexts and context change |fromto Gamma
+    rho1 drho rho2|, the inductive hypothesis reduces to the
+    thesis.
+  \end{itemize}
+\end{proof}
+
+Next, we will introduce formally operator |`oplus`| and relate it
+to validity. In particular, we will prove that |fromto tau v1 dv
+v2| implies |v1 `oplus` dv = v2|, and explain why the converse is not true.
+
+
+To understand why invalid changes cause derivatives to produce
+incorrect results, consider again |grand_total = \ xs ys -> sum
+(merge xs ys)|. Suppose a bag change |dxs| removes an element
+|20| from input bag |xs|, while |dys| makes no changes to |ys|:
+in this case, the output should decrease, so |dgrand_total xs dxs
+ys dys| should return |-20|. However, that is only correct if
+|20| is actually an element of |xs|. Otherwise, |xs `oplus` dxs| will make no change
