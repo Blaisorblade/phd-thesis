@@ -120,7 +120,6 @@
 \NewDocumentCommand{\NAT}{}{\Keyword{Nat}}
 \NewDocumentCommand{\INT}{}{\Keyword{Int}}
 \NewDocumentCommand{\BOOL}{}{\Keyword{Bool}}
-\NewDocumentCommand{\DERIVE}{}{\mathcal{Derive}}
 \NewDocumentCommand{\EVAL}{}{\mathcal{Eval}}
 \NewDocumentCommand{\DOM}{}{D}
 \NewDocumentCommand{\NEGATE}{}{\Term{negate}}
@@ -181,7 +180,8 @@
 \NewDocumentCommand{\EvalConst}{sm}{\Parens#1{\mean{#2}[\text{const}]}}
 \NewDocumentCommand{\EvalIncConst}{sm}{\Parens#1{\mean{#2}[\text{$\GD$ const}]}}
 \NewDocumentCommand{\EvalBase}{sm}{\Parens#1{\mean{#2}[\text{base}]}}
-\NewDocumentCommand{\Derive}{sm}{\Parens#1{\DERIVE(#2)}}
+\NewDocumentCommand{\DERIVE}{}{\mathcal{D}}
+\NewDocumentCommand{\Derive}{sm}{\Parens#1{\DERIVE[#2]}}
 \NewDocumentCommand{\DeriveConst}{sm}{\Parens#1{\DERIVE_{\text{const}}(#2)}}
 \NewDocumentCommand{\Dom}{m}{\DOM_{#1}}
 
