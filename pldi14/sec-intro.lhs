@@ -42,55 +42,389 @@ Programmers typically have to choose between a few undesirable options.
   relation with parallelism. Build scripts might be a good
   example.}
 
-Since no approach guarantees efficient incrementalization for arbitrary
-programs, we propose to design domain-specific languages whose programs can be
-incrementalized by transformation; we will discuss why we favor this approach.
+Since no approach guarantees efficient incrementalization for
+arbitrary programs, we propose to design domain-specific
+languages whose programs can be incrementalized by
+transformation. We will discuss why we favor this approach.
 
 \section{A motivating example}
 \label{sec:motiv-example}
-To understand incrementalization better, consider the |grand_total| program (presented in
-Haskell-like notation), which calculates the sum of all numbers
-in collections |xs| and |ys|:
-\begin{code}
-grand_total  = \ xs ys -> fold (+) 0 (merge xs ys)
-output       = grand_total {{1, 1}} {{2, 3, 4}} = 11
-\end{code}
-With |{{...}}| we represent a multiset or \emph{bag}, that is an unordered collection (like a set)
-where elements are allowed to appear more than once (unlike a set).
-Now assume that the input |xs| changes from |{{1,1}}| to
-|{{1}}|, and |ys| changes from |{{2, 3, 4}}| to |{{2, 3, 4, 5}}|.
-Instead of recomputing |output| from scratch, we could also compute it incrementally. If we have a
-representation for the changes to the inputs (say, for now,
-|dxs = {{Remove 1}}| and |dys = {{Add 5}}|), we can compute the new
-result through a function |dgrand_total| that takes the old inputs
-|xs = {{1,1}}| and |ys = {{2, 3, 4}}| and the changes |dxs| and |dys|
-to produce the output change.
-In this case, it would compute the change
-|dgrand_total xs dxs ys dys = Plus 4|,
-which can then be used to update the original output |11|
-%
-to yield the updated result |15|. We call |dgrand_total| the \emph{derivative} of |grand_total|, and we call the program transformation producing |dgrand_total| \emph{differentiation} (or, sometimes, simply \emph{derivation}).
-A derivative is a function in the
-same language as |grand_total|, accepting and producing changes, which
-are simple first-class values of this language.
-%
-If we increase the size of the original inputs |xs| and |ys|, the time
-complexity of |grand_total xs ys| increases linearly, while the time complexity
-of |dgrand_total xs dxs ys dys| only depends on the sizes of |dxs| and |dys|,
-which under our assumptions are smaller (just like in our example).
+To understand incrementalization better, we apply it to a small
+example program, shown in Haskell-like notation.
 
-\subsection{Differentiation}
+In the following program, |grand_total xs ys| sums numbers in
+input collections |xs| and |ys|. We also compute an initial
+output |output1| on initial inputs |xs1| and |ys1|:
+
+\begin{code}
+  grand_total xs ys = sum (merge xs ys)
+  output1           = grand_total xs1 ys1
+                    = sum {{1, 2, 3, 4}} = 10
+\end{code}
+
+We have called |grand_total| on initial inputs |xs1 = {{1, 2, 3}}| and |ys1 = {{4}}|
+to obtain initial output |output1|. Here |{{...}}| denotes a multiset
+or \emph{bag} containing the elements among braces.\footnote{A bag is an
+  unordered collection (like a set) where elements are allowed to appear more
+  than once (unlike a set).} Our initial inputs here are small so that we can
+show them concretely, but in practice they are typically much bigger; we use |n|
+to denote the input size. In this case the asymptotic complexity of computing
+|grand_total| is |Theta(n)|.
+
+We must compute updated output |output2| from updated inputs |xs2 = {{1, 1, 2, 3}}|
+and |ys2 = {{4, 5}}|. We could recompute |output2| from scratch as
+\begin{code}
+  output2      = grand_total xs2 ys2
+               = sum {{1, 1, 2, 3, 4, 5}} = 16
+\end{code}
+But if the size of the updated inputs is |Theta(n)|, recomputation also
+takes time |Theta(n)|, and we would like to obtain our result asymptotically faster.
+
+To compute the updated output |output2| faster, we assume the changes to the
+inputs have a description of size |dn| that is asymptotically smaller than the
+input size |n|, that is |dn = o(n)|. All approaches to incrementalization
+require small input changes. Incremental computation will then process the input
+changes, rather than just the new inputs.
+
+In our approach to incrementalization we also describe changes to values as new
+values. We call such description simply \emph{changes}. Each change |dx| has a
+source |x1| and a destination |x2|. There is an operator |`oplus`| that computes
+the destination of a change |x2| given its source |x1| and and the change
+itself, so that in general |x2 = x1 `oplus` dx|. For now, a change |das| to a
+bag |as1| simply contains all elements to be added to the base bag |as1| to
+obtain the updated bag |as2| (we'll ignore removing elements for this section
+and discuss it later). In our example, the change from |xs1| (that is |{{1, 2,
+    3}}|) to |xs2| (that is |{{1, 1, 2, 3}}|) is |dxs = {{1}}|, while the change
+from |ys1| (that is |{{4}}|) to |ys2| (that is |{{4, 5}}|) is |dys = {{5}}|. To
+represent the output change |doutput| from |output1| to |output2| we need
+integer changes. For now, we represent integer changes as integers, and define
+|`oplus`| on integers as addition: |x1 `oplus` dx = x1 + dx|.
+
+We propose to compute the output change |doutput| from |output1| to |output2| by
+calling a new function |dgrand_total|, the \emph{derivative} of |grand_total| on
+base inputs and their respective changes. We can then compute the updated output
+|output2| as the old output |output1| updated by change |doutput|. Below we give
+the derivative of |grand_total| and show our approach gives the correct result
+in this example.
+
+\begin{code}
+  dgrand_total xs dxs ys dys = sum (merge dxs dys)
+  doutput                    = dgrand_total xs1 dxs ys1 dys =
+                             = sum {{1, 5}} = 6
+  output2                    = output1 `oplus` doutput = output1 + doutput = 10 + 6 = 16
+\end{code}
+
+The goal is that a derivative is asymptotically faster than a base program.
+Here, derivative |dgrand_total| simply \emph{ignores} base inputs, so its time
+complexity depends only on the size of changes |dn|. The complexity of
+|dgrand_total| is in particular |Theta(dn) = o(n)|.
+
+Moreover, we propose to generate derivatives by a program transformation |derive(param)| on base terms |t|, assuming that we already have derivatives for primitive functions they
+use.
+
+We call this program transformation \emph{differentiation} (or,
+sometimes, simply \emph{derivation}); we write |derive(t)| to
+denote the result of this transformation on a term |t|.
+Informally, |derive(t)| evaluates to a change going from |t|
+evaluated on old inputs to |t| evaluated on new inputs. In our
+example, we can apply |derive(param)| to |grand_total|'s body to
+produce |dgrand_total|'s body:
+\[ |derive(sum (merge xs ys)) = sum (merge dxs dys)|.\]
+
+A derivative of |grand_total| is a function in the same language as
+|grand_total|, that accepts changes from initial inputs |xs1| and |ys1| to
+updated inputs |xs2| and |ys2| and evaluates to the change from the base result
+|grand_total xs1 ys1| to the updated result |grand_total xs2 ys2|.
+
+More in general, for a unary function |f|, a derivative |df|
+takes an input |x| and a change |dx| for |x| and produces a
+change from base output |f x| to updated output |f (x `oplus`
+dx)|. Symbolically we can write
+\begin{code}
+  f x `oplus` df x dx = f (x `oplus` dx)
+\end{code}
+
+For functions |f| of multiple arguments, a derivative |df| takes all base inputs
+of |f| together with changes to each of them, and produces a change from the
+base output to the updated output.
+% To make things concrete we show
+% \begin{code}
+  % xs1          = {{1}}
+  % dxs          = {{1}}
+  % xs2          = {{1, 1}}
+
+  % ys1          = {{2, 3, 4}}
+  % dys          = {{5}}
+  % ys2          = {{2, 3, 4, 5}}
+
+  % output1      = grand_total xs1 ys1
+  %              = sum {{1, 2, 3, 4}} = 10
+  % output2      = grand_total xs2 ys2
+  %              = sum {{1, 1, 2, 3, 4, 5}} = 16
+  % dgrand_total = \ xs dxs ys dys -> sum (merge dxs dys)
+  % doutput      = dgrand_total xs1 dxs ys1 dys =
+  %              = sum {{1, 5}} = 6
+  % output2      = outpu1 + doutput
+% \end{code}
+
+% To clarify notation:
+% \begin{itemize}
+% \item |{{...}}| denotes a multiset or \emph{bag} containing the
+%   elements among braces. A bag is an unordered collection (like a
+%   set) where elements are allowed to appear more than once
+%   (unlike a set).
+% \item Function |grand_total| is given in Haskell-like notation;
+%   it merges the two input bags, and sums all elements to compute
+%   its result.
+% \item Change |dxs| is a value describing the change from base input |xs1| to updated input |xs2|. For now changes to bags simply list elements to insert, so that |dxs = {{1}}| means ``insert element |1| from base input |xs1| to obtain updated input |xs2|''.
+%   Similarly, |dys = {{5}}| means ``insert |5| into base input |ys1| to obtain updated input |ys2|''.
+% \end{itemize}
+
+% In this case, |dgrand_total| would compute the output change
+% |doutput = dgrand_total xs1 dxs ys1 dys = 6|, which can then
+% be used to update the original output |10| to yield the updated
+% result |16|.
+
+% In this example incremental computation doesn't seem to save much
+% time, but that's only because base inputs are small. Usually
+% inputs are instead much bigger than changes. The time complexity
+% of recomputation, |grand_total xs2 ys2|, is linear in the sizes
+% of |xs2| and |ys2|, while the time complexity of |dgrand_total
+% xs1 dxs ys1 dys| only depends on the sizes of |dxs| and |dys|.
+
+% A derivative is a function in the
+% same language as |grand_total|, that accepts changes to all inputs  and producing changes, which
+% are simple first-class values of this language.
+%
+
+\subsection{Our object language}
+We will define differentiation as a recursive program transformation on terms.
+To be able to define the transformation and state the invariant it satisfies, we
+need to first recall the object language we develop the transformation in.
+
+\ILC\ considers as object language a strongly-normalizing
+simply-typed $\Gl$-calculus (STLC). To prove that
+incrementalization preserves the final results of our
+object-language programs, we need to specify a semantics for
+STLC. To this end we use a denotational semantics. Since STLC is
+strongly normalizing~\citep[Ch. 12]{Pierce02TAPL} we need not
+handle partiality in our semantics, in particular we can eschew
+using domain theory. The domains for our denotational semantics
+are simply Agda types, and semantic values are Agda values---in
+other words, we give a denotational semantics in terms of type
+theory.\footnote{Alternatively, some would call such a semantics
+  a definitional interpreter~\citep{Amin2017}.}
+%
+Using denotational semantics allows us to state the specification
+of differentiation directly in the semantic domain, and take
+advantage of Agda's support for equational reasoning for proving
+equalities between Agda functions.
+
+\input{pldi14/fig-lambda-calc}
+
+We recall syntax, typing rules and denotational semantics of STLC in
+\cref{fig:lambda-calc}; for a more proper introduction to STLC (but not to
+denotational semantics) we refer the reader to \citet[Ch. 9]{Pierce02TAPL}.
+
+\subsubsection{Language plugins}
+Our STLC is parameterized by \emph{language plugins} (or just plugins).
+A plugin defines:
+\begin{itemize}
+\item
+  a set of base types $\iota$, base constants $c$ and their
+  semantics $\EvalConst{c}$, in the usual sense;
+\item a representation for changes for each base type, and a
+  derivative for each primitive;
+\item proofs of correctness for its components.
+\end{itemize}
+
+Once a plugin
+specifies the primitives and their respective derivatives,
+and
+\ILC\ can glue together these simple derivatives in such a way
+that derivatives for arbitrary STLC expressions
+using these primitives can be computed.
+
+Our |grand_total| example requires a plugin that provides a types for integers
+and bags and primitives such that we can implement |sum| and
+|merge|.\pg{Elaborate.}
+
+% Our first implementation and our first correctness proof are
+% explicitly modularized to be parametric in the plugins, to
+% clarify precisely the interface that plugins must satisfy.
+
+% \subsection{Differentiation}
+% After we defined our language, its type system and its semantics, we motivate
+% and sketch what differentiation does on an arbitrary well-typed term |t| such
+% that |Gamma /- t : tau|. We will later make all this more formal.
+
+% For any type |tau|, we introduce type |Dt ^ tau|, the type of changes for terms
+% of type |tau|. We also have operator |oplusIdx(tau) : tau -> Dt ^ tau -> tau|;
+% we typically omit its subscript. So if |x : tau| and |dx : Dt ^ tau| is a change
+% for |x|, then |x `oplus` dx| is the destination of that change. We overload
+% |`oplus`| also on semantic values. So if |v : eval(tau)|, and if |dv : eval(Dt ^
+% tau)| is a change for |v|, then |v `oplus` dv : eval(tau)| is the destination of
+% |dv|.
+
+% We design differentiation to satisfy two (informal) invariants:
+% \begin{itemize}
+% \item Whenever the output of |t| depends on a base input |x : sigma|, |derive(t)| depends on
+%   input |x : sigma| and a change |dx : Dt ^ sigma| for |x|.
+% \item Term |derive(t)| has type |Dt ^ tau|. In particular, |derive(t)| produces
+%   a change from |t| evaluated on all base inputs, to |t| evaluated on all base
+%   inputs updated with the respective changes.
+% \end{itemize}
+
+% Consider |\x -> x + y|.
+
+% Term |t| depends on values for free variables. So whenever |x : sigma| is free
+% in |t|, |dx : Dt ^ sigma| should be free in |derive(t)|. To state this more
+% formally we define \emph{change contexts} |Dt ^ Gamma|.\pg{Definition.}
+% \begin{code}
+%   Dt ^ emptyCtx = emptyCtx
+%   Dt ^ (Gamma, x : tau) = Dt ^ Gamma, dx : Dt ^ tau
+% \end{code}
+
+% We can then state the static semantics of differentiation.
+% \begin{typing}
+% \Rule[Derive]
+%   {\Typing{t}{\tau}}
+%   {\Typing[\Append{\GG}{\DeltaContext{\GG}}]{\Derive{t}}{\DeltaType{\tau}}}
+% \end{typing}
+
+% Moreover, |eval(t)| takes an environment |rho : eval(Gamma)|, so
+% |eval(derive(t))| must take environment |rho| and a \emph{change environment}
+% |drho : eval(Dt ^ Gamma)| that is a change for |rho|.
+
+% We also extend |`oplus`| to contexts pointwise:
+% \begin{code}
+%   emptyRho `oplus` emptyRho = emptyRho
+%   (rho , x = v) `oplus` (drho, dx = dv) = (rho `oplus` drho, x = v `oplus` dv)
+% \end{code}
+
+% Since |derive(t)| is defined in a typing context |Gamma, Dt ^ Gamma| that merges
+% |Gamma| and |Dt ^ Gamma|, |eval(derive(t))| takes an environment |rho, drho|
+% that similarly merges |rho| and |drho|.
+% \begin{code}
+%   eval(t) rho `oplus` eval(derive(t)) (rho, drho) = eval(t) (rho `oplus` drho)
+% \end{code}
+
+% To exemplify the above invariants, take a term |t| with one free variable: |x :
+% sigma /- t : tau|. Values of free variables are inputs to terms just like
+% function arguments. So take an input |v `elem` eval(sigma)| and change |dv| for
+% |v|. Then we can state the correctness condition as follows:
+% \begin{code}
+%   eval(t) (emptyRho, x = v) `oplus` eval(derive(t)) (emptyRho, x = v, dx = dv) =
+%   eval(t) (emptyRho, x = v `oplus` dv)
+% \end{code}
+
+% Earlier we looked at derivatives of functions.
+% Let |t| is a unary closed
+% function: | /- t : sigma -> tau|. Take an input |v `elem` eval(sigma)| and
+% change |dv| for |v|. Then |emptyCtx /- derive(t) : sigma -> Dt ^ sigma -> Dt ^
+% tau| and
+% \begin{code}
+%   eval(t) emptyRho v `oplus` eval(derive(t)) emptyRho v dv = eval(t) emptyRho (v `oplus` dv)
+% \end{code}
+
+% Next, we look at differentiating a function. Take again a term |t| such that |x
+% : sigma /- t : tau|, and consider term |t1 = \x : sigma . t| (which is
+% well-typed: | /- \x : sigma -> t : sigma -> tau|).
+% From requirements above, we want |emptyCtx /- derive(\x : sigma . t) : Dt ^
+% (sigma -> tau)|.
+
+% Consider a few examples:
+
+% \begin{itemize}
+% \item
+% \item
+%   Let |t| be a unary closed function: | /- t : sigma -> tau|. Take an input |v `elem` eval(sigma)| and
+%   change |dv| for |v|. Then |emptyCtx /- derive(t) : sigma -> Dt ^ sigma -> Dt ^ tau| and
+% \begin{code}
+%   eval(t) emptyRho v `oplus` eval(derive(t)) emptyRho v dv = eval(t) emptyRho (v `oplus` dv)
+% \end{code}
+% %
+% \item Take a binary closed function |t| : | /- t : sigma1 -> sigma2 -> tau|, inputs |v `elem` eval(sigma1)|, |u `elem` eval(sigma2)|, and changes |dv| for |v| and |du| for |u|.
+%   Then |emptyCtx /- derive(t) : sigma1 -> Dt ^ sigma1 -> sigma2 -> Dt ^ sigma2 -> Dt ^ tau|.
+% \begin{code}
+%   eval(t) emptyRho v u `oplus` eval(derive(t)) emptyRho v dv u du =
+%   eval(t) emptyRho (v `oplus` dv) (u `oplus` du)
+% \end{code}
+% %
+% \end{itemize}
+
+% As we see, we want |derive(t)| to handle changes to both values of free
+% variables and function arguments. We define
+
+% To handle changes to free variables, we define changes contexts |Dt ^ Gamma|
+
+
+% To better understand what are the appropriate inputs to consider,
+% let's recall what are the inputs to the semantics of |t|.
+% Semantics |eval(t)| takes an environment |rho1 : eval(Gamma)| to an output |v1|.
+% If |tau| is a function type |sigma1 -> tau1|, output |v1| is in turn a function
+% |f1|, and applying this function to a further input |a1 : eval(sigma1)| will
+% produce an output |u1 `elem` eval(tau1)|. In turn, |tau1| can be a function type,
+% so that |u1| takes another argument\ldots
+% Overall we can apply |eval(t)| to an appropriate environment |rho1| and as
+% many inputs as called for by |tau| to get, in the end, a result of base type.
+% Similarly, we can evaluate |t| with updated input |rho2| getting output |v2|. If
+% |tau| is a function type, |v2| is a function |f2| that takes further input |a2|
+% to output |u2 `in` eval(tau1)|, and soon.
+
+% We design differentiation so that the semantics of the derivative of |t|,
+% |eval(derive(t))|, takes inputs and changes for all those inputs. So
+% |eval(derive(t))| takes a base environment |rho1| and a change environment
+% |drho| from |rho1| to |rho2| and produces a change |dv| from |v1| to |v2|. If
+% |tau| is a function type, |dv| is a \emph{function change} |df| from |f1| to
+% |f2|. that in turn takes base input |a1| and an input change |da| from |a1| to
+% |a2|, and evaluate to an output change |du| from |u1| to |u2|.
+
+% \begin{code}
+%   derive(\x -> t) = \x dx -> derive(t)
+%   derive(s t) = derive(s) t (derive(t))
+%   derive(x) = dx
+% \end{code}
+% % Inputs to |t| include the environment it is
+% % evaluated in, while the output of |t| might be a function. Since a function takes in
+% % turn further inputs, we want a function change to
+% % change, in turn, takes further inputs
+
+% % To refine this definition we must consider however \emph{all}
+% % inputs: this includes both the environment in which we evaluate |t|, as well as
+% % any function arguments it takes (if |t| evaluates to a function). In fact, |t| might be a function change itself
+% % Hence we say that
+
+% % \begin{itemize}
+% % \item function |eval(derive(t)| is a for function |eval(t)|
+% % \item a function change for |f| takes a
+% %   , that is, a change from |eval(t)| to |eval(t)|
+% %  )
+% % \item the derivative of a function takes
+% %   evaluating with |eval(-)| the derivative
+% %   |eval(derive(t))|
+% %   |t| might be in general an open term in context |Gamma|, that must be evaluated in an environment |rho1| that matches |Gamma|; we define the evaluation . Then evaluating |eval(Derive(t))|
+% % \item
+% % a change to a function |f : A -> B| is a function |df| that takes a base input
+% % \end{itemize}
+% % As we hinted, derivative computes the
+
+% % More in general, we extend differentiation on arbitrary terms.
+% % The derivative of a term |t| is a new term |Derive(t)| in
+% % the same language, that accepts changes to all inputs of |t| (call them |x1, x2,
+% % ..., xn| of |t| and evaluates to the change of |t|)
+
+
+\subsection{Differentiation on our example}
 \pg{This example is still a bit too complex as written; I'm skipping too many steps.}
 
-To help fix ideas for later discussion, let us show on a simpler
-variant of |grand_total| how the derivative of |grand_total|
+To help fix ideas for later discussion, let us show
+how the derivative of |grand_total|
 looks like.
 
-For now we consider the
-following program:
 \begin{code}
-grand_total2  = \ xs ys -> sum (merge xs ys)
-output       = grand_total2 {{1, 1}} {{2, 3, 4}} = 11
+grand_total  = \ xs ys -> sum (merge xs ys)
+output       = grand_total {{1}} {{2, 3, 4}} = 11
 \end{code}
 We define derivation as a compositional program transformation,
 so we first compute |derive(merge xs ys)|. To compute its change
@@ -146,29 +480,17 @@ Next we must transform |derive(\ xs ys -> sum (merge xs ys))|. Since |derive(sum
 Next we need to transform the binding of |grand_total2| to its body |b = \ xs ys -> sum (merge xs ys)|. We copy this binding and add a new additional binding from |dgrand_total2| to the derivative of |b|.
 
 \begin{code}
-grand_total2   = \ xs      ys      ->  sum  (merge  xs   ys)
-dgrand_total2  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
+grand_total   = \ xs      ys      ->  sum  (merge  xs   ys)
+dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
 \end{code}
 
 Finally, we need to transform the binding of |output| and its body. By iterating similar steps,
 in the end we get:\pg{fill missing steps}
 \begin{code}
-grand_total2   = \ xs      ys      ->  sum  (merge  xs   ys)
-dgrand_total2  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
-output         = grand_total2   {{1, 1}}              {{2, 3, 4}}
-doutput        = dgrand_total2  {{1, 1}} {{Remove 1}} {{2, 3, 4}} {{Add 5}}
-\end{code}
-
-\pg{Integrate this.}
-The transformation is defined by:
-\begin{code}
-  derive(\x -> t) = \x dx -> derive(t)
-  derive(s t) = derive(s) t (derive(t))
-  derive(x) = dx
-  derive(let x = t1 in t2) =
-    let  x = t1
-         dx = derive(t1)
-    in   derive(t2)
+grand_total   = \ xs      ys      ->  sum  (merge  xs   ys)
+dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
+output         = grand_total   {{1, 2, 3}}              {{4}}
+doutput        = dgrand_total  {{1, 2, 3}} {{1}} {{4}} {{5}}
 \end{code}
 
 
@@ -188,11 +510,13 @@ taking time linear in the base inputs. \pg{Point out this is
 % \end{code}
 
 \section{A program transformation}
-To support automatic incrementalization, in the next chapters we introduce the \ILC\
-(incrementalizing $\Gl$-calculi) framework. We define
-an automatic program transformation $\DERIVE$
-that \emph{differentiates} programs, that is, computes their
-derivatives; $\DERIVE$ guarantees that
+To support automatic incrementalization, in the next chapters we
+introduce the \ILC\ (incrementalizing $\Gl$-calculi) framework.
+We define an automatic program transformation $\DERIVE$ that
+\emph{differentiates} programs, that is, computes their total
+derivatives with respect to all inputs.
+
+$\DERIVE$ guarantees that
 \begin{equation}
   \label{eq:correctness}
   |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
@@ -234,22 +558,6 @@ the semantics of |f|, giving us \cref{eq:correctness} from
 \cref{eq:correctness-math-funs}.\footnote{A few technical details
   complicate the picture, but we'll discuss them later.}
 
-\subsection{Our language}
-\ILC\ considers as object language a strongly-normalizing simply-typed $\Gl$-calculus
-parameterized by \emph{language plugins} (or just plugins). A plugin
-defines
-%
-(a) base types and primitive operations, and
-%
-(b) a change representation for each base type, and an
-incremental version for each primitive. In other words, the plugin
-specifies the primitives and their respective derivatives, and
-\ILC\ can glue together these simple derivatives in such a way
-that derivatives for arbitrary simply-typed $\Gl$-calculus expressions
-using these primitives can be computed. Both our implementation and our correctness proof
-is parametric in the plugins, hence it is easy to support (and prove correct)
-new plugins.
-
 \subsection{The meta-language of our proofs}
 In this subsection we describe the meta-language used in our
 correctness proof.
@@ -285,25 +593,6 @@ our formalization, are mostly cosmetic for our purposes:
   assume in Agda%
   \footnote{\url{http://permalink.gmane.org/gmane.comp.lang.agda/2343}}.
 \end{itemize}
-
-\paragraph{A semantics for our object language}
-To prove that incrementalization preserves the final results of
-our object-language programs, we need to give it a semantics. To
-this end we use a denotational semantics. Since our object
-language (simply-typed $\Gl$-calculus) is strongly
-normalizing~\citep[Ch. 12]{Pierce02TAPL} and since we do not add
-computational effects, we can eschew use of domain theory or any
-other technique to handle partiality or other effects: The
-domains for our denotational semantics are simply Agda types, and
-semantic values are Agda values---in other words, we give a
-denotational semantics in terms of type
-theory.\footnote{Alternatively, some would call such a semantics
-  a definitional interpreter~\citep{Amin2017}}
-%
-Using denotational semantics allows us to state the specification
-of differentiation directly in the semantic domain, and take
-advantage of Agda's support for equational reasoning for proving
-equalities between Agda functions.
 
 We postulate not only functional extensionality, but also a few
 standard axioms on the implementation of bags, to avoid proving
