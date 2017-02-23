@@ -609,7 +609,9 @@ incorrect results, consider again |grand_total = \ xs ys -> sum
 |20| from input bag |xs|, while |dys| makes no changes to |ys|:
 in this case, the output should decrease, so |dgrand_total xs dxs
 ys dys| should return |-20|. However, that is only correct if
-|20| is actually an element of |xs|. Otherwise, |xs `oplus` dxs| will make no change
+|20| is actually an element of |xs|. Otherwise, |xs `oplus` dxs|
+will make no change to |xs|. Similar issues apply with function
+changes.\pg{elaborate}
 
 % \subsection{Differentiation}
 % After we defined our language, its type system and its semantics, we motivate
