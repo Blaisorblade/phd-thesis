@@ -114,3 +114,5 @@
 
 %format Theta(n) = "\Theta(" n ")"
 %format o(n) = "o(" n ")"
+
+%format param = "\text{\textendash}"
