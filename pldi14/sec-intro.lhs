@@ -5,8 +5,8 @@
 % \section{Introduction}
 \label{sec:intro}
 
-Incremental computation has a long-standing history in computer
-science~\citep{Ramalingam93}.
+Incremental computation (or incrementalization) has a long-standing history in
+computer science~\citep{Ramalingam93}.
 Often, a program needs to update the output of some nontrivial function $f$
 when the input to the computation changes.
 Programmers typically have to choose between a few undesirable options.
@@ -31,12 +31,20 @@ Programmers typically have to choose between a few undesirable options.
   example. Database query languages are another one.\pg{Mention here limits?}
 \item They can attempt using general-purpose techniques for
   incrementalizing programs, such as \emph{self-adjusting
-    computation} and variants. Such techniques are
+    computation} and variants. Self-adjusting computation applies
+  to arbitrary purely functional programs and has been extended
+  to imperative programs; however, it only guarantees efficient
+  incrementalization for base programs designed for efficient
+  incrementalization.
 \end{itemize}
 
 \pg{Continue discussing dependencies minimization and the
   relation with parallelism. Build scripts might be a good
   example.}
+
+Since no approach guarantees efficient incrementalization for arbitrary
+programs, we propose to design domain-specific languages whose programs can be
+incrementalized by transformation; we will discuss why we favor this approach.
 
 \section{A motivating example}
 \label{sec:motiv-example}
