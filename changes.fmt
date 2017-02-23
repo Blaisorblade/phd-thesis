@@ -17,7 +17,6 @@
 %format oplus = "(\oplus)"
 %format ominus = "(\ominus)"
 
-%  format `oplusIdx(t)` = "\oplus_{" t "}"
 %format oplusIdx(t) = "\oplus_{" t "}"
 %format ominusIdx(t) = "\ominus_{" t "}"
 
