@@ -867,54 +867,54 @@ taking time linear in the base inputs. \pg{Point out this is
 %   t ::= t1 t2 | \x -> t | x | c
 % \end{code}
 
-\section{A program transformation}
-To support automatic incrementalization, in the next chapters we
-introduce the \ILC\ (incrementalizing $\Gl$-calculi) framework.
-We define an automatic program transformation $\DERIVE$ that
-\emph{differentiates} programs, that is, computes their total
-derivatives with respect to all inputs.
+% \section{A program transformation}
+% To support automatic incrementalization, in the next chapters we
+% introduce the \ILC\ (incrementalizing $\Gl$-calculi) framework.
+% We define an automatic program transformation $\DERIVE$ that
+% \emph{differentiates} programs, that is, computes their total
+% derivatives with respect to all inputs.
 
-$\DERIVE$ guarantees that
-\begin{equation}
-  \label{eq:correctness}
-  |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
-\end{equation}
-where
-$\cong$ is denotational equality,
-|da| is a change on |a| and |a `oplus` da| denotes |a|
-updated with change |da|, that is, the updated input of |f|.
-Hence, when the derivative is faster than
-recomputation, we can optimize programs by replacing the
-left-hand side, which recomputes the output from scratch, with
-the right-hand side, which computes the output incrementally
-using derivatives, while preserving the program result.
+% $\DERIVE$ guarantees that
+% \begin{equation}
+%   \label{eq:correctness}
+%   |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
+% \end{equation}
+% where
+% $\cong$ is denotational equality,
+% |da| is a change on |a| and |a `oplus` da| denotes |a|
+% updated with change |da|, that is, the updated input of |f|.
+% Hence, when the derivative is faster than
+% recomputation, we can optimize programs by replacing the
+% left-hand side, which recomputes the output from scratch, with
+% the right-hand side, which computes the output incrementally
+% using derivatives, while preserving the program result.
 
-To understand this equation we must also formalize changes for
-functions. That's because \ILC\ applies to higher-order
-languages, where functions can be inputs or outputs. This makes
-\cref{eq:correctness} less trivial to state and prove.
+% To understand this equation we must also formalize changes for
+% functions. That's because \ILC\ applies to higher-order
+% languages, where functions can be inputs or outputs. This makes
+% \cref{eq:correctness} less trivial to state and prove.
 
-To simplify the formalization we consider, beyond derivatives of
-programs, also derivatives of pure mathematical functions
-(\cref{sec:1st-order-changes}). We distinguish programs and
-mathematical functions as in denotational semantics. We avoid
-however using domain theory. To this end, we restrict attention
-in our theory to strongly normalizing calculi.
-%
-We define those with an analogue of
-\cref{eq:correctness}: function |df| is a derivative of |f| if
-and only if
-\begin{equation}
-  \label{eq:correctness-math-funs}
-  |f (a `oplus` da) = (f a) `oplus` (df a da)|
-\end{equation}
-Once we establish a theory of changes and derivatives for
-mathematical functions, we will be able to lift that to programs:
-intuitively, a program function |df| is a derivative of |f| if
-the semantics of |df|, that is |eval(df)|, is the derivative of
-the semantics of |f|, giving us \cref{eq:correctness} from
-\cref{eq:correctness-math-funs}.\footnote{A few technical details
-  complicate the picture, but we'll discuss them later.}
+% To simplify the formalization we consider, beyond derivatives of
+% programs, also derivatives of pure mathematical functions
+% (\cref{sec:1st-order-changes}). We distinguish programs and
+% mathematical functions as in denotational semantics. We avoid
+% however using domain theory. To this end, we restrict attention
+% in our theory to strongly normalizing calculi.
+% %
+% We define those with an analogue of
+% \cref{eq:correctness}: function |df| is a derivative of |f| if
+% and only if
+% \begin{equation}
+%   \label{eq:correctness-math-funs}
+%   |f (a `oplus` da) = (f a) `oplus` (df a da)|
+% \end{equation}
+% Once we establish a theory of changes and derivatives for
+% mathematical functions, we will be able to lift that to programs:
+% intuitively, a program function |df| is a derivative of |f| if
+% the semantics of |df|, that is |eval(df)|, is the derivative of
+% the semantics of |f|, giving us \cref{eq:correctness} from
+% \cref{eq:correctness-math-funs}.\footnote{A few technical details
+%   complicate the picture, but we'll discuss them later.}
 
 \subsection{The meta-language of our proofs}
 In this subsection we describe the meta-language used in our
