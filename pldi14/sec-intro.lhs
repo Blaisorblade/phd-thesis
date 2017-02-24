@@ -299,7 +299,8 @@ together in \cref{fig:differentiation}.
 \begin{figure}
   \small
   \centering
-  \FramedSignature{\Delta\Gt}
+%  \subfigure[Change types and contexts]
+    \FramedSignature{\Delta\Gt}
 \begin{align*}
   |Dt ^ iota| &= \ldots\\
   |Dt ^ (sigma -> tau)| &= |Dt ^ sigma -> tau -> Dt ^ tau|
@@ -310,6 +311,8 @@ together in \cref{fig:differentiation}.
   \Delta\EmptyContext &= \EmptyContext \\
   \Delta\Extend{x}{\tau} &= \Extend{\Extend[\Delta\Gamma]{x}{\tau}}{\D x : \Delta\tau} \\
 \end{align*}
+
+%\subfigure[Differentiation]
   \FramedSignature{|derive(t)|}
 \begin{code}
   derive(\x -> t) = \x dx -> derive(t)
@@ -318,8 +321,10 @@ together in \cref{fig:differentiation}.
   derive(c) = ...
 \end{code}
 
+  %[Typing lemma for differentiation]
   If |Gamma /- t : tau| then |Dt ^ Gamma /- derive(t) : Dt ^ tau|.
 
+  % [Validity]
   \FramedSignature{|fromto tau v1 dv v2|\text{ with }|v1, v2 : eval(tau), dv : eval(Dt^tau)|}
 \begin{align*}
   |fromto iota v1 dv v2| &= \ldots \\
