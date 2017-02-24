@@ -506,10 +506,15 @@ The transformation is defined by:
   %   in   derive(t2)
 
 
+Now we can prove |derive(param)|'s static semantics:
 \begin{proof}[Proof of \cref{lem:derive-typing}]
   The thesis can be proven by induction on the typing derivation
   |Gamma /- t : tau|.
 \end{proof}
+
+\pg{Define that term |dt| is a valid change of |t| if |eval(dt)
+  drho| is a valid change between |eval(t) rho1| and |eval(t)
+  rho2| whenever |fromto Gamma rho1 drho rho2|.}
 
 To illustrate correctness statement \cref{thm:correct-derive}, it
 is helpful to look first at its proof. Readers familiar with
