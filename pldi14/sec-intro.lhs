@@ -350,8 +350,7 @@ together in \cref{fig:differentiation}.
     |fromto (tau) (f1 a1) (df a1 da) (f2 a2)|
 \end{align*}
 
-
-  \FramedSignature{|fromto Gamma rho1 drho rho2|}
+  \RightFramedSignature{|fromto Gamma rho1 drho rho2|\text{ with }|rho1, rho2 : eval(Gamma), drho : eval(Dt^Gamma)|}
 \begin{typing}
   \Axiom
   {\validfromto{\EmptyContext}{\EmptyContext}{\EmptyContext}{\EmptyContext}}
