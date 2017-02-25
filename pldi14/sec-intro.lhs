@@ -112,10 +112,10 @@ the derivative of |grand_total| and show our approach gives the correct result
 in this example.
 
 \begin{code}
-  dgrand_total xs dxs ys dys = sum (merge dxs dys)
-  doutput                    = dgrand_total xs1 dxs ys1 dys =
-                             = sum {{1, 5}} = 6
-  output2                    = output1 `oplus` doutput = output1 + doutput = 10 + 6 = 16
+  dgrand_total xs dxs ys dys  = sum (merge dxs dys)
+  doutput                     = dgrand_total xs1 dxs ys1 dys =
+                              = sum {{1, 5}} = 6
+  output2                     = output1 `oplus` doutput = output1 + doutput = 10 + 6 = 16
 \end{code}
 
 The goal is that a derivative is asymptotically faster than a
