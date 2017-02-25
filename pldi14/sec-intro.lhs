@@ -302,7 +302,7 @@ together in \cref{fig:differentiation}.
 \RightFramedSignature{\Delta\Gt}
 \begin{align*}
   |Dt ^ iota| &= \ldots\\
-  |Dt ^ (sigma -> tau)| &= |Dt ^ sigma -> tau -> Dt ^ tau|
+  |Dt ^ (sigma -> tau)| &= |sigma -> Dt ^ sigma -> Dt ^ tau|
 \end{align*}
 \caption{Change types}
 \end{subfigure}
