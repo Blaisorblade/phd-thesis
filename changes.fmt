@@ -102,7 +102,7 @@
 %format tau2
 %format iota = "\iota"
 
-%format valid tau dv v = dv "\;\mathbf{V}_{" tau "}\;" v
+%format valid (tau) (dv) (v) = dv "\;\mathbf{V}_{" tau "}\;" v
 
 %format fromto (tau) (v1) (dv) (v2) = "\validfromto{" tau "}{" v1 "}{" dv "}{" v2 "}"
 
