@@ -2,7 +2,7 @@
 %include polycode.fmt
 %include changes.fmt
 
-\input{pldi14/fig-correctness}
+%\input{pldi14/fig-correctness}
 
 
 \section{Architecture of the proof}

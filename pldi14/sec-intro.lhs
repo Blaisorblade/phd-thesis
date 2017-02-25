@@ -297,35 +297,51 @@ explain how they fit together. The definitions are collected
 together in \cref{fig:differentiation}.
 
 \begin{figure}
-  \small
-  \centering
-%  \subfigure[Change types and contexts]
-    \FramedSignature{\Delta\Gt}
+
+  \begin{subfigure}[c]{0.5\textwidth}
+\RightFramedSignature{\Delta\Gt}
 \begin{align*}
   |Dt ^ iota| &= \ldots\\
   |Dt ^ (sigma -> tau)| &= |Dt ^ sigma -> tau -> Dt ^ tau|
 \end{align*}
-
-  \FramedSignature{\Delta\Gamma}
+\caption{Change types}
+\end{subfigure}
+%
+\hfill
+%
+\begin{subfigure}[c]{0.5\textwidth}
+\RightFramedSignature{\Delta\Gamma}
 \begin{align*}
   \Delta\EmptyContext &= \EmptyContext \\
-  \Delta\Extend{x}{\tau} &= \Extend{\Extend[\Delta\Gamma]{x}{\tau}}{\D x : \Delta\tau} \\
+  \Delta\Extend{x}{\tau} &= \Extend{\Extend[\Delta\Gamma]{x}{\tau}}{\D x : \Delta\tau}
 \end{align*}
+\caption{Change contexts}
+\end{subfigure}
+\vfill
 
-%\subfigure[Differentiation]
-  \FramedSignature{|derive(t)|}
-\begin{code}
-  derive(\x -> t) = \x dx -> derive(t)
-  derive(s t) = derive(s) t (derive(t))
-  derive(x) = dx
-  derive(c) = ...
-\end{code}
-
-  %[Typing lemma for differentiation]
-  If |Gamma /- t : tau| then |Dt ^ Gamma /- derive(t) : Dt ^ tau|.
-
-  % [Validity]
-  \FramedSignature{|fromto tau v1 dv v2|\text{ with }|v1, v2 : eval(tau), dv : eval(Dt^tau)|}
+\begin{subfigure}[c]{0.5\textwidth}
+  \RightFramedSignature{|derive(t)|}
+\begin{align*}
+  |derive(\x -> t)| &= |\x dx -> derive(t)| \\
+  |derive(s t)| &= |derive(s) t (derive(t))| \\
+  |derive(x)| &= |dx| \\
+  |derive(c)| &= ...
+\end{align*}
+\caption{Differentiation}
+\end{subfigure}
+%
+\begin{subfigure}[c]{0.5\textwidth}
+  \begin{typing}
+    \Rule[Derive]
+    {|Gamma /- t : tau|}
+    {|Dt ^ Gamma /- derive(t) : Dt ^ tau|}
+\end{typing}
+\subcaption{Differentiation typing}
+\label{fig:derive}
+\end{subfigure}
+%
+\begin{subfigure}[c]{1.0\textwidth}
+  \RightFramedSignature{|fromto tau v1 dv v2|\text{ with }|v1, v2 : eval(tau), dv : eval(Dt^tau)|}
 \begin{align*}
   |fromto iota v1 dv v2| &= \ldots \\
   |fromto (sigma -> tau) f1 df f2| &=
@@ -339,6 +355,7 @@ together in \cref{fig:differentiation}.
 \begin{typing}
   \Axiom
   {\validfromto{\EmptyContext}{\EmptyContext}{\EmptyContext}{\EmptyContext}}
+
   \Rule{|fromto Gamma rho1 drho rho2|\\
     |fromto tau a1 da a2|}{
   \validfromto{\Extend{x}{\tau}}
@@ -347,10 +364,17 @@ together in \cref{fig:differentiation}.
   {\ExtendEnv*[\rho_2]{x}{a_2}}}
 \end{typing}
 
+\caption{Validity}
+\end{subfigure}
+
+\vskip 2\baselineskip
+\begin{subfigure}[c]{1.0\textwidth}
+  \centering
+
   If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
   |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.
-
-  \caption{Defining differentiation.}
+\end{subfigure}
+\caption{Defining differentiation.}
   \label{fig:differentiation}
 \end{figure}
 

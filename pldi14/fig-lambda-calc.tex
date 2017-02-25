@@ -2,11 +2,10 @@
     \small
     \centering
 
-  \NewDocumentCommand{\Subcaption}{mm}
-    {\subfigure[\label{#1}{#2}]{\rule{\linewidth}{0pt}}\vspace{0.8cm}}
   \NewDocumentCommand{\Align}{m}
     {{\begin{align*}#1\end{align*}}}
 
+    \begin{subfigure}[b]{0.6\textwidth}
 \begin{tabular}{>{$}r<{$}@{$\;::=\;$}>{$}c<{$}@{$\;$}>{$}l<{$}@{\quad}>{(}l<{)}}
 \Gi      & \rlap{\ldots} &                       & base types\\
 \Gs, \Gt & \Gi           & \mid \Fun{\Gt}{\Gt}   & types\\
@@ -17,10 +16,14 @@ s, t     & c             & \mid \Lam{x}{t}
                            \mid x                & terms
 \end{tabular}
     \Subcaption{fig:lambda-calc:syntax}
-      {Our base calculus: Syntax}
+      {Syntax}
 %\label{fig:syntax}
-
-\begin{typing}
+    \end{subfigure}
+%
+    \vfill
+%
+    \begin{subfigure}[b]{\textwidth}
+    \begin{typing}
 \noindent
 \Rule[Const]
   {\ldots}
@@ -41,9 +44,12 @@ s, t     & c             & \mid \Lam{x}{t}
   {\Typing{\App{s}{t}}{\Gt}}
 \end{typing}
     \Subcaption{fig:lambda-calc:typing}
-      {Our base calculus: Typing}
+      {Typing}
 %\label{fig:typing}
+    \end{subfigure}
+    \vfill
 
+    \begin{subfigure}[b]{0.3\textwidth}
     \Align{
       \Eval{\iota}
         & = \ldots\\
@@ -51,8 +57,11 @@ s, t     & c             & \mid \Lam{x}{t}
         & = \Eval{\Gs} \to \Eval{\Gt}
     }
     \Subcaption{fig:lambda-calc:values}{
-      Standard values.
+      Values.
     }
+  \end{subfigure}
+  \hfill
+    \begin{subfigure}[b]{0.6\textwidth}
     \Align{
       \Eval{\EmptyContext}
         & = \left\{ \EmptyEnv \right\} \\
@@ -60,8 +69,10 @@ s, t     & c             & \mid \Lam{x}{t}
         & = \left\{ \ExtendEnv*{x}{v} \mid \Gr \in \Eval{\GG} \land v \in \Eval{\Gt}\right\}
     }
     \Subcaption{fig:lambda-calc:environments}{
-      Standard environments.
+      Environments.
     }
+  \end{subfigure}
+  \begin{subfigure}[b]{0.5\textwidth}
     \Align{
       \EvalWith{c}{\rho}
         & =\EvalConst{c}\\
@@ -73,8 +84,9 @@ s, t     & c             & \mid \Lam{x}{t}
         & = \textit{lookup $x$ in $\Gr$}
     }
     \Subcaption{fig:lambda-calc:evaluation}{
-      Standard semantics.
+      Denotational semantics.
     }
-    \caption{Standard definitions for the simply-typed lambda calculus.}
+  \end{subfigure}
+  \caption{Standard definitions for the simply-typed lambda calculus.}
     \label{fig:lambda-calc}
 \end{figure*}
