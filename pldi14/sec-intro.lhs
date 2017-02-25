@@ -45,14 +45,105 @@ Programmers typically have to choose between a few undesirable options.
 Since no approach guarantees efficient incrementalization for
 arbitrary programs, we propose to design domain-specific
 functional languages whose programs can be incrementalized by
-transformation. We will discuss later why we favor this approach.\pg{where?}
+a transformation that we call \emph{differentiation}. We will discuss later why we favor this approach.\pg{where?}
+
+We build our domain-specific functional languages based on
+simply-typed $\lambda$-calculus. Hence, we recall its definition
+in \cref{sec:intro-stlc}. We show a motivating example for our
+approach in \cref{sec:motiv-example}. We define differentiation,
+state and prove its correctness theorem in
+\cref{sec:correct-derive}.
+
+\section{Our object language}
+\label{sec:intro-stlc}
+We will define differentiation as a recursive program transformation on terms.
+To be able to define the transformation and state the invariant it satisfies, we
+need to first recall the object language we develop the transformation in.
+
+\ILC\ considers as object language a strongly-normalizing
+simply-typed $\Gl$-calculus (STLC). To prove that
+incrementalization preserves the final results of our
+object-language programs, we need to specify a semantics for
+STLC. To this end we use a denotational semantics. Since STLC is
+strongly normalizing~\citep[Ch. 12]{Pierce02TAPL} we need not
+handle partiality in our semantics, in particular we can eschew
+using domain theory. The domains for our denotational semantics
+are simply Agda types, and semantic values are Agda values---in
+other words, we give a denotational semantics in terms of type
+theory.\footnote{Alternatively, some would call such a semantics
+  a definitional interpreter~\citep{Amin2017}.}
+%
+Using denotational semantics allows us to state the specification
+of differentiation directly in the semantic domain, and take
+advantage of Agda's support for equational reasoning for proving
+equalities between Agda functions.
+
+\input{pldi14/fig-lambda-calc}
+
+We recall syntax, typing rules and denotational semantics of STLC in
+\cref{fig:lambda-calc}; for a more proper introduction to STLC (but not to
+denotational semantics) we refer the reader to \citet[Ch. 9]{Pierce02TAPL}.
+
+In our examples, we will use some unproblematic syntactic sugar
+over STLC, including let expressions, global definitions, type
+inference, and we will use a Haskell-like concrete syntax.
+\pg{Let expressions, global definitions, HM polymorphism...}
+
+\subsection{Language plugins}
+Our STLC is parameterized by \emph{language plugins} (or just
+plugins) that encapsulate its domain-specific aspects.
+
+A plugin defines a set of base types $\iota$, primitives $c$ and
+their denotational semantics $\EvalConst{c}$. As usual, we
+require that $\EvalConst{c}: \Eval{\tau}$ whenever $c : \tau$.
+It
+also supports incrementalization for these primitives, as we
+explain in \cref{?}.
+
+Once a plugin explains how to incrementalize each primitive,
+\ILC\ explains how to incrementalize programs using these
+primitives.
+
+% It will also need to explain how to support incrementalization for
+% For each
+% base type and base primitive, a language plugin
+% will also have to provide support for incrementalization
+
+% \begin{itemize}
+% \item a representation for changes for each base type, and a
+%   derivative for each primitive;
+% \item proofs of correctness for its components.
+% \end{itemize}
+
+% Once a plugin
+% specifies the primitives and how each is incrementalized,
+% \ILC\ can
+% and
+% \ILC\ can glue together these simple derivatives in such a way
+% that
+% derivatives for arbitrary STLC expressions
+% using these primitives can be computed.
+
+% For instance, a language plugin could add support for a base type
+% of integers |Int| with associated primitives
+
+% In this chapter we will assume a language plugin
+
+% Our |grand_total| example requires a plugin that provides a types for integers
+% and bags and primitives such that we can implement |sum| and
+% |merge|.\pg{Elaborate.}
+
+% Our first implementation and our first correctness proof are
+% explicitly modularized to be parametric in the plugins, to
+% clarify precisely the interface that plugins must satisfy.
 
 \section{A motivating example}
 \label{sec:motiv-example}
 In this section, we illustrate informally incrementalization on a
-small example program, shown in Haskell notation. We give a more precise presentation in
-\cref{sec:correct-derive} after recalling some background on
-our object language in \cref{sec:intro-stlc}.
+small example program. We give a more
+precise presentation in \cref{sec:correct-derive}.
+% after recalling some background on
+% our object language in \cref{sec:intro-stlc}.
 
 In the following program, |grand_total xs ys| sums numbers in
 input collections |xs| and |ys|. We also compute an initial
@@ -90,26 +181,62 @@ input size |n|, that is |dn = o(n)|. All approaches to incrementalization
 require small input changes. Incremental computation will then process the input
 changes, rather than just the new inputs.
 
-In our approach to incrementalization we also describe changes to values as new
-values. We call such description simply \emph{changes}. Each change |dx| has a
-source |x1| and a destination |x2|. There is an operator |`oplus`| that computes
-the destination of a change |x2| given its source |x1| and and the change
-itself, so that in general |x2 = x1 `oplus` dx|. For now, a change |das| to a
-bag |as1| simply contains all elements to be added to the base bag |as1| to
-obtain the updated bag |as2| (we'll ignore removing elements for this section
-and discuss it later). In our example, the change from |xs1| (that is |{{1, 2,
-    3}}|) to |xs2| (that is |{{1, 1, 2, 3}}|) is |dxs = {{1}}|, while the change
-from |ys1| (that is |{{4}}|) to |ys2| (that is |{{4, 5}}|) is |dys = {{5}}|. To
-represent the output change |doutput| from |output1| to |output2| we need
-integer changes. For now, we represent integer changes as integers, and define
-|`oplus`| on integers as addition: |x1 `oplus` dx = x1 + dx|.
+To talk about how the differences between old values and new
+values, we introduce a few concepts, for now without full definitions.
+In our approach to
+incrementalization, we describe changes to values as values
+themselves: We call such descriptions simply \emph{changes}. Just
+like in STLC we have terms (programs) that evaluates to values,
+we also have \emph{change terms}, that evaluate to \emph{change
+  values}. We require that going from old values to new values
+preserves types: That is, if an old value |v1| has type |tau|,
+then also its corresponding new value |v2| must have type |tau|.
+To each type |tau| we associate a type of changes or change type
+|Dt^tau|: a change between |v1| and |v2| must have type |Dt^tau|.
 
-We propose to compute the output change |doutput| from |output1| to |output2| by
-calling a new function |dgrand_total|, the \emph{derivative} of |grand_total| on
-base inputs and their respective changes. We can then compute the updated output
-|output2| as the old output |output1| updated by change |doutput|. Below we give
-the derivative of |grand_total| and show our approach gives the correct result
-in this example.
+Not all descriptions of changes are meaningful,
+so we also talk about \emph{valid} changes.
+%
+A value |dv| can be a valid change from |v1| to |v2|. We also
+call |v1| the source of |dv| and |v2| the destination of |dv|.
+
+We also introduce an operator |`oplus`| on values and changes: if
+|dv| is a valid change from |v1| to |v2|, then |v1 `oplus` dv|
+(read as ``|v1| updated by |dv|'') is guaranteed to return |v2|.
+However, we later show that often |v1 `oplus` dv| can be defined
+even if |dv| is not a valid change from |v1| to |v1 `oplus` dv|;
+in fact, |`oplus`| is overloaded over types, and for each type
+|tau| it has an overload of signature |tau -> Dt ^ tau -> tau|.
+
+To show how incrementalization affects our example, we next
+describe valid changes for bags and integers. For now, a change |das|
+to a bag |as1| simply contains all elements to be added to the
+base bag |as1| to obtain the updated bag |as2| (we'll ignore
+removing elements for this section and discuss it later). In our
+example, the change from |xs1| (that is |{{1, 2, 3}}|) to |xs2|
+(that is |{{1, 1, 2, 3}}|) is |dxs = {{1}}|, while the change
+from |ys1| (that is |{{4}}|) to |ys2| (that is |{{4, 5}}|) is
+|dys = {{5}}|. To represent the output change |doutput| from
+|output1| to |output2| we need integer changes. For now, we
+represent integer changes as integers, and define |`oplus`| on
+integers as addition: |v1 `oplus` dv = v1 + dv|. For both bags and integers, a
+change |dv| is always valid between |v1| and |v2 = v1 `oplus`
+dv|; for other changes, however, validity will be more
+restrictive.
+
+After introducing these notions, we describe how, in our
+approach, we incrementalize our example. We propose to compute
+the output change |doutput| from |output1| to |output2| by
+calling a new function |dgrand_total|, the \emph{derivative} of
+|grand_total| on base inputs and their respective changes. We can
+then compute the updated output |output2| as the old output
+|output1| updated by change |doutput|. We have successfully
+incrementalized our program |grand_total| if not only we get the
+correct result for |output2|, but if we also get it faster than
+by just calling |grand_total xs2 ys2|.
+
+Below we give the derivative of |grand_total| and show our
+approach gives the correct result in this example.
 
 \begin{code}
   dgrand_total xs dxs ys dys  = sum (merge dxs dys)
@@ -118,8 +245,9 @@ in this example.
   output2                     = output1 `oplus` doutput = output1 + doutput = 10 + 6 = 16
 \end{code}
 
-The goal is that a derivative is asymptotically faster than a
-base program. Here, derivative |dgrand_total| simply
+
+Our approach requires a derivative that is asymptotically faster
+than its base program. Here, derivative |dgrand_total| simply
 \emph{ignores} base inputs, so its time complexity depends only
 on the size of changes |dn|. The complexity of |dgrand_total| is
 in particular |Theta(dn) = o(n)|.
@@ -134,7 +262,7 @@ denote the result of this transformation on a term |t|.
 Informally, |derive(t)| describes how |t| changes, that is,
 
 \begin{slogan}
-|derive(t)| evaluates to a change from |t|
+|derive(t)| evaluates on base inputs and valid inputs changes to a change from |t|
 evaluated on old inputs to |t| evaluated on new inputs.
 \end{slogan}
 
@@ -142,7 +270,7 @@ In our
 example, we can apply |derive(param)| to |grand_total|'s body to
 produce |dgrand_total|'s body. After simplifying the result, we get
 \[ |derive(sum (merge xs ys)) `cong` sum (merge dxs dys)|.\]
-where `cong` denotes program equivalence. Correctness of |derive(param)| guarantees
+where |`cong`| denotes program equivalence. Correctness of |derive(param)| guarantees
 that |sum (merge dxs dys)| evaluates to a change from
 |sum (merge xs ys)| evaluated on old inputs |xs1, ys1| to
 |sum (merge xs ys)| evaluated on new inputs |xs2, ys2|.
@@ -167,8 +295,45 @@ produces a change from the base output to the updated output. We
 will make this more formal in next section.
 
 In this section, we have sketched the meaning of differentiation
-informally. However, we have neither actully defined it, nor
-discussed what it does on higher-order terms. To answer these questions
+informally. Next, we discuss incrementalization on higher-order
+terms in \cref{sec:higher-order-intro}, before defining
+differentiation in \cref{sec:correct-derive}.
+
+\subsection{Function changes}
+\label{sec:higher-order-intro}
+A first-class function can close over free variables that can
+change, hence functions values can change themselves; hence, we
+introduce \emph{function changes} to describe these changes.
+For instance, term |tf = \x -> x + y| is a function that closes over
+|y|, so if |y| goes from |v1 = 5| to |v2 = 6|, then |f1 = eval(t)
+(emptyRho, y = v1)| is different from |f2 = eval(t) (emptyRho, y
+= v2)|.
+%
+Moreover, consider a program |t| that applies |tf| to an input
+|x| that varies from |v1 = 1| to |v2 = 2|. Term |derive(tf x)|
+needs to compute a change from |f1 v1| to |f2 v2|. We do so using
+a change from |v1| to |v2| and a function change from |f1| to
+|f2| by defining function changes suitably.
+
+So, we require that a valid function change from |f1| to |f2|
+(where |f1, f2 : eval(sigma -> tau)|) is in turn a function |df|
+that takes an input |a1| and a change |da|, valid from |a1| to
+|a2|, to a valid change from |f1 a1| to |f2 a2|.
+\paragraph{Discussion}
+It would be more symmetric to make function changes also take
+updated input |a2|, that is, have |df a1 da a2| computes a change
+from |f1 a1| to |f2 a2|. However, passing |a2| explicitly adds no
+information: the value |a2| can be computed from |a1| and |da| as
+|a1 `oplus` da|. Indeed, in various cases a function change can
+compute its required output without actually computing |a1
+`oplus` da|. Finally, if the size of |a1| and |a2| is
+asymptotically larger than |da|, actually computing |a2| could be
+expensive. Hence, we stick to our asymmetric form of function
+changes. We will discuss other alternatives later.\pg{Where?}
+
+% To answer these
+% questions precisely, we next recall definitions of our object
+% language, simply-typed $\lambda$-calculus.
 
 % To make things concrete we show
 % \begin{code}
@@ -220,81 +385,22 @@ discussed what it does on higher-order terms. To answer these questions
 % are simple first-class values of this language.
 %
 
-\section{Our object language}
-\label{sec:intro-stlc}
-We will define differentiation as a recursive program transformation on terms.
-To be able to define the transformation and state the invariant it satisfies, we
-need to first recall the object language we develop the transformation in.
-
-\ILC\ considers as object language a strongly-normalizing
-simply-typed $\Gl$-calculus (STLC). To prove that
-incrementalization preserves the final results of our
-object-language programs, we need to specify a semantics for
-STLC. To this end we use a denotational semantics. Since STLC is
-strongly normalizing~\citep[Ch. 12]{Pierce02TAPL} we need not
-handle partiality in our semantics, in particular we can eschew
-using domain theory. The domains for our denotational semantics
-are simply Agda types, and semantic values are Agda values---in
-other words, we give a denotational semantics in terms of type
-theory.\footnote{Alternatively, some would call such a semantics
-  a definitional interpreter~\citep{Amin2017}.}
-%
-Using denotational semantics allows us to state the specification
-of differentiation directly in the semantic domain, and take
-advantage of Agda's support for equational reasoning for proving
-equalities between Agda functions.
-
-\input{pldi14/fig-lambda-calc}
-
-We recall syntax, typing rules and denotational semantics of STLC in
-\cref{fig:lambda-calc}; for a more proper introduction to STLC (but not to
-denotational semantics) we refer the reader to \citet[Ch. 9]{Pierce02TAPL}.
-
-\subsection{Language plugins}
-Our STLC is parameterized by \emph{language plugins} (or just plugins).
-A plugin defines:
-\begin{itemize}
-\item
-  a set of base types $\iota$, base constants $c$ and their
-  semantics $\EvalConst{c}$, in the usual sense;
-\item a representation for changes for each base type, and a
-  derivative for each primitive;
-\item proofs of correctness for its components.
-\end{itemize}
-
-Once a plugin
-specifies the primitives and their respective derivatives,
-and
-\ILC\ can glue together these simple derivatives in such a way
-that derivatives for arbitrary STLC expressions
-using these primitives can be computed.
-
-Our |grand_total| example requires a plugin that provides a types for integers
-and bags and primitives such that we can implement |sum| and
-|merge|.\pg{Elaborate.}
-
-% Our first implementation and our first correctness proof are
-% explicitly modularized to be parametric in the plugins, to
-% clarify precisely the interface that plugins must satisfy.
-
 \section{Differentiation and its meaning}
 \label{sec:correct-derive}
 
-In this section, we introduce differentiation formally. We
-claimed differentiation turns input changes into output changes.
-We also formalize and prove this claim, and explain what it means
-on higher-order programs.
+In this section, we make our previous discussion precise: we
+introduce differentiation and state and prove its correctness. We
+also elaborate on its effect on higher-order programs.
 
 To support incrementalization, we also motivate and introduce in
-this section (a) a description of changes, and operations on
-changes, parameterized by types; (b) a definition of which
-changes are valid; (c) a compositional term-to-term
-transformation called differentiation and written |derive(t)|
-that produces incremental programs.
-
-Before stating how these concepts are actually implemented, we
-explain how they fit together. The definitions are collected
-together in \cref{fig:differentiation}.
+this section (a) a description of changes and operations on
+changes; (b) a definition of which changes are valid; (c) a
+compositional term-to-term transformation called differentiation
+and written |derive(t)| that produces incremental programs. We
+have already mentioned the different concepts and how they fit
+together. We next explain definitions and show key equations. We
+collect the complete definitions and crucial lemmas in
+\cref{fig:differentiation}.
 
 \begin{figure}
 
@@ -305,6 +411,7 @@ together in \cref{fig:differentiation}.
   |Dt ^ (sigma -> tau)| &= |sigma -> Dt ^ sigma -> Dt ^ tau|
 \end{align*}
 \caption{Change types}
+\label{fig:change-types}
 \end{subfigure}
 %
 \hfill
@@ -353,7 +460,7 @@ together in \cref{fig:differentiation}.
   \RightFramedSignature{|fromto Gamma rho1 drho rho2|\text{ with }|rho1, rho2 : eval(Gamma), drho : eval(Dt^Gamma)|}
 \begin{typing}
   \Axiom
-  {\validfromto{\EmptyContext}{\EmptyContext}{\EmptyContext}{\EmptyContext}}
+  {\validfromto{\EmptyContext}{\EmptyEnv}{\EmptyEnv}{\EmptyEnv}}
 
   \Rule{|fromto Gamma rho1 drho rho2|\\
     |fromto tau a1 da a2|}{
@@ -364,6 +471,7 @@ together in \cref{fig:differentiation}.
 \end{typing}
 
 \caption{Validity}
+\label{fig:validity}
 \end{subfigure}
 
 \vskip 2\baselineskip
@@ -377,73 +485,129 @@ together in \cref{fig:differentiation}.
   \label{fig:differentiation}
 \end{figure}
 
-For each type |tau|, we define a change type |Dt^tau|. We refer
-to values of change types as \emph{change values}. A change value
-|dv : eval(Dt^tau)| describes the difference between two values
-|v1, v2 : eval(tau)|. To describe changes to the inputs of a
-term, we also introduce change contexts |Dt^Gamma| and
-environment changes |drho : eval(Dt^Gamma)|; an environment
-change from |rho1 : eval(Gamma)| to |rho2: eval(Gamma)| is simply
-an environment containing a change for each environment entry.
+First, we define for each type |tau| when |dv| is a valid change
+from |v1| to |v2|, where |v1| and |v2| are values of type |tau|.
+We first introduce, for for each type |tau|, a type |Dt^tau| that
+we call a \emph{change type} (as defined in \cref{fig:change-types}).
+We require |dv| to belong to
+|eval(Dt^tau)|.
+%
+Then, we define \emph{validity} as a family of ternary relations,
+indeed by types and relating changes with their sources and
+destinations.
+%
+We say that |dv| is valid change from |v1| to |v2|, and write
+|fromto tau v1 dv v2|, if |dv : eval(Dt^tau)|, |v1, v2 :
+eval(tau)|, if |dv| is a ``valid'' description of the difference
+from |v1| to |v2|, as we define in \cref{fig:validity}.
+%
+We refer
+to values of change types as \emph{change values}.
 
-Later we will define operator |`oplus`|, such that |v1
-`oplus` dv = v2| whenever |dv| is a change between |v1| and |v2|.
+Next, we explain the definitions of change types and validity for
+function type |sigma -> tau|.
+%
+Take function values |f1, f2 : eval(sigma -> tau)|. As discussed
+informally, a valid function change |df| from |f1| to |f2| must
+take as arguments (a) a base input |v1 : eval(sigma)| and (b) a valid
+input change |dv| from |v1| to updated input |v2 : eval(sigma)|.
+The result of this application, |df v1 dv|, must give a change
+from |f1 v1| to |f2 v2|. We
+formalize this requirement as the definition of validity for
+functions changes. Hence, we define change type |Dt^(sigma ->
+tau)| as |sigma -> Dt ^ sigma -> Dt ^ tau|, and we define
+validity on function types as:
+\begin{align*}
+  |fromto (sigma -> tau) f1 df f2| &=
+  |forall a1 a2 : eval(sigma), da : eval(Dt ^ sigma) .| \\
+  &\text{if }|fromto (sigma) a1 da a2| \text{ then }
+    |fromto (tau) (f1 a1) (df a1 da) (f2 a2)|
+\end{align*}
 
+To describe changes to the inputs of a term, we now also
+introduce change contexts |Dt^Gamma| environment changes |drho :
+eval(Dt^Gamma)|, and validity for environment changes |fromto
+Gamma rho1 drho rho2|.
+
+A valid environment change from |rho1 : eval(Gamma)| to |rho2:
+eval(Gamma)| is an environment |drho : eval(Dt^Gamma)| that
+extends environment |rho1| with valid changes for each entry. We
+first define the shape of change environments by defining change
+contexts |Dt^Gamma| as follows:
+\begin{align*}
+  \Delta\EmptyContext &= \EmptyContext \\
+  \Delta\Extend{x}{\tau} &= \Extend{\Extend[\Delta\Gamma]{x}{\tau}}{\D x : \Delta\tau}\text{.}
+\end{align*}
+Then, we describe validity of change
+environments via a judgment.
+We define judgment |fromto Gamma rho1 drho rho2|, pronounced
+``|drho| is a valid environment change between |rho1| and
+|rho2|'', where |rho1, rho2 : eval(Gamma), drho :
+eval(Dt^Gamma)|, via the following inference rules:
+\begin{typing}
+  \Axiom
+  {\validfromto{\EmptyContext}{\EmptyEnv}{\EmptyEnv}{\EmptyEnv}}
+
+  \Rule{|fromto Gamma rho1 drho rho2|\\
+    |fromto tau a1 da a2|}{
+  \validfromto{\Extend{x}{\tau}}
+  {\ExtendEnv*[\rho_1]{x}{a_1}}
+  {\ExtendEnv*[\ExtendEnv[\D\rho]{x}{a_1}]{dx}{\D{a}}}
+  {\ExtendEnv*[\rho_2]{x}{a_2}}}
+\end{typing}
+
+Finally, we extend validity to terms. We say a term |dt| is a
+valid change for term |t| (at type |tau|), and write |valid(tau)
+dt t|, if there exists a context |Gamma| such that |Gamma /- t :
+tau|, |Dt ^ Gamma /- dt : Dt^tau|, and |eval(dt) drho| is a valid
+change between |eval(t) rho1| and |eval(t) rho2| whenever |fromto
+Gamma rho1 drho rho2|. In other words, |eval(dt)| must map
+changes from old to new inputs to changes from old to new
+outputs, where we refer to inputs and outputs of |t|.
+
+\subsection{Correctness  of |derive(param)|}
 Roughly, our goal is that evaluating |derive(t)| (where |t| is a
 well-typed term) maps an environment change |drho| from |rho1| to
 |rho2| into a result change |eval(derive(t)) drho|, going from
-|eval(t) rho1| to |eval(t) rho2|. To this end, we first constrain
-the static semantics of |derive(t)|, that is its typing, so that
-|derive(t)| maps changes to |t|'s inputs to changes to |t|'s
-output:
+|eval(t) rho1| to |eval(t) rho2|.
 
-\begin{lemma}[Typing of |derive(param)|]
-  \label{lem:derive-typing}
-  If |Gamma /- t : tau| then |Dt ^ Gamma /- derive(t) : Dt ^ tau|.
-\end{lemma}
+Hence |derive(param)| must have the right static semantics (that
+is, the right typing), so that |derive(t)| maps changes to |t|'s
+inputs to changes to |t|'s output. That is, we require it to
+satisfy the following derived typing rule:
+
+\begin{typing}
+  \Rule[Derive]
+  {|Gamma /- t : tau|}
+  {|Dt ^ Gamma /- derive(t) : Dt ^ tau|}
+\end{typing}
+
+as we show in \cref{lem:derive-typing}.
 
 Next, we constraint |derive(t)|'s dynamic semantics, that is the
-result of evaluating it. we might hope for the following
-correctness statement to hold:
+result of evaluating it.
+%
+Recall that we'll define operator |`oplus`|, such that |v1
+`oplus` dv = v2| holds whenever |dv| is a valid change between
+|v1| and |v2|.
 
-\begin{theorem}[Incorrect correctness statement]
-If |Gamma /- t : tau| and |rho1 `oplus` drho = rho2| then
-|(eval(t) rho1) `oplus` (eval(derive(t)) drho) = (eval(t) rho2)|.
-\end{theorem}
-
-This statement is not quite right: we can only prove correctness
-if we restrict the statement to input changes |drho| that are
-\emph{valid}, in a sense we'll define. Moreover, to prove this
-statement by induction we need to strengthen its conclusion: we
-require that the output change |eval(derive(t)) drho| is also
-valid. To see why, consider |(\x -> s) t|: Here the output of |t|
-is an input of |s|. Similarly, in |derive((\x -> s) t)|, the
-output of |derive(t)| become input changes for subterm
-|derive(t)|, and |derive(s)| behaves correctly only if only if
-|derive(t)| produces a valid change.
-
-Formally, validity is a logical relation |fromto tau v1 dv v2|,
-relating a change value |dv : eval(Dt^tau)|, a source value |v1 :
-eval(tau)| and a target value |v2 : eval(tau)|. We read |fromto
-tau v1 dv v2| as ``|dv| is valid change from |v1| to
-|v2|''.
-
-As mentioned, to discuss input changes we also extend these
-definitions to environments, defining |Dt^Gamma| and |fromto
-Gamma rho1 drho rho2|.
-A valid environment change |drho|, valid from |rho1| to |rho2|,
-extends environment |rho1| with valid changes for each entry.
-
-Once we define these notions, we can fix |derive(param)|'s correctness statement.
-Evaluating |derive(param)| on a well-typed term |t| maps a valid
-environment change |drho| from |rho1| to |rho2| into a valid
-result change |eval(derive(t)) drho|, going
-from |eval(t) rho1| to |eval(t) rho2|. Formally we have:
+Once we define these notions, we can state |derive(param)|'s true
+correctness statement: whenever |t| is well-typed, |derive(t)| is
+a valid change for |t|. Formally we have:
 \begin{theorem}[Correctness of |derive(param)|]
   \label{thm:correct-derive}
-  If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
+  If |Gamma /- t : tau| then |valid tau (derive(t)) t|. That is,
+  if |fromto Gamma rho1 drho rho2| then
   |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.
 \end{theorem}
+
+As a corollary, we can deduce that updating base result |eval(t) rho1| with
+|eval(derive(t)) drho| gives the updated result |eval(t) rho2|.
+\begin{corollary}[Correctness of |derive(param)|, corollary]
+  \label{thm:correct-derive}
+  If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
+  |eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|.
+\end{corollary}
 
 % We will later also show change types
 % containing invalid changes.
@@ -470,58 +634,8 @@ from |eval(t) rho1| to |eval(t) rho2|. Formally we have:
 % using this statement we do not know that |eval(derive(s)) drho|
 % evaluates to a valid change.
 %
-Typically, change types
-contain values that invalid in some sense, but incremental
-programs will \emph{preserve} validity. In particular, valid
-changes between functions are in turn functions that take valid input
-changes to valid output changes. Hence, we
-formalize validity as a logical relation.
 
-A first-class function can close over free variables that can
-change, hence functions values can change themselves; hence, we
-introduce \emph{function changes} to describe these changes.
-For instance, term |t = \x. x + y| is a function that closes over
-|y|, so if |y| goes from |v1 = 5| to |v2 = 6|, |f1 = eval(t)
-(emptyRho, y = v1)| is different from |f2 = eval(t) (emptyRho, y
-= v2)|.
-In general,
-a valid function change from |f1| to |f2| (where |f1, f2
-: eval(sigma -> tau)|) is in turn a function |df| that takes an
-input |a1| and a change |da|, valid from |a1| to |a2|, to a valid
-change from |f1 a1| to |f2 a2|. Function changes do not take
-updated input |a2| as explicit argument; the value |a2| is implied by
-|a1| and |da|, since it can be computed as |a1 `oplus` da|. Formally we define:
-\begin{align*}
-  |Dt ^ iota| &= \ldots\\
-  |Dt ^ (sigma -> tau)| &= |Dt ^ sigma -> tau -> Dt ^ tau|\\
-  |fromto (sigma -> tau) f1 df f2| &=
-  |forall a1 a2 : eval(sigma), da : eval(Dt ^ sigma) .| \\
-  &\text{if }|fromto (sigma) a1 da a2| \text{ then }
-    |fromto (tau) (f1 a1) (df a1 da) (f2 a2)|
-\end{align*}
-
-As mentioned, to discuss input changes we also extend these
-definitions to environments, defining |Dt^Gamma| and |fromto
-Gamma rho1 drho rho2|.
-A valid environment change |drho|, valid from |rho1| to |rho2|, extends environment |rho1| with valid changes for each entry.
-\begin{align*}
-  \Delta\EmptyContext &= \EmptyContext \\
-  \Delta\Extend{x}{\tau} &= \Extend{\Extend[\Delta\Gamma]{x}{\tau}}{\D x : \Delta\tau} \\
-\end{align*}
-%
-\begin{typing}
-  \Axiom
-  {\validfromto{\EmptyContext}{\EmptyContext}{\EmptyContext}{\EmptyContext}}
-  \Rule{|fromto Gamma rho1 drho rho2|\\
-    |fromto tau a1 da a2|}{
-  \validfromto{\Extend{x}{\tau}}
-  {\ExtendEnv*[\rho_1]{x}{a_1}}
-  {\ExtendEnv*[\ExtendEnv[\D\rho]{x}{a_1}]{dx}{\D{a}}}
-  {\ExtendEnv*[\rho_2]{x}{a_2}}}
-\end{typing}
-
-We write differentiation as |derive(t)|. We first give its
-definition and typing.
+After stating these requirements, we define |derive(param)| and prove they hold.
 The transformation is defined by:
 \begin{code}
   derive(\x -> t) = \x dx -> derive(t)
@@ -535,14 +649,14 @@ The transformation is defined by:
 
 
 Now we can prove |derive(param)|'s static semantics:
+\begin{lemma}[Typing of |derive(param)|]
+  \label{lem:derive-typing}
+  If |Gamma /- t : tau| then |Dt ^ Gamma /- derive(t) : Dt ^ tau|.
+\end{lemma}
 \begin{proof}[Proof of \cref{lem:derive-typing}]
   The thesis can be proven by induction on the typing derivation
   |Gamma /- t : tau|.
 \end{proof}
-
-\pg{Define that term |dt| is a valid change of |t| if |eval(dt)
-  drho| is a valid change between |eval(t) rho1| and |eval(t)
-  rho2| whenever |fromto Gamma rho1 drho rho2|.}
 
 To illustrate correctness statement \cref{thm:correct-derive}, it
 is helpful to look first at its proof. Readers familiar with
@@ -555,12 +669,13 @@ motivate how |derive(param)| is defined.
 \begin{proof}[Proof of \cref{thm:correct-derive}]
   By induction on typing derivation |Gamma /- t : tau|.
   \begin{itemize}
-  \item Case |Gamma /- x : tau|.
-    \pg{State the thesis and motivate the pick for |derive(x)|.}
-    The thesis follows |fromto tau
-    (eval(x) rho1) (eval(dx) drho) (eval(x) rho2)| because the
-    environment entry for |dx| is a valid change for the
-    environment entry for |x|.
+  \item Case |Gamma /- x : tau|. The thesis is |valid tau
+    (derive(x)) x|, that is |fromto tau (eval(x) rho1)
+    (eval(derive(x)) drho) (eval(x) rho2)| whenever |fromto Gamma
+    drho rho1 rho2|. We define |derive(x) = dx|, so the proof
+    succeeds: |drho| is a valid environment change from
+    |rho1| to |rho2|, so |eval(dx) drho| is a valid change from
+    |eval(x) rho1| to |eval(x) rho2|, as required by our thesis.
   \item Case |Gamma /- s t : tau|.
     By inversion of typing, there is some type |sigma| such that |Gamma /- s : sigma -> tau| and
     |Gamma /- t : sigma|.
@@ -631,11 +746,35 @@ rho1) (eval(derive(t)) drho) (eval(t) rho2)| gives the thesis.
   \end{itemize}
 \end{proof}
 
-Next, we will introduce formally operator |`oplus`| and relate it
-to validity. In particular, we will prove that |fromto tau v1 dv
-v2| implies |v1 `oplus` dv = v2|, and explain why the converse is not true.
+\subsection{Discussion}
+%
+We might have asked for the following
+correctness property:
 
+\begin{theorem}[Incorrect correctness statement]
+If |Gamma /- t : tau| and |rho1 `oplus` drho = rho2| then
+|(eval(t) rho1) `oplus` (eval(derive(t)) drho) = (eval(t) rho2)|.
+\end{theorem}
 
+However, this property is not quite right. We can only prove correctness
+if we restrict the statement to input changes |drho| that are
+\emph{valid}. Moreover, to prove this
+statement by induction we need to strengthen its conclusion: we
+require that the output change |eval(derive(t)) drho| is also
+valid. To see why, consider term |(\x -> s) t|: Here the output of |t|
+is an input of |s|. Similarly, in |derive((\x -> s) t)|, the
+output of |derive(t)| becomes an input change for subterm
+|derive(t)|, and |derive(s)| behaves correctly only if only if
+|derive(t)| produces a valid change.
+
+Typically, change types
+contain values that invalid in some sense, but incremental
+programs will \emph{preserve} validity. In particular, valid
+changes between functions are in turn functions that take valid input
+changes to valid output changes. This is why we
+formalize validity as a logical relation.
+
+\paragraph{Invalid input changes}
 To understand why invalid changes cause derivatives to produce
 incorrect results, consider again |grand_total = \ xs ys -> sum
 (merge xs ys)|. Suppose a bag change |dxs| removes an element
@@ -645,6 +784,45 @@ ys dys| should return |-20|. However, that is only correct if
 |20| is actually an element of |xs|. Otherwise, |xs `oplus` dxs|
 will make no change to |xs|. Similar issues apply with function
 changes.\pg{elaborate}
+
+\paragraph{Deriving closed terms of function type}
+If we differentiate a closed term |/- t : tau|, we get a change
+term |derive(t)| from |t| to itself\pg{Lexicon not introduced for
+  terms.}: |fromto tau (eval(derive(t)) emptyenv) (eval(t)
+emptyenv) (eval(t) emptyenv)|. We call such changes nil changes;
+they're important for two reasons. First, we will soon see that a
+unit element for |`oplus`| has its uses. Second, nil changes at
+function type are even more useful. A nil function change for
+function |f| takes an input |v1| and input change |dv| to a
+change from |f v1| and |f (v1 `oplus` dv)|. In other words, a nil
+function change for |f| is a \emph{derivative} for |f|!
+
+\pg{Define nil changes?}
+\paragraph{Constraining |`oplus`| on functions}
+\pg{Revise.}
+How should |`oplus`| be defined on functions?
+We show that we must set |f1 `oplus` df = \v -> f1 x `oplus` df v
+(nil v)|.
+
+We know that a valid function change |valid (sigma -> tau) df f1
+f2| takes valid input changes |valid sigma dv v1 v2| to a valid
+output change |valid tau (df v1 dv) (f1 v1) (f2 v2)|. We require
+that |`oplus`| agrees with validity, so |f2 = f1 `oplus` df|, |v2
+= v1 `oplus` dv| and |f2 v2 = (f1 `oplus` df) (v1 `oplus` dv) =
+f1 v1 `oplus` df v1 dv|. Replacing |dv| with |nil v| gives
+|(f1 `oplus` df) v1 = f1 v1 `oplus` df v1 (nil v)|.
+
+It also follows that |f1 v1 `oplus` df v1 dv = (f1 `oplus` df)
+(v1 `oplus` dv) = f1 (v1 `oplus` dv) `oplus` df (v1 `oplus` dv)
+(nil (v1 `oplus` dv))|. It turns out that this equation, together
+with a weaker form of validity preservation, characterizes
+function changes.
+
+\paragraph{Updating values by changes with |`oplus`|}
+Next, we will introduce formally operator |`oplus`| and relate it
+to validity. In particular, we will prove that |fromto tau v1 dv
+v2| implies |v1 `oplus` dv = v2|, and explain why the converse is
+not true.
 
 % \subsection{Differentiation}
 % After we defined our language, its type system and its semantics, we motivate
