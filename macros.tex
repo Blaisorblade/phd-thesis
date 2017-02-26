@@ -35,14 +35,8 @@
 \newcommand{\mei}{\todo{ME}}
 \newcommand{\rmi}{\todo{RM}}
 
-% Allow using \lambda in section headers in two steps. Use \TitleLambda where needed.
-% (I'm scared of redefining \lambda).
-% Step 1:
-\PrerenderUnicode{λ}
-% Step 2:
-
-% Warning: This can be a robust command, but cannot be defined
-% via \NewDocumentCommand for reasons unknown to me.
-% Asked on http://tex.stackexchange.com/q/142902/1340
-\DeclareRobustCommand{\TitleLambda}{\texorpdfstring{$\lambda$}{λ}}
-%\NewDocumentCommand{\TitleLambda}{}{\texorpdfstring{$\lambda$}{λ}}
+% Allow using λ in section headers and having it show in PDF bookmarks.
+% http://tex.stackexchange.com/a/142906/1340
+\usepackage{newunicodechar}
+\newunicodechar{λ}{\texorpdfstring{\ensuremath{\lambda}}{λ}}
+\DeclareRobustCommand{\TitleLambda}{λ}
