@@ -477,8 +477,9 @@ collect the complete definitions and crucial lemmas in
 \vskip 2\baselineskip
 \begin{subfigure}[c]{1.0\textwidth}
   \centering
-
-  If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
+  % \deriveCorrect % XXX reorder and use this
+  If |Gamma /- t : tau| then |valid tau (derive(t)) t|. That is,
+  if |fromto Gamma rho1 drho rho2| then
   |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.
 \end{subfigure}
 \caption{Defining differentiation.}
@@ -576,13 +577,15 @@ is, the right typing), so that |derive(t)| maps changes to |t|'s
 inputs to changes to |t|'s output. That is, we require it to
 satisfy the following derived typing rule:
 
-\begin{typing}
-  \Rule[Derive]
-  {|Gamma /- t : tau|}
-  {|Dt ^ Gamma /- derive(t) : Dt ^ tau|}
-\end{typing}
-
-as we show in \cref{lem:derive-typing}.
+\begin{restatable*}[Typing of |derive(param)|]{lemma}{deriveTyping}
+  \label{lem:derive-typing}
+  Transformation |derive(param)| satisfies derived typing rule:
+  \begin{typing}
+    \Rule[Derive]
+    {|Gamma /- t : tau|}
+    {|Dt ^ Gamma /- derive(t) : Dt ^ tau|}
+  \end{typing}
+\end{restatable*}
 
 Next, we constraint |derive(t)|'s dynamic semantics, that is the
 result of evaluating it.
@@ -594,20 +597,21 @@ Recall that we'll define operator |`oplus`|, such that |v1
 Once we define these notions, we can state |derive(param)|'s true
 correctness statement: whenever |t| is well-typed, |derive(t)| is
 a valid change for |t|. Formally we have:
-\begin{theorem}[Correctness of |derive(param)|]
+\begin{restatable*}[Correctness of |derive(param)|]{theorem}{deriveCorrect}
   \label{thm:correct-derive}
   If |Gamma /- t : tau| then |valid tau (derive(t)) t|. That is,
   if |fromto Gamma rho1 drho rho2| then
   |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.
-\end{theorem}
+\end{restatable*}
 
-As a corollary, we can deduce that updating base result |eval(t) rho1| with
-|eval(derive(t)) drho| gives the updated result |eval(t) rho2|.
-\begin{corollary}[Correctness of |derive(param)|, corollary]
-  \label{thm:correct-derive}
+As a corollary of \cref{thm:correct-derive}, we can deduce that
+updating base result |eval(t) rho1| with |eval(derive(t)) drho|
+gives the updated result |eval(t) rho2|.
+\begin{restatable*}[Correctness of |derive(param)|, corollary]{corollary}{deriveCorrectOplus}
+  \label{thm:correct-derive-oplus}
   If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
   |eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|.
-\end{corollary}
+\end{restatable*}
 
 % We will later also show change types
 % containing invalid changes.
@@ -641,18 +645,17 @@ The transformation is defined by:
   derive(\x -> t) = \x dx -> derive(t)
   derive(s t) = derive(s) t (derive(t))
   derive(x) = dx
+  derive(c) = ...
 \end{code}
   % derive(^^let x = t1 in t2) =
   %   let  x = t1
   %        dx = derive(t1)
-  %   in   derive(t2)
+  %        in   derive(t2)
+
 
 
 Now we can prove |derive(param)|'s static semantics:
-\begin{lemma}[Typing of |derive(param)|]
-  \label{lem:derive-typing}
-  If |Gamma /- t : tau| then |Dt ^ Gamma /- derive(t) : Dt ^ tau|.
-\end{lemma}
+\deriveTyping
 \begin{proof}[Proof of \cref{lem:derive-typing}]
   The thesis can be proven by induction on the typing derivation
   |Gamma /- t : tau|.
@@ -666,6 +669,7 @@ definitions. Nevertheless, we spell it out, and use it to
 motivate how |derive(param)| is defined.
 
 \pg{Motivate inside the proof the definitions given for the various cases of derive.}
+\deriveCorrect
 \begin{proof}[Proof of \cref{thm:correct-derive}]
   By induction on typing derivation |Gamma /- t : tau|.
   \begin{itemize}
@@ -689,7 +693,7 @@ motivate how |derive(param)| is defined.
     In detail, our thesis is
     \[|fromto tau (eval(s t) rho1) (eval(derive(s t)) drho) (eval(s t) rho2)|,\]
     %
-    where |eval(s t) rho = (eval(s) rho) (eval(t) rho)| (for any |rho : eval(Gamma)|)and
+    where |eval(s t) rho = (eval(s) rho) (eval(t) rho)| (for any |rho : eval(Gamma)|) and
     \begin{equational}
       \begin{code}
    eval(derive(s t)) drho
@@ -746,6 +750,7 @@ rho1) (eval(derive(t)) drho) (eval(t) rho2)| gives the thesis.
   \end{itemize}
 \end{proof}
 
+\deriveCorrectOplus
 \subsection{Discussion}
 %
 We might have asked for the following
@@ -788,8 +793,8 @@ changes.\pg{elaborate}
 \paragraph{Deriving closed terms of function type}
 If we differentiate a closed term |/- t : tau|, we get a change
 term |derive(t)| from |t| to itself\pg{Lexicon not introduced for
-  terms.}: |fromto tau (eval(derive(t)) emptyenv) (eval(t)
-emptyenv) (eval(t) emptyenv)|. We call such changes nil changes;
+  terms.}: |fromto tau (eval(t)
+emptyRho) (eval(derive(t)) emptyRho) (eval(t) emptyRho)|. We call such changes nil changes;
 they're important for two reasons. First, we will soon see that a
 unit element for |`oplus`| has its uses. Second, nil changes at
 function type are even more useful. A nil function change for

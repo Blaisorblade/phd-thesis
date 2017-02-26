@@ -172,7 +172,7 @@ similarly to a distributive law.
   %   &\App{(\Update[A \to B]{f&&}{\D f})}{&&v}
   %     && = \Update[B]{\App{f}{v}&&}{\App{\App{\D f}{v}}{\NilC[A]{v}}}\\
   %   &\App{\App{(\Diff[A \to B]{f_2&&}{f_1})}{&&v}}{\D v}
-  %     && = \Diff[B]{\App{f_2}{\Update*[A]{v}{\D v}}&&}{\App{f_1}{v}}\qedAligned
+  %     && = \Diff[B]{\App{f_2}{\Update*[A]{v}{\D v}}&&}{\App{f_1}{v}}
   % \end{alignat*}
 \end{definition}
 

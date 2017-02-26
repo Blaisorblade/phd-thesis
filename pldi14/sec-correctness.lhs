@@ -123,7 +123,6 @@ $\Gi$ such that $\forall v. \Change[\Gi]{v} \subseteq \Eval{\Change{\Gi}}$.
   \begin{align*}
 %    \ChangeStruct{C}_{\Gi} & = \ChangeStruct{C}_\Gi\\
     \ChangeStruct{C}_{\Fun{\Gs}{\Gt}} & = \ChangeStruct{C}_{\Gs} \to \ChangeStruct{C}_{\Gt}.
-  \qedAligned
   \end{align*}
 \end{definition}
 

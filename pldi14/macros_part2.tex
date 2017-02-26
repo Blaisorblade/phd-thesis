@@ -18,14 +18,19 @@
 %
 % http://tex.stackexchange.com/a/67251
 \theoremstyle{definition}
-\input{pldi14/QED}
-\newtheorem{theorem}{Theorem}
-% http://tex.stackexchange.com/a/45358/1340
-% \numberwithin{section}{chapter} % From AMS Author FAQ (http://www.ams.org/faq?class_id=561), makes no difference?
-\numberwithin{theorem}{section}
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{definition}[theorem]{Definition}
+% \input{pldi14/QED}
+\theoremsymbol{\ensuremath{\Box}}
+\declaretheorem[numberwithin=section]{theorem}
+\declaretheorem[numberlike=theorem]{lemma}
+\declaretheorem[numberlike=theorem]{corollary}
+\declaretheorem[numberlike=theorem]{definition}
+% \newtheorem{theorem}{Theorem}
+% % http://tex.stackexchange.com/a/45358/1340
+% % \numberwithin{section}{chapter} % From AMS Author FAQ (http://www.ams.org/faq?class_id=561), makes no difference?
+%\numberwithin{theorem}{section}
+% \newtheorem{lemma}[theorem]{Lemma}
+% \newtheorem{corollary}[theorem]{Corollary}
+% \newtheorem{definition}[theorem]{Definition}
 
 \begin{oldSec}
 \newtheorem{parameter}[theorem]{Plugin Requirement}
