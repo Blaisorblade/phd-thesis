@@ -642,10 +642,12 @@ motivate how |derive(param)| is defined.
     \end{gather*}
     Since |s| has function type, its validity means:
 \begin{align*}
-  |fromto (sigma -> tau) (eval(s) rho1) (eval(derive(s)) drho) (eval(s) rho2)| &=
-  |forall a1 a2 : eval(sigma), da : eval(Dt ^ sigma) .|
-  \text{ if }|fromto (sigma) a1 da a2| \text{ then }\\
-    &|fromto (tau) ((eval(s) rho1) a1) ((eval(derive(s)) drho) a1 da) ((eval(s) rho2) a2)|
+  |fromto (sigma -> tau) (eval(s) rho1) (eval(derive(s)) drho) (eval(s) rho2)|
+  &=
+    |forall a1 a2 : eval(sigma), da : eval(Dt ^ sigma)|\\
+  &\text{ if }|fromto (sigma) a1 da a2| \\
+  & \text{ then }
+    |fromto (tau) ((eval(s) rho1) a1) ((eval(derive(s)) drho) a1 da) ((eval(s) rho2) a2)|
 \end{align*}
 Instantiating in this statement |fromto (sigma) a1 da a2| by |fromto sigma (eval(t)
 rho1) (eval(derive(t)) drho) (eval(t) rho2)| gives the thesis.
@@ -658,13 +660,16 @@ rho1) (eval(derive(t)) drho) (eval(t) rho2)| gives the thesis.
     \[|fromto tau (eval(t) (rho1, x = a1)) (eval(derive(t))
       (drho, x = a1, dx = da)) (eval(t) (rho2, x = a2))|.\]
 
-    To do so, take the inductive hypothesis on |t|. Since appropriate environment for |t| must match typing context |Gamma , x : sigma|, the hypothesis can be written as requiring that whenever
-    $
+    To do so, take the inductive hypothesis on |t|. Since appropriate environment for |t| must match typing context |Gamma , x : sigma|, we know by the hypothesis that if
+    %
+    \[
       \validfromto{\Extend{x}{\sigma}}
-  {\ExtendEnv*[\rho_1]{x}{a_1}}
-  {\ExtendEnv*[\ExtendEnv[\D\rho]{x}{a_1}]{dx}{\D{a}}}
-  {\ExtendEnv*[\rho_2]{x}{a_2}}$, that is |fromto Gamma rho1 drho rho2| and |fromto sigma a1 da a2|,
-    we have
+      {\ExtendEnv*[\rho_1]{x}{a_1}}
+      {\ExtendEnv*[\ExtendEnv[\D\rho]{x}{a_1}]{dx}{\D{a}}}
+      {\ExtendEnv*[\rho_2]{x}{a_2}},\]
+    %
+    that is |fromto Gamma rho1
+    drho rho2| and |fromto sigma a1 da a2|, then we have
     \[|fromto tau (eval(t) (rho1, x = a1)) (eval(derive(t))
       (drho, x = a1, dx = da)) (eval(t) (rho2, x = a2))|.\]
 
@@ -704,7 +709,8 @@ changes to valid output changes. This is why we
 formalize validity as a logical relation.
 
 \paragraph{Invalid input changes}
-To understand why invalid changes cause derivatives to produce
+To see concretely why invalid changes, in general, can cause
+derivatives to produce
 incorrect results, consider again |grand_total = \ xs ys -> sum
 (merge xs ys)|. Suppose a bag change |dxs| removes an element
 |20| from input bag |xs|, while |dys| makes no changes to |ys|:
@@ -728,8 +734,7 @@ function change for |f| is a \emph{derivative} for |f|!
 
 \pg{Define nil changes?}
 \paragraph{Constraining |`oplus`| on functions}
-\pg{Revise.}
-How should |`oplus`| be defined on functions?
+Next, we discuss how |`oplus`| should be defined on functions.
 We show that we must set |f1 `oplus` df = \v -> f1 x `oplus` df v
 (nil v)|.
 
