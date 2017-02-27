@@ -402,90 +402,6 @@ together. We next explain definitions and show key equations. We
 collect the complete definitions and crucial lemmas in
 \cref{fig:differentiation}.
 
-\begin{figure}
-
-  \begin{subfigure}[c]{0.5\textwidth}
-\RightFramedSignature{\Delta\Gt}
-\begin{align*}
-  |Dt ^ iota| &= \ldots\\
-  |Dt ^ (sigma -> tau)| &= |sigma -> Dt ^ sigma -> Dt ^ tau|
-\end{align*}
-\caption{Change types}
-\label{fig:change-types}
-\end{subfigure}
-%
-\hfill
-%
-\begin{subfigure}[c]{0.5\textwidth}
-\RightFramedSignature{\Delta\Gamma}
-\begin{align*}
-  \Delta\EmptyContext &= \EmptyContext \\
-  \Delta\Extend{x}{\tau} &= \Extend{\Extend[\Delta\Gamma]{x}{\tau}}{\D x : \Delta\tau}
-\end{align*}
-\caption{Change contexts}
-\end{subfigure}
-\vfill
-
-\begin{subfigure}[c]{0.5\textwidth}
-  \RightFramedSignature{|derive(t)|}
-\begin{align*}
-  |derive(\x -> t)| &= |\x dx -> derive(t)| \\
-  |derive(s t)| &= |derive(s) t (derive(t))| \\
-  |derive(x)| &= |dx| \\
-  |derive(c)| &= ...
-\end{align*}
-\caption{Differentiation}
-\end{subfigure}
-%
-\begin{subfigure}[c]{0.5\textwidth}
-  \begin{typing}
-    \Rule[Derive]
-    {|Gamma /- t : tau|}
-    {|Dt ^ Gamma /- derive(t) : Dt ^ tau|}
-\end{typing}
-\subcaption{Differentiation typing}
-\label{fig:derive}
-\end{subfigure}
-%
-\begin{subfigure}[c]{1.0\textwidth}
-  \RightFramedSignature{|fromto tau v1 dv v2|\text{ with }|v1, v2 : eval(tau), dv : eval(Dt^tau)|}
-\begin{align*}
-  |fromto iota v1 dv v2| &= \ldots \\
-  |fromto (sigma -> tau) f1 df f2| &=
-  |forall a1 a2 : eval(sigma), da : eval(Dt ^ sigma) .| \\
-  &\text{if }|fromto (sigma) a1 da a2| \text{ then }
-    |fromto (tau) (f1 a1) (df a1 da) (f2 a2)|
-\end{align*}
-
-  \RightFramedSignature{|fromto Gamma rho1 drho rho2|\text{ with }|rho1, rho2 : eval(Gamma), drho : eval(Dt^Gamma)|}
-\begin{typing}
-  \Axiom
-  {\validfromto{\EmptyContext}{\EmptyEnv}{\EmptyEnv}{\EmptyEnv}}
-
-  \Rule{|fromto Gamma rho1 drho rho2|\\
-    |fromto tau a1 da a2|}{
-  \validfromto{\Extend{x}{\tau}}
-  {\ExtendEnv*[\rho_1]{x}{a_1}}
-  {\ExtendEnv*[\ExtendEnv[\D\rho]{x}{a_1}]{dx}{\D{a}}}
-  {\ExtendEnv*[\rho_2]{x}{a_2}}}
-\end{typing}
-
-\caption{Validity}
-\label{fig:validity}
-\end{subfigure}
-
-\vskip 2\baselineskip
-\begin{subfigure}[c]{1.0\textwidth}
-  \centering
-  % \deriveCorrect % XXX reorder and use this
-  If |Gamma /- t : tau| then |valid tau (derive(t)) t|. That is,
-  if |fromto Gamma rho1 drho rho2| then
-  |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.
-\end{subfigure}
-\caption{Defining differentiation.}
-  \label{fig:differentiation}
-\end{figure}
-
 First, we define for each type |tau| when |dv| is a valid change
 from |v1| to |v2|, where |v1| and |v2| are values of type |tau|.
 We first introduce, for for each type |tau|, a type |Dt^tau| that
@@ -566,7 +482,7 @@ Gamma rho1 drho rho2|. In other words, |eval(dt)| must map
 changes from old to new inputs to changes from old to new
 outputs, where we refer to inputs and outputs of |t|.
 
-\subsection{Correctness  of |derive(param)|}
+\subsection{Correctness of differentiation}
 Roughly, our goal is that evaluating |derive(t)| (where |t| is a
 well-typed term) maps an environment change |drho| from |rho1| to
 |rho2| into a result change |eval(derive(t)) drho|, going from
@@ -577,7 +493,7 @@ is, the right typing), so that |derive(t)| maps changes to |t|'s
 inputs to changes to |t|'s output. That is, we require it to
 satisfy the following derived typing rule:
 
-\begin{restatable*}[Typing of |derive(param)|]{lemma}{deriveTyping}
+\begin{restatable}[Typing of |derive(param)|]{lemma}{deriveTyping}
   \label{lem:derive-typing}
   Transformation |derive(param)| satisfies derived typing rule:
   \begin{typing}
@@ -585,9 +501,9 @@ satisfy the following derived typing rule:
     {|Gamma /- t : tau|}
     {|Dt ^ Gamma /- derive(t) : Dt ^ tau|}
   \end{typing}
-\end{restatable*}
+\end{restatable}
 
-Next, we constraint |derive(t)|'s dynamic semantics, that is the
+Next, we constrain |derive(t)|'s dynamic semantics, that is the
 result of evaluating it.
 %
 Recall that we'll define operator |`oplus`|, such that |v1
@@ -597,21 +513,29 @@ Recall that we'll define operator |`oplus`|, such that |v1
 Once we define these notions, we can state |derive(param)|'s true
 correctness statement: whenever |t| is well-typed, |derive(t)| is
 a valid change for |t|. Formally we have:
-\begin{restatable*}[Correctness of |derive(param)|]{theorem}{deriveCorrect}
+\begin{restatable}[Correctness of |derive(param)|]{theorem}{deriveCorrect}
   \label{thm:correct-derive}
   If |Gamma /- t : tau| then |valid tau (derive(t)) t|. That is,
   if |fromto Gamma rho1 drho rho2| then
   |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.
-\end{restatable*}
+\end{restatable}
 
-As a corollary of \cref{thm:correct-derive}, we can deduce that
-updating base result |eval(t) rho1| with |eval(derive(t)) drho|
+Once we define |`oplus`| we'll be able to relate it to validity. The statement we'll prove is
+\begin{restatable}[Valid changes update correctly]{lemma}{validOplus}
+  \label{thm:valid-oplus}
+  If |fromto tau v1 dv v2| then |v1 `oplus` dv = v2|.
+\end{restatable}
+
+And as a corollary of \cref{thm:correct-derive,thm:valid-oplus}, we can deduce that
+updating base result |eval(t) rho1| by change |eval(derive(t)) drho| via |`oplus`|
 gives the updated result |eval(t) rho2|.
-\begin{restatable*}[Correctness of |derive(param)|, corollary]{corollary}{deriveCorrectOplus}
+\begin{restatable}[Correctness of |derive(param)|, corollary]{corollary}{deriveCorrectOplus}
   \label{thm:correct-derive-oplus}
   If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
   |eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|.
-\end{restatable*}
+\end{restatable}
+
+\input{pldi14/fig-differentiation}
 
 % We will later also show change types
 % containing invalid changes.
@@ -639,7 +563,7 @@ gives the updated result |eval(t) rho2|.
 % evaluates to a valid change.
 %
 
-After stating these requirements, we define |derive(param)| and prove they hold.
+After stating these requirements, we define |derive(param)| and prove the requirements hold.
 The transformation is defined by:
 \begin{code}
   derive(\x -> t) = \x dx -> derive(t)
@@ -654,9 +578,9 @@ The transformation is defined by:
 
 
 
-Now we can prove |derive(param)|'s static semantics:
-\deriveTyping
-\begin{proof}[Proof of \cref{lem:derive-typing}]
+Now we can characterize |derive(param)|'s static semantics:
+\deriveTyping*
+\begin{proof}
   The thesis can be proven by induction on the typing derivation
   |Gamma /- t : tau|.
 \end{proof}
@@ -669,8 +593,8 @@ definitions. Nevertheless, we spell it out, and use it to
 motivate how |derive(param)| is defined.
 
 \pg{Motivate inside the proof the definitions given for the various cases of derive.}
-\deriveCorrect
-\begin{proof}[Proof of \cref{thm:correct-derive}]
+\deriveCorrect*
+\begin{proof}
   By induction on typing derivation |Gamma /- t : tau|.
   \begin{itemize}
   \item Case |Gamma /- x : tau|. The thesis is |valid tau
@@ -750,8 +674,8 @@ rho1) (eval(derive(t)) drho) (eval(t) rho2)| gives the thesis.
   \end{itemize}
 \end{proof}
 
-\deriveCorrectOplus
 \subsection{Discussion}
+\pg{In this section we clarify a few points... about what?}
 %
 We might have asked for the following
 correctness property:
@@ -828,6 +752,11 @@ Next, we will introduce formally operator |`oplus`| and relate it
 to validity. In particular, we will prove that |fromto tau v1 dv
 v2| implies |v1 `oplus` dv = v2|, and explain why the converse is
 not true.
+
+\validOplus*
+
+\deriveCorrectOplus*
+
 
 % \subsection{Differentiation}
 % After we defined our language, its type system and its semantics, we motivate

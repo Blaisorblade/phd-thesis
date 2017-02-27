@@ -29,6 +29,7 @@
 %format `such` = "\mid"
 %format ^ = " "
 %format ^^ = "\;"
+%format ^^^ = "\\"
 %format f0
 %format f1
 %format f2
