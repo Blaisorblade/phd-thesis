@@ -30,6 +30,7 @@
 %format ^ = " "
 %format ^^ = "\;"
 %format ^^^ = "\\"
+%format ^&^ = "&"
 %format f0
 %format f1
 %format f2
@@ -103,7 +104,7 @@
 %format tau2
 %format iota = "\iota"
 
-%format valid (tau) (dv) (v) = "\validfrom{" tau "}{" dv "}{" v "}"
+%format correct (tau) (dv) (v) = "\correctdt{" tau "}{" dv "}{" v "}"
 %format fromto (tau) (v1) (dv) (v2) = "\validfromto{" tau "}{" v1 "}{" dv "}{" v2 "}"
 
 %format (new(v)) = "\New{" v "}"

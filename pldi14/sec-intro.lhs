@@ -473,20 +473,22 @@ eval(Dt^Gamma)|, via the following inference rules:
   {\ExtendEnv*[\rho_2]{x}{a_2}}}
 \end{typing}
 
-Finally, we extend validity to terms. We say a term |dt| is a
-valid change for term |t| (at type |tau|), and write |valid(tau)
-dt t|, if there exists a context |Gamma| such that |Gamma /- t :
-tau|, |Dt ^ Gamma /- dt : Dt^tau|, and |eval(dt) drho| is a valid
-change between |eval(t) rho1| and |eval(t) rho2| whenever |fromto
-Gamma rho1 drho rho2|. In other words, |eval(dt)| must map
-changes from old to new inputs to changes from old to new
-outputs, where we refer to inputs and outputs of |t|.
+Finally, we define when a change term is a correct change for a
+base term. We say a term |dt| is a correct change for term |t|
+(at type |tau|), and write |correct(tau) dt t|, if there exists a
+context |Gamma| such that |Gamma /- t : tau|, |Dt ^ Gamma /- dt :
+Dt^tau|, and |eval(dt) drho| is a valid change from |eval(t)
+rho1| to |eval(t) rho2| whenever |fromto Gamma rho1 drho rho2|.
+In other words, |eval(dt)| must map changes from old to new
+inputs to changes from old to new outputs, where we refer to
+inputs and outputs of |t|.
 
 \subsection{Correctness of differentiation}
 Roughly, our goal is that evaluating |derive(t)| (where |t| is a
 well-typed term) maps an environment change |drho| from |rho1| to
 |rho2| into a result change |eval(derive(t)) drho|, going from
-|eval(t) rho1| to |eval(t) rho2|.
+|eval(t) rho1| to |eval(t) rho2|. That is, |derive(t)| must be a
+correct change for |t|.
 
 Hence |derive(param)| must have the right static semantics (that
 is, the right typing), so that |derive(t)| maps changes to |t|'s
@@ -512,11 +514,11 @@ Recall that we'll define operator |`oplus`|, such that |v1
 
 Once we define these notions, we can state |derive(param)|'s true
 correctness statement: whenever |t| is well-typed, |derive(t)| is
-a valid change for |t|. Formally we have:
+a correct change for |t|. Formally we have:
 \begin{restatable}[Correctness of |derive(param)|]{theorem}{deriveCorrect}
   \label{thm:correct-derive}
-  If |Gamma /- t : tau| then |valid tau (derive(t)) t|. That is,
-  if |fromto Gamma rho1 drho rho2| then
+  If |Gamma /- t : tau|, then |derive(t)| is a correct change for |t|.
+  That is, if |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
   |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.
 \end{restatable}
 
@@ -590,29 +592,38 @@ is helpful to look first at its proof. Readers familiar with
 logical relations proofs should be able to reproduce this proof
 on their own, as it is rather standard, once one uses the given
 definitions. Nevertheless, we spell it out, and use it to
-motivate how |derive(param)| is defined.
-
-\pg{Motivate inside the proof the definitions given for the various cases of derive.}
+motivate how |derive(param)| is defined. For each case, we first
+give a short proof sketch, and then redo the proof in more
+detail to make the proof easier to follow.
 \deriveCorrect*
 \begin{proof}
   By induction on typing derivation |Gamma /- t : tau|.
   \begin{itemize}
-  \item Case |Gamma /- x : tau|. The thesis is |valid tau
-    (derive(x)) x|, that is |fromto tau (eval(x) rho1)
-    (eval(derive(x)) drho) (eval(x) rho2)| whenever |fromto Gamma
-    drho rho1 rho2|. We define |derive(x) = dx|, so the proof
-    succeeds: |drho| is a valid environment change from
-    |rho1| to |rho2|, so |eval(dx) drho| is a valid change from
-    |eval(x) rho1| to |eval(x) rho2|, as required by our thesis.
+  \item Case |Gamma /- x : tau|. The thesis is that |derive(x)|
+    is a correct change for |x|, that is |fromto tau (eval(x)
+    rho1) (eval(derive(x)) drho) (eval(x) rho2)|. We claim the
+    correct change for |x| is |dx|, hence define |derive(x) =
+    dx|. Indeed, |drho| is a valid environment change
+    from |rho1| to |rho2|, so |eval(dx) drho| is a valid change
+    from |eval(x) rho1| to |eval(x) rho2|, as required by our
+    thesis.
   \item Case |Gamma /- s t : tau|.
-    By inversion of typing, there is some type |sigma| such that |Gamma /- s : sigma -> tau| and
-    |Gamma /- t : sigma|.
+    %
+    The thesis is that |derive(s t)| is a correct change for |s t|, that is
+    |fromto tau (eval(s t) rho1) (eval(derive(s t)) drho) (eval(s t) rho2)|.
+    %
+    By inversion of typing, there is some type |sigma| such that
+    |Gamma /- s : sigma -> tau| and |Gamma /- t : sigma|.
 
-    In essence, to prove the thesis, you can show by induction on
-    |s|, |eval(derive(s)) drho| is a validity-preserving function
-    change |df|, and use induction on |t| to produce a valid
-    input to |df|. The thesis follows by validity preservation,
-    and calculations showing the change has the right source and destination.
+    To prove the thesis, in short, you can apply the inductive
+    hypothesis to |t| and |s| on the same |rho1, drho, rho2|,
+    obtaining respectively that |derive t| and |derive s|
+    are correct changes for |s| and |t|. In particular, |derive s|
+    evaluates to a validity-preserving function change.
+    Term |derive (s t)|, that is |(derive s) t (derive t)|, applies
+    validity-preserving function |derive s| to |t| and valid
+    input change |derive t|, and this produces a correct change for
+    |s t| as required.
 
     In detail, our thesis is
     \[|fromto tau (eval(s t) rho1) (eval(derive(s t)) drho) (eval(s t) rho2)|,\]
@@ -642,9 +653,9 @@ motivate how |derive(param)| is defined.
     \end{gather*}
     Since |s| has function type, its validity means:
 \begin{align*}
-  |fromto (sigma -> tau) (eval(s) rho1) (eval(derive(s)) drho) (eval(s) rho2)|
-  &=
-    |forall a1 a2 : eval(sigma), da : eval(Dt ^ sigma)|\\
+  |fromto (sigma -> tau) (^&^ eval(s) rho1) (eval(derive(s)) drho) (eval(s) rho2)|
+  =\\
+    &|forall a1 a2 : eval(sigma), da : eval(Dt ^ sigma)|\\
   &\text{ if }|fromto (sigma) a1 da a2| \\
   & \text{ then }
     |fromto (tau) ((eval(s) rho1) a1) ((eval(derive(s)) drho) a1 da) ((eval(s) rho2) a2)|
@@ -654,13 +665,42 @@ rho1) (eval(derive(t)) drho) (eval(t) rho2)| gives the thesis.
 
   \item Case |Gamma /- \x -> t : sigma -> tau|. By inversion of typing,
     |Gamma , x : sigma /- t : tau|.
-    We need to deduce the thesis
-    \[|fromto (sigma -> tau) ((\a1 -> eval(t) (rho1, x = a1))) (\a1 da -> eval(derive(t)) (drho, x = a1, dx = da)) ((\a2 -> eval(t) (rho2, x = a2)))|.\]
-    That is, for any |a1, a2, da| such that |fromto sigma a1 da a2|, we must have
+
+    In short, our thesis is that |derive(\x -> t)| is a correct
+    change for |\x -> t|. By induction on |t| we know that
+    |derive(t)| is a correct change for |t|. We show these two
+    correctness claims mean the same thing since we pick
+    |derive(\x -> t) = \x dx -> derive(t)|. By |derive(param)|'s
+    typing you can show that |Dt^Gamma, x : sigma, dx : Dt^sigma
+    /- derive(t): tau|. Now, |eval(\x dx -> derive(t))| is just a
+    curried version of |eval(derive(t))|; to wit, observe their
+    meta-level types:
+    \begin{align*}
+    |eval(derive(t)) : eval(Dt ^ Gamma , x : sigma,
+      dx : Dt^sigma) -> eval(Dt^tau)| \\
+      |eval(\x dx -> derive(t)) : eval(Dt^Gamma)
+      -> eval(sigma) -> eval(Dt^sigma) -> eval(Dt^tau)|
+    \end{align*}
+    Curried functions have equivalent behavior, so both ones give
+    a correct change for |t|, going from |eval(t) rho1| to |eval(t)
+    rho2|, once we apply them to inputs for context
+    |Gamma , x : sigma| and corresponding valid changes.
+
+    More in detail, we need to deduce the thesis that |derive(\x
+    -> t)| is a correct change for |\x -> t|. By the definition
+    of correctness, and of validity of function type, the thesis
+    means
+    \begin{multline*}
+      |fromto (sigma -> tau) (^^^(\a1 -> eval(t) (rho1, x = a1))) (\a1 da -> eval(derive(t)) (drho, x = a1, dx = da)) ((\a2 -> eval(t) (rho2, x = a2)))|.
+    \end{multline*}
+      That is, for any |a1, a2, da| such that |fromto sigma a1 da a2|, we must have
     \[|fromto tau (eval(t) (rho1, x = a1)) (eval(derive(t))
       (drho, x = a1, dx = da)) (eval(t) (rho2, x = a2))|.\]
 
-    To do so, take the inductive hypothesis on |t|. Since appropriate environment for |t| must match typing context |Gamma , x : sigma|, we know by the hypothesis that if
+    To do so, take the inductive hypothesis on |t|. Since
+    appropriate environment for |t| must match typing context
+    |Gamma , x : sigma|, we know by the inductive hypothesis that
+    if
     %
     \[
       \validfromto{\Extend{x}{\sigma}}
