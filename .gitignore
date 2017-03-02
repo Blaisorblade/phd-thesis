@@ -22,6 +22,7 @@ pldi14/sec-function-change.tex
 pldi14/sec-differentiate.tex
 pldi14/sec-correctness.tex
 pldi14/fig-differentiation.tex
+pldi14/sec-preliminaries.tex
 mylhs2tex.sty
 
 ## Core latex/pdflatex auxiliary files:

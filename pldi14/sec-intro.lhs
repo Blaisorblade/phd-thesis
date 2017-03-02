@@ -3,6 +3,7 @@
 %include changes.fmt
 
 % \section{Introduction}
+\chapter{Introduction to static differentiation}
 \label{sec:intro}
 
 Incremental computation (or incrementalization) has a long-standing history in
@@ -44,108 +45,30 @@ Programmers typically have to choose between a few undesirable options.
 
 Since no approach guarantees efficient incrementalization for
 arbitrary programs, we propose to design domain-specific
-functional languages whose programs can be incrementalized by
-a transformation that we call \emph{differentiation}. We will discuss later why we favor this approach.\pg{where?}
+functional languages whose programs can be incrementalized by a
+transformation that we call \emph{differentiation}. We will
+discuss later why we favor this approach.\pg{where?}
 
 We build our domain-specific functional languages based on
-simply-typed $\lambda$-calculus. Hence, we recall its definition
-in \cref{sec:intro-stlc}. We show a motivating example for our
-approach in \cref{sec:motiv-example}. We define differentiation,
-state and prove its correctness theorem in
-\cref{sec:correct-derive}.
+simply-typed $\lambda$-calculus (STLC), extended with \emph{language plugins} to define the domain-specific parts. We recall it in \cref{sec:intro-stlc}.
+We show a motivating example for our approach in
+\cref{sec:motiv-example}. We define differentiation, state and
+prove its correctness theorem in \cref{sec:correct-derive}.
 
-\section{Our object language}
-\label{sec:intro-stlc}
-We will define differentiation as a recursive program transformation on terms.
-To be able to define the transformation and state the invariant it satisfies, we
-need to first recall the object language we develop the transformation in.
+% \section{Our object language: STLC}
+% \label{sec:intro-stlc}
 
-\ILC\ considers as object language a strongly-normalizing
-simply-typed $\Gl$-calculus (STLC). To prove that
-incrementalization preserves the final results of our
-object-language programs, we need to specify a semantics for
-STLC. To this end we use a denotational semantics. Since STLC is
-strongly normalizing~\citep[Ch. 12]{Pierce02TAPL} we need not
-handle partiality in our semantics, in particular we can eschew
-using domain theory. The domains for our denotational semantics
-are simply Agda types, and semantic values are Agda values---in
-other words, we give a denotational semantics in terms of type
-theory.\footnote{Alternatively, some would call such a semantics
-  a definitional interpreter~\citep{Amin2017}.}
-%
-Using denotational semantics allows us to state the specification
-of differentiation directly in the semantic domain, and take
-advantage of Agda's support for equational reasoning for proving
-equalities between Agda functions.
-
-\input{pldi14/fig-lambda-calc}
-
-We recall syntax, typing rules and denotational semantics of STLC in
-\cref{fig:lambda-calc}; for a more proper introduction to STLC (but not to
-denotational semantics) we refer the reader to \citet[Ch. 9]{Pierce02TAPL}.
-
-In our examples, we will use some unproblematic syntactic sugar
-over STLC, including let expressions, global definitions, type
-inference, and we will use a Haskell-like concrete syntax.
-\pg{Let expressions, global definitions, HM polymorphism...}
-
-\subsection{Language plugins}
-Our STLC is parameterized by \emph{language plugins} (or just
-plugins) that encapsulate its domain-specific aspects.
-
-A plugin defines a set of base types $\iota$, primitives $c$ and
-their denotational semantics $\EvalConst{c}$. As usual, we
-require that $\EvalConst{c}: \Eval{\tau}$ whenever $c : \tau$.
-It
-also supports incrementalization for these primitives, as we
-explain in \cref{?}.
-
-Once a plugin explains how to incrementalize each primitive,
-\ILC\ explains how to incrementalize programs using these
-primitives.
-
-% It will also need to explain how to support incrementalization for
-% For each
-% base type and base primitive, a language plugin
-% will also have to provide support for incrementalization
-
-% \begin{itemize}
-% \item a representation for changes for each base type, and a
-%   derivative for each primitive;
-% \item proofs of correctness for its components.
-% \end{itemize}
-
-% Once a plugin
-% specifies the primitives and how each is incrementalized,
-% \ILC\ can
-% and
-% \ILC\ can glue together these simple derivatives in such a way
-% that
-% derivatives for arbitrary STLC expressions
-% using these primitives can be computed.
-
-% For instance, a language plugin could add support for a base type
-% of integers |Int| with associated primitives
-
-% In this chapter we will assume a language plugin
-
-% Our |grand_total| example requires a plugin that provides a types for integers
-% and bags and primitives such that we can implement |sum| and
-% |merge|.\pg{Elaborate.}
-
-% Our first implementation and our first correctness proof are
-% explicitly modularized to be parametric in the plugins, to
-% clarify precisely the interface that plugins must satisfy.
+% We will define differentiation as a recursive program transformation on terms.
+% To be able to define the transformation and state the invariant it satisfies, we
+% need to first recall the object language we develop the transformation in.
 
 \section{A motivating example}
 \label{sec:motiv-example}
 In this section, we illustrate informally incrementalization on a
 small example program. We give a more
 precise presentation in \cref{sec:correct-derive}.
-% after recalling some background on
-% our object language in \cref{sec:intro-stlc}.
 
-In the following program, |grand_total xs ys| sums numbers in
+In the following program, term |grand_total xs ys| sums numbers in
 input collections |xs| and |ys|. We also compute an initial
 output |output1| on initial inputs |xs1| and |ys1|:
 
