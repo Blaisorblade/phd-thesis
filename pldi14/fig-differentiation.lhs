@@ -12,6 +12,7 @@
 \end{align*}
 \caption{Change types}
 \label{fig:change-types}
+\label{fig:correctness:change-types}
 \end{subfigure}
 %
 \hfill
@@ -23,6 +24,7 @@
   \Delta\Extend{x}{\tau} &= \Extend{\Extend[\Delta\Gamma]{x}{\tau}}{\D x : \Delta\tau}
 \end{align*}
 \caption{Change contexts}
+\label{fig:correctness:change-contexts}% \pg{Does not match the original one!}
 \end{subfigure}
 \vfill
 
@@ -32,9 +34,10 @@
   |derive(\x -> t)| &= |\x dx -> derive(t)| \\
   |derive(s t)| &= |derive(s) t (derive(t))| \\
   |derive(x)| &= |dx| \\
-  |derive(c)| &= ...
+  |derive(c)| &= |deriveConst(c)|
 \end{align*}
 \caption{Differentiation}
+\label{fig:correctness:derive}
 \end{subfigure}
 %
 \begin{subfigure}[c]{0.5\textwidth}
@@ -72,6 +75,7 @@
 
 \caption{Validity}
 \label{fig:validity}
+\label{fig:correctness:change-environments}
 \end{subfigure}
 
 \vskip 2\baselineskip

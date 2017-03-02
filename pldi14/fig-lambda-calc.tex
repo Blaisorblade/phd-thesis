@@ -15,8 +15,8 @@ s, t     & c             & \mid \Lam{x}{t}
                            \mid \App{t}{t}
                            \mid x                & terms
 \end{tabular}
-    \Subcaption{fig:lambda-calc:syntax}
-      {Syntax}
+\caption{Syntax}
+\label{fig:lambda-calc:syntax}
 %\label{fig:syntax}
     \end{subfigure}
 %
@@ -43,8 +43,9 @@ s, t     & c             & \mid \Lam{x}{t}
    \Typing{t}{\Gs}}
   {\Typing{\App{s}{t}}{\Gt}}
 \end{typing}
-    \Subcaption{fig:lambda-calc:typing}
-      {Typing}
+\caption{Typing}
+\label{fig:lambda-calc:typing}
+
 %\label{fig:typing}
     \end{subfigure}
     \vfill
@@ -55,10 +56,10 @@ s, t     & c             & \mid \Lam{x}{t}
         & = \ldots\\
       \Eval{\Fun{\Gs}{\Gt}}
         & = \Eval{\Gs} \to \Eval{\Gt}
-    }
-    \Subcaption{fig:lambda-calc:values}{
-      Values.
-    }
+      }
+      \caption{Values.}
+      \label{fig:lambda-calc:values}
+      \label{fig:correctness:values}
   \end{subfigure}
   \hfill
     \begin{subfigure}[b]{0.6\textwidth}
@@ -68,9 +69,9 @@ s, t     & c             & \mid \Lam{x}{t}
       \Eval{\Extend{x}{\Gt}}
         & = \left\{ \ExtendEnv*{x}{v} \mid \Gr \in \Eval{\GG} \land v \in \Eval{\Gt}\right\}
     }
-    \Subcaption{fig:lambda-calc:environments}{
-      Environments.
-    }
+    \caption{Environments.}
+    \label{fig:lambda-calc:environments}
+    \label{fig:correctness:environments}
   \end{subfigure}
   \begin{subfigure}[b]{0.5\textwidth}
     \Align{
@@ -83,9 +84,9 @@ s, t     & c             & \mid \Lam{x}{t}
       \EvalWith{x}{\Gr}
         & = \textit{lookup $x$ in $\Gr$}
     }
-    \Subcaption{fig:lambda-calc:evaluation}{
-      Denotational semantics.
-    }
+    \caption{Denotational semantics.}
+    \label{fig:lambda-calc:evaluation}
+    \label{fig:correctness:evaluation}
   \end{subfigure}
   \caption{Standard definitions for the simply-typed lambda calculus.}
     \label{fig:lambda-calc}
