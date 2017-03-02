@@ -73,9 +73,9 @@ input collections |xs| and |ys|. We also compute an initial
 output |output1| on initial inputs |xs1| and |ys1|:
 
 \begin{code}
-  grand_total xs ys = sum (merge xs ys)
-  output1           = grand_total xs1 ys1
-                    = sum {{1, 2, 3, 4}} = 10
+  grand_total xs ys  = sum (merge xs ys)
+  output1            = grand_total xs1 ys1
+                     = sum {{1, 2, 3, 4}} = 10
 \end{code}
 
 We have called |grand_total| on initial inputs |xs1 = {{1, 2, 3}}| and |ys1 = {{4}}|
@@ -165,7 +165,8 @@ approach gives the correct result in this example.
   dgrand_total xs dxs ys dys  = sum (merge dxs dys)
   doutput                     = dgrand_total xs1 dxs ys1 dys =
                               = sum {{1, 5}} = 6
-  output2                     = output1 `oplus` doutput = output1 + doutput = 10 + 6 = 16
+  output2                     = output1 `oplus` doutput = output1 + doutput
+                              = 10 + 6 = 16
 \end{code}
 
 
