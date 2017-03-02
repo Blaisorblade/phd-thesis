@@ -87,6 +87,7 @@
 %format evalInc(t) = "\EvalInc{" t "}"
 %format (evalConst(c)) = "\EvalConst{" c "}"
 %format (derive(t)) = "\Derive{" t "}"
+%format (deriveConst(t)) = "\DeriveConst{" t "}"
 %format `cong` = "\cong"
 
 %format nabla = "\nabla"
@@ -119,3 +120,12 @@
 %format o(n) = "o(" n ")"
 
 %format param = "\text{\textendash}"
+
+%format cache1
+%format cache2
+%format caches1
+%format caches2
+%format mapCache1
+%format mapCache2
+%format cx1
+%format cx2
