@@ -445,16 +445,7 @@ eval(Dt^Gamma)|, via the following inference rules:
   {\ExtendEnv*[\ExtendEnv[\D\rho]{x}{a_1}]{dx}{\D{a}}}
   {\ExtendEnv*[\rho_2]{x}{a_2}}}
 \end{typing}
-
-Finally, we define when a change term is a correct change for a
-base term. We say a term |dt| is a correct change for term |t|
-(at type |tau|), and write |correct(tau) dt t|, if there exists a
-context |Gamma| such that |Gamma /- t : tau|, |Dt ^ Gamma /- dt :
-Dt^tau|, and |eval(dt) drho| is a valid change from |eval(t)
-rho1| to |eval(t) rho2| whenever |fromto Gamma rho1 drho rho2|.
-In other words, |eval(dt)| must map changes from old to new
-inputs to changes from old to new outputs, where we refer to
-inputs and outputs of |t|.
+\end{definition}
 
 \subsection{Correctness of differentiation}
 Roughly, our goal is that evaluating |derive(t)| (where |t| is a
@@ -477,13 +468,24 @@ satisfy the following derived typing rule:
     {|Dt ^ Gamma /- derive(t) : Dt ^ tau|}
   \end{typing}
 \end{restatable}
-
 Next, we constrain |derive(t)|'s dynamic semantics, that is the
 result of evaluating it.
 %
 Recall that we'll define operator |`oplus`|, such that |v1
 `oplus` dv = v2| holds whenever |dv| is a valid change between
 |v1| and |v2|.
+
+To state correctness of |derive(param)|
+(\cref{thm:correct-derive}), we define when a change term is a
+\emph{correct change} for a base term. We say a term |dt| is a
+correct change for term |t| (at type |tau|), and write
+|correct(tau) dt t|, if there exists a context |Gamma| such that
+|Gamma /- t : tau|, |Dt ^ Gamma /- dt : Dt^tau|, and |eval(dt)
+drho| is a valid change from |eval(t) rho1| to |eval(t) rho2|
+whenever |fromto Gamma rho1 drho rho2|. In other words,
+|eval(dt)| must map changes from old to new inputs to changes
+from old to new outputs, where we refer to inputs and outputs of
+|t|.
 
 Once we define these notions, we can state |derive(param)|'s true
 correctness statement: whenever |t| is well-typed, |derive(t)| is
