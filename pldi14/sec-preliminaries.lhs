@@ -15,18 +15,20 @@ We mechanize our correctness proof using Agda, hence we use Agda
 also as our foundation. We discuss what this means in
 \cref{sec:metalanguage}.
 
-Our object language is a standard simply-typed $\lambda$-calculus (STLC),
+Our object language is a standard simply-typed $\lambda$-calculus
+(STLC)~\citep[Ch. 9]{Pierce02TAPL},
 parameterized over base types and constants. We term the set of
 base types and constants a \emph{language plugin} (see
 \cref{sec:lang-plugins}). In our examples we assume that the
 language plugins supports needed base types and constants.
 Moreover, we will later add further requirements to language
 plugins, to support incrementalization of the features they add.
+We use a set-theoretic denotational semantics rather than
+operational semantics.
 
 At this point, readers might want to skip to \cref{sec:intro}
-right away; if needed, they might want to come back here where
-needed. Language plugins are the least standard presentation
-choice.
+right away, or focus on denotational semantics; if needed, they
+might want to come back here where needed.
 
 \section{Our proof meta-language}
 \label{sec:metalanguage}
@@ -96,10 +98,19 @@ We consider as object language a strongly-normalizing
 simply-typed $\Gl$-calculus (STLC).
 
 We recall the syntax and typing rules of STLC in
-\cref{fig:lambda-calc:syntax,fig:lambda-calc:typing}.
-Language plugins define base types and constants. For a more
-proper introduction to STLC we refer the reader to \citet[Ch.
-9]{Pierce02TAPL}.
+\cref{fig:lambda-calc:syntax,fig:lambda-calc:typing}, together
+with the metavariables we use. Language plugins define base types
+|iota| and constants |c|. Types can be base types |iota| or
+function types |sigma -> tau|. Terms can be constants |c|,
+variables |x|, function applications |t1 t2| or lambda
+abstractions |\x -> t|. To describe assumptions on variable types
+when typing terms, we define typing contexts |Gamma| as being
+either empty |emptyCtx|, or as context extensions |Gamma, x :
+tau|, which extend context |Gamma| by asserting variable |x| has
+type |tau|. Typing is defined through a judgment |Gamma /- t :
+tau|, stating that term |t| under typing context |Gamma| has type
+|tau|. For a more proper introduction to STLC we refer the reader
+to \citet[Ch. 9]{Pierce02TAPL}.
 
 \input{pldi14/fig-lambda-calc}
 
@@ -107,22 +118,11 @@ proper introduction to STLC we refer the reader to \citet[Ch.
 \label{sec:denotational-sem}
 To prove that incrementalization preserves the final results of
 our object-language programs, we need to specify a semantics for
-STLC. To this end we use a denotational semantics. Since STLC is
-strongly normalizing~\citep[Ch. 12]{Pierce02TAPL} we need not
-handle partiality in our semantics, in particular we can eschew
+STLC. To this end we use a naive set-theoretic denotational semantics. Since STLC is
+strongly normalizing~\citep[Ch. 12]{Pierce02TAPL}, our semantics need not
+handle partiality, in particular we can eschew
 using domain theory. Instead, we simply use sets, as provided by
 the ambient theory (see \cref{sec:metalanguage} for discussion).
-
-% Using denotational semantics allows us to state the specification
-% of differentiation directly in the semantic domain, and take
-% advantage of Agda's support for equational reasoning for proving
-% equalities between Agda functions.
-
-% The domains for our denotational semantics
-% are simply Agda types, and semantic values are Agda values---in
-% other words, we give a denotational semantics in terms of type
-% theory.\footnote{Alternatively, some would call such a semantics
-%   a definitional interpreter~\citep{Amin2017}.}
 
 We first associate, to every type |tau|, a set of values
 |eval(tau)|, so that terms of a type |tau| evaluate to values in
@@ -143,6 +143,8 @@ functions as the domain of function types.
   The domain $\Eval{\Gt}$ of a type $\Gt$ is defined as in
   \cref{fig:correctness:values}.
 \end{definition}
+
+We let metavariable |v| range over members of domains.
 
 Given this domain
 construction, we can now define a denotational semantics for
@@ -195,14 +197,126 @@ free variables, |evalConst(c)| does not depend on an environment.
 
 In our examples, we will use some unproblematic syntactic sugar
 over STLC, including let expressions, global definitions, type
-inference, and we will use a Haskell-like concrete syntax.
-\pg{Let expressions, global definitions, HM polymorphism...}
+inference, and we will use a Haskell-like concrete syntax. At
+times, our concrete examples will use Hindley-Milner
+polymorphism, but this is also not a significant extension. A
+polymorphic definition of type |forall alpha. tau| (where |alpha|
+is free in |tau|) can be taken as sugar for a family, indexed by
+type argument |tau1| of definitions of type |tau [alpha :=
+tau1]|; we use this trick without explicit mention in our first
+implementation of incrementalization in Scala~\citep{CaiEtAl2014ILC}.
 
+\subsection{Weakening}
+While we don't discuss our formalization of variables in full, in
+this subsection we discuss briefly weakening on STLC terms and
+state as a lemma that weakening preserves meaning. This lemma is needed in
+a key proof, the one of \cref{thm:correct-derive}.
+
+As usual, if a term |t| is well-typed in a given context
+|Gamma1|, and context |Gamma2| extends |Gamma1| (which we
+write as |Gamma1 `preceq` Gamma2|), then |t| is also well-typed in
+|Gamma2|.
+\begin{lemma}[Weakening is admissible]
+  \label{lem:weakening}
+  The following typing rule is admissible:
+\begin{typing}
+  \Rule[Weaken]
+  { |Gamma1 /- t : tau|\\
+    |Gamma1 `preceq` Gamma2|}
+  {|Gamma2 /- t : tau|}
+\end{typing}
+\end{lemma}
+
+Weakening also preserves semantics. If a term |t| is typed in
+context |Gamma1|, evaluating it requires an environment matching
+|Gamma1|. So if we weaken |t| to a bigger context |Gamma2|,
+evaluation requires an extended environment matching |Gamma2|,
+and is going to produce the same result.
+\begin{lemma}[Weakening preserves meaning]
+  \label{lem:weaken-sound}
+  Take |Gamma1 /- t : tau| and |rho1 : eval(Gamma1)|. If |Gamma1
+  `preceq` Gamma2| and |rho2 : eval(Gamma2)| extends |rho1|, then
+  we have that
+  \[|eval(t) rho1 = eval(t) rho2|.\]
+\end{lemma}
+
+To formalize the statements and their proofs, we define formally
+the subcontext relation |Gamma1 `preceq` Gamma2| as a judgment
+using \emph{order preserving embeddings}.%
+\footnote{As mentioned by James Chapman at
+  \url{https://lists.chalmers.se/pipermail/agda/2011/003423.html},
+  who attributes them to Conor McBride.} We refer to our
+mechanized proof for details, including auxiliary definitions and
+relevant lemmas.
+
+\subsection{Discussion: Our choice of semantics style}
+To formalize meaning of our programs, we use denotational
+semantics while nowadays most prefer operational semantics, in
+particular small-step. Hence, we next justify our choice and
+discuss related work.
+
+We expect we could use other semantics techniques, such as
+big-step or small-step semantics. But at least for such a simple
+object language, working with denotational semantics as we use it
+is easier than other approaches in a proof assistant, especially
+in Agda.
+
+\begin{itemize}
+\item Our semantics |eval(param)| is a function and not a
+  relation, like in small-step or big-step semantics.
+\item It is clear to Agda that our semantics is a total function,
+  since it is structurally recursive.
+\item Agda can normalize |eval(param)| on partially-known terms
+  when normalizing goals.
+\item The meanings of our programs are well-behaved Agda
+  functions, not syntax, so we know ``what they mean'' and need
+  not prove any lemmas about it. We need not prove, say, that
+  evaluation is deterministic.
+\end{itemize}
+
+In Agda, the domains for our denotational semantics are simply
+Agda types, and semantic values are Agda values---in other words,
+we give a denotational semantics in terms of type
+theory.
+Using denotational semantics allows us to state the specification
+of differentiation directly in the semantic domain, and take
+advantage of Agda's support for equational reasoning for proving
+equalities between Agda functions.
+
+Our variant is used for instance by
+\citet{McBride2010outrageous}, who attribute it to
+\citet{Augustsson1999exercise} and \citet{Altenkirch1999monadic}.
+In particular, \citet{Altenkirch1999monadic} already define our
+type |Term Gamma tau| of simply-typed lambda terms |t|,
+well-typed with type |tau| in context |Gamma|, while
+\citet{Augustsson1999exercise} defines semantic domains by
+induction over types.\footnote{We formalize through meta-level
+  type |Term Gamma tau| only well-typed terms, that is our
+  formalization of typing is Church-style. In fact, arguably
+  |Term Gamma tau| describes at once both well-typed terms and
+  their typing derivations.}
+
+More in general, similar approaches are becoming more common when
+using proof assistants. Our denotational semantics could be
+otherwise called a \emph{definitional interpreter} (which is in
+particular compositional), and mechanized formalizations using a
+variety of definitional interpreters are nowadays often
+advocated, either using denotational
+semantics~\citep{Chlipala08}, or using \emph{functional} big-step
+semantics, even for languages that are not strongly
+normalizing~\citep{Owens2016functional,Amin2017}.
 
 \subsection{Language plugins}
 \label{sec:lang-plugins}
 Our STLC is parameterized by \emph{language plugins} (or just
-plugins) that encapsulate its domain-specific aspects. For instance
+plugins) that encapsulate its domain-specific aspects.
+\pg{add examples}
+%For instance...
+
+Our formalization is parameterized over one language plugin
+providing all base types and primitives. In fact, we expect a
+language plugin to be composed out of multiple language plugins
+merged together~\citep{ErdwegGR12}.
 
 The sets of base types and primitive
 constants, as well as the typing rules for primitive constants, are
@@ -215,10 +329,19 @@ A plugin defines a set of base types $\iota$, primitives $c$ and
 their denotational semantics $\EvalConst{c}$. As usual, we
 require that $\EvalConst{c}: \Eval{\tau}$ whenever $c : \tau$.
 
-Our formalization is parameterized over one language plugin
-providing all base types and primitives. In fact, we expect a
-language plugin to be composed out of multiple language plugins
-merged together~\citep{ErdwegGR12}.
+To sum up, we collect formally the plugin requirements we have
+mentioned in this chapter.
+\begin{restatable}[Base types]{requirement}{baseTypes}
+  \label{req:base-types}
+   There is a set of base types |iota|, and for each there is a domain |eval(iota)|.
+\end{restatable}
+\begin{restatable}[Constants]{requirement}{constants}
+  \label{req:constants}
+  There is a set of constants |c|. To each constant is associated
+  a type |tau|, such that the constant has that type
+  ($\ConstTyping{c}{\tau}$) and the constants' semantics matches
+  that type ($\EvalConst{c}: \Eval{\tau}$).
+\end{restatable}
 
 % It will also need to explain how to support incrementalization for
 % For each

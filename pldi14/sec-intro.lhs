@@ -50,7 +50,7 @@ transformation that we call \emph{differentiation}. We will
 discuss later why we favor this approach.\pg{where?}
 
 We build our domain-specific functional languages based on
-simply-typed $\lambda$-calculus (STLC), extended with \emph{language plugins} to define the domain-specific parts. We recall it in \cref{sec:intro-stlc}.
+simply-typed $\lambda$-calculus (STLC), extended with \emph{language plugins} to define the domain-specific parts, as discussed in \cref{sec:intro-stlc}.
 We show a motivating example for our approach in
 \cref{sec:motiv-example}. We define differentiation, state and
 prove its correctness theorem in \cref{sec:correct-derive}.
@@ -83,6 +83,8 @@ to obtain initial output |output1|. Here |{{...}}| denotes a multiset
 or \emph{bag} containing the elements among braces. A bag is an
 unordered collection (like a set) where elements are allowed to appear more
 than once (unlike a set).
+In this example, we assume a language plugin that adds support
+both integers and bags.
 
 This example uses small inputs for simplicity, but in practice they
 are typically much bigger; we use |n|
