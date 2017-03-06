@@ -182,13 +182,12 @@
 \NewDocumentCommand{\EvalIncSmash}{m}{\mean{#1}[\smash{\GD}\!\!\!]}
 \NewDocumentCommand{\EvalIncSmashWith}{smmm}{\Parens#1{\mean[#3][#4]{#2}[\smash{\GD}\!\!\!]}}
 
+\NewDocumentCommand{\CONST}{}{\mathcal{C}}
 
-\NewDocumentCommand{\EvalConst}{sm}{\Parens#1{\mean{#2}[\text{const}]}}
-\NewDocumentCommand{\EvalIncConst}{sm}{\Parens#1{\mean{#2}[\text{$\GD$ const}]}}
-\NewDocumentCommand{\EvalBase}{sm}{\Parens#1{\mean{#2}[\text{base}]}}
+\NewDocumentCommand{\EvalConst}{sm}{\Parens#1{\mean{#2}[\CONST]}}
 \NewDocumentCommand{\DERIVE}{}{\mathcal{D}}
 \NewDocumentCommand{\Derive}{sm}{\Parens#1{\DERIVE(#2)}}
-\NewDocumentCommand{\DeriveConst}{sm}{\Parens#1{\DERIVE_{\text{c}}(#2)}}
+\NewDocumentCommand{\DeriveConst}{sm}{\Parens#1{\DERIVE^{\CONST}(#2)}}
 \NewDocumentCommand{\Dom}{m}{\DOM_{#1}}
 
 \NewDocumentCommand{\Append}{smm}{\Parens#1{#2 , #3}}
@@ -197,7 +196,7 @@
 \NewDocumentCommand{\EmptyContext}{}{\varepsilon}
 \NewDocumentCommand{\Extend}{sO{\Gamma}mm}{\Parens#1{\Append{#2}{\HasType{#3}{#4}}}}
 \NewDocumentCommand{\Typing}{O{\Gamma}mm}{#1 \vdash \HasType{#2}{#3}}
-\NewDocumentCommand{\ConstTyping}{mm}{\Vdash \HasType{#1}{#2}}
+\NewDocumentCommand{\ConstTyping}{mm}{\vdash^{\CONST} \HasType{#1}{#2}}
 
 \NewDocumentCommand{\HasValue}{smm}{\Parens#1{#2 = #3}}
 % I'm not sure I like the implementation of \EmptyEnv, please fill in a better one.

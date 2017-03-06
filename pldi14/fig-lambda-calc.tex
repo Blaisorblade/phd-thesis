@@ -26,8 +26,8 @@ s, t     & c             & \mid \Lam{x}{t}
     \begin{typing}
 \noindent
 \Rule[Const]
-  {\ldots}
-  {\Typing[]{c}{\tau}}
+  {\ConstTyping{c}{\tau}}
+  {\Typing{c}{\tau}}
 
 \Axiom[Lookup]
   {\Typing[\Append{\GG_1}{\Append{\HasType{x}{\tau}}{\GG_2}}]{\Var{x}}{\tau}}
@@ -82,7 +82,7 @@ s, t     & c             & \mid \Lam{x}{t}
       \EvalWith{\App{s}{t}}{\rho}
         & = \App{\EvalWith*{s}{\rho}}{\EvalWith*{t}{\rho}}\\
       \EvalWith{x}{\Gr}
-        & = \textit{lookup $x$ in $\Gr$}
+        & = \text{lookup $x$ in $\Gr$}
     }
     \caption{Denotational semantics.}
     \label{fig:lambda-calc:evaluation}

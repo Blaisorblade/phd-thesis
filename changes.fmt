@@ -1,8 +1,12 @@
 %include forall.fmt
 
+%format alpha = "\alpha"
 %format Nat = "\mathbb{N}"
 %format Int = "\mathbb{Z}"
 %format Gamma = "\Gamma"
+%format Gamma1
+%format Gamma2
+%format `preceq` = "\preceq"
 %format v1
 %format v2
 
