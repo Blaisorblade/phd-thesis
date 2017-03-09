@@ -313,3 +313,23 @@ update :: Int -> a -> Seq a -> Seq a
 \chapter{Static caching}
 \label{sec:static-caching}
 \pg{Write it!}
+
+\input{pldi14/sec-rw}
+\chapter{Conclusions}
+\pg{Plan for things that complete the original paper's story: add them by
+  revising that text and in that chapter.}
+
+\bibliography{Bibs/DB,Bibs/ProgLang,Bibs/SoftEng,Bibs/own}
+\chapter*{Acknowledgments}
+% From AOSD13
+I thank Sebastian Erdweg for helpful discussions on
+this project, Katharina Haselhorst for help
+implementing the code generator, and the anonymous reviewers, Jacques Carette and Karl Klose
+for their helpful comments on this chapter.
+This work is supported in part by the European Research Council, grant \#203099 ``ScalPL''.
+
+% From PLDI14 (?)
+% From ILC17
+We thank Cai Yufei, Tillmann Rendel, Lourdes Del Carmen Gonz\`alez Huesca, Yann
+R\`egis-Gianas, Philipp Schuster, Sebastian Erdweg, Marc Lasson, Robert Atkey,
+... for helpful discussions on this project.
