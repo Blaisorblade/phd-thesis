@@ -35,8 +35,8 @@ Programmers typically have to choose between a few undesirable options.
     computation} and variants. Self-adjusting computation applies
   to arbitrary purely functional programs and has been extended
   to imperative programs; however, it only guarantees efficient
-  incrementalization for base programs designed for efficient
-  incrementalization.
+  incrementalization when applied to base programs that
+  are \emph{designed} for efficient incrementalization.
 \end{itemize}
 
 \pg{Continue discussing dependencies minimization and the
@@ -71,8 +71,9 @@ Our theory generalizes an existing field of mathematics called
 the \emph{calculus of finite difference}: If |f| is a real
 function, one can define its \emph{finite difference}, that is a
 function |f_d| such that |f_d a da = f (a + da) - f a|. Readers
-might notice the similarity with the derivative of |f|, since it
-is defined as $f'(a) = \lim_{da \to 0} (f (a + da) - f(a)) / da$.
+might notice the similarity (and the differences) between the
+finite difference and the derivative of |f|, since the latter is
+defined as $f'(a) = \lim_{da \to 0} (f (a + da) - f(a)) / da$.
 
 The calculus of finite differences provides theorems that in many
 cases allow computing a closed formula for |f_d| given a closed
@@ -115,23 +116,33 @@ In this section, we illustrate informally incrementalization on a
 small example program. We give a more
 precise presentation in \cref{sec:correct-derive}.
 
-In the following program, term |grand_total xs ys| sums numbers in
+In the following program, term |grand_total xs ys| sums integer numbers in
 input collections |xs| and |ys|. We also compute an initial
 output |output1| on initial inputs |xs1| and |ys1|:
 
 \begin{code}
+  grand_total        :: Bag Int -> Bag Int -> Int
+  output1            :: Int
+
   grand_total xs ys  = sum (merge xs ys)
   output1            = grand_total xs1 ys1
                      = sum {{1, 2, 3, 4}} = 10
 \end{code}
 
-We have called |grand_total| on initial inputs |xs1 = {{1, 2, 3}}| and |ys1 = {{4}}|
-to obtain initial output |output1|. Here |{{...}}| denotes a multiset
-or \emph{bag} containing the elements among braces. A bag is an
-unordered collection (like a set) where elements are allowed to appear more
-than once (unlike a set).
-In this example, we assume a language plugin that adds support
-both integers and bags.
+We have called |grand_total| on initial inputs |xs1 = {{1, 2,
+    3}}| and |ys1 = {{4}}| to obtain initial output |output1|.
+Here, double braces |{{...}}| denote a multiset or \emph{bag},
+containing the elements among the double braces. A bag is an
+unordered collection (like a set) where elements are allowed to
+appear more than once (unlike a set). In this example, we assume
+a language plugin that supports a base type of integers |Int| and
+a family of base types of bags |Bag tau| for any type
+|tau|.\footnote{Using |Bag tau|, a type of bags of elements of
+  some \emph{type} rather than |Bag iota|, a type of bags of
+  elements of some \emph{primitive type}, runs into technical
+  problems during proof mechanization
+  (see~\cref{sec:modularity-limits}), though those problems do
+  not affect our main conclusions.}
 
 This example uses small inputs for simplicity, but in practice they
 are typically much bigger; we use |n|
@@ -180,10 +191,19 @@ even if |dv| is not a valid change from |v1| to |v1 `oplus` dv|;
 in fact, |`oplus`| is overloaded over types, and for each type
 |tau| it has an overload of signature |tau -> Dt ^ tau -> tau|.
 
+In Haskell terms, we can define |Dt^tau| and an overloaded
+`oplus` through a type class with an associated type:
+\begin{code}
+class ChangeStruct t where
+  type Dt t
+  oplus :: t -> Dt t -> t
+\end{code}
+We'll later come back to this definition and refine it.
+
 To show how incrementalization affects our example, we next
-describe valid changes for bags and integers. For now, a change |das|
-to a bag |as1| simply contains all elements to be added to the
-base bag |as1| to obtain the updated bag |as2| (we'll ignore
+describe valid changes for bags and integers. For now, a change
+|das| to a bag |as1| simply contains all elements to be added to
+the base bag |as1| to obtain the updated bag |as2| (we'll ignore
 removing elements for this section and discuss it later). In our
 example, the change from |xs1| (that is |{{1, 2, 3}}|) to |xs2|
 (that is |{{1, 1, 2, 3}}|) is |dxs = {{1}}|, while the change
@@ -239,11 +259,12 @@ Informally, |derive(t)| describes how |t| changes, that is,
 evaluated on old inputs to |t| evaluated on new inputs.
 \end{slogan}
 
-In our
-example, we can apply |derive(param)| to |grand_total|'s body to
-produce |dgrand_total|'s body. After simplifying the result, we get
-\[ |derive(sum (merge xs ys)) `cong` sum (merge dxs dys)|.\]
-where |`cong`| denotes program equivalence. Correctness of |derive(param)| guarantees
+In our example, we can apply |derive(param)| to |grand_total|'s
+body to produce |dgrand_total|'s body. After simplifying the
+result via $\beta$-reduction, we get
+\[ |derive(sum (merge xs ys)) `betaeq` sum (merge dxs dys)|.\]
+%
+Correctness of |derive(param)| guarantees
 that |sum (merge dxs dys)| evaluates to a change from
 |sum (merge xs ys)| evaluated on old inputs |xs1, ys1| to
 |sum (merge xs ys)| evaluated on new inputs |xs2, ys2|.
@@ -255,12 +276,14 @@ updated inputs |xs2| and |ys2| and evaluates to the change from the base result
 |grand_total xs1 ys1| to the updated result |grand_total xs2 ys2|.
 
 More in general, for a unary function |f|, a derivative |df|
-takes an input |x| and a change |dx| for |x| and produces a
-change from base output |f x| to updated output |f (x `oplus`
-dx)|. Symbolically we write
-\begin{code}
-  f x `oplus` df x dx `cong` f (x `oplus` dx)
-\end{code}
+takes an input |a| and a change |da| for |a| and produces a
+change from base output |f a| to updated output |f (a `oplus`
+da)|. Symbolically we write
+%   \label{eq:correctness}
+\begin{equation}
+  \label{eq:derivative-requirement}
+  |f (a `oplus` da) `cong` f a `oplus` df a da|
+\end{equation}
 
 For functions |f| of multiple arguments, a derivative |df| takes
 all base inputs of |f| together with changes to each of them, and
@@ -292,6 +315,7 @@ So, we require that a valid function change from |f1| to |f2|
 (where |f1, f2 : eval(sigma -> tau)|) is in turn a function |df|
 that takes an input |a1| and a change |da|, valid from |a1| to
 |a2|, to a valid change from |f1 a1| to |f2 a2|.
+
 \paragraph{Discussion}
 It would be more symmetric to make function changes also take
 updated input |a2|, that is, have |df a1 da a2| computes a change
@@ -371,28 +395,44 @@ changes; (b) a definition of which changes are valid; (c) a
 compositional term-to-term transformation called differentiation
 and written |derive(t)| that produces incremental programs. We
 have already mentioned the different concepts and how they fit
-together. We next explain definitions and show key equations. We
-collect the complete definitions and crucial lemmas in
+together. We next explain definitions and key facts about them. We
+collect the complete definitions and crucial facts in
 \cref{fig:differentiation}.
+These definitions must be extended for base types and constants
+provided by the language plugin.
 
-First, we define for each type |tau| when |dv| is a valid change
-from |v1| to |v2|, where |v1| and |v2| are values of type |tau|.
-We first introduce, for for each type |tau|, a type |Dt^tau| that
-we call a \emph{change type} (as defined in \cref{fig:change-types}).
-We require |dv| to belong to
-|eval(Dt^tau)|.
-%
+First, for each type |tau| and values |v1| and |v2| of type
+|tau|, we define when |dv| is a valid change from |v1| to |v2|.
+We define valid changes in two steps: we (a) define a type
+|Dt^tau| of changes, that we call \emph{change type}, and (b)
+define a relation that picks valid changes out of all elements of
+change types. Both definitions are delegated to plugins on base
+types. In a moment, we explain the definitions we give on
+function types.
+
+\begin{definition}[Change types]
+  The change type |Dt^tau| of a type |tau| is defined in
+  \cref{fig:change-types}.
+\end{definition}
+\begin{restatable}[Base change types]{requirement}{baseChangeTypes}
+  To each base type |iota| is associated a change type |Dt^iota|.
+\end{restatable}
+We refer
+to values of change types as \emph{change values}.
+
 Then, we define \emph{validity} as a family of ternary relations,
 indeed by types and relating changes with their sources and
 destinations.
-%
+\begin{definition}
 We say that |dv| is valid change from |v1| to |v2|, and write
 |fromto tau v1 dv v2|, if |dv : eval(Dt^tau)|, |v1, v2 :
-eval(tau)|, if |dv| is a ``valid'' description of the difference
+eval(tau)| and |dv| is a ``valid'' description of the difference
 from |v1| to |v2|, as we define in \cref{fig:validity}.
-%
-We refer
-to values of change types as \emph{change values}.
+\end{definition}
+The definition of validity for base types is delegated to language plugins, so we state a
+\begin{restatable}[Base validity definitions]{requirement}{baseValidity}
+  To each base type |iota| is associated a definition of validity for |iota|.
+\end{restatable}
 
 Next, we explain the definitions of change types and validity for
 function type |sigma -> tau|.
@@ -422,14 +462,21 @@ Gamma rho1 drho rho2|.
 A valid environment change from |rho1 : eval(Gamma)| to |rho2:
 eval(Gamma)| is an environment |drho : eval(Dt^Gamma)| that
 extends environment |rho1| with valid changes for each entry. We
-first define the shape of change environments by defining change
-contexts |Dt^Gamma| as follows:
+first define the shape of change environments through
+\emph{change contexts}:
+
+\begin{definition}[Change contexts]
+  For each context |Gamma| we define change context |Dt^Gamma| as
+  follows:
 \begin{align*}
   \Delta\EmptyContext &= \EmptyContext \\
   \Delta\Extend{x}{\tau} &= \Extend{\Extend[\Delta\Gamma]{x}{\tau}}{\D x : \Delta\tau}\text{.}
 \end{align*}
+\end{definition}
+
 Then, we describe validity of change
 environments via a judgment.
+\begin{definition}[Valid environment changes]
 We define judgment |fromto Gamma rho1 drho rho2|, pronounced
 ``|drho| is a valid environment change between |rho1| and
 |rho2|'', where |rho1, rho2 : eval(Gamma), drho :
@@ -546,8 +593,10 @@ The transformation is defined by:
   derive(\x -> t) = \x dx -> derive(t)
   derive(s t) = derive(s) t (derive(t))
   derive(x) = dx
-  derive(c) = ...
+  derive(c) = deriveConst(c)
 \end{code}
+Transformation |deriveConst(c)| must be defined by language
+plugins (as stated in \cref{req:const-differentiation}).
   % derive(^^let x = t1 in t2) =
   %   let  x = t1
   %        dx = derive(t1)
@@ -559,8 +608,15 @@ Now we can characterize |derive(param)|'s static semantics:
 \deriveTyping*
 \begin{proof}
   The thesis can be proven by induction on the typing derivation
-  |Gamma /- t : tau|.
+  |Gamma /- t : tau|. The case for constants is delegated to plugins in
+  \cref{req:const-differentiation}.
 \end{proof}
+\begin{restatable}[Differentiation on constants]{requirement}{constDifferentiation}
+  \label{req:const-differentiation}
+  For each constant |c|, if $\ConstTyping{c}{\tau}$, then
+  |deriveConst(c)| is defined and satisfies |/- deriveConst(c) :
+  Dt^tau|.
+\end{restatable}
 
 To illustrate correctness statement \cref{thm:correct-derive}, it
 is helpful to look first at its proof. Readers familiar with
@@ -612,10 +668,10 @@ detail to make the proof easier to follow.
 =  (eval(derive(s)) drho) (eval(t) rho1) (eval(derive(t)) drho)
       \end{code}%
     \end{equational}%
-    The last step relies on |eval(t) drho = eval(t) rho1|.
-    That follows by soundness of weakening:
-    |drho : eval(Dt^Gamma)| extends |rho1 : eval(Gamma)|, and |t|
-    can be typed in context |Gamma|.
+    The last step relies on |eval(t) drho = eval(t) rho1|. Since
+    weakening preserves meaning (\cref{lem:weaken-sound}), this
+    follows because |drho : eval(Dt^Gamma)| extends |rho1 :
+    eval(Gamma)|, and |t| can be typed in context |Gamma|.
 
     Our thesis becomes
     \[|fromto tau ((eval(s) rho1) (eval(t) rho1)) ((eval(derive(s)) drho) (eval(t) rho1) (eval(derive(t)) drho)) ((eval(s) rho2) (eval(t) rho2))|.\]
@@ -691,6 +747,20 @@ rho1) (eval(derive(t)) drho) (eval(t) rho2)| gives the thesis.
     If we pick the same contexts and context change |fromto Gamma
     rho1 drho rho2|, the inductive hypothesis reduces to the
     thesis.
+  \item Case |Gamma /- c : tau|. In essence, since weakening
+    preserves meaning, we can rewrite the thesis to match
+    \cref{req:correct-derive-const}.
+
+    In more detail, the thesis is that |deriveConst(c)| is a
+    correct change for |c|, that is, if |fromto Gamma rho1 drho
+    rho2| then |fromto tau (eval(c) rho1) (eval(derive(c)) drho)
+    (eval(c) rho2)|. Since constants don't depend on the
+    environment and weakening preserves meaning
+    (\cref{lem:weaken-sound}), and by the definitions of
+    |eval(param)| and |derive(param)| on constants, the thesis
+    can be simplified to |fromto tau (eval(c) emptyRho)
+    (eval(deriveConst(c)) emptyRho) (eval(c) emptyRho)|, which is
+    delegated to plugins in \cref{req:correct-derive-const}.
   \end{itemize}
 \end{proof}
 
@@ -895,7 +965,7 @@ not true.
 % many inputs as called for by |tau| to get, in the end, a result of base type.
 % Similarly, we can evaluate |t| with updated input |rho2| getting output |v2|. If
 % |tau| is a function type, |v2| is a function |f2| that takes further input |a2|
-% to output |u2 `in` eval(tau1)|, and soon.
+% to output |u2 `elem` eval(tau1)|, and soon.
 
 % We design differentiation so that the semantics of the derivative of |t|,
 % |eval(derive(t))|, takes inputs and changes for all those inputs. So
