@@ -120,6 +120,11 @@
 
 %format `and` = "\land"
 
+%format => = "\Rightarrow"
+%format _ = "\text{\textunderscore}"
+%format =>_ = "\mathord{\Rightarrow}\text{\textunderscore}"
+%format mutual = "\textbf{mutual}"
+
 %format Theta(n) = "\Theta(" n ")"
 %format o(n) = "o(" n ")"
 
