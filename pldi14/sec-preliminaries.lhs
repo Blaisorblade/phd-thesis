@@ -33,10 +33,13 @@ might want to come back here where needed.
 \section{Our proof meta-language}
 \label{sec:metalanguage}
 In this section we describe the meta-language used in our
-correctness proof.
-To prove the correctness of \ILC, we provide a mechanized proof
-in Agda~\citep{agda-head}. Agda is an implementation of
-intensional Martin-Löf type theory.
+correctness proof. To prove the correctness of \ILC, we provide a
+mechanized proof in Agda~\citep{agda-head}. Agda is an
+implementation of intensional Martin-Löf type theory. As
+conventional, we distinguish between ``formalization'' (which
+refers to on-paper formalized proofs) and ``mechanization''
+(which refers to proofs encoded in the language of a proof
+assistant for computer-aided \emph{mechanized} verification).
 
 To make our proofs more accessible, we present them in terms of
 set theory, though for convenience we still use (informally)
@@ -113,6 +116,16 @@ tau|, stating that term |t| under typing context |Gamma| has type
 to \citet[Ch. 9]{Pierce02TAPL}.
 
 \input{pldi14/fig-lambda-calc}
+
+In fact, the definition of base types might be mutually recursive
+with the definition of types. So a language plugin might add as
+base types, for instance, collections of elements of type |tau|,
+products and sums of type |sigma| and type |tau|, and so on.
+%
+However, this mutual recursion must satisfy a few technical
+restrictions, and dividing mutually recursive types into
+different modules runs into a few obstacles we do not fully
+address in practice. See \cref{sec:modularity-limits} for the gory details.
 
 \subsection{Denotational semantics for STLC}
 \label{sec:denotational-sem}
@@ -310,17 +323,26 @@ normalizing~\citep{Owens2016functional,Amin2017}.
 \label{sec:lang-plugins}
 Our STLC is parameterized by \emph{language plugins} (or just
 plugins) that encapsulate its domain-specific aspects.
-\pg{add examples}
-%For instance...
+
+In our examples, our language plugin will typically support
+integers and primitive operations on them. However, our plugin
+will also support various sorts \emph{collections} and base
+operations on them. Our first example of collection will be
+\emph{bags}. Bags are unordered collections (like sets) where
+elements are allowed to appear more than once (unlike in sets), and
+they are also called multisets.
 
 Our formalization is parameterized over one language plugin
 providing all base types and primitives. In fact, we expect a
 language plugin to be composed out of multiple language plugins
-merged together~\citep{ErdwegGR12}.
+merged together~\citep{ErdwegGR12}. Our mechanization is mostly
+parameterized over language plugins, but see
+\cref{sec:modularity-limits} for discussion of a few limitations.
 
 The sets of base types and primitive
-constants, as well as the typing rules for primitive constants, are
-on purpose left unspecified and only defined by plugins --- they are \emph{extensions points}.
+constants, as well as the types for primitive constants, are
+on purpose left unspecified and only defined by plugins ---
+they are \emph{extensions points}.
 %
 We use ellipses (``$\ldots$'') for some extension points, and
 give names to others when needed to refer to them.
@@ -329,6 +351,7 @@ A plugin defines a set of base types $\iota$, primitives $c$ and
 their denotational semantics $\EvalConst{c}$. As usual, we
 require that $\EvalConst{c}: \Eval{\tau}$ whenever $c : \tau$.
 
+\paragraph{Summary}
 To sum up, we collect formally the plugin requirements we have
 mentioned in this chapter.
 \begin{restatable}[Base types]{requirement}{baseTypes}
@@ -338,9 +361,9 @@ mentioned in this chapter.
 \begin{restatable}[Constants]{requirement}{constants}
   \label{req:constants}
   There is a set of constants |c|. To each constant is associated
-  a type |tau|, such that the constant has that type
-  ($\ConstTyping{c}{\tau}$) and the constants' semantics matches
-  that type ($\EvalConst{c}: \Eval{\tau}$).
+  a type |tau|, such that the constant has that type, that is
+  $\ConstTyping{c}{\tau}$, and the constants' semantics matches
+  that type, that is $\EvalConst{c}: \Eval{\tau}$.
 \end{restatable}
 
 % It will also need to explain how to support incrementalization for

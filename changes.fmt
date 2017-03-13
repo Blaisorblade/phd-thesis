@@ -124,6 +124,7 @@
 %format _ = "\text{\textunderscore}"
 %format =>_ = "\mathord{\Rightarrow}\text{\textunderscore}"
 %format mutual = "\textbf{mutual}"
+%format ... = "\ldots"
 
 %format Theta(n) = "\Theta(" n ")"
 %format o(n) = "o(" n ")"
