@@ -32,22 +32,27 @@ might want to come back here where needed.
 
 \section{Our proof meta-language}
 \label{sec:metalanguage}
-In this section we describe the meta-language used in our
-correctness proof. To prove the correctness of \ILC, we provide a
-mechanized proof in Agda~\citep{agda-head}. Agda is an
-implementation of intensional Martin-Löf type theory. As
-conventional, we distinguish between ``formalization'' (which
+In this section we describe the logic (or meta-language) used in our
+\emph{mechanized} correctness proof.
+
+First, as usual, we distinguish between ``formalization'' (which
 refers to on-paper formalized proofs) and ``mechanization''
 (which refers to proofs encoded in the language of a proof
 assistant for computer-aided \emph{mechanized} verification).
 
-To make our proofs more accessible, we present them in terms of
-set theory, though for convenience we still use (informally)
-dependently-typed type signatures where useful. For readers
-familiar with type theory, we will also discuss at some points
-relevant differences between the two presentations; however,
-readers unfamiliar with type theory can skip such discussions
-without prejudice.
+To prove the correctness of \ILC, we provide a mechanized proof
+in Agda~\citep{agda-head}. Agda is an implementation of
+intensional Martin-Löf type theory, so our proofs use a
+type-theoretic foundation.
+
+At times, we use conventional set-theoretic language to discuss
+our proofs, but the differences are only superficial. For
+instance, we might talk about a set of elements |S| and with
+elements such as |s `elem` S|, though we always mean that |S| is
+a type in our metalanguage, and that |s : S|. Talking about sets
+avoids ambiguity between types of our meta-language and types of
+our object-language (that we discuss next in
+\cref{sec:intro-stlc}).
 
 In our examples we consider a language plugin supporting
 \emph{bags}, a type of collection (described in
@@ -58,23 +63,31 @@ for different values representing the same bag (such different
 values typically arise when implementing bags as search trees).
 
 \subsection{Type theory versus set theory}
-For our purposes, the differences between set theory and type
-theory, and the two presentations of our formalization, are
-limited:
+Martin-Löf type theory is dependently typed, so we can form the
+dependent function type |(x : A) -> B| where |x| can appear free
+in |B|. Dependent function types are a powerful generalization of
+type |A -> B|: Such a type guarantees that if we apply a function
+|f : (x : A) -> B| to an argument |a : A|, the result has type |B
+[ x := a ]|, that is |B| where |x| is substituted by |a|. We will
+at times use dependent types in our presentation.
+
+For our purposes, the other differences between set theory and
+type theory affecting our formalization are limited:
 \begin{itemize}
-\item We use intuitionistic logic, so we do not use the law of
-  excluded middle.
+\item We do not postulate the law of excluded middle, so our
+  logic is constructive.
 \item Unlike set theory, type theory is proof-relevant: that is,
   proofs are first-class mathematical objects.
 \item Instead of sets, we use types; instead of subsets
   $\{x \in A \mid P(x)\}$, we must use $\Sigma$-types
   $\Sigma (x : A) P(x)$ which contain pairs of elements $x$ and
   proofs they satisfy predicate $P$.
-\item We postulate functional extensionality,
-  that is, functions that give equal results on any equal inputs
-  are equal themselves. This postulate is known to be consistent
-  with Agda's type theory~\citep{Hofmann96}, hence it is safe to
-  assume in Agda%
+\item In set theory we can assume functional extensionality, that
+  is, that functions that give equal results on all equal inputs
+  are equal themselves. Intuitionistic type theory does not prove
+  functional extensionality, so we need to add it as a postulate.
+  This postulate is known to be consistent with Agda's type
+  theory~\citep{Hofmann96}, hence it is safe to assume in Agda%
   \footnote{\url{http://permalink.gmane.org/gmane.comp.lang.agda/2343}}.
 \end{itemize}
 
@@ -82,7 +95,7 @@ To handle binding issues in our object language, our
 formalization uses typed de Brujin indexes, because this
 techniques takes advantage of Agda's support for type refinement
 in pattern matching. On top of that, we implement a HOAS-like
-frontend, that we use for writing specific terms.
+frontend, which we use for writing specific terms.
 
 
 % Our Agda formalization, Scala implementation and benchmark
@@ -152,20 +165,25 @@ domain theory or other techniques to model partiality: our
 domains are simply sets. Likewise, we can use normal
 functions as the domain of function types.
 
-\begin{definition}[Domains]
+\begin{definition}[Domains and values]
   The domain $\Eval{\Gt}$ of a type $\Gt$ is defined as in
-  \cref{fig:correctness:values}.
+  \cref{fig:correctness:values}. A value is a member of a domain.
 \end{definition}
 
-We let metavariable |v| range over members of domains.
+We let metavariables |u, v, ...|, |a, b, ...| range over members
+of domains; we tend to use |v| for generic values and |a| for
+values we use as a function argument. We also let metavariable
+|f, g, ...| range over values in the domain for a function type.
+At times we might also use metavariables |f, g, ...| to range
+over \emph{terms} of function types; the context will clarify
+what is intended.
 
-Given this domain
-construction, we can now define a denotational semantics for
-terms. The plugin has to provide the evaluation function for
-constants. In general, the evaluation function |eval(t)| computes the value of a
-well-typed term |t| given the values of all free variables in
-|t|. The values of the free variables are provided in an
-environment.
+Given this domain construction, we can now define a denotational
+semantics for terms. The plugin has to provide the evaluation
+function for constants. In general, the evaluation function
+|eval(t)| computes the value of a well-typed term |t| given the
+values of all free variables in |t|. The values of the free
+variables are provided in an environment.
 
 \begin{definition}[Environments]
   An environment $\Gr$ assigns values to the names of free
@@ -253,9 +271,20 @@ and is going to produce the same result.
   \[|eval(t) rho1 = eval(t) rho2|.\]
 \end{lemma}
 
-To formalize the statements and their proofs, we define formally
-the subcontext relation |Gamma1 `preceq` Gamma2| as a judgment
-using \emph{order preserving embeddings}.%
+Mechanize these statements and their proofs requires some care.
+We have a meta-level type |Term Gamma tau| of object terms having
+type |tau| in context |Gamma|. Evaluation has type |eval(param) :
+Term Gamma tau -> eval(Gamma) -> eval(tau)|, so |eval(t) rho1 =
+eval(t) rho2| is not directly ill-typed.
+%
+To remedy this, we define formally the subcontext relation
+|Gamma1 `preceq` Gamma2|, and an explicit operation that weakens
+a term in context |Gamma1| to a corresponding term in bigger
+context |Gamma2|, |weaken : Gamma1 `preceq` Gamma2 -> Term Gamma1
+tau -> Term Gamma2 tau|.
+%
+We define the subcontext relation |Gamma1 `preceq` Gamma2| as a
+judgment using \emph{order preserving embeddings}.%
 \footnote{As mentioned by James Chapman at
   \url{https://lists.chalmers.se/pipermail/agda/2011/003423.html},
   who attributes them to Conor McBride.} We refer to our
