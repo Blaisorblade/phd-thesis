@@ -357,13 +357,6 @@ requires proving tedious lemmas.
 \section{Correctness of differentiation}
 \label{sec:differentiate-correct}
 \label{sec:erasure}
-\DeclareFixedFootnote{\EmptyEmptyNote}{%
-To evaluate a closed term $t$, we need no environment entries, so
-the empty environment $\EmptyEnv$ suffices:
-$\EvalWith*{t}{\EmptyEnv}$ is the value of $t$ in the empty environment, and
-$\;\EvalIncSmashWith*{t}{\EmptyEnv}{\EmptyEnv}$
-is the value of $t$ using the change semantics, the empty environment and the empty change
-environment.}
 
 We can now
 prove that the behavior of $\Eval{\Derive{t}}$ is consistent with

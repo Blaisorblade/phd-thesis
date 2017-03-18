@@ -29,6 +29,16 @@
 
 \title{Optimizing and Incrementalizing Collection Queries by AST Transformations}
 \author{Paolo G. Giarrusso}
+
+% Only for development.
+%
+% Requires that other files are compiled with include, and can only be used in
+% incremental runs: a first run has to be made without includeonly.
+%
+% \includeonly{pldi14/sec-preliminaries,pldi14/sec-intro}
+%
+% Also, include can add extra page breaks, so maybe switch back to input at the end.
+% From http://web.science.mq.edu.au/~rdale/resources/writingnotes/latexstruct.html.
 \begin{document}
 \maketitle
 \input{pldi14/agda}
@@ -40,42 +50,50 @@
 % \end{abstract}
 \tableofcontents
 
-\input{chap-intro}
+\include{chap-intro}
 
 \part{Optimizing collection queries by reification}
 \label{sec:ch-aosd13}
 
-\input{aosd13/graphs/evalResLos}
-\input{aosd13/paperBody}
+\include{aosd13/graphs/evalResLos}
+\include{aosd13/paperBody}
 
 
 \part{Incrementalization}
 \label{part:incr}
-\input{pldi14/sec-preliminaries}
-\input{pldi14/sec-intro}
+\include{pldi14/sec-preliminaries}
+\include{pldi14/sec-intro}
 
 % Include either-or, one includes the other.
-%\input{change-theory-reconstruct}
-\input{pldi14/sec-change-theory}
-\input{pldi14/sec-change-equiv}
+%\include{change-theory-reconstruct}
+\include{pldi14/sec-change-theory}
+\include{pldi14/sec-change-equiv}
 
-\input{pldi14/sec-differentiate}
-\input{pldi14/sec-practice}
-\input{pldi14/sec-concl}
+\DeclareFixedFootnote{\EmptyEmptyNote}{%
+To evaluate a closed term $t$, we need no environment entries, so
+the empty environment $\EmptyEnv$ suffices:
+$\EvalWith*{t}{\EmptyEnv}$ is the value of $t$ in the empty environment, and
+$\;\EvalIncSmashWith*{t}{\EmptyEnv}{\EmptyEnv}$
+is the value of $t$ using the change semantics, the empty environment and the empty change
+environment.}
+
+\include{pldi14/sec-differentiate}
+\include{pldi14/sec-practice}
+\include{pldi14/sec-concl}
 
 % Appendixes, to integrate.
-% \input{pldi14/sec-evaluation}
-% \input{pldi14/sec-addendum}
+% \include{pldi14/sec-evaluation}
+% \include{pldi14/sec-addendum}
 
 \begin{oldSec}
-\input{pldi14/sec-STLC-correct}
+\include{pldi14/sec-STLC-correct}
 \end{oldSec}
 
 \begin{oldSec}
-\input{pldi14/sec-informal}
+\include{pldi14/sec-informal}
 \end{oldSec}
 
-\input{new-stuff}
+\include{new-stuff}
 \end{document}
 %%% Local Variables:
 %%% mode: latex
