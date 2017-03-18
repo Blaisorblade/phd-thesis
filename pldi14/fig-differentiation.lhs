@@ -83,6 +83,6 @@
   \centering
   \deriveCorrect*
 \end{subfigure}
-\caption{Defining differentiation.}
+\caption{Defining differentiation and proving it correct.}
   \label{fig:differentiation}
 \end{figure}

@@ -228,14 +228,20 @@ free variables, |evalConst(c)| does not depend on an environment.
 
 In our examples, we will use some unproblematic syntactic sugar
 over STLC, including let expressions, global definitions, type
-inference, and we will use a Haskell-like concrete syntax. At
-times, our concrete examples will use Hindley-Milner
+inference, and we will use a Haskell-like concrete syntax. In
+particular, when giving type signatures or type annotations in
+Haskell snippets, we will use |::| to separate terms or variables
+from their types, rather than |:| as in
+$\lambda$-calculus.\pg{Reconsider.}
+%
+At times, our concrete examples will use Hindley-Milner
 polymorphism, but this is also not a significant extension. A
 polymorphic definition of type |forall alpha. tau| (where |alpha|
 is free in |tau|) can be taken as sugar for a family, indexed by
 type argument |tau1| of definitions of type |tau [alpha :=
 tau1]|; we use this trick without explicit mention in our first
-implementation of incrementalization in Scala~\citep{CaiEtAl2014ILC}.
+implementation of incrementalization in
+Scala~\citep{CaiEtAl2014ILC}.
 
 \subsection{Weakening}
 While we don't discuss our formalization of variables in full, in

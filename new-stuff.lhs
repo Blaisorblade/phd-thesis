@@ -66,6 +66,7 @@ A few other annoyances include:
 \end{enumerate}
 
 \chapter{Defunctionalizing function changes}
+\label{ch:defunc-fun-changes}
 
 If we represent function changes as functions, we can only apply them. This and
 other problems are vastly simplified if we instead defunctionalize function

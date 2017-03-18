@@ -64,6 +64,7 @@ prove its correctness theorem in \cref{sec:correct-derive}.
 
 
 \section{Generalizing the calculus of finite differences}
+\label{sec:generalize-fin-diff}
 %format f_d = "\Delta f"
 %format `dot` = "\cdot"
 % Revise terminology.
@@ -164,6 +165,7 @@ input size |n|, that is |dn = o(n)|. All approaches to incrementalization
 require small input changes. Incremental computation will then process the input
 changes, rather than just the new inputs.
 
+\subsection{Introducing changes}
 To talk about how the differences between old values and new
 values, we introduce a few concepts, for now without full definitions.
 In our approach to
@@ -174,7 +176,7 @@ we also have \emph{change terms}, that evaluate to \emph{change
   values}. We require that going from old values to new values
 preserves types: That is, if an old value |v1| has type |tau|,
 then also its corresponding new value |v2| must have type |tau|.
-To each type |tau| we associate a type of changes or change type
+To each type |tau| we associate a type of changes or \emph{change type}
 |Dt^tau|: a change between |v1| and |v2| must have type |Dt^tau|.
 
 Not all descriptions of changes are meaningful,
@@ -200,6 +202,7 @@ class ChangeStruct t where
 \end{code}
 We'll later come back to this definition and refine it.
 
+ \pg{changes on bags?}
 To show how incrementalization affects our example, we next
 describe valid changes for bags and integers. For now, a change
 |das| to a bag |as1| simply contains all elements to be added to
@@ -216,8 +219,9 @@ change |dv| is always valid between |v1| and |v2 = v1 `oplus`
 dv|; for other changes, however, validity will be more
 restrictive.
 
+\subsection{Incrementalizing with changes}
 After introducing these notions, we describe how, in our
-approach, we incrementalize our example. We propose to compute
+approach, we incrementalize our example program. We propose to compute
 the output change |doutput| from |output1| to |output2| by
 calling a new function |dgrand_total|, the \emph{derivative} of
 |grand_total| on base inputs and their respective changes. We can
@@ -326,8 +330,9 @@ compute its required output without actually computing |a1
 `oplus` da|. Finally, if the size of |a1| and |a2| is
 asymptotically larger than |da|, actually computing |a2| could be
 expensive. Hence, we stick to our asymmetric form of function
-changes. We will discuss other alternatives later.\pg{Where?}
-
+changes.% We will discuss other alternatives later in \cref{?}.
+\pg{Discuss alternatives?}
+\pg{Our definition of function change might seem to defy intuitions. In particular, pointwise changes might appear more intuitive. We discuss them later, too.}
 % To answer these
 % questions precisely, we next recall definitions of our object
 % language, simply-typed $\lambda$-calculus.
@@ -415,10 +420,10 @@ function types.
   \cref{fig:change-types}.
 \end{definition}
 \begin{restatable}[Base change types]{requirement}{baseChangeTypes}
+  \label{req:base-change-types}
   To each base type |iota| is associated a change type |Dt^iota|.
 \end{restatable}
-We refer
-to values of change types as \emph{change values}.
+We refer to values of change types as \emph{change values}.
 
 Then, we define \emph{validity} as a family of ternary relations,
 indeed by types and relating changes with their sources and
@@ -431,8 +436,11 @@ from |v1| to |v2|, as we define in \cref{fig:validity}.
 \end{definition}
 The definition of validity for base types is delegated to language plugins, so we state a
 \begin{restatable}[Base validity definitions]{requirement}{baseValidity}
+  \label{req:base-validity}
   To each base type |iota| is associated a definition of validity for |iota|.
 \end{restatable}
+We mentioned informally in \cref{sec:motiv-example} how validity is
+defined, for instance, on integers and bags.\pg{revise if we add more examples.}
 
 Next, we explain the definitions of change types and validity for
 function type |sigma -> tau|.
@@ -545,7 +553,8 @@ a correct change for |t|. Formally we have:
 \end{restatable}
 
 Once we define |`oplus`| we'll be able to relate it to validity. The statement we'll prove is
-\begin{restatable}[Valid changes update correctly]{lemma}{validOplus}
+\begin{restatable}[Valid changes update correctly, or |`oplus`|
+  agrees with validity]{lemma}{validOplus}
   \label{thm:valid-oplus}
   If |fromto tau v1 dv v2| then |v1 `oplus` dv = v2|.
 \end{restatable}
