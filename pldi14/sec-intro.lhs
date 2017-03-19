@@ -803,48 +803,6 @@ language plugins:
   (eval(deriveConst(c)) emptyRho) (evalConst c)|.
 \end{restatable}
 
-\subsection{Discussion}
-In this section we discuss a few points about differentiation and
-its correctness.
-%
-We might have asked for the following
-correctness property:
-
-\begin{theorem}[Incorrect correctness statement]
-If |Gamma /- t : tau| and |rho1 `oplus` drho = rho2| then
-|(eval(t) rho1) `oplus` (eval(derive(t)) drho) = (eval(t) rho2)|.
-\end{theorem}
-
-However, this property is not quite right. We can only prove correctness
-if we restrict the statement to input changes |drho| that are
-\emph{valid}. Moreover, to prove this
-statement by induction we need to strengthen its conclusion: we
-require that the output change |eval(derive(t)) drho| is also
-valid. To see why, consider term |(\x -> s) t|: Here the output of |t|
-is an input of |s|. Similarly, in |derive((\x -> s) t)|, the
-output of |derive(t)| becomes an input change for subterm
-|derive(t)|, and |derive(s)| behaves correctly only if only if
-|derive(t)| produces a valid change.
-
-Typically, change types
-contain values that invalid in some sense, but incremental
-programs will \emph{preserve} validity. In particular, valid
-changes between functions are in turn functions that take valid input
-changes to valid output changes. This is why we
-formalize validity as a logical relation.
-
-\paragraph{Invalid input changes}
-To see concretely why invalid changes, in general, can cause
-derivatives to produce
-incorrect results, consider again |grand_total = \ xs ys -> sum
-(merge xs ys)|. Suppose a bag change |dxs| removes an element
-|20| from input bag |xs|, while |dys| makes no changes to |ys|:
-in this case, the output should decrease, so |dgrand_total xs dxs
-ys dys| should return |-20|. However, that is only correct if
-|20| is actually an element of |xs|. Otherwise, |xs `oplus` dxs|
-will make no change to |xs|. Similar issues apply with function
-changes.\pg{elaborate}
-
 \subsection{Differentiation on our example}
 \pg{This example is still a bit too complex as written; I'm skipping too many steps.}
 
@@ -934,6 +892,48 @@ ys))| is just |dsum (merge xs ys) (derive(merge xs ys))|. A
 direct execution of this program will compute |merge xs ys|,
 taking time linear in the base inputs. \pg{Point out this is
   self-maintainable!}
+
+\subsection{Discussion}
+In this section we discuss a few points about differentiation and
+its correctness.
+%
+We might have asked for the following
+correctness property:
+
+\begin{theorem}[Incorrect correctness statement]
+If |Gamma /- t : tau| and |rho1 `oplus` drho = rho2| then
+|(eval(t) rho1) `oplus` (eval(derive(t)) drho) = (eval(t) rho2)|.
+\end{theorem}
+
+However, this property is not quite right. We can only prove correctness
+if we restrict the statement to input changes |drho| that are
+\emph{valid}. Moreover, to prove this
+statement by induction we need to strengthen its conclusion: we
+require that the output change |eval(derive(t)) drho| is also
+valid. To see why, consider term |(\x -> s) t|: Here the output of |t|
+is an input of |s|. Similarly, in |derive((\x -> s) t)|, the
+output of |derive(t)| becomes an input change for subterm
+|derive(t)|, and |derive(s)| behaves correctly only if only if
+|derive(t)| produces a valid change.
+
+Typically, change types
+contain values that invalid in some sense, but incremental
+programs will \emph{preserve} validity. In particular, valid
+changes between functions are in turn functions that take valid input
+changes to valid output changes. This is why we
+formalize validity as a logical relation.
+
+\paragraph{Invalid input changes}
+To see concretely why invalid changes, in general, can cause
+derivatives to produce
+incorrect results, consider again |grand_total = \ xs ys -> sum
+(merge xs ys)|. Suppose a bag change |dxs| removes an element
+|20| from input bag |xs|, while |dys| makes no changes to |ys|:
+in this case, the output should decrease, so |dgrand_total xs dxs
+ys dys| should return |-20|. However, that is only correct if
+|20| is actually an element of |xs|. Otherwise, |xs `oplus` dxs|
+will make no change to |xs|. Similar issues apply with function
+changes.\pg{elaborate}
 
 \section{Operations on changes}
 In the previous section we have characterized the behavior of
