@@ -803,10 +803,9 @@ language plugins:
   (eval(deriveConst(c)) emptyRho) (evalConst c)|.
 \end{restatable}
 
-
 \subsection{Discussion}
-\pg{Move this before operations.}
-\pg{In this section we clarify a few points... about what?}
+In this section we discuss a few points about differentiation and
+its correctness.
 %
 We might have asked for the following
 correctness property:
