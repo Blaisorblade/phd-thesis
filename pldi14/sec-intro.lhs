@@ -803,6 +803,139 @@ language plugins:
   (eval(deriveConst(c)) emptyRho) (evalConst c)|.
 \end{restatable}
 
+
+\subsection{Discussion}
+\pg{Move this before operations.}
+\pg{In this section we clarify a few points... about what?}
+%
+We might have asked for the following
+correctness property:
+
+\begin{theorem}[Incorrect correctness statement]
+If |Gamma /- t : tau| and |rho1 `oplus` drho = rho2| then
+|(eval(t) rho1) `oplus` (eval(derive(t)) drho) = (eval(t) rho2)|.
+\end{theorem}
+
+However, this property is not quite right. We can only prove correctness
+if we restrict the statement to input changes |drho| that are
+\emph{valid}. Moreover, to prove this
+statement by induction we need to strengthen its conclusion: we
+require that the output change |eval(derive(t)) drho| is also
+valid. To see why, consider term |(\x -> s) t|: Here the output of |t|
+is an input of |s|. Similarly, in |derive((\x -> s) t)|, the
+output of |derive(t)| becomes an input change for subterm
+|derive(t)|, and |derive(s)| behaves correctly only if only if
+|derive(t)| produces a valid change.
+
+Typically, change types
+contain values that invalid in some sense, but incremental
+programs will \emph{preserve} validity. In particular, valid
+changes between functions are in turn functions that take valid input
+changes to valid output changes. This is why we
+formalize validity as a logical relation.
+
+\paragraph{Invalid input changes}
+To see concretely why invalid changes, in general, can cause
+derivatives to produce
+incorrect results, consider again |grand_total = \ xs ys -> sum
+(merge xs ys)|. Suppose a bag change |dxs| removes an element
+|20| from input bag |xs|, while |dys| makes no changes to |ys|:
+in this case, the output should decrease, so |dgrand_total xs dxs
+ys dys| should return |-20|. However, that is only correct if
+|20| is actually an element of |xs|. Otherwise, |xs `oplus` dxs|
+will make no change to |xs|. Similar issues apply with function
+changes.\pg{elaborate}
+
+\subsection{Differentiation on our example}
+\pg{This example is still a bit too complex as written; I'm skipping too many steps.}
+
+To help fix ideas for later discussion, let us show
+how the derivative of |grand_total|
+looks like.
+
+\begin{code}
+grand_total  = \ xs ys -> sum (merge xs ys)
+output       = grand_total {{1}} {{2, 3, 4}} = 11
+\end{code}
+We define derivation as a compositional program transformation,
+so we first compute |derive(merge xs ys)|. To compute its change
+we simply call the derivative of |merge|, that is |dmerge|, and
+apply it to the base inputs and their changes: hence we write
+\[|derive(merge xs ys) = dmerge xs dxs ys dys|.\]
+As we'll
+better see later, we can define function |dmerge| as
+\[|dmerge = \xs dxs ys dys -> merge dxs dys|,\]
+%
+so |derive(merge xs ys)| can be simplified by $\beta$-reduction
+to |merge dxs dys|:
+\begin{code}
+          derive(merge xs ys)
+=         dmerge xs dxs ys dys
+`betaeq`  (\xs dxs ys dys -> merge dxs dys) xs dxs ys dys
+`betaeq`  merge dxs dys
+\end{code}
+
+Let's next derive |sum (merge xs ys)|. First, like above, the
+derivative of |sum zs| would be |dsum zs dzs|, which depends on
+base input |zs| and its change |dzs|. As we'll see, |dsum zs dzs|
+can simply call |sum| on |dzs|, so |dsum zs dzs = sum dzs|. To
+derive |sum (merge xs ys)|, we must call the derivative of |sum|,
+that is |dsum|, on its base argument and its change, so on |merge
+xs ys| and |derive(merge xs ys)|. We can later simplify again by
+$\beta$-reduction and obtain
+\begin{code}
+          derive(sum (merge xs ys))
+=         dsum (merge xs ys) (derive(merge xs ys))
+`betaeq`  sum (derive(merge xs ys))
+=         sum (dmerge xs dxs ys dys)
+`betaeq`  sum (merge dxs dys)
+\end{code}
+
+Here we see the output of differentiation is defined in a bigger
+typing context: while |merge xs ys| only depends on base inputs
+|xs| and |ys|, |derive(merge xs ys)| also depends on their
+changes. This property extends beyond the examples we just saw:
+if a term |t| is defined in context |Gamma|, then the output of
+derivation |derive(t)| is defined in context |Gamma, Dt ^ Gamma|,
+where |Dt ^ Gamma| is a context that binds a change |dx| for each
+base input |x| bound in the context |Gamma|.
+
+Next we must transform |derive(\ xs ys -> sum (merge xs ys))|. Since |derive(sum (merge xs ys))| is defined (ignoring later optimizations) in a context binding |xs, dxs, ys, dys|, deriving |\ xs ys -> sum (merge xs ys)| must bind all those variables.
+
+\begin{code}
+          derive(\ xs ys -> sum (merge xs ys))
+=         \xs dxs ys dys -> derive(sum (merge xs ys))
+`betaeq`  \xs dxs ys dys -> sum (merge dxs dys)
+\end{code}
+
+Next we need to transform the binding of |grand_total2| to its body |b = \ xs ys -> sum (merge xs ys)|. We copy this binding and add a new additional binding from |dgrand_total2| to the derivative of |b|.
+
+\begin{code}
+grand_total   = \ xs      ys      ->  sum  (merge  xs   ys)
+dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
+\end{code}
+
+Finally, we need to transform the binding of |output| and its body. By iterating similar steps,
+in the end we get:\pg{fill missing steps}
+\begin{code}
+grand_total   = \ xs      ys      ->  sum  (merge  xs   ys)
+dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
+output         = grand_total   {{1, 2, 3}}              {{4}}
+doutput        = dgrand_total  {{1, 2, 3}} {{1}} {{4}} {{5}}
+\end{code}
+
+
+\paragraph{Self-maintainability}
+Differentiation does not always produce efficient derivatives
+without further program transformations; in particular,
+derivatives might need to recompute results produced by the base
+program. In the above example, if we don't inline derivatives and
+use $\beta$-reduction to simplify programs, |derive(sum (merge xs
+ys))| is just |dsum (merge xs ys) (derive(merge xs ys))|. A
+direct execution of this program will compute |merge xs ys|,
+taking time linear in the base inputs. \pg{Point out this is
+  self-maintainable!}
+
 \section{Operations on changes}
 In the previous section we have characterized the behavior of
 differentiation. However, this characterization is not yet
@@ -1225,48 +1358,6 @@ becomes in particular:
   |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
 \end{equation}
 
-\subsection{Discussion}
-\pg{Move this before operations.}
-\pg{In this section we clarify a few points... about what?}
-%
-We might have asked for the following
-correctness property:
-
-\begin{theorem}[Incorrect correctness statement]
-If |Gamma /- t : tau| and |rho1 `oplus` drho = rho2| then
-|(eval(t) rho1) `oplus` (eval(derive(t)) drho) = (eval(t) rho2)|.
-\end{theorem}
-
-However, this property is not quite right. We can only prove correctness
-if we restrict the statement to input changes |drho| that are
-\emph{valid}. Moreover, to prove this
-statement by induction we need to strengthen its conclusion: we
-require that the output change |eval(derive(t)) drho| is also
-valid. To see why, consider term |(\x -> s) t|: Here the output of |t|
-is an input of |s|. Similarly, in |derive((\x -> s) t)|, the
-output of |derive(t)| becomes an input change for subterm
-|derive(t)|, and |derive(s)| behaves correctly only if only if
-|derive(t)| produces a valid change.
-
-Typically, change types
-contain values that invalid in some sense, but incremental
-programs will \emph{preserve} validity. In particular, valid
-changes between functions are in turn functions that take valid input
-changes to valid output changes. This is why we
-formalize validity as a logical relation.
-
-\paragraph{Invalid input changes}
-To see concretely why invalid changes, in general, can cause
-derivatives to produce
-incorrect results, consider again |grand_total = \ xs ys -> sum
-(merge xs ys)|. Suppose a bag change |dxs| removes an element
-|20| from input bag |xs|, while |dys| makes no changes to |ys|:
-in this case, the output should decrease, so |dgrand_total xs dxs
-ys dys| should return |-20|. However, that is only correct if
-|20| is actually an element of |xs|. Otherwise, |xs `oplus` dxs|
-will make no change to |xs|. Similar issues apply with function
-changes.\pg{elaborate}
-
 % \subsection{Differentiation}
 % After we defined our language, its type system and its semantics, we motivate
 % and sketch what differentiation does on an arbitrary well-typed term |t| such
@@ -1428,96 +1519,6 @@ changes.\pg{elaborate}
 % % the same language, that accepts changes to all inputs of |t| (call them |x1, x2,
 % % ..., xn| of |t| and evaluates to the change of |t|)
 
-
-\subsection{Differentiation on our example}
-\pg{This example is still a bit too complex as written; I'm skipping too many steps.}
-
-To help fix ideas for later discussion, let us show
-how the derivative of |grand_total|
-looks like.
-
-\begin{code}
-grand_total  = \ xs ys -> sum (merge xs ys)
-output       = grand_total {{1}} {{2, 3, 4}} = 11
-\end{code}
-We define derivation as a compositional program transformation,
-so we first compute |derive(merge xs ys)|. To compute its change
-we simply call the derivative of |merge|, that is |dmerge|, and
-apply it to the base inputs and their changes: hence we write
-\[|derive(merge xs ys) = dmerge xs dxs ys dys|.\]
-As we'll
-better see later, we can define function |dmerge| as
-\[|dmerge = \xs dxs ys dys -> merge dxs dys|,\]
-%
-so |derive(merge xs ys)| can be simplified by $\beta$-reduction
-to |merge dxs dys|:
-\begin{code}
-          derive(merge xs ys)
-=         dmerge xs dxs ys dys
-`betaeq`  (\xs dxs ys dys -> merge dxs dys) xs dxs ys dys
-`betaeq`  merge dxs dys
-\end{code}
-
-Let's next derive |sum (merge xs ys)|. First, like above, the
-derivative of |sum zs| would be |dsum zs dzs|, which depends on
-base input |zs| and its change |dzs|. As we'll see, |dsum zs dzs|
-can simply call |sum| on |dzs|, so |dsum zs dzs = sum dzs|. To
-derive |sum (merge xs ys)|, we must call the derivative of |sum|,
-that is |dsum|, on its base argument and its change, so on |merge
-xs ys| and |derive(merge xs ys)|. We can later simplify again by
-$\beta$-reduction and obtain
-\begin{code}
-          derive(sum (merge xs ys))
-=         dsum (merge xs ys) (derive(merge xs ys))
-`betaeq`  sum (derive(merge xs ys))
-=         sum (dmerge xs dxs ys dys)
-`betaeq`  sum (merge dxs dys)
-\end{code}
-
-Here we see the output of differentiation is defined in a bigger
-typing context: while |merge xs ys| only depends on base inputs
-|xs| and |ys|, |derive(merge xs ys)| also depends on their
-changes. This property extends beyond the examples we just saw:
-if a term |t| is defined in context |Gamma|, then the output of
-derivation |derive(t)| is defined in context |Gamma, Dt ^ Gamma|,
-where |Dt ^ Gamma| is a context that binds a change |dx| for each
-base input |x| bound in the context |Gamma|.
-
-Next we must transform |derive(\ xs ys -> sum (merge xs ys))|. Since |derive(sum (merge xs ys))| is defined (ignoring later optimizations) in a context binding |xs, dxs, ys, dys|, deriving |\ xs ys -> sum (merge xs ys)| must bind all those variables.
-
-\begin{code}
-          derive(\ xs ys -> sum (merge xs ys))
-=         \xs dxs ys dys -> derive(sum (merge xs ys))
-`betaeq`  \xs dxs ys dys -> sum (merge dxs dys)
-\end{code}
-
-Next we need to transform the binding of |grand_total2| to its body |b = \ xs ys -> sum (merge xs ys)|. We copy this binding and add a new additional binding from |dgrand_total2| to the derivative of |b|.
-
-\begin{code}
-grand_total   = \ xs      ys      ->  sum  (merge  xs   ys)
-dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
-\end{code}
-
-Finally, we need to transform the binding of |output| and its body. By iterating similar steps,
-in the end we get:\pg{fill missing steps}
-\begin{code}
-grand_total   = \ xs      ys      ->  sum  (merge  xs   ys)
-dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
-output         = grand_total   {{1, 2, 3}}              {{4}}
-doutput        = dgrand_total  {{1, 2, 3}} {{1}} {{4}} {{5}}
-\end{code}
-
-
-\paragraph{Self-maintainability}
-Differentiation does not always produce efficient derivatives
-without further program transformations; in particular,
-derivatives might need to recompute results produced by the base
-program. In the above example, if we don't inline derivatives and
-use $\beta$-reduction to simplify programs, |derive(sum (merge xs
-ys))| is just |dsum (merge xs ys) (derive(merge xs ys))|. A
-direct execution of this program will compute |merge xs ys|,
-taking time linear in the base inputs. \pg{Point out this is
-  self-maintainable!}
 
 % \begin{code}
 %   t ::= t1 t2 | \x -> t | x | c
