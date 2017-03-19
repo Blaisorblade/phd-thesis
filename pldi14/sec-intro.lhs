@@ -793,7 +793,440 @@ rho1) (eval(derive(t)) drho) (eval(t) rho2)| gives the thesis.
   \end{itemize}
 \end{proof}
 
+Next, we state the proof obligation that the theorem imposes on
+language plugins:
+
+\begin{restatable}[Correctness of |deriveConst(param)|]{requirement}{deriveConstCorrect}
+  \label{req:correct-derive-const}
+  If |/- c : tau| then |deriveConst(c)| is a correct change for
+  |c|. That is, if |/- c : tau| then |fromto tau (evalConst c)
+  (eval(deriveConst(c)) emptyRho) (evalConst c)|.
+\end{restatable}
+
+\section{Operations on changes}
+In the previous section we have characterized the behavior of
+differentiation. However, this characterization is not yet
+directly useful. Moreover, it is not yet clear how plugins should
+define differentiation on primitives.
+
+Hence, we continue exploring how changes behave, and introduce
+operations (including |`oplus`|) that manipulate them. We will
+define these operations both at the semantic level to operate on
+change values, and on the syntactic level to use in object
+programs. While often the same definitions are applicable,
+additional performance concerns apply to object-level
+implementations.
+
+We will summarize this section in \cref{fig:change-structures};
+readers might want to jump there for the definitions. However, we
+first build up to those definitions.
+
+\subsection{Basic change structures}
+First, we generalize the concept of changes. For each type |tau|
+we have defined notions of change type and of valid changes; but
+these notions can be defined for arbitrary sets.
+
+\begin{definition}
+  A basic change structure for set |V| is given by defining:
+  \begin{subdefinition}
+  \item a change set |Dt^V|
+  \item a ternary relation called validity among |V|, |Dt^V| and
+    |V|. If |v1, v2 `elem` V| and |dv `elem` DV|, and this relation holds, we write
+    |fromto V v1 dv v2| and say that |dv| is a valid change from |v1| to |v2|.
+  \end{subdefinition}
+\end{definition}
+
+We have already given the ingredients to define two families of basic change structures,
+a family for types and one for contexts:
+\begin{definition}
+  To each type |tau| we associate a basic change structure for
+  set |eval(tau)|; we do so by taking |eval(Dt^tau)| as change
+  set and by reusing validity as previously defined. We keep
+  writing |fromto tau v1 dv v2| rather than |fromto (eval(tau)) v1 dv v2|.
+\end{definition}
+\begin{definition}
+  To each environment |Gamma| we associate a basic change
+  structure for set |eval(Gamma)|; we do so by taking
+  |eval(Dt^Gamma)| as change set and by reusing validity as
+  previously defined. We keep writing |fromto Gamma rho1 drho rho2|
+  rather than |fromto (eval(Gamma)) rho1 drho rho2|.
+\end{definition}
+Moreover, we required that language plugins must define change
+types and validity for base types
+(\cref{req:base-change-types,req:base-validity}). Equivalently we
+can require that plugins define basic change structures on all
+base types:
+\begin{restatable}[Basic change structures on base
+  types]{requirement}{baseBasicChangeStructures}
+  \label{req:base-basic-change-structures}
+  To each base type |iota| is associated a basic change structure
+  for |eval(iota)|.
+\end{restatable}
+
+Basic change structures generalize validity and change sets, so
+we can talk about a change set |Dt^V| for an arbitrary set |V|,
+not just for the semantics of a type (|V = eval(tau)|) or the
+semantics of a context (|V = eval(Gamma)|).
+%
+In particular, we can define a basic change structure for any
+function space |A -> B| as long as we have basic change
+structures for |A| and |B|.
+\begin{definition}
+  \label{def:basic-change-structure-funs}
+  We define a basic change structure on |A -> B| whenever |A, B|
+  are sets and we have a basic change structure for each of them.
+  \begin{subdefinition}
+  \item we define the change set |Dt^(A -> B)| as |A -> Dt^A -> Dt^B|.
+  \item we define that |df| is a valid function change from |f1|
+    to |f2| (that is, |fromto (A -> B) f1 df f2|) if and only if,
+    for any inputs |a1, a2 : A|, input change |da : Dt^a| that is
+    valid from |a1| to |a2| (|fromto A a1 da a2|), we have
+    |fromto B (f1 a1) (df a1 da) (f2 a2)|.
+  \end{subdefinition}
+\end{definition}
+
+In particular, we obtain a basic change structure on |eval(Gamma)
+-> eval(tau)| for any |Gamma, tau|. After a new definition, we
+can restate correctness of differentiation using this new basic
+change structure.
+
+\begin{definition}[Incremental semantics]
+  \label{def:inc-semantics}
+  We define the \emph{incremental semantics} of a well-typed term
+  |Gamma /- t : tau| in terms of differentiation as:
+  \[|evalInc t = (\rho1 drho -> eval(derive t) drho) : eval(Gamma)
+    -> eval(Dt^Gamma) -> eval(Dt^tau)|.\]
+\end{definition}
+
+The incremental semantics of a term |evalInc t| is a function
+change for |eval t|.
+The definition of incremental semantics might seem surprising,
+because function change |\rho1 drho -> eval(derive(t)) drho|
+appears to ignore the argument for |rho1|. But this is just an
+artifact: If you take a valid change |drho| from |rho1| to
+|rho2|, then |drho| extends |rho1|, so we can safely ignore
+|rho1|.
+
+\begin{theorem}[|evalInc t| is a valid change from |eval t| to |eval t|]
+  \label{thm:correct-derive-2}
+  If |Gamma /- t : tau|, then |evalInc(t)| is a valid change from
+  |eval t| to |eval t|:
+  \[
+    |fromto (eval Gamma -> eval tau) (eval t) (evalInc t) (eval t)|
+  \]
+\end{theorem}
+
+\begin{proof}
+  By expanding \cref{def:basic-change-structure-funs,def:inc-semantics}
+  one can verify this is just a restatement of \cref{thm:correct-derive}.
+\end{proof}
+
+The notion of basic change structure is somewhat weak, since we
+place no constraints on validity, but we are going to build on it
+a more interesting notion of \emph{change structure}, which adds
+operations including |`oplus`| and requirements on them.
+
+As anticipated, we use changes to generalize the calculus of
+finite differences from groups (see
+\cref{sec:generalize-fin-diff}). We'll later see how change
+structures generalize groups.
+
+Moreover, now that we defined basic change structures, we can
+already talk about a set |S| with different basic change
+structures defined on it, and about ways to create basic change
+structures.
+
+For instance, for any set |V| we can talk about \emph{replacement
+  changes} on |V|: a replacement change |dv = !u| for a value |v
+: V| simply specifies directly a new value |u : V|, so that
+|fromto V v (! u) u|. We read |!| as the ``bang'' operator. A
+basic change structure can decide to use only replacement changes
+(which might be appropriate for primitive types with values of
+constant size), or to make |Dt^V| a sum type allowing both
+replacement changes and other ways to describe a change (as long
+as we're using a language plugin that adds sum types).
+
+But before defining |`oplus`|, we need to introduce a few more
+concepts, as we do next.
+
+% including |`oplus`|
+% but also |nil(param)| and |`ominus`| and
+
+\subsection{Nil changes}
+\label{sec:nil-changes-intro}
+Some valid changes have the same value |v| both as source and as
+destination. They are \emph{nil changes}:
+\begin{definition}[Nil changes]
+  A change |dv : Dt^V| is a \emph{nil change} for a value |v : V|
+  if it is a valid change from |v| to itself: |fromto V v dv v|.
+\end{definition}
+
+For instance, |0| is a nil change for any integer number |n|.
+However, in general a change might be nil for an element but not
+for another. For instance, the replacement change |!6| is a nil
+change on |6| but not on |5|.
+
+When we define change structures, each element is going to be
+associated to at least one nil change, as we're going to show later:
+\begin{restatable}[Existence of nil changes]{lemma}{nilChangesExist}
+  \label{lem:nilChangesExist}
+  Given a basic change structure for |V|, to each element |v
+  `elem` V| is associated a distinguished nil change that we
+  denote by |nil v|.
+\end{restatable}
+
+Moreover, nil changes are a right identity element for |`oplus`|:
+\begin{restatable}[Nil changes are identity elements]{corollary}{nilChangesRightId}
+  \label{lem:nilChangesRightId}
+  Any nil change |dv| for a value |v| is a right identity element for
+  |`oplus`|, that is we have |v `oplus` dv = v| for every set |V|
+  with a basic change structure, every element |v `elem` V| and
+  every nil change |dv| for |v|.
+\end{restatable}
+\begin{proof}
+  This follows from \cref{thm:valid-oplus} and the definition of
+  nil changes.
+\end{proof}
+The converse of this theorem does not hold: there exists changes
+|dv| such that |v `oplus` dv = v| yet |dv| is not a valid change
+from |v| to |v|. For instance, under earlier definitions for
+changes on naturals, if we take |v = 0| and |dv = -5|, we have |v
+`oplus` dv = v| even though |dv| is not valid; examples of
+invalid changes on functions are discussed at \cref{sec:invalid}.
+However, we prefer to define ``|dv| is a nil change'' as we do,
+to imply that |dv| is valid, not just a neutral element.
+
+We can already show some values have nil changes even though we
+haven't proved \cref{lem:nilChangesExist}.
+\begin{examples}
+  \begin{itemize}
+  \item
+An environment change for an empty environment |emptyRho :
+eval(emptyCtx)| must be an environment for the empty context
+|Dt^emptyCtx = emptyCtx|, so it must be the empty environment! In
+other words, if and only if |fromto emptyCtx emptyRho drho
+emptyRho|, then and only then |drho = emptyRho| and, in
+particular, |drho| is a nil change.
+
+\item If all values in an environment |rho| have nil changes,
+the environment has a nil change |drho = nil(rho)| associating
+each value to a nil change. Indeed, take a context |Gamma| and a
+suitable environment |rho : eval(Gamma)|. For each typing
+assumption |x : tau| in |Gamma|, assume we have a nil change |nil
+v| for |v|. Then we define |nil rho : eval(Dt^Gamma)| by
+structural recursion on |rho| as:
+\begin{code}
+  nil emptyRho = emptyRho
+  nil (rho, x = v) = nil rho, x = v, dx = nil v
+\end{code}
+Then we can see that |nil rho| is indeed a nil change for |rho|,
+that is, |fromto Gamma rho (nil rho) rho|.
+\item We have seen in \cref{thm:correct-derive-2} that, whenever
+  |Gamma /- t : tau|, |eval t| has nil change |evalInc t|.
+  Moreover, if we have an appropriate nil environment change
+  |fromto Gamma rho drho rho| (which we often do, as discussed
+  above), then we also get a nil change |evalInc t rho drho| for
+  |eval t rho|:
+\[|fromto tau (eval t
+  rho) (evalInc t rho drho) (eval t rho)|.\]
+In particular, for all closed well-typed terms |/- t : tau| we have
+\[|fromto tau (eval t
+emptyRho) (evalInc t emptyRho emptyRho) (eval t emptyRho)|.\]
+\end{itemize}
+\end{examples}
+
+\subsection{Nil changes on arbitrary functions}
+\label{sec:nil-changes-fun-intro}
+Not all functions |f : A -> B| arise as the semantics of some
+term. We discuss next how to compute |nil f| anyway. Technically,
+we are given an arbitrary metalanguage function |f : A -> B|,
+where |A| and |B| are arbitrary sets; we assume a basic change
+structure on |A -> B|, and want to find a nil change for |f|. As
+discussed, if |f| is the semantics of a closed term |t| (|f =
+eval(t) emptyRho|), the nil change for |f| is |df =
+eval(derive(f)) emptyRho|. But in general we cannot inspect the
+STLC code for |f| (which might not exist), only test its behavior
+by applying it to arguments---we only know |f| extensionally, not
+intensionally. Yet, by defining a few further operations, we can
+still define a nil change for |f|.
+
+We see |nil f| such that |fromto (A -> B) f (nil f) f|. That is,
+whenever |fromto A a1 da a2| then |fromto B (f1 a1) (nil f a1 da)
+(f2 a2)|. By \cref{thm:valid-oplus}, this means that we need to
+find |nil f| such that |f1 a1 `oplus` nil f a1 da = f2 a2|, where
+|a1 `oplus` da = a2|. To solve this equation, we introduce an
+operator |`ominus`|, such that |a2 `ominus` a1| produces a valid
+change from |a1| to |a2|, and see that |nil f| must be
+
+\[|nil f = \a1 da -> f (a1 `oplus` da) `ominus` f a1|.\]
+
+Definitions of |`ominus`| will be provided as part of change
+structures. In particular, we need to define also |`ominus`| on
+functions. Since |f2 `ominus` f1| must produce a valid function
+change, by generalizing the reasoning we just did, we obtain that
+whenever |fromto A a1 da a2| then we need to have
+|fromto B (f1 a1) ((f2 `ominus` f1) a1 da) (f2 a2)|, and can define
+
+\begin{equation}
+  \label{eq:ominus-fun-1}
+|f2 `ominus` f1 = \a1 da -> f2 (a1 `oplus` da) `ominus` f1 a1|.
+\end{equation}
+
+We have made this definition at the meta-level. We can also use
+the same definition in object programs, but there we face
+additional concerns. The produced function change is rather slow,
+because it recomputes the old output |f1 a1|, while also computes
+the new output |f2 a2| and taking the difference.
+
+However, we can implement `ominus` using replacement changes, if
+they are supported on the relevant types. If we define |`ominus`|
+on set |B| as |b2 `ominus` b1 = !b2|, then \cref{eq:ominus-fun-1}
+simplifies to
+\[|f2 `ominus` f1 = \a1 da -> ! (f2 (a1 `oplus` da))|.\]
+
+We could even imagine allowing replacement changes on functions
+themselves. However, here the bang operator needs to be defined
+to produce a function change that can be applied, hence
+\[|!f2 = \a1 da -> ! (f2 (a1 `oplus` da))|.\]
+
+Alternatively, as we'll see later in
+\cref{ch:defunc-fun-changes}, we could represent function changes
+not as functions but as data, and provide a function applying
+function changes |df : Dt^(sigma -> tau)| to inputs |t1 : sigma|
+and |dt : Dt^sigma|.
+
+\subsection{Constraining ⊕ on functions}
+\label{sec:oplus-fun-intro}
+Next, we discuss how |`oplus`| must be defined on functions, and
+show informally why we must define |f1 `oplus` df = \v -> f1 x
+`oplus` df v (nil v)| to prove that |`oplus`| on functions agrees
+with validity (\cref{thm:valid-oplus}).
+
+% Take functions
+% |f1 `oplus` df|
+% Take a value |v|.
+% Assume there exists a valid nil change for |v|, and
+% write it |nil v| (see \cref{lem:nilChangesExist}).
+
+We know that a valid function change |fromto (sigma -> tau) df f1
+f2| takes valid input changes |fromto sigma dv v1 v2| to a valid
+output change |fromto tau (df v1 dv) (f1 v1) (f2 v2)|. We require
+that |`oplus`| agrees with validity (\cref{thm:valid-oplus}), so
+|f2 = f1 `oplus` df|, |v2 = v1 `oplus` dv| and
+%
+\[|f2 v2 = (f1 `oplus` df) (v1 `oplus` dv) = f1 v1 `oplus` df v1
+  dv|.\]
+%
+Instantiating |dv| with |nil v| gives equation
+%
+\[|(f1 `oplus` df) v1 = f1 v1 `oplus` df v1 (nil v)|,\]
+%
+which is not only a requirement on |`oplus`| for functions but
+also defines |`oplus`| effectively.
+
+It also follows that
+\[
+  |f1 v1 `oplus` df v1 dv = (f1 `oplus` df) (v1 `oplus` dv) = f1
+  (v1 `oplus` dv) `oplus` df (v1 `oplus` dv) (nil (v1 `oplus`
+  dv))|.\]
+%
+We used this equation earlier \citep{CaiEtAl2014ILC}, together
+with a weaker form of validity preservation, to characterize
+function changes.
+
+\subsection{Updating values by changes with ⊕}
+\label{sec:oplus}
+\label{sec:invalid}
+Next, we will introduce formally operators |`oplus`|, |`ominus`|
+and |nil(param)| and relate them to validity. In particular, we will
+prove that |fromto tau v1 dv v2| implies |v1 `oplus` dv = v2|,
+and explain why the converse is not true.
+
+\pg{resume, turn into figure}
+\begin{restatable}[Base definitions of |`oplus`|]{requirement}{baseOplus}
+  \label{req:base-oplus}
+  For each base type |iota| we have a definition of
+  |oplusIdx(iota) : iota -> Dt^iota -> iota|.
+\end{restatable}
+
+Notationally, we usually omit subscripts from |`oplus`|.
+
+To prove that |`oplus`| agrees with validity in general
+(\cref{thm:valid-oplus}), we must require definitions from
+plugins to satisfy this theorem on base types:
+\begin{restatable}[|`oplus`| agrees with validity on base types]{requirement}{baseValidOplus}
+  \label{req:base-valid-oplus}
+  If\\ |fromto iota v1 dv v2| then |v1 `oplus` dv = v2|.
+\end{restatable}
+
+We define then |`oplus`| on function spaces:
+\begin{code}
+  f1 (oplusIdx(A -> B)) df = \v -> f1 v `oplus` df v (nil v)
+\end{code}
+
+In particular, when |A -> B = eval(sigma) -> eval(tau)|, it follows that
+\begin{code}
+  f1 (oplusIdx(sigma -> tau)) df = \v -> f1 v `oplus` df v (nil v)
+\end{code}
+
+\validOplus*
+\begin{proof}\pg{?}
+\end{proof}
+\deriveCorrectOplus*
+\begin{proof}\pg{?}
+\end{proof}
+\nilChangesExist*
+\begin{proof}\pg{?}
+\end{proof}
+
+We only need |`ominus`| to be able to define nil changes on
+arbitrary functions |f : eval(sigma -> tau)|.
+
+However, as anticipated earlier, if |f| is the semantics of a
+well-typed term |t|, that is |f = eval(t) emptyRho|, we can
+define the nil change of |f| through its derivative.\pg{See
+  before}
+% no, we need full abstraction, unless the term is closed.
+
+\pg{figure}
+\begin{figure}
+  \caption{Defining change structures.}
+  \label{fig:change-structures}
+\end{figure}
+
+\subsection{Derivatives are nil changes}
+\pg{This now goes earlier?}
+When we introduced derivatives, we claimed we can compute them by
+applying differentiation to function bodies.
+In fact, we can
+compute the derivative of a closed lambda abstraction by
+differentiating the whole abstraction!
+
+To see why, let's first consider an arbitrary closed term |t|,
+such that |/- t : tau|.
+
+If we differentiate a closed term |/- t : tau|, we get a change
+term |derive(t)| from |t| to itself\pg{Lexicon not introduced for
+  terms.}: |fromto tau (eval(t)
+emptyRho) (eval(derive(t)) emptyRho) (eval(t) emptyRho)|. We call such changes nil changes;
+they're important for two reasons. First, we will soon see that a
+identity element for |`oplus`| has its uses. Second, nil changes at
+function type are even more useful. A nil function change for
+function |f| takes an input |v1| and input change |dv| to a
+change from |f v1| and |f (v1 `oplus` dv)|. In other words, a nil
+function change for |f| is a \emph{derivative} for |f|!
+
+%\pg{steps}
+To sum up, if |f| is a closed function |derive(f)| is its
+derivative. So, if |f| is unary, \cref{eq:derivative-requirement}
+becomes in particular:
+\begin{equation}
+  \label{eq:correctness}
+  |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
+\end{equation}
+
 \subsection{Discussion}
+\pg{Move this before operations.}
 \pg{In this section we clarify a few points... about what?}
 %
 We might have asked for the following
@@ -833,49 +1266,6 @@ ys dys| should return |-20|. However, that is only correct if
 |20| is actually an element of |xs|. Otherwise, |xs `oplus` dxs|
 will make no change to |xs|. Similar issues apply with function
 changes.\pg{elaborate}
-
-\paragraph{Deriving closed terms of function type}
-If we differentiate a closed term |/- t : tau|, we get a change
-term |derive(t)| from |t| to itself\pg{Lexicon not introduced for
-  terms.}: |fromto tau (eval(t)
-emptyRho) (eval(derive(t)) emptyRho) (eval(t) emptyRho)|. We call such changes nil changes;
-they're important for two reasons. First, we will soon see that a
-unit element for |`oplus`| has its uses. Second, nil changes at
-function type are even more useful. A nil function change for
-function |f| takes an input |v1| and input change |dv| to a
-change from |f v1| and |f (v1 `oplus` dv)|. In other words, a nil
-function change for |f| is a \emph{derivative} for |f|!
-
-\pg{Define nil changes?}
-\paragraph{Constraining |`oplus`| on functions}
-Next, we discuss how |`oplus`| should be defined on functions.
-We show that we must set |f1 `oplus` df = \v -> f1 x `oplus` df v
-(nil v)|.
-
-We know that a valid function change |valid (sigma -> tau) df f1
-f2| takes valid input changes |valid sigma dv v1 v2| to a valid
-output change |valid tau (df v1 dv) (f1 v1) (f2 v2)|. We require
-that |`oplus`| agrees with validity, so |f2 = f1 `oplus` df|, |v2
-= v1 `oplus` dv| and |f2 v2 = (f1 `oplus` df) (v1 `oplus` dv) =
-f1 v1 `oplus` df v1 dv|. Replacing |dv| with |nil v| gives
-|(f1 `oplus` df) v1 = f1 v1 `oplus` df v1 (nil v)|.
-
-It also follows that |f1 v1 `oplus` df v1 dv = (f1 `oplus` df)
-(v1 `oplus` dv) = f1 (v1 `oplus` dv) `oplus` df (v1 `oplus` dv)
-(nil (v1 `oplus` dv))|. It turns out that this equation, together
-with a weaker form of validity preservation, characterizes
-function changes.
-
-\paragraph{Updating values by changes with |`oplus`|}
-Next, we will introduce formally operator |`oplus`| and relate it
-to validity. In particular, we will prove that |fromto tau v1 dv
-v2| implies |v1 `oplus` dv = v2|, and explain why the converse is
-not true.
-
-\validOplus*
-
-\deriveCorrectOplus*
-
 
 % \subsection{Differentiation}
 % After we defined our language, its type system and its semantics, we motivate
