@@ -214,10 +214,30 @@ from |ys1| (that is |{{4}}|) to |ys2| (that is |{{4, 5}}|) is
 |dys = {{5}}|. To represent the output change |doutput| from
 |output1| to |output2| we need integer changes. For now, we
 represent integer changes as integers, and define |`oplus`| on
-integers as addition: |v1 `oplus` dv = v1 + dv|. For both bags and integers, a
-change |dv| is always valid between |v1| and |v2 = v1 `oplus`
-dv|; for other changes, however, validity will be more
-restrictive.
+integers as addition: |v1 `oplus` dv = v1 + dv|.
+
+For both bags and integers, a change |dv| is always valid between
+|v1| and |v2 = v1 `oplus` dv|; for other changes, however,
+validity will be more restrictive. For instance, say we want to
+define changes on a type of natural numbers, and we still want to
+have |v1 `oplus` dv = v1 + dv|. A change from |3| to |2| should
+still be |-1|, so the type of changes must be |Int|. But the
+result of |`oplus`| should still be a natural, that is an integer
+|>= 0|: to ensure that |v1 `oplus` dv >= 0| we need to require
+that |dv >= -v1|. We use this requirement to define validity on
+naturals: |fromto v1 dv (v1 + dv)| is defined as equivalent to
+|dv >= -v1|. We can guarantee equation |v1 `oplus` dv = v1 + dv|
+not for all changes, but only for valid changes. Conversely, if a
+change |dv| is invalid for |v1|, then |v1 + dv < 0|. We then
+define |v1 `oplus` dv| to be |0|, though any other definition on
+invalid changes would work.\footnote{In fact, we could leave
+  |`oplus`| undefined on invalid changes. Our original
+  presentation~\citep{CaiEtAl2014ILC}, in essence, restricted
+  |`oplus`| to valid changes through dependent types, by ensuring
+  that applying it to invalid changes would be ill-typed. Later,
+  \citet{Huesca2015incrementality}, in similar developments,
+  simply made |`oplus`| partial on its domain instead of
+  restricting the domain, achieving similar results.}
 
 \subsection{Incrementalizing with changes}
 After introducing these notions, we describe how, in our
