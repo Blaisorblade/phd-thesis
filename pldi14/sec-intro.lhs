@@ -283,7 +283,7 @@ denote the result of this transformation on a term |t|.
 Informally, |derive(t)| describes how |t| changes, that is,
 
 \begin{slogan}
-|derive(t)| evaluates on base inputs and valid inputs changes to a change from |t|
+|derive(t)| evaluates on base inputs and valid inputs changes to a valid change from |t|
 evaluated on old inputs to |t| evaluated on new inputs.
 \end{slogan}
 
@@ -741,21 +741,26 @@ a correct change for |t|. Formally we have:
 \end{restatable}
 
 Once we define |`oplus`| we'll be able to relate it to validity. The statement we'll prove is
-\begin{restatable}[Valid changes update correctly, or |`oplus`|
-  agrees with validity]{lemma}{validOplus}
+\begin{restatable}[|`oplus`| agrees with validity]{lemma}{validOplus}
   \label{thm:valid-oplus}
   If |fromto tau v1 dv v2| then |v1 `oplus` dv = v2|.
 \end{restatable}
 
-And as a corollary of \cref{thm:correct-derive,thm:valid-oplus}, we can deduce that
-updating base result |eval(t) rho1| by change |eval(derive(t)) drho| via |`oplus`|
-gives the updated result |eval(t) rho2|.
+And we can deduce that updating base result |eval(t) rho1| by
+change |eval(derive(t)) drho| via |`oplus`| gives the updated
+result |eval(t) rho2|.
 \begin{restatable}[Correctness of |derive(param)|, corollary]{corollary}{deriveCorrectOplus}
   \label{thm:correct-derive-oplus}
   If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
   |eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|.
 \end{restatable}
-
+For didactic reasons we anticipate the proof of this corollary:
+\begin{proof}
+  First, differentiation is correct (\cref{thm:correct-derive}), so under the hypotheses
+  \[|fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|;\]
+  that judgement implies the thesis \[|eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|\]
+  because |`oplus`| agrees with validty (\cref{thm:valid-oplus}).
+\end{proof}
 \input{pldi14/fig-differentiation}
 
 % We will later also show change types
@@ -1180,7 +1185,7 @@ When we define change structures, each element is going to be
 associated to at least one nil change, as we're going to show later:
 \begin{restatable}[Existence of nil changes]{lemma}{nilChangesExist}
   \label{lem:nilChangesExist}
-  Given a basic change structure for |V|, to each element |v
+  Given a change structure for |V|, to each element |v
   `elem` V| is associated a distinguished nil change that we
   denote by |nil v|.
 \end{restatable}
@@ -1264,18 +1269,20 @@ We see |nil f| such that |fromto (A -> B) f (nil f) f|. That is,
 whenever |fromto A a1 da a2| then |fromto B (f1 a1) (nil f a1 da)
 (f2 a2)|. By \cref{thm:valid-oplus}, this means that we need to
 find |nil f| such that |f1 a1 `oplus` nil f a1 da = f2 a2|, where
-|a1 `oplus` da = a2|. To solve this equation, we introduce an
-operator |`ominus`|, such that |a2 `ominus` a1| produces a valid
+|a1 `oplus` da = a2|. To solve this equation, we \emph{introduce
+operator |`ominus`|}, such that |a2 `ominus` a1| produces a valid
 change from |a1| to |a2|, and see that |nil f| must be
 
 \[|nil f = \a1 da -> f (a1 `oplus` da) `ominus` f a1|.\]
 
 Definitions of |`ominus`| will be provided as part of change
-structures. In particular, we need to define also |`ominus`| on
-functions. Since |f2 `ominus` f1| must produce a valid function
-change, by generalizing the reasoning we just did, we obtain that
-whenever |fromto A a1 da a2| then we need to have
-|fromto B (f1 a1) ((f2 `ominus` f1) a1 da) (f2 a2)|, and can define
+structures. In particular, we define |`ominus`| on functions. And
+once we define |`ominus`|, we can also define |nil v = v `ominus`
+v|.
+Since |f2 `ominus` f1| must produce a valid function change,
+by generalizing the reasoning we just did, we obtain that
+whenever |fromto A a1 da a2| then we need to have |fromto B (f1
+a1) ((f2 `ominus` f1) a1 da) (f2 a2)|, and can define
 
 \begin{equation}
   \label{eq:ominus-fun-1}
@@ -1303,7 +1310,7 @@ Alternatively, as we'll see later in
 \cref{ch:defunc-fun-changes}, we could represent function changes
 not as functions but as data, and provide a function applying
 function changes |df : Dt^(sigma -> tau)| to inputs |t1 : sigma|
-and |dt : Dt^sigma|.
+and |dt : Dt^sigma|.\pg{reconsider}
 
 \subsection{Constraining ⊕ on functions}
 \label{sec:oplus-fun-intro}
@@ -1344,7 +1351,8 @@ We used this equation earlier \citep{CaiEtAl2014ILC}, together
 with a weaker form of validity preservation, to characterize
 function changes.
 
-\subsection{Updating values by changes with ⊕}
+\subsection{Formally defining ⊕ and change structures}
+%\subsection{Updating values by changes with ⊕}
 \label{sec:oplus}
 \label{sec:invalid}
 Next, we will introduce formally operators |`oplus`|, |`ominus`|
@@ -1369,14 +1377,22 @@ plugins to satisfy this theorem on base types:
   If\\ |fromto iota v1 dv v2| then |v1 `oplus` dv = v2|.
 \end{restatable}
 
-We define then |`oplus`| on function spaces:
+\begin{definition}
+  For each type |tau| we define operators |oplusIdx(tau) : tau ->
+  Dt^tau -> tau|, |ominusIdx(tau) : tau -> tau -> Dt^tau|.
+\end{definition}
+
+We define then |`oplus`|, |`nil`| and |`ominus`| on function spaces:
 \begin{code}
+  nil v = v `ominus` v
   f1 (oplusIdx(A -> B)) df = \v -> f1 v `oplus` df v (nil v)
+  f2 (ominusIdx(A -> B)) f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
 \end{code}
 
 In particular, when |A -> B = eval(sigma) -> eval(tau)|, it follows that
 \begin{code}
   f1 (oplusIdx(sigma -> tau)) df = \v -> f1 v `oplus` df v (nil v)
+  f2 (ominusIdx(sigma -> tau)) f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
 \end{code}
 
 \validOplus*
