@@ -1399,41 +1399,88 @@ define the nil change of |f| through its derivative.\pg{See
 % no, we need full abstraction, unless the term is closed.
 
 \pg{figure}
+% \NewDocumentCommand{\RightFramedSignatureML}{m}
+% {\vbox{\hfill\fbox{\(
+%         #1
+% \)
+%     }}}
+
 \begin{figure}
+  \pg{change structures}
+  \[|nil v = v `ominus` v |\]
+\begin{subfigure}[c]{0.6\textwidth}
+  \RightFramedSignature{|oplusIdx(A): A -> Dt^A -> A|}
+  \RightFramedSignature{|ominusIdx(A): A -> A -> Dt^A|}
+\begin{code}
+  f1 (oplusIdx(A -> B)) df = \v -> f1 v `oplus` df v (nil v)
+  f2 (ominusIdx(A -> B)) f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
+\end{code}
+\caption{Change structures for function spaces}
+\end{subfigure}
+\begin{subfigure}[c]{0.6\textwidth}
+  \RightFramedSignature{|oplusIdx(tau): eval(tau -> Dt^tau -> tau)|}
+  \RightFramedSignature{|ominusIdx(tau): eval(tau -> tau -> Dt^tau)|}
+\begin{code}
+  f1 (oplusIdx(sigma -> tau))   df = \v -> f1 v `oplus` df v (nil v)
+  v1 (oplusIdx iota)            dv = ...
+  f2 (ominusIdx(sigma -> tau))  f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
+  v2 (ominusIdx iota)           v1 = ...
+\end{code}
+\caption{|`oplus`| and |`ominus`| on semantic domains}
+\end{subfigure}
+\begin{subfigure}[c]{0.7\textwidth}
+  \RightFramedSignature{|oplusIdx(Gamma): eval(Gamma -> Dt^Gamma -> Gamma)|}
+  \RightFramedSignature{|ominusIdx(Gamma): eval(Gamma -> Gamma -> Dt^Gamma)|}
+\begin{code}
+  emptyRho `oplus` emptyRho                    = emptyRho
+  (rho, x = v) `oplus` (drho, x = v, dx = dv)  = (rho `oplus` drho, x = v `oplus` dv)
+  emptyRho `ominus` emptyRho                   = emptyRho
+  (rho2, x = v2) `ominus` (rho1, x = v1)       = (rho2 `ominus` rho1, x = v1, dx = v2 `ominus` v1)
+\end{code}
+  % nil emptyRho = emptyRho
+  % nil (rho, x = v) = nil rho, x = v, dx = nil v
+\caption{|`oplus`| and |`ominus`| on environments}
+\end{subfigure}
+\validOplus*
+  \deriveCorrectOplus*
+  \nilChangesExist*
+
   \caption{Defining change structures.}
   \label{fig:change-structures}
 \end{figure}
 
-\subsection{Derivatives are nil changes}
-\pg{This now goes earlier?}
-When we introduced derivatives, we claimed we can compute them by
-applying differentiation to function bodies.
-In fact, we can
-compute the derivative of a closed lambda abstraction by
-differentiating the whole abstraction!
+% \subsection{Derivatives are nil changes}
+% \pg{This now goes earlier?}
+% When we introduced derivatives, we claimed we can compute them by
+% applying differentiation to function bodies.
+% In fact, we can
+% compute the derivative of a closed lambda abstraction by
+% differentiating the whole abstraction!
 
-To see why, let's first consider an arbitrary closed term |t|,
-such that |/- t : tau|.
+% To see why, let's first consider an arbitrary closed term |t|,
+% such that |/- t : tau|.
 
-If we differentiate a closed term |/- t : tau|, we get a change
-term |derive(t)| from |t| to itself\pg{Lexicon not introduced for
-  terms.}: |fromto tau (eval(t)
-emptyRho) (eval(derive(t)) emptyRho) (eval(t) emptyRho)|. We call such changes nil changes;
-they're important for two reasons. First, we will soon see that a
-identity element for |`oplus`| has its uses. Second, nil changes at
-function type are even more useful. A nil function change for
-function |f| takes an input |v1| and input change |dv| to a
-change from |f v1| and |f (v1 `oplus` dv)|. In other words, a nil
-function change for |f| is a \emph{derivative} for |f|!
+% If we differentiate a closed term |/- t : tau|, we get a change
+% term |derive(t)| from |t| to itself\pg{Lexicon not introduced for
+%   terms.}: |fromto tau (eval(t)
+% emptyRho) (eval(derive(t)) emptyRho) (eval(t) emptyRho)|. We call such changes nil changes;
+% they're important for two reasons. First, we will soon see that a
+% identity element for |`oplus`| has its uses. Second, nil changes at
+% function type are even more useful. A nil function change for
+% function |f| takes an input |v1| and input change |dv| to a
+% change from |f v1| and |f (v1 `oplus` dv)|. In other words, a nil
+% function change for |f| is a \emph{derivative} for |f|!
 
-%\pg{steps}
-To sum up, if |f| is a closed function |derive(f)| is its
-derivative. So, if |f| is unary, \cref{eq:derivative-requirement}
-becomes in particular:
-\begin{equation}
-  \label{eq:correctness}
-  |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
-\end{equation}
+% %\pg{steps}
+% To sum up, if |f| is a closed function |derive(f)| is its
+% derivative. So, if |f| is unary, \cref{eq:derivative-requirement}
+% becomes in particular:
+% \begin{equation}
+%   \label{eq:correctness}
+%   |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
+% \end{equation}
+
+\pg{move back in, readd, ...}
 
 % \subsection{Differentiation}
 % After we defined our language, its type system and its semantics, we motivate
