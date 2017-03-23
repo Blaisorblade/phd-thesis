@@ -1395,15 +1395,31 @@ In particular, when |A -> B = eval(sigma) -> eval(tau)|, it follows that
   f2 (ominusIdx(sigma -> tau)) f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
 \end{code}
 
+\pg{Both change structure requirements, theorems on types}
+\begin{restatable}[|`ominus`| produces valid changes]{lemma}{validOminus}
+  \label{thm:valid-ominus}
+  |`ominus`| produces valid changes, that is |fromto tau v1 (v2
+  `ominus` v1) v2| and |v1 `oplus` (v2 `ominus` v1) = v2| for any
+  type |tau| and any |v1, v2 : eval(tau)|.
+\end{restatable}
 \validOplus*
 \begin{proof}\pg{?}
 \end{proof}
-\deriveCorrectOplus*
-\begin{proof}\pg{?}
+\begin{restatable}[|`ominus`| inverts |`oplus`|]{lemma}{oplusOminus}
+  For any type
+  |`ominus`| produces valid changes, that is |fromto tau v1 (v2
+  `ominus` v1) v2| for any type |tau| and any |v1, v2 :
+  eval(tau)|.
+\end{restatable}
+\begin{proof}
+  From \cref{thm:valid-ominus,thm:valid-oplus}.
 \end{proof}
+\deriveCorrectOplus*
+The proof came earlier.
 \nilChangesExist*
 \begin{proof}\pg{?}
 \end{proof}
+
 
 We only need |`ominus`| to be able to define nil changes on
 arbitrary functions |f : eval(sigma -> tau)|.
