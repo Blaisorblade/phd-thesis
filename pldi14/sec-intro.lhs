@@ -50,10 +50,14 @@ transformation that we call \emph{differentiation}. We will
 discuss later why we favor this approach.\pg{where?}
 
 We build our domain-specific functional languages based on
-simply-typed $\lambda$-calculus (STLC), extended with \emph{language plugins} to define the domain-specific parts, as discussed in \cref{sec:intro-stlc}.
-We show a motivating example for our approach in
-\cref{sec:motiv-example}. We define differentiation, state and
-prove its correctness theorem in \cref{sec:correct-derive}.
+simply-typed $\lambda$-calculus (STLC), extended with
+\emph{language plugins} to define the domain-specific parts, as
+discussed in \cref{sec:intro-stlc}. We show a motivating example
+for our approach in \cref{sec:motiv-example}. We define
+differentiation and motivate it informally in
+\cref{sec:informal-derive}, apply it to our motivating example in
+\cref{sec:derive-example}. Finally, in next chapter, we state and prove its
+correctness theorem in \cref{sec:correct-derive}.
 
 % \section{Our object language: STLC}
 % \label{sec:intro-stlc}
@@ -165,7 +169,7 @@ input size |n|, that is |dn = o(n)|. All approaches to incrementalization
 require small input changes. Incremental computation will then process the input
 changes, rather than just the new inputs.
 
-\subsection{Introducing changes}
+\section{Introducing changes}
 To talk about how the differences between old values and new
 values, we introduce a few concepts, for now without full definitions.
 In our approach to
@@ -319,7 +323,7 @@ informally. Next, we discuss incrementalization on higher-order
 terms in \cref{sec:higher-order-intro}, before defining
 differentiation in \cref{sec:correct-derive}.
 
-\subsection{Function changes}
+\section{Function changes}
 \label{sec:higher-order-intro}
 A first-class function can close over free variables that can
 change, hence functions values can change themselves; hence, we
