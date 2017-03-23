@@ -6,17 +6,21 @@
 
 \section{Change equivalence}
 \label{sec:changeeeq}
-Next, we formalize when two changes are ``equivalent'', and show
-that any change |dv| is equivalent to the difference
-|(v `oplus` dv) `ominus` dv|, even though the definition of
-change structure has no such explicit requirement.
+Next, we formalize when two changes are ``equivalent'', so we
+know when we can replace a change by another without affecting
+the result of the program. We could simply replace changes by
+equal changes, but that would not enable sufficient
+optimizations. For instance, if change |dv| is valid for |v|, it
+is not necessarily equal to the difference |(v `oplus` dv)
+`ominus` v|, but the two changes are always going to be
+equivalent, even though the definition of change structure has no
+such explicit requirement.
 
-We could demand that
-|(v `oplus` dv) `ominus` dv| be equal to |dv|. On naturals and
-on bags, this would be true. But there are sensible examples of
-change structures where |dv| and |(v `oplus` dv) `ominus` dv|
-are different changes, even though both go from $v$ to |v `oplus`
-dv|.
+We could demand that |(v `oplus` dv) `ominus` v| be instead
+\emph{equal} to |dv|. On naturals and on bags, this would be
+true. But there are sensible examples of change structures where
+|dv| and |(v `oplus` dv) `ominus` dv| are different changes, even
+though both go from |v| to |v `oplus` dv|.
 
 In fact, we can have multiple changes between the same source and target. For
 instance, we can go from list |['a', 'b', 'c']| to list |['a', 'b', 'd']| by
