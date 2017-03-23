@@ -407,10 +407,174 @@ changes.% We will discuss other alternatives later in \cref{?}.
 % are simple first-class values of this language.
 %
 
+\section{Differentiation, informally}
+\label{sec:informal-derive}
+Next, we define differentiation and explain informally why it
+does what we want. We then give an example of how differentiation
+applies to our example. A short formal proof will follow soon in
+\cref{sec:correct-derive}, justifying more formally why this
+definition is correct, but we proceed more gently.
+
+We define differentiation as the following term transformation:
+\begin{code}
+  derive(\x -> t) = \x dx -> derive(t)
+  derive(s t) = derive(s) t (derive(t))
+  derive(x) = dx
+  derive(c) = deriveConst(c)
+\end{code}
+
+This transformation might seem deceptively simple. Indeed, pure
+$\lambda$-calculus only handles binding and higher-order
+functions, leaving ``real work'' to primitives. Similarly, our
+transformation incrementalizes binding and higher-order
+functions, leaving ``real work'' to derivatives of primitives.
+However, our support of $\lambda$-calculus allows to \emph{glue}
+primitives together. We'll discuss later how we add support to
+various primitives and families of primitives.
+
+Now we try to motivate the transformation informally.
+As we claimed earlier, |derive(param)| must satisfy the following
+slogan:
+\begin{slogan}
+|derive(t)| evaluates on base inputs and valid inputs changes to a valid change from |t|
+evaluated on old inputs to |t| evaluated on new inputs.
+\end{slogan}
+
+Let's analyzes each case of the definition of |derive(u)|. In
+each case we assume that our slogan applies to any subterms of
+|u| and show it applies to |u| itself.
+\begin{itemize}
+\item if |u = x|, by our slogan |derive(x)| must evaluate to the
+  change of |x| when inputs change, so we set |derive(x) = dx|.
+\item if |u = c|, we simply delegate differentiation to
+  |deriveConst(c)|, which is defined by plugins. Since plugins
+  can define arbitrary primitives, they need provide their
+  derivatives.
+\item if |u = \x -> t|, then |u| introduces a function. Assume for
+  simplicity that |u| is a closed term. Then |derive(t)|
+  evaluates to the change of the result of this function |u|,
+  evaluated in a context binding |x| and its change |dx|. Then,
+  because of how function changes are defined, the change of |u|
+  is the change of |t| abstracted into a function of the
+  \emph{base input} |x| and its change |dx|, so |derive(u) = \x
+  dx -> derive(t)|.
+\item if |u = s t|, then |s| is a function. Assume for
+  simplicity that |u| is a closed term. Then |derive(s)|
+  evaluates to the change of |s|, as a function of |derive(s)|'s
+  base input and input change. So, we apply |derive(s)| to its
+  actual base input |t| and actual input change |derive(t)|, and
+  obtain |derive(s t) = derive(s) t derive(t)|.
+\end{itemize}
+
+This is not quite a correct proof sketch because of many issues,
+but we fix these issues with our formal treatment in
+\cref{sec:correct-derive}. In particular, in the case for
+abstraction |u = \x -> t|, |derive(t)| depends not only on |x|
+and |dx|, but also on other free variables of |u| and their
+changes. Similarly, we must deal with free variables also in the
+case for application |u = s t|. But first, we apply
+differentiation to our earlier example.
+
+\section{Differentiation on our example}
+\label{sec:derive-example}
+\pg{This example is still a bit too complex as written; I'm
+  skipping too many steps. Unless it comes after the basic
+  formalism is established.}
+
+To exemplify the behavior of differentiation concretely, and help
+fix ideas for later discussion, in this section we show how the derivative of
+|grand_total| looks like.
+
+\begin{code}
+grand_total  = \ xs ys -> sum (merge xs ys)
+output       = grand_total {{1}} {{2, 3, 4}} = 11
+\end{code}
+We define derivation as a compositional program transformation,
+so we first compute |derive(merge xs ys)|. To compute its change
+we simply call the derivative of |merge|, that is |dmerge|, and
+apply it to the base inputs and their changes: hence we write
+\[|derive(merge xs ys) = dmerge xs dxs ys dys|.\]
+As we'll
+better see later, we can define function |dmerge| as
+\[|dmerge = \xs dxs ys dys -> merge dxs dys|,\]
+%
+so |derive(merge xs ys)| can be simplified by $\beta$-reduction
+to |merge dxs dys|:
+\begin{code}
+          derive(merge xs ys)
+=         dmerge xs dxs ys dys
+`betaeq`  (\xs dxs ys dys -> merge dxs dys) xs dxs ys dys
+`betaeq`  merge dxs dys
+\end{code}
+
+Let's next derive |sum (merge xs ys)|. First, like above, the
+derivative of |sum zs| would be |dsum zs dzs|, which depends on
+base input |zs| and its change |dzs|. As we'll see, |dsum zs dzs|
+can simply call |sum| on |dzs|, so |dsum zs dzs = sum dzs|. To
+derive |sum (merge xs ys)|, we must call the derivative of |sum|,
+that is |dsum|, on its base argument and its change, so on |merge
+xs ys| and |derive(merge xs ys)|. We can later simplify again by
+$\beta$-reduction and obtain
+\begin{code}
+          derive(sum (merge xs ys))
+=         dsum (merge xs ys) (derive(merge xs ys))
+`betaeq`  sum (derive(merge xs ys))
+=         sum (dmerge xs dxs ys dys)
+`betaeq`  sum (merge dxs dys)
+\end{code}
+
+Here we see the output of differentiation is defined in a bigger
+typing context: while |merge xs ys| only depends on base inputs
+|xs| and |ys|, |derive(merge xs ys)| also depends on their
+changes. This property extends beyond the examples we just saw:
+if a term |t| is defined in context |Gamma|, then the output of
+derivation |derive(t)| is defined in context |Gamma, Dt ^ Gamma|,
+where |Dt ^ Gamma| is a context that binds a change |dx| for each
+base input |x| bound in the context |Gamma|.
+
+Next we must transform |derive(\ xs ys -> sum (merge xs ys))|. Since |derive(sum (merge xs ys))| is defined (ignoring later optimizations) in a context binding |xs, dxs, ys, dys|, deriving |\ xs ys -> sum (merge xs ys)| must bind all those variables.
+
+\begin{code}
+          derive(\ xs ys -> sum (merge xs ys))
+=         \xs dxs ys dys -> derive(sum (merge xs ys))
+`betaeq`  \xs dxs ys dys -> sum (merge dxs dys)
+\end{code}
+
+Next we need to transform the binding of |grand_total2| to its body |b = \ xs ys -> sum (merge xs ys)|. We copy this binding and add a new additional binding from |dgrand_total2| to the derivative of |b|.
+
+\begin{code}
+grand_total   = \ xs      ys      ->  sum  (merge  xs   ys)
+dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
+\end{code}
+
+Finally, we need to transform the binding of |output| and its body. By iterating similar steps,
+in the end we get:
+\begin{code}
+grand_total   = \ xs      ys      ->  sum  (merge  xs   ys)
+dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
+output         = grand_total   {{1, 2, 3}}       {{4}}
+doutput        = dgrand_total  {{1, 2, 3}} {{1}} {{4}} {{5}}
+               `betaeq` sum (merge {{1}} {{5}})
+\end{code}
+
+As expected,
+
+\paragraph{Self-maintainability}
+Differentiation does not always produce efficient derivatives
+without further program transformations; in particular,
+derivatives might need to recompute results produced by the base
+program. In the above example, if we don't inline derivatives and
+use $\beta$-reduction to simplify programs, |derive(sum (merge xs
+ys))| is just |dsum (merge xs ys) (derive(merge xs ys))|. A
+direct execution of this program will compute |merge xs ys|,
+taking time linear in the base inputs. \pg{Point out this is
+  self-maintainable!}
+
+\chapter{Differentiation and changes, formally}
 \section{Differentiation and its meaning}
 \label{sec:correct-derive}
 
-In this section, we make our previous discussion precise: we
+In this chapter, we make our previous discussion precise: we
 introduce differentiation and state and prove its correctness. We
 also elaborate on its effect on higher-order programs.
 
@@ -802,96 +966,6 @@ language plugins:
   |c|. That is, if |/- c : tau| then |fromto tau (evalConst c)
   (eval(deriveConst(c)) emptyRho) (evalConst c)|.
 \end{restatable}
-
-\subsection{Differentiation on our example}
-\pg{This example is still a bit too complex as written; I'm skipping too many steps.}
-
-To help fix ideas for later discussion, let us show
-how the derivative of |grand_total|
-looks like.
-
-\begin{code}
-grand_total  = \ xs ys -> sum (merge xs ys)
-output       = grand_total {{1}} {{2, 3, 4}} = 11
-\end{code}
-We define derivation as a compositional program transformation,
-so we first compute |derive(merge xs ys)|. To compute its change
-we simply call the derivative of |merge|, that is |dmerge|, and
-apply it to the base inputs and their changes: hence we write
-\[|derive(merge xs ys) = dmerge xs dxs ys dys|.\]
-As we'll
-better see later, we can define function |dmerge| as
-\[|dmerge = \xs dxs ys dys -> merge dxs dys|,\]
-%
-so |derive(merge xs ys)| can be simplified by $\beta$-reduction
-to |merge dxs dys|:
-\begin{code}
-          derive(merge xs ys)
-=         dmerge xs dxs ys dys
-`betaeq`  (\xs dxs ys dys -> merge dxs dys) xs dxs ys dys
-`betaeq`  merge dxs dys
-\end{code}
-
-Let's next derive |sum (merge xs ys)|. First, like above, the
-derivative of |sum zs| would be |dsum zs dzs|, which depends on
-base input |zs| and its change |dzs|. As we'll see, |dsum zs dzs|
-can simply call |sum| on |dzs|, so |dsum zs dzs = sum dzs|. To
-derive |sum (merge xs ys)|, we must call the derivative of |sum|,
-that is |dsum|, on its base argument and its change, so on |merge
-xs ys| and |derive(merge xs ys)|. We can later simplify again by
-$\beta$-reduction and obtain
-\begin{code}
-          derive(sum (merge xs ys))
-=         dsum (merge xs ys) (derive(merge xs ys))
-`betaeq`  sum (derive(merge xs ys))
-=         sum (dmerge xs dxs ys dys)
-`betaeq`  sum (merge dxs dys)
-\end{code}
-
-Here we see the output of differentiation is defined in a bigger
-typing context: while |merge xs ys| only depends on base inputs
-|xs| and |ys|, |derive(merge xs ys)| also depends on their
-changes. This property extends beyond the examples we just saw:
-if a term |t| is defined in context |Gamma|, then the output of
-derivation |derive(t)| is defined in context |Gamma, Dt ^ Gamma|,
-where |Dt ^ Gamma| is a context that binds a change |dx| for each
-base input |x| bound in the context |Gamma|.
-
-Next we must transform |derive(\ xs ys -> sum (merge xs ys))|. Since |derive(sum (merge xs ys))| is defined (ignoring later optimizations) in a context binding |xs, dxs, ys, dys|, deriving |\ xs ys -> sum (merge xs ys)| must bind all those variables.
-
-\begin{code}
-          derive(\ xs ys -> sum (merge xs ys))
-=         \xs dxs ys dys -> derive(sum (merge xs ys))
-`betaeq`  \xs dxs ys dys -> sum (merge dxs dys)
-\end{code}
-
-Next we need to transform the binding of |grand_total2| to its body |b = \ xs ys -> sum (merge xs ys)|. We copy this binding and add a new additional binding from |dgrand_total2| to the derivative of |b|.
-
-\begin{code}
-grand_total   = \ xs      ys      ->  sum  (merge  xs   ys)
-dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
-\end{code}
-
-Finally, we need to transform the binding of |output| and its body. By iterating similar steps,
-in the end we get:\pg{fill missing steps}
-\begin{code}
-grand_total   = \ xs      ys      ->  sum  (merge  xs   ys)
-dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
-output         = grand_total   {{1, 2, 3}}              {{4}}
-doutput        = dgrand_total  {{1, 2, 3}} {{1}} {{4}} {{5}}
-\end{code}
-
-
-\paragraph{Self-maintainability}
-Differentiation does not always produce efficient derivatives
-without further program transformations; in particular,
-derivatives might need to recompute results produced by the base
-program. In the above example, if we don't inline derivatives and
-use $\beta$-reduction to simplify programs, |derive(sum (merge xs
-ys))| is just |dsum (merge xs ys) (derive(merge xs ys))|. A
-direct execution of this program will compute |merge xs ys|,
-taking time linear in the base inputs. \pg{Point out this is
-  self-maintainable!}
 
 \subsection{Discussion}
 In this section we discuss a few points about differentiation and
