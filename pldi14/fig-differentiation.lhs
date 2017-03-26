@@ -21,7 +21,7 @@
 \RightFramedSignature{\Delta\Gamma}
 \begin{align*}
   \Delta\EmptyContext &= \EmptyContext \\
-  \Delta\Extend{x}{\tau} &= \Extend{\Extend[\Delta\Gamma]{x}{\tau}}{\D x : \Delta\tau}
+  \Delta\Extend*{x}{\tau} &= \Extend[\Extend[\Delta\Gamma]{x}{\tau}]{\D x}{\Delta\tau}
 \end{align*}
 \caption{Change contexts}
 \label{fig:correctness:change-contexts}% \pg{Does not match the original one!}

@@ -666,7 +666,7 @@ first define the shape of change environments through
   follows:
 \begin{align*}
   \Delta\EmptyContext &= \EmptyContext \\
-  \Delta\Extend{x}{\tau} &= \Extend{\Extend[\Delta\Gamma]{x}{\tau}}{\D x : \Delta\tau}\text{.}
+  \Delta\Extend*{x}{\tau} &= \Extend[\Extend[\Delta\Gamma]{x}{\tau}]{\D x}{\Delta\tau}\text{.}
 \end{align*}
 \end{definition}
 
