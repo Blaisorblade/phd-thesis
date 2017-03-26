@@ -986,9 +986,7 @@ language plugins:
 \end{restatable}
 
 \subsection{Discussion}
-In this section we discuss a few points about differentiation and
-its correctness.
-%
+\paragraph{The correctness statement}
 We might have asked for the following
 correctness property:
 
@@ -1026,6 +1024,129 @@ ys dys| should return |-20|. However, that is only correct if
 |20| is actually an element of |xs|. Otherwise, |xs `oplus` dxs|
 will make no change to |xs|. Similar issues apply with function
 changes.\pg{elaborate}
+
+\subsection{Binding issues}
+\label{sec:derive-binding-issues}
+Differentiation generates new names, so a correct implementation
+must make sure to prevent accidental capture, but our previous
+discussion ignored the problem. Our formalization has no capture
+issues as it uses deBrujin indexes, and change context just
+alternates variables for base inputs and input changes. A context
+such as |Gamma = x : Int, y : Bool| is encoded as |Gamma = Int,
+Bool|; its change context is |Dt^Gamma = Int, Dt^Int, Bool,
+Dt^Bool|. This solution is correct and robust, and is the one we
+rely on; we use names in this thesis only to simplify
+presentation.
+%
+
+In this subsection we discuss issues in implementing this
+transformation with names rather than deBrujin indexes. Unlike
+the rest of this chapter, we keep this discussion informal, also
+because we have not mechanized any definitions using names (as it
+may be possible using nominal logic). The rest of the thesis does
+not depend on this material, so readers might want to skip to
+next section.
+
+Using names introduces the risk of capture, as it is common for
+name-generating
+transformations~\citep{Erdweg2014captureavoiding}. For instance,
+differentiating term |t = \x -> f dx|, gives |derive(t) = \x dx
+-> df dx ddx|. Here variable |dx| represents a base input and is
+free in |t|, yet it is incorrectly captured in |derive(t)| by the
+other variable |dx|, the one representing |x|'s change.
+Differentiation gives instead a
+correct result if we $\alpha$-rename |x| in |t| to any other
+name (more on that in a moment).
+
+A few workarounds and fixes are possible.
+\begin{itemize}
+\item As a workaround, we can forbid names starting with the letter |d| for
+  variables in base terms, as we do in our examples; that's
+  formally correct but pretty unsatisfactory and inelegant. With
+  this approach, our term |t = \x -> f dx| is simply forbidden.
+\item As a better workaround, instead of prefixing variable names
+  with |d|, we can add change variables as a separate construct
+  to the syntax of variables and forbid differentiation on terms
+  that containing change variables. While we used this approach
+  in our prototype implementation in
+  Scala~\citep{CaiEtAl2014ILC}, it makes our output language
+  annoyingly non-standard.
+  % A slight downside is that
+  % this unnecessarily prevents attempting iterated
+  % differentiation, as in |derive(derive(t))|.
+
+  % which other
+  % approaches to finite differencing rely on~\citep{Koch10IQE}.%
+  % \footnote{We explain in }
+  % \footnote{This restriction is
+  %   still unnecessary and slightly unfortunate, since other
+  %   approaches to finite differencing on database languages require
+  %   iterated differentiation~\citep{Koch10IQE}.
+
+  %   In fact,
+  %   we never iterate differentiation, but t
+
+  %   We discuss later~\cref{sec:finite-diff}.}
+\item We can try to $\alpha$-rename \emph{existing} bound
+  variables, as in the implementation of capture-avoiding
+  substitution. As mentioned, in our case, we can rename bound
+  variable |x| to |y| and get |t' = \y -> f dx|. Differentiation
+  gives the correct result |derive(t') = \y dy -> df dx ddx|. In
+  general we can define |derive(\x -> t) = \y dy -> derive(t[x :=
+  y])| where neither |y| nor |dy| appears free in |t|; that is,
+  we search for a fresh variable |y| (which, being fresh, does
+  not appear anywhere else) such that also |dy| does not appear
+  free in |t|.
+
+  This solution is however subtle: it reuses ideas from
+  capture-avoiding substitution, which is well-known to be
+  subtle. We have not attempted to formally prove such a solution
+  correct (or even test it) and have no plan to do so.
+\item Finally and most easily we can $\alpha$-rename \emph{new}
+  bound variables, the ones used to refer to changes, or rather,
+  only pick them fresh. But if we pick, say, fresh variable |dx1|
+  to refer to the change of variable |x|, we \emph{must} use
+  |dx1| consistently for every occurrence of |x|, so that
+  |derive(\x -> x)| is not |\dx1 -> dx2|. Hence, we extend
+  |derive(param)| to also take a map from names to names as
+  follows:
+\begin{align*}
+  |derive(\x -> t, m)| &= |\x n -> derive(t, (m[x -> n]))| \\
+  |derive(s t, m)| &= |derive(s, m) t (derive(t, m))| \\
+  |derive(x, m)| &= |m^(x)| \\
+  |derive(c, m)| &= |deriveConst(c)|
+\end{align*}
+where |m^(x)| represents lookup of |x| in map |m|,
+|n| is a fresh variable that does not appear in |t|,
+and |m[x -> n]| extend |m| with a new mapping from |x| to |n|.
+
+  But this change affects the interface of differentiation, in
+  particular, which variables are free in output terms. With this
+  change, |derive(s, emptyMap)| gives a result
+  $\alpha$-equivalent to |derive(s)| if term |s| is closed and
+  triggers no capture issues. But if |s| is open, we must
+  initialize |m| with mappings from |s|'s free variables to fresh
+  variables for their changes. Such variables appear free in |derive(s,
+  m)|, so we must modify
+  Hence
+  hence we must also use modify |Dt ^ Gamma| to use |m| to
+  keep rule \textsc{Derive} valid.
+
+  Hence we define $\Delta_m \Gamma$ by adding |m| as a parameter to
+  |Dt^Gamma|, and use it in a modified rule \textsc{Derive'}:
+\begin{align*}
+  \Delta_m\EmptyContext &= \EmptyContext \\
+  \Delta_m\Extend*{x}{\tau} &= \Extend[\Extend[\Delta_m\Gamma]{x}{\tau}]{m(x)}{\Delta\tau}\text{.}
+\end{align*}
+  \begin{typing}
+    \Rule[Derive']
+    {|Gamma /- t : tau|}
+    {\Delta_m \Gamma| /- derive(t, m) : Dt ^ tau|}
+  \end{typing}
+  We have not proved this solution is correct, just like the
+  previous one, but this time it appears intuitively obvious that
+  \textsc{Derive'} holds and that |derive(t, m)| is correct.
+\end{itemize}
 
 \section{Operations on changes}
 In the previous section we have characterized the behavior of
