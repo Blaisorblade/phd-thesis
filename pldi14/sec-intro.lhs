@@ -197,14 +197,31 @@ even if |dv| is not a valid change from |v1| to |v1 `oplus` dv|;
 in fact, |`oplus`| is overloaded over types, and for each type
 |tau| it has an overload of signature |tau -> Dt ^ tau -> tau|.
 
-In Haskell terms, we can define |Dt^tau| and an overloaded
-|`oplus`| through a type class with an associated type:
+We also introduce operator |`ominus`|: given two values |v1, v2|
+for the same type, |v2 `ominus` v1| is a valid change from |v1|
+to |v2|.
+
+Finally, we introduce change composition: if |dv1| is a valid
+change from |v1| to |v2| and |dv2| is a valid change from |v2| to
+|v3|, then |ocompose dv1 v1 dv2| is a valid change from |v1| to
+|v3|. This operation will be useful later.
+
+Definitions of these operations and concepts for a type form a
+\emph{change structure}. We'll define change structures properly
+later. We already sketch, preliminarly, how a change structure
+can be represented in Haskell terms: a change structure is
+encoded as a \emph{type class} named |ChangeStruct t|, where change type
+|Dt^tau| is defined as an associated type |Dt^t|, and operations
+|`oplus`|, |`ominus`| and |`ocompose`| are defined as methods.
 \begin{code}
 class ChangeStruct t where
   type Dt t
   oplus :: t -> Dt t -> t
+  ominus :: t -> t -> Dt t
+  (`ocompose`) :: Dt t -> t -> Dt t -> Dt t
 \end{code}
-We'll later come back to this definition and refine it.
+We'll come back to this definition and refine it,
+describing the laws it satisfies, in \cref{sec:change-struct-tc}.
 
  \pg{changes on bags?}
 To show how incrementalization affects our example, we next
