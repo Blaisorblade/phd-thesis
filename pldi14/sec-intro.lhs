@@ -181,12 +181,12 @@ we also have \emph{change terms}, that evaluate to \emph{change
 preserves types: That is, if an old value |v1| has type |tau|,
 then also its corresponding new value |v2| must have type |tau|.
 To each type |tau| we associate a type of changes or \emph{change type}
-|Dt^tau|: a change between |v1| and |v2| must have type |Dt^tau|.
+|Dt^tau|: a change between |v1| and |v2| must be a value of type |Dt^tau|.
 
 Not all descriptions of changes are meaningful,
 so we also talk about \emph{valid} changes.
 %
-A value |dv| can be a valid change from |v1| to |v2|. We also
+A change value |dv| can be a valid change from |v1| to |v2|. We also
 call |v1| the source of |dv| and |v2| the destination of |dv|.
 
 We also introduce an operator |`oplus`| on values and changes: if
@@ -198,7 +198,7 @@ in fact, |`oplus`| is overloaded over types, and for each type
 |tau| it has an overload of signature |tau -> Dt ^ tau -> tau|.
 
 In Haskell terms, we can define |Dt^tau| and an overloaded
-`oplus` through a type class with an associated type:
+|`oplus`| through a type class with an associated type:
 \begin{code}
 class ChangeStruct t where
   type Dt t
@@ -623,7 +623,7 @@ function types.
 We refer to values of change types as \emph{change values}.
 
 Then, we define \emph{validity} as a family of ternary relations,
-indeed by types and relating changes with their sources and
+indexed by types and relating changes with their sources and
 destinations.
 \begin{definition}
 We say that |dv| is valid change from |v1| to |v2|, and write
@@ -1149,18 +1149,30 @@ and |m[x -> n]| extend |m| with a new mapping from |x| to |n|.
 \end{itemize}
 
 \section{Operations on changes}
-In the previous section we have characterized the behavior of
-differentiation. However, this characterization is not yet
-directly useful. Moreover, it is not yet clear how plugins should
-define differentiation on primitives.
+In the previous section, we have shown that evaluating the result
+of differentiation produces a valid change |dv| from the old
+output |v1| to the new one |v2|. We also want a way to
+\emph{compute} |v2| from |v1| and |dv|, that is, we want to
+\emph{define} the operator |`oplus`| that we have talked so much
+about.
+
+Moreover, it is not yet clear concretely how plugins should
+define differentiation on primitives. To write derivatives on
+primitives, we will need operations on changes, such as
+|`oplus`|, |`ominus`|, |`ocompose`| and |nilc|, and
+guarantees on their behavior. Guarantees on the behavior of
+change operations will be needed to prove that programs using
+change operations behave as specified. In particular, such
+guarantees are required to prove that the derivatives of some
+primitives are correct.
 
 Hence, we continue exploring how changes behave, and introduce
 operations (including |`oplus`|) that manipulate them. We will
 define these operations both at the semantic level to operate on
 change values, and on the syntactic level to use in object
-programs. While often the same definitions are applicable,
-additional performance concerns apply to object-level
-implementations.
+programs, such as derivatives of primitives. While often the same
+definitions are applicable, additional performance concerns apply
+to object-level implementations.
 
 We will summarize this section in \cref{fig:change-structures};
 readers might want to jump there for the definitions. However, we
@@ -1295,7 +1307,7 @@ But before defining |`oplus`|, we need to introduce a few more
 concepts, as we do next.
 
 % including |`oplus`|
-% but also |nil(param)| and |`ominus`| and
+% but also |nilc| and |`ominus`| and
 
 \subsection{Nil changes}
 \label{sec:nil-changes-intro}
@@ -1438,9 +1450,10 @@ to produce a function change that can be applied, hence
 
 Alternatively, as we'll see later in
 \cref{ch:defunc-fun-changes}, we could represent function changes
-not as functions but as data, and provide a function applying
-function changes |df : Dt^(sigma -> tau)| to inputs |t1 : sigma|
-and |dt : Dt^sigma|.\pg{reconsider}
+not as functions but as data through \emph{defunctionalization},
+and provide a function applying function changes |df : Dt^(sigma
+-> tau)| to inputs |t1 : sigma| and |dt :
+Dt^sigma|.\pg{reconsider}
 
 \subsection{Constraining ⊕ on functions}
 \label{sec:oplus-fun-intro}
@@ -1481,12 +1494,13 @@ We used this equation earlier \citep{CaiEtAl2014ILC}, together
 with a weaker form of validity preservation, to characterize
 function changes.
 
-\subsection{Formally defining ⊕ and change structures}
+\section{Formally defining ⊕ and change structures}
 %\subsection{Updating values by changes with ⊕}
+\label{sec:change-structures-formal}
 \label{sec:oplus}
 \label{sec:invalid}
 Next, we will introduce formally operators |`oplus`|, |`ominus`|
-and |nil(param)| and relate them to validity. In particular, we will
+and |nilc| and relate them to validity. In particular, we will
 prove that |fromto tau v1 dv v2| implies |v1 `oplus` dv = v2|,
 and explain why the converse is not true.
 
@@ -1496,8 +1510,6 @@ and explain why the converse is not true.
   For each base type |iota| we have a definition of
   |oplusIdx(iota) : iota -> Dt^iota -> iota|.
 \end{restatable}
-
-Notationally, we usually omit subscripts from |`oplus`|.
 
 To prove that |`oplus`| agrees with validity in general
 (\cref{thm:valid-oplus}), we must require definitions from
@@ -1512,7 +1524,7 @@ plugins to satisfy this theorem on base types:
   Dt^tau -> tau|, |ominusIdx(tau) : tau -> tau -> Dt^tau|.
 \end{definition}
 
-We define then |`oplus`|, |`nil`| and |`ominus`| on function spaces:
+We define then |`oplus`|, |nilc| and |`ominus`| on function spaces:
 \begin{code}
   nil v = v `ominus` v
   f1 (oplusIdx(A -> B)) df = \v -> f1 v `oplus` df v (nil v)
@@ -1536,10 +1548,9 @@ In particular, when |A -> B = eval(sigma) -> eval(tau)|, it follows that
 \begin{proof}\pg{?}
 \end{proof}
 \begin{restatable}[|`ominus`| inverts |`oplus`|]{lemma}{oplusOminus}
-  For any type
-  |`ominus`| produces valid changes, that is |fromto tau v1 (v2
-  `ominus` v1) v2| for any type |tau| and any |v1, v2 :
-  eval(tau)|.
+  For any type |tau| and any values |v1, v2 : eval(tau)|,
+  |`oplus`| inverts |`ominus`|, that is |v1 `oplus` (v2 `ominus`
+  v1) = v2|.
 \end{restatable}
 \begin{proof}
   From \cref{thm:valid-ominus,thm:valid-oplus}.

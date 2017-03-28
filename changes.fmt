@@ -3,12 +3,18 @@
 %format alpha = "\alpha"
 %format Nat = "\mathbb{N}"
 %format Int = "\mathbb{Z}"
+
+%format `times` = "\times"
 %format Gamma = "\Gamma"
 %format Gamma1
 %format Gamma2
 %format `preceq` = "\preceq"
 %format v1
 %format v2
+%format v3
+
+%format V1
+%format V2
 
 %format t1
 %format t2
@@ -25,7 +31,7 @@
 %format (ominusIdx(t)) = "\ominus_{" t "}"
 
 %format `ocompose` = "\circledcirc "
-%format ocompose = "(\circledcirc)"
+%format ocompose v1 dv1 dv2 = dv1 "\circledcirc_{" v1 "}" dv2
 
 %format `doe` = "\Doe"
 %format chs (v) = "\ChangeStruct{" v "}"
@@ -41,6 +47,7 @@
 %format a0
 %format a1
 %format a2
+%format a3
 %format da0
 %format da1
 %format da2
@@ -83,8 +90,11 @@
 
 %format Dt = "\Delta"
 %format DtIdx(t) = "\Delta_{" t "}"
+%format Dt2 = "\Delta_2"
 %format DV = "\Delta V"
 
+%format Sigma = "\Sigma"
+%format nilc = "\NilC{}"
 %format (nil(v)) = "\NilC{" v "}"
 %format NIL = "\NILC"
 %format eval(t) = "\Eval{" t "}"
