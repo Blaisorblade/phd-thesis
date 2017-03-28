@@ -1424,7 +1424,7 @@ by applying it to arguments---we only know |f| extensionally, not
 intensionally. Yet, by defining a few further operations, we can
 still define a nil change for |f|.
 
-We see |nil f| such that |fromto (A -> B) f (nil f) f|. That is,
+We define |nil f| so that |fromto (A -> B) f (nil f) f|. That is,
 whenever |fromto A a1 da a2| then |fromto B (f1 a1) (nil f a1 da)
 (f2 a2)|. By \cref{thm:valid-oplus}, this means that we need to
 find |nil f| such that |f1 a1 `oplus` nil f a1 da = f2 a2|, where
@@ -1454,7 +1454,7 @@ additional concerns. The produced function change is rather slow,
 because it recomputes the old output |f1 a1|, while also computes
 the new output |f2 a2| and taking the difference.
 
-However, we can implement `ominus` using replacement changes, if
+However, we can implement |`ominus`| using replacement changes, if
 they are supported on the relevant types. If we define |`ominus`|
 on set |B| as |b2 `ominus` b1 = !b2|, then \cref{eq:ominus-fun-1}
 simplifies to
@@ -1485,9 +1485,9 @@ with validity (\cref{thm:valid-oplus}).
 % Assume there exists a valid nil change for |v|, and
 % write it |nil v| (see \cref{lem:nilChangesExist}).
 
-We know that a valid function change |fromto (sigma -> tau) df f1
-f2| takes valid input changes |fromto sigma dv v1 v2| to a valid
-output change |fromto tau (df v1 dv) (f1 v1) (f2 v2)|. We require
+We know that a valid function change |fromto (sigma -> tau) f1 df
+f2| takes valid input changes |fromto sigma v1 dv v2| to a valid
+output change |fromto tau (f1 v1) (df v1 dv) (f2 v2)|. We require
 that |`oplus`| agrees with validity (\cref{thm:valid-oplus}), so
 |f2 = f1 `oplus` df|, |v2 = v1 `oplus` dv| and
 %

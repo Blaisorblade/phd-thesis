@@ -44,10 +44,15 @@
 %format f0
 %format f1
 %format f2
+
 %format a0
 %format a1
 %format a2
 %format a3
+
+%format b1
+%format b2
+
 %format da0
 %format da1
 %format da2
