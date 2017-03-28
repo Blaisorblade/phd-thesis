@@ -186,8 +186,10 @@ To each type |tau| we associate a type of changes or \emph{change type}
 Not all descriptions of changes are meaningful,
 so we also talk about \emph{valid} changes.
 %
-A change value |dv| can be a valid change from |v1| to |v2|. We also
-call |v1| the source of |dv| and |v2| the destination of |dv|.
+A change value |dv| can be a valid change from |v1| to |v2|. We
+can also consider a valid change as an edge from |v1| to |v2|,
+and we call |v1| the source of |dv| and |v2| the destination of
+|dv|.\pg{What about changes with multiple valid sources?}
 
 We also introduce an operator |`oplus`| on values and changes: if
 |dv| is a valid change from |v1| to |v2|, then |v1 `oplus` dv|
@@ -1411,37 +1413,43 @@ emptyRho) (evalInc t emptyRho emptyRho) (eval t emptyRho)|.\]
 
 \subsection{Nil changes on arbitrary functions}
 \label{sec:nil-changes-fun-intro}
-Not all functions |f : A -> B| arise as the semantics of some
-term. We discuss next how to compute |nil f| anyway. Technically,
-we are given an arbitrary metalanguage function |f : A -> B|,
-where |A| and |B| are arbitrary sets; we assume a basic change
-structure on |A -> B|, and want to find a nil change for |f|. As
-discussed, if |f| is the semantics of a closed term |t| (|f =
-eval(t) emptyRho|), the nil change for |f| is |df =
-eval(derive(f)) emptyRho|. But in general we cannot inspect the
-STLC code for |f| (which might not exist), only test its behavior
-by applying it to arguments---we only know |f| extensionally, not
-intensionally. Yet, by defining a few further operations, we can
-still define a nil change for |f|.
 
-We define |nil f| so that |fromto (A -> B) f (nil f) f|. That is,
-whenever |fromto A a1 da a2| then |fromto B (f1 a1) (nil f a1 da)
-(f2 a2)|. By \cref{thm:valid-oplus}, this means that we need to
-find |nil f| such that |f1 a1 `oplus` nil f a1 da = f2 a2|, where
-|a1 `oplus` da = a2|. To solve this equation, we \emph{introduce
-operator |`ominus`|}, such that |a2 `ominus` a1| produces a valid
-change from |a1| to |a2|, and see that |nil f| must be
+We have discussed how to find a nil change |nil f| for a function
+|f| if we know the \emph{intension} of |f|, that is, its
+definition. What if we have only its \emph{extension}, that is,
+its behavior? Can we still find |nil f|?
+That's necessary to implement |nilc| as an
+object-language function |nilc| from |f| to |nil f|, since such a
+function does not have access to |f|'s implementation. That's
+also necessary to define |nilc| in the metalanguage on function
+spaces.
+
+We first look at the metalanguage case. We want to find a nil
+change for an arbitrary metalanguage function |f : A -> B|, where
+|A| and |B| are arbitrary sets; we assume a basic change
+structure on |A -> B|, and will require them to support a few
+additional operations.
+
+We seek |nil f| so that |fromto (A -> B) f (nil f) f|. That
+is, whenever |fromto A a1 da a2| then |fromto B (f1 a1) (nil f a1
+da) (f2 a2)|. By \cref{thm:valid-oplus}, this means that we need
+to find |nil f| such that |f1 a1 `oplus` nil f a1 da = f2 a2|,
+where |a1 `oplus` da = a2|. To solve this equation, we
+\emph{introduce operator |`ominus`|}, such that |a2 `ominus` a1|
+produces a valid change from |a1| to |a2|, and see that |nil f|
+must be
 
 \[|nil f = \a1 da -> f (a1 `oplus` da) `ominus` f a1|.\]
 
 Definitions of |`ominus`| will be provided as part of change
 structures. In particular, we define |`ominus`| on functions. And
 once we define |`ominus`|, we can also define |nil v = v `ominus`
-v|.
-Since |f2 `ominus` f1| must produce a valid function change,
-by generalizing the reasoning we just did, we obtain that
-whenever |fromto A a1 da a2| then we need to have |fromto B (f1
-a1) ((f2 `ominus` f1) a1 da) (f2 a2)|, and can define
+v|. We seek a valid function change |f2 `ominus` f1| from |f1| to
+|f2|. We have just sought and found a valid change from |f| to
+|f|; generalizing the reasoning we used, we obtain that whenever
+|fromto A a1 da a2| then we need to have |fromto B (f1 a1) ((f2
+`ominus` f1) a1 da) (f2 a2)|; since |a2 = a1 `oplus` da|, we can
+define
 
 \begin{equation}
   \label{eq:ominus-fun-1}
@@ -1485,31 +1493,24 @@ with validity (\cref{thm:valid-oplus}).
 % Assume there exists a valid nil change for |v|, and
 % write it |nil v| (see \cref{lem:nilChangesExist}).
 
-We know that a valid function change |fromto (sigma -> tau) f1 df
-f2| takes valid input changes |fromto sigma v1 dv v2| to a valid
-output change |fromto tau (f1 v1) (df v1 dv) (f2 v2)|. We require
+We know that a valid function change |fromto (A -> B) f1 df
+f2| takes valid input changes |fromto A v1 dv v2| to a valid
+output change |fromto B (f1 v1) (df v1 dv) (f2 v2)|. We require
 that |`oplus`| agrees with validity (\cref{thm:valid-oplus}), so
 |f2 = f1 `oplus` df|, |v2 = v1 `oplus` dv| and
 %
-\[|f2 v2 = (f1 `oplus` df) (v1 `oplus` dv) = f1 v1 `oplus` df v1
-  dv|.\]
+\begin{equation}
+  \label{eq:fun-preserv-eq}
+|f2 v2 = (f1 `oplus` df) (v1 `oplus` dv) = f1 v1 `oplus` df v1
+  dv|.
+\end{equation}
 %
 Instantiating |dv| with |nil v| gives equation
 %
-\[|(f1 `oplus` df) v1 = f1 v1 `oplus` df v1 (nil v)|,\]
+\[|(f1 `oplus` df) v1 = (f1 `oplus` df) (v1 `oplus` nil v) = f1 v1 `oplus` df v1 (nil v)|,\]
 %
 which is not only a requirement on |`oplus`| for functions but
 also defines |`oplus`| effectively.
-
-It also follows that
-\[
-  |f1 v1 `oplus` df v1 dv = (f1 `oplus` df) (v1 `oplus` dv) = f1
-  (v1 `oplus` dv) `oplus` df (v1 `oplus` dv) (nil (v1 `oplus`
-  dv))|.\]
-%
-We used this equation earlier \citep{CaiEtAl2014ILC}, together
-with a weaker form of validity preservation, to characterize
-function changes.
 
 \section{Formally defining ⊕ and change structures}
 %\subsection{Updating values by changes with ⊕}
