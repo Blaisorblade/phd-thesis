@@ -25,6 +25,9 @@ pldi14/fig-differentiation.tex
 pldi14/sec-preliminaries.tex
 mylhs2tex.sty
 
+## lhs2TeX extracted code
+defunc.hs
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof

@@ -22,11 +22,14 @@ lhsSources=$(patsubst %,%.lhs,new-stuff change-theory-reconstruct \
 	sec-change-equiv sec-function-change sec-differentiate sec-correctness \
 	fig-differentiation))
 lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
-sources=$(shell find . -name '*.tex') $(wildcard Bibs/*.bib) $(lhsSources) $(lhsFmt)
+# Sources to watch for changes but that don't need to be compiled on their own,
+# because they're included elsewhere.
+sourcesIncluded=$(shell find . -name '*.tex') $(wildcard Bibs/*.bib) $(lhsFmt) defunc.lhs
+sources=$(lhsSources) $(sourcesIncluded)
 INTERM_PRODUCTS=mylhs2tex.sty $(lhsCompiled)
 
 
-all:	open
+all:	check open
 OPEN = ./open.sh
 
 open: $(PDF_NAME)
@@ -37,6 +40,8 @@ ifeq ($V, 1)
 else
   REDIR=> /dev/null
 endif
+
+new-stuff.tex: defunc.lhs
 
 .PHONY: FORCE
 %.tex: %.lhs $(lhsFmt)
@@ -68,3 +73,8 @@ demon:
 	make
 	$(fswatch) $(sources) Makefile | $(xargs) make & \
 	wait
+
+
+%.hs: %.lhs $(lhsFmt)
+	lhs2TeX --newcode -P .: -o $*.hs $*.lhs
+check: defunc.hs
