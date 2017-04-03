@@ -4,7 +4,8 @@
 
 %if style == newcode
 \begin{code}
-{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE ExistentialQuantification, TypeFamilies, TypeFamilyDependencies,
+InstanceSigs, GADTs #-}
 \end{code}
 %endif
 
@@ -102,9 +103,10 @@ for all |x|.
 Function |oreplace| encodes |!t|, that is the bang operator. We use a different
 notation because |!| is reserved for other purposes in Haskell.
 
+These typeclasses omit operation |`ominus`| intentionally: we do \emph{not}
+require that change structures support a proper difference operation.
+Nevertheless, as discussed |b `ominus` a| can be expressed through |oreplace b|.
 \pg{Should we omit |oreplace| at first?}
-% These typeclasses omit operation |`ominus`| intentionally: we do \emph{not}
-% require that change structures support a difference operation.
 
 % or that all changes are
 % representable.
@@ -119,6 +121,13 @@ id x = x
 -- and its derivative:
 did :: a -> Dt^a -> Dt^a
 did x dx = dx
+
+instance (NilChangeStruct a, ChangeStruct b) => ChangeStruct (a -> b) where
+  type Dt^(a -> b) = a -> Dt^a -> Dt^b
+  oplus f df = \x -> f x `oplus` df x (nil x)
+  oreplace f = \x dx -> oreplace (f (x `oplus` dx))
+instance (NilChangeStruct a, ChangeStruct b) => NilChangeStruct (a -> b) where
+  nil f = oreplace f
 
 -- Same for |apply|:
 apply :: (a -> b) -> a -> b
@@ -177,35 +186,80 @@ all the ILC theory we developed to show differentiation is correct.
 
 \section{Defunctionalization}
 In a typed language supporting generalized algebraic datatypes (GADTs),
-defunctionalization transforms the type of functions |sigma -> tau| to a new
-type |Fun sigma tau|, indexed by both |sigma| and
-|tau|~\citep{Pottier2004polymorphic}.
+defunctionalization transforms the type of function values |sigma -> tau| to a
+new type |Fun sigma tau| of defunctionalized function values, indexed by both
+|sigma| and |tau|~\citep{Pottier2004polymorphic}, together with an interpreter
+for defunctionalized function values |apply :: Fun sigma tau -> sigma -> tau|.
+The resulting programs are expressed in a first-order subset of the original
+programming language, where all proper functions are top-level definitions.
 
-\pg{For concreteness, we imagine a program having closures...}
+For instance, we imagine a program having closures |\x -> x + 1| and |\x -> x +
+y|, where |y :: Int|.
+\begin{figure}
+\begin{code}
+applyToInts :: (Int -> a) -> [a]
+applyToInts f =
+  [f 0, f 1]
 
+getList :: [Int]
+getList =
+  let  l1 = applyToInts (\x -> x + 1)
+       y = 2
+       l2 = applyToInts (\x -> x + y)
+  in   l1 ++ l2
+\end{code}
+\caption{A small program that we use as an example for defunctionalization.}
+\label{fig:defunc-example}
+\end{figure}
+\pg{Can we incrementalize this? Hmm... Maybe take already the running example on
+sequences?}
+
+
+\pg{Defunctionalize all functions? Both variants? For now we don't want codes
+for all top-level functions, do we?}
 For each lambda expression |l = \x -> t| in the source program, typed as |Gamma
 /- \x -> t : sigma -> tau|, defunctionalization creates a constructor |C| of
-|Fun sigma tau|. While lambda expression |l| closes \emph{implicitly} over
+|Fun sigma tau|.\footnote{More specifically, we only need codes for functions
+that are used as first-class arguments, not for other functions, though codes
+for the latter can be added as well.}
+While lambda expression |l| closes \emph{implicitly} over
 environment |rho : eval(Gamma)|, |C| closes over it explicitly: the values bound
 to free variables in environment |rho| are passed as arguments to constructor
 |c|.
 
-We use a variant of defunctionalization. Instead of having a single type |Fun
-sigma tau|. We defunctionalize functions from |sigma| to |tau| as pairs of a
+We use a variant of defunctionalization: Instead of having a single type |Fun
+sigma tau|, we defunctionalize functions from |sigma| to |tau| as pairs of a
 function descriptor and a (possibly empty) environment. We separate the
 environment because a variety of operations must manipulate it uniformly. To
-this end, we define a GADT of function codes indexed by |Code env sigma tau|, so
-that a function |sigma -> tau| is encoded as a pair of an environment of type
-|env| and a function |F env (Code env sigma tau)|.
-
+this end, we define a GADT of function codes indexed by |Code env sigma tau|,
+with a case for each lambda expression in the source program. We show, as an
+example, cases for the program above\pg{figure}
 \begin{code}
 data Code env sigma tau where
+  Add1 :: Code () Int Int
+  AddY :: Code Int Int Int
   -- ...
+\end{code}
+We also require an interpretation function |applyCode|, taking a function
+code, an environment and an input and producing an output.
+\begin{code}
+applyCode :: Code env sigma tau -> env -> sigma -> tau
+applyCode Add1  ()  x = x + 1
+applyCode AddY  y   x = x + y
+\end{code}
 
+A function |sigma -> tau| is encoded as a pair of an environment of type |env|
+and a function |F env (Code env sigma tau)|. To bind type variable |env|, we use
+a Haskell extension called |ExistentialQuantification|, that adds to Haskell a
+form of existential types.
+\begin{code}
 data Fun sigma tau = forall env . F env (Code env sigma tau)
-
+\end{code}
+We can wrap |applyCode| into a more conventional |applyFun| function that
+interprets defunctionalized function values:
+\begin{code}
 applyFun :: (Fun sigma tau) -> sigma -> tau
-applyFun = undefined
+applyFun (F env c) arg = applyCode c env arg
 \end{code}
 
 %  CPair1 :: Code sigma tau (sigma, tau)
