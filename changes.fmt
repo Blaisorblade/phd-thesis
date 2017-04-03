@@ -38,7 +38,7 @@
 %format (ominusIdx(t)) = "\ominus_{" t "}"
 
 %format `ocompose` = "\circledcirc "
-%format ocompose dv1 v1 dv2 = dv1 "\circledcirc_{" v1 "}" dv2
+%format ocompose (dv1) (v1) (dv2) = dv1 "\circledcirc_{" v1 "}" dv2
 
 %format `doe` = "\Doe"
 %format chs (v) = "\ChangeStruct{" v "}"
