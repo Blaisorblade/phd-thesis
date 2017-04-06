@@ -60,6 +60,9 @@
 %format b1
 %format b2
 
+%format c1
+%format c2
+
 %format da0
 %format da1
 %format da2
@@ -161,5 +164,7 @@
 %format mapCache2
 %format cx1
 %format cx2
+
+%format size(s) = "\left|{" s "}\right|"
 
 %endif

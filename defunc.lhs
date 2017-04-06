@@ -5,7 +5,10 @@
 %if style == newcode
 \begin{code}
 {-# LANGUAGE ExistentialQuantification, TypeFamilies, TypeFamilyDependencies,
-InstanceSigs, GADTs #-}
+  InstanceSigs, GADTs, TypeOperators #-}
+import qualified Data.Sequence as S
+import Data.Sequence(Seq)
+import Prelude hiding (map, concatMap)
 \end{code}
 %endif
 
@@ -73,7 +76,8 @@ containing both manually-written plugin code, and code that is transformed
 systematically, based on informal generalizations and variants of
 |derive(param)|. Our main goal is to study variants of differentiation and of
 encodings in Haskell, while also studying language plugins for non-trivial
-primitives, such as different sorts of collections.
+primitives, such as different sorts of collections. We make liberal use of GHC
+extensions where needed.
 
 As sketched before, we internalize change structures in Haskell as follows:
 \begin{code}
