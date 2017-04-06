@@ -363,7 +363,7 @@ of the indexes is modularized in the optimizer.
 After describing how to use {\LoS}, we explain how \LoS{} represents queries internally and optimizes them.
 \begin{techrep}
 Here we give only a brief overview of our implementation technique; it is described in more detail
-in Appendix~\ref{sec:intfScala}.
+in \cref{sec:intfScala}.
 \end{techrep}
 \begin{nontechrep}
 We give only a brief overview of our implementation technique; it is described in more detail
@@ -592,7 +592,7 @@ type \code{Exp[Map[String, Book]]}. Looking up a key of the wrong type, for
 instance by writing \code{idxByPublisher(book)} where \code{book: Book}, will
 make \texttt{scalac} emit a static type error.
 
-\chapter{Collection query embedding as a case study}
+\chapter{A deep EDSL for collection queries}
 \label{sec:caseStudy}
 In this chapter we discuss collections as a \emph{critical} case
 study~\citep{flyvbjerg06five} for deep DSL embedding.
