@@ -170,6 +170,7 @@ require small input changes. Incremental computation will then process the input
 changes, rather than just the new inputs.
 
 \section{Introducing changes}
+\label{sec:change-intro}
 To talk about how the differences between old values and new
 values, we introduce a few concepts, for now without full definitions.
 In our approach to
@@ -1203,6 +1204,7 @@ we have defined notions of change type and of valid changes; but
 these notions can be defined for arbitrary sets.
 
 \begin{definition}
+  \label{def:bchs}
   A basic change structure for set |V| is given by defining:
   \begin{subdefinition}
   \item a change set |Dt^V|
@@ -1215,12 +1217,14 @@ these notions can be defined for arbitrary sets.
 We have already given the ingredients to define two families of basic change structures,
 a family for types and one for contexts:
 \begin{definition}
+  \label{def:bchs-types}
   To each type |tau| we associate a basic change structure for
   set |eval(tau)|; we do so by taking |eval(Dt^tau)| as change
   set and by reusing validity as previously defined. We keep
   writing |fromto tau v1 dv v2| rather than |fromto (eval(tau)) v1 dv v2|.
 \end{definition}
 \begin{definition}
+  \label{def:bchs-contexts}
   To each environment |Gamma| we associate a basic change
   structure for set |eval(Gamma)|; we do so by taking
   |eval(Dt^Gamma)| as change set and by reusing validity as
