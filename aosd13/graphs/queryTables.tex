@@ -67,22 +67,25 @@ refer to the {\LoS} implementation when run, respectively, without
 optimizations, with optimizations, with optimizations and indexing.
 Queries marked with the $R$ superscript were selected by random sampling.}
 \newcommand{\tablerowsize}{\scriptsize}
-\begin{sidewaystable}[tb]
+\begin{sidewaystable}[ph!]
 \centering
 \input{\graphPath{EvalTable}}
 \nocaptionrule\caption{Performance results. \captionEvalTable}
 \label{table:performance}
 \end{sidewaystable}
 
-\begin{table*}[tb]
-\centering
+
+
+\begin{table}[h]
+  \centering
+  \footnotesize
 \input{\graphPath{EvalSummaryTable}}
 \nocaptionrule\caption{Average performance ratios.
 This table summarizes all interesting performance ratios across all queries,
 using the geometric mean~\citep{Fleming86}.
 The meaning of speedups is discussed in Sec.~\ref{sec:implemenationsandspeedups}.}
 \label{table:performanceAvg}
-\end{table*}
+\end{table}
 
 \begin{extraEval}
 \begin{table*}[tb]
