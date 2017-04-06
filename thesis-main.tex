@@ -24,6 +24,12 @@
 \excludecomment{todos}
 \includecomment{forNonBeamer}
 
+% Number floats and figures together. Documented at
+% http://stackoverflow.com/a/43266057/53974.
+\makeatletter
+\let\c@table\c@figure
+\let\ftype@table\ftype@figure
+\makeatother
 \title{Optimizing and Incrementalizing Collection Queries by AST Transformations}
 \author{Paolo G. Giarrusso}
 
