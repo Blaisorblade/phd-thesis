@@ -5,7 +5,7 @@
 %if style == newcode
 \begin{code}
 {-# LANGUAGE ExistentialQuantification, TypeFamilies, TypeFamilyDependencies,
-  InstanceSigs, GADTs, TypeOperators #-}
+  InstanceSigs, GADTs, TypeOperators, ConstraintKinds #-}
 import qualified Data.Sequence as S
 import Data.Sequence(Seq)
 import Prelude hiding (map, concatMap)
@@ -17,8 +17,8 @@ import Prelude hiding (map, concatMap)
 
 Up to now we have represented function changes as functions, which can only be
 applied. However, incremental programs often inspect changes to decide how to
-react to them most efficiently. Inspecting function changes would also help
-performance. In this chapter, we address these restrictions by
+react to them most efficiently. Also inspecting function changes would help
+performance further. In this chapter, we address these restrictions by
 \emph{defunctionalizing} functions and function changes, so that we can inspect
 both at runtime.
 
@@ -34,7 +34,7 @@ to |O(size(dxs))|.
 
 We will also present a change structure on defunctionalized function changes,
 and show its benefits.\pg{Furthermore, other operations on function and
-  function changes become cheaper, such as |oplus|, |nilc|, and so on.}
+  function changes become cheaper, such as |`oplus`|, |nilc|, and so on.}
 %Moreover, as we have discussed
 
 % \chapter{Defunctionalizing function changes}
@@ -128,7 +128,7 @@ did x dx = dx
 
 instance (NilChangeStruct a, ChangeStruct b) => ChangeStruct (a -> b) where
   type Dt^(a -> b) = a -> Dt^a -> Dt^b
-  oplus f df = \x -> f x `oplus` df x (nil x)
+  f `oplus` df = \x -> f x `oplus` df x (nil x)
   oreplace f = \x dx -> oreplace (f (x `oplus` dx))
 instance (NilChangeStruct a, ChangeStruct b) => NilChangeStruct (a -> b) where
   nil f = oreplace f
@@ -189,110 +189,449 @@ all the ILC theory we developed to show differentiation is correct.
 % operation, or that all changes are representable.
 
 \section{Defunctionalization}
-In a typed language supporting generalized algebraic datatypes (GADTs),
-defunctionalization transforms the type of function values |sigma -> tau| to a
-new type |Fun sigma tau| of defunctionalized function values, indexed by both
-|sigma| and |tau|~\citep{Pottier2004polymorphic}, together with an interpreter
-for defunctionalized function values |apply :: Fun sigma tau -> sigma -> tau|.
-The resulting programs are expressed in a first-order subset of the original
-programming language, where all proper functions are top-level definitions.
+Defunctionalization is a whole-program transformation that turns a program
+relying on first-class functions into a first-order program. The resulting
+program is expressed in a first-order language (often a subset of the original
+language); closures are encoded by data values, which embed both the closure
+environment and a tag to distinguish different function. Defunctionalization
+also generates a function that interprets encoded closures, which we call
+|applyFun|.
 
-For instance, we imagine a program having closures |\x -> x + 1| and |\x -> x +
-y|, where |y :: Int|.
-\begin{figure}
+% We have multiple versions of the same definitions, hide the version numbers in
+% LaTeX output.
+
+%if style /= newcode
+
+%format Fun0 = Fun
+%format DFun0 = DFun
+%format AddOne0 = AddOne
+%format Pair0 = Pair
+%format MapPair0 = MapPair
+%format mapDF0 = mapDF
+%format concatMapDF0 = concatMapDF
+%format nestedLoopDF0 = nestedLoopDF
+%format F0 = F
+%format DF0 = DF
+%format Code0 = Code
+%format codeMatch0 = codeMatch
+%format applyFun0 = applyFun
+%format dapplyFun0 = dapplyFun
+%format successors0 = successors
+
+%format Fun1 = Fun
+%format DFun1 = DFun
+%format AddOne1 = AddOne
+%format Pair1 = Pair
+%format MapPair1 = MapPair
+%format apply1 = apply
+%format mapDF1 = mapDF
+%format concatMapDF1 = concatMapDF
+%format nestedLoopDF1 = nestedLoopDF
+%format F1 = F
+%format DF1 = DF
+%format Code1 = Code
+%format codeMatch1 = codeMatch
+%format applyFun1 = applyFun
+%format dapplyFun1 = dapplyFun
+%format successors1 = successors
+%format dmapDF1 = dmapDF
+
+%format RawFun1 = RawFun
+%format applyCode1 = applyCode
+%format applyRaw1 = applyRaw
+%format dapplyCode1 = dapplyCode
+
+% Here indexes are not to be hidden.
+%format C1
+%format env1
+%format env2
+
+%format derApplyDFun1
+%format Add1
+%format Add2
+
+%endif
+
+In a typed language, defunctionalization can be done using generalized algebraic
+datatypes (GADTs)~\citep{Pottier2004polymorphic}. Each first-class function of
+type |sigma -> tau| is replaced by a value of a new GADT |Fun sigma tau|, that
+represents defunctionalized function values and has a constructor for each
+different function. If a first-class function |t1| closes over |x :: tau1|, the
+corresponding constructor |C1| will take |x :: tau1| as an argument. The
+interpreter for defunctionalized function values becomes |applyFun :: Fun sigma tau
+-> sigma -> tau|. The resulting programs are expressed in a first-order subset
+of the original programming language, where all true functions left are
+first-order functions defined at the top-level.
+
+For instance, consider the program on sequences in \cref{fig:defunc-example}.
+\begin{figure}[h]
 \begin{code}
-applyToInts :: (Int -> a) -> [a]
-applyToInts f =
-  [f 0, f 1]
+successors :: [Int] -> [Int]
+successors xs = map (\x -> x + 1) xs
 
-getList :: [Int]
-getList =
-  let  l1 = applyToInts (\x -> x + 1)
-       y = 2
-       l2 = applyToInts (\x -> x + y)
-  in   l1 ++ l2
+nestedLoop :: [sigma] -> [tau] -> [(sigma, tau)]
+nestedLoop xs ys = concatMap (\x -> map (\y -> (x, y)) ys) xs
+
+map :: (sigma -> tau) -> [sigma] -> [tau]
+map f [] = []
+map f (x : xs) = f x : map f xs
+
+concatMap :: (sigma -> [tau]) -> [sigma] -> [tau]
+concatMap f xs = concat (map f xs)
 \end{code}
-\caption{A small program that we use as an example for defunctionalization.}
+\caption{A small example program for defunctionalization.}
 \label{fig:defunc-example}
 \end{figure}
-\pg{Can we incrementalize this? Hmm... Maybe take already the running example on
-sequences?}
 
+In this program, the first-class function values arise from evaluating the three
+terms |\y -> (x, y)|, that we call |pair|, |\x -> map (\y -> (x, y)) ys|,
+that we call |mapPair|, and |\x -> x + 1|, that we call |addOne|.
+Defunctionalization creates a type |Fun sigma tau| with a constructor for each
+of the three terms, respectively |Pair|, |MapPair| and |AddOne|.
+Both |pair| and |mapPair| close over some free variables, so their
+corresponding constructors will take an argument
+for each free variable; for |pair| we have
+%
+\[|x :: sigma /- (\y -> (x, y)) :: tau -> (sigma, tau)|,\]
+%
+while for |mapPair| we have
+%
+\[|ys :: [tau] /- (\x -> map (\y -> (x, y)) ys) :: sigma -> [(sigma, tau)]|.\]
+%
+Hence, the type of defunctionalized functions |Fun sigma tau| and its
+interpreter |applyFun0| become:
 
-\pg{Defunctionalize all functions? Both variants? For now we don't want codes
-for all top-level functions, do we?}
-For each lambda expression |l = \x -> t| in the source program, typed as |Gamma
-/- \x -> t : sigma -> tau|, defunctionalization creates a constructor |C| of
-|Fun sigma tau|.\footnote{More specifically, we only need codes for functions
-that are used as first-class arguments, not for other functions, though codes
-for the latter can be added as well.}
-While lambda expression |l| closes \emph{implicitly} over
-environment |rho : eval(Gamma)|, |C| closes over it explicitly: the values bound
-to free variables in environment |rho| are passed as arguments to constructor
-|c|.
-
-We use a variant of defunctionalization: Instead of having a single type |Fun
-sigma tau|, we defunctionalize functions from |sigma| to |tau| as pairs of a
-function descriptor and a (possibly empty) environment. We separate the
-environment because a variety of operations must manipulate it uniformly. To
-this end, we define a GADT of function codes indexed by |Code env sigma tau|,
-with a case for each lambda expression in the source program. We show, as an
-example, cases for the program above\pg{figure}
 \begin{code}
-data Code env sigma tau where
-  Add1 :: Code () Int Int
-  AddY :: Code Int Int Int
-  -- ...
+data Fun0 sigma tau where
+  AddOne0   ::            Fun0 Int    Int
+  Pair0     :: sigma  ->  Fun0 tau    (sigma, tau)
+  MapPair0  :: [tau]  ->  Fun0 sigma  [(sigma, tau)]
+
+applyFun0 ::  Fun0 sigma tau ->  sigma -> tau
+applyFun0     AddOne0            x = x + 1
+applyFun0     (Pair0 x)          y = (x, y)
+applyFun0     (MapPair0 ys)      x = mapDF0 (Pair0 x) ys
+\end{code}
+
+We need to also transform the rest of the program accordingly.
+
+\begin{code}
+successors0 :: [Int] -> [Int]
+successors0 xs = map (\x -> x + 1) xs
+
+nestedLoopDF0 :: [sigma] -> [tau] -> [(sigma, tau)]
+nestedLoopDF0 xs ys = concatMapDF0 (MapPair0 ys) xs
+
+mapDF0 :: Fun0 sigma tau -> [sigma] -> [tau]
+mapDF0 f [] = []
+mapDF0 f (x : xs) = applyFun0 f x : mapDF0 f xs
+
+concatMapDF0 :: Fun0 sigma [tau] -> [sigma] -> [tau]
+concatMapDF0 f xs = concat (mapDF0 f xs)
+\end{code}
+
+Some readers might notice this program still uses first-class function, because
+it encodes multi-argument functions through currying. To get a fully first-order
+program, we encode multi-arguments functions using tuples instead of currying.%
+\footnote{Strictly speaking, the resulting program is still not first-order,
+  because in Haskell multi-argument data constructors, such as the pair
+  constructor |(,)| that we use, are still first-class curried functions, unlike
+  for instance in OCaml. To make this program truly first-order, we must
+  formalize tuple constructors as a term constructor, or formalize these
+  function definitions as multi-argument functions. At this point, this
+  discussion is merely a technicality that does not affect our goals, but it
+  becomes relevant if we formalize the resulting first-order
+  language~\citep{Giarrusso2017Static}.}
+%
+Using tuples our example becomes:
+%{
+%if style /= newcode
+%format applyFun01 = applyFun
+%format mapDF01 = mapDF
+%format concatMapDF01 = concatMapDF
+%format nestedLoopDF01 = nestedLoopDF
+%endif
+\begin{code}
+applyFun01 ::  (Fun0 sigma tau, sigma) ->  tau
+applyFun01     (AddOne0, x)                = x + 1
+applyFun01     (Pair0 x, y)                = (x, y)
+applyFun01     (MapPair0 ys, x)            = mapDF01 (Pair0 x, ys)
+
+mapDF01 :: (Fun0 sigma tau, [sigma]) -> [tau]
+mapDF01 (f, []) = []
+mapDF01 (f, x : xs) = applyFun01 (f, x) : mapDF01 (f, xs)
+
+concatMapDF01 :: (Fun0 sigma [tau], [sigma]) -> [tau]
+concatMapDF01 (f, xs) = concat (mapDF01 (f, xs))
+
+nestedLoopDF01 :: ([sigma], [tau]) -> [(sigma, tau)]
+nestedLoopDF01 (xs, ys) = concatMapDF01 (MapPair0 ys, xs)
+\end{code}
+%}
+
+\pg{Revise this.} But for now we'll avoid using tuples and stick to currying, as
+it makes for more idiomatic Haskell.
+
+In general, defunctionalization creates a constructor |C| of type |Fun sigma
+tau| for each first-class function expression |Gamma /- t : sigma -> tau| in the
+source program.\footnote{We only need codes for functions that are used as
+  first-class arguments, not for other functions, though codes for the latter
+  can be added as well.}
+%
+While lambda expression |l| closes \emph{implicitly} over environment |rho :
+eval(Gamma)|, |C| closes over it explicitly: the values bound to free variables
+in environment |rho| are passed as arguments to constructor |C|. As a standard
+optimization, we only includes variables that actually occur free in |l|, not
+all those that are bound in the context where |l| occurs.
+
+\subsection{Defunctionalization with separate function codes}
+For our goals we use a slight variant of defunctionalization: Instead of having
+a single type |Fun sigma tau|, we defunctionalize functions from |sigma| to
+|tau| as pairs of a (possibly empty) environment and a function descriptor |Code
+env sigma tau| (which contains no environment). Environments for a context such
+as |x :: tau1, y :: tau2, ...| are encoded as values of type |tau1 `times` tau2
+`times` ...|. Empty environments are encoded as empty tuples.
+\pg{Hen}
+%
+As an upside, we can define many operations generically across all function
+codes, reducing the amount of code generated by defunctionalization. What's
+more, we later define operations that use raw function codes and need no
+environment.
+
+Specifically, instead of defining directly a GADT of defunctionalized functions
+|Fun sigma tau|, we define a GADT of \emph{function codes} |Code env sigma tau|,
+that is indexed not just by |sigma| and |tau| but also by the type of
+environments. We then define |Fun sigma tau| as a pair of a function code of type
+|Code env sigma tau| and an environment of type |env|. Again,
+defunctionalization adds to |Code env sigma tau| a constructor for each
+first-class function expression in the source program.
+%
+Defunctionalizing the program above in this style produces the following type of
+function codes:
+\begin{code}
+data Code1 env sigma tau where
+  Pair1 :: Code1 sigma tau (sigma, tau)
+  MapPair1 :: Code1 [tau] sigma [(sigma, tau)]
 \end{code}
 We also require an interpretation function |applyCode|, taking a function
 code, an environment and an input and producing an output.
 \begin{code}
-applyCode :: Code env sigma tau -> env -> sigma -> tau
-applyCode Add1  ()  x = x + 1
-applyCode AddY  y   x = x + y
+applyCode1 :: Code1 env sigma tau -> env -> sigma -> tau
+applyCode1 Pair1 x y = (x, y)
+applyCode1 MapPair1 ys x = mapDF1 (F1 (Pair1, x)) ys
 \end{code}
 
-A function |sigma -> tau| is encoded as a pair of an environment of type |env|
-and a function |F env (Code env sigma tau)|. To bind type variable |env|, we use
-a Haskell extension called |ExistentialQuantification|, that adds to Haskell a
-form of existential types.
+As mentioned, the type |Fun sigma tau|, that encodes |sigma -> tau|, is defined
+as the product of |Code env sigma tau| and |env|, where type variable |env| is
+existentially bound. We also define a type synonym |RawFun1 env sigma tau| for
+the product type before hiding the existential type.
 \begin{code}
-data Fun sigma tau = forall env . F env (Code env sigma tau)
+type RawFun1 env sigma tau = (Code1 env sigma tau, env)
+data Fun1 sigma tau where
+  F1 :: RawFun1 env sigma tau -> Fun1 sigma tau
 \end{code}
-We can wrap |applyCode| into a more conventional |applyFun| function that
-interprets defunctionalized function values:
+We can wrap |applyCode1| into a more conventional |applyFun1| (again, through a
+wrapper |applyRaw1|) function that interprets defunctionalized function values:
 \begin{code}
-applyFun :: (Fun sigma tau) -> sigma -> tau
-applyFun (F env c) arg = applyCode c env arg
+applyRaw1 :: RawFun1 env sigma tau -> sigma -> tau
+applyRaw1 (code, env) = applyCode1 code env
+
+applyFun1 :: Fun1 sigma tau -> sigma -> tau
+applyFun1 (F1 f) arg = applyRaw1 f arg
 \end{code}
 
-%  CPair1 :: Code sigma tau (sigma, tau)
-%  CMapPair1 :: Code [tau] sigma [(sigma, tau)]
+The rest of the source program is defunctionalized like before, using the new
+definition of |Fun sigma tau| and of |applyFun1|.
 
-ILC requires support for function changes because the environment can change.
-Hence we start by representing function changes through environment changes.
+%if style == newcode
+\begin{code}
+mapDF1 :: Fun1 sigma tau -> [sigma] -> [tau]
+mapDF1 f [] = []
+mapDF1 f (x : xs) = applyFun1 f x : mapDF1 f xs
+
+dmapDF1 :: Fun1 sigma tau -> DFun1 sigma tau -> [sigma] -> Dt [sigma] -> Dt [tau]
+dmapDF1 = undefined
+\end{code}
+%endif
+
+\subsection{Defunctionalizing function changes}
+\label{sec:defunc-func-changes}
+Defunctionalization encodes function values as pairs of function codes and
+environments. In ILC, a function value can change because the environment
+changes or because the whole closure is replaced by a different one, with a
+different function code and different environment. For now, we focus on
+environment changes for simplicity. To allow inspecting function changes, we
+defunctionalize them as well.
+
+Take a function |f : sigma -> tau| and a function change |df : Dt^(sigma ->
+tau)|, where we recall that |Dt^(sigma -> tau) = sigma -> Dt^sigma -> Dt^tau|.
+Instead of representing df through a new value of type |Fun sigma tau|, we
+introduce a new type |DFun sigma tau| to replace |Dt^(sigma -> tau)|, so that
+|Dt^(Fun sigma tau) = DFun sigma tau|. To apply |DFun sigma tau| we introduce an
+interpreter |dapplyFun1 :: Dt^(Fun sigma tau) -> Dt^(sigma -> tau)|, or
+equivalently |dapplyFun1 :: DFun sigma tau -> sigma -> Dt^sigma -> Dt^tau|.
+
+Similarly to |Fun sigma tau|, we define |DFun sigma tau| using function codes.
+Hence, |DFun sigma tau| pairs a function code |Code env sigma tau| together with
+an environment change and a change structure for the environment type.
+%
+\pg{Hey, we need also the base environment at this point! Darn! Or we pass |f|
+  to |dapplyFun1|?}
+\pg{Or maybe we first do untyped static caching and then defunctionalization?}
+%
+\begin{spec}
+data DFun1 sigma tau = forall env . ChangeStruct env => DF1 (Dt^env, Code1 env sigma tau)
+\end{spec}
+
+Without separate function codes, the definition of |DFun1| would have to include
+one case for each first-class function.
+
+% In fact, we can also replace a function value by another one with different
+% code. However, for now we set aside support for this case; as we will see, for
+% that case we can simply support replacing a function value with a new code and
+% associated environment, that is, simply support a replacement change.
+
+\subsubsection{A change structure for defunctionalized function changes}
+\pg{We're missing a few ingredients for change structures}
+A function change |df| is valid for |f| if |df| has the same function code as
+|f| and if |df|'s environment change is valid for |f|'s environment:
+\[|fromto (Fun sigma tau) (F rho1 c) (DF drho c) (F rho2 c) = fromto env rho1
+  drho rho2|\] where |c| is a function code of type |Code env sigma tau|, and
+where |c|'s type binds the type variable |env| we use on the right-hand side.
+
+Next, we implement |`oplus`| on function changes to match our definition of
+validity, as required. We only need |f `oplus` df| to give a result if |df| is a
+valid change for |f|. Hence, if the function code embedded in |df| does not
+match the one in |f|, we give an error.\footnote{We originally specified
+|`oplus`| as a total function to avoid formalizing partial functions, but as
+mentioned in \cref{sec:change-intro}, we do not rely on the behavior of
+|`oplus`| on invalid changes.}
+However, our first attempt does not typecheck, since the typechecker does not
+know whether the environment and the environment change have compatible types.
+\begin{spec}
+instance ChangeStruct (Fun1 sigma tau) where
+  type Dt^(Fun1 sigma tau) = DFun1 sigma tau
+  F1 (env, c1) `oplus` DF1 (denv, c2) =
+    if c1 == c2 then
+      F1 (env `oplus` denv) c1
+    else
+      error "Invalid function change in oplus"
+\end{spec}
+
+%format ~ = "\sim"
+
+In particular, |env `oplus` denv| is reported as ill-typed, because we don't
+know that |env| and |denv| have compatible types. Take |c1 = Pair1, c2 =
+MapPair1,f = F1 (env, Pair1) :: sigma -> tau| and |df = DF1 (denv, MapPair1) ::
+Dt^(sigma -> tau)|. Assume we evaluate |f `oplus` df = F1 (env, Pair1) `oplus`
+DF1 (denv, MapPair1)|: there, indeed, |env :: sigma| and |denv :: [tau]|, so
+|env `oplus` denv| is not type-correct. Yet, evaluating |f `oplus` df| would
+\emph{not} fail, because |MapPair1| and |Pair1| are different, |c1 == c2| will
+return false and |env `oplus` denv| won't be evaluated. But the typechecker does
+not know that.
+
+% Indeed, if |c1| and |c2| are different, |env|
+% and |denv| have different types as well: |env :: env1| and |denv :: Dt^env2|,
+% where |env1| is an existential type variable brought in scope by matching on |F
+% env c1|, while |env2| is brought in scope by matching on |DF denv c2|. And even
+% if |c1 == c2|, the typechecker does not learn that |c1| and |c2| have the same
+% type and in particular that |env1 ~ env2| (where |~| denotes type equivalence in
+% Haskell).
+
+Hence we need an equality operation that produces a witness of type equality. We
+define the needed infrastructure with few lines of code. First, we need a GADT
+of witnesses of type equality. This is available in GHC's standard library, but
+its definition is short so we show it:
 
 \begin{code}
-data DFun sigma tau = forall env . DP (Dt^env) (Code env sigma tau)
+-- From Data.Type.Equality in GHC 8.0
+data tau1 :~: tau2 where
+  Refl :: tau :~: tau
+\end{code}
+Take |v :: tau1 :~: tau2|: by standard GADT typing rules, if |v| matches |Refl|
+then |tau1| and |tau2| are equal and we write (with Haskell syntax) |tau1 ~
+tau2|. Even if |tau1 :~: tau2| has only constructor |Refl|, a match is necessary
+since |v| might be bottom. Readers familiar with type theory, Agda or Coq will
+recognize that |(:~:)| resembles Agda's propositional equality or Martin-Löf's
+identity types, even though it can only represents equality between types and
+not between values.
+
+Next, we define a new equality operation on codes. For equal codes, this
+operation produces a witness that their environment types match, otherwise
+nothing. Using this operation, we can complete the above instance of
+|ChangeStruct (Fun1 sigma tau)|.
+
+% codeMatch1 :: Code1 env1 sigma1 tau1 -> Code1 env2 sigma2 tau2 -> IsEq (env1, sigma1, tau1) (env2, sigma2, tau2)
+\begin{code}
+codeMatch1 :: Code1 env1 sigma tau -> Code1 env2 sigma tau -> Maybe (env1 :~: env2)
+codeMatch1 AddOne1 AddOne1 = Just Refl
+codeMatch1 Pair1 Pair1 = Just Refl
+codeMatch1 MapPair1 MapPair1 = Just Refl
+codeMatch1 _ _ = Nothing
+
+instance ChangeStruct (Fun1 sigma tau) where
+  type Dt^(Fun1 sigma tau) = DFun1 sigma tau
+  (F1 (c1, env)) `oplus` (DF1 (c2, denv)) =
+    case codeMatch1 c1 c2 of
+      Just Refl -> F1 (c1, env `oplus` denv)
+      Nothing -> error "Invalid function change in oplus"
 \end{code}
 
-In fact, we can also replace a function value by another one with different
-code. However, for now we set aside support for this case; as we will see, for
-that case we can simply support replacing a function value with a new code and
-associated environment, that is, simply support a replacement change.
-
+\subsubsection{?}
 Next, we add support for derivatives and function changes. We can start by
-simply adding a derivative for |applyFun|:
+simply adding a derivative for |applyFun1|:
 \begin{code}
-applyDFun :: (Fun sigma tau) -> (DFun sigma tau) -> sigma -> Dt^sigma -> Dt^tau
-applyDFun = undefined
+dapplyFun1 :: Fun1 sigma tau -> DFun1 sigma tau -> sigma -> Dt^sigma -> Dt^tau
+dapplyFun1 = undefined
 \end{code}
 
-However, we can also implement further accessors that inspect function changes. We can now finally detect if a change is nil:
+However, we can also implement further accessors that inspect function changes.
+We can now finally detect if a change is nil. To this end, we first define a
+typeclass that allows testing changes to determine if they're nil:
 \begin{code}
-isNil :: DFun sigma tau -> Bool
+class NilTestable t where
+  isNil :: Dt^t -> Bool
+\end{code}
+Now, a function change is nil only if the contained environment is nil.
+\begin{spec}
+instance NilTestable (Fun1 sigma tau) where
+  isNil :: DFun1 sigma tau -> Bool
+  isNil (DF1 (denv, code)) = isNil denv
+\end{spec}
+However, this definition of |isNil| only works given a typeclass instance for
+|NilTestable env|; we need to add this requirement as a constraint, but we
+cannot add it to |isNil|'s type signature since type variable |env| is not in
+scope there.
+Instead, we must add the constraint where we introduce it by existential
+quantification, just like the constraint |ChangeStruct env|.
+
+\begin{code}
+data DFun1 sigma tau = forall env . (NilTestable env, ChangeStruct env) => DF1 (Code1 env sigma tau, Dt^env)
+\end{code}
+
+\begin{code}
+instance NilTestable (Fun1 sigma tau) where
+  isNil :: DFun1 sigma tau -> Bool
+  isNil (DF1 (code, denv)) = isNil denv
 \end{code}
 
 We can then wrap a derivative to return a nil change immediately if at runtime
 all input changes turn out to be nil. This was not possible in PLDI'14, because
 nil function changes could not be detected at runtime, only at compile time.
+
+\pg{Can we in this context?}
+% \begin{code}
+% wrapDF :: DFun sigma tau -> sigma -> Dt^sigma -> Dt^tau
+% wrapDF f df x dx =
+%   if isNil df then
+%     nil (f x)
+%   else
+%
+% \end{code}
+%
+% \begin{code}
+% wrapDer1 g df c =
+%   case isNilFun df of
+%     Nil -> (onil Proxy, c)
+%     NotNil -> g df c
+% \end{code}

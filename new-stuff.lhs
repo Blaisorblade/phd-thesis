@@ -57,7 +57,7 @@ A few other annoyances include:
 \item Applying a derivative to a nil change always produce a nil change, but we
   never take advantage of this to optimize derivatives, except sometimes at
   compile time.
-\item No support change composition: there is no direct way to compose a
+\item No support for change composition: there is no direct way to compose a
   sequence of changes |dx1, dx2, dx3, ...| across |x0, x1, x2, x3, ...| and
   produce a single change, except by applying all those changes and computing a
   difference with |x0 `oplus` dx1 `oplus` dx2 `oplus` dx3|.
