@@ -190,7 +190,10 @@ so we also talk about \emph{valid} changes.
 A change value |dv| can be a valid change from |v1| to |v2|. We
 can also consider a valid change as an edge from |v1| to |v2|,
 and we call |v1| the source of |dv| and |v2| the destination of
-|dv|.\pg{What about changes with multiple valid sources?}
+|dv|. We'll discuss examples of valid and invalid changes in
+\cref{ex:valid-bag-int,ex:invalid-nat}.
+\pg{What about changes
+  with multiple valid sources?}
 
 We also introduce an operator |`oplus`| on values and changes: if
 |dv| is a valid change from |v1| to |v2|, then |v1 `oplus` dv|
@@ -211,7 +214,9 @@ change from |v1| to |v2| and |dv2| is a valid change from |v2| to
 
 Definitions of these operations and concepts for a type form a
 \emph{change structure}. We'll define change structures properly
-later. We already sketch, preliminarly, how a change structure
+later.
+\pg{Why show a change structure in Haskell terms?}
+We already sketch, preliminarly, how a change structure
 can be represented in Haskell terms: a change structure is
 encoded as a \emph{type class} named |ChangeStruct t|, where change type
 |Dt^tau| is defined as an associated type |Dt^t|, and operations
@@ -226,6 +231,10 @@ class ChangeStruct t where
 We'll come back to this definition and refine it,
 describing the laws it satisfies, in \cref{sec:change-struct-tc}.
 
+\begin{examples}
+  \label{ex:valid-bag-int}
+  \label{ex:chs-int}
+  \label{ex:invalid-nat}
  \pg{changes on bags?}
 To show how incrementalization affects our example, we next
 describe valid changes for bags and integers. For now, a change
@@ -262,7 +271,8 @@ invalid changes would work.\footnote{In fact, we could leave
   \citet{Huesca2015incrementality}, in similar developments,
   simply made |`oplus`| partial on its domain instead of
   restricting the domain, achieving similar results.}
-
+\end{examples}
+\pg{bags with removals? where?}
 \subsection{Incrementalizing with changes}
 After introducing these notions, we describe how, in our
 approach, we incrementalize our example program. We propose to compute
@@ -331,6 +341,16 @@ da)|. Symbolically we write
 \begin{equation}
   \label{eq:derivative-requirement}
   |f (a `oplus` da) `cong` f a `oplus` df a da|
+\end{equation}
+where we use |`cong`| to mean denotational equality (that is, |t1
+`cong` t2| if and only if |eval(t1) = eval(t2)|).
+
+We claim that differentiation produces derivatives. Hence, we can
+take \cref{eq:derivative-requirement}, replace |df| by
+|derive(f)|, and obtain as a corollary the following equation:
+\begin{equation}
+  \label{eq:correctness}
+  |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
 \end{equation}
 
 For functions |f| of multiple arguments, a derivative |df| takes
@@ -510,6 +530,7 @@ differentiation to our earlier example.
 
 \section{Differentiation on our example}
 \label{sec:derive-example}
+\label{sec:derive-example-merge}
 \pg{This example is still a bit too complex as written; I'm
   skipping too many steps. Unless it comes after the basic
   formalism is established.}
@@ -590,8 +611,6 @@ doutput        = dgrand_total  {{1, 2, 3}} {{1}} {{4}} {{5}}
                `betaeq` sum (merge {{1}} {{5}})
 \end{code}
 
-As expected,
-
 \paragraph{Self-maintainability}
 Differentiation does not always produce efficient derivatives
 without further program transformations; in particular,
@@ -602,6 +621,14 @@ ys))| is just |dsum (merge xs ys) (derive(merge xs ys))|. A
 direct execution of this program will compute |merge xs ys|,
 taking time linear in the base inputs. \pg{Point out this is
   self-maintainable!}
+
+\pg{write}
+\subsection{A higher-order example}
+\label{sec:differentiation-fold-example}
+% Referenced later in sec-performance.tex by saying:
+% % We have seen in \cref{ssec:differentiation} that $\Derivative$
+% % needlessly recomputes $\Merge\Xs\Ys$. However, the result is a
+% % base input to $\FOLD'$.
 
 \chapter{Differentiation and changes, formally}
 \section{Differentiation and its meaning}

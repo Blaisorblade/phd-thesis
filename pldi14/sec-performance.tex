@@ -29,7 +29,7 @@ size.
 $\Derive{\MERGE} = \Lam {x\; \D x\; y \; \D y}{\Merge{\D x}{\D y}}$
 is self-maintainable with the
 change structure $\ChangeStruct{\Bag{S}}$ described in
-\cref{ssec:change-structures}, because it does not use the base
+\cref{ex:valid-bag-int}, because it does not use the base
 inputs $x$ and $y$.
 Other derivatives are self-maintainable only in certain contexts.
 The derivative of element-wise function application
@@ -42,7 +42,8 @@ is self-maintainable in this case (as discussed in next section).
 We take advantage of this by implementing a specialized
 derivative for $\FOLDBAG$.
 
-We have seen in \cref{ssec:differentiation} that $\Derivative$
+\pg{broken reference}
+We have seen in \cref{sec:differentiation-fold-example} that $\Derivative$
 needlessly recomputes $\Merge\Xs\Ys$. However, the result is a
 base input to $\FOLD'$.
 %

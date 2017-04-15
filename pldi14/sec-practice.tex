@@ -24,7 +24,7 @@ types and primitives,
 (4) arrange for their program to be called on changes instead of
 updated inputs.
 
-As discussed in \cref{ssec:differentiation}, differentiation
+As discussed in \cref{sec:informal-derive}, differentiation
 supports abstraction, application and variables, but since
 computation on base types is performed by primitives for those
 types, efficient derivatives for primitives are essential for
@@ -143,7 +143,7 @@ we omit details for lack of space.
 
 \section{Case study}
 \label{sec:plugins}
-
+\pg{change naming for derivatives, they're dfold not fold' now.}
 
 We perform a case study on a nontrivial realistic program to
 demonstrate that \ILC\ can speed it up.
@@ -243,8 +243,9 @@ terms of $\FOLDBAG$ with suitable arguments.
 %
 For instance, we can sum the elements of a bag of integers with
 $\FoldBag{\Term{gZ}}{\Lam*{x}{x}}$, where
-$\Term{gZ}$ is the abelian group on integers defined in
-\cref{ssec:change-structures}.
+$\Term{gZ}$ is the abelian group induced on
+integers by addition $(\mathbb{Z}, +, 0, -)$.
+%
 Users of $\FOLDBAG$ can define different abelian groups to specify
 different operations (for instance, to multiply floating-point numbers).
 
@@ -270,6 +271,7 @@ precondition on $\Term{mapReduce}$ in
 \cref{fig:case-study-pseudocode}. $\Term{foldMapGen}$ has the
 same implementation but without those restrictions; as a
 consequence, its derivative is not self-maintainable, but it is more generally applicable.
+\pg{No ``lack of space''}
 Lack of space prevents us from giving more details.
 
 To define $\Term{GroupChange}$, we need a suitable erased change
@@ -287,7 +289,7 @@ That is, a change between two values is either simply the new
 value (which replaces the old one, triggering recomputation),
 or their difference (computed with abelian group
 operations, like in the changes structures for groups from
-\cref{ssec:change-structures}. The operator $\DIFF$
+\cref{sec:change-structure-groups}. The operator $\DIFF$
 does not know which group to use, so it does not take advantage
 of the group structure.
 However, $\FOLDBAG$ is now able to generate a group change.
@@ -329,7 +331,7 @@ are nil changes)}\\
 (\FOLDBAG~G~f~\DZs)
 \end{align*}
 }%
-We know from \cref{ssec:plugin} that
+We know from \cref{sec:derive-example-merge} that
 \[
 \MERGE'=\Lam{u}{\Lam{\D u}{\Lam{v}{\Lam{\D v}{\Merge{\D u}{\D v}}}}}.
 \]
