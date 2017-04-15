@@ -1,6 +1,3 @@
-% Ensure that arXiv processes this as PDF.
-\pdfoutput=1
-
 \documentclass{book}
 \usepackage{mylhs2tex}
 \usepackage{natbib}
@@ -9,8 +6,6 @@
 \bibliographystyle{abbrvnat}
 \input{packages}
 \input{macros}
-
-\usepackage{amsthm,fixfoot}
 
 \usepackage{listings}
 \input{lstsetup}
@@ -29,8 +24,26 @@
 \excludecomment{todos}
 \includecomment{forNonBeamer}
 
+% Number floats and figures together. Documented at
+% http://stackoverflow.com/a/43266057/53974.
+\makeatletter
+\let\c@table\c@figure
+\let\ftype@table\ftype@figure
+\makeatother
 \title{Optimizing and Incrementalizing Collection Queries by AST Transformations}
 \author{Paolo G. Giarrusso}
+
+% Only for development.
+%
+% Requires that other files are compiled with include, and can only be used in
+% incremental runs: a first run has to be made without includeonly.
+%
+%\includeonly{pldi14/sec-preliminaries,pldi14/sec-intro}
+%\includeonly{pldi14/sec-intro,new-stuff}
+%\includeonly{aosd13/graphs/evalResLos,aosd13/paperBody}
+%
+% Also, include can add extra page breaks, so maybe switch back to input at the end.
+% From http://web.science.mq.edu.au/~rdale/resources/writingnotes/latexstruct.html.
 \begin{document}
 \maketitle
 \input{pldi14/agda}
@@ -42,63 +55,48 @@
 % \end{abstract}
 \tableofcontents
 
-\input{chap-intro}
+\listoffigures
+\listoftables
+
+\include{chap-intro}
 
 \part{Optimizing collection queries by reification}
 \label{sec:ch-aosd13}
 
-\input{aosd13/graphs/evalResLos}
-\input{aosd13/paperBody}
+\include{aosd13/graphs/evalResLos}
+\include{aosd13/paperBody}
 
 
 \part{Incrementalization}
 \label{part:incr}
-\chapter{Introduction to static differentiation}
-\input{pldi14/sec-intro}
+\include{pldi14/sec-preliminaries}
+\include{pldi14/sec-intro}
 
 % Include either-or, one includes the other.
-%\input{change-theory-reconstruct}
-\input{pldi14/sec-change-theory}
+%\include{change-theory-reconstruct}
+\pg{readd some things here.}
+%\include{pldi14/sec-change-theory}
 
-\input{pldi14/sec-differentiate}
-\input{pldi14/sec-practice}
-\input{pldi14/sec-concl}
+\pg{readd a shorter version of this.}
+%\include{pldi14/sec-change-equiv}
+
+%\include{pldi14/sec-differentiate}
+\include{pldi14/sec-practice}
+\include{pldi14/sec-concl}
 
 % Appendixes, to integrate.
-% \input{pldi14/sec-evaluation}
-% \input{pldi14/sec-addendum}
+% \include{pldi14/sec-evaluation}
+% \include{pldi14/sec-addendum}
 
 \begin{oldSec}
-\input{pldi14/sec-STLC-correct}
+\include{pldi14/sec-STLC-correct}
 \end{oldSec}
 
 \begin{oldSec}
-\input{pldi14/sec-informal}
+\include{pldi14/sec-informal}
 \end{oldSec}
 
-\input{new-stuff}
-
-\input{pldi14/sec-rw}
-\chapter{Conclusions}
-\pg{Plan for things that complete the original paper's story: add them by
-  revising that text and in that chapter.}
-
-\bibliography{Bibs/DB,Bibs/ProgLang,Bibs/SoftEng,Bibs/own}
-\chapter*{Acknowledgments}
-% From AOSD13
-I thank Sebastian Erdweg for helpful discussions on
-this project, Katharina Haselhorst for help
-implementing the code generator, and the anonymous reviewers, Jacques Carette and Karl Klose
-for their helpful comments on this chapter.
-This work is supported in part by the European Research Council, grant \#203099 ``ScalPL''.
-
-% From PLDI14 (?)
-% From ILC17
-We thank Cai Yufei, Tillmann Rendel, Lourdes Del Carmen Gonz\`alez Huesca, Yann
-R\`egis-Gianas, Philipp Schuster, Sebastian Erdweg, Marc Lasson, Robert Atkey,
-... for helpful discussions on this project.
-
-
+\include{new-stuff}
 \end{document}
 %%% Local Variables:
 %%% mode: latex

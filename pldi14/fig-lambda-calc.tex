@@ -1,0 +1,93 @@
+\begin{figure*}
+    \small
+    \centering
+
+  \NewDocumentCommand{\Align}{m}
+    {{\begin{align*}#1\end{align*}}}
+
+    \begin{subfigure}[b]{0.6\textwidth}
+\begin{tabular}{>{$}r<{$}@{$\;::=\;$}>{$}c<{$}@{$\;$}>{$}l<{$}@{\quad}>{(}l<{)}}
+\Gi      & \rlap{\ldots} &                       & base types\\
+\Gs, \Gt & \Gi           & \mid \Fun{\Gt}{\Gt}   & types\\
+\GG      & \EmptyContext & \mid \Extend{x}{\tau} & typing contexts\\
+c        & \rlap{\ldots} &                       & constants\\
+s, t     & c             & \mid \Lam{x}{t}
+                           \mid \App{t}{t}
+                           \mid x                & terms
+\end{tabular}
+\caption{Syntax}
+\label{fig:lambda-calc:syntax}
+%\label{fig:syntax}
+    \end{subfigure}
+%
+    \vfill
+%
+    \begin{subfigure}[b]{\textwidth}
+    \begin{typing}
+\noindent
+\Rule[Const]
+  {\ConstTyping{c}{\tau}}
+  {\Typing{c}{\tau}}
+
+\Axiom[Lookup]
+  {\Typing[\Append{\GG_1}{\Append{\HasType{x}{\tau}}{\GG_2}}]{\Var{x}}{\tau}}
+
+\raisebox{0.5\baselineskip}{\fbox{$\Typing{t}{\tau}$}}
+
+\Rule[Lam]
+  {\Typing[\Extend{x}{\Gs}]{t}{\Gt}}
+  {\Typing{\Lam{x}{t}}{\Fun{\Gs}{\Gt}}}
+
+\Rule[App]
+  {\Typing{s}{\Fun{\Gs}{\Gt}}\\
+   \Typing{t}{\Gs}}
+  {\Typing{\App{s}{t}}{\Gt}}
+\end{typing}
+\caption{Typing}
+\label{fig:lambda-calc:typing}
+
+%\label{fig:typing}
+    \end{subfigure}
+    \vfill
+
+    \begin{subfigure}[b]{0.3\textwidth}
+    \Align{
+      \Eval{\iota}
+        & = \ldots\\
+      \Eval{\Fun{\Gs}{\Gt}}
+        & = \Eval{\Gs} \to \Eval{\Gt}
+      }
+      \caption{Values.}
+      \label{fig:lambda-calc:values}
+      \label{fig:correctness:values}
+  \end{subfigure}
+  \hfill
+    \begin{subfigure}[b]{0.6\textwidth}
+    \Align{
+      \Eval{\EmptyContext}
+        & = \left\{ \EmptyEnv \right\} \\
+      \Eval{\Extend{x}{\Gt}}
+        & = \left\{ \ExtendEnv*{x}{v} \mid \Gr \in \Eval{\GG} \land v \in \Eval{\Gt}\right\}
+    }
+    \caption{Environments.}
+    \label{fig:lambda-calc:environments}
+    \label{fig:correctness:environments}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \Align{
+      \EvalWith{c}{\rho}
+        & =\EvalConst{c}\\
+      \EvalWith{\Lam{x}{t}}{\rho}
+        & = \lambda v.\ \EvalWith{t}{\ExtendEnv*{x}{v}}\\
+      \EvalWith{\App{s}{t}}{\rho}
+        & = \App{\EvalWith*{s}{\rho}}{\EvalWith*{t}{\rho}}\\
+      \EvalWith{x}{\Gr}
+        & = \text{lookup $x$ in $\Gr$}
+    }
+    \caption{Denotational semantics.}
+    \label{fig:lambda-calc:evaluation}
+    \label{fig:correctness:evaluation}
+  \end{subfigure}
+  \caption{Standard definitions for the simply-typed lambda calculus.}
+    \label{fig:lambda-calc}
+\end{figure*}

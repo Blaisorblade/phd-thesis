@@ -561,7 +561,8 @@ Conversely, function applications are represented using the constructor \code{Ap
 %\begin{lstlisting}
 %def toFOAS[S, T](funBody: Exp[S] => Exp[T]) = 
 %\end{lstlisting}
-In our example, \code{Fun(str => str + "!")} produces \code{FOASFun(StringConcat(TypedVar[String](1), Const("!")), TypedVar[String](1))}%
+In our example, \code{Fun(str => str + "!")} produces\\
+\code{FOASFun(StringConcat(TypedVar[String](1), Const("!")), TypedVar[String](1))}%
 %: since an unbound variable appears here, this can be easily recognized as an open term
 .
 

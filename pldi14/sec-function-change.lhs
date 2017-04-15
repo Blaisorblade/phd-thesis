@@ -172,7 +172,7 @@ similarly to a distributive law.
   %   &\App{(\Update[A \to B]{f&&}{\D f})}{&&v}
   %     && = \Update[B]{\App{f}{v}&&}{\App{\App{\D f}{v}}{\NilC[A]{v}}}\\
   %   &\App{\App{(\Diff[A \to B]{f_2&&}{f_1})}{&&v}}{\D v}
-  %     && = \Diff[B]{\App{f_2}{\Update*[A]{v}{\D v}}&&}{\App{f_1}{v}}\qedAligned
+  %     && = \Diff[B]{\App{f_2}{\Update*[A]{v}{\D v}}&&}{\App{f_1}{v}}
   % \end{alignat*}
 \end{definition}
 
@@ -324,75 +324,6 @@ $\Lam{f} {\Lam{\D f} {\Lam{x} {\Lam{\D x} {\App {\App {\D f} x} {\D x}}}}}$.
 We hence solve difficulties described in
 section~\ref{ss:pointwise-limit}.
 \end{oldSec}
-
-\subsection{Function changes and change equivalence}
-
-\pg{Revise}
-We claimed earlier that change equivalence is
-respected by all valid operations in our theory. Here we prove
-that all function changes do preserve this equivalence.
-
-\begin{lemma}[Function change application preserves change equivalence]
-  \label{thm:change-respect-doe}
-  If |df1 `doe` df2| and |dv1 `doe` dv2| then |df1 v dv1 `doe`
-  df2 v dv2|, for any change structures $\chs A$ and $\chs B$,
-  base value |a `elem` A|, function |f `elem` A -> B|, changes
-  |da1, da2 `elem` Dt ^ a| and |df1, df2 `elem` Dt ^ f|.
-\end{lemma}
-\begin{optionalproof}
-  By definition of change equivalence, the thesis |df1 v dv1
-  `doe` df2 v dv2| means that |f v `oplus` df1 v dv1 = f v
-  `oplus` df2 v dv2|.
-  We prove this statement by equational reasoning:
-\begin{equational}
-\begin{code}
-   f v `oplus` df1 v dv1
-=  {- by incrementalization (\cref{thm:incrementalization}) -}
-   (f `oplus` df1) (v `oplus` dv1)
-=  {- since |df1 `doe` df2| and |dv1 `doe` dv2| -}
-   (f `oplus` df2) (v `oplus` dv2)
-=  {- by incrementalization (\cref{thm:incrementalization}) -}
-   f v `oplus` df2 v dv2
-\end{code}
-\end{equational}
-\end{optionalproof}
-This lemma generalizes \cref{thm:deriv-respect-doe}.
-
-We can prove a form of extensionality for function changes:
-function changes are equal if they produce change-equivalent
-changes on allowed inputs.
-\begin{lemma}[Extensionality for change equivalence]
-  For any change structures $\chs A, \chs B$ and base function |f
-  `elem` A -> B|, two function changes |df1, df2 `elem` Dt ^ f|
-  are equivalent (|df1 `doe` df2|) if they behave equivalently when
-  applied to arbitrary inputs |a `elem` A|, |da1, da2 `elem` Dt ^
-  x| (|df1 a da1 `doe` df2 a da2|)
-\end{lemma}
-\begin{optionalproof}
-  The thesis |df1 `doe` df2| means that |f `oplus` df1| is equal
-  to |f `oplus` df2|. We prove this using function
-  extensionality.
-  %
-  Let |a `elem` A| be an arbitrary input, and let us prove that
-  |(f `oplus` df1) a| is equal to |(f `oplus` df2) a|.
-  %
-  First, we apply the hypothesis with |da1 = da2 = (nil a)|
-  (since change equivalence is reflexive), and obtain that |df1 a
-  (nil a) `doe` df2 a (nil a)|, that is |f a `oplus` df1 a (nil
-  a) = f a `oplus` df2 a (nil a)|.
-  Now we can prove the thesis by equational reasoning:
-\begin{equational}
-\begin{code}
-   (f `oplus` df1) a
-=  {- by the definition of |`oplus`| on functions (\cref{def:function-changes:update}) -}
-   f a `oplus` df1 a (nil a)
-=  {- as just shown -}
-   f a `oplus` df2 a (nil a)
-=  {- by the definition of |`oplus`| on functions (\cref{def:function-changes:update}) -}
-   (f `oplus` df2) a {-"\text{.}"-}
-\end{code}
-\end{equational}
-\end{optionalproof}
 
 \subsubsection{Function changes of curried functions}
 Above we characterized function changes for unary functions.
@@ -583,26 +514,6 @@ In particular, any derivative is a nil change, and any nil change is a derivativ
 \end{enumerate}
 \end{optionalproof}
 
-We explained earlier that derivatives of a function can be
-different because they can return different but equivalent
-changes on some inputs; as promised, we now show that all
-derivatives of a function are change-equivalent.
-\begin{lemma}[Derivatives are unique up to change equivalence]
-  \label{thm:deriv-unique}
-  If two function changes |df1, df2| are derivatives for
-  |f|, then they're change equivalence to each other and to |f|'s nil change:
-  |df1 `doe` nil f `doe` df2|, for
-  any change structures $\chs A, \chs B$ and base function |f
-  `elem` A -> B|.
-\end{lemma}
-\begin{optionalproof}
-  Derivatives |df1| and |df2| are nil changes (as just shown in
-  \cref{thm:derivative-is-nil}). Change |nil f| is also a
-  nil change (by \cref{thm:update-nil-v2}). Nil changes are all
-  change equivalent (by \cref{thm:nil-equivs}), that is, we have
-  the thesis |df1 `doe` nil f `doe` df2|.
-\end{optionalproof}
-
 \begin{oldSec}
 \pg{The following two paragraphs are too verbose, and possibly
   unneeded.}
@@ -680,9 +591,6 @@ cannot do any better than recomputation.
   definitions. Moreover, \texttt{nil-term} fits nicely in the
   algebra of changes.}
 \end{oldSec}
-
-\pg{Integrate.}
-\input{pldi14/sec-change-structures}
 
 \section{Chapter conclusion}
 In this chapter, we developed the theory of changes to define

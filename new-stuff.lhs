@@ -57,7 +57,7 @@ A few other annoyances include:
 \item Applying a derivative to a nil change always produce a nil change, but we
   never take advantage of this to optimize derivatives, except sometimes at
   compile time.
-\item No support change composition: there is no direct way to compose a
+\item No support for change composition: there is no direct way to compose a
   sequence of changes |dx1, dx2, dx3, ...| across |x0, x1, x2, x3, ...| and
   produce a single change, except by applying all those changes and computing a
   difference with |x0 `oplus` dx1 `oplus` dx2 `oplus` dx3|.
@@ -65,120 +65,7 @@ A few other annoyances include:
   often we are not supposed to use it.
 \end{enumerate}
 
-\chapter{Defunctionalizing function changes}
-
-If we represent function changes as functions, we can only apply them. This and
-other problems are vastly simplified if we instead defunctionalize function
-changes. Furthermore, assembling changes for functions becomes easier if the
-functions are defunctionalized as well.
-
-In this chapter, we show how to systematically incrementalize such
-defunctionalized programs by systematic program transformation.
-
-\subsection{Avoiding the closed-world assumption}
-\pg{Move this somewhere better.}
-
-\pg{cite Uroboro.}
-
-Defunctionalization as usually defined can only be performed on a closed
-program. Using open algebraic datatypes can lift this restriction, though
-usually at the cost of exhaustiveness checking.
-
-Representing changes as data instead of functions is not a goal per se. Rather,
-our goal is defining other primitive operations on function changes beyond
-application, and that is not possible if function changes are represented as
-functions. However, this problem could also be solved by representing function
-changes as more general \emph{codata} using copatterns. Codata generalize
-functions; while functions can only be \emph{observed} by applying them to an
-argument, codata can support further observations. Moreover, when defining
-codata using copatterns, the codata definition fixes a set of observations,
-while new generators can be defined in the entire program, similarly to how
-functions can be defined in a whole programs.
-
-Hence we could potentially represent changes as codata. We leave this for future
-work.
-
-\section{Setup}
-\pg{Clarify how we use Haskell} We encode ILC by manually writing Haskell code,
-containing both manually-written plugin code and systematically transformed code
-that could be generated. At first we do not
-implement or formalize all the transformation steps.
-
-Even though we do not support higher-order programs directly, we still reuse or
-adapt many of the ideas from ILC. \pg{Check this} And as we will see, we treat
-defunctionalized functions specially.
-
-In this chapter we will support polymorphism but avoid tackling first-class
-polymorphism.
-\pg{add pointer.}
-
-Let's rememeber our basic interface to change structures:
-\begin{code}
-class ChangeStruct t where
-  type Dt^t = r | r -> t
-  oplus :: t -> Dt^t -> t
-  oreplace :: t -> Dt^t
-
-class ChangeStruct t => OnilChangeStruct t where
-  -- Proxy is used to encode explicit type application.
-  onil :: Proxy t -> Dt^t
-
-class ChangeStruct t => NilChangeStruct t where
-  nil :: t -> Dt^t
-\end{code}
-
-Let's also recall the \emph{absorption law}, |x `oplus` oreplace y = y|.
-
-Crucially, changes to type |t| are represented as type |Dt^t|, and this
-interface does \emph{not} require that change structures support a difference
-operation, or that all changes are representable.
-
-\section{Defunctionalization}
-We defunctionalize functions from |A| to |B| as pairs of a function descriptor
-and a (possibly empty) environment. The function descriptor is represented using
-a GADT of codes indexed by |A|, |B| and environment type. We separate the
-environment because a variety of operations must manipulate it uniformly.
-
-\pg{Add example snippets}
-\begin{code}
-data Code env a b where
-  CPair1 :: Code a b (a, b)
-  CMapPair1 :: Code [b] a [(a, b)]
-
-data Fun1 a b = forall env . P env (Code env a b)
-
-applyFun1 :: (Fun1 a b) -> a -> b
-applyFun1 = undefined
-\end{code}
-
-ILC requires support for function changes because the environment can change.
-Hence we start by representing function changes through environment changes.
-
-\begin{code}
-data DFun1 a b = forall env . DP (Dt^env) (Code env a b)
-\end{code}
-
-In fact, we can also replace a function value by another one with different
-code. However, for now we set aside support for this case; as we will see, for
-that case we can simply support replacing a function value with a new code and
-associated environment, that is, simply support a replacement change.
-
-Next, we add support for derivatives and function changes. We can start by
-simply adding a derivative for |applyFun1|:
-\begin{code}
-applyDFun1 :: (Fun1 a b) -> (DFun1 a b) -> a -> Dt^a -> Dt^b
-applyDFun1 = undefined
-\end{code}
-
-However, we can also implement further accessors that inspect function changes. We can now finally detect if a change is nil:
-\begin{code}
-isNil :: DFun1 a b -> Boolean
-\end{code}
-
-We can then wrap a derivative to return a nil change immediately if at runtime
-all input changes turn out to be nil. This was not possible in PLDI'14, because
-nil function changes could not be detected at runtime, only at compile time.
-
+%include defunc.lhs
 \subsection{Supporting function composition}
 
 Imagine, in the setting of PLDI'14 extended with change composition, applying
@@ -313,3 +200,171 @@ update :: Int -> a -> Seq a -> Seq a
 \chapter{Static caching}
 \label{sec:static-caching}
 \pg{Write it!}
+
+\input{pldi14/sec-rw}
+\chapter{Conclusions}
+\pg{Plan for things that complete the original paper's story: add them by
+  revising that text and in that chapter.}
+
+\bibliography{Bibs/DB,Bibs/ProgLang,Bibs/SoftEng,Bibs/own}
+
+\appendix
+\chapter{More on our formalization}
+\section{Mechanizing plugins modularly and limitations}
+\label{sec:modularity-limits}
+Next, we discuss our mechanization of language plugins in Agda, and its
+limitations. For the concerned reader, we can say these limitations affect
+essentially how modular our proofs are, and not their cogency.
+
+In essence, it's not possible to express in Agda the correct interface for
+language plugins, so some parts of language plugins can't be modularized as desirable.
+Alternatively, we can mechanize any fixed language plugin together with
+the main formalization, which is not truly modular, or mechanize a core
+formulation parameterized on a language plugin, which that runs into a few
+limitations, or encode plugins so they can be modularized and deal with encoding
+overhead.
+
+This section requires some Agda knowledge not provided here, but
+we hope that readers familiar with both Haskell and Coq will be
+able to follow along.
+
+Our mechanization is divided into multiple Agda modules. Most
+modules have definitions that depend on language plugins,
+directly or indirectly. Those take definitions from language
+plugins as \emph{module parameters}.
+
+For instance, STLC object types are formalized through Agda type
+|Type|, defined in module |Parametric.Syntax.Type|. The latter is
+parameterized over |Base|, the type of base types.
+
+For instance, |Base| can support a base type of integers, and a
+base type of bags of elements of type |iota| (where |iota :
+Base|). Simplifying a few details, our definition is equivalent
+to the following Agda code:
+\begin{code}
+module Parametric.Syntax.Type (Base : Set) where
+  data Type : Set where
+    base  :  ^^(iota : Base)                   -> Type
+    _=>_  :  ^^(sigma : Type)  -> (tau : Type) -> Type
+
+-- Elsewhere, in plugin:
+
+data Base : Set where
+  baseInt  :  ^^Base
+  baseBag  :  ^^(iota : Base) -> Base
+-- ...
+\end{code}
+
+But with these definitions, we only have bags of elements of base type. If
+|iota| is a base type, |base (baseBag iota)| is the type of bags with elements
+of type |base iota|. Hence, we have bags of elements of base type. But we don't
+have a way to encode |Bag tau| if |tau| is an arbitrary non-base type, such as
+|base baseInt => base baseInt| (the encoding of object type |Int -> Int|).
+%
+Can we do better? If we ignore modularization, we can define types through the
+following mutually recursive datatypes:
+
+\begin{code}
+mutual
+  data Type : Set where
+    base  :  ^^(iota : Base Type)              -> Type
+    _=>_  :  ^^(sigma : Type)  -> (tau : Type) -> Type
+
+  data Base : Set where
+    baseInt  :  ^^Base
+    baseBag  :  ^^(iota : Type) -> Base
+\end{code}
+
+So far so good, but these types have to be defined together. We
+can go a step further by defining:
+
+\begin{code}
+mutual
+  data Type : Set where
+    base  :  ^^(iota : Base Type)              -> Type
+    _=>_  :  ^^(sigma : Type)  -> (tau : Type) -> Type
+
+  data Base (Type : Set) : Set where
+    baseInt  :  ^^Base Type
+    baseBag  :  ^^(iota : Type) -> Base Type
+\end{code}
+
+Here, |Base| takes the type of object types as a parameter, and
+|Type| uses |Base Type| to tie the recursion. This definition
+still works, but only as long as |Base| and |Type| are defined together.
+
+If we try to separate the definitions of |Base| and |Type| into
+different modules, we run into trouble.
+\begin{code}
+module Parametric.Syntax.Type (Base : Set -> Set) where
+  data Type : Set where
+    base  :  ^^(iota : Base Type)              -> Type
+    _=>_  :  ^^(sigma : Type)  -> (tau : Type) -> Type
+
+-- Elsewhere, in plugin:
+
+data Base (Type : Set) : Set where
+  baseInt  :  ^^Base Type
+  baseBag  :  ^^(iota : Type) -> Base Type
+\end{code}
+
+Here, |Type| is defined for an arbitrary function on types |Base
+: Set -> Set|. However, this definition is rejected by Agda's
+\emph{positivity checker}. Like Coq, Agda forbids defining
+datatypes that are not strictly positive, as they can introduce
+inconsistencies.
+\pg{Add the ``Bad'' example from Agda's wiki, with link for credit.}
+
+The above definition of |Type| is \emph{not} strictly positive,
+because we could pass to it as argument |Base = \tau -> (tau ->
+tau)| so that |Base Type = Type -> Type|, making |Type| occur in
+a negative position. However, the actual uses of |Base| we are
+interested in are fine. The problem is that we cannot inform the
+positivity checker that |Base| is supposed to be a strictly
+positive type function, because Agda doesn't supply the needed
+expressivity.
+
+This problem is well-known. It could be solved if Agda function spaces supported
+positivity annotations,\footnote{As discussed in
+  \url{https://github.com/agda/agda/issues/570} and
+  \url{https://github.com/agda/agda/issues/2411}.} or by encoding a universe of
+strictly-positive type constructors. This encoding is not fully transparent and
+adds hard-to-hide noise to
+development~\citep{Schwaab2013modular}.\footnote{Using pattern synonyms and
+  \texttt{DISPLAY} pragmas might successfully hide this noise.}
+Few alternatives remain:
+\begin{itemize}
+\item We can forbid types from occurring in base types, as we did in our
+  original paper~\citep{CaiEtAl2014ILC}. There we did not discuss at all a
+  recursive definition of base types.
+\item We can use the modular mechanization, disable positivity checking and risk
+  introducing inconsistencies. We tried this successfully in a branch of that
+  formalization. We believe we did not introduce inconsistencies in that branch
+  but have no hard evidence.
+\item We can simply combine the core formalization with a sample plugin. This is
+  not truly modular because the core modularization can only be reused by
+  copy-and-paste. Moreover, in dependently-typed languages the content of a
+  definition can affect whether later definitions typecheck, so alternative
+  plugins using the same interface might not typecheck.\footnote{Indeed, if
+    |Base| were not strictly positive, the application |Type Base| would be
+    ill-typed as it would fail positivity checking, even though |Base: Set ->
+    Set| does not require |Base| to be strictly positive.}
+\end{itemize}
+
+Sadly, giving up on modularity altogether appears the more conventional choice.
+Either way, as we claimed at the outset, these modularity concerns only limit
+the modularity of the mechanized proofs, not their cogency.
+
+\chapter*{Acknowledgments}
+% From AOSD13
+I thank Sebastian Erdweg for helpful discussions on
+this project, Katharina Haselhorst for help
+implementing the code generator, and the anonymous reviewers, Jacques Carette and Karl Klose
+for their helpful comments on this chapter.
+This work is supported in part by the European Research Council, grant \#203099 ``ScalPL''.
+
+% From PLDI14 (?)
+% From ILC17
+We thank Cai Yufei, Tillmann Rendel, Lourdes Del Carmen Gonz\`alez Huesca, Yann
+R\`egis-Gianas, Philipp Schuster, Sebastian Erdweg, Marc Lasson, Robert Atkey,
+... for helpful discussions on this project.

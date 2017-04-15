@@ -8,15 +8,15 @@ values are objects and changes are arrows.
 A change structure on a set $V$ is given by:
 \begin{subdefinition}
 \item a set of changes $\GD V$.
-\item\label{subdef:src} a function $\Term{src} : \GD V → V$ mapping a change to
+\item\label{subdef:src} a function $\Term{src} : \GD V \to V$ mapping a change to
   its source value. In our paper, we consider a separate set of changes
   $\Delta v$ for each source $v \in V$. Here, instead, I consider a single set
   with all the changes, and a function mapping them to their source.
-\item\label{subdef:dst} A function $\Term{dst} : \GD V → V$ mapping a change to
+\item\label{subdef:dst} A function $\Term{dst} : \GD V \to V$ mapping a change to
   its destination value. If two changes share source and destination, we say
   they are \emph{change-equivalent}, or for short,
   \emph{equivalent}, and we write $\Doe$.
-\item\label{subdef:nil} A function $\Term{nil} : V → \GD V$ mapping a value to
+\item\label{subdef:nil} A function $\Term{nil} : V \to \GD V$ mapping a value to
   its nil change, such that $\Term{src} \cdot \Term{nil} = \Term{Id}$ and
   $\Term{dst} \cdot \Term{nil} = \Term{Id}$.
 \end{subdefinition}
@@ -25,7 +25,7 @@ In addition, we can require any of the following properties.
 \item\label{subdef:exist} \emph{Completeness}: Between any two values there exists
   at least a change.
 \item\label{subdef:ominus} \emph{$\ominus$, the witness of completeness:} A
-  function $\ominus : V \times V → \GD V$ mapping two values to one change
+  function $\ominus : V \times V \to \GD V$ mapping two values to one change
   between them, such that $\Term{dst} \cdot \ominus = \pi_2$ and
   $\Term{src} \cdot \ominus = \pi_1$. This requirement implies
   \cref{subdef:exist}, but gives also a function that computes this change.
@@ -63,9 +63,10 @@ formulates it categorically, as we show next.
 Instead of representing a \emph{family} of change sets $\Delta v$ indexed by
 $v \in V$ directly, one can just have a single set of all changes, and use
 $\Term{src}$ to map a change $d_v \in \Delta V$ to its base value $v$ belonging
-to the index set $V$. I believe that $\Term{src}$ is technically a
-fibration\footnote{\url{http://ncatlab.org/nlab/show/fibration\#fibrations_in_category_theory}},
-but I am not familiar with the theory of fibration enough to be sure.
+to the index set $V$.
+% I believe that $\Term{src}$ is technically a
+% fibration,\footnote{\url{http://ncatlab.org/nlab/show/fibration\#fibrations_in_category_theory}}
+% but I am not familiar with the theory of fibration enough to be sure.
 
 To show the equivalence of the two definitions, one can set
 $\Delta V = \sum_{v: V} \Delta v$. If the change sets are already disjoint and
@@ -74,10 +75,10 @@ one works in set theory, it's not necessary to use disjoint union
 set-theoretic union $\Delta V = \cup_{v: V} \Delta v$.
 
 Next, we need to express the signature of $\oplus$:
-\[\oplus: (v: V) → (dv: \Delta v) → V\]
+\[\oplus: (v: V) \to (dv: \Delta v) \to V\]
 when we only have $V$ and $\Delta V = \sum_{v: V} \Delta v$; however, if we
 curry the signature of $\oplus$ using a $\Sigma$-type, we get
-$\sum_{v: V} \Delta v → V$, that is $\Delta V → V$; the resulting function maps
+$\sum_{v: V} \Delta v \to V$, that is $\Delta V \to V$; the resulting function maps
 a change to its destination, hence it is nothing but $\Term{dst}$.
 
 \paragraph{Variants of this definition}

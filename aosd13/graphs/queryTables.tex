@@ -45,7 +45,35 @@
 %\label{table:implemented-analyses}
 %\end{table*}
 
-\begin{table}
+
+\newcommand{\captionEvalTable}{%
+As in in Sec.~\ref{sec:implemenationsandspeedups}, (1) denotes the modular Scala
+implementation, (2) the hand-optimized Scala one, and ($3^-$), ($3^o$), ($3^x$)
+refer to the {\LoS} implementation when run, respectively, without
+optimizations, with optimizations, with optimizations and indexing.
+Queries marked with the $R$ superscript were selected by random sampling.}
+\newcommand{\tablerowsize}{\scriptsize}
+\begin{sidewaystable}[ph!]
+\centering
+\input{\graphPath{EvalTable}}
+\nocaptionrule\caption{Performance results. \captionEvalTable}
+\label{table:performance}
+\end{sidewaystable}
+
+
+
+\begin{table}[h]
+  \centering
+  \footnotesize
+\input{\graphPath{EvalSummaryTable}}
+\nocaptionrule\caption{Average performance ratios.
+This table summarizes all interesting performance ratios across all queries,
+using the geometric mean~\citep{Fleming86}.
+The meaning of speedups is discussed in Sec.~\ref{sec:implemenationsandspeedups}.}
+\label{table:performanceAvg}
+\end{table}
+
+\begin{table}[h!]
 \begin{tabular}{p{7cm}r}\toprule
 Abstraction & Used \\ \midrule
 % calculate class hierarchy & 5 \\
@@ -59,30 +87,6 @@ Sliding window (size $n$) over all instructions (and their index) &	3\\
 \nocaptionrule\caption{Description of abstractions removed during hand-optimization and number of queries where the abstraction is used (and optimized away).}
 \label{table:implemented-abstractions}
 \end{table}
-
-\newcommand{\captionEvalTable}{%
-As in in Sec.~\ref{sec:implemenationsandspeedups}, (1) denotes the modular Scala
-implementation, (2) the hand-optimized Scala one, and ($3^-$), ($3^o$), ($3^x$)
-refer to the {\LoS} implementation when run, respectively, without
-optimizations, with optimizations, with optimizations and indexing.
-Queries marked with the $R$ superscript were selected by random sampling.}
-\newcommand{\tablerowsize}{\scriptsize}
-\begin{table*}[tb]
-\centering
-\input{\graphPath{EvalTable}}
-\nocaptionrule\caption{Performance results. \captionEvalTable}
-\label{table:performance}
-\end{table*}
-
-\begin{table*}[tb]
-\centering
-\input{\graphPath{EvalSummaryTable}}
-\nocaptionrule\caption{Average performance ratios.
-This table summarizes all interesting performance ratios across all queries,
-using the geometric mean~\citep{Fleming86}.
-The meaning of speedups is discussed in Sec.~\ref{sec:implemenationsandspeedups}.}
-\label{table:performanceAvg}
-\end{table*}
 
 \begin{extraEval}
 \begin{table*}[tb]

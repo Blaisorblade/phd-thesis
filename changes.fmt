@@ -1,10 +1,27 @@
 %include forall.fmt
 
+%if style == newcode
+
+%format ^ = " "
+%format ^^ = " "
+
+%else
+
+%format alpha = "\alpha"
 %format Nat = "\mathbb{N}"
 %format Int = "\mathbb{Z}"
+
+%format `times` = "\times"
 %format Gamma = "\Gamma"
+%format Gamma1
+%format Gamma2
+%format `preceq` = "\preceq"
 %format v1
 %format v2
+%format v3
+
+%format V1
+%format V2
 
 %format t1
 %format t2
@@ -17,12 +34,11 @@
 %format oplus = "(\oplus)"
 %format ominus = "(\ominus)"
 
-%  format `oplusIdx(t)` = "\oplus_{" t "}"
-%format oplusIdx(t) = "\oplus_{" t "}"
-%format ominusIdx(t) = "\ominus_{" t "}"
+%format (oplusIdx(t)) = "\oplus_{" t "}"
+%format (ominusIdx(t)) = "\ominus_{" t "}"
 
 %format `ocompose` = "\circledcirc "
-%format ocompose = "(\circledcirc)"
+%format ocompose (dv1) (v1) (dv2) = dv1 "\circledcirc_{" v1 "}" dv2
 
 %format `doe` = "\Doe"
 %format chs (v) = "\ChangeStruct{" v "}"
@@ -30,12 +46,23 @@
 %format `such` = "\mid"
 %format ^ = " "
 %format ^^ = "\;"
+%format ^^^ = "\\"
+%format ^&^ = "&"
 %format f0
 %format f1
 %format f2
+
 %format a0
 %format a1
 %format a2
+%format a3
+
+%format b1
+%format b2
+
+%format c1
+%format c2
+
 %format da0
 %format da1
 %format da2
@@ -52,6 +79,19 @@
 %format x1
 %format x2
 %format x3
+%format xn = "x_n"
+
+%format as1
+%format as2
+%format xs1
+%format xs2
+%format ys1
+%format ys2
+%format output1
+%format output2
+
+%format u1
+%format u2
 
 %format df0
 %format df1
@@ -65,30 +105,66 @@
 
 %format Dt = "\Delta"
 %format DtIdx(t) = "\Delta_{" t "}"
+%format Dt2 = "\Delta_2"
 %format DV = "\Delta V"
 
+%format Sigma = "\Sigma"
+%format nilc = "\NilC{}"
 %format (nil(v)) = "\NilC{" v "}"
 %format NIL = "\NILC"
 %format eval(t) = "\Eval{" t "}"
 %format evalInc(t) = "\EvalInc{" t "}"
 %format (evalConst(c)) = "\EvalConst{" c "}"
 %format (derive(t)) = "\Derive{" t "}"
+%format (deriveConst(t)) = "\DeriveConst{" t "}"
 %format `cong` = "\cong"
 
 %format nabla = "\nabla"
+%format emptyCtx = "\EmptyContext"
+%format emptyRho = "\EmptyEnv"
 %format rho = "\rho"
 %format drho = "\D\rho"
+%format rho1
+%format rho2
 %format sigma = "\sigma"
 %format tau = "\tau"
-%format sigma1 = sigma "_1"
-%format tau1 = tau "_1"
+%format sigma1
+%format sigma2
+%format tau1
+%format tau2
 %format iota = "\iota"
 
-%format valid tau dv v = dv "\;\mathbf{V}_{" tau "}\;" v
+%format correct (tau) (dv) (v) = "\correctdt{" tau "}{" dv "}{" v "}"
+%format fromto (tau) (v1) (dv) (v2) = "\validfromto{" tau "}{" v1 "}{" dv "}{" v2 "}"
 
 %format (new(v)) = "\New{" v "}"
 %format (old(v)) = "\Old{" v "}"
 %format `betaeq` = "=_{\beta}"
 %format == = "\equiv"
+%format /- = "\vdash"
 
 %format `and` = "\land"
+
+%format => = "\Rightarrow"
+%format _ = "\text{\textunderscore}"
+%format =>_ = "\mathord{\Rightarrow}\text{\textunderscore}"
+%format mutual = "\textbf{mutual}"
+%format ... = "\ldots"
+
+%format Theta(n) = "\Theta(" n ")"
+%format o(n) = "o(" n ")"
+
+%format param = "\text{\textendash}"
+
+%format cache1
+%format cache2
+%format caches1
+%format caches2
+%format mapCache1
+%format mapCache2
+%format cx1
+%format cx2
+
+%format size(s) = "\left|{" s "}\right|"
+
+%endif

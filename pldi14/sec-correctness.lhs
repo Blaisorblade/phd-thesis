@@ -2,7 +2,7 @@
 %include polycode.fmt
 %include changes.fmt
 
-\input{pldi14/fig-correctness}
+%\input{pldi14/fig-correctness}
 
 
 \section{Architecture of the proof}
@@ -33,61 +33,11 @@ $\Eval{\Derive{t}}$ has the corresponding behavior on the
 corresponding input. Our correctness property follows as a
 corollary.
 
-\section{Denotational semantics}
-\label{sec:denotational-sem}
+% \section{Denotational semantics}
+% \label{sec:denotational-sem}
 
-In order to prove that incrementalization preserves the meaning
-of terms, we define a denotational semantics of the object
-language. We first associate a domain with every type, given the
-domains of base types provided by the plugin. Since our calculus
-is strongly normalizing and all functions are total, we can
-avoid using domain theory to model partiality: our domains are
-simply sets. Likewise, we can use functions as the domain of function types.
-
-
-\begin{definition}[Domains]
-  The domain $\Eval{\Gt}$ of a type $\Gt$ is defined as in
-  \cref{fig:correctness:values}.
-\end{definition}
-
-\pg{Don't mix semantics and evaluation!!!}
-Given this domain
-construction, we can now define an evaluation function for
-terms. The plugin has to provide the evaluation function for
-constants. In general, the evaluation function |eval(t)| computes the value of a
-well-typed term |t| given the values of all free variables in
-|t|. The values of the free variables are provided in an
-environment.
-
-\begin{definition}[Environments]
-  An environment $\Gr$ assigns values to the names of free
-  variables.
-
-  \begin{syntax}
-    \Gr ::= \EmptyContext \mid \ExtendEnv{x}{v}
-  \end{syntax}
-
-  We write $\Eval{\GG}$ for the set of environments that assign
-  values to the names bound in $\GG$ (see
-  \cref{fig:correctness:environments}).
-\end{definition}
-
-\begin{definition}[Evaluation]
-  \label{def:evaluation}
-  Given $\Typing{t}{\tau}$, the meaning of $t$ is defined by the
-  function $\Eval{t}$ of type $\Fun{\Eval{\GG}}{\Eval{\tau}}$
-  in \cref{fig:correctness:evaluation}.
-\end{definition}
-
-This is the standard semantics of the simply-typed
-$\Gl$-calculus.
-
-For each constant |c : tau|, the plugin provides |evalConst(c) :
-eval(tau)|, the semantics of |c|; since constants don't contain
-free variables, |evalConst(c)| does not depend on an environment.
-
-We can now specify what it means to incrementalize the
-simply-typed $\Gl$ calculus with respect to this semantics.
+% We can now specify what it means to incrementalize the
+% simply-typed $\Gl$ calculus with respect to this semantics.
 
 \section{Change semantics}
 The informal specification of differentiation is to map
@@ -123,7 +73,6 @@ $\Gi$ such that $\forall v. \Change[\Gi]{v} \subseteq \Eval{\Change{\Gi}}$.
   \begin{align*}
 %    \ChangeStruct{C}_{\Gi} & = \ChangeStruct{C}_\Gi\\
     \ChangeStruct{C}_{\Fun{\Gs}{\Gt}} & = \ChangeStruct{C}_{\Gs} \to \ChangeStruct{C}_{\Gt}.
-  \qedAligned
   \end{align*}
 \end{definition}
 
@@ -408,13 +357,6 @@ requires proving tedious lemmas.
 \section{Correctness of differentiation}
 \label{sec:differentiate-correct}
 \label{sec:erasure}
-\DeclareFixedFootnote{\EmptyEmptyNote}{%
-To evaluate a closed term $t$, we need no environment entries, so
-the empty environment $\EmptyEnv$ suffices:
-$\EvalWith*{t}{\EmptyEnv}$ is the value of $t$ in the empty environment, and
-$\;\EvalIncSmashWith*{t}{\EmptyEnv}{\EmptyEnv}$
-is the value of $t$ using the change semantics, the empty environment and the empty change
-environment.}
 
 We can now
 prove that the behavior of $\Eval{\Derive{t}}$ is consistent with
