@@ -15,6 +15,7 @@ comment.cut
 ## lhs2TeX output
 change-theory-reconstruct.tex
 new-stuff.tex
+backmatter.tex
 pldi14/sec-intro.tex
 pldi14/sec-change-theory.tex
 pldi14/sec-change-equiv.tex
