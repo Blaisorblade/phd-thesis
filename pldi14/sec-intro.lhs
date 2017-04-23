@@ -1709,32 +1709,49 @@ its behavior? Can we still find |nil f|?
 That's necessary to implement |nilc| as an
 object-language function |nilc| from |f| to |nil f|, since such a
 function does not have access to |f|'s implementation. That's
-also necessary to define |nilc| in the metalanguage on function
-spaces.
+also necessary to define |nilc| on metalanguage function spaces---and we look at this case first.
 
-We first look at the metalanguage case. We want to find a nil
-change for an arbitrary metalanguage function |f : A -> B|, where
-|A| and |B| are arbitrary sets; we assume a basic change
-structure on |A -> B|, and will require them to support a few
-additional operations.
-
-We seek |nil f| so that |fromto (A -> B) f (nil f) f|. That
-is, whenever |fromto A a1 da a2| then |fromto B (f1 a1) (nil f a1
-da) (f2 a2)|. By \cref{thm:valid-oplus}, this means that we need
-to find |nil f| such that |f1 a1 `oplus` nil f a1 da = f2 a2|,
+We seek a nil change |nil f| for an arbitrary
+metalanguage function |f : A -> B|, where |A| and |B| are
+arbitrary sets; we assume a basic change structure on |A -> B|,
+and will require |A| and |B| to support a few additional
+operations. We require that
+\begin{equation}
+  \label{eq:search-nil-fun}
+  |fromto (A -> B) f (nil f) f|.
+\end{equation}
+That is, whenever |fromto A a1 da a2| then |fromto B (f1 a1) (nil f a1
+da) (f2 a2)|. By \cref{thm:valid-oplus}, this implies that
+\begin{equation}
+  \label{eq:search-nil-fun-oplus}
+  |f1 a1 `oplus` nil f a1 da = f2 a2|,
+\end{equation}
 where |a1 `oplus` da = a2|. To solve this equation, we
 \emph{introduce operator |`ominus`|}, such that |a2 `ominus` a1|
 produces a valid change from |a1| to |a2|, and see that |nil f|
 must be
 
-\[|nil f = \a1 da -> f (a1 `oplus` da) `ominus` f a1|.\]
+\begin{equation}
+  \label{eq:define-nil-fun}
+|nil f = \a1 da -> f (a1 `oplus` da) `ominus` f a1|.
+\end{equation}
 
-Definitions of |`ominus`| will be provided as part of change
-structures. In particular, we define |`ominus`| on functions. And
-once we define |`ominus`|, we can also define |nil v = v `ominus`
-v|. We seek a valid function change |f2 `ominus` f1| from |f1| to
-|f2|. We have just sought and found a valid change from |f| to
-|f|; generalizing the reasoning we used, we obtain that whenever
+We can verify, in particular, that this definition for |nil f|
+solves not just \cref{eq:search-nil-fun-oplus} but also
+\cref{eq:search-nil-fun}.
+
+We have shown that, to define |nilc| on functions |f : A -> B|,
+we can use |`ominus`| at type |B|. Without using |f|'s intension,
+we are aware of no alternative. To ensure |nil f| is defined for
+all |f|, we require that change structures define |`ominus`|. We
+can then define |nilc| as a derived operation via |nil v = v
+`ominus` v|, and verify this derived definition satisfies
+requirements for |nil|.
+
+Next, we show how to define |`ominus`| on functions. We seek a
+valid function change |f2 `ominus` f1| from |f1| to |f2|. We have
+just sought and found a valid change from |f| to |f|;
+generalizing the reasoning we used, we obtain that whenever
 |fromto A a1 da a2| then we need to have |fromto B (f1 a1) ((f2
 `ominus` f1) a1 da) (f2 a2)|; since |a2 = a1 `oplus` da|, we can
 define
@@ -1744,6 +1761,20 @@ define
 |f2 `ominus` f1 = \a1 da -> f2 (a1 `oplus` da) `ominus` f1 a1|.
 \end{equation}
 
+One can verify that \cref{eq:ominus-fun-1} defines |f2 `ominus`
+f1| as a valid function from |f1| to |f2|, as desired. What's
+more, our earlier specialized definition of |nil f| in
+\cref{eq:define-nil-fun} becomes now redundant. We can just use
+general definition |nil f = f `ominus` f|, simplify through the definition
+of |`ominus`| in \cref{eq:ominus-fun-1}, and obtain
+%
+\[
+  |nil f = f `ominus` f = \a1 da -> f (a1 `oplus` da) `ominus` f
+  a1|,
+\]
+which is the same definition as
+\cref{eq:define-nil-fun}.
+
 We have made this definition at the meta-level. We can also use
 the same definition in object programs, but there we face
 additional concerns. The produced function change is rather slow,
@@ -1752,8 +1783,8 @@ the new output |f2 a2| and taking the difference.
 
 However, we can implement |`ominus`| using replacement changes, if
 they are supported on the relevant types. If we define |`ominus`|
-on set |B| as |b2 `ominus` b1 = !b2|, then \cref{eq:ominus-fun-1}
-simplifies to
+on set |B| as |b2 `ominus` b1 = !b2| and simplify \cref{eq:ominus-fun-1},
+we obtain
 \[|f2 `ominus` f1 = \a1 da -> ! (f2 (a1 `oplus` da))|.\]
 
 We could even imagine allowing replacement changes on functions
@@ -1764,16 +1795,17 @@ to produce a function change that can be applied, hence
 Alternatively, as we'll see later in
 \cref{ch:defunc-fun-changes}, we could represent function changes
 not as functions but as data through \emph{defunctionalization},
-and provide a function applying function changes |df : Dt^(sigma
--> tau)| to inputs |t1 : sigma| and |dt :
-Dt^sigma|.\pg{reconsider}
+and provide a function applying defunctionalized function changes
+|df : Dt^(sigma -> tau)| to inputs |t1 : sigma| and |dt :
+Dt^sigma|. In this case, |!f2| would simply be another way to
+produce defunctionalized function changes.
 
 \subsection{Constraining ⊕ on functions}
 \label{sec:oplus-fun-intro}
 Next, we discuss how |`oplus`| must be defined on functions, and
 show informally why we must define |f1 `oplus` df = \v -> f1 x
 `oplus` df v (nil v)| to prove that |`oplus`| on functions agrees
-with validity (\cref{thm:valid-oplus}).
+with validity (that is, \cref{thm:valid-oplus}).
 
 % Take functions
 % |f1 `oplus` df|
@@ -1884,6 +1916,7 @@ define the nil change of |f| through its derivative.\pg{See
 % \)
 %     }}}
 
+As a summary of definitions on types, we show that:
 \begin{figure}
   \pg{change structures}
   \[|nil v = v `ominus` v |\]
