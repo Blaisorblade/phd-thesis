@@ -44,13 +44,15 @@ Programmers typically have to choose between a few undesirable options.
   relation with parallelism. Build scripts might be a good
   example.}
 
-Since no approach guarantees automatic efficient
-incrementalization for arbitrary programs, we propose to design
-functional domain-specific languages (DSLs) whose programs can be
-incrementalized by a transformation that we call
-\emph{differentiation}. We propose functional DSLs, so that
-language primitive can be parameterized over functions and hence
-highly flexible.\pg{why not defunctionalize/closure convert/...?}
+No approach guarantees automatic efficient incrementalization for
+arbitrary programs. We propose instead to design functional
+domain-specific languages (DSLs) with carefully designed
+primitives, so that programs in such DSLs can be incrementalized
+efficiently. To incrementalize such programs, we use a
+transformation that we call \emph{differentiation}. We propose
+functional DSLs, so that language primitive can be parameterized
+over functions and hence highly flexible.\pg{why not
+  defunctionalize/closure convert/...?}
 
 \pg{actually argue for higher-order collection DSLs over relational databases}
 \pg{not in source}\pg{rewrite}\pg{find source for argument}
@@ -88,8 +90,9 @@ differentiation and motivate it informally in
 \cref{sec:informal-derive}. We apply differentiation to our
 motivating example in \cref{sec:derive-example}.
 %
-\pg{check later this TOC} We formalize differentiation and prove
-it correct in next chapter~\cref{ch:derive-formally}.
+\pg{check later this TOC} In \cref{ch:derive-formally}, we
+introduce a formal theory of changes, and we use it to formalize
+differentiation and prove it correct.
 
 % \section{Our object language: STLC}
 % \label{sec:intro-stlc}
@@ -104,28 +107,29 @@ it correct in next chapter~\cref{ch:derive-formally}.
 %format f_d = "\Delta f"
 %format `dot` = "\cdot"
 % Revise terminology.
-Our theory generalizes an existing field of mathematics called
+Our theory of changes generalizes an existing field of mathematics called
 the \emph{calculus of finite difference}: If |f| is a real
 function, one can define its \emph{finite difference}, that is a
 function |f_d| such that |f_d a da = f (a + da) - f a|. Readers
 might notice the similarity (and the differences) between the
 finite difference and the derivative of |f|, since the latter is
 defined as
-\[f'(a) = \lim_{da \to 0} (f (a + da) - f(a)) / da.\]
+\[f'(a) = \lim_{\Varid{da} \to 0} \frac{f (a + \Varid{da}) - f(a)}{\Varid{da}}.\]
 
-The calculus of finite differences provides theorems that in many
-cases allow computing a closed formula for |f_d| given a closed
-formula for |f|. For instance, if function |f| is defined by
-|f x = 2 `dot` x|, one can prove its finite difference is |f_d x dx =
-2 `dot` (x + dx) - 2 `dot` x = 2 `dot` dx|.
+The calculus of finite differences helps computing a closed
+formula for |f_d| given a closed formula for |f|. For instance,
+if function |f| is defined by |f x = 2 `dot` x|, one can prove
+its finite difference is |f_d x dx = 2 `dot` (x + dx) - 2 `dot` x
+= 2 `dot` dx|.
 
-We consider finite differences helpful for incrementalization
-because they allow computing functions on updated inputs based on
-results on base inputs, if we know how inputs change. Taking
-again |f x = 2 `dot` x|, if |x| is a base input and |x + dx| is
-an updated input, we can compute |f (x + dx) = f x + f_d x dx|.
-Here, the input change is |dx| and the output change is |f_d x
-dx|.
+Finite differences are helpful for incrementalization because
+they allow computing functions on updated inputs based on results
+on base inputs, if we know how inputs change. Take again for
+instance |f x = 2 `dot` x|: if |x| is a base input and |x + dx|
+is an updated input, we can compute |f (x + dx) = f x + f_d x
+dx|. If we already computed |y = f x| and reuse the result, we
+can compute |f (x + dx) = y + f_d x|. Here, the input change is
+|dx| and the output change is |f_d x dx|.
 
 However, the calculus of finite differences is usually defined
 for real functions. Since it is based on operators |+| and |-|,
@@ -136,12 +140,12 @@ researched~\citep{Paige82FDC,GlucheGrust97Incr}, most recently and
 spectacularly with DBToaster by
 \citet{Koch10IQE} and \citet{Koch2016incremental}.
 
-But it is not immediate how to generalize it beyond groups. And
-many useful types do not form a group: for instance, lists of
-integers don't form a group but only a monoid. Moreover, it's
-hard to represent list changes simply through a list: how do we
-specify which elements were inserted (and where), which were
-removed and which were subjected to change themselves?
+But it is not immediate how to generalize finite differencing
+beyond groups. And many useful types do not form a group: for
+instance, lists of integers don't form a group but only a monoid.
+Moreover, it's hard to represent list changes simply through a
+list: how do we specify which elements were inserted (and where),
+which were removed and which were subjected to change themselves?
 
 In ILC, we generalize the calculus of finite differences by
 using distinct types for base values and changes, and adapting
@@ -150,8 +154,8 @@ the surrounding theory.
 \section{A motivating example}
 \label{sec:motiv-example}
 In this section, we illustrate informally incrementalization on a
-small example program. We give a more
-precise presentation in \cref{sec:correct-derive}.
+small example. We give a more precise presentation in
+\cref{sec:correct-derive}.
 
 In the following program, term |grand_total xs ys| sums integer numbers in
 input collections |xs| and |ys|. We also compute an initial
