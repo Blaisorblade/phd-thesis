@@ -39,20 +39,26 @@
 
 \chapter{Incrementalizing more programs}
 \label{ch:inc-more-programs}
-\pg{Only a sketch for now}
+\pg{Only a very rough sketch for now}
 
-While the basic framework we presented is significant, applying it in practice
-to incrementalize programs is hard because of a few problems.
+In the previous chapters we have shown how to apply finite differencing to
+programs with first-class functions. With finite differencing we can
+incrementalize a few programs, but for others we run into problems:
+
 \begin{enumerate}
-\item The incremental computation does not have accesss to intermediate results from the original computation.
-\item Since function changes are represented as functions, the derivative cannot
-  test if a function change is nil. In fact, while a function change can replace
-  a function with an arbitrary other function, actual changes often simply
-  replace a closure with another closure using the same code but closing over a
-  changed environment.
+\item The incremental computation does not have accesss to intermediate results
+  from the original computation.
+\item Since function changes are represented as functions, they cannot be
+  inspected at runtime, preventing a few optimizations. For instance, applying a
+  derivative to a nil change always produces a nil change, but we never take
+  advantage of this to optimize derivatives, except sometimes at compile time.
 \end{enumerate}
+ % In fact, while a function change can replace
+ %  a function with an arbitrary other function, actual changes often simply
+ %  replace a closure with another closure using the same code but closing over a
+ %  changed environment.
 
-A few other annoyances include:
+A few other limitations include:
 \begin{enumerate}
 \item Applying a derivative to a nil change always produce a nil change, but we
   never take advantage of this to optimize derivatives, except sometimes at
@@ -79,7 +85,7 @@ going from |f1 a1| to |f1 a2|, we can assemble the desired change as |db = db1
 However, to compute |db2| incrementally we cannot apply |df| to |da2|: |df a1
 da2| gives the difference between |f0 a1| and |f1 a2|, but |db2| should be the
 difference between |f1 a1| and |f1 a2|. Hence, we need to compute a nil change
-for |f1|, that is, .
+for |f1|.
 
 Doing that efficiently from the available elements is hard. However, with
 defunctionalized changes this becomes much easier (assuming the function code
@@ -200,6 +206,26 @@ update :: Int -> a -> Seq a -> Seq a
 \chapter{Static caching}
 \label{sec:static-caching}
 \pg{Write it!}
+
+\pg{It'd be nice to type the smart approach to cache type variables. We can't
+  generally. It would be good to characterize when it can be used, but we don't
+  do that either. Instead, we just show examples of what would be possible.}
+%
+\pg{We conjecture that we can type using free type variables:
+  \begin{itemize}
+
+  \item second-class uses of higher-order functions (such as in map, flatMap, and so on)
+  \item but not first-class uses
+  \item we can probably thread type variables where possible and use the packing trick elsewhere.
+\end{itemize}
+}
+
+\pg{In fact, assume a combinator |mapInt : (Int -> Int) -> List Int -> List
+  Int|. We can't prove that |mapInt f| uses its argument as we expect, maybe it
+  does nothing on the list elements, or maybe it maps |inc| on (some of) them.
+  Many such behaviors are allowed by its type; but our translation turns these
+  |mapInt| variants with the same type into functions with different cache
+  types. Mapping different functions over different elements produces.}
 
 \input{pldi14/sec-rw}
 \chapter{Conclusions}
