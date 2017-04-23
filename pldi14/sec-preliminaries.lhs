@@ -119,7 +119,7 @@ with the metavariables we use. Language plugins define base types
 |iota| and constants |c|. Types can be base types |iota| or
 function types |sigma -> tau|. Terms can be constants |c|,
 variables |x|, function applications |t1 t2| or lambda
-abstractions |\x -> t|. To describe assumptions on variable types
+abstractions |\(x : sigma) -> t|. To describe assumptions on variable types
 when typing terms, we define typing contexts |Gamma| as being
 either empty |emptyCtx|, or as context extensions |Gamma, x :
 tau|, which extend context |Gamma| by asserting variable |x| has
