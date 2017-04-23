@@ -1171,13 +1171,15 @@ rho1) (eval(derive(t)) drho) (eval(t) rho2)| (and |a1, da, a2| as needed) gives 
 
     In short, our thesis is that |derive(\x -> t)| is a correct
     change for |\x -> t|. By induction on |t| we know that
-    |derive(t)| is a correct change for |t|. We show these two
-    correctness claims mean the same thing since we pick
-    |derive(\x -> t) = \x dx -> derive(t)|. By |derive(param)|'s
-    typing you can show that |Dt^Gamma, x : sigma, dx : Dt^sigma
-    /- derive(t): tau|. Now, |eval(\x dx -> derive(t))| is just a
-    curried version of |eval(derive(t))|; to wit, observe their
-    meta-level types:
+    |derive(t)| is a correct change for |t|.
+    %
+    We show that our thesis, that is correctness of |derive(\x ->
+    t)|, is equivalent to correctness of |derive(t)|, because we
+    pick |derive(\x -> t) = \x dx -> derive(t)|. By
+    typing of |derive(param)| you can show that |Dt^Gamma, x :
+    sigma, dx : Dt^sigma /- derive(t): Dt^tau|. Now, |eval(\x dx
+    -> derive(t))| is just a curried version of
+    |eval(derive(t))|; to wit, observe their meta-level types:
     \begin{align*}
     |eval(derive(t)) : eval(Dt ^ Gamma , x : sigma,
       dx : Dt^sigma) -> eval(Dt^tau)| \\
@@ -1190,17 +1192,28 @@ rho1) (eval(derive(t)) drho) (eval(t) rho2)| (and |a1, da, a2| as needed) gives 
     |Gamma , x : sigma| and corresponding valid changes.
 
     More in detail, we need to deduce the thesis that |derive(\x
-    -> t)| is a correct change for |\x -> t|. By the definition
-    of correctness, and of validity of function type, the thesis
-    means
+    -> t)| is a correct change for |\x -> t|.
+    %
+    By the definition of correctness, the thesis is that for all
+    |drho, rho1, rho2| such that |fromto (Gamma, x : sigma) rho1
+    drho rho2| we have
+    \[|fromto (sigma -> tau) (eval(\x -> t) rho1) (eval(derive(\x -> t)) drho) (eval(\x -> t) rho2)|\]
+%
+    Simplifying, we get
+    % We can simplify the hypothesis |fromto (Gamma, x : sigma)
+    % rho1 drho rho2| using the definition of validity on
+    % environments. This
     \begin{multline*}
       |fromto (sigma -> tau) (^^^(\a1 -> eval(t) (rho1, x = a1))) (\a1 da -> eval(derive(t)) (drho, x = a1, dx = da)) ((\a2 -> eval(t) (rho2, x = a2)))|.
     \end{multline*}
-      That is, for any |a1, a2, da| such that |fromto sigma a1 da a2|, we must have
+    %
+    By definition of validity of function type, the thesis means
+    that for any |a1, a2, da| such that |fromto sigma a1 da a2|,
+    we must have
     \[|fromto tau (eval(t) (rho1, x = a1)) (eval(derive(t))
       (drho, x = a1, dx = da)) (eval(t) (rho2, x = a2))|.\]
 
-    To do so, take the inductive hypothesis on |t|. Since
+    To prove the rewritten thesis, take the inductive hypothesis on |t|. Since
     appropriate environment for |t| must match typing context
     |Gamma , x : sigma|, we know by the inductive hypothesis that
     if
@@ -1235,8 +1248,6 @@ rho1) (eval(derive(t)) drho) (eval(t) rho2)| (and |a1, da, a2| as needed) gives 
     delegated to plugins in \cref{req:correct-derive-const}.
   \end{itemize}
 \end{proof}
-
-\pg{Flow?}
 
 \section{Discussion}
 \paragraph{The correctness statement}
