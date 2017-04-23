@@ -432,7 +432,57 @@ So, we require that a valid function change from |f1| to |f2|
 that takes an input |a1| and a change |da|, valid from |a1| to
 |a2|, to a valid change from |f1 a1| to |f2 a2|.
 
-\paragraph{Discussion}
+\subsubsection{Pointwise changes}
+% We can also describe the difference from function |f| to function
+% |f `oplus` df| as |nabla^f = \x -> f2 x `ominus` f1 x|.
+\pg{Our definition of function change might seem to defy intuitions. In particular, pointwise changes might appear more intuitive. We discuss them later, too.}
+
+We can also decompose function changes into orthogonal (and
+possibly easier to understand) concepts.
+
+The difference between |f2 a2| and |f1 a1| is due to changes to
+both the function and its argument. We can compute the whole
+change at once via a function change |df| as |df a1 da|. Or we
+can compute separately the effects of the function change and of
+the argument change. We can account for changes from |a1| to |a2|
+using $f'$, a derivative of |f|: |f' a1 da = f (a1 `oplus` da)
+`ominus` f a1|.\footnote{We're hiding some details here for
+  simplicity; they are clarified in
+  \cref{sec:change-equivalence}.}
+
+We can account for changes from |f1| to |f2| using the
+\emph{pointwise difference} of two functions, |nabla ^ f1 = \a ->
+f2 a `ominus` f1 a|; in particular, |f2 (a1 `oplus` da) `ominus`
+f1 (a1 `oplus` da) = nabla ^ f (a1 `oplus` da)|. Hence, a
+function change simply \emph{combines} a derivative with a
+pointwise change using change composition:
+%
+%To account for changes to $a$, we can use
+%$f'$, the derivative of $f$. To account for changes to $f$, we
+%can use the \emph{pointwise difference} of two functions, $\nabla
+%f = \Lam{a}{\App{\New{f}}{a} \DIFF \App{\Old{f}}{a}}$.
+%
+% Now,
+%assuming for the moment the incrementalization theorem, we can
+%show the meaning of a function change $df$ in terms of
+%derivatives and pointwise changes:
+%
+\begin{code}
+   df a1 da
+=  ocompose (f' a1 da) (f a1) (nabla ^ f (a1 `oplus` da))
+\end{code}
+
+One can also compute a pointwise change from a function change:
+\begin{code}
+  nabla f a = df a (nil a)
+\end{code}
+
+While some might find pointwise changes a more natural concept,
+we find it easier to use our definitions of function changes,
+which combines both pointwise changes and derivatives into a
+single concept.
+
+\subsubsection{Passing change targets}
 It would be more symmetric to make function changes also take
 updated input |a2|, that is, have |df a1 da a2| computes a change
 from |f1 a1| to |f2 a2|. However, passing |a2| explicitly adds no
@@ -444,7 +494,7 @@ asymptotically larger than |da|, actually computing |a2| could be
 expensive. Hence, we stick to our asymmetric form of function
 changes.% We will discuss other alternatives later in \cref{?}.
 \pg{Discuss alternatives?}
-\pg{Our definition of function change might seem to defy intuitions. In particular, pointwise changes might appear more intuitive. We discuss them later, too.}
+
 % To answer these
 % questions precisely, we next recall definitions of our object
 % language, simply-typed $\lambda$-calculus.
