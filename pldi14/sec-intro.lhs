@@ -814,26 +814,23 @@ taking time linear in the base inputs. \pg{Point out this is
 \label{sec:non-termination}
 \pg{write, and put somewhere}
 
-\chapter{Differentiation and changes, formally}
+\chapter{Changes and differentiation, formally}
 \label{ch:derive-formally}
-\section{Differentiation and its meaning}
-\label{sec:correct-derive}
+To support incrementalization, in this chapter, we introduce
+differentiation and state and prove its correctness, making our
+previous discussion precise. We also elaborate on the effect of
+differentiation on higher-order programs.
 
-In this chapter, we make our previous discussion precise: we
-introduce differentiation and state and prove its correctness. We
-also elaborate on its effect on higher-order programs.
-
-To support incrementalization, we also motivate and introduce in
-this section (a) a description of changes and operations on
-changes; (b) a definition of which changes are valid; (c) a
-compositional term-to-term transformation called differentiation
-and written |derive(t)| that produces incremental programs. We
-have already mentioned the different concepts and how they fit
-together. We next explain definitions and key facts about them. We
-collect the complete definitions and crucial facts in
-\cref{fig:differentiation}.
-These definitions must be extended for base types and constants
-provided by the language plugin.
+\section{Changes and validity}
+\label{sec:changes-formally}
+In this section we introduce formally (a) a description of
+changes and operations on changes; (b) a definition of which
+changes are valid. We have already mentioned the different
+concepts and how they fit together. We next explain definitions
+and deduce their key properties. We collect the complete definitions and
+crucial facts in \cref{fig:differentiation}. These definitions
+must be extended for base types and constants provided by the
+language plugin.
 
 First, for each type |tau| and values |v1| and |v2| of type
 |tau|, we define when |dv| is a valid change from |v1| to |v2|.
@@ -932,7 +929,12 @@ eval(Dt^Gamma)|, via the following inference rules:
 \end{typing}
 \end{definition}
 
-\subsection{Correctness of differentiation}
+\section{Correctness of differentiation}
+\label{sec:correct-derive}
+In this section we state and prove correctness of
+differentiation, a compositional term-to-term transformation
+written |derive(t)| that produces incremental programs.
+
 Roughly, our goal is that evaluating |derive(t)| (where |t| is a
 well-typed term) maps an environment change |drho| from |rho1| to
 |rho2| into a result change |eval(derive(t)) drho|, going from
@@ -971,12 +973,15 @@ correct change for term |t| (at type |tau|), and write
 drho| is a valid change from |eval(t) rho1| to |eval(t) rho2|
 whenever |fromto Gamma rho1 drho rho2|.
 \end{definition}
+
 In other words, |eval(dt)| must be a function that takes changes
 |drho| from old to new inputs of |t|, and maps them to changes
 from old to new outputs of |t|.
 
 Once we define these notions, we can rephrase
-\cref{slogan:derive} as |derive(t)| is a correct change for |t|.
+\cref{slogan:derive}:
+\sloganDerive
+In other words, |derive(t)| is a correct change for |t|.
 Indeed, this is (in essence) |derive(param)|'s true correctness
 statement, which holds for any \emph{well-typed} |t|. Formally we
 have:
