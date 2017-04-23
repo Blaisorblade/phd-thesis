@@ -1060,11 +1060,10 @@ Now we can characterize |derive(param)|'s static semantics:
   |Gamma /- t : tau|. The case for constants is delegated to plugins in
   \cref{req:const-differentiation}.
 \end{proof}
-\begin{restatable}[Differentiation on constants]{requirement}{constDifferentiation}
+\begin{restatable}[Typing of |deriveConst(param)|]{requirement}{constDifferentiation}
   \label{req:const-differentiation}
-  For each constant |c|, if $\ConstTyping{c}{\tau}$, then
-  |deriveConst(c)| is defined and satisfies |/- deriveConst(c) :
-  Dt^tau|.
+  If $\ConstTyping{c}{\tau}$ then |deriveConst(c)| is defined and
+  satisfies |/- deriveConst(c) : Dt^tau|.
 \end{restatable}
 
 To illustrate correctness statement \cref{thm:correct-derive}, it
@@ -1075,6 +1074,18 @@ definitions. Nevertheless, we spell it out, and use it to
 motivate how |derive(param)| is defined. For each case, we first
 give a short proof sketch, and then redo the proof in more
 detail to make the proof easier to follow.
+
+First, we state the proof obligation that
+\cref{thm:correct-derive} imposes on language plugins:
+
+\begin{restatable}[Correctness of |deriveConst(param)|]{requirement}{deriveConstCorrect}
+  \label{req:correct-derive-const}
+  If $\ConstTyping{c}{\tau}$ then |deriveConst(c)| is a correct
+  change for |c|, that is, |fromto tau (evalConst c)
+  (eval(deriveConst(c)) emptyRho) (evalConst c)|.
+\end{restatable}
+
+Then we proceed with the proof:
 \deriveCorrect*
 \begin{proof}
   By induction on typing derivation |Gamma /- t : tau|.
@@ -1213,15 +1224,7 @@ rho1) (eval(derive(t)) drho) (eval(t) rho2)| (and |a1, da, a2| as needed) gives 
   \end{itemize}
 \end{proof}
 
-Next, we state the proof obligation that the theorem imposes on
-language plugins:
-
-\begin{restatable}[Correctness of |deriveConst(param)|]{requirement}{deriveConstCorrect}
-  \label{req:correct-derive-const}
-  If |/- c : tau| then |deriveConst(c)| is a correct change for
-  |c|. That is, if |/- c : tau| then |fromto tau (evalConst c)
-  (eval(deriveConst(c)) emptyRho) (evalConst c)|.
-\end{restatable}
+\pg{Flow?}
 
 \section{Discussion}
 \paragraph{The correctness statement}
