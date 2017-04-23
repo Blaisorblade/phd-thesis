@@ -358,23 +358,30 @@ sometimes, simply \emph{derivation}); we write |derive(t)| to
 denote the result of this transformation on a term |t|.
 Informally, |derive(t)| describes how |t| changes, that is,
 
-\begin{slogan}
-|derive(t)| evaluates on base inputs and valid inputs changes to a valid change from |t|
+\begin{restatable}[|derive(param)| maps input changes to output changes]{slogan}{sloganDerive}
+  \label{slogan:derive}
+Term |derive(t)| evaluates on base inputs and valid \emph{input changes} to a valid \emph{output change} from |t|
 evaluated on old inputs to |t| evaluated on new inputs.
-\end{slogan}
+\end{restatable}
 
-In our example, we can apply |derive(param)| to |grand_total|'s
-body to produce |dgrand_total|'s body. After simplifying the
-result via $\beta$-reduction, we get
-\[ |derive(sum (merge xs ys)) `betaeq` sum (merge dxs dys)|.\]
+Notice |derive(t)|'s behavior parallels the behavior of |t|,
+because |t| maps inputs to outputs just like |derive(t)| maps
+input changes to output changes.
+
+% What's more, we define |derive(param)| \emph{compositionally}:
+% |derive(t)| is defined in terms of |derive(param)| applied to
+% subterms of |t|.
+
+In our example, we have applied |derive(param)| to
+|grand_total|'s body, and simplify the result via
+$\beta$-reduction to produce |dgrand_total|'s body.
 %
 Correctness of |derive(param)| guarantees
 that |sum (merge dxs dys)| evaluates to a change from
 |sum (merge xs ys)| evaluated on old inputs |xs1, ys1| to
 |sum (merge xs ys)| evaluated on new inputs |xs2, ys2|.
 
-Here,
-a derivative of |grand_total| is a function in the same language as
+Here, a derivative of |grand_total| is a function in the same language as
 |grand_total|, that accepts changes from initial inputs |xs1| and |ys1| to
 updated inputs |xs2| and |ys2| and evaluates to the change from the base result
 |grand_total xs1 ys1| to the updated result |grand_total xs2 ys2|.
@@ -411,26 +418,101 @@ differentiation in \cref{sec:correct-derive}.
 
 %format y1
 %format y2
+%format tf = "t_f"
+%format dtf = "\Varid{dt}_f"
 \section{Function changes}
 \label{sec:higher-order-intro}
+\subsection{Producing function changes}
 A first-class function can close over free variables that can
 change, hence functions values can change themselves; hence, we
 introduce \emph{function changes} to describe these changes.
-For instance, term |tf = \x -> x + y| is a function that closes over
-|y|, so if |y| goes from |v1 = 5| to |v2 = 6|, then |f1 = eval(t)
-(y = v1)| is different from |f2 = eval(t) (y
-= v2)|.
-%
-Moreover, consider a program |t| that applies |tf| to an input
-|x| that varies from |v1 = 1| to |v2 = 2|. Term |derive(tf x)|
-needs to compute a change from |f1 v1| to |f2 v2|. We do so using
-a change from |v1| to |v2| and a function change from |f1| to
-|f2| by defining function changes suitably.
 
-So, we require that a valid function change from |f1| to |f2|
-(where |f1, f2 : eval(sigma -> tau)|) is in turn a function |df|
-that takes an input |a1| and a change |da|, valid from |a1| to
-|a2|, to a valid change from |f1 a1| to |f2 a2|.
+% Mapping from variables to values:
+% x -> a
+% y -> v
+
+For instance, term |tf = \x -> x + y| is a function that closes
+over |y|, so different values |v| for |y| give rise to different
+values for |f = eval(tf) (y = v)|. Take a change |dv| from |v1
+= 5| to |v2 = 6|; different inputs |v1| and |v2| for |y| give
+rise to different outputs |f1 = eval(tf) (y = v1)| and |f2 =
+eval(tf) (y = v2)|.
+%
+We describe this output difference through a function change |df|
+from |f1| to |f2|.
+
+Consider again \cref{slogan:derive} and how it applies to term
+|f|: \sloganDerive* Since |y| is free in |tf|, |y| is an input of
+|tf|. So, continuing our example, |dtf = derive(tf)| must map
+from an input change |dv| from |v1| to |v2| for variable |y| to
+an output change |df| from |f1| to |f2|; more precisely, we must
+have |df = eval(dtf) (y = v1, dy = dv)|.
+
+\subsection{Consuming function changes}
+Function changes can not only be produced but also be consumed in
+programs obtained from |derive(param)|. We discuss next how.
+
+As discussed, we consider the value for |y| as an input to |tf =
+\x -> x + y|.
+%
+However, we also choose to consider the argument for |x| as an
+input (of a different sort) to |tf = \x -> x + y|, and we require
+our \cref{slogan:derive} to apply to input |x| too. While this
+might sound surprising, it works out well.
+Specifically,
+since |df = eval(derive(tf))| is a change from |f1| to |f2|, we
+require |df a1 da| to be a change from |f1 a1| to |f2 a2|, so
+|df| maps base input |a1| and input change |da| to output change
+|df a1 da|, satisfying the slogan.
+
+More in general, any valid function change |df| from |f1| to |f2|
+(where |f1, f2 : eval(sigma -> tau)|) must in turn be a function
+that takes an input |a1| and a change |da|, valid from |a1|
+to |a2|, to a valid change |df a1 da| from |f1 a1| to |f2 a2|.
+
+This way, to satisfy our slogan on application |t = tf x|, we can
+simply define |derive(param)| so that |derive(tf x) = derive(tf)
+x dx|. Then
+\[|eval(derive(tf x)) (y = v1, dy = dv, x = a1, dx =
+  da) = eval(derive(tf)) a1 da = df a1 da|.\]
+As required, that's a
+change from |f1 a1| to |f2 a2|.
+
+% x -> u
+% y -> v
+% z -> w
+
+% Continuing our example, consider for instance term |t = tf z|,
+% where |tf = \x -> x + y| like above. As discussed, |y| undergoes
+% change |dv| from |v1| to |v2|, so |tf|'s value undergoes change
+% |df| from |f1| to |f2|. Moreover, assume variable |z| undergoes
+% change |dw| from |w1| to |w2|. Again, variables |y| and |z| are
+% inputs to |t|, so by our slogan |derive(t)| needs to map their
+% changes to a change from old |t|'s output |f1 w1| to new |t|'s
+% output |f2 w2|.
+
+% We require that a valid function change from |f1| to |f2| (where
+% |f1, f2 : eval(sigma -> tau)|) is in turn a function |df| that
+% takes an input |a1| and a change |da|, valid from |a1| to |a2|,
+% to a valid change from |f1 a1| to |f2 a2|.
+
+% Thanks to this invariant, we can define |derive(param)| so that
+% |derive(t) = derive(tf) v dv|.
+
+% Then, |eval(derive(t)) (y = y1, dy
+% = dy, v = v1, dv = dv) = eval(derive(tf)) v1 dv|
+
+%% We do so using a change
+%% from |v1| to |v2| and a function change from |f1| to |f2| by
+%% defining function changes suitably.
+%
+%%
+%% We want to define |derive(param)| \emph{compositionally}. To this end,
+%% we define function changes so that they enable computing the
+%% change to their output from the change to their input.
+%
+%% To see why that's needed, consider term |t = f v|, where again |f
+%% = \x -> x + y|.
 
 \subsubsection{Pointwise changes}
 % We can also describe the difference from function |f| to function
@@ -587,17 +669,13 @@ However, our support of $\lambda$-calculus allows to \emph{glue}
 primitives together. We'll discuss later how we add support to
 various primitives and families of primitives.
 
-Now we try to motivate the transformation informally.
-As we claimed earlier, |derive(param)| must satisfy the following
-slogan:
-\begin{slogan}
-|derive(t)| evaluates on base inputs and valid inputs changes to a valid change from |t|
-evaluated on old inputs to |t| evaluated on new inputs.
-\end{slogan}
+Now we try to motivate the transformation informally. We claimed
+that |derive(param)| must satisfy \cref{slogan:derive}, which reads
+\sloganDerive*
 
-Let's analyzes each case of the definition of |derive(u)|. In
-each case we assume that our slogan applies to any subterms of
-|u| and show it applies to |u| itself.
+Let's analyze the definition of |derive(param)| by case analysis
+of input term |u|. In each case we assume that our slogan applies
+to any subterms of |u|, and sketch why it applies to |u| itself.
 \begin{itemize}
 \item if |u = x|, by our slogan |derive(x)| must evaluate to the
   change of |x| when inputs change, so we set |derive(x) = dx|.
@@ -724,9 +802,9 @@ direct execution of this program will compute |merge xs ys|,
 taking time linear in the base inputs. \pg{Point out this is
   self-maintainable!}
 
-\pg{write}
-\subsection{A higher-order example}
+\section{A higher-order example}
 \label{sec:differentiation-fold-example}
+\pg{write}
 % Referenced later in sec-performance.tex by saying:
 % % We have seen in \cref{ssec:differentiation} that $\Derivative$
 % % needlessly recomputes $\Merge\Xs\Ys$. However, the result is a
@@ -884,19 +962,24 @@ Recall that we'll define operator |`oplus`|, such that |v1
 
 To state correctness of |derive(param)|
 (\cref{thm:correct-derive}), we define when a change term is a
-\emph{correct change} for a base term. We say a term |dt| is a
+\emph{correct change} for a base term.
+\begin{definition}
+We say a term |dt| is a
 correct change for term |t| (at type |tau|), and write
 |correct(tau) dt t|, if there exists a context |Gamma| such that
 |Gamma /- t : tau|, |Dt ^ Gamma /- dt : Dt^tau|, and |eval(dt)
 drho| is a valid change from |eval(t) rho1| to |eval(t) rho2|
-whenever |fromto Gamma rho1 drho rho2|. In other words,
-|eval(dt)| must be a function that takes changes |drho| from old
-to new inputs of |t|, and maps them to changes from old to new
-outputs of |t|.
+whenever |fromto Gamma rho1 drho rho2|.
+\end{definition}
+In other words, |eval(dt)| must be a function that takes changes
+|drho| from old to new inputs of |t|, and maps them to changes
+from old to new outputs of |t|.
 
-Once we define these notions, we can state |derive(param)|'s true
-correctness statement: whenever |t| is well-typed, |derive(t)| is
-a correct change for |t|. Formally we have:
+Once we define these notions, we can rephrase
+\cref{slogan:derive} as |derive(t)| is a correct change for |t|.
+Indeed, this is (in essence) |derive(param)|'s true correctness
+statement, which holds for any \emph{well-typed} |t|. Formally we
+have:
 \begin{restatable}[Correctness of |derive(param)|]{theorem}{deriveCorrect}
   \label{thm:correct-derive}
   If |Gamma /- t : tau|, then |derive(t)| is a correct change for |t|.
