@@ -19,45 +19,77 @@ Programmers typically have to choose between a few undesirable options.
   original input, the same result can be computed much faster.
 \item They can write by hand a new function $df$ that updates the
   output based on input changes, using various techniques.
-  Depending on the complexity of $f$, their ability and effort,
-  this choice can be much more efficient, but takes significant
-  developer time. Moreover, this choice introduces significant
-  potential for bugs, because writing $df$ is hard and because it
-  must be updated when $f$ changes. In actual applications, this
-  complicates code maintenance tasks
-  significantly~\citep{Salvaneschi13reactive}.
-\item They can write the function of interest using
-  domain-specific languages that support incrementalization.
-  Build scripts and associated domain-specific languages are one
-  example. Database query languages are another one.\pg{Mention here limits?}
+  Writing |df| by hand can be much more efficient than rerunning
+  |f|, but it requires significant developer effort, is
+  error-prone, and requires updating |df| to keep it consistent
+  with |f|. This complicates code maintenance significantly in
+  practice~\citep{Salvaneschi13reactive}.
+\item They can write |f| using domain-specific languages that
+  support incrementalization, for tasks where such languages are
+  available. For instance, build scripts (our |f|) are written in
+  domain-specific languages that support (coarse-grained)
+  incremental builds. Database query languages also have often
+  support for incrementalization. \pg{Mention here limits?}
 \item They can attempt using general-purpose techniques for
   incrementalizing programs, such as \emph{self-adjusting
-    computation} and variants. Self-adjusting computation applies
-  to arbitrary purely functional programs and has been extended
-  to imperative programs; however, it only guarantees efficient
-  incrementalization when applied to base programs that
-  are \emph{designed} for efficient incrementalization.
+    computation} and variants such as Adapton. Self-adjusting
+  computation applies to arbitrary purely functional programs and
+  has been extended to imperative programs; however, it only
+  guarantees efficient incrementalization when applied to base
+  programs that are \emph{designed} for efficient
+  incrementalization.
 \end{itemize}
 
 \pg{Continue discussing dependencies minimization and the
   relation with parallelism. Build scripts might be a good
   example.}
 
-Since no approach guarantees efficient incrementalization for
-arbitrary programs, we propose to design domain-specific
-functional languages whose programs can be incrementalized by a
-transformation that we call \emph{differentiation}. We will
-discuss later why we favor this approach.\pg{where?}
+Since no approach guarantees automatic efficient
+incrementalization for arbitrary programs, we propose to design
+functional domain-specific languages (DSLs) whose programs can be
+incrementalized by a transformation that we call
+\emph{differentiation}. We propose functional DSLs, so that
+language primitive can be parameterized over functions and hence
+highly flexible.\pg{why not defunctionalize/closure convert/...?}
+
+\pg{actually argue for higher-order collection DSLs over relational databases}
+\pg{not in source}\pg{rewrite}\pg{find source for argument}
+Our primary example will be DSLs for operations on collections:
+as discussed earlier (\cref{sec:aosd13-intro}), we favor
+higher-order collection DSLs over relational databases.
+% moving data to relational databases requires transforming them to
+% a rather different metamodel
+%
+\pg{ What I'm saying... should also hopefully apply to data
+  layout transformations used in databases.
+Flattening? Nested data? Sharding?
+  And data layout transformations *are*
+  available in LMS... but not in GPLs?}
+% We will discuss later why we favor this
+% approach.\pg{where?}
 
 We build our domain-specific functional languages based on
 simply-typed $\lambda$-calculus (STLC), extended with
 \emph{language plugins} to define the domain-specific parts, as
-discussed in \cref{sec:intro-stlc}. We show a motivating example
-for our approach in \cref{sec:motiv-example}. We define
+discussed in \cref{sec:intro-stlc}. We call our approach
+\emph{ILC}.\footnote{Originally, this acronym stood for
+  \emph{incremental lambda calculus}, an extension of
+  $\lambda$-calculus with additional operations. Such extensions
+  are no more needed, so we don't have any more an incremental
+  lambda calculus per se, but the name stuck, redefined as
+  \emph{incrementalizing lambda calculus}.} We discuss
+inspiration for differentiation in
+\cref{sec:generalize-fin-diff}. We show a motivating example for
+our approach in \cref{sec:motiv-example}. We introduce informally
+the concept of \emph{changes} as values in
+\cref{sec:change-intro}, and introduce \emph{changes to
+  functions} in \cref{sec:higher-order-intro}. We define
 differentiation and motivate it informally in
-\cref{sec:informal-derive}, apply it to our motivating example in
-\cref{sec:derive-example}. Finally, in next chapter, we state and prove its
-correctness theorem in \cref{sec:correct-derive}.
+\cref{sec:informal-derive}. We apply differentiation to our
+motivating example in \cref{sec:derive-example}.
+%
+\pg{check later this TOC} We formalize differentiation and prove
+it correct in next chapter~\cref{ch:derive-formally}.
 
 % \section{Our object language: STLC}
 % \label{sec:intro-stlc}
@@ -78,12 +110,13 @@ function, one can define its \emph{finite difference}, that is a
 function |f_d| such that |f_d a da = f (a + da) - f a|. Readers
 might notice the similarity (and the differences) between the
 finite difference and the derivative of |f|, since the latter is
-defined as $f'(a) = \lim_{da \to 0} (f (a + da) - f(a)) / da$.
+defined as
+\[f'(a) = \lim_{da \to 0} (f (a + da) - f(a)) / da.\]
 
 The calculus of finite differences provides theorems that in many
 cases allow computing a closed formula for |f_d| given a closed
-formula for |f|. For instance, if function |f| is defined by |f x
-= 2 `dot` x|, one can verify its finite difference is |f_d x dx =
+formula for |f|. For instance, if function |f| is defined by
+|f x = 2 `dot` x|, one can prove its finite difference is |f_d x dx =
 2 `dot` (x + dx) - 2 `dot` x = 2 `dot` dx|.
 
 We consider finite differences helpful for incrementalization
@@ -103,13 +136,12 @@ researched~\citep{Paige82FDC,GlucheGrust97Incr}, most recently and
 spectacularly with DBToaster by
 \citet{Koch10IQE} and \citet{Koch2016incremental}.
 
-But it is not immediate how to generalize it beyond groups.
-On the other hand, many useful types do not form a
-group: for instance, lists of integers don't form a group but
-only a monoid. Moreover, it's hard to represent list changes
-simply through a list: how do we specify which elements were
-inserted (and where), which were removed and which were subjected
-to change themselves?
+But it is not immediate how to generalize it beyond groups. And
+many useful types do not form a group: for instance, lists of
+integers don't form a group but only a monoid. Moreover, it's
+hard to represent list changes simply through a list: how do we
+specify which elements were inserted (and where), which were
+removed and which were subjected to change themselves?
 
 In ILC, we generalize the calculus of finite differences by
 using distinct types for base values and changes, and adapting
@@ -466,6 +498,8 @@ We define differentiation as the following term transformation:
   |derive(x)| &= |dx| \\
   |derive(c)| &= |deriveConst(c)|
 \end{align*}
+where |deriveConst(c)| defines differentiation on primitives and
+is provided by language plugins (see \cref{sec:lang-plugins}).
 % \begin{code}
 %   derive(\x -> t)   = \x dx -> derive(t)
 %   derive(s t)       = derive(s) t (derive(t))
