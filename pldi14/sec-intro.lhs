@@ -370,7 +370,7 @@ change, hence functions values can change themselves; hence, we
 introduce \emph{function changes} to describe these changes.
 For instance, term |tf = \x -> x + y| is a function that closes over
 |y|, so if |y| goes from |v1 = 5| to |v2 = 6|, then |f1 = eval(t)
-(emptyRho, y = v1)| is different from |f2 = eval(t) (emptyRho, y
+(y = v1)| is different from |f2 = eval(t) (y
 = v2)|.
 %
 Moreover, consider a program |t| that applies |tf| to an input
