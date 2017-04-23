@@ -442,7 +442,11 @@ We describe this output difference through a function change |df|
 from |f1| to |f2|.
 
 Consider again \cref{slogan:derive} and how it applies to term
-|f|: \sloganDerive* Since |y| is free in |tf|, |y| is an input of
+|f|:
+%
+\sloganDerive*
+%
+Since |y| is free in |tf|, |y| is an input of
 |tf|. So, continuing our example, |dtf = derive(tf)| must map
 from an input change |dv| from |v1| to |v2| for variable |y| to
 an output change |df| from |f1| to |f2|; more precisely, we must
@@ -671,6 +675,7 @@ various primitives and families of primitives.
 
 Now we try to motivate the transformation informally. We claimed
 that |derive(param)| must satisfy \cref{slogan:derive}, which reads
+%
 \sloganDerive*
 
 Let's analyze the definition of |derive(param)| by case analysis
@@ -980,7 +985,9 @@ from old to new outputs of |t|.
 
 Once we define these notions, we can rephrase
 \cref{slogan:derive}:
-\sloganDerive
+%
+\sloganDerive*
+%
 In other words, |derive(t)| is a correct change for |t|.
 Indeed, this is (in essence) |derive(param)|'s true correctness
 statement, which holds for any \emph{well-typed} |t|. Formally we
