@@ -489,10 +489,12 @@ from |f1 a1| to |f2 a2|. However, passing |a2| explicitly adds no
 information: the value |a2| can be computed from |a1| and |da| as
 |a1 `oplus` da|. Indeed, in various cases a function change can
 compute its required output without actually computing |a1
-`oplus` da|. Finally, if the size of |a1| and |a2| is
-asymptotically larger than |da|, actually computing |a2| could be
-expensive. Hence, we stick to our asymmetric form of function
-changes.% We will discuss other alternatives later in \cref{?}.
+`oplus` da|. Finally, since we expect the size of |a1| and |a2|
+is asymptotically larger than |da|, actually computing |a2| could
+be expensive.
+Hence, we stick to our asymmetric form of function
+changes.
+% We will discuss other alternatives later in \cref{?}.
 \pg{Discuss alternatives?}
 
 % To answer these
@@ -1178,23 +1180,63 @@ ys dys| should return |-20|. However, that is only correct if
 will make no change to |xs|. Similar issues apply with function
 changes.\pg{elaborate}
 
-\subsection{Binding issues}
+\subsection{Alternative environment changes}
+\label{sec:envs-without-base-inputs-intro}
+Environment changes can also be defined differently. We will use
+this alternative definition later (in
+\cref{sec:defunc-env-changes}).
+
+A change |drho| from |rho1| to |rho2| contains a copy of |rho1|.
+Thanks to this copy, we can use an environment change as
+environment for the result of differentiation, that is, we can
+evaluate |derive t| with environment |drho|, and
+\cref{def:inc-semantics} can define |evalInc(t)| as |\rho1 drho
+-> eval(derive t) drho|.
+
+But we could adapt definitions to omit the copy of |rho1| from
+|drho|, by setting
+
+\[\Delta\Extend*{x}{\tau} = \Extend[\Delta\Gamma]{\D
+    x}{\Delta\tau}\]
+
+\noindent and adapting other definitions. Evaluating |derive(t)|
+still requires base inputs; we could then set |evalInc(t) = \rho1
+drho -> eval(derive t) (rho1, drho)|, where |rho1, drho| simply
+merges the two environments appropriately (we omit a formal
+definition). This is the approach taken by
+\citet{CaiEtAl2014ILC}. When proving \cref{thm:correct-derive},
+using one or the other definition for environment changes makes
+little difference; if we embed the base environment in
+environment changes, we reduce noise because we need not define
+environment meging formally.
+
+Later (in \cref{sec:defunc-env-changes}) we will deal with
+environment explicitly, and manipulate them in programs. Then we
+will use this alternative definition for environment changes,
+since it will be convenient to store base environments separately
+from environment changes.
+
+\subsection{Capture avoidance}
 \label{sec:derive-binding-issues}
 Differentiation generates new names, so a correct implementation
-must make sure to prevent accidental capture, but our previous
-discussion ignored the problem. Our formalization has no capture
-issues as it uses deBrujin indexes, and change context just
-alternates variables for base inputs and input changes. A context
+must prevent accidental capture. Till now we have ignored this problem.
+
+\paragraph{Using de Brujin indexes}
+Our mechanization has no capture
+issues because it uses deBrujin indexes. Change context just
+alternate variables for base inputs and input changes. A context
 such as |Gamma = x : Int, y : Bool| is encoded as |Gamma = Int,
 Bool|; its change context is |Dt^Gamma = Int, Dt^Int, Bool,
 Dt^Bool|. This solution is correct and robust, and is the one we
-rely on; we use names in this thesis only to simplify
-presentation.
-%
+rely on.
 
-In this subsection we discuss issues in implementing this
-transformation with names rather than deBrujin indexes. Unlike
-the rest of this chapter, we keep this discussion informal, also
+\paragraph{Using names}
+Next, we discuss issues in implementing this transformation with
+names rather than deBrujin indexes. Using names rather than de
+Brujin indexes makes terms more readable; this is also why in
+this thesis we use names in our on-paper formalization.
+
+Unlike the rest of this chapter, we keep this discussion informal, also
 because we have not mechanized any definitions using names (as it
 may be possible using nominal logic). The rest of the thesis does
 not depend on this material, so readers might want to skip to
@@ -1203,8 +1245,8 @@ next section.
 Using names introduces the risk of capture, as it is common for
 name-generating
 transformations~\citep{Erdweg2014captureavoiding}. For instance,
-differentiating term |t = \x -> f dx|, gives |derive(t) = \x dx
--> df dx ddx|. Here variable |dx| represents a base input and is
+differentiating term |t = \x -> f dx| gives |derive(t) = \x dx
+-> df dx ddx|. Here, variable |dx| represents a base input and is
 free in |t|, yet it is incorrectly captured in |derive(t)| by the
 other variable |dx|, the one representing |x|'s change.
 Differentiation gives instead a
