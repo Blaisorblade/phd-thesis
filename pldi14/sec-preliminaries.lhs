@@ -468,7 +468,7 @@ mentioned in this chapter.
 
 % Our |grand_total| example requires a plugin that provides a types for integers
 % and bags and primitives such that we can implement |sum| and
-% |merge|.\pg{Elaborate.}
+% |merge|.
 
 % Our first implementation and our first correctness proof are
 % explicitly modularized to be parametric in the plugins, to
