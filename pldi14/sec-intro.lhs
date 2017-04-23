@@ -630,7 +630,12 @@ taking time linear in the base inputs. \pg{Point out this is
 % % needlessly recomputes $\Merge\Xs\Ys$. However, the result is a
 % % base input to $\FOLD'$.
 
+\section{Nontermination}
+\label{sec:non-termination}
+\pg{write, and put somewhere}
+
 \chapter{Differentiation and changes, formally}
+\label{ch:derive-formally}
 \section{Differentiation and its meaning}
 \label{sec:correct-derive}
 
@@ -678,6 +683,7 @@ We say that |dv| is valid change from |v1| to |v2|, and write
 eval(tau)| and |dv| is a ``valid'' description of the difference
 from |v1| to |v2|, as we define in \cref{fig:validity}.
 \end{definition}
+
 The definition of validity for base types is delegated to language plugins, so we state a
 \begin{restatable}[Base validity definitions]{requirement}{baseValidity}
   \label{req:base-validity}
@@ -1032,7 +1038,7 @@ language plugins:
   (eval(deriveConst(c)) emptyRho) (evalConst c)|.
 \end{restatable}
 
-\subsection{Discussion}
+\section{Discussion}
 \paragraph{The correctness statement}
 We might have asked for the following
 correctness property:
