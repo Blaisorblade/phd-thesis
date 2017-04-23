@@ -151,55 +151,58 @@ In ILC, we generalize the calculus of finite differences by
 using distinct types for base values and changes, and adapting
 the surrounding theory.
 
+%format s1
+%format s2
 \section{A motivating example}
 \label{sec:motiv-example}
 In this section, we illustrate informally incrementalization on a
 small example. We give a more precise presentation in
 \cref{sec:correct-derive}.
 
-In the following program, term |grand_total xs ys| sums integer numbers in
-input collections |xs| and |ys|. We also compute an initial
-output |output1| on initial inputs |xs1| and |ys1|:
+In the following program, |grand_total xs ys| sums integer numbers in
+input collections |xs| and |ys|.
 
 \begin{code}
   grand_total        :: Bag Int -> Bag Int -> Int
-  output1            :: Int
+  s                  :: Int
 
   grand_total xs ys  = sum (merge xs ys)
-  output1            = grand_total xs1 ys1
-                     = sum {{1, 2, 3, 4}} = 10
+  s                  = grand_total xs ys
 \end{code}
 
-We have called |grand_total| on initial inputs |xs1 = {{1, 2,
-    3}}| and |ys1 = {{4}}| to obtain initial output |output1|.
-Here, double braces |{{...}}| denote a multiset or \emph{bag},
-containing the elements among the double braces. A bag is an
-unordered collection (like a set) where elements are allowed to
-appear more than once (unlike a set). In this example, we assume
-a language plugin that supports a base type of integers |Int| and
-a family of base types of bags |Bag tau| for any type
-|tau|.\footnote{Using |Bag tau|, a type of bags of elements of
-  some \emph{type} rather than |Bag iota|, a type of bags of
-  elements of some \emph{primitive type}, runs into technical
-  problems during proof mechanization
-  (see~\cref{sec:modularity-limits}), though those problems do
-  not affect our main conclusions.}
+This program computes output |s| from input collections |xs| and
+|ys|. These collections are multisets or \emph{bags}, that is,
+collections that are unordered (like sets) where elements are
+allowed to appear more than once (unlike sets). In this example,
+we assume a language plugin that supports a base type of integers
+|Int| and a family of base types of bags |Bag tau| for any type
+|tau|.
+
+We can run this program on specific inputs |xs1 = {{1, 2, 3}}|
+and |ys1 = {{4}}| to obtain output |s1|. Here, double braces
+|{{...}}| denote a bag containing the elements among the double
+braces.
+
+\begin{code}
+  s1                 = grand_total xs1 ys1
+                     = sum {{1, 2, 3, 4}} = 10
+\end{code}
 
 This example uses small inputs for simplicity, but in practice they
 are typically much bigger; we use |n|
 to denote the input size. In this case the asymptotic complexity of computing
-|grand_total| is |Theta(n)|.
+|s| is |Theta(n)|.
 
-Consider computing updated output |output2| from updated inputs |xs2 = {{1, 1, 2, 3}}|
-and |ys2 = {{4, 5}}|. We could recompute |output2| from scratch as
+Consider computing updated output |s2| from updated inputs |xs2 = {{1, 1, 2, 3}}|
+and |ys2 = {{4, 5}}|. We could recompute |s2| from scratch as
 \begin{code}
-  output2      = grand_total xs2 ys2
+  s2           = grand_total xs2 ys2
                = sum {{1, 1, 2, 3, 4, 5}} = 16
 \end{code}
 But if the size of the updated inputs is |Theta(n)|, recomputation also
 takes time |Theta(n)|, and we would like to obtain our result asymptotically faster.
 
-To compute the updated output |output2| faster, we assume the changes to the
+To compute the updated output |s2| faster, we assume the changes to the
 inputs have a description of size |dn| that is asymptotically smaller than the
 input size |n|, that is |dn = o(n)|. All approaches to incrementalization
 require small input changes. Incremental computation will then process the input
@@ -213,7 +216,7 @@ In our approach to
 incrementalization, we describe changes to values as values
 themselves: We call such descriptions simply \emph{changes}. Just
 like in STLC we have terms (programs) that evaluates to values,
-we also have \emph{change terms}, that evaluate to \emph{change
+we also have \emph{change terms}, which evaluate to \emph{change
   values}. We require that going from old values to new values
 preserves types: That is, if an old value |v1| has type |tau|,
 then also its corresponding new value |v2| must have type |tau|.
@@ -224,12 +227,12 @@ Not all descriptions of changes are meaningful,
 so we also talk about \emph{valid} changes.
 %
 A change value |dv| can be a valid change from |v1| to |v2|. We
-can also consider a valid change as an edge from |v1| to |v2|,
-and we call |v1| the source of |dv| and |v2| the destination of
-|dv|. We'll discuss examples of valid and invalid changes in
-\cref{ex:valid-bag-int,ex:invalid-nat}.
-\pg{What about changes
-  with multiple valid sources?}
+can also consider a valid change as an edge from |v1| to |v2| in
+a graph associated to |tau| (where the vertexes are values of
+type |tau|), and we call |v1| the source of |dv| and |v2| the
+destination of |dv|. We'll discuss examples of valid and invalid
+changes in \cref{ex:valid-bag-int,ex:invalid-nat}. \pg{What about
+  changes with multiple valid sources?}
 
 We also introduce an operator |`oplus`| on values and changes: if
 |dv| is a valid change from |v1| to |v2|, then |v1 `oplus` dv|
@@ -249,8 +252,8 @@ change from |v1| to |v2| and |dv2| is a valid change from |v2| to
 |v3|. This operation will be useful later.
 
 Definitions of these operations and concepts for a type form a
-\emph{change structure}. We'll define change structures properly
-later.
+\emph{change structure}. We'll define change structures more
+formally later.
 \pg{Why show a change structure in Haskell terms?}
 We already sketch, preliminarly, how a change structure
 can be represented in Haskell terms: a change structure is
@@ -267,34 +270,41 @@ class ChangeStruct t where
 We'll come back to this definition and refine it,
 describing the laws it satisfies, in \cref{sec:change-struct-tc}.
 
-\begin{examples}
+\begin{example}[Changes on integers and bags]
   \label{ex:valid-bag-int}
   \label{ex:chs-int}
-  \label{ex:invalid-nat}
  \pg{changes on bags?}
 To show how incrementalization affects our example, we next
-describe valid changes for bags and integers. For now, a change
+describe valid changes for integers and bags.
+%
+For now, a change
 |das| to a bag |as1| simply contains all elements to be added to
 the base bag |as1| to obtain the updated bag |as2| (we'll ignore
 removing elements for this section and discuss it later). In our
 example, the change from |xs1| (that is |{{1, 2, 3}}|) to |xs2|
 (that is |{{1, 1, 2, 3}}|) is |dxs = {{1}}|, while the change
 from |ys1| (that is |{{4}}|) to |ys2| (that is |{{4, 5}}|) is
-|dys = {{5}}|. To represent the output change |doutput| from
-|output1| to |output2| we need integer changes. For now, we
+|dys = {{5}}|.
+%
+To represent the output change |ds| from
+|s1| to |s2| we need integer changes. For now, we
 represent integer changes as integers, and define |`oplus`| on
 integers as addition: |v1 `oplus` dv = v1 + dv|.
+\end{example}
 
 For both bags and integers, a change |dv| is always valid between
 |v1| and |v2 = v1 `oplus` dv|; for other changes, however,
-validity will be more restrictive. For instance, say we want to
+validity will be more restrictive.
+\begin{example}[Changes on naturals]
+  \label{ex:invalid-nat}
+For instance, say we want to
 define changes on a type of natural numbers, and we still want to
 have |v1 `oplus` dv = v1 + dv|. A change from |3| to |2| should
 still be |-1|, so the type of changes must be |Int|. But the
 result of |`oplus`| should still be a natural, that is an integer
 |>= 0|: to ensure that |v1 `oplus` dv >= 0| we need to require
 that |dv >= -v1|. We use this requirement to define validity on
-naturals: |fromto v1 dv (v1 + dv)| is defined as equivalent to
+naturals: |fromto Nat v1 dv (v1 + dv)| is defined as equivalent to
 |dv >= -v1|. We can guarantee equation |v1 `oplus` dv = v1 + dv|
 not for all changes, but only for valid changes. Conversely, if a
 change |dv| is invalid for |v1|, then |v1 + dv < 0|. We then
@@ -307,18 +317,18 @@ invalid changes would work.\footnote{In fact, we could leave
   \citet{Huesca2015incrementality}, in similar developments,
   simply made |`oplus`| partial on its domain instead of
   restricting the domain, achieving similar results.}
-\end{examples}
+\end{example}
 \pg{bags with removals? where?}
 \subsection{Incrementalizing with changes}
 After introducing these notions, we describe how, in our
 approach, we incrementalize our example program. We propose to compute
-the output change |doutput| from |output1| to |output2| by
+the output change |ds| from |s1| to |s2| by
 calling a new function |dgrand_total|, the \emph{derivative} of
 |grand_total| on base inputs and their respective changes. We can
-then compute the updated output |output2| as the old output
-|output1| updated by change |doutput|. We have successfully
+then compute the updated output |s2| as the old s
+|s1| updated by change |ds|. We have successfully
 incrementalized our program |grand_total| if not only we get the
-correct result for |output2|, but if we also get it faster than
+correct result for |s2|, but if we also get it faster than
 by just calling |grand_total xs2 ys2|.
 
 Below we give the derivative of |grand_total| and show our
@@ -326,9 +336,9 @@ approach gives the correct result in this example.
 
 \begin{code}
   dgrand_total xs dxs ys dys  = sum (merge dxs dys)
-  doutput                     = dgrand_total xs1 dxs ys1 dys =
+  ds                          = dgrand_total xs1 dxs ys1 dys =
                               = sum {{1, 5}} = 6
-  output2                     = output1 `oplus` doutput = output1 + doutput
+  s2                          = s1 `oplus` ds = s1 + ds
                               = 10 + 6 = 16
 \end{code}
 
@@ -399,6 +409,8 @@ informally. Next, we discuss incrementalization on higher-order
 terms in \cref{sec:higher-order-intro}, before defining
 differentiation in \cref{sec:correct-derive}.
 
+%format y1
+%format y2
 \section{Function changes}
 \label{sec:higher-order-intro}
 A first-class function can close over free variables that can
@@ -579,7 +591,7 @@ fix ideas for later discussion, in this section we show how the derivative of
 
 \begin{code}
 grand_total  = \ xs ys -> sum (merge xs ys)
-output       = grand_total {{1}} {{2, 3, 4}} = 11
+s            = grand_total {{1}} {{2, 3, 4}} = 11
 \end{code}
 We define derivation as a compositional program transformation,
 so we first compute |derive(merge xs ys)|. To compute its change
@@ -644,8 +656,8 @@ in the end we get:
 \begin{code}
 grand_total   = \ xs      ys      ->  sum  (merge  xs   ys)
 dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
-output         = grand_total   {{1, 2, 3}}       {{4}}
-doutput        = dgrand_total  {{1, 2, 3}} {{1}} {{4}} {{5}}
+s             = grand_total   {{1, 2, 3}}       {{4}}
+ds            = dgrand_total  {{1, 2, 3}} {{1}} {{4}} {{5}}
                `betaeq` sum (merge {{1}} {{5}})
 \end{code}
 
