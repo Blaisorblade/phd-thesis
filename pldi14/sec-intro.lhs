@@ -824,11 +824,13 @@ taking time linear in the base inputs. \pg{Point out this is
 \label{ch:derive-formally}
 \input{pldi14/fig-differentiation}
 
-To support incrementalization, in this chapter, we introduce
+To support incrementalization, in this chapter we introduce
 differentiation and state and prove its correctness, making our
-previous discussion precise. We also elaborate on the effect of
-differentiation on higher-order programs.
+previous discussion precise. We discuss consequences of
+correctness in \cref{ch:change-theory}.
 
+% We also elaborate on the effect of
+% differentiation on higher-order programs.
 \section{Changes and validity}
 \label{sec:changes-formally}
 In this section we introduce formally (a) a description of
@@ -1444,8 +1446,9 @@ and |m[x -> n]| extend |m| with a new mapping from |x| to |n|.
   \textsc{Derive'} holds and that |derive(t, m)| is correct.
 \end{itemize}
 
-\section{Operations on changes}
-In the previous section, we have shown that evaluating the result
+\chapter{Change theory}
+\label{ch:change-theory}
+In the previous chapter, we have shown that evaluating the result
 of differentiation produces a valid change |dv| from the old
 output |v1| to the new one |v2|. We also want a way to
 \emph{compute} |v2| from |v1| and |dv|, that is, we want to
@@ -1474,7 +1477,7 @@ We will summarize this section in \cref{fig:change-structures};
 readers might want to jump there for the definitions. However, we
 first build up to those definitions.
 
-\subsection{Basic change structures}
+\section{Basic change structures}
 First, we generalize the concept of changes. For each type |tau|
 we have defined notions of change type and of valid changes; but
 these notions can be defined for arbitrary sets.
@@ -1608,6 +1611,7 @@ concepts, as we do next.
 % including |`oplus`|
 % but also |nilc| and |`ominus`| and
 
+\section{Change structures, informally}
 \subsection{Nil changes}
 \label{sec:nil-changes-intro}
 Some valid changes have the same value |v| both as source and as
