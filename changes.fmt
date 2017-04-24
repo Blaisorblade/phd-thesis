@@ -135,7 +135,7 @@
 %format tau2
 %format iota = "\iota"
 
-%format correct (tau) (dv) (v) = "\correctdt{" tau "}{" dv "}{" v "}"
+%format correct (dv) (v) = "\correctdt{" dv "}{" v "}"
 %format fromto (tau) (v1) (dv) (v2) = "\validfromto{" tau "}{" v1 "}{" dv "}{" v2 "}"
 
 %format (new(v)) = "\New{" v "}"

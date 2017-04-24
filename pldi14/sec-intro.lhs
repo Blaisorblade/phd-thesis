@@ -854,20 +854,21 @@ Then, we define \emph{validity} as a family of ternary relations,
 indexed by types and relating changes with their sources and
 destinations.
 \begin{definition}
-We say that |dv| is valid change from |v1| to |v2|, and write
+We say that |dv| is valid change from |v1| to |v2| (at type |tau|), and write
 |fromto tau v1 dv v2|, if |dv : eval(Dt^tau)|, |v1, v2 :
 eval(tau)| and |dv| is a ``valid'' description of the difference
 from |v1| to |v2|, as we define in \cref{fig:validity}.
 \end{definition}
 
+\pg{line breaks}
 Both definitions place requirements on language plugins:
 \begin{restatable}[Base change types]{requirement}{baseChangeTypes}
   \label{req:base-change-types}
-  To each base type |iota| is associated a change type |Dt^iota|.
+  The plugin defines a change type |Dt^iota| for each base type |iota|.
 \end{restatable}
 \begin{restatable}[Base validity definitions]{requirement}{baseValidity}
   \label{req:base-validity}
-  To each base type |iota| is associated a definition of validity for |iota|.
+  The plugin defines validity for each base type |iota|.
 \end{restatable}
 We sketched informally in \cref{sec:motiv-example} how validity is
 defined, for instance, on integers and bags.\pg{revise if we add more examples.}
@@ -933,19 +934,55 @@ eval(Dt^Gamma)|, via the following inference rules:
 \section{Correctness of differentiation}
 \label{sec:correct-derive}
 In this section we state and prove correctness of
-differentiation, a term-to-term transformation
-written |derive(t)| that produces incremental programs.
+differentiation, a term-to-term transformation written
+|derive(t)| that produces incremental programs. We recall that
+all our results apply only to well-typed terms (since we
+formalize no other ones).
 
-Roughly, our goal is that evaluating |derive(t)| (where |t| is a
-well-typed term) maps an environment change |drho| from |rho1| to
-|rho2| into a result change |eval(derive(t)) drho|, going from
-|eval(t) rho1| to |eval(t) rho2|. That is, |derive(t)| must be a
-correct change for |t|.
+We previously sketched |derive(param)|'s through
+\cref{slogan:derive}, which we repeat for reference:
+%
+\sloganDerive*
 
-Hence |derive(param)| must have the right static semantics (that
-is, the right typing), so that |derive(t)| maps changes to |t|'s
-inputs to changes to |t|'s output. That is, we require it to
-satisfy the following derived typing rule:
+A bit more formally, the input of a term |Gamma /- t : tau| is an
+environment for |Gamma|. So evaluating |derive(t)| must map an
+environment change |drho| from |rho1| to |rho2| into a valid
+result change |eval(derive(t)) drho|, going from |eval(t) rho1|
+to |eval(t) rho2|.\footnote{If |tau| is a function type, |df =
+  eval(derive(t)) drho| accepts further inputs; since |df| must
+  be a valid function change, it will also map them to valid
+  outputs as required by our slogan.}
+That is, |derive(t)| must be a \emph{correct
+  change} for |t| as defined next:
+\begin{definition}[Correct change]
+  We say a term |dt| is a correct change for term |t|, and write
+  |correct dt t|, if there exists a context |Gamma| and a type
+  |tau| such that |Gamma /- t : tau|, |Dt ^ Gamma /- dt :
+  Dt^tau|, and |eval(dt) drho| is a valid change from |eval(t)
+  rho1| to |eval(t) rho2| whenever |fromto Gamma rho1 drho rho2|.
+\end{definition}
+In other words, |eval(dt)| must be a function that takes changes
+|drho| from old to new inputs of |t|, and maps them to changes
+from old to new outputs of |t|.
+
+% Next, we constrain |derive(t)|'s dynamic semantics, that is the
+% result of evaluating it.
+%
+% Recall that we'll define operator |`oplus`|, such that |v1
+% `oplus` dv = v2| holds whenever |dv| is a valid change between
+% |v1| and |v2|.
+
+At this point, our slogan becomes |derive(param)|'s correctness
+statement:
+\begin{restatable}[|derive(param)| is correct]{theorem}{deriveCorrect}
+  \label{thm:correct-derive}
+  If |Gamma /- t : tau|, then |derive(t)| is a correct change for |t|.
+  That is, if |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
+  |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.
+\end{restatable}
+
+That theorem only makes sense if |derive(param)| has the right
+static semantics:
 
 \begin{restatable}[Typing of |derive(param)|]{lemma}{deriveTyping}
   \label{lem:derive-typing}
@@ -956,60 +993,22 @@ satisfy the following derived typing rule:
     {|Dt ^ Gamma /- derive(t) : Dt ^ tau|}
   \end{typing}
 \end{restatable}
-Next, we constrain |derive(t)|'s dynamic semantics, that is the
-result of evaluating it.
-%
-Recall that we'll define operator |`oplus`|, such that |v1
-`oplus` dv = v2| holds whenever |dv| is a valid change between
-|v1| and |v2|.
 
-To state correctness of |derive(param)|
-(\cref{thm:correct-derive}), we define when a change term is a
-\emph{correct change} for a base term.
-\begin{definition}
-We say a term |dt| is a
-correct change for term |t| (at type |tau|), and write
-|correct(tau) dt t|, if there exists a context |Gamma| such that
-|Gamma /- t : tau|, |Dt ^ Gamma /- dt : Dt^tau|, and |eval(dt)
-drho| is a valid change from |eval(t) rho1| to |eval(t) rho2|
-whenever |fromto Gamma rho1 drho rho2|.
-\end{definition}
-
-In other words, |eval(dt)| must be a function that takes changes
-|drho| from old to new inputs of |t|, and maps them to changes
-from old to new outputs of |t|.
-
-Once we define these notions, we can rephrase
-\cref{slogan:derive}:
-%
-\sloganDerive*
-%
-In other words, |derive(t)| is a correct change for |t|.
-Indeed, this is (in essence) |derive(param)|'s true correctness
-statement, which holds for any \emph{well-typed} |t|. Formally we
-have:
-\begin{restatable}[Correctness of |derive(param)|]{theorem}{deriveCorrect}
-  \label{thm:correct-derive}
-  If |Gamma /- t : tau|, then |derive(t)| is a correct change for |t|.
-  That is, if |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
-  |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.
-\end{restatable}
-
-Once we define |`oplus`| we'll be able to relate it to validity. The statement we'll prove is
+Once we define |`oplus`| we'll be able to relate it to validity, by proving
 \begin{restatable}[|`oplus`| agrees with validity]{lemma}{validOplus}
   \label{thm:valid-oplus}
   If |fromto tau v1 dv v2| then |v1 `oplus` dv = v2|.
 \end{restatable}
 
-And we can deduce that updating base result |eval(t) rho1| by
-change |eval(derive(t)) drho| via |`oplus`| gives the updated
-result |eval(t) rho2|.
-\begin{restatable}[Correctness of |derive(param)|, corollary]{corollary}{deriveCorrectOplus}
+Hence, updating base result |eval(t) rho1| by change
+|eval(derive(t)) drho| via |`oplus`| gives the updated result
+|eval(t) rho2|.
+\begin{restatable}[|derive(param)| is correct, corollary]{corollary}{deriveCorrectOplus}
   \label{thm:correct-derive-oplus}
   If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
   |eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|.
 \end{restatable}
-For didactic reasons we anticipate the proof of this corollary:
+We anticipate the proof of this corollary:
 \begin{proof}
   First, differentiation is correct (\cref{thm:correct-derive}), so under the hypotheses
   \[|fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|;\]
@@ -1052,27 +1051,42 @@ The transformation is defined by:
   |derive(x)| &= |dx| \\
   |derive(c)| &= |deriveConst(c)|
 \end{align*}
-Transformation |deriveConst(c)| must be defined by language
-plugins (as stated in \cref{req:const-differentiation}).
+where |deriveConst(c)| is defined by language plugins.
   % derive(^^let x = t1 in t2) =
   %   let  x = t1
   %        dx = derive(t1)
   %        in   derive(t2)
 
+\subsection{Plugin requirements}
+Differentiation is extended by plugins on constants, so plugins
+must prove their extensions correct.
 
+\begin{restatable}[Typing of |deriveConst(param)|]{requirement}{constDifferentiation}
+  \label{req:const-differentiation}
+  For all |c| such that $\ConstTyping{c}{\tau}$, the plugin defines
+  |deriveConst(c)| satisfying |/- deriveConst(c) :
+  Dt^tau| .
+\end{restatable}
 
-Now we can characterize |derive(param)|'s static semantics:
+\begin{restatable}[Correctness of |deriveConst(param)|]{requirement}{deriveConstCorrect}
+  \label{req:correct-derive-const}
+  For all |c| such that $\ConstTyping{c}{\tau}$, |deriveConst(c)|
+  is a correct change for |c|, that is, |fromto tau (evalConst c)
+  (eval(deriveConst(c)) emptyRho) (evalConst c)|.
+\end{restatable}
+
+\subsection{Proofs}
+Now we characterize |derive(param)| must have the right static semantics (that
+is, the right typing), so that |derive(t)| maps changes to |t|'s
+inputs to changes to |t|'s output. That is, we require it to
+satisfy the following derived typing rule:
+
 \deriveTyping*
 \begin{proof}
   The thesis can be proven by induction on the typing derivation
   |Gamma /- t : tau|. The case for constants is delegated to plugins in
   \cref{req:const-differentiation}.
 \end{proof}
-\begin{restatable}[Typing of |deriveConst(param)|]{requirement}{constDifferentiation}
-  \label{req:const-differentiation}
-  If $\ConstTyping{c}{\tau}$ then |deriveConst(c)| is defined and
-  satisfies |/- deriveConst(c) : Dt^tau|.
-\end{restatable}
 
 To illustrate correctness statement \cref{thm:correct-derive}, it
 is helpful to look first at its proof. Readers familiar with
@@ -1082,16 +1096,6 @@ definitions. Nevertheless, we spell it out, and use it to
 motivate how |derive(param)| is defined. For each case, we first
 give a short proof sketch, and then redo the proof in more
 detail to make the proof easier to follow.
-
-First, we state the proof obligation that
-\cref{thm:correct-derive} imposes on language plugins:
-
-\begin{restatable}[Correctness of |deriveConst(param)|]{requirement}{deriveConstCorrect}
-  \label{req:correct-derive-const}
-  If $\ConstTyping{c}{\tau}$ then |deriveConst(c)| is a correct
-  change for |c|, that is, |fromto tau (evalConst c)
-  (eval(deriveConst(c)) emptyRho) (evalConst c)|.
-\end{restatable}
 
 Then we proceed with the proof:
 \deriveCorrect*
