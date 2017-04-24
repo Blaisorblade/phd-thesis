@@ -582,14 +582,14 @@ A few workarounds and fixes are possible.
   |derive(param)| to also take a map from names to names as
   follows:
 \begin{align*}
-  |derive(\(x: sigma) -> t, m)| &= |\(x: sigma) (n : Dt^sigma) -> derive(t, (m[x -> n]))| \\
+  |derive(\(x: sigma) -> t, m)| &= |\(x: sigma) (dx : Dt^sigma) -> derive(t, (m[x -> dx]))| \\
   |derive(s t, m)| &= |derive(s, m) t (derive(t, m))| \\
   |derive(x, m)| &= |m^(x)| \\
   |derive(c, m)| &= |deriveConst(c)|
 \end{align*}
 where |m^(x)| represents lookup of |x| in map |m|,
-|n| is a fresh variable that does not appear in |t|,
-and |m[x -> n]| extend |m| with a new mapping from |x| to |n|.
+|dx| is now a fresh variable that does not appear in |t|,
+and |m[x -> dx]| extend |m| with a new mapping from |x| to |dx|.
 
   But this change affects the interface of differentiation, in
   particular, which variables are free in output terms. With this
