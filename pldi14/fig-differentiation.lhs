@@ -30,12 +30,7 @@
 
 \begin{subfigure}[c]{0.5\textwidth}
   \RightFramedSignature{|derive(t)|}
-\begin{align*}
-  |derive(\x -> t)| &= |\x dx -> derive(t)| \\
-  |derive(s t)| &= |derive(s) t (derive(t))| \\
-  |derive(x)| &= |dx| \\
-  |derive(c)| &= |deriveConst(c)|
-\end{align*}
+  \deriveDef
 \caption{Differentiation}
 \label{fig:correctness:derive}
 \end{subfigure}

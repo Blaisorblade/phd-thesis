@@ -227,17 +227,8 @@ We anticipate the proof of this corollary:
 
 After stating these requirements, we define |derive(param)| and prove the requirements hold.
 The transformation is defined by:
-\begin{align*}
-  |derive(\x -> t)| &= |\x dx -> derive(t)| \\
-  |derive(s t)| &= |derive(s) t (derive(t))| \\
-  |derive(x)| &= |dx| \\
-  |derive(c)| &= |deriveConst(c)|
-\end{align*}
+\deriveDef
 where |deriveConst(c)| is defined by language plugins.
-  % derive(^^let x = t1 in t2) =
-  %   let  x = t1
-  %        dx = derive(t1)
-  %        in   derive(t2)
 
 \subsection{Plugin requirements}
 Differentiation is extended by plugins on constants, so plugins
