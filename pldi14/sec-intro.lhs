@@ -728,7 +728,7 @@ fix ideas for later discussion, in this section we show how the derivative of
 grand_total  = \ xs ys -> sum (merge xs ys)
 s            = grand_total {{1}} {{2, 3, 4}} = 11
 \end{code}
-We define derivation as a compositional program transformation,
+Differentiation is a structurally recursive program transformation,
 so we first compute |derive(merge xs ys)|. To compute its change
 we simply call the derivative of |merge|, that is |dmerge|, and
 apply it to the base inputs and their changes: hence we write
@@ -937,7 +937,7 @@ eval(Dt^Gamma)|, via the following inference rules:
 \section{Correctness of differentiation}
 \label{sec:correct-derive}
 In this section we state and prove correctness of
-differentiation, a compositional term-to-term transformation
+differentiation, a term-to-term transformation
 written |derive(t)| that produces incremental programs.
 
 Roughly, our goal is that evaluating |derive(t)| (where |t| is a
