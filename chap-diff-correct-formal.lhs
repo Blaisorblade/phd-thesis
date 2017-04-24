@@ -582,7 +582,7 @@ A few workarounds and fixes are possible.
   |derive(param)| to also take a map from names to names as
   follows:
 \begin{align*}
-  |derive(\x -> t, m)| &= |\x n -> derive(t, (m[x -> n]))| \\
+  |derive(\(x: sigma) -> t, m)| &= |\(x: sigma) (n : Dt^sigma) -> derive(t, (m[x -> n]))| \\
   |derive(s t, m)| &= |derive(s, m) t (derive(t, m))| \\
   |derive(x, m)| &= |m^(x)| \\
   |derive(c, m)| &= |deriveConst(c)|

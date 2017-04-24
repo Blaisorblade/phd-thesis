@@ -638,7 +638,7 @@ changes.
 %
 \newcommand{\deriveDef}{%
 \begin{align*}
-  |derive(\x -> t)| &= |\x dx -> derive(t)| \\
+  |derive(\(x : sigma) -> t)| &= |\(x : sigma) (dx : Dt^sigma) -> derive(t)| \\
   |derive(s t)| &= |derive(s) t (derive(t))| \\
   |derive(x)| &= |dx| \\
   |derive(c)| &= |deriveConst(c)|
