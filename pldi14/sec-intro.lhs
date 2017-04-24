@@ -5,6 +5,7 @@
 % \section{Introduction}
 \chapter{Introduction to static differentiation}
 \label{sec:intro}
+\label{ch:static-diff-intro}
 
 Incremental computation (or incrementalization) has a long-standing history in
 computer science~\citep{Ramalingam93}.
@@ -830,30 +831,23 @@ differentiation on higher-order programs.
 \label{sec:changes-formally}
 In this section we introduce formally (a) a description of
 changes and operations on changes; (b) a definition of which
-changes are valid. We have already mentioned the different
-concepts and how they fit together. We next explain definitions
-and deduce their key properties. We collect the complete definitions and
-crucial facts in \cref{fig:differentiation}. These definitions
-must be extended for base types and constants provided by the
-language plugin.
+changes are valid. We have already introduced informally in
+\cref{ch:static-diff-intro} the different notions and how they
+fit together. We next define the same notions formally, and
+deduce their key properties. We collect the complete definitions
+and crucial facts in \cref{fig:differentiation}. Language plugins
+extend these definitions for base types and constants they
+provide.
 
-First, for each type |tau| and values |v1| and |v2| of type
-|tau|, we define when |dv| is a valid change from |v1| to |v2|.
 We define valid changes in two steps: we (a) define a type
 |Dt^tau| of changes, that we call \emph{change type}, and (b)
 define a relation that picks valid changes out of all elements of
-change types. Both definitions are delegated to plugins on base
-types. In a moment, we explain the definitions we give on
-function types.
+change types.
 
 \begin{definition}[Change types]
   The change type |Dt^tau| of a type |tau| is defined in
   \cref{fig:change-types}.
 \end{definition}
-\begin{restatable}[Base change types]{requirement}{baseChangeTypes}
-  \label{req:base-change-types}
-  To each base type |iota| is associated a change type |Dt^iota|.
-\end{restatable}
 We refer to values of change types as \emph{change values}.
 
 Then, we define \emph{validity} as a family of ternary relations,
@@ -866,28 +860,30 @@ eval(tau)| and |dv| is a ``valid'' description of the difference
 from |v1| to |v2|, as we define in \cref{fig:validity}.
 \end{definition}
 
-The definition of validity for base types is delegated to language plugins, so we state a
+Both definitions place requirements on language plugins:
+\begin{restatable}[Base change types]{requirement}{baseChangeTypes}
+  \label{req:base-change-types}
+  To each base type |iota| is associated a change type |Dt^iota|.
+\end{restatable}
 \begin{restatable}[Base validity definitions]{requirement}{baseValidity}
   \label{req:base-validity}
   To each base type |iota| is associated a definition of validity for |iota|.
 \end{restatable}
-We mentioned informally in \cref{sec:motiv-example} how validity is
+We sketched informally in \cref{sec:motiv-example} how validity is
 defined, for instance, on integers and bags.\pg{revise if we add more examples.}
 
 Next, we explain the definitions of change types and validity for
 function type |sigma -> tau|.
 %
-Take function values |f1, f2 : eval(sigma -> tau)|. As discussed
-informally, a valid function change |df| from |f1| to |f2| must
-take as arguments (a) a base input |v1 : eval(sigma)| and (b) a valid
-input change |dv| from |v1| to updated input |v2 : eval(sigma)|.
-The result of this application, |df v1 dv|, must give a change
-from |f1 v1| to |f2 v2|. We
-formalize this requirement as the definition of validity for
-functions changes. Hence, we define change type |Dt^(sigma ->
-tau)| as |sigma -> Dt ^ sigma -> Dt ^ tau|, and we define
-validity on function types as:
+Take function values |f1, f2 : eval(sigma -> tau)|. As sketched,
+valid function changes map valid input changes to valid output
+changes. A bit more precisely, |df| is a valid function change
+from |f1| to |f2| if, for all |a1, a2 : eval(sigma)| and for all
+valid changes |da : eval(Dt^sigma)| from |a1| to |a2|, |df a1 da|
+is a valid change from |f1 a1| to |f2 a2|. Formally, we define
+change types and validity for function types as:
 \begin{align*}
+  |Dt^(sigma -> tau)| &= |sigma -> Dt ^ sigma -> Dt ^ tau|\\
   |fromto (sigma -> tau) f1 df f2| &=
   |forall a1 a2 : eval(sigma), da : eval(Dt ^ sigma) .| \\
   &\text{if }|fromto (sigma) a1 da a2| \text{ then }
