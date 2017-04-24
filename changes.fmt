@@ -141,6 +141,8 @@
 %format (new(v)) = "\New{" v "}"
 %format (old(v)) = "\Old{" v "}"
 %format `betaeq` = "=_{\beta}"
+%format `eq` = "="
+
 %format == = "\equiv"
 %format /- = "\vdash"
 

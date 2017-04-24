@@ -740,10 +740,10 @@ better see later, we can define function |dmerge| as
 so |derive(merge xs ys)| can be simplified by $\beta$-reduction
 to |merge dxs dys|:
 \begin{code}
-          derive(merge xs ys)
-=         dmerge xs dxs ys dys
-`betaeq`  (\xs dxs ys dys -> merge dxs dys) xs dxs ys dys
-`betaeq`  merge dxs dys
+            derive(merge xs ys)
+  `eq`      dmerge xs dxs ys dys
+  `betaeq`  (\xs dxs ys dys -> merge dxs dys) xs dxs ys dys
+  `betaeq`  merge dxs dys
 \end{code}
 
 Let's next derive |sum (merge xs ys)|. First, like above, the
@@ -755,11 +755,11 @@ that is |dsum|, on its base argument and its change, so on |merge
 xs ys| and |derive(merge xs ys)|. We can later simplify again by
 $\beta$-reduction and obtain
 \begin{code}
-          derive(sum (merge xs ys))
-=         dsum (merge xs ys) (derive(merge xs ys))
-`betaeq`  sum (derive(merge xs ys))
-=         sum (dmerge xs dxs ys dys)
-`betaeq`  sum (merge dxs dys)
+            derive(sum (merge xs ys))
+  `eq`      dsum (merge xs ys) (derive(merge xs ys))
+  `betaeq`  sum (derive(merge xs ys))
+  `eq`      sum (dmerge xs dxs ys dys)
+  `betaeq`  sum (merge dxs dys)
 \end{code}
 
 Here we see the output of differentiation is defined in a bigger
@@ -774,9 +774,9 @@ base input |x| bound in the context |Gamma|.
 Next we must transform |derive(\ xs ys -> sum (merge xs ys))|. Since |derive(sum (merge xs ys))| is defined (ignoring later optimizations) in a context binding |xs, dxs, ys, dys|, deriving |\ xs ys -> sum (merge xs ys)| must bind all those variables.
 
 \begin{code}
-          derive(\ xs ys -> sum (merge xs ys))
-=         \xs dxs ys dys -> derive(sum (merge xs ys))
-`betaeq`  \xs dxs ys dys -> sum (merge dxs dys)
+            derive(\ xs ys -> sum (merge xs ys))
+  `eq`      \xs dxs ys dys -> derive(sum (merge xs ys))
+  `betaeq`  \xs dxs ys dys -> sum (merge dxs dys)
 \end{code}
 
 Next we need to transform the binding of |grand_total2| to its body |b = \ xs ys -> sum (merge xs ys)|. We copy this binding and add a new additional binding from |dgrand_total2| to the derivative of |b|.
@@ -789,11 +789,11 @@ dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
 Finally, we need to transform the binding of |output| and its body. By iterating similar steps,
 in the end we get:
 \begin{code}
-grand_total   = \ xs      ys      ->  sum  (merge  xs   ys)
-dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
-s             = grand_total   {{1, 2, 3}}       {{4}}
-ds            = dgrand_total  {{1, 2, 3}} {{1}} {{4}} {{5}}
-               `betaeq` sum (merge {{1}} {{5}})
+grand_total   `eq`      \ xs      ys      ->  sum  (merge  xs   ys)
+dgrand_total  `eq`      \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
+s             `eq`      grand_total   {{1, 2, 3}}       {{4}}
+ds            `eq`      dgrand_total  {{1, 2, 3}} {{1}} {{4}} {{5}}
+              `betaeq`  sum (merge {{1}} {{5}})
 \end{code}
 
 \paragraph{Self-maintainability}
