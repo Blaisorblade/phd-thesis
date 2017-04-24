@@ -13,6 +13,8 @@ comment.cut
 *.pdf
 
 ## lhs2TeX output
+chap-intro-incr.tex
+chap-diff-correct-formal.tex
 change-theory-reconstruct.tex
 new-stuff.tex
 backmatter.tex
