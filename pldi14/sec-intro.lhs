@@ -359,7 +359,7 @@ sometimes, simply \emph{derivation}); we write |derive(t)| to
 denote the result of this transformation on a term |t|.
 Informally, |derive(t)| describes how |t| changes, that is,
 
-\begin{restatable}[|derive(param)| maps input changes to output changes]{slogan}{sloganDerive}
+\begin{restatable}[|derive(t)| maps input changes to output changes]{slogan}{sloganDerive}
   \label{slogan:derive}
 Term |derive(t)| evaluates on base inputs and valid \emph{input changes} to a valid \emph{output change} from |t|
 evaluated on old inputs to |t| evaluated on new inputs.
@@ -822,6 +822,7 @@ taking time linear in the base inputs. \pg{Point out this is
 
 \chapter{Changes and differentiation, formally}
 \label{ch:derive-formally}
+
 To support incrementalization, in this chapter, we introduce
 differentiation and state and prove its correctness, making our
 previous discussion precise. We also elaborate on the effect of
@@ -853,25 +854,26 @@ We refer to values of change types as \emph{change values}.
 Then, we define \emph{validity} as a family of ternary relations,
 indexed by types and relating changes with their sources and
 destinations.
-\begin{definition}
+\begin{definition}[Validity]
 We say that |dv| is valid change from |v1| to |v2| (at type |tau|), and write
 |fromto tau v1 dv v2|, if |dv : eval(Dt^tau)|, |v1, v2 :
 eval(tau)| and |dv| is a ``valid'' description of the difference
 from |v1| to |v2|, as we define in \cref{fig:validity}.
 \end{definition}
 
-\pg{line breaks}
 Both definitions place requirements on language plugins:
 \begin{restatable}[Base change types]{requirement}{baseChangeTypes}
   \label{req:base-change-types}
-  The plugin defines a change type |Dt^iota| for each base type |iota|.
+  For each base type |iota|, the plugin defines a change type
+  |Dt^iota|.
 \end{restatable}
-\begin{restatable}[Base validity definitions]{requirement}{baseValidity}
+\begin{restatable}[Validity on base types]{requirement}{baseValidity}
   \label{req:base-validity}
-  The plugin defines validity for each base type |iota|.
+  For each base type |iota|, the plugin defines validity.
 \end{restatable}
-We sketched informally in \cref{sec:motiv-example} how validity is
-defined, for instance, on integers and bags.\pg{revise if we add more examples.}
+In \cref{ex:valid-bag-int,ex:invalid-nat} we exemplified
+informally change types and validity on naturals, integers and
+bags.\pg{revise if we add more examples.}
 
 Next, we explain the definitions of change types and validity for
 function type |sigma -> tau|.
@@ -976,9 +978,10 @@ At this point, our slogan becomes |derive(param)|'s correctness
 statement:
 \begin{restatable}[|derive(param)| is correct]{theorem}{deriveCorrect}
   \label{thm:correct-derive}
-  If |Gamma /- t : tau|, then |derive(t)| is a correct change for |t|.
-  That is, if |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
-  |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.
+  Term |derive(t)| is a correct change for |t|. That is, if
+  |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
+  |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t)
+  rho2)|.
 \end{restatable}
 
 That theorem only makes sense if |derive(param)| has the right
@@ -986,12 +989,13 @@ static semantics:
 
 \begin{restatable}[Typing of |derive(param)|]{lemma}{deriveTyping}
   \label{lem:derive-typing}
-  Transformation |derive(param)| satisfies derived typing rule:
+  Rule
   \begin{typing}
     \Rule[Derive]
     {|Gamma /- t : tau|}
     {|Dt ^ Gamma /- derive(t) : Dt ^ tau|}
   \end{typing}
+  is a derived typing rule.
 \end{restatable}
 
 Once we define |`oplus`| we'll be able to relate it to validity, by proving
@@ -1015,6 +1019,7 @@ We anticipate the proof of this corollary:
   that judgement implies the thesis \[|eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|\]
   because |`oplus`| agrees with validty (\cref{thm:valid-oplus}).
 \end{proof}
+
 \input{pldi14/fig-differentiation}
 
 % We will later also show change types
@@ -1076,18 +1081,6 @@ must prove their extensions correct.
 \end{restatable}
 
 \subsection{Proofs}
-Now we characterize |derive(param)| must have the right static semantics (that
-is, the right typing), so that |derive(t)| maps changes to |t|'s
-inputs to changes to |t|'s output. That is, we require it to
-satisfy the following derived typing rule:
-
-\deriveTyping*
-\begin{proof}
-  The thesis can be proven by induction on the typing derivation
-  |Gamma /- t : tau|. The case for constants is delegated to plugins in
-  \cref{req:const-differentiation}.
-\end{proof}
-
 To illustrate correctness statement \cref{thm:correct-derive}, it
 is helpful to look first at its proof. Readers familiar with
 logical relations proofs should be able to reproduce this proof
@@ -1097,7 +1090,13 @@ motivate how |derive(param)| is defined. For each case, we first
 give a short proof sketch, and then redo the proof in more
 detail to make the proof easier to follow.
 
-Then we proceed with the proof:
+\deriveTyping*
+\begin{proof}
+  The thesis can be proven by induction on the typing derivation
+  |Gamma /- t : tau|. The case for constants is delegated to plugins in
+  \cref{req:const-differentiation}.
+\end{proof}
+
 \deriveCorrect*
 \begin{proof}
   By induction on typing derivation |Gamma /- t : tau|.
