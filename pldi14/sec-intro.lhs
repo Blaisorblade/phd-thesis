@@ -822,6 +822,7 @@ taking time linear in the base inputs. \pg{Point out this is
 
 \chapter{Changes and differentiation, formally}
 \label{ch:derive-formally}
+\input{pldi14/fig-differentiation}
 
 To support incrementalization, in this chapter, we introduce
 differentiation and state and prove its correctness, making our
@@ -976,13 +977,7 @@ from old to new outputs of |t|.
 
 At this point, our slogan becomes |derive(param)|'s correctness
 statement:
-\begin{restatable}[|derive(param)| is correct]{theorem}{deriveCorrect}
-  \label{thm:correct-derive}
-  Term |derive(t)| is a correct change for |t|. That is, if
-  |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
-  |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t)
-  rho2)|.
-\end{restatable}
+  \deriveCorrect
 
 That theorem only makes sense if |derive(param)| has the right
 static semantics:
@@ -1019,8 +1014,6 @@ We anticipate the proof of this corollary:
   that judgement implies the thesis \[|eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|\]
   because |`oplus`| agrees with validty (\cref{thm:valid-oplus}).
 \end{proof}
-
-\input{pldi14/fig-differentiation}
 
 % We will later also show change types
 % containing invalid changes.
