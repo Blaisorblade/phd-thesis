@@ -72,7 +72,17 @@ A few other limitations include:
 \end{enumerate}
 
 %include defunc.lhs
-\subsection{Supporting function composition}
+\chapter{Misc to integrate}
+\subsection{Applying function changes to composed changes}
+\pg{Move somewhere else. About lists?}
+\pg{No subscript for |`ocompose`| here?}
+
+\pg{Status: this is still text where I figure this out.}
+
+To implement change composition |da1 `ocompose` da2|, we can represent changes
+by lists of individual or \emph{atomic} changes. Change composition is then just
+concatenation. We can then extend functions on atomic changes to functions on
+changes. Next, we show how.
 
 Imagine, in the setting of PLDI'14 extended with change composition, applying
 one function change |df| to a composed argument change |da1 `ocompose` da2|,
