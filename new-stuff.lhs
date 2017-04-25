@@ -86,15 +86,15 @@ changes. Next, we show how.
 
 Imagine, in the setting of PLDI'14 extended with change composition, applying
 one function change |df| to a composed argument change |da1 `ocompose` da2|,
-where |f1 `oplus` df = f2|, |a0 `oplus` da1 = a1| and |a1 `oplus` da2 = a2|. We
-want to compute incrementally the difference |db| between |f2 a2| and |f1 a0|.
-The change |db1 = df a0 da1| goes from |f1 a0| to |f2 a1|. With a change |db2|
-going from |f2 a1| to |f2 a2|, we can assemble the desired change as |db = db1
+where |f1 `oplus` df = f2|, |a1 `oplus` da1 = a2| and |a2 `oplus` da2 = a3|. We
+want to compute incrementally the difference |db| between |f2 a3| and |f1 a1|.
+The change |db1 = df a1 da1| goes from |f1 a1| to |f2 a2|. With a change |db2|
+going from |f2 a2| to |f2 a3|, we can assemble the desired change as |db = db1
 `ocompose` db2|.
 
-However, to compute |db2| incrementally we cannot apply |df| to |da2|: |df a1
-da2| gives the difference between |f1 a1| and |f2 a2|, but |db2| should be the
-difference between |f2 a1| and |f2 a2|. Hence, we need to compute a nil change
+However, to compute |db2| incrementally we cannot apply |df| to |da2|: |df a2
+da2| gives the difference between |f1 a2| and |f2 a3|, but |db2| should be the
+difference between |f2 a2| and |f2 a3|. Hence, we need to compute a nil change
 for |f2|.
 
 Doing that efficiently from the available elements is hard. However, with
