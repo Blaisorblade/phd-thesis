@@ -394,62 +394,343 @@ and |nilc| and relate them to validity. In particular, we will
 prove that |fromto tau v1 dv v2| implies |v1 `oplus` dv = v2|,
 and explain why the converse is not true.
 
-\pg{resume, turn into figure}
-\begin{restatable}[Base definitions of |`oplus`|]{requirement}{baseOplus}
-  \label{req:base-oplus}
-  For each base type |iota| we have a definition of
-  |oplusIdx(iota) : iota -> Dt^iota -> iota|.
-\end{restatable}
+To introduce these operators, we first define \emph{change
+  structures} on arbitrary sets by restricting change structures.
+Then, to understand their definition better, we prove a few
+corollaries of their definition in
+\cref{sec:chs-properties,sec:chs-derivable-ops}. Then, we show
+how to take change structures on |A| and |B| and define new ones
+on |A -> B|, |A `times` B| and |A + B| in
+\cref{sec:chs-defining}. Using these structures, we finally show
+that starting from change structures for base types, we can
+define change structures for all types |tau| and contexts
+|Gamma|.
 
-To prove that |`oplus`| agrees with validity in general
-(\cref{thm:valid-oplus}), we must require definitions from
-plugins to satisfy this theorem on base types:
-\begin{restatable}[|`oplus`| agrees with validity on base types]{requirement}{baseValidOplus}
-  \label{req:base-valid-oplus}
-  If\\ |fromto iota v1 dv v2| then |v1 `oplus` dv = v2|.
-\end{restatable}
-
+But first, we give the definition of change structures:
 \begin{definition}
-  For each type |tau| we define operators |oplusIdx(tau) : tau ->
-  Dt^tau -> tau|, |ominusIdx(tau) : tau -> tau -> Dt^tau|.
+  \label{def:change-structure}
+  A change structure |chs(V)| is given if we have:
+  \begin{subdefinition}
+  \item a base set |V|;
+  \item a basic change structure for |V| (hence change set |Dt^V| and validity |fromto V v1 dv v2|);
+  \item an update operation \[|`oplus` : V -> Dt^V -> V|\] that
+    \emph{updates} a value with a change;
+  \item proof that |`oplus`| agrees with validity: if |fromto V v1 dv
+    v2| then |v1 `oplus` dv = v2|;
+  \item a nil change operation \[|nilc : V -> Dt^V|;\]
+  \item proof that for every |v : V|, change |nil v| is a valid
+    nil change for |v|, that is, |fromto V v (nil v) v|;
+  \item a difference operation |`ominus` : V -> V -> Dt^V| that
+    produces a change across two values;
+  \item proof that |`ominus`| produces valid changes: for all |v1, v2 :
+    V| we have
+    \[|fromto V v1 (v2 `ominus` v1) v2|;\]
+  \item a change composition operation \[|`ocompose` : Dt^V -> V -> Dt^V
+      -> Dt^V|,\]
+    that composes together two changes relative to a base value.
+  \item proof that |`ocompose`| preserves validity: if |fromto V
+    v1 dv1 v2| and |fromto V v2 dv2 v3| then
+    \[|fromto V v1 (ocompose dv1 v1 dv2) v3|.\] It's useful to
+    compare the statement of this law to the transitivity of a
+    relation or to the typing of function
+    composition.\footnote{This analogy can be made formal by
+      saying that triples |(v1, dv, v2)| such that |fromto V v1
+      dv v2| are the arrows of a category under change
+      composition, where objects are individual values.}
+  \end{subdefinition}
 \end{definition}
 
-We define then |`oplus`|, |nilc| and |`ominus`| on function spaces:
-\begin{code}
-  nil v = v `ominus` v
-  f1 (oplusIdx(A -> B)) df = \v -> f1 v `oplus` df v (nil v)
-  f2 (ominusIdx(A -> B)) f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
-\end{code}
+\paragraph{Notation}
+Operators |`oplus`| and |`ominus`| can be subscripted to
+highlight their base set, but we will usually omit such
+subscripts. Moreover, |`oplus`| is left-associative, so that
+|v `oplus` dv1 `oplus` dv2| means |(v `oplus` dv1) `oplus` dv2|.
 
-In particular, when |A -> B = eval(sigma) -> eval(tau)|, it follows that
-\begin{code}
-  f1 (oplusIdx(sigma -> tau)) df = \v -> f1 v `oplus` df v (nil v)
-  f2 (ominusIdx(sigma -> tau)) f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
-\end{code}
+Finally, whenever we have a change structure such as
+|chs(A)|, |chs(B)|, |chs(V)|, and so on, we write respectively
+|A|, |B|, |V| to refer to its base set.
+%$\ocompose$
 
-\pg{Both change structure requirements, theorems on types}
-\begin{restatable}[|`ominus`| produces valid changes]{lemma}{validOminus}
-  \label{thm:valid-ominus}
-  |`ominus`| produces valid changes, that is |fromto tau v1 (v2
-  `ominus` v1) v2| and |v1 `oplus` (v2 `ominus` v1) = v2| for any
-  type |tau| and any |v1, v2 : eval(tau)|.
-\end{restatable}
-\validOplus*
-\begin{proof}\pg{?}
-\end{proof}
-\begin{restatable}[|`ominus`| inverts |`oplus`|]{lemma}{oplusOminus}
-  For any type |tau| and any values |v1, v2 : eval(tau)|,
-  |`oplus`| inverts |`ominus`|, that is |v1 `oplus` (v2 `ominus`
-  v1) = v2|.
+\subsection{Properties of change structures}
+\label{sec:chs-properties}
+To understand better the definition of change structures, we
+present next a few lemmas following from this definition.
+
+\begin{restatable}[|`ominus`| inverts |`oplus`|]{lemma}{oplusOminusChS}
+  \label{thm:oplusOminusChS}
+  |`oplus`| inverts |`ominus`|, that is
+  \[|v1 `oplus` (v2 `ominus` v1) = v2|,\] for change structure
+  |chs(V)| and any values |v1, v2 : V|.
 \end{restatable}
 \begin{proof}
-  From \cref{thm:valid-ominus,thm:valid-oplus}.
+  For change structures, we know |fromto V v1 (v2 `ominus` v1)
+  v2|, and |v1 `oplus` (v2 `ominus` v1) = v2| follows.
+
+  More in detail: Change |dv = v2 `ominus` v1| is a valid change
+  from |v1| to |v2| (because |`ominus`| produces valid changes,
+  |fromto V v1 (v2 `ominus` v1) v2|), so updating |dv|'s source
+  |v1| with |dv| produces |dv|'s destination |v2| (because
+  |`oplus`| agrees with validity, that is if |fromto V v1 dv v2|
+  then |v1 `oplus` dv = v2|).
 \end{proof}
-\deriveCorrectOplus*
-The proof came earlier.
-\nilChangesExist*
-\begin{proof}\pg{?}
+
+%format v2a = "v_{2a}"
+%format v2b = "v_{2b}"
+\begin{lemma}[A change can't be valid for two destinations with the same source]
+  Given a change |dv : Dt^V| and a source |v1 : V|, |dv| can only
+  be valid with |v1| as source for a \emph{single} destination.
+  That is, if |fromto V v1 dv v2a| and |fromto V v1 dv v2b| then |v2a =
+  v2b|.
+\end{lemma}
+\begin{proof}
+  The proof follows, intuitively, because |`oplus`| also maps
+  change |dv| and its source |v1| to its destination, and
+  |`oplus`| is a function.
+
+  More technically, since |`oplus`| respects validity, the
+  hypotheses mean that |v2a = v1 `oplus` dv = v2b| as required.
 \end{proof}
+Beware that, changes can be valid for multiple sources, and associate
+them to different destination. For instance, integer |0| is a
+valid change for all integers.\pg{For this we need to know that
+  there's a change structure for integers.}
+
+Sometimes it's useful to specify that a change |dv| is valid for
+a source |v| without naming |dv|'s destination, which is just |v
+`oplus` dv|. So we give the following
+\begin{definition}[One-sided validity]
+We define relation |valid V v dv| as an abbreviation for
+|fromto V v dv (v `oplus` dv)|.
+\end{definition}
+
+We use this definition right away:
+\begin{lemma}[|`ocompose`| and |`oplus`| interact correctly]
+  If |valid V v1 dv1| and |valid V (v1 `oplus` dv1) dv2| then
+  |v1 `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus` dv2|.
+\end{lemma}
+\begin{proof}
+  We know that |`ocompose`| preserves validity, so under the
+  hypotheses |valid V v1 dv1| and |valid V (v1 `oplus` dv1) dv2|
+  we get that |dv = ocompose dv1 v1 dv2| is a valid change from
+  |v1| to |v1 `oplus` dv1 `oplus` dv2|:
+  \[|fromto V v1 (ocompose dv1
+    v1 dv2) v1 `oplus` dv1 `oplus` dv2|.\]
+  Hence, updating |dv|'s source |v1| with |dv|
+  produces |dv|'s destination |v1 `oplus` dv1 `oplus` dv2|:
+  \[|v1 `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus`
+    dv2|.\]
+\end{proof}
+
+% \begin{lemma}[|`ocompose`| and |`oplus`| interact correctly]
+%   If |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3| then |v1
+%   `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus` dv2|.
+% \end{lemma}
+% \begin{proof}
+%   We know that |`ocompose`| preserves validity, so under the
+%   hypotheses |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3| we get
+%   that |dv = ocompose dv1 v1 dv2| is a valid change from |v1| to
+%   |v3| (|fromto V v1 (ocompose dv1 v1 dv2) v3|). Hence, updating
+%   |dv|'s source |v1| with |dv| produces |dv|'s destination |v3|.
+% \end{proof}
+
+\subsection{Derivable operations}
+\label{sec:chs-derivable-ops}
+We can define |nilc| and |`ocompose`| in terms of other
+operations, and prove they satisfy their requirements for change
+structures.
+
+\begin{code}
+  nil v = v `ominus` v
+  ocompose dv1 v1 dv2 = v1 `oplus` dv1 `oplus` dv2 `ominus` v1
+\end{code}
+\begin{lemma}
+  If we define |nil v = v `ominus` v|, then |nilc| produces
+  valid changes as required (|fromto V v (nil v) v|), for any
+  change structure |chs(V)| and value |v : V|.
+\end{lemma}
+\begin{proof}
+  This follows from validity of |`ominus`| (|fromto V v1 (v2
+  `ominus` v1) v2|) instantiated with |v1 = v| and |v2 = v|.
+\end{proof}
+\begin{lemma}
+  If we define |ocompose dv1 v1 dv2 = v1 `oplus` dv1 `oplus` dv2
+  `ominus` v1|, then |`ocompose`| preserves validity as required,
+  that is, if |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3|
+  then |fromto V v1 (ocompose dv1 v1 dv2) v3|.
+\end{lemma}
+\begin{proof}
+  We need to show that |`ocompose`| preserves validity. So we can
+  assume hypotheses |fromto V v1 dv1 v2| and |fromto V v2 dv2
+  v3|. Since |`oplus`| agrees with validity, we have |v2 = v1 `oplus`
+  dv1|, and |v3 = v2 `oplus` dv2 = v1 `oplus` dv1 `oplus` dv2|.
+
+  Inlining |`ocompose`|'s definition and substituting |v3|, the
+  thesis becomes that if then |fromto V v1 (v1 `oplus` dv1
+  `oplus` dv2 `ominus` v1) (v1 `oplus` dv1 `oplus` dv2)|, which
+  is true because |`ominus`| produces valid changes.
+\end{proof}
+\subsection{Defining new change structures from existing ones}
+\label{sec:chs-defining}
+
+In this section, we derive change structures for |A -> B|, |A
+`times` B| and |A + B| from two change structures |chs(A)| and
+|chs(B)|. The change structure for |A -> B| will be used right
+away to define a change structure for type |sigma -> tau| (or,
+more accurately, for set |eval(sigma -> tau)|) in terms of change
+structures for |sigma| and |tau|. The other change structures
+will be useful when we introduce types |sigma `times` tau| and
+|sigma + tau| through suitable language plugins.\pg{Maybe move
+  them later? It's OK for now though.}
+
+\begin{definition}[Change structure for |A -> B|]
+  Given change structures |chs(A)| and |chs(B)| we define a
+  change structure on their function space |A -> B|, written |chs(A) -> chs(B)|,
+  where:
+  \pg{don't like the phrasing.}
+  \begin{subdefinition}
+  \item The change set is defined as: |Dt^(A -> B) = A -> Dt^A -> Dt^B|.
+  \item Validity is defined as |fromto (A -> B) f1 df f2 = forall
+    a1 da a2 . (fromto A a1 da a2) -> (fromto B (f1 a1) (df a1
+    da) (f2 a2))|.
+  \item |f1 `oplus` df = \a -> f1 a `oplus` df a (nil a)|.
+  \item We prove that |`oplus`| agrees with validity on |A -> B|.
+    Consider |f1 , f2: A -> B| and |fromto (A -> B) f1 df f2|; we
+    must show that |f1 `oplus` df = f2|. By functional
+    extensionality, we only need prove that |(f1 `oplus` df) a =
+    f2 a|, that is that |f1 a `oplus` df a (nil a) = f2 a|. Since
+    |`oplus`| agrees with validity on |B|, we just need to show that
+    |fromto B (f1 a) (df a (nil a)) (f2 a)|, which
+    follows because |nil a| is a valid change from |a| to
+    |a| and because |df| is a valid change from |f1| to |f2|.
+  \item We define difference by |f2 `ominus` f1 = \a da -> f2 (a `oplus` da) `ominus` f1 a|.
+  \item We prove that |`ominus`| produces valid changes on |A -> B|. Consider
+    |df = f2 `ominus` f1| for |f1, f2: A -> B|. For any valid
+    input |fromto A a1 da a2|, we must show that |df| produces a
+    valid output with the correct vertexes, that is, that |fromto
+    B (f1 a1) (df a1 da) (f2 a2)|. Since |`oplus`| agrees with
+    validity, |a2| equals |a1 `oplus` da|. By substituting away
+    |a2| and |df| the thesis becomes |fromto B (f1 a1) (f2 (a1
+    `oplus` da) `ominus` f1 a1) (f2 (a1 `oplus` da))|, which is
+    true because |`ominus`| produces valid changes on |B|.
+  \item We define |nilc| through |nil f = f `ominus` f|, like in
+    \cref{sec:chs-derivable-ops}, and reuse its generic
+    correctness proof.
+  \item Change composition is defined as |ocompose df1 f1 df2 =
+    \a da -> ocompose (df1 a (nil a)) (f1 a) (df2 a da)|.
+  \item We prove that change composition preserves validity on |A
+    -> B|. That is, we must prove |fromto B (f1 a1) (ocompose
+    (df1 a (nil a1)) (f1 a1) (df2 a1 da)) (f3 a2)| for every |f1,
+    f2, f3, df1, df2, a1, da, a2| satifsfying |fromto (A -> B) f1
+    df1 f2|, |fromto (A -> B) f2 df2 f3| and |fromto A a1 da a2|.
+
+    Because change composition preserves validity on |B|, it's
+    enough to prove that (1) |fromto B (f1 a1) (df1 a1 (nil a1))
+    (f2 a1)| (2) |fromto B (f2 a1) (df2 a1 da) (f3 a2)|. That is,
+    intuitively, we create a composite change using |`ocompose`|,
+    and it goes from |f1 a1| to |f3 a2| passing through |f2 a1|.
+    Part (1) follows because |df1| is a valid function change
+    from |f1| to |f2|, applied to a valid change |nil a1| from
+    |a1| to |a1|.\pg{}
+    Part (2) follows because |df2| is a valid function change
+    from |f2| to |f3|, applied to a valid change |da| from
+    |a1| to |a2|.
+  \end{subdefinition}
+\end{definition}
+
+\begin{definition}[Change structure for |A `times` B|]
+  Given change structures |chs(A)| and |chs(B)| we define a
+  change structure on their product |chs(A `times` B)|, that we
+  also write |chs(A) `times` chs(B)|.
+  \begin{subdefinition}
+  \item
+    \pg{resume}
+  \end{subdefinition}
+\end{definition}
+
+%\paragraph{Aside}\pg{mention alternative definition of change composition}
+\subsection{Change structures for types and contexts}
+
+As promised, given change structures for base types we can
+provide change structures for all types:
+
+\begin{restatable}[Change structures for base types]{requirement}{baseChs}
+  For each base type |iota| we must have a change structure
+  |chs(iota)| defined on base set |eval(iota)|, based on the
+  basic change structures defined earlier.\pg{?}
+  % including
+  % |oplusIdx(iota) : iota -> Dt^iota -> iota|?
+\end{restatable}
+
+\begin{definition}[Change structure for types]
+  \label{def:chs-types}
+  For each type |tau| we define a change structure |chs(tau)| on
+  base set |eval(tau)|.
+\end{definition}
+\begin{code}
+  chs(iota) = ...
+  chs(sigma -> tau) = chs(sigma) -> chs(tau)
+\end{code}
+\begin{lemma}
+  Change sets and validity, as defined in \cref{def:chs-types},
+  give rise to the same basic change structures as the ones
+  defined earlier in \cref{def:bchs-types}.
+\end{lemma}
+\begin{proof}
+  This can be verified by induction on types. For each case, it
+  is sufficient to compare definitions.
+\end{proof}
+%%%%
+% What's below must be revised.
+%%%%
+
+% To prove that |`oplus`| agrees with validity in general
+% (\cref{thm:valid-oplus}), we must require definitions from
+% plugins to satisfy this theorem on base types:
+% \begin{restatable}[|`oplus`| agrees with validity on base types]{requirement}{baseValidOplus}
+%   \label{req:base-valid-oplus}
+%   If\\ |fromto iota v1 dv v2| then |v1 `oplus` dv = v2|.
+% \end{restatable}
+
+% \begin{definition}
+%   For each type |tau| we define operators |oplusIdx(tau) : tau ->
+%   Dt^tau -> tau|, |ominusIdx(tau) : tau -> tau -> Dt^tau|.
+% \end{definition}
+
+% We define then |`oplus`|, |nilc| and |`ominus`| on function spaces:
+% \begin{code}
+%   nil v = v `ominus` v
+%   f1 (oplusIdx(A -> B)) df = \v -> f1 v `oplus` df v (nil v)
+%   f2 (ominusIdx(A -> B)) f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
+% \end{code}
+
+% In particular, when |A -> B = eval(sigma) -> eval(tau)|, it follows that
+% \begin{code}
+%   f1 (oplusIdx(sigma -> tau)) df = \v -> f1 v `oplus` df v (nil v)
+%   f2 (ominusIdx(sigma -> tau)) f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
+% \end{code}
+
+% \pg{Both change structure requirements, theorems on types}
+% \begin{restatable}[|`ominus`| produces valid changes]{lemma}{validOminus}
+%   \label{thm:valid-ominus}
+%   |`ominus`| produces valid changes, that is |fromto tau v1 (v2
+%   `ominus` v1) v2| and |v1 `oplus` (v2 `ominus` v1) = v2| for any
+%   type |tau| and any |v1, v2 : eval(tau)|.
+% \end{restatable}
+% \begin{restatable}[|`ominus`| inverts |`oplus`|]{lemma}{oplusOminus}
+%   For any type |tau| and any values |v1, v2 : eval(tau)|,
+%   |`oplus`| inverts |`ominus`|, that is |v1 `oplus` (v2 `ominus`
+%   v1) = v2|.
+% \end{restatable}
+% \begin{proof}
+%   From \cref{thm:valid-ominus,thm:valid-oplus}.
+% \end{proof}
+
+%% Remember that, as we proved earlier:
+%% \deriveCorrectOplus*
+
+% \nilChangesExist*
+% \begin{proof}\pg{?}
+% \end{proof}
 
 
 We only need |`ominus`| to be able to define nil changes on
@@ -512,6 +793,259 @@ As a summary of definitions on types, we show that:
   \caption{Defining change structures.}
   \label{fig:change-structures}
 \end{figure}
+
+% \subsection{Change structures, algebraically}
+% \label{sec:chs-alg}
+% \pg{INCOMPLETE}
+% \pg{Move to later, *if* we keep this.}
+% If we ignore validity requirements, we can rephrase laws of
+% change structures as algebraic equations:
+% \begin{code}
+%   v1 `oplus` (v2 `ominus` v1) = v2
+%   v1 `oplus` (nil v1) = v1
+%   v1 `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus` dv2
+% \end{code}
+% Later, once we define a suitable equivalence relation |`doe`| on
+% changes, we'll also be able to state a few further algebraic laws:
+% \begin{code}
+%   nil v1 `doe` v1 `ominus` v1
+%   (v1 `oplus` dv) `ominus` v1 `doe` dv
+%   ocompose dv1 v1 dv2 = v1 `oplus` dv1 `oplus` dv2 `ominus` v1
+% \end{code}
+
+% We can define
+% \begin{code}
+%   valid : (v : V) -> (dv : Dt V) -> Set
+%   valid v dv = fromto V dv v (v `oplus` dv)
+%   Dt : (v : V) -> Set
+%   Dt^v = Sigma [ dv `elem` Dt V ] valid v dv
+% \end{code}
+
+% Alternatively, with two-sided validity, we could define:
+% \begin{code}
+%   Dt2 : (v1 v2 : V)
+%   Dt2 : (v1 v2 : V) -> Set
+%   Dt2 v1 v2 = Sigma [ dv `elem` Dt V ] ch dv from v1 to v2
+
+%   oplus : (v1 : V) -> {v2 : V} -> (dv : Dt2 v1 v2) -> V
+%   ominus : (v2 v1 : V) -> (Dt2 v2 v1)
+%   `ocompose` : (v1 : V) -> {v2 v3 : V} -> (dv1 : Dt2 v1 v2) -> (dv2 : Dt2 v2 v3) -> Dt2 v1 v3
+% \end{code}
+
+\subsection{Equivalent definitions of change validity}
+\pg{Correct the claim of equivalence, that's not quite true I
+  think.}
+
+In this section we compare our \emph{new-style} formalization
+with the one we and others used in our \emph{old-style}
+formalization, that is, our first formalization of change
+theory~\citep{CaiEtAl2014ILC}. In particular, we focus on change
+validity for function spaces, and its role in the overall proof
+of |derive(param)|'s correctness. Specifically, we compare
+new-style valid function changes to old-style ones, and sketch in
+which sense they are equivalent.
+
+Let's assume |fromto (A -> B) f1 df f2| and |fromto A a1 da
+a2|. We know that then |fromto B (f1 a1) (df a1 da) (f2
+a2)|.
+
+We have seen in \cref{eq:fun-preserv-eq} that |f2 a2 = f1 a1
+`oplus` df a1 da|, and we have defined |(f1 `oplus` df) a1 = f1
+a1 `oplus` df a1 (nil a)|.
+
+Combining these two equations, it follows that
+\[
+  |f1 a1 `oplus` df a1 da = (f1 `oplus` df) (a1 `oplus` da) = f1
+  (a1 `oplus` da) `oplus` df (a1 `oplus` da) (nil (a1 `oplus`
+  da))|.\]
+%
+This equation is one requirement that old-style function changes
+had to satisfy. What we have seen is that the new-style
+definition of validity, although different (and we believe
+simpler), implies the same equation.
+
+Old-style valid function changes also had to map a valid change
+|da| with source |a1| to a valid change |df a1 da| with source
+|f1 a1|. New-style function changes also satisfy this
+requirement.
+
+This suggests the two definitions should be equivalent. However,
+new-style function changes are also defined on invalid input
+changes, unlike old-style valid function changes.
+However, we can
+fix this issue by restricting the input domain of function
+changes to valid changes. Indeed, we believe that sets of valid
+new-style function changes, restricted this way, are isomorphic
+to sets of old-style function changes, but only as long as we
+stick to the on-paper old-style formalization, presented in set
+theory.
+
+However, the actual mechanized proofs use type theory, where
+proofs have first-class status. Old-style changes embed proofs of
+their own validity, while new-style changes don't. Moreover, a
+change |dv| for source |v| has type |Dt^v|, which can only be
+expressed using dependent types.
+%
+While that formulation has lots of conceptual elegance, programs
+produced by |derive(param)| are expressed in STLC, which does not
+support dependent types and cannot express proofs; hence
+|derive(param)| cannot produce changes that are valid according
+to \citeauthor{CaiEtAl2014ILC}. Instead,
+\citeauthor{CaiEtAl2014ILC} need to give a separate semantics
+mapping terms to their validity-embedding changes, and then
+relate validity-embedding changes to the ``erased changes''
+produced by |derive(param)|.\footnote{While we didn't realize
+  back then, we could have probably reused the theory of
+  realizability to perform erasure and extract the computational
+  content from validity-embedding changes.} While this additional
+step is not conceptually hard, mechanizing it took significant
+work; moreover, dealing with both validity-embedding changes and
+erased changes introduced significant inelegant noise in quite a
+few definitions and theorem statements.
+
+Using our formalization, we have also defined a type of
+validity-embedding changes |Dt^v|, with elements that pair a
+change and its validity proof:
+\[|Dt^v = Sigma [ dv `elem` Dt V ] valid v dv|.\]
+
+However, such new-style validity-embedding changes are not
+equivalent to old-style changes on function spaces, even if we
+restrict our attention to valid inputs; we need one last step to
+relate them together. Take an arbitrary function |f1 : A -> B|.
+For \citeauthor{CaiEtAl2014ILC}, |df' : Dt^f1| means that |df'|
+maps validity-embedding changes to validity-embedding changes;
+for us, |df' : Dt^f1| means that |df'| contains (1) a map |df|
+from changes to changes and (2) a proof that |df| preserves
+validity: in a sense, new-style changes split what was a map of
+validity-embedding changes into its action on changes and its
+action on validity proofs. This ``splitting'' becomes trickier
+for higher-order function types, such as |(A -> B) -> (C -> D)|,
+so it must be defined by induction on types; essentially, we need
+to adapt \citeauthor{CaiEtAl2014ILC}'s erasure.
+
+We have not attempted a mechanization of the full equivalence,
+but we have been satisfied with mechanizing several fragments
+without further issues.
+
+\paragraph{Mechanization overhead}
+The formalization presented in this thesis appears simpler and
+smaller than the original one, because we avoid needing erasure,
+but also for other smaller simplifications.
+
+Most importantly, our fundamental relation is ``two-sided''
+(|fromto V v1 dv v2|) rather than ``one-sided'' (|valid V v dv|);
+that is, validity specifies both the source and the destination
+explicitly. This is easier now that validity proofs are separate
+from changes. While this might seem trivial, it's somewhat
+significant for functions.
+%
+Indeed, new-style validity allows stating that |df : Dt^(A -> B)|
+is a change from |f1| to |f2|, instead of stating that |df| is a
+change from |f1| to |f1 `oplus` df = \a -> f1 a `oplus` df a (nil
+a)|. And given |fromto A a1 da a2|, validity preservation says
+that |df a1 da| has destination |f2 a2| rather than |(f1 `oplus`
+df) (a1 `oplus da) = f1 (a1 `oplus da) `oplus` df (a1 `oplus da)
+(nil (a1 `oplus da))|. Such expansions added significant noise to
+mechanized proving and to the resulting proofs.
+
+\paragraph{Credits and related work}
+The proof presented in this chapter is an evolution of the
+original one by \citet{CaiEtAl2014ILC}.
+%
+While this formalization and the mechanization are both original
+with this thesis, some ideas were suggested by other
+(currently-unpublished) developments by Yufei Cai and by Yann
+Régis-Gianas. Yufei Cai showed a simpler set-theoretic proof by
+separating validity, while we noticed separating validity works
+equally well in a mechanized type theory and simplifies the
+mechanization. Yann Régis-Gianas has an almost complete proof
+using a two-sided validity relation that simplified the proof
+significantly. Since his proof was about an untyped
+$\lambda$-calculus, the proof uses a step-indexed logical
+relation to define validity, a necessary choice which however
+adds nontrivial overhead. That proof also uses step-indexed
+big-step semantics; because of this choice, mechanizing the proof
+would be harder in Agda, since Agda has limited support for proof
+automation compared to Coq.
+%
+I gave the first complete and mechanized ILC correctness proof
+using two-sided validity, again for a simply-typed
+$\lambda$-calculus with a denotational semantics. Based on
+two-sided validity, I also reconstructed the rest of the theory
+of changes.
+
+% For \citeauthor{CaiEtAl2014ILC}, function changes map
+% validity-embedding changes to validity-embedding changes: a
+% function change |df' : Dt^f| has type |(a : A) -> (da : Dt^a) ->
+% Dt^(f1 a)|.
+
+% Instead, with our definition, if |df' : Dt^f1| then |df'| pairs a
+% function change |df : Dt^(A -> B)| (that is, |A -> Dt^A -> Dt^B|)
+% and a proof of validity preservation, that
+% |(a1 a2 : A) -> (da : Dt^A) -> fromto A a1 da a2 -> fromto B (f1 a1) (df a1 da) (f2 a2)| (with |f2 = f1 `oplus` df|).
+% This is equivalent to
+% |(a : A) -> (da : Dt^A) -> valid A a da -> valid B (f1 a) (df a da)|.
+
+
+% when they write |df a1 da|, change |da| is in fact a pair of an
+% ``actual change'' and its validity proof. Similarly, |df a1 da|
+% is also a pair of an ``actual change'' and a validity proof. For
+% that reason, to relate valid changes with
+
+% %
+% We defined |evalInc t = (\rho1 drho -> eval(derive t) drho)|
+% essentially as the semantics of |derive(t)|; function
+% |evalInc(t)| is only a valid function change in our
+% formalization, but not in \citeauthor{CaiEtAl2014ILC}'s. More in
+% general, in that earlier formalization the semantics of a lambda
+% term is almost never be a valid change.
+% There, one must define a
+% separate incremental semantics that is a valid function change
+% and that \emph{erases} to |eval(derive t)|. That's because in
+% \citeauthor{CaiEtAl2014ILC} the input to function changes embeds
+% validity proofs, while for us it doesn't.
+
+% While this difference is conceptually innocuous, it
+% makes the earlier proof trickier than ours.
+
+% In our mechanization, we treat changes |dv : Dt^V| and their
+% proofs of validity |dvv : valid V v dv| as two separate objects,
+% while \citeauthor{CaiEtAl2014ILC} combine them. For
+% \citeauthor{CaiEtAl2014ILC}, instead, changes belong to change
+% sets |Dt^v| indexed by the source |v|, and each change in |Dt^v|
+% contains a proof that it's valid for |v|.
+
+% \citeauthor{CaiEtAl2014ILC}'s definition resembles our definition
+% of |Dt^v = Sigma [ dv `elem` Dt V ] valid v dv| in
+% \cref{sec:chs-alg}; indeed, for any natural |n : Nat| the two
+% definitions of |Dt^n| are the same.
+
+% But on function spaces the two definitions diverge.
+% Take |f1 : A -> B|.
+
+% For us, |Dt^f| pairs a ``raw'' function change with a proof of
+% its validity: |Dt^f = Sigma [ df `elem` Dt^(A -> B) ] valid (A ->
+% B) f df|, where |valid (A -> B) f df| means that |df| preserves
+% validity, taking a valid change |da| (|fromto A a1 da a2|) to a
+% valid change |df a1 da| (|fromto B (f1 a1) (df a1 da) ((f1
+% `oplus` df) a2)|).
+%
+
+% % Instead, for \citeauthor{CaiEtAl2014ILC}, function changes map
+% % validity-embedding changes to validity-embedding changes: a
+% % function change |df : Dt^f| has type |(a1 : A) -> (da : Dt^a1) ->
+% % Dt^(f a1)|.
+
+% % when they write |df a1 da|, change |da| is in fact a pair of an
+% % ``actual change'' and its validity proof. Similarly, |df a1 da|
+% % is also a pair of an ``actual change'' and a validity proof. For
+% % that reason, to relate valid changes with
+
+% Remember |valid (A -> B) f df = fromto (A -> B) f df (f `oplus` df) = forall |
+% that is:
+% \[|Dt^f = Sigma [ df `elem` A -> Dt^A -> Dt^B ] (forall (a1 : A) ())|\]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % \subsection{Derivatives are nil changes}
 % \pg{This now goes earlier?}
@@ -760,3 +1294,31 @@ As a summary of definitions on types, we show that:
 % the semantics of |f|, giving us \cref{eq:correctness} from
 % \cref{eq:correctness-math-funs}.\footnote{A few technical details
 %   complicate the picture, but we'll discuss them later.}
+
+\section{Based changes}
+\pg{We can study }
+
+\section{Change equivalence}
+\label{sec:change-equivalence}
+\pg{We can use based changes.}
+
+Next, we define an equivalence relation on changes, that
+describes when two changes |dv1, dv2| can be substituted for one
+another.
+
+\begin{definition}[Change equivalence]
+  Two changes |dv1|, |dv2| are equivalent if and only if there
+  exists |v1, v2| such that both |dv1| and |dv2| are valid from
+  |v1| to |v2|.
+\end{definition}
+
+Change equivalence is respected by all validity-preserving
+operations, such as valid function changes |df|.
+
+Viceversa, two function changes that map equivalent sources to
+equivalent destinations are also equivalent.
+
+\pg{Hm. Do the theorems we want work with this definition?}
+
+Earlier we have sometimes written that two changes are equal.
+However, that's often too restrictive.
