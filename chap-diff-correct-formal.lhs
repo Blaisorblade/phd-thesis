@@ -515,7 +515,8 @@ this thesis we use names in our on-paper formalization.
 
 Unlike the rest of this chapter, we keep this discussion informal, also
 because we have not mechanized any definitions using names (as it
-may be possible using nominal logic). The rest of the thesis does
+may be possible using nominal logic), nor attempted formal proofs.
+The rest of the thesis does
 not depend on this material, so readers might want to skip to
 next section.
 
@@ -615,9 +616,8 @@ and |m[x -> dx]| extend |m| with a new mapping from |x| to |dx|.
     {|Gamma /- t : tau|}
     {\Delta_m \Gamma| /- derive(t, m) : Dt ^ tau|}
   \end{typing}
-  We have not proved this solution is correct, just like the
-  previous one, but this time it appears intuitively obvious that
-  \textsc{Derive'} holds and that |derive(t, m)| is correct.
+  We conjecture that \textsc{Derive'} holds and that |derive(t, m)| is correct,
+  but we have attempted no formal proof.
 \end{itemize}
 
 \section{Plugin requirement summary}
