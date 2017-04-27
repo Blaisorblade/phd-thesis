@@ -30,7 +30,7 @@
 
 \begin{subfigure}[c]{0.5\textwidth}
   \RightFramedSignature{|derive(t)|}
-  \deriveDef
+  \deriveDefCore
 \caption{Differentiation}
 \label{fig:correctness:derive}
 \end{subfigure}

@@ -226,11 +226,6 @@ We anticipate the proof of this corollary:
 % evaluates to a valid change.
 %
 
-After stating these requirements, we define |derive(param)| and prove the requirements hold.
-The transformation is defined by:
-\deriveDef
-where |deriveConst(c)| is defined by language plugins.
-
 \subsection{Plugin requirements}
 Differentiation is extended by plugins on constants, so plugins
 must prove their extensions correct.
@@ -250,6 +245,11 @@ must prove their extensions correct.
 \end{restatable}
 
 \subsection{Proofs}
+We next recall |derive(param)|'s definition and prove it satisfies
+its correctness statement \cref{thm:correct-derive}.
+%After stating on |derive(param)|, we define |derive(param)| and prove the requirements hold.
+\deriveDef*
+
 To illustrate correctness statement \cref{thm:correct-derive}, it
 is helpful to look first at its proof. Readers familiar with
 logical relations proofs should be able to reproduce this proof
