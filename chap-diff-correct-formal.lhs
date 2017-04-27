@@ -618,3 +618,25 @@ and |m[x -> dx]| extend |m| with a new mapping from |x| to |dx|.
   previous one, but this time it appears intuitively obvious that
   \textsc{Derive'} holds and that |derive(t, m)| is correct.
 \end{itemize}
+
+\section{Plugin requirement summary}
+For reference, we repeat here plugin requirements spread through the chapter.
+
+\baseChangeTypes*
+\baseValidity*
+\constDifferentiation*
+\deriveConstCorrect*
+
+\section{Chapter summary}
+\pg{tenses?}
+
+In this chapter, we have formally defined changes for values and environments of
+our language, when they are valid. Through these definitions, we have explained
+that |derive(t)| is correct, that is, that it maps changes to the input
+environment to changes to the output environment. All of this assumes, among
+other things, that language plugins define valid changes for their base types
+and derivatives for their primitives.
+
+In next chapter, we will discuss operations we provide to construct and use
+changes. These operations will be especially useful to provide derivatives of
+primitives.
