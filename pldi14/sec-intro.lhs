@@ -679,6 +679,19 @@ provide change structures for all types:
   This can be verified by induction on types. For each case, it
   is sufficient to compare definitions.
 \end{proof}
+\validOplus
+\begin{proof}
+  This is required by the requirements of change structures on
+  |chs(tau)|.
+\end{proof}
+
+As shortly proved in \cref{sec:correct-derive}, since |`oplus`|
+agrees with validity (\cref{thm:valid-oplus}) and |derive(param)|
+is correct (\cref{thm:correct-derive}) we get
+\cref{thm:correct-derive-oplus}:
+
+\deriveCorrectOplus
+
 %%%%
 % What's below must be revised.
 %%%%

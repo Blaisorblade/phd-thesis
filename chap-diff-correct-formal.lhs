@@ -177,20 +177,21 @@ static semantics:
   is a derived typing rule.
 \end{restatable}
 
-Once we define |`oplus`| we'll be able to relate it to validity, by proving
-\begin{restatable}[|`oplus`| agrees with validity]{lemma}{validOplus}
+After we'll define |`oplus`|, in next chapter, we'll be able to relate |`oplus`|
+to validity, by proving \cref{thm:valid-oplus}, which we state in advance here:
+\begin{restatable*}[|`oplus`| agrees with validity]{lemma}{validOplus}
   \label{thm:valid-oplus}
   If |fromto tau v1 dv v2| then |v1 `oplus` dv = v2|.
-\end{restatable}
+\end{restatable*}
 
 Hence, updating base result |eval(t) rho1| by change
 |eval(derive(t)) drho| via |`oplus`| gives the updated result
 |eval(t) rho2|.
-\begin{restatable}[|derive(param)| is correct, corollary]{corollary}{deriveCorrectOplus}
+\begin{restatable*}[|derive(param)| is correct, corollary]{corollary}{deriveCorrectOplus}
   \label{thm:correct-derive-oplus}
   If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
   |eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|.
-\end{restatable}
+\end{restatable*}
 We anticipate the proof of this corollary:
 \begin{proof}
   First, differentiation is correct (\cref{thm:correct-derive}), so under the hypotheses
