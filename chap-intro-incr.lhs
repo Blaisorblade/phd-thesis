@@ -532,9 +532,14 @@ change at once via a function change |df| as |df a1 da|. Or we
 can compute separately the effects of the function change and of
 the argument change. We can account for changes from |a1| to |a2|
 using $f'$, a derivative of |f|: |f' a1 da = f (a1 `oplus` da)
-`ominus` f a1|.\footnote{We're hiding some details here for
-  simplicity; they are clarified in
-  \cref{sec:change-equivalence}.}
+`ominus` f a1|.%
+%
+\footnote{For simplicity, we use equality on changes, even though equality is
+  too restrictive. Later (in \cref{sec:change-equivalence}) we'll define an
+  equivalence relation on changes, called change equivalence and written
+  |`doe`|, and use it systematically to relate changes in place of equality. For
+  instance, we'll write that |f' a1 da `doe` f (a1 `oplus` da) `ominus` f a1|.
+  But for the present discussion, equality will do.}
 
 We can account for changes from |f1| to |f2| using the
 \emph{pointwise difference} of two functions, |nabla ^ f1 = \a ->
