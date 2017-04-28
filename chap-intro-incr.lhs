@@ -366,7 +366,7 @@ evaluated on old inputs to |t| evaluated on new inputs.
 
 Notice |derive(t)|'s behavior parallels the behavior of |t|,
 because |t| maps inputs to outputs just like |derive(t)| maps
-input changes to output changes.
+valid input changes to valid output changes.
 
 % What's more, we define |derive(param)| \emph{compositionally}:
 % |derive(t)| is defined in terms of |derive(param)| applied to
@@ -448,9 +448,13 @@ Consider again \cref{slogan:derive} and how it applies to term
 %
 Since |y| is free in |tf|, |y| is an input of
 |tf|. So, continuing our example, |dtf = derive(tf)| must map
-from an input change |dv| from |v1| to |v2| for variable |y| to
-an output change |df| from |f1| to |f2|; more precisely, we must
+a valid input change |dv| from |v1| to |v2| for variable |y| to
+a valid output change |df| from |f1| to |f2|; more precisely, we must
 have |df = eval(dtf) (y = v1, dy = dv)|.
+
+More in general, valid function changes preserve validity. Hence, we'll later
+see that validity on function changes is defined as a \emph{logical relation}
+(see \cref{sec:changes-formally}).
 
 \subsection{Consuming function changes}
 Function changes can not only be produced but also be consumed in

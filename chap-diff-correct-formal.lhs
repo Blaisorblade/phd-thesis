@@ -36,9 +36,12 @@ change types.
 \end{definition}
 We refer to values of change types as \emph{change values}.
 
-Then, we define \emph{validity} as a family of ternary relations,
+Then, we define \emph{validity} as a family of ternary \emph{logical relations},
 indexed by types and relating changes with their sources and
 destinations.
+In a typical logical relation, \emph{functions} must map related input to
+related outputs. Here, in a twist, it's \emph{function changes} that must map
+related inputs to related outputs.
 \begin{definition}[Validity]
 We say that |dv| is valid change from |v1| to |v2| (at type |tau|), and write
 |fromto tau v1 dv v2|, if |dv : eval(Dt^tau)|, |v1, v2 :
