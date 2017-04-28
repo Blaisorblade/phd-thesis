@@ -247,7 +247,7 @@ must prove their extensions correct.
   (eval(deriveConst(c)) emptyRho) (evalConst c)|.
 \end{restatable}
 
-\subsection{Proofs}
+\subsection{Correctness proof}
 We next recall |derive(param)|'s definition and prove it satisfies
 its correctness statement \cref{thm:derive-correct}.
 %After stating on |derive(param)|, we define |derive(param)| and prove the requirements hold.
