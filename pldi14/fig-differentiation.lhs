@@ -77,7 +77,7 @@
 \begin{subfigure}[c]{1.0\textwidth}
   \centering
 \begin{restatable*}[|derive(param)| is correct]{theorem}{deriveCorrect}
-  \label{thm:correct-derive}
+  \label{thm:derive-correct}
   Term |derive(t)| is a correct change for |t|. That is, if
   |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
   |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t)

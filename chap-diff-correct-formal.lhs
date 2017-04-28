@@ -191,13 +191,13 @@ Hence, updating base result |eval(t) rho1| by change
 |eval(derive(t)) drho| via |`oplus`| gives the updated result
 |eval(t) rho2|.
 \begin{restatable*}[|derive(param)| is correct, corollary]{corollary}{deriveCorrectOplus}
-  \label{thm:correct-derive-oplus}
+  \label{thm:derive-correct-oplus}
   If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
   |eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|.
 \end{restatable*}
 We anticipate the proof of this corollary:
 \begin{proof}
-  First, differentiation is correct (\cref{thm:correct-derive}), so under the hypotheses
+  First, differentiation is correct (\cref{thm:derive-correct}), so under the hypotheses
   \[|fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|;\]
   that judgement implies the thesis \[|eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|\]
   because |`oplus`| agrees with validty (\cref{thm:valid-oplus}).
@@ -249,7 +249,7 @@ must prove their extensions correct.
 
 \subsection{Proofs}
 We next recall |derive(param)|'s definition and prove it satisfies
-its correctness statement \cref{thm:correct-derive}.
+its correctness statement \cref{thm:derive-correct}.
 %After stating on |derive(param)|, we define |derive(param)| and prove the requirements hold.
 \deriveDef*
 
@@ -261,7 +261,7 @@ Before correctness, we prove \cref{lem:derive-typing}:
   \cref{req:const-differentiation}.
 \end{proof}
 
-We prove \cref{thm:correct-derive} using a typical logical relations strategy.
+We prove \cref{thm:derive-correct} using a typical logical relations strategy.
 We proceed by induction on term |t| and prove for each case that if
 |derive(param)| preserves validity on subterms of |t|, then also |derive(t)|
 preserves validity. Hence, if the input environment change |drho| is valid, then
@@ -495,7 +495,7 @@ still requires base inputs; we could then set |evalInc(t) = \rho1
 drho -> eval(derive t) (rho1, drho)|, where |rho1, drho| simply
 merges the two environments appropriately (we omit a formal
 definition). This is the approach taken by
-\citet{CaiEtAl2014ILC}. When proving \cref{thm:correct-derive},
+\citet{CaiEtAl2014ILC}. When proving \cref{thm:derive-correct},
 using one or the other definition for environment changes makes
 little difference; if we embed the base environment in
 environment changes, we reduce noise because we need not define

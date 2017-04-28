@@ -286,7 +286,7 @@ depend on an environment.
 While we don't discuss our formalization of variables in full, in
 this subsection we discuss briefly weakening on STLC terms and
 state as a lemma that weakening preserves meaning. This lemma is needed in
-a key proof, the one of \cref{thm:correct-derive}.
+a key proof, the one of \cref{thm:derive-correct}.
 
 As usual, if a term |t| is well-typed in a given context
 |Gamma1|, and context |Gamma2| extends |Gamma1| (which we

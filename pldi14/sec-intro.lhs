@@ -123,7 +123,7 @@ artifact: If you take a valid change |drho| from |rho1| to
 |rho1|.
 
 \begin{theorem}[|evalInc t| is a valid change from |eval t| to |eval t|]
-  \label{thm:correct-derive-2}
+  \label{thm:derive-correct-2}
   If |Gamma /- t : tau|, then |evalInc(t)| is a valid change from
   |eval t| to |eval t|:
   \[
@@ -133,7 +133,7 @@ artifact: If you take a valid change |drho| from |rho1| to
 
 \begin{proof}
   By expanding \cref{def:basic-change-structure-funs,def:inc-semantics}
-  one can verify this is just a restatement of \cref{thm:correct-derive}.
+  one can verify this is just a restatement of \cref{thm:derive-correct}.
 \end{proof}
 
 The notion of basic change structure is somewhat weak, since we
@@ -237,7 +237,7 @@ structural recursion on |rho| as:
 \end{code}
 Then we can see that |nil rho| is indeed a nil change for |rho|,
 that is, |fromto Gamma rho (nil rho) rho|.
-\item We have seen in \cref{thm:correct-derive-2} that, whenever
+\item We have seen in \cref{thm:derive-correct-2} that, whenever
   |Gamma /- t : tau|, |eval t| has nil change |evalInc t|.
   Moreover, if we have an appropriate nil environment change
   |fromto Gamma rho drho rho| (which we often do, as discussed
@@ -687,8 +687,8 @@ provide change structures for all types:
 
 As shortly proved in \cref{sec:correct-derive}, since |`oplus`|
 agrees with validity (\cref{thm:valid-oplus}) and |derive(param)|
-is correct (\cref{thm:correct-derive}) we get
-\cref{thm:correct-derive-oplus}:
+is correct (\cref{thm:derive-correct}) we get
+\cref{thm:derive-correct-oplus}:
 
 \deriveCorrectOplus
 
