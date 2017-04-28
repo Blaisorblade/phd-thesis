@@ -253,21 +253,32 @@ its correctness statement \cref{thm:correct-derive}.
 %After stating on |derive(param)|, we define |derive(param)| and prove the requirements hold.
 \deriveDef*
 
-To illustrate correctness statement \cref{thm:correct-derive}, it
-is helpful to look first at its proof. Readers familiar with
-logical relations proofs should be able to reproduce this proof
-on their own, as it is rather standard, once one uses the given
-definitions. Nevertheless, we spell it out, and use it to
-motivate how |derive(param)| is defined. For each case, we first
-give a short proof sketch, and then redo the proof in more
-detail to make the proof easier to follow.
-
+Before correctness, we prove \cref{lem:derive-typing}:
 \deriveTyping*
 \begin{proof}
   The thesis can be proven by induction on the typing derivation
   |Gamma /- t : tau|. The case for constants is delegated to plugins in
   \cref{req:const-differentiation}.
 \end{proof}
+
+We prove \cref{thm:correct-derive} using a typical logical relations strategy.
+We proceed by induction on term |t| and prove for each case that if
+|derive(param)| preserves validity on subterms of |t|, then also |derive(t)|
+preserves validity. Hence, if the input environment change |drho| is valid, then
+the result of differentiation evaluates to valid change |eval(derive(t)) drho|.
+
+Readers familiar with logical relations proofs should be able to reproduce this
+proof on their own, as it is rather standard, once one uses the given
+definitions. In particular, this proof resembles closely the proof of the
+abstraction theorem or relational parametricity (as given by \citet[Sec.
+6]{Wadler1989theorems} or by \citet[Sec. 3.3, Theorem
+3]{Bernardy2011realizability}) and the proof of the fundamental theorem of
+logical relations by \citet{Statman1985logical}.
+
+Nevertheless, we spell this proof out, and use it to motivate how
+|derive(param)| is defined, more formally than we did in
+\cref{sec:informal-derive}. For each case, we first give a short proof sketch,
+and then redo the proof in more detail to make the proof easier to follow.
 
 \deriveCorrect*
 \begin{proof}
