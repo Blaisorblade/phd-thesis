@@ -589,10 +589,13 @@ will be useful when we introduce types |sigma `times` tau| and
   \pg{don't like the phrasing.}
   \begin{subdefinition}
   \item The change set is defined as: |Dt^(A -> B) = A -> Dt^A -> Dt^B|.
-  \item Validity is defined as |fromto (A -> B) f1 df f2 = forall
-    a1 da a2 . (fromto A a1 da a2) -> (fromto B (f1 a1) (df a1
-    da) (f2 a2))|.
-  \item |f1 `oplus` df = \a -> f1 a `oplus` df a (nil a)|.
+  \item Validity is defined as
+    \begin{multline*}
+      |fromto (A -> B) f1 df f2 = forall a1 da a2 . (fromto A a1 da a2)| \\
+      \text{ implies } |(fromto B (f1 a1) (df a1 da) (f2 a2))|.
+    \end{multline*}
+  \item We define change update by
+    \[|f1 `oplus` df = \a -> f1 a `oplus` df a (nil a)|.\]
   \item We prove that |`oplus`| agrees with validity on |A -> B|.
     Consider |f1 , f2: A -> B| and |fromto (A -> B) f1 df f2|; we
     must show that |f1 `oplus` df = f2|. By functional
@@ -602,7 +605,7 @@ will be useful when we introduce types |sigma `times` tau| and
     |fromto B (f1 a) (df a (nil a)) (f2 a)|, which
     follows because |nil a| is a valid change from |a| to
     |a| and because |df| is a valid change from |f1| to |f2|.
-  \item We define difference by |f2 `ominus` f1 = \a da -> f2 (a `oplus` da) `ominus` f1 a|.
+  \item We define difference by \[|f2 `ominus` f1 = \a da -> f2 (a `oplus` da) `ominus` f1 a|.\]
   \item We prove that |`ominus`| produces valid changes on |A -> B|. Consider
     |df = f2 `ominus` f1| for |f1, f2: A -> B|. For any valid
     input |fromto A a1 da a2|, we must show that |df| produces a
@@ -612,14 +615,14 @@ will be useful when we introduce types |sigma `times` tau| and
     |a2| and |df| the thesis becomes |fromto B (f1 a1) (f2 (a1
     `oplus` da) `ominus` f1 a1) (f2 (a1 `oplus` da))|, which is
     true because |`ominus`| produces valid changes on |B|.
-  \item We define |nilc| through |nil f = f `ominus` f|, like in
+  \item We define |nilc| through \[|nil f = f `ominus` f|,\] like in
     \cref{sec:chs-derivable-ops}, and reuse its generic
     correctness proof.
-  \item Change composition is defined as |ocompose df1 f1 df2 =
-    \a da -> ocompose (df1 a (nil a)) (f1 a) (df2 a da)|.
+  \item We define change composition as \[|ocompose df1 f1 df2 =
+    \a da -> ocompose (df1 a (nil a)) (f1 a) (df2 a da)|.\]
   \item We prove that change composition preserves validity on |A
-    -> B|. That is, we must prove |fromto B (f1 a1) (ocompose
-    (df1 a (nil a1)) (f1 a1) (df2 a1 da)) (f3 a2)| for every |f1,
+    -> B|. That is, we must prove \[|fromto B (f1 a1) (ocompose
+    (df1 a (nil a1)) (f1 a1) (df2 a1 da)) (f3 a2)|\] for every |f1,
     f2, f3, df1, df2, a1, da, a2| satifsfying |fromto (A -> B) f1
     df1 f2|, |fromto (A -> B) f2 df2 f3| and |fromto A a1 da a2|.
 
