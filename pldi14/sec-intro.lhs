@@ -622,7 +622,7 @@ will be useful when we introduce types |sigma `times` tau| and
     \a da -> ocompose (df1 a (nil a)) (f1 a) (df2 a da)|.\]
   \item We prove that change composition preserves validity on |A
     -> B|. That is, we must prove \[|fromto B (f1 a1) (ocompose
-    (df1 a (nil a1)) (f1 a1) (df2 a1 da)) (f3 a2)|\] for every |f1,
+    (df1 a1 (nil a1)) (f1 a1) (df2 a1 da)) (f3 a2)|\] for every |f1,
     f2, f3, df1, df2, a1, da, a2| satifsfying |fromto (A -> B) f1
     df1 f2|, |fromto (A -> B) f2 df2 f3| and |fromto A a1 da a2|.
 
