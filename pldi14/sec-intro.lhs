@@ -1583,3 +1583,20 @@ clearer, we only give the first such proof in full.
 We can define change structures on products |A + B|, given change
 structures on |A| and |B|.
 \pg{resume.}
+
+
+% Missing sections from chap-intro-incr.lhs.
+
+\chapter{Misc}
+
+\section{A higher-order example}
+\label{sec:differentiation-fold-example}
+\pg{write}
+% Referenced later in sec-performance.tex by saying:
+% % We have seen in \cref{ssec:differentiation} that $\Derivative$
+% % needlessly recomputes $\Merge\Xs\Ys$. However, the result is a
+% % base input to $\FOLD'$.
+
+\section{Nontermination}
+\label{sec:non-termination}
+\pg{write, and put somewhere}

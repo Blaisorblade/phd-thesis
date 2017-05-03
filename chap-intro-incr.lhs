@@ -808,14 +808,5 @@ direct execution of this program will compute |merge xs ys|,
 taking time linear in the base inputs. \pg{Point out this is
   self-maintainable!}
 
-\section{A higher-order example}
-\label{sec:differentiation-fold-example}
-\pg{write}
-% Referenced later in sec-performance.tex by saying:
-% % We have seen in \cref{ssec:differentiation} that $\Derivative$
-% % needlessly recomputes $\Merge\Xs\Ys$. However, the result is a
-% % base input to $\FOLD'$.
-
-\section{Nontermination}
-\label{sec:non-termination}
-\pg{write, and put somewhere}
+\section{Chapter conclusion}
+\pg{TODO: add}
