@@ -645,26 +645,6 @@ changes.
 % same language as |grand_total|, that accepts changes to all inputs  and producing changes, which
 % are simple first-class values of this language.
 %
-\newcommand{\deriveDefCore}{%
-\begin{align*}
-  |derive(\(x : sigma) -> t)| &= |\(x : sigma) (dx : Dt^sigma) -> derive(t)| \\
-  |derive(s t)| &= |derive(s) t (derive(t))| \\
-  |derive(x)| &= |dx| \\
-  |derive(c)| &= |deriveConst(c)|
-\end{align*}
-}
-% derive(^^let x = t1 in t2) =
-%   let  x = t1
-%        dx = derive(t1)
-%        in   derive(t2)
-
-% \begin{code}
-%   derive(\x -> t)   = \x dx -> derive(t)
-%   derive(s t)       = derive(s) t (derive(t))
-%   derive(x)         = dx
-%   derive(c)         = deriveConst(c)
-% \end{code}
-
 \section{Differentiation, informally}
 \label{sec:informal-derive}
 Next, we define differentiation and explain informally why it
