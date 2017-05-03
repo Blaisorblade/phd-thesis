@@ -1374,6 +1374,128 @@ equivalent destinations are also equivalent.
 Earlier we have sometimes written that two changes are equal.
 However, that's often too restrictive.
 
+\section{The relation with parametricity and the abstraction theorem}
+
+In this section we discuss similarities between correctness of |derive(param)|
+(\cref{thm:derive-correct}) and the fundamental theorem of logical relations,
+for the case of binary logical relations. This section is intended for logical
+relation experts, and we keep it rather informal.
+
+%format p(t) = "\mathcal{P}(" t ")"
+
+Most studies of logical relations mention no term transformation that relates to
+|derive(param)|; one exception is given by \citet{Bernardy2011realizability}.
+They study relational parametricity, a particular binary logical relation, where
+the fundamental theorem of logical relations becomes the abstraction theorem. To
+prove the abstraction theorem, \citeauthor{Bernardy2011realizability} present a
+term transformation |p(param)|; we'll show the analogy between this term
+transformation and
+|derive(param)|.%
+%
+\footnote{\citeauthor{Bernardy2011realizability} were not the first to introduce
+  such a transformation, but we base our comparison off their presentation and
+  avoid discussing their related work.}
+
+Transformation |p(t)| takes a term |t| to a proof term |p(t)| in a suitable
+object logic (related to the one of |t|), that proves that |t| maps logically
+related inputs to logically related outputs. For binary logical relations and
+simply-typed $\lambda$-calculus, we can specialize their definition to the
+following:
+
+%format (idx1 (t)) = "\mathcal{S}_1(" t ")"
+%format (idx2 (t)) = "\mathcal{S}_2(" t ")"
+
+\begin{code}
+  (t1, t2) `elem` r(sigma -> tau) =
+    forall x1 x2 : sigma, px : (x1, x2) `elem` r(sigma). (t1 x1, t2 x2) `elem` r(tau)
+  p(x) =
+      px
+  p(\(x : sigma) -> t) =
+    \(x1 x2 : sigma) (px : (x1, x2) `elem` r(sigma)) -> p(t)
+  p(s t) =
+    p(s) (idx1 s) (idx2 s) p(t)
+\end{code}
+
+where |idx1 s| and |idx2 s| subscript variables in terms with 1 and 2:
+\begin{code}
+  idx1(x) = x1
+  idx1(\(x : sigma) -> t) = \(x1 : sigma) -> idx1 t
+  idx1(s t) = (idx1 s) (idx1 t)
+
+  idx2(x) = x2
+  idx2(\(x : sigma) -> t) = \(x2 : sigma) -> idx2 t
+  idx2(s t) = (idx2 s) (idx2 t)
+\end{code}
+
+To see the analogy, let's show a variant of differentiation. This time,
+|derive(\x -> t) = \x1 x2 dx -> derive(t)| is a function that binds not just the
+source of |dx|, but also its target, and the additional symmetry simplifies its
+theoretical study.
+
+\begin{code}
+  Dt2 : (v1 v2 : V)
+  Dt2 : (v1 v2 : V) -> Set
+  Dt2 v1 v2 = Sigma [ dv `elem` Dt^V ] (fromto sigma v1 dv v2)
+  (f1, df, f2) `elem` r(sigma -> tau) =
+    forall x1, dx, x2 : sigma, dxx : r(sigma) . (f1 x1, df x1 x2 dx, f2 x2) `elem` r(tau)
+
+  derive(x) = dx
+  derive(\(x : sigma) -> t) = \x1 x2 (dx : Dt2 x1 x2) -> derive(t)
+  derive(s t) = derive(s) (idx1 s) (idx2 s) (derive t)
+
+  derive(\(x : sigma) -> t) = \x1 x2 (fromto sigma x1 dx x2) -> derive(t)
+\end{code}
+
+\pg{connection}
+For readers familiar with staging,
+we explain how \citeauthor{Bernardy2011realizability}'s
+transformation relates to standard proofs of the abstraction theorem.
+In short, (a) the usual proof of the abstraction theorem
+can be regarded as an \emph{interpreter} from object-level terms to metalevel
+proofs; (b) standard interpreters can be turned into compilers by staging, so
+that they evaluate object-level code for a function instead of the function
+itself at the metalevel; (c) an ``interpreter'' that produces a metalevel proof
+can be staged into a ``compiler'' (or term transformation) into an object-level
+proof term in a suitable logic; (d) the above definition of |p(t)| corresponds
+(informally) to staging the proof of the abstraction theorem.
+\begin{enumerate}
+\item Recall that the abstraction theorem is proven by
+induction on terms.\footnote{Or on typing derivations, but as discussed we
+  regard the two as isomorphic, since typing is syntax-directed.} Let's write
+|P(t)| to say that term |t| satisfies the abstraction theorem; then the theorem
+statement is |forall t. P(t)| in the metalevel logic. The proof is constructive,
+so we can regard it (informally) under the lens of the Curry-Howard isomorphism.
+Under this lens, a metalevel proof of |forall t. P (t)| is a function from terms
+|t| to a metalevel proof of |P(t)|; a proof by induction is a structurally
+recursive function from terms to metalevel proofs, just like an interpreter is a
+structural recursive function from terms to metalevel functions. Hence, we
+regard the proof of the abstraction theorem as an interpreter.
+\item Staging an interpreter produces a compiler, which evaluates
+  not to a value |v| but to code that will later evaluate to
+  value |v|; this code will already be specialized for the input
+  term.
+\item Similarly, by staging an interpreter that produces proofs,
+  we produce a compiler from term to proofs.
+\end{enumerate}
+
+% Most other proofs,
+% instead of creating a proof term, but simply produce a similar proof in the meta
+% logic by induction on terms. The two proof strategies are related by an analogue
+% of staging.
+
+
+% Here we discuss the relation with parametricity, the abstraction theorem, and
+% the fundamental theorem of logical relations, for readers familiar with these
+% topics. Parametricity is typically studied for type systems containing System F,
+% but \citet{Bernardy2011realizability} generalize it to arbitrary PTSs.
+
+
+
+% Correctness of |derive(param)| (\cref{thm:derive-correct}) relates to binary
+% parametricity. However, usual statements of binary parametricity mention no
+% analog of changes or |derive(param)|. One defines a relational interpretation of
+% terms, mapping input relations to output relations, and shows this maps
+
 
 \chapter{Language plugins for products and sums}
 \label{ch:prod-sums}
