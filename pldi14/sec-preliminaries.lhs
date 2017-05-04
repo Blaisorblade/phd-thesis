@@ -99,7 +99,7 @@ Moreover, by using type theory:
 \end{itemize}
 
 To handle binding issues in our object language, our
-formalization uses typed de Brujin indexes, because this
+formalization uses typed de Bruijn indexes, because this
 techniques takes advantage of Agda's support for type refinement
 in pattern matching. On top of that, we implement a HOAS-like
 frontend, which we use for writing specific terms.

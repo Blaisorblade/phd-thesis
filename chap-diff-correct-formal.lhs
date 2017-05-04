@@ -512,9 +512,9 @@ from environment changes.
 Differentiation generates new names, so a correct implementation
 must prevent accidental capture. Till now we have ignored this problem.
 
-\paragraph{Using de Brujin indexes}
+\paragraph{Using de Bruijn indexes}
 Our mechanization has no capture
-issues because it uses deBrujin indexes. Change context just
+issues because it uses de Bruijn indexes. Change context just
 alternate variables for base inputs and input changes. A context
 such as |Gamma = x : Int, y : Bool| is encoded as |Gamma = Int,
 Bool|; its change context is |Dt^Gamma = Int, Dt^Int, Bool,
@@ -523,8 +523,8 @@ rely on.
 
 \paragraph{Using names}
 Next, we discuss issues in implementing this transformation with
-names rather than deBrujin indexes. Using names rather than de
-Brujin indexes makes terms more readable; this is also why in
+names rather than de Bruijn indexes. Using names rather than de
+Bruijn indexes makes terms more readable; this is also why in
 this thesis we use names in our on-paper formalization.
 
 Unlike the rest of this chapter, we keep this discussion informal, also

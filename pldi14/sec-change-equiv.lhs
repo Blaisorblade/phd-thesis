@@ -140,7 +140,7 @@ We avoid quotienting for a few reasons:
   observational type theory and homotopy type theory), but we
   decided to stick to standard type theory constructions; among
   other reasons, some formalization techniques we use (such as
-  typed deBrujin indexes) do not work.%
+  typed deBruijn indexes) do not work.%
   \pg{Revise when we describe our mechanization earlier.}
 \item The goal of our theory is to support reasoning on programs,
   and in programs we do not have the option of working concretely
