@@ -100,6 +100,9 @@ structures for |A| and |B|.
   \end{subdefinition}
 \end{definition}
 
+\pg{After I turn ``correct change'' into ``derivative'', revise
+  this again.}
+%
 In particular, we obtain a basic change structure on |eval(Gamma)
 -> eval(tau)| for any |Gamma, tau|. After a new definition, we
 can restate correctness of differentiation using this new basic

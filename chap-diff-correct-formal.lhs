@@ -34,20 +34,47 @@ change types.
   The change type |Dt^tau| of a type |tau| is defined in
   \cref{fig:change-types}.
 \end{definition}
-We refer to values of change types as \emph{change values}.
+We refer to values of change types as \emph{change values} or just \emph{changes}.
 
 Then, we define \emph{validity} as a family of ternary \emph{logical relations},
-indexed by types and relating changes with their sources and
-destinations.
-In a typical logical relation, \emph{functions} must map related input to
-related outputs. Here, in a twist, it's \emph{function changes} that must map
+indexed by types and relating a change with its \emph{source} and
+\emph{destination}.
+A typical logical relation constrains \emph{functions} to map related input to
+related outputs. In a twist, validity constrains \emph{function changes} to map
 related inputs to related outputs.
-\begin{definition}[Validity]
-We say that |dv| is valid change from |v1| to |v2| (at type |tau|), and write
+\begin{definition}[Change validity]
+We say that |dv| is a (valid) change from |v1| to |v2| (at type |tau|), and write
 |fromto tau v1 dv v2|, if |dv : eval(Dt^tau)|, |v1, v2 :
 eval(tau)| and |dv| is a ``valid'' description of the difference
 from |v1| to |v2|, as we define in \cref{fig:validity}.
 \end{definition}
+\begin{notation}
+  We'll typically quantify theorems over valid changes with their sources and
+  destination. So we write |forall (fromto tau v1 dv v2). ^^ P|, and say ``for
+  all (valid) changes |dv| from |v1| to |v2| at type |tau| we have |P|'', as a
+  shortcut for
+  \[|forall
+    v1, v2 : eval(tau), dv : eval(Dt^tau).|\text{ if }|fromto tau v1 dv v2|\text{ then }|P|.\]
+
+  Since we focus on valid changes, we'll omit the word ``valid'' when clear from context.
+  In particular, a change from |v1| to |v2| is necessarily valid.
+\end{notation}
+
+Next, we explain the definitions of change types and validity for
+function type |sigma -> tau|.
+%
+Take function values |f1, f2 : eval(sigma -> tau)|. As sketched,
+valid function changes map valid input changes to valid output
+changes. A bit more precisely, |df| is a valid function change
+from |f1| to |f2| if, for all changes |da| from |a1| to |a2| at type |sigma|,
+value |df a1 da|
+is a valid change from |f1 a1| to |f2 a2|. Formally, we define
+change types and validity for function types as:
+\begin{align*}
+  |Dt^(sigma -> tau)| &= |sigma -> Dt ^ sigma -> Dt ^ tau|\\
+  |fromto (sigma -> tau) f1 df f2| &=
+  |forall (fromto (sigma) a1 da a2). fromto (tau) (f1 a1) (df a1 da) (f2 a2)|
+\end{align*}
 
 Both definitions place requirements on language plugins:
 \begin{restatable}[Base change types]{requirement}{baseChangeTypes}
@@ -62,24 +89,6 @@ Both definitions place requirements on language plugins:
 In \cref{ex:valid-bag-int,ex:invalid-nat} we exemplified
 informally change types and validity on naturals, integers and
 bags.\pg{revise if we add more examples.}
-
-Next, we explain the definitions of change types and validity for
-function type |sigma -> tau|.
-%
-Take function values |f1, f2 : eval(sigma -> tau)|. As sketched,
-valid function changes map valid input changes to valid output
-changes. A bit more precisely, |df| is a valid function change
-from |f1| to |f2| if, for all |a1, a2 : eval(sigma)| and for all
-valid changes |da : eval(Dt^sigma)| from |a1| to |a2|, |df a1 da|
-is a valid change from |f1 a1| to |f2 a2|. Formally, we define
-change types and validity for function types as:
-\begin{align*}
-  |Dt^(sigma -> tau)| &= |sigma -> Dt ^ sigma -> Dt ^ tau|\\
-  |fromto (sigma -> tau) f1 df f2| &=
-  |forall a1 a2 : eval(sigma), da : eval(Dt ^ sigma) .| \\
-  &\text{if }|fromto (sigma) a1 da a2| \text{ then }
-    |fromto (tau) (f1 a1) (df a1 da) (f2 a2)|
-\end{align*}
 
 To describe changes to the inputs of a term, we now also
 introduce change contexts |Dt^Gamma| environment changes |drho :
@@ -103,10 +112,10 @@ first define the shape of change environments through
 
 Then, we describe validity of change
 environments via a judgment.
-\begin{definition}[Valid environment changes]
+\begin{definition}[Environment change validity]
 We define judgment |fromto Gamma rho1 drho rho2|, pronounced
-``|drho| is a valid environment change between |rho1| and
-|rho2|'', where |rho1, rho2 : eval(Gamma), drho :
+``|drho| is an environment change from |rho1| to
+|rho2| (at context |Gamma|)'', where |rho1, rho2 : eval(Gamma), drho :
 eval(Dt^Gamma)|, via the following inference rules:
 \begin{typing}
   \Axiom
@@ -142,14 +151,13 @@ to |eval(t) rho2|.\footnote{If |tau| is a function type, |df =
   eval(derive(t)) drho| accepts further inputs; since |df| must
   be a valid function change, it will also map them to valid
   outputs as required by our slogan.}
+\pg{Replace with derivative.}
 That is, |derive(t)| must be a \emph{correct
   change} for |t| as defined next:
 \begin{definition}[Correct change]
-  We say a term |dt| is a correct change for term |t|, and write
-  |correct dt t|, if there exists a context |Gamma| and a type
-  |tau| such that |Gamma /- t : tau|, |Dt ^ Gamma /- dt :
-  Dt^tau|, and |eval(dt) drho| is a valid change from |eval(t)
-  rho1| to |eval(t) rho2| whenever |fromto Gamma rho1 drho rho2|.
+  We say a term |Dt ^ Gamma /- dt : Dt^tau| is a correct change for term |Gamma
+  /- t : tau|, and write |correct dt t|, if |eval(dt) drho| is a change from
+  |eval(t) rho1| to |eval(t) rho2| for all |fromto Gamma rho1 drho rho2|.
 \end{definition}
 In other words, |eval(dt)| must be a function that takes changes
 |drho| from old to new inputs of |t|, and maps them to changes
