@@ -57,6 +57,10 @@ Talking about sets
 avoids ambiguity between types of our meta-language and types of
 our object-language (that we discuss next in
 \cref{sec:intro-stlc}).
+\begin{notation}
+  We'll let uppercase latin letters |A, B, C ..., V, U| range
+  over sets, never over types.
+\end{notation}
 
 We do not prove correctness of all our language plugins. However,
 in earlier work~\citep{CaiEtAl2014ILC} we prove correctness for
@@ -96,6 +100,7 @@ Moreover, by using type theory:
   add it as a postulate. In Agda, this postulate is known to be
   consistent~\citep{Hofmann96}, hence it is safe to assume%
   \footnote{\url{http://permalink.gmane.org/gmane.comp.lang.agda/2343}}.
+%\item All our function spaces are limited to computable functions.
 \end{itemize}
 
 To handle binding issues in our object language, our
@@ -145,8 +150,9 @@ context |Gamma| has type |tau|.%
   is even more clear in our mechanization; see discussion
   in~\cref{sec:sem-style-and-rw}.}
 %
-For a more proper introduction to STLC we refer the reader
-to \citet[Ch. 9]{Pierce02TAPL}.
+For a proper introduction to STLC we refer the reader to
+\citet[Ch. 9]{Pierce02TAPL}. We will assume significant
+familiarity with it.
 
 \input{pldi14/fig-lambda-calc}
 
@@ -164,7 +170,7 @@ mechanization, we need to verify \emph{by hand} that such
 restrictions are satisfied (which they are). See
 \cref{sec:modularity-limits} for the gory details.
 
-\paragraph{Notation}
+\begin{notation}
 We typically omit type annotations on $\lambda$-abstractions,
 that is we write |\x -> t| rather than |\(x : sigma) -> t|. Such
 type annotations can often be inferred from context (or type
@@ -178,6 +184,14 @@ programs.
 We often omit |emptyCtx| from typing contexts with some assumptions.
 For instance we write |x : tau1, y : tau2| instead of |emptyCtx,
 x : tau1, y : tau2|.
+
+We overload symbols (often without warning) when they can be
+disambiguated from context, especially when we can teach modern
+programming languages to disambiguate such overloadings. For
+instance, we reuse |->| for lambda abstractions |\x -> t|,
+function spaces |A -> B|, and function types |sigma -> tau|, even
+though the first is the separator.
+\end{notation}
 
 \paragraph{Extensions}
 In our examples, we will use some unproblematic syntactic sugar
