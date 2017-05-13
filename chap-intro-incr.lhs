@@ -702,7 +702,7 @@ to any subterms of |u|, and sketch why it applies to |u| itself.
   evaluates to the change of |s|, as a function of |derive(s)|'s
   base input and input change. So, we apply |derive(s)| to its
   actual base input |t| and actual input change |derive(t)|, and
-  obtain |derive(s t) = derive(s) t derive(t)|.
+  obtain |derive(s t) = derive(s) t (derive t)|.
 \end{itemize}
 
 This is not quite a correct proof sketch because of many issues,
