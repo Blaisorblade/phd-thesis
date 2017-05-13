@@ -19,9 +19,12 @@ change operations.
 All definitions and proofs in this and next chapter is mechanized in Agda,
 except where otherwise indicated. We typically include full proofs anyway,
 because we believe they clarify the meaning and consequences of our definitions.
-We try and provide enough detail that readers can follow along without pencil
-and paper, at the expense of making our proofs look longer than they would
-usually be.
+To make proofs accessible, we try and provide enough detail that our target
+readers can follow along \emph{without} pencil and paper, at the expense of
+making our proofs look longer than they would usually be. As we target readers
+proficient with STLC (but not necessarily proficient with logical relations),
+we'll still omit routine steps needed to reason on STLC, such as typing
+derivations.
 
 % We also elaborate on the effect of
 % differentiation on higher-order programs.
