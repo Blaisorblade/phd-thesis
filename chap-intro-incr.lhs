@@ -32,12 +32,12 @@ Programmers typically have to choose between a few undesirable options.
   support for incrementalization. \pg{Mention here limits?}
 \item They can attempt using general-purpose techniques for
   incrementalizing programs, such as \emph{self-adjusting
-    computation} and variants such as Adapton. Self-adjusting
+    computation} and variants such as \emph{Adapton}. Self-adjusting
   computation applies to arbitrary purely functional programs and
   has been extended to imperative programs; however, it only
   guarantees efficient incrementalization when applied to base
   programs that are \emph{designed} for efficient
-  incrementalization.
+  incrementalization.\pg{Citations}
 \end{itemize}
 
 \pg{Continue discussing dependencies minimization and the
@@ -54,8 +54,9 @@ functional DSLs, so that language primitive can be parameterized
 over functions and hence highly flexible.\pg{why not
   defunctionalize/closure convert/...?}
 
-\pg{actually argue for higher-order collection DSLs over relational databases}
-\pg{not in source}\pg{rewrite}\pg{find source for argument}
+\pg{actually argue for higher-order collection DSLs over relational databases;
+  we didn't do that in the cited thesis section.}
+%
 Our primary example will be DSLs for operations on collections:
 as discussed earlier (\cref{sec:aosd13-intro}), we favor
 higher-order collection DSLs over relational databases.
@@ -74,12 +75,11 @@ We build our domain-specific functional languages based on
 simply-typed $\lambda$-calculus (STLC), extended with
 \emph{language plugins} to define the domain-specific parts, as
 discussed in \cref{sec:intro-stlc}. We call our approach
-\emph{ILC}.\footnote{Originally, this acronym stood for
-  \emph{incremental lambda calculus}, an extension of
+\emph{ILC} for \emph{Incrementalizing Lambda Calculus}.\footnote{Originally, ILC stood for
+  \emph{Incremental Lambda Calculus}, an extension of
   $\lambda$-calculus with additional operations. Such extensions
   are no more needed, so we don't have any more an incremental
-  lambda calculus per se, but the name stuck, redefined as
-  \emph{incrementalizing lambda calculus}.} We discuss
+  lambda calculus per se, but the name stuck.} We discuss
 inspiration for differentiation in
 \cref{sec:generalize-fin-diff}. We show a motivating example for
 our approach in \cref{sec:motiv-example}. We introduce informally
@@ -90,7 +90,7 @@ differentiation and motivate it informally in
 \cref{sec:informal-derive}. We apply differentiation to our
 motivating example in \cref{sec:derive-example}.
 %
-\pg{check later this TOC} In \cref{ch:derive-formally}, we
+\pg{check later this TOC} In \cref{ch:derive-formally,ch:change-theory}, we
 introduce a formal theory of changes, and we use it to formalize
 differentiation and prove it correct.
 
@@ -137,8 +137,7 @@ it can be directly extended to commutative groups.
 Incrementalization based on finite differences for groups and
 first-order programs has already been
 researched~\citep{Paige82FDC,GlucheGrust97Incr}, most recently and
-spectacularly with DBToaster by
-\citet{Koch10IQE} and \citet{Koch2016incremental}.
+spectacularly with DBToaster~\citep{Koch10IQE,Koch2016incremental}.
 
 But it is not immediate how to generalize finite differencing
 beyond groups. And many useful types do not form a group: for
@@ -156,8 +155,7 @@ the surrounding theory.
 \section{A motivating example}
 \label{sec:motiv-example}
 In this section, we illustrate informally incrementalization on a
-small example. We give a more precise presentation in
-\cref{sec:correct-derive}.
+small example.
 
 In the following program, |grand_total xs ys| sums integer numbers in
 input collections |xs| and |ys|.
@@ -253,22 +251,7 @@ change from |v1| to |v2| and |dv2| is a valid change from |v2| to
 
 Definitions of these operations and concepts for a type form a
 \emph{change structure}. We'll define change structures more
-formally later.
-\pg{Why show a change structure in Haskell terms?}
-We already sketch, preliminarly, how a change structure
-can be represented in Haskell terms: a change structure is
-encoded as a \emph{type class} named |ChangeStruct t|, where change type
-|Dt^tau| is defined as an associated type |Dt^t|, and operations
-|`oplus`|, |`ominus`| and |`ocompose`| are defined as methods.
-\begin{code}
-class ChangeStruct t where
-  type Dt t
-  oplus :: t -> Dt t -> t
-  ominus :: t -> t -> Dt t
-  (`ocompose`) :: Dt t -> t -> Dt t -> Dt t
-\end{code}
-We'll come back to this definition and refine it,
-describing the laws it satisfies, in \cref{sec:change-struct-tc}.
+formally later in \cref{def:change-structure}.
 
 \begin{example}[Changes on integers and bags]
   \label{ex:valid-bag-int}
@@ -331,7 +314,7 @@ incrementalized our program |grand_total| if not only we get the
 correct result for |s2|, but if we also get it faster than
 by just calling |grand_total xs2 ys2|.
 
-Below we give the derivative of |grand_total| and show our
+Below we give |dgrand_total| and show our
 approach gives the correct result in this example.
 
 \begin{code}
@@ -342,7 +325,6 @@ approach gives the correct result in this example.
                               = 10 + 6 = 16
 \end{code}
 
-
 Our approach requires a derivative that is asymptotically faster
 than its base program. Here, derivative |dgrand_total| simply
 \emph{ignores} base inputs, so its time complexity depends only
@@ -352,16 +334,21 @@ in particular |Theta(dn) = o(n)|.
 Moreover, we propose to generate derivatives by a program
 transformation |derive(param)| on base terms |t|, assuming that
 we already have derivatives for primitive functions they use.
-
 We call this program transformation \emph{differentiation} (or,
 sometimes, simply \emph{derivation}); we write |derive(t)| to
 denote the result of this transformation on a term |t|.
+%
+Differentiation only produces derivatives on closed terms, but it is defined as
+a structurally recursive program transformation, hence it is also defined on
+open terms.
+
 Informally, |derive(t)| describes how |t| changes, that is,
 
 \begin{restatable}[|derive(t)| maps input changes to output changes]{slogan}{sloganDerive}
   \label{slogan:derive}
-Term |derive(t)| evaluates on base inputs and valid \emph{input changes} to a valid \emph{output change} from |t|
-evaluated on old inputs to |t| evaluated on new inputs.
+  Term |derive(t)| applied to base inputs and valid \emph{input changes} gives a
+  valid \emph{output change} from |t| applied on old inputs to |t| applied on
+  new inputs.
 \end{restatable}
 
 Notice |derive(t)|'s behavior parallels the behavior of |t|,
@@ -414,7 +401,23 @@ will make this more formal in next section.
 In this section, we have sketched the meaning of differentiation
 informally. Next, we discuss incrementalization on higher-order
 terms in \cref{sec:higher-order-intro}, before defining
-differentiation in \cref{sec:correct-derive}.
+differentiation in \cref{sec:informal-derive}.
+
+% \pg{Why show a change structure in Haskell terms?}
+% We already sketch, preliminarly, how a change structure
+% can be represented in Haskell terms: a change structure is
+% encoded as a \emph{type class} named |ChangeStruct t|, where change type
+% |Dt^tau| is defined as an associated type |Dt^t|, and operations
+% |`oplus`|, |`ominus`| and |`ocompose`| are defined as methods.
+% \begin{code}
+% class ChangeStruct t where
+%   type Dt t
+%   oplus :: t -> Dt t -> t
+%   ominus :: t -> t -> Dt t
+%   (`ocompose`) :: Dt t -> t -> Dt t -> Dt t
+% \end{code}
+% We'll come back to this definition and refine it,
+% describing the laws it satisfies, in \cref{sec:change-struct-tc}.
 
 %format y1
 %format y2
@@ -438,8 +441,8 @@ values for |f = eval(tf) (y = v)|. Take a change |dv| from |v1
 rise to different outputs |f1 = eval(tf) (y = v1)| and |f2 =
 eval(tf) (y = v2)|.
 %
-We describe this output difference through a function change |df|
-from |f1| to |f2|.
+We describe the difference between outputs |f1| and |f2| through a function
+change |df| from |f1| to |f2|.
 
 Consider again \cref{slogan:derive} and how it applies to term
 |f|:
@@ -451,10 +454,6 @@ Since |y| is free in |tf|, |y| is an input of
 a valid input change |dv| from |v1| to |v2| for variable |y| to
 a valid output change |df| from |f1| to |f2|; more precisely, we must
 have |df = eval(dtf) (y = v1, dy = dv)|.
-
-More in general, valid function changes preserve validity. Hence, we'll later
-see that validity on function changes is defined as a \emph{logical relation}
-(see \cref{sec:changes-formally}).
 
 \subsection{Consuming function changes}
 Function changes can not only be produced but also be consumed in
@@ -485,6 +484,15 @@ x dx|. Then
   da) = eval(derive(tf)) a1 da = df a1 da|.\]
 As required, that's a
 change from |f1 a1| to |f2 a2|.
+
+\pg{Maybe this is too steep now.}
+Overall, valid function changes preserve validity, just like |derive(t)| in
+\cref{slogan:derive}, and map valid input changes to valid output changes. In
+turn, output changes can be function changes; since they are valid, they in turn
+map valid changes to their inputs to valid output changes (as we'll see in
+\cref{lem:validity-binary-functions}). We'll later formalize this and define
+validity by recursion on types, that is, as a \emph{logical relation} (see
+\cref{sec:validity-logical}).
 
 % x -> u
 % y -> v
@@ -525,7 +533,9 @@ change from |f1 a1| to |f2 a2|.
 \subsubsection{Pointwise changes}
 % We can also describe the difference from function |f| to function
 % |f `oplus` df| as |nabla^f = \x -> f2 x `ominus` f1 x|.
-\pg{Our definition of function change might seem to defy intuitions. In particular, pointwise changes might appear more intuitive. We discuss them later, too.}
+\pg{Our definition of function change might seem to defy intuitions. In
+  particular, pointwise changes might appear more intuitive. We discuss them
+  later, too.}
 
 We can also decompose function changes into orthogonal (and
 possibly easier to understand) concepts.
@@ -649,21 +659,20 @@ changes.
 \label{sec:informal-derive}
 Next, we define differentiation and explain informally why it
 does what we want. We then give an example of how differentiation
-applies to our example. A short formal proof will follow soon in
+applies to our example. A formal proof will follow soon in
 \cref{sec:correct-derive}, justifying more formally why this
 definition is correct, but we proceed more gently.
 
 \begin{restatable}[Differentiation]{definition}{deriveDef}
-Differentiation is a term transformation defined as follows:
+Differentiation is the following term transformation:
 \deriveDefCore
 where |deriveConst(c)| defines differentiation on primitives and
 is provided by language plugins (see \cref{sec:lang-plugins}),
 and |dx| stands for a variable generated by prefixing |x|'s
 name with |d|, so that |derive(y) = dy| and so on.%
 \end{restatable}
-If both |x| and |dx| appear in |t|, capture issues arise in |derive(t)|. We
-ignore these issues for now, and discuss them in
-\cref{sec:derive-binding-issues}.
+If |t| contains occurrences of both (say) |x| and |dx|, capture issues arise in
+|derive(t)|. We defer these issues to \cref{sec:derive-binding-issues}.
 
 This transformation might seem deceptively simple. Indeed, pure
 $\lambda$-calculus only handles binding and higher-order
@@ -694,8 +703,8 @@ to any subterms of |u|, and sketch why it applies to |u| itself.
   evaluates to the change of the result of this function |u|,
   evaluated in a context binding |x| and its change |dx|. Then,
   because of how function changes are defined, the change of |u|
-  is the change of |t| abstracted into a function of the
-  \emph{base input} |x| and its change |dx|, so |derive(u) = \x
+  is the change of output |t| as a function of the
+  \emph{base input} |x| and its change |dx|, that is |derive(u) = \x
   dx -> derive(t)|.
 \item if |u = s t|, then |s| is a function. Assume for
   simplicity that |u| is a closed term. Then |derive(s)|
@@ -805,8 +814,8 @@ program. In the above example, if we don't inline derivatives and
 use $\beta$-reduction to simplify programs, |derive(sum (merge xs
 ys))| is just |dsum (merge xs ys) (derive(merge xs ys))|. A
 direct execution of this program will compute |merge xs ys|,
-taking time linear in the base inputs. \pg{Point out this is
-  self-maintainable!}
+taking time linear in the base inputs.%
+\pg{Point out this is self-maintainable!}
 
 \section{Chapter conclusion}
 \pg{TODO: add}
