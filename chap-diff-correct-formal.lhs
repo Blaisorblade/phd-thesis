@@ -92,27 +92,24 @@ on naturals.\pg{Re-revise.}%
 \end{typing}
 \end{definition}
 
-Compared to validity for integers, validity for naturals requires the
-destination |v1 + dv| to be again a natural. For instance, given source |v1 =
-1|, change |dv = -2| is valid (with destination |v2 = -1|) only on integers, not
-on naturals.\pg{Re-revise.}%
-% \footnote{For convenience we're implicitly identifying naturals with
-%   non-negative integers, ignoring the isomorphism between them.}
-
 Intuitively, we can think of a valid change from |v1| to |v2| as a graph
 \emph{edge} from |v1| to |v2|, so we'll often use graph terminology when
 discussing changes. This intuition is robust and can be made fully
-precise.\pg{This is in Yufei Cai's PhD thesis, how to say it?} More
-specifically, a basic change structure on |V| can be seen as a directed
-multigraph, having as vertexes the elements of |V|, and as edges from |v1| to
-|v2| the valid changes |dv| from |v1| to |v2|. This is a multigraph because our
-definition allows multiple edges between |v1| and |v2|.
+precise.\footnote{See for instance Robert Atkey's blog post~\citep{Atkey2015ILC}
+  or Yufei Cai's PhD thesis~\citep{CaiPhD}.}
+More specifically, a basic change structure on |V| can
+be seen as a directed multigraph, having as vertexes the elements of |V|, and as
+edges from |v1| to |v2| the valid changes |dv| from |v1| to |v2|. This is a
+multigraph because our definition allows multiple edges between |v1| and |v2|.
 
-Technically, a change |dv| can be valid from |v1| to |v2| and from |v3| to |v4|.
-Hence we'll always quantify theorems over valid changes |dv| with their sources |v1| and
-destination |v2|, using the following notation.%
-\footnote{If you prefer, you can tag a change with its source and
-  destination. Or you can regard the whole triple |(v1, dv, v2)| as a change.
+A change |dv| can be valid from |v1| to |v2| and from |v3| to |v4|, but we'll
+still want to talk about \emph{the} source and \emph{the} destination of a
+change. When we talk about a change |dv| valid from |v1| to |v2|, value |v1| is
+|dv|'s source and |v2| is |dv|'s destination. Hence we'll always quantify
+theorems over valid changes |dv| with their sources |v1| and destination |v2|,
+using the following notation.%
+\footnote{If you prefer, you can tag a change with its source and destination by
+  using a triple, and regard the whole triple |(v1, dv, v2)| as a change.
   Mathematically, this gives the correct results, but we'll typically not use
   such triples as changes in programs for performance reasons.}
 \begin{notation}
