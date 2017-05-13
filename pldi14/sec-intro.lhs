@@ -33,145 +33,25 @@ We will summarize this section in \cref{fig:change-structures};
 readers might want to jump there for the definitions. However, we
 first build up to those definitions.
 
-% \section{Basic change structures}
-% First, we generalize the concept of changes. For each type |tau|
-% we have defined notions of change type and of valid changes; but
-% these notions can be defined for arbitrary sets.
-
-% \begin{definition}
-%   \label{def:bchs}
-%   A basic change structure for set |V| is given by defining:
-%   \begin{subdefinition}
-%   \item a change set |Dt^V|
-%   \item a ternary relation called validity among |V|, |Dt^V| and
-%     |V|. If |v1, v2 `elem` V| and |dv `elem` DV|, and this relation holds, we write
-%     |fromto V v1 dv v2| and say that |dv| is a valid change from |v1| to |v2|.
-%   \end{subdefinition}
-% \end{definition}
-
-% We have already given the ingredients to define two families of basic change structures,
-% a family for types and one for contexts:
-% \begin{definition}
-%   \label{def:bchs-types}
-%   To each type |tau| we associate a basic change structure for
-%   set |eval(tau)|; we do so by taking |eval(Dt^tau)| as change
-%   set and by reusing validity as previously defined. We keep
-%   writing |fromto tau v1 dv v2| rather than |fromto (eval(tau)) v1 dv v2|.
-% \end{definition}
-% \begin{definition}
-%   \label{def:bchs-contexts}
-%   To each context |Gamma| we associate a basic change
-%   structure for set |eval(Gamma)|; we do so by taking
-%   |eval(Dt^Gamma)| as change set and by reusing validity as
-%   previously defined. We keep writing |fromto Gamma rho1 drho rho2|
-%   rather than |fromto (eval(Gamma)) rho1 drho rho2|.
-% \end{definition}
-% Moreover, we required that language plugins must define change
-% types and validity for base types
-% (\cref{req:base-change-types,req:base-validity}). Equivalently we
-% can require that plugins define basic change structures on all
-% base types:
-% \begin{restatable}[Basic change structures on base
-%   types]{requirement}{baseBasicChangeStructures}
-%   \label{req:base-basic-change-structures}
-%   To each base type |iota| is associated a basic change structure
-%   on |eval(iota)|.
-% \end{restatable}
-
-Basic change structures generalize validity and change sets, so
-we can talk about a change set |Dt^V| for an arbitrary set |V|,
-not just for the semantics of a type (|V = eval(tau)|) or the
-semantics of a context (|V = eval(Gamma)|).
-%
-In particular, we can define a basic change structure for any
-function space |A -> B| as long as we have basic change
-structures for |A| and |B|.
-
-\pg{After I turn ``correct change'' into ``derivative'', revise
-  this again.}
-%
-In particular, we obtain a basic change structure on |eval(Gamma)
--> eval(tau)| for any |Gamma, tau|. After a new definition, we
-can restate correctness of differentiation using this new basic
-change structure.
-
-\begin{definition}[Incremental semantics]
-  \label{def:inc-semantics}
-  We define the \emph{incremental semantics} of a well-typed term
-  |Gamma /- t : tau| in terms of differentiation as:
-  \[|evalInc t = (\rho1 drho -> eval(derive t) drho) : eval(Gamma)
-    -> eval(Dt^Gamma) -> eval(Dt^tau)|.\]
-\end{definition}
-
-The incremental semantics of a term |evalInc t| is a function
-change for |eval t|.
-The definition of incremental semantics might seem surprising,
-because function change |\rho1 drho -> eval(derive(t)) drho|
-appears to ignore the argument for |rho1|. But this is just an
-artifact: If you take a valid change |drho| from |rho1| to
-|rho2|, then |drho| extends |rho1|, so we can safely ignore
-|rho1|.
-
-\begin{theorem}[|evalInc t| is a valid change from |eval t| to |eval t|]
-  \label{thm:derive-correct-2}
-  If |Gamma /- t : tau|, then |evalInc(t)| is a valid change from
-  |eval t| to |eval t|:
-  \[
-    |fromto (eval Gamma -> eval tau) (eval t) (evalInc t) (eval t)|
-  \]
-\end{theorem}
-
-\begin{proof}
-  By expanding \cref{def:basic-change-structure-funs,def:inc-semantics}
-  one can verify this is just a restatement of \cref{thm:derive-correct}.
-\end{proof}
-
-The notion of basic change structure is somewhat weak, since we
-place no constraints on validity, but we are going to build on it
-a more interesting notion of \emph{change structure}, which adds
-operations including |`oplus`| and requirements on them.
+% The notion of basic change structure is somewhat weak, since we
+% place no constraints on validity, but we are going to build on it
+% a more interesting notion of \emph{change structure}, which adds
+% operations including |`oplus`| and requirements on them.
 
 As anticipated, we use changes to generalize the calculus of
 finite differences from groups (see
 \cref{sec:generalize-fin-diff}). We'll later see how change
 structures generalize groups.
 
-Moreover, now that we defined basic change structures, we can
-already talk about a set |S| with different basic change
-structures defined on it, and about ways to create basic change
-structures.
-
-For instance, for any set |V| we can talk about \emph{replacement
-  changes} on |V|: a replacement change |dv = !u| for a value |v
-: V| simply specifies directly a new value |u : V|, so that
-|fromto V v (! u) u|. We read |!| as the ``bang'' operator. A
-basic change structure can decide to use only replacement changes
-(which might be appropriate for primitive types with values of
-constant size), or to make |Dt^V| a sum type allowing both
-replacement changes and other ways to describe a change (as long
-as we're using a language plugin that adds sum types).
-
 But before defining |`oplus`|, we need to introduce a few more
 concepts, as we do next.
-
-% including |`oplus`|
 % but also |nilc| and |`ominus`| and
 
 \section{Change structures, informally}
+\pg{Move after change structures and drop parts made redundant.}
 \subsection{Nil changes}
+\pg{Change structures make this whole section redundant.}
 \label{sec:nil-changes-intro}
-Some valid changes have the same value |v| both as source and as
-destination. They are \emph{nil changes}:
-\begin{definition}[Nil changes]
-  A change |dv : Dt^V| is a \emph{nil change} for a value |v : V|
-  if it is a valid change from |v| to itself: |fromto V v dv v|.
-\end{definition}
-
-For instance, |0| is a nil change for any integer number |n|.
-However, in general a change might be nil for an element but not
-for another. For instance, the replacement change |!6| is a nil
-change on |6| but not on |5|.
-
 When we define change structures, each element is going to be
 associated to at least one nil change, as we're going to show later:
 \begin{restatable}[Existence of nil changes]{lemma}{nilChangesExist}
@@ -227,7 +107,7 @@ structural recursion on |rho| as:
 \end{code}
 Then we can see that |nil rho| is indeed a nil change for |rho|,
 that is, |fromto Gamma rho (nil rho) rho|.
-\item We have seen in \cref{thm:derive-correct-2} that, whenever
+\item We have seen in \cref{thm:derive-correct} that, whenever
   |Gamma /- t : tau|, |eval t| has nil change |evalInc t|.
   Moreover, if we have an appropriate nil environment change
   |fromto Gamma rho drho rho| (which we often do, as discussed
@@ -871,9 +751,11 @@ As a summary of definitions on types, we show that:
 %   `ocompose` : (v1 : V) -> {v2 v3 : V} -> (dv1 : Dt2 v1 v2) -> (dv2 : Dt2 v2 v3) -> Dt2 v1 v3
 % \end{code}
 
-\subsection{Equivalent definitions of change validity}
-\pg{Correct the claim of equivalence, that's not quite true I
-  think.}
+\subsection{Alternative definitions of change validity}
+\label{sec:alt-change-validity}
+
+\pg{Correct the claim of equivalence, that's false (and we
+  already correct it later).}
 
 In this section we compare our \emph{new-style} formalization
 with the one we and others used in our \emph{old-style}
