@@ -195,9 +195,10 @@
 %        in   derive(t2)
 
 % \begin{code}
-%   derive(\x -> t)   = \x dx -> derive(t)
-%   derive(s t)       = derive(s) t (derive(t))
-%   derive(x)         = dx
-%   derive(c)         = deriveConst(c)
+% derive(\(x : sigma) -> t))  = \(x : sigma) (dx : Dt^sigma) -> derive(t)
+% derive(s t)                 = derive(s) t (derive(t))
+% derive(x)                   = dx
+% derive(c)                   = deriveConst(c)
 % \end{code}
+
 %endif
