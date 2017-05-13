@@ -639,36 +639,35 @@ and then redo the proof in more detail to make the proof easier to follow.
 \begin{proof}
   By induction on typing derivation |Gamma /- t : tau|.
   \begin{itemize}
-  \item Case |Gamma /- x : tau|. The thesis is that |derive(x)|
-    is a correct change for |x|, that is |fromto tau (eval(x)
-    rho1) (eval(derive(x)) drho) (eval(x) rho2)|. We claim the
-    correct change for |x| is |dx|, hence define |derive(x) =
-    dx|. Indeed, |drho| is a valid environment change
-    from |rho1| to |rho2|, so |eval(dx) drho| is a valid change
-    from |eval(x) rho1| to |eval(x) rho2|, as required by our
-    thesis.
+  \item Case |Gamma /- x : tau|. The thesis is that |eval(derive(x))|
+    is a derivative for |eval(x)|, that is |fromto tau (eval(x)
+    rho1) (eval(derive(x)) drho) (eval(x) rho2)|.
+    Since |drho| is a valid environment change
+    from |rho1| to |rho2|, |eval(dx) drho| is a valid change
+    from |eval(x) rho1| to |eval(x) rho2|. Hence, defining |derive(x) =
+    dx| satisfies our thesis.
   \item Case |Gamma /- s t : tau|.
     %
-    The thesis is that |derive(s t)| is a correct change for |s t|, that is
+    The thesis is that |eval(derive(s t))| is a derivative for |eval(s t)|, that is
     |fromto tau (eval(s t) rho1) (eval(derive(s t)) drho) (eval(s t) rho2)|.
     %
     By inversion of typing, there is some type |sigma| such that
     |Gamma /- s : sigma -> tau| and |Gamma /- t : sigma|.
 
     To prove the thesis, in short, you can apply the inductive
-    hypothesis to |t| and |s| on the same |rho1, drho, rho2|,
-    obtaining respectively that |derive t| and |derive s|
-    are correct changes for |s| and |t|. In particular, |derive s|
+    hypothesis to |s| and |t|,
+    obtaining respectively that |eval(derive s)| and |eval(derive t)|
+    are derivatives for |eval(s)| and |eval(t)|. In particular, |eval(derive s)|
     evaluates to a validity-preserving function change.
     Term |derive (s t)|, that is |(derive s) t (derive t)|, applies
-    validity-preserving function |derive s| to |t| and valid
-    input change |derive t|, and this produces a correct change for
+    validity-preserving function |derive s| to valid
+    input change |derive t|, and this produces a valid change for
     |s t| as required.
 
-    In detail, our thesis is
+    In detail, our thesis is that for all |fromto Gamma rho1 drho rho2| we have
     \[|fromto tau (eval(s t) rho1) (eval(derive(s t)) drho) (eval(s t) rho2)|,\]
     %
-    where |eval(s t) rho = (eval(s) rho) (eval(t) rho)| (for any |rho : eval(Gamma)|) and
+    where |eval(s t) rho = (eval(s) rho) (eval(t) rho)| and
     \begin{equational}
       \begin{code}
    eval(derive(s t)) drho
@@ -683,7 +682,7 @@ and then redo the proof in more detail to make the proof easier to follow.
     eval(Gamma)|, and |t| can be typed in context |Gamma|.
 
     Our thesis becomes
-    \[|fromto tau ((eval(s) rho1) (eval(t) rho1)) ((eval(derive(s)) drho) (eval(t) rho1) (eval(derive(t)) drho)) ((eval(s) rho2) (eval(t) rho2))|.\]
+    \[|fromto tau (eval s rho1 (eval t rho1)) (eval(derive s) drho (eval t rho1) (eval(derive t) drho)) (eval s rho2 (eval t rho2))|.\]
 
     By the inductive
     hypothesis on |s| and |t| we have
@@ -691,69 +690,83 @@ and then redo the proof in more detail to make the proof easier to follow.
       |fromto (sigma -> tau) (eval(s) rho1) (eval(derive(s)) drho) (eval(s) rho2)| \\
       |fromto sigma (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.
     \end{gather*}
-    Since |s| has function type, its validity means:
-\begin{align*}
-  |fromto (sigma -> tau) (^&^ eval(s) rho1) (eval(derive(s)) drho) (eval(s) rho2)|
-  =\\
-    &|forall a1 a2 : eval(sigma), da : eval(Dt ^ sigma)|\\
-  &\text{ if }|fromto (sigma) a1 da a2| \\
-  & \text{ then }
-    |fromto (tau) ((eval(s) rho1) a1) ((eval(derive(s)) drho) a1 da) ((eval(s) rho2) a2)|
-\end{align*}
-Instantiating in this statement the hypothesis |fromto (sigma) a1 da a2| by |fromto sigma (eval(t)
-rho1) (eval(derive(t)) drho) (eval(t) rho2)| (and |a1, da, a2| as needed) gives the thesis.
+    Since |eval(s)| is a function, its validity
+    means
+    \[|forall (fromto sigma a1 da a2)^^ . fromto (tau) (eval s rho1 a1) (eval(derive s) drho a1 da) (eval s rho2 a2)|.\]
+
+    Instantiating in this statement the hypothesis |fromto sigma a1 da a2| by
+    |fromto sigma (eval t rho1) (eval(derive t) drho) (eval t rho2)| gives the
+    thesis.
 
   \item Case |Gamma /- \x -> t : sigma -> tau|. By inversion of typing,
     |Gamma , x : sigma /- t : tau|.
+    By typing of |derive(param)| you can show that
+    \[|Dt^Gamma, x : sigma, dx : Dt^sigma /- derive(t): Dt^tau|.\]
 
-    In short, our thesis is that |derive(\x -> t)| is a correct
-    change for |\x -> t|. By induction on |t| we know that
-    |derive(t)| is a correct change for |t|.
-    %
-    We show that our thesis, that is correctness of |derive(\x ->
-    t)|, is equivalent to correctness of |derive(t)|, because we
-    pick |derive(\x -> t) = \x dx -> derive(t)|. By
-    typing of |derive(param)| you can show that |Dt^Gamma, x :
-    sigma, dx : Dt^sigma /- derive(t): Dt^tau|. Now, |eval(\x dx
-    -> derive(t))| is just a curried version of
-    |eval(derive(t))|; to wit, observe their meta-level types:
-    \begin{align*}
-    |eval(derive(t)) : eval(Dt ^ Gamma , x : sigma,
-      dx : Dt^sigma) -> eval(Dt^tau)| \\
-      |eval(\x dx -> derive(t)) : eval(Dt^Gamma)
-      -> eval(sigma) -> eval(Dt^sigma) -> eval(Dt^tau)|
-    \end{align*}
-    Curried functions have equivalent behavior, so both ones give
-    a correct change for |t|, going from |eval(t) rho1| to |eval(t)
-    rho2|, once we apply them to inputs for context
-    |Gamma , x : sigma| and corresponding valid changes.
+    % In short, our thesis is that |eval(derive(\x -> t))| is a derivative
+    % for |eval(\x -> t)|.
+    % Because we pick |derive(\x -> t) = \x dx -> derive(t)|, and because of how validity is defined on functions,
+    % our thesis is equivalent that |eval(derive t)| must be
+    % By induction on |t| we know that
+    % |eval(derive(t))| is a derivative for |eval(t)|.
+    % %
+    % We show that our thesis, that is correctness of |derive(\x ->
+    % t)|, is equivalent to correctness of |derive(t)|, because we
+    % pick |derive(\x -> t) = \x dx -> derive(t)|.
 
-    More in detail, we need to deduce the thesis that |derive(\x
-    -> t)| is a correct change for |\x -> t|.
-    %
-    By the definition of correctness, the thesis is that for all
-    |drho, rho1, rho2| such that |fromto (Gamma, x : sigma) rho1
-    drho rho2| we have
-    \[|fromto (sigma -> tau) (eval(\x -> t) rho1) (eval(derive(\x -> t)) drho) (eval(\x -> t) rho2)|\]
-%
-    Simplifying, we get
+    In short, our thesis is that |evalInc(\x -> t) = \rho1 drho -> eval(\x dx -> derive(t)) drho| is a
+    derivative of |eval(\x -> t)|. After a few simplifications, our thesis reduces to
+    \[|fromto tau (eval t (rho1, x = a1))
+      (eval(derive t) (drho, x = a1, dx = da))
+      (eval t (rho2, x = a2))|\]
+    for all |fromto Gamma rho1 drho rho2| and |fromto sigma a1 da a2|.
+    But then, the thesis is simply that |evalInc t| is the derivative of |eval
+    t|, which is true by inductive hypothesis.
+
+    % Now, |eval(\x
+    % dx -> derive(t)) = \drho a da -> eval(derive(t)) (drho, x = a, dx = da)| is just a curried version of |eval(derive(t))|; to wit,
+    % observe their meta-level types: \pg{not because of the types.}
+    % \begin{align*}
+    % |eval(derive(t)) : eval(Dt ^ Gamma , x : sigma,
+    %   dx : Dt^sigma) -> eval(Dt^tau)| \\
+    %   |eval(\x dx -> derive(t)) : eval(Dt^Gamma)
+    %   -> eval(sigma) -> eval(Dt^sigma) -> eval(Dt^tau)|
+    % \end{align*}
+    % Curried functions have equivalent behavior, so both ones give a derivative
+    % for |eval t|, once we apply them to inputs for context |Gamma , x : sigma|
+    % and corresponding valid changes.
+
+    More in detail, our thesis is that |evalInc(\x -> t)| is a derivative
+    for |eval(\x -> t)|, that is
+    \begin{multline}
+      \label{eq:der-corr-th1}
+      |forall (fromto Gamma rho1 drho rho2) . ^^^ fromto (sigma -> tau) (eval(\x -> t) rho1) (eval(derive(\x -> t)) drho) (eval(\x -> t) rho2)|
+    \end{multline}
+  %
+    By simplifying, the thesis \cref{eq:der-corr-th1} becomes
     % We can simplify the hypothesis |fromto (Gamma, x : sigma)
     % rho1 drho rho2| using the definition of validity on
     % environments. This
-    \begin{multline*}
-      |fromto (sigma -> tau) (^^^(\a1 -> eval(t) (rho1, x = a1))) (\a1 da -> eval(derive(t)) (drho, x = a1, dx = da)) ((\a2 -> eval(t) (rho2, x = a2)))|.
-    \end{multline*}
+    \begin{multline}
+      \label{eq:der-corr-th2}
+      |forall (fromto Gamma rho1 drho rho2) . ^^^ fromto (sigma -> tau) (^^^(\a1 -> eval(t) (rho1, x = a1))) (\a1 da -> eval(derive(t)) (drho, x = a1, dx = da)) ((\a2 -> eval(t) (rho2, x = a2)))|.
+    \end{multline}
     %
-    By definition of validity of function type, the thesis means
-    that for any |a1, a2, da| such that |fromto sigma a1 da a2|,
-    we must have
-    \[|fromto tau (eval(t) (rho1, x = a1)) (eval(derive(t))
-      (drho, x = a1, dx = da)) (eval(t) (rho2, x = a2))|.\]
+    By definition of validity of function type, the thesis
+    \cref{eq:der-corr-th2} becomes
+    \begin{multline}
+      \label{eq:der-corr-th3}
+      |forall (fromto Gamma rho1 drho rho2). ^^ forall (fromto sigma a1 da a2). ^^^
+      fromto tau (^^^eval t (rho1, x = a1))
+      (eval(derive t) (drho, x = a1, dx = da))
+      (eval t (rho2, x = a2))|.
+    \end{multline}
 
-    To prove the rewritten thesis, take the inductive hypothesis on |t|. Since
-    appropriate environment for |t| must match typing context
-    |Gamma , x : sigma|, we know by the inductive hypothesis that
-    if
+    To prove the rewritten thesis \cref{eq:der-corr-th3}, take the inductive hypothesis on |t|: it says
+    that |eval(derive t)| is a derivative for |eval t|, so |eval(derive t)| maps
+    valid environment changes on |Gamma , x : sigma| to valid changes on |tau|.
+    But by inversion of the validity judgment,
+    all valid environment changes on |Gamma , x : sigma| can be written as
     %
     \[
       \validfromto{\Extend{x}{\sigma}}
@@ -761,20 +774,22 @@ rho1) (eval(derive(t)) drho) (eval(t) rho2)| (and |a1, da, a2| as needed) gives 
       {\ExtendEnv*[\ExtendEnv[\D\rho]{x}{a_1}]{dx}{\D{a}}}
       {\ExtendEnv*[\rho_2]{x}{a_2}},\]
     %
-    that is |fromto Gamma rho1
-    drho rho2| and |fromto sigma a1 da a2|, then we have
-    \[|fromto tau (eval(t) (rho1, x = a1)) (eval(derive(t))
-      (drho, x = a1, dx = da)) (eval(t) (rho2, x = a2))|.\]
-
-    If we pick the same contexts and context change |fromto Gamma
-    rho1 drho rho2|, the inductive hypothesis reduces to the
-    thesis.
+    for valid changes |fromto Gamma rho1
+    drho rho2| and |fromto sigma a1 da a2|.
+    So, the inductive hypothesis is that
+    \begin{multline}
+      |forall (fromto Gamma rho1 drho rho2). ^^ forall (fromto sigma a1 da a2). ^^^
+      fromto tau (^^^eval t (rho1, x = a1))
+      (eval(derive t) (drho, x = a1, dx = da))
+      (eval t (rho2, x = a2))|.
+    \end{multline}
+    But that is exactly our thesis \cref{eq:der-corr-th3}, so we're done!
   \item Case |Gamma /- c : tau|. In essence, since weakening
     preserves meaning, we can rewrite the thesis to match
     \cref{req:correct-derive-const}.
 
     In more detail, the thesis is that |deriveConst(c)| is a
-    correct change for |c|, that is, if |fromto Gamma rho1 drho
+    derivative for |c|, that is, if |fromto Gamma rho1 drho
     rho2| then |fromto tau (eval(c) rho1) (eval(derive(c)) drho)
     (eval(c) rho2)|. Since constants don't depend on the
     environment and weakening preserves meaning
