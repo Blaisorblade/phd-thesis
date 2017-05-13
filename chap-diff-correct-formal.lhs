@@ -186,21 +186,23 @@ what their validity means for curried binary functions |f : A -> B -> C|. We
 omit similar statements for higher arities, as they add no new ideas.
 \begin{lemma}[Validity on |A -> B -> C|]
   \label{lem:validity-binary-functions}
-  Applying a function change |fromto (A -> B -> C) f1 df f2| to valid input
-  changes |fromto A a1 da a2| and |fromto B b1 db b2| gives a valid output
-  change
+  For any basic change structures |bchs(A)|, |bchs(B)| and |bchs(C)|, function
+  change |df : Dt^(A -> B -> C)| is valid from |f1| to |f2| (where |f1, f2 : A
+  -> B|) (that is, |fromto (A -> B -> C) f1 df f2|) \emph{if and only if}
+  applying |df| to valid input changes |fromto A a1 da a2| and |fromto B b1 db
+  b2| gives a valid output change
   \[|fromto C (f a1 b1) (df a1 da b1 db) (f a2 b2)|\]
-  for any basic change structures |bchs(A)|, |bchs(B)| and |bchs(C)|.
 \end{lemma}
 \begin{proof}
   Follows from unrolling the definition of function validity of |df| twice.
 
-  That is: valid function change |fromto (A -> (B -> C)) f1 df f2| maps valid
-  input change |fromto A a1 da a2| to valid output change
+  That is: function change |df| is valid (|fromto (A -> (B -> C)) f1 df f2|) if
+  and only if it maps valid input change |fromto A a1 da a2| to valid output
+  change
   \[|fromto (B -> C) (f1 a1) (df a1 da) (f2 a2)|.
   \]
-  Valid change |df a1 da| is in turn a function change, that maps valid input
-  change |fromto B b1 db b2| to
+  In turn, |df a1 da| is a function change, that is valid if and only if
+  it maps valid input change |fromto B b1 db b2| to
   \[|fromto C (f a1 b1) (df a1 da b1 db) (f a2 b2)|
   \]
   as required by the thesis.
@@ -224,33 +226,36 @@ following definition.
   of |f| if |df| is a nil change of |f| (|fromto (A -> B) f df f|).
 \end{definition}
 
-Applying derivatives to nil changes gives again nil changes.
+Applying derivatives to nil changes gives again nil changes. This fact is useful
+when reasoning on derivatives. The proof is a useful exercise on using validity.
 \begin{lemma}[Derivatives preserve nil changes]
   \label{lem:derivatives-nil-changes}
-
-  Applying a derivative |fromto (A -> B) f df f| to a nil change |fromto A a da
-  a| gives a nil change
+  For any basic change structures |bchs(A)| and |bchs(B)|,
+  function change |df : Dt^(A -> B)| is a derivative of |f : A -> B| (|fromto (A
+  -> B) f df f|) if and only if applying |df|
+  to an arbitrary input nil change |fromto A a da a| gives a nil change
   %
-  \[|fromto B (f a) (df a da) (f a)|,\]
-  %
-  for any basic change structures |bchs(A)| and |bchs(B)|.
+  \[|fromto B (f a) (df a da) (f a)|.\]
 \end{lemma}
 \begin{proof}
-  Follows from validity of |df| and |da|.
+  Just rewrite the definition of derivatives (\cref{def:derivative}) using the
+  definition of validity of |df|.
 
   In detail, by definition of validity for function changes
-  (\cref{def:basic-change-structure-funs}), from |fromto (A -> B) f1 df f2| and
-  |fromto A a1 da a2| follows |fromto B (f1 a1) (df a1 da) (f2 a2)|. But here
-  |f1 = f2 = f| and |a1 = a2 = a|, hence follows the thesis |fromto B (f a) (df
-  a da) (f a)|.
+  (\cref{def:basic-change-structure-funs}), |fromto (A -> B) f1 df f2| means
+  that from |fromto A a1 da a2| follows |fromto B (f1 a1) (df a1 da) (f2 a2)|.
+  Just substitute |f1 = f2 = f| and |a1 = a2 = a| to get the required
+  equivalence.
 \end{proof}
 
 Also derivatives of curried $n$-ary functions |f| preserve nil changes. We only
 state this formally for curried binary functions |f : A -> B -> C|; higher
 arities require no new ideas.
-\begin{lemma}[Derivatives preserve nil changes, |A -> B -> C| case]
+\begin{lemma}[Derivatives preserve nil changes on |A -> B -> C|]
   \label{lem:binary-derivatives-nil-changes}
-  Applying a derivative |fromto (A -> B -> C) f df f| to nil changes |fromto A a
+  Change |df : Dt^(A -> B -> C)| is a derivative of |f : A -> B -> C|
+  \emph{if and only if}
+  applying |df| to nil changes |fromto A a
   da a| and |fromto B b db b| gives a nil change
   \[|fromto C (f a b) (df a da b db) (f a b)|,\]
   %
@@ -261,9 +266,11 @@ arities require no new ideas.
   the thesis follows by applying twice the fact that derivatives preserve nil
   changes (\cref{lem:derivatives-nil-changes}).
 
-  Since derivatives preserve nil changes, |fromto (B -> C) (f a) (df a da) (f
+  In detail, since derivatives preserve nil changes, |df| is a derivative if and
+  only if for all |fromto A a da a| we have |fromto (B -> C) (f a) (df a da) (f
   a)|. But then, |df a da| is a nil change, that is a derivative, and since it
-  preserves nil changes we have |fromto C (f a b) (df a da b db) (f a b)|.
+  preserves nil changes, |df| is a derivative if and only if for all |fromto A a
+  da a| and |fromto B b db b| we have |fromto C (f a b) (df a da b db) (f a b)|.
 \end{proof}
 
 \subsection{Basic change structures on types}
