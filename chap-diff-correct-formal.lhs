@@ -30,14 +30,11 @@ derivations.
 % differentiation on higher-order programs.
 \section{Changes and validity}
 \label{sec:changes-formally}
-In this section we introduce formally (a) a description of
-changes and operations on changes; (b) a definition of which
-changes are valid. We have already introduced informally in
-\cref{ch:static-diff-intro} the key notions and how they
-fit together. We next define the same notions formally, and
-deduce their key properties. We collect the complete definitions
-and crucial facts in \cref{fig:differentiation}. Language plugins
-extend these definitions for base types and constants they
+In this section we introduce formally (a) a description of changes; (b) a
+definition of which changes are valid. We have already introduced informally in
+\cref{ch:static-diff-intro} these notions and how they fit together. We next
+define the same notions formally, and deduce their key properties.
+Language plugins extend these definitions for base types and constants that they
 provide.
 
 To formalize the notion of changes for elements of a set |V|, we define the
@@ -65,9 +62,18 @@ notion of \emph{basic change structure} on |V|.
   \end{subdefinition}
 \end{definition}
 
+\begin{example}
 In \cref{ex:valid-bag-int,ex:invalid-nat} we exemplified
 informally change types and validity on naturals, integers and
-bags. We define formally basic change structures on naturals and integers. \pg{revise if we add more examples.}
+bags.\pg{revise if we add more examples.}
+We define formally basic change structures on naturals and integers.
+Compared to validity for integers, validity for naturals ensures that the
+destination |v1 + dv| is again a natural. For instance, given source |v1 =
+1|, change |dv = -2| is valid (with destination |v2 = -1|) only on integers, not
+on naturals.\pg{Re-revise.}%
+% \footnote{For convenience we're implicitly identifying naturals with
+%   non-negative integers, ignoring the isomorphism between them.}
+\end{example}
 \begin{definition}[Basic change structure on integers]
   Basic change structure |bchs(Int)| on integers has integers as changes
   (|Dt^Int=Int|) and the following validity judgment.
@@ -120,17 +126,17 @@ destination |v2|, using the following notation.%
 \end{notation}
 
 We can have multiple basic change structures on the same set.
-\begin{example}
-For instance, for any set |V| we can talk about \emph{replacement
-  changes} on |V|: a replacement change |dv = !v2| for a value |v1
-: V| simply specifies directly a new value |v2 : V|, so that
-|fromto V v1 (! v2) v2|. We read |!| as the ``bang'' operator.
-\end{example}
+\begin{example}[Replacement changes]
+For instance, for any set |V| we can talk about \emph{replacement changes} on
+|V|: a replacement change |dv = !v2| for a value |v1 : V| simply specifies
+directly a new value |v2 : V|, so that |fromto V v1 (! v2) v2|. We read |!| as
+the ``bang'' operator.
 
-A basic change structure can decide to use only replacement changes (which might
+A basic change structure can decide to use only replacement changes (which can
 be appropriate for primitive types with values of constant size), or to make
 |Dt^V| a sum type allowing both replacement changes and other ways to describe a
 change (as long as we're using a language plugin that adds sum types).
+\end{example}
 
 \paragraph{Nil changes}
 Just like integers have a null element |0|, among changes there can be nil
