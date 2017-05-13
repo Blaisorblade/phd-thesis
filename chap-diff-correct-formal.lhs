@@ -7,9 +7,14 @@
 \input{pldi14/fig-differentiation}
 
 To support incrementalization, in this chapter we introduce differentiation and
-state and prove its correctness, making our previous discussion precise. In
-\cref{ch:change-theory} we study consequences of correctness and change
-operations.
+state and prove its correctness, making our previous discussion precise. We
+formalize what are valid changes, what are derivatives, and we show how to
+produce derivatives using |derive(param)|.
+%
+Crucial definitions or derived facts are summarized in \cref{fig:differentiation}.
+%
+Later, in \cref{ch:change-theory} we study consequences of correctness and
+change operations.
 
 All definitions and proofs in this and next chapter is mechanized in Agda,
 except where otherwise indicated. We typically include full proofs anyway,
