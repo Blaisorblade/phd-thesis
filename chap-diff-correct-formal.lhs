@@ -300,11 +300,21 @@ function types |sigma -> tau|, we simply construct basic change structures
 
 Crucially, for each type |tau| we can define a type |Dt^tau| of changes, that we
 call \emph{change type}, such that the change set |Dt^eval(tau)| is just the
-domain |eval(Dt^tau)| associated to change type |Dt^tau|.
+domain |eval(Dt^tau)| associated to change type |Dt^tau|: |Dt^eval(tau) =
+eval(Dt^tau)|. This equation allows writing change terms that evaluate directly
+to change values.%
+\footnote{Instead, in earlier proofs~\citep{CaiEtAl2014ILC} the values of change
+  terms were not change values, but had to be related to change values through a
+  logical relation; see \cref{sec:alt-change-validity}.}
 
 \begin{definition}[Change types]
-  The change type |Dt^tau| of a type |tau| is defined in
-  \cref{fig:change-types}.
+  \label{def:change-types}
+  The change type |Dt^tau| of a type |tau| is defined as follows:
+  % in \cref{fig:change-types}.
+\begin{align*}
+  |Dt ^ iota| &= \ldots\\
+  |Dt ^ (sigma -> tau)| &= |sigma -> Dt ^ sigma -> Dt ^ tau|
+\end{align*}
 \end{definition}
 \begin{lemma}[|Dt| and |eval(param)| commute on types]
   For each type |tau|, change set |Dt^eval(tau)| equals the domain of change
@@ -327,26 +337,30 @@ domain |eval(Dt^tau)| associated to change type |Dt^tau|.
 We refer to values of change types as \emph{change values} or just \emph{changes}.
 
 \begin{notation}
-  We write |bchs(tau)|, not |bchs(eval(tau))|, and |fromto tau v1 dv v2|, not
-  |fromto (eval tau) v1 dv v2|. We also write consistently |eval(Dt^tau)|, not
-  |Dt^eval(tau)|.
+  We write basic change structures for types |bchs(tau)|, not |bchs(eval(tau))|,
+  and |fromto tau v1 dv v2|, not |fromto (eval tau) v1 dv v2|. We also write
+  consistently |eval(Dt^tau)|, not |Dt^eval(tau)|.
 \end{notation}
 
 % We proceed in four steps: we (a) define a type |Dt^tau| of changes, that we call
 % \emph{change type}, (b) define a logical relation for validity that picks valid
 % changes out of all elements of change types (c) define a basic change structure
-% for each type (d) verify that the basic change structure on \pg{do it and *then*
+% on each type (d) verify that the basic change structure on \pg{do it and *then*
 %   summarize it.}
 
 %We can also give \emph{equivalent} definitions for changes directly on types.
 
-Next, we show an equivalent definition of validity directly by induction on
-types. That is, we define \emph{validity} as a ternary \emph{logical relation}
-relating a change with its \emph{source} and \emph{destination}. A typical
-logical relation constrains \emph{functions} to map related input to related
-outputs. In a twist, validity constrains \emph{function changes} to map related
-inputs to related outputs.
+\subsection{Validity as a logical relation}
+\label{sec:validity-logical}
+
+Next, we show an equivalent definition of validity for values of terms, directly
+by induction on types. It will be apparent that validity is a ternary
+\emph{logical} relation between a change, its source and
+destination. A typical logical relation constrains \emph{functions} to
+map related input to related outputs. In a twist, validity constrains
+\emph{function changes} to map related inputs to related outputs.
 \begin{definition}[Change validity]
+  \label{def:ch-validity}
 We say that |dv| is a (valid) change from |v1| to |v2| (on type |tau|), and write
 |fromto tau v1 dv v2|, if |dv : eval(Dt^tau)|, |v1, v2 :
 eval(tau)| and |dv| is a ``valid'' description of the difference
@@ -360,9 +374,22 @@ The key equations for function types are:
   |forall (fromto sigma a1 da a2) ^^ . ^^ fromto tau (f1 a1) (df a1 da) (f2 a2)|
 \end{align*}
 
+\begin{remark}
+  \label{rem:validity-logical-recursion}
+  We have kept repeating the idea that valid function changes map valid input
+  changes to valid output changes. As seen in
+  \cref{sec:higher-order-intro,lem:validity-binary-functions,lem:binary-derivatives-nil-changes},
+  such valid outputs can in turn be valid function changes. We'll see the same
+  idea at work in \cref{def:bchs-contexts-types}, in the correctness proof of
+  |derive(param)|.
 
-\pg{resume here and integrate this definition}
+  As we have finally seen in this section, this definition of validity can be
+  formalized as a logical relation, defined by induction on types. We'll later
+  take for granted the consequences of validity, togetherb with lemmas such as
+  \cref{lem:validity-binary-functions}.\pg{Re-revise.}
+\end{remark}
 
+\subsection{Change structures on typing contexts}
 To describe changes to the inputs of a term, we now also introduce change
 contexts |Dt^Gamma|, environment changes |drho : eval(Dt^Gamma)|, and validity
 for environment changes |fromto Gamma rho1 drho rho2|.
@@ -374,6 +401,7 @@ first define the shape of environment changes through
 \emph{change contexts}:
 
 \begin{definition}[Change contexts]
+  \label{def:change-contexts}
   For each context |Gamma| we define change context |Dt^Gamma| as
   follows:
 \begin{align*}
@@ -413,17 +441,17 @@ Then, we describe validity of environment changes via a judgment.
   drho rho2|.
 \end{notation}
 
-Finally, we define basic change structures on the semantics of terms. A term
-|Gamma /- t : tau| has semantics |eval(t)| living in function space |eval(Gamma)
--> eval(tau)|. On this function space we can associate a basic change structure.
-\begin{definition}%[Basic change structures for contexts and types]
-  \label{def:bchs-contexts-types}
-  To each context |Gamma| and type |tau| we associate a basic change structure
-  |bchs(Gamma) -> bchs(tau)|.
-\end{definition}
-
-Equipped with such a family of basic change structures, we can proceed to show
-correctness of differentiation.
+Finally, to state and prove correctness of differentiation, we are going to need
+to discuss function changes on term semantics. The semantics of a term |Gamma /-
+t : tau| is a function |eval(t)| from environments in |eval(Gamma)| to values in
+|eval(tau)|. To discuss changes to |eval t| we need a basic change structure on
+function space |eval(Gamma) -> eval(tau)|.
+\begin{lemma}%[Basic change structures for contexts and types]
+  \label{lem:bchs-contexts-types}
+  The construction of basic change structures on function spaces
+  (\cref{def:basic-change-structure-funs}) associates a basic change structure
+  |bchs(Gamma) -> bchs(tau)| to each context |Gamma| and type |tau|.
+\end{lemma}
 
 \section{Correctness of differentiation}
 \label{sec:correct-derive}
@@ -438,41 +466,85 @@ We previously sketched |derive(param)|'s invariant through
 %
 \sloganDerive*
 
-A bit more formally, the input of a term |Gamma /- t : tau| is an
-environment for |Gamma|. So evaluating |derive(t)| must map an
-environment change |drho| from |rho1| to |rho2| into a valid
-result change |eval(derive(t)) drho|, going from |eval(t) rho1|
-to |eval(t) rho2|.\footnote{If |tau| is a function type, |df =
-  eval(derive(t)) drho| accepts further inputs; since |df| must
-  be a valid function change, it will also map them to valid
-  outputs as required by our slogan.}
-\pg{Replace with derivative.}
-\pg{Define derivative earlier as a nil change.}
-\pg{Don't revise things TOO MUCH.}
-That is, |derive(t)| must be a \emph{derivative} for |t| as defined next:
-\begin{definition}[Derivative]
-  We say a term |Dt ^ Gamma /- dt : Dt^tau| is a correct change for term |Gamma
-  /- t : tau|, and write |correct dt t|, if |eval(dt)| is a derivative of
-  |eval(t)|, that is, a change from |eval(t)| to |eval(t)|, that is,
-  |eval(dt) drho| is a change from
-  |eval(t) rho1| to |eval(t) rho2| for all |fromto Gamma rho1 drho rho2|.
+After stating our slogan, we have learned how such valid output changes behave
+(\cref{rem:validity-logical-recursion}). Valid output changes can be in turn
+function changes, that map valid changes to \emph{their} inputs to valid changes
+to \emph{their} outputs, and so on---validity is defined to recurse over types.
+We are going to say, in essence, that |derive t| produces a valid function
+change from |t| to |t|.
+
+More formally, the input of a term |Gamma /- t : tau| is an environment for
+|Gamma|. So evaluating |derive(t)| must map an environment change |drho| from
+|rho1| to |rho2| into a valid result change |eval(derive(t)) drho|, going from
+|eval(t) rho1| to |eval(t) rho2|. In other words, function |evalInc t = \rho drho ->
+eval(derive t) drho| must be a \emph{nil change} for |eval t|, that is, a \emph{derivative} for |eval t|.
+We give a name to this function change, and state |derive(param)|'s correctness theorem.
+
+\begin{definition}[Incremental semantics]
+  \label{def:inc-semantics}
+  We define the \emph{incremental semantics} of a well-typed term
+  |Gamma /- t : tau| in terms of differentiation as:
+  \[|evalInc t = (\rho1 drho -> eval(derive t) drho) : eval(Gamma)
+    -> eval(Dt^Gamma) -> eval(Dt^tau)|.\]
 \end{definition}
-% In other words, |eval(dt)| must be a function that takes changes
-% |drho| from old to new inputs of |t|, and maps them to changes
-% from old to new outputs of |t|.
 
-% Next, we constrain |derive(t)|'s dynamic semantics, that is the
-% result of evaluating it.
-%
-% Recall that we'll define operator |`oplus`|, such that |v1
-% `oplus` dv = v2| holds whenever |dv| is a valid change between
-% |v1| and |v2|.
+\begin{restatable}[|derive(param)| is correct]{theorem}{deriveCorrect}
+  \label{thm:derive-correct}
+  Function |evalInc t| is a derivative of |eval t|. That is, if
+  |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
+  |fromto tau (eval(t) rho1) (eval(derive t) drho) (eval(t)
+  rho2)|.
+\end{restatable}
 
-At this point, our slogan becomes |derive(param)|'s correctness
-statement:
-  \deriveCorrect
+We defer the proof to \cref{sec:derive-correct-proof}.
 
-That theorem only makes sense if |derive(param)| has the right
+You might wonder why |evalInc t = \rho1 drho -> eval(derive(t)) drho| appears to
+ignore |rho1|. But for all |fromto Gamma rho1 drho rho2|, change environment
+|drho| extends |rho1|, which hence provides no further information. We are only
+interested in applying |evalInc t| to valid environment changes |drho|, so
+|evalInc t rho1 drho| can safely ignore |rho1|.
+
+\begin{remark}[Term derivatives]
+  In \cref{ch:static-diff-intro}, we suggested that |derive t| only produced a
+  derivative for closed terms, not for open ones. But |evalInc t = \rho drho ->
+  eval(derive t) drho| is \emph{always} a nil change and derivative of |eval t|
+  for any |Gamma /- t : tau|. There is no contradiction, because the
+  \emph{value} of |derive t| is |eval(derive t) drho|, which is only a nil
+  change if |drho| is a nil change as well. In particular, for closed terms
+  (|Gamma = emptyCtx|), |drho| must equal the empty environment |emptyRho|,
+  hence a nil change. If |tau| is a function type, |df = eval(derive t) drho|
+  accepts further inputs; since |df| must be a valid function change, it will
+  also map them to valid outputs as required by our \cref{slogan:derive}.
+  Finally, if |Gamma = emptyCtx| and |tau| is a function type, then |df = eval
+  (derive t) emptyRho| is a derivative of |f = eval t emptyRho|.
+
+  We summarize this remark with the following definition and corollary.
+\end{remark}
+\begin{definition}[Derivatives of terms]
+  For all closed terms of function type |/- t : sigma -> tau| we call |derive t| the (term) derivative of |t|.
+\end{definition}
+\begin{restatable}[Term derivatives evaluate to
+  derivatives]{corollary}{deriveCorrectClosed}
+  % |derive(param)| on closed terms gives derivatives
+  For all closed terms of function type |/- t : sigma -> tau|, function
+  |eval(derive t) emptyRho| is a derivative of |eval t emptyRho|.
+\end{restatable}
+\begin{proof}
+  Because |evalInc t| is a derivative (\cref{thm:derive-correct}), and applying
+  derivative |evalInc t| to nil change |emptyRho| gives a derivative
+  (\cref{lem:derivatives-nil-changes}).
+\end{proof}
+\begin{remark}
+  We typically talk \emph{a} derivative of a function value |f : A -> B|, not
+  \emph{the} derivative, since multiple different functions can satisfy the
+  specification of derivatives. We talk about \emph{the derivative} to refer to
+  a canonically chosen derivative. For terms and their semantics, the canonical
+  derivative the one produced by differentiation. For language primitives, the
+  canonical derivative is the one chosen by the language plugin under
+  consideration.
+\end{remark}
+
+\Cref{thm:derive-correct} only makes sense if |derive(param)| has the right
 static semantics:
 
 \begin{restatable}[Typing of |derive(param)|]{lemma}{deriveTyping}
@@ -509,32 +581,6 @@ We anticipate the proof of this corollary:
   because |`oplus`| agrees with validty (\cref{thm:valid-oplus}).
 \end{proof}
 
-% We will later also show change types
-% containing invalid changes.
-
-% % As we will see, change types contain changes that are not valid,
-% % yet |`oplus`| is typically defined also on invalid changes.
-
-% To fix this statement, we need to define
-% which changes are \emph{valid}.
-% Validity restricts
-% As we'll see, correctness of
-% differentiation requires changes to satisfy some invariants, but
-% change types contain changes that violate them.
-%
-% which are not encoded by change types
-% and are not checked by
-% |`oplus`|; to formalize these invariants, so that incremental
-% programs might rely on such invariants, we will introduce the
-% notion of \emph{validity}.
-% The above correctness statement does not require
-% input changes to be valid, so it does not hold. Moreover, it does
-% not claim that the output of differentiation gives a valid
-% change, so it is too weak to prove: if |s| is a subterm of |t|,
-% using this statement we do not know that |eval(derive(s)) drho|
-% evaluates to a valid change.
-%
-
 \subsection{Plugin requirements}
 Differentiation is extended by plugins on constants, so plugins
 must prove their extensions correct.
@@ -548,12 +594,15 @@ must prove their extensions correct.
 
 \begin{restatable}[Correctness of |deriveConst(param)|]{requirement}{deriveConstCorrect}
   \label{req:correct-derive-const}
-  For all |c| such that $\ConstTyping{c}{\tau}$, |deriveConst(c)|
-  is a correct change for |c|, that is, |fromto tau (evalConst c)
-  (eval(deriveConst(c)) emptyRho) (evalConst c)|.
+  For all $\ConstTyping{c}{\tau}$, |eval(deriveConst(c))| is a derivative for
+  |eval(c)|.
 \end{restatable}
+Since constants are typed in the empty context, and the only change for an empty environment is an empty environment, \cref{req:correct-derive-const} means that for all $\ConstTyping{c}{\tau}$ we have
+\[|fromto tau (eval c emptyRho) (eval(deriveConst c) emptyRho) (eval c
+  emptyRho)|.\]
 
 \subsection{Correctness proof}
+\label{sec:derive-correct-proof}
 We next recall |derive(param)|'s definition and prove it satisfies
 its correctness statement \cref{thm:derive-correct}.
 %After stating on |derive(param)|, we define |derive(param)| and prove the requirements hold.
