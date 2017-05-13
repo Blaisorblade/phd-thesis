@@ -664,6 +664,7 @@ applies to our example. A formal proof will follow soon in
 definition is correct, but we proceed more gently.
 
 \begin{restatable}[Differentiation]{definition}{deriveDef}
+  \label{def:derive}
 Differentiation is the following term transformation:
 \deriveDefCore
 where |deriveConst(c)| defines differentiation on primitives and
