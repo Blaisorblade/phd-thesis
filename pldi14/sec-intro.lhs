@@ -33,50 +33,50 @@ We will summarize this section in \cref{fig:change-structures};
 readers might want to jump there for the definitions. However, we
 first build up to those definitions.
 
-\section{Basic change structures}
-First, we generalize the concept of changes. For each type |tau|
-we have defined notions of change type and of valid changes; but
-these notions can be defined for arbitrary sets.
+% \section{Basic change structures}
+% First, we generalize the concept of changes. For each type |tau|
+% we have defined notions of change type and of valid changes; but
+% these notions can be defined for arbitrary sets.
 
-\begin{definition}
-  \label{def:bchs}
-  A basic change structure for set |V| is given by defining:
-  \begin{subdefinition}
-  \item a change set |Dt^V|
-  \item a ternary relation called validity among |V|, |Dt^V| and
-    |V|. If |v1, v2 `elem` V| and |dv `elem` DV|, and this relation holds, we write
-    |fromto V v1 dv v2| and say that |dv| is a valid change from |v1| to |v2|.
-  \end{subdefinition}
-\end{definition}
+% \begin{definition}
+%   \label{def:bchs}
+%   A basic change structure for set |V| is given by defining:
+%   \begin{subdefinition}
+%   \item a change set |Dt^V|
+%   \item a ternary relation called validity among |V|, |Dt^V| and
+%     |V|. If |v1, v2 `elem` V| and |dv `elem` DV|, and this relation holds, we write
+%     |fromto V v1 dv v2| and say that |dv| is a valid change from |v1| to |v2|.
+%   \end{subdefinition}
+% \end{definition}
 
-We have already given the ingredients to define two families of basic change structures,
-a family for types and one for contexts:
-\begin{definition}
-  \label{def:bchs-types}
-  To each type |tau| we associate a basic change structure for
-  set |eval(tau)|; we do so by taking |eval(Dt^tau)| as change
-  set and by reusing validity as previously defined. We keep
-  writing |fromto tau v1 dv v2| rather than |fromto (eval(tau)) v1 dv v2|.
-\end{definition}
-\begin{definition}
-  \label{def:bchs-contexts}
-  To each environment |Gamma| we associate a basic change
-  structure for set |eval(Gamma)|; we do so by taking
-  |eval(Dt^Gamma)| as change set and by reusing validity as
-  previously defined. We keep writing |fromto Gamma rho1 drho rho2|
-  rather than |fromto (eval(Gamma)) rho1 drho rho2|.
-\end{definition}
-Moreover, we required that language plugins must define change
-types and validity for base types
-(\cref{req:base-change-types,req:base-validity}). Equivalently we
-can require that plugins define basic change structures on all
-base types:
-\begin{restatable}[Basic change structures on base
-  types]{requirement}{baseBasicChangeStructures}
-  \label{req:base-basic-change-structures}
-  To each base type |iota| is associated a basic change structure
-  for |eval(iota)|.
-\end{restatable}
+% We have already given the ingredients to define two families of basic change structures,
+% a family for types and one for contexts:
+% \begin{definition}
+%   \label{def:bchs-types}
+%   To each type |tau| we associate a basic change structure for
+%   set |eval(tau)|; we do so by taking |eval(Dt^tau)| as change
+%   set and by reusing validity as previously defined. We keep
+%   writing |fromto tau v1 dv v2| rather than |fromto (eval(tau)) v1 dv v2|.
+% \end{definition}
+% \begin{definition}
+%   \label{def:bchs-contexts}
+%   To each context |Gamma| we associate a basic change
+%   structure for set |eval(Gamma)|; we do so by taking
+%   |eval(Dt^Gamma)| as change set and by reusing validity as
+%   previously defined. We keep writing |fromto Gamma rho1 drho rho2|
+%   rather than |fromto (eval(Gamma)) rho1 drho rho2|.
+% \end{definition}
+% Moreover, we required that language plugins must define change
+% types and validity for base types
+% (\cref{req:base-change-types,req:base-validity}). Equivalently we
+% can require that plugins define basic change structures on all
+% base types:
+% \begin{restatable}[Basic change structures on base
+%   types]{requirement}{baseBasicChangeStructures}
+%   \label{req:base-basic-change-structures}
+%   To each base type |iota| is associated a basic change structure
+%   on |eval(iota)|.
+% \end{restatable}
 
 Basic change structures generalize validity and change sets, so
 we can talk about a change set |Dt^V| for an arbitrary set |V|,
@@ -86,19 +86,6 @@ semantics of a context (|V = eval(Gamma)|).
 In particular, we can define a basic change structure for any
 function space |A -> B| as long as we have basic change
 structures for |A| and |B|.
-\begin{definition}
-  \label{def:basic-change-structure-funs}
-  We define a basic change structure on |A -> B| whenever |A, B|
-  are sets and we have a basic change structure for each of them.
-  \begin{subdefinition}
-  \item we define the change set |Dt^(A -> B)| as |A -> Dt^A -> Dt^B|.
-  \item we define that |df| is a valid function change from |f1|
-    to |f2| (that is, |fromto (A -> B) f1 df f2|) if and only if,
-    for any inputs |a1, a2 : A|, input change |da : Dt^a| that is
-    valid from |a1| to |a2| (|fromto A a1 da a2|), we have
-    |fromto B (f1 a1) (df a1 da) (f2 a2)|.
-  \end{subdefinition}
-\end{definition}
 
 \pg{After I turn ``correct change'' into ``derivative'', revise
   this again.}
@@ -576,7 +563,7 @@ structures.
 
 In this section, we derive a change structure for |A -> B| from
 two change structures |chs(A)| and |chs(B)|. The change structure
-for |A -> B| will enable defining a change structure for type
+on |A -> B| will enable defining a change structure for type
 |sigma -> tau| in terms of change structures for |sigma| and
 |tau|.
 
@@ -702,7 +689,7 @@ dv| where |dv : eval(Dt^tau)|.
 \pg{Some comment on how things are defined.}
 \begin{definition}[Change structure for environments]
   \label{def:chs-envs}
-  To each environment |Gamma| we associate a change structure
+  To each context |Gamma| we associate a change structure
   |chs(Gamma)|, that extends the basic change structure from \cref{def:bchs-contexts}.
   Operations are defined as follows.
 \begin{code}
@@ -1174,7 +1161,7 @@ of changes.
 % \end{typing}
 
 % Moreover, |eval(t)| takes an environment |rho : eval(Gamma)|, so
-% |eval(derive(t))| must take environment |rho| and a \emph{change environment}
+% |eval(derive(t))| must take environment |rho| and a \emph{environment change}
 % |drho : eval(Dt ^ Gamma)| that is a change for |rho|.
 
 % We also extend |`oplus`| to contexts pointwise:
@@ -1255,7 +1242,7 @@ of changes.
 
 % We design differentiation so that the semantics of the derivative of |t|,
 % |eval(derive(t))|, takes inputs and changes for all those inputs. So
-% |eval(derive(t))| takes a base environment |rho1| and a change environment
+% |eval(derive(t))| takes a base environment |rho1| and a environment change
 % |drho| from |rho1| to |rho2| and produces a change |dv| from |v1| to |v2|. If
 % |tau| is a function type, |dv| is a \emph{function change} |df| from |f1| to
 % |f2|. that in turn takes base input |a1| and an input change |da| from |a1| to

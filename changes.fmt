@@ -19,6 +19,7 @@
 %format v1
 %format v2
 %format v3
+%format v4
 
 %format V1
 %format V2
@@ -42,7 +43,9 @@
 
 %format `doe` = "\Doe"
 %format chs (v) = "\ChangeStruct{" v "}"
+%format bchs(v) = "\widetilde{" v "}"
 
+%format `eqdef` = "\eqdef"
 %format `such` = "\mid"
 %format ^ = " "
 %format ^^ = "\;"
@@ -139,7 +142,7 @@
 %format tau2
 %format iota = "\iota"
 
-%format correct (dv) (v) = "\correctdt{" dv "}{" v "}"
+
 %format fromto (tau) (v1) (dv) (v2) = "\validfromto{" tau "}{" v1 "}{" dv "}{" v2 "}"
 
 %format (new(v)) = "\New{" v "}"

@@ -50,10 +50,8 @@
 \begin{align*}
   |fromto iota v1 dv v2| &= \ldots \\
   |fromto (sigma -> tau) f1 df f2| &=
-  |forall a1 a2 : eval(sigma), da : eval(Dt ^ sigma) .| \\
-  &\text{if }|fromto (sigma) a1 da a2| \text{ then }
-    |fromto (tau) (f1 a1) (df a1 da) (f2 a2)|
-\end{align*}
+  |forall (fromto sigma a1 da a2) ^^ . ^^ fromto tau (f1 a1) (df a1 da) (f2 a2)|
+  \end{align*}
 
   \RightFramedSignature{|fromto Gamma rho1 drho rho2|\text{ with }|rho1, rho2 : eval(Gamma), drho : eval(Dt^Gamma)|}
 \begin{typing}
@@ -76,13 +74,13 @@
 \vskip 2\baselineskip
 \begin{subfigure}[c]{1.0\textwidth}
   \centering
-\begin{restatable*}[|derive(param)| is correct]{theorem}{deriveCorrect}
-  \label{thm:derive-correct}
-  Term |derive(t)| is a correct change for |t|. That is, if
-  |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
-  |fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t)
-  rho2)|.
-\end{restatable*}
+If |Gamma /- t : tau| then
+% \[|fromto (eval(Gamma) -> eval(tau)) (eval t) (evalInc t) (eval t)|\]
+% that is
+\[|forall (fromto Gamma rho1 drho rho2) ^^ . ^^
+  fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.\]
+\caption{Correctness of |derive(param)|}
+\label{fig:correctness:derive-correct}
 \end{subfigure}
 \caption{Defining differentiation and proving it correct.}
   \label{fig:differentiation}

@@ -6,10 +6,17 @@
 \label{ch:derive-formally}
 \input{pldi14/fig-differentiation}
 
-To support incrementalization, in this chapter we introduce
-differentiation and state and prove its correctness, making our
-previous discussion precise. We discuss consequences of
-correctness in \cref{ch:change-theory}.
+To support incrementalization, in this chapter we introduce differentiation and
+state and prove its correctness, making our previous discussion precise. In
+\cref{ch:change-theory} we study consequences of correctness and change
+operations.
+
+All definitions and proofs in this and next chapter is mechanized in Agda,
+except where otherwise indicated. We typically include full proofs anyway,
+because we believe they clarify the meaning and consequences of our definitions.
+We try and provide enough detail that readers can follow along without pencil
+and paper, at the expense of making our proofs look longer than they would
+usually be.
 
 % We also elaborate on the effect of
 % differentiation on higher-order programs.
@@ -18,87 +25,334 @@ correctness in \cref{ch:change-theory}.
 In this section we introduce formally (a) a description of
 changes and operations on changes; (b) a definition of which
 changes are valid. We have already introduced informally in
-\cref{ch:static-diff-intro} the different notions and how they
+\cref{ch:static-diff-intro} the key notions and how they
 fit together. We next define the same notions formally, and
 deduce their key properties. We collect the complete definitions
 and crucial facts in \cref{fig:differentiation}. Language plugins
 extend these definitions for base types and constants they
 provide.
 
-We define valid changes in two steps: we (a) define a type
-|Dt^tau| of changes, that we call \emph{change type}, and (b)
-define a relation that picks valid changes out of all elements of
-change types.
+To formalize the notion of changes for elements of a set |V|, we define the
+notion of \emph{basic change structure} on |V|.
 
-\begin{definition}[Change types]
-  The change type |Dt^tau| of a type |tau| is defined in
-  \cref{fig:change-types}.
+\begin{definition}[Basic change structures]
+  \label{def:bchs}
+  A basic change structure on set |V|, written |bchs(V)|, comprises:
+  \begin{subdefinition}
+  \item a change set |Dt^V|
+  \item a ternary \emph{validity} relation |fromto V v1 dv v2|, for |v1, v2
+    `elem` V| and |dv `elem` Dt^V|, that we read as ``|dv| is a valid change
+    from source |v1| to destination |v2| (on set |V|)''.
+  % \item a ternary relation called \emph{validity}.
+  %   We say that
+  %   We write this relation as |fromto V v1 dv
+  %   v2|, where |v1, v2 `elem` V| and |dv `elem` Dt^V|, and say that |dv| is a
+  %   valid change from source |v1| to destination |v2| (on set |V|).
+  % \item a ternary relation called \emph{validity} among |V|, |Dt^V| and |V|.
+  %   When this relation holds
+  %   If |v1, v2
+  %   `elem` V| and |dv `elem` DV|, and this relation holds, we write |fromto V v1
+  %   dv v2| and say that |dv| is a valid change from source |v1| to destination
+  %   |v2| (on set |V|).
+  \end{subdefinition}
 \end{definition}
-We refer to values of change types as \emph{change values} or just \emph{changes}.
 
-Then, we define \emph{validity} as a family of ternary \emph{logical relations},
-indexed by types and relating a change with its \emph{source} and
-\emph{destination}.
-A typical logical relation constrains \emph{functions} to map related input to
-related outputs. In a twist, validity constrains \emph{function changes} to map
-related inputs to related outputs.
-\begin{definition}[Change validity]
-We say that |dv| is a (valid) change from |v1| to |v2| (at type |tau|), and write
-|fromto tau v1 dv v2|, if |dv : eval(Dt^tau)|, |v1, v2 :
-eval(tau)| and |dv| is a ``valid'' description of the difference
-from |v1| to |v2|, as we define in \cref{fig:validity}.
+In \cref{ex:valid-bag-int,ex:invalid-nat} we exemplified
+informally change types and validity on naturals, integers and
+bags. We define formally basic change structures on naturals and integers. \pg{revise if we add more examples.}
+\begin{definition}[Basic change structure on integers]
+  Basic change structure |bchs(Int)| on integers has integers as changes
+  (|Dt^Int=Int|) and the following validity judgment.
+\begin{typing}
+  \Axiom
+  {\validfromto{|Int|}{|v1|}{|dv|}{|v1 + dv|}}
+\end{typing}
 \end{definition}
+
+\begin{definition}[Basic change structure on naturals]
+  Basic change structure |bchs(Nat)| on naturals has integers as changes
+  (|Dt^Nat=Int|) and the following validity judgment.
+\begin{typing}
+  \Rule{|v1 + dv >= 0|}
+  {\validfromto{|Nat|}{|v1|}{|dv|}{|v1 + dv|}}
+\end{typing}
+\end{definition}
+
+Compared to validity for integers, validity for naturals requires the
+destination |v1 + dv| to be again a natural. For instance, given source |v1 =
+1|, change |dv = -2| is valid (with destination |v2 = -1|) only on integers, not
+on naturals.\pg{Re-revise.}%
+% \footnote{For convenience we're implicitly identifying naturals with
+%   non-negative integers, ignoring the isomorphism between them.}
+
+Intuitively, we can think of a valid change from |v1| to |v2| as a graph
+\emph{edge} from |v1| to |v2|, so we'll often use graph terminology when
+discussing changes. This intuition is robust and can be made fully
+precise.\pg{This is in Yufei Cai's PhD thesis, how to say it?} More
+specifically, a basic change structure on |V| can be seen as a directed
+multigraph, having as vertexes the elements of |V|, and as edges from |v1| to
+|v2| the valid changes |dv| from |v1| to |v2|. This is a multigraph because our
+definition allows multiple edges between |v1| and |v2|.
+
+Technically, a change |dv| can be valid from |v1| to |v2| and from |v3| to |v4|.
+Hence we'll always quantify theorems over valid changes |dv| with their sources |v1| and
+destination |v2|, using the following notation.%
+\footnote{If you prefer, you can tag a change with its source and
+  destination. Or you can regard the whole triple |(v1, dv, v2)| as a change.
+  Mathematically, this gives the correct results, but we'll typically not use
+  such triples as changes in programs for performance reasons.}
 \begin{notation}
-  We'll typically quantify theorems over valid changes with their sources and
-  destination. So we write |forall (fromto tau v1 dv v2). ^^ P|, and say ``for
-  all (valid) changes |dv| from |v1| to |v2| at type |tau| we have |P|'', as a
-  shortcut for
+  We write \[|forall (fromto V v1 dv v2)^^ . ^^ P|,\] and say ``for all (valid)
+  changes |dv| from |v1| to |v2| on set |V| we have |P|'', as a shortcut for
   \[|forall
-    v1, v2 : eval(tau), dv : eval(Dt^tau).|\text{ if }|fromto tau v1 dv v2|\text{ then }|P|.\]
+    v1, v2 `elem` V, dv `elem` Dt^V,|\text{ if }|fromto V v1 dv v2|\text{ then }|P|.\]
 
   Since we focus on valid changes, we'll omit the word ``valid'' when clear from context.
   In particular, a change from |v1| to |v2| is necessarily valid.
 \end{notation}
 
-Next, we explain the definitions of change types and validity for
-function type |sigma -> tau|.
+We can have multiple basic change structures on the same set.
+\begin{example}
+For instance, for any set |V| we can talk about \emph{replacement
+  changes} on |V|: a replacement change |dv = !v2| for a value |v1
+: V| simply specifies directly a new value |v2 : V|, so that
+|fromto V v1 (! v2) v2|. We read |!| as the ``bang'' operator.
+\end{example}
+
+A basic change structure can decide to use only replacement changes (which might
+be appropriate for primitive types with values of constant size), or to make
+|Dt^V| a sum type allowing both replacement changes and other ways to describe a
+change (as long as we're using a language plugin that adds sum types).
+
+\paragraph{Nil changes}
+Just like integers have a null element |0|, among changes there can be nil
+changes:
+\begin{definition}[Nil changes]
+  \label{def:nil-changes}
+  We say that |dv: Dt^V| is a nil change for |v: V| if |fromto V v dv v|.
+\end{definition}
+
+For instance, |0| is a nil change for any integer number |n|.
+However, in general a change might be nil for an element but not
+for another. For instance, the replacement change |!6| is a nil
+change on |6| but not on |5|.
+
+We'll say more on nil changes in \cref{sec:derivative-formal,sec:nil-changes-intro}.
+
+\subsection{Function spaces}
+Next, we define a basic change structure that we call |bchs(A) ->
+bchs(B)| for an arbitrary function space |A -> B|, assuming we have basic change
+structures for both |A| and |B|.
 %
-Take function values |f1, f2 : eval(sigma -> tau)|. As sketched,
+Take function values |f1, f2 : A -> B|. As sketched,
 valid function changes map valid input changes to valid output
-changes. A bit more precisely, |df| is a valid function change
-from |f1| to |f2| if, for all changes |da| from |a1| to |a2| at type |sigma|,
+changes. More precisely, |df| is a valid function change
+from |f1| to |f2| if, for all changes |da| from |a1| to |a2| on set |A|,
 value |df a1 da|
 is a valid change from |f1 a1| to |f2 a2|. Formally, we define
-change types and validity for function types as:
+a basic change structure on function spaces as follows.
+\begin{definition}[Basic change structure on |A -> B|]
+  \label{def:basic-change-structure-funs}
+  Given basic change structures on |A| and |B|, we define a basic change
+  structure on |A -> B| that we write |bchs(A) -> bchs(B)| as follows:
+  \begin{subdefinition}
+  \item Change set |Dt^(A -> B)| is |A -> Dt^A -> Dt^B|.
+  \item Function change |df| is valid from |f1|
+    to |f2| (that is, |fromto (A -> B) f1 df f2|) if and only if,
+    for all |fromto A a1 da a2|, we have
+    |fromto B (f1 a1) (df a1 da) (f2 a2)|.
+  \end{subdefinition}
+\end{definition}
+
+\begin{notation}
+  When reading out |df a1 da| we'll often talk for brevity about applying |df|
+  to |da|, leaving |da|'s source |a1| implicit when it can be deduced from
+  context.
+\end{notation}
+
+We'll also consider valid changes |df| for curried $n$-ary functions. We show
+what their validity means for curried binary functions |f : A -> B -> C|. We
+omit similar statements for higher arities, as they add no new ideas.
+\begin{lemma}[Validity on |A -> B -> C|]
+  \label{lem:validity-binary-functions}
+  Applying a function change |fromto (A -> B -> C) f1 df f2| to valid input
+  changes |fromto A a1 da a2| and |fromto B b1 db b2| gives a valid output
+  change
+  \[|fromto C (f a1 b1) (df a1 da b1 db) (f a2 b2)|\]
+  for any basic change structures |bchs(A)|, |bchs(B)| and |bchs(C)|.
+\end{lemma}
+\begin{proof}
+  Follows from unrolling the definition of function validity of |df| twice.
+
+  That is: valid function change |fromto (A -> (B -> C)) f1 df f2| maps valid
+  input change |fromto A a1 da a2| to valid output change
+  \[|fromto (B -> C) (f1 a1) (df a1 da) (f2 a2)|.
+  \]
+  Valid change |df a1 da| is in turn a function change, that maps valid input
+  change |fromto B b1 db b2| to
+  \[|fromto C (f a1 b1) (df a1 da b1 db) (f a2 b2)|
+  \]
+  as required by the thesis.
+\end{proof}
+
+\subsection{Derivatives}
+\label{sec:derivative-formal}
+Among valid function changes, derivatives play a central role, especially in the
+statement of correctness of differentiation.
+
+Take a function |f: A -> B|. We want to say that a function |df : A -> Dt^A ->
+Dt^B| is a derivative for |f| if, for all changes |da| from |a1| to |a2| on set
+|A|, change |df a1 da| is valid from |f a1| to |f a2|. Comparing with the
+definition of validity for function changes, we see that a derivative is exactly
+a change from |f| to |f|, that is, a nil change for |f|. Hence, we give the
+following definition.
+
+\begin{definition}[Derivatives as nil function changes]
+  \label{def:derivative}
+  Given function |f : A -> B|, function |df : A -> Dt^A -> Dt^B| is a derivative
+  of |f| if |df| is a nil change of |f| (|fromto (A -> B) f df f|).
+\end{definition}
+
+Applying derivatives to nil changes gives again nil changes.
+\begin{lemma}[Derivatives preserve nil changes]
+  \label{lem:derivatives-nil-changes}
+
+  Applying a derivative |fromto (A -> B) f df f| to a nil change |fromto A a da
+  a| gives a nil change
+  %
+  \[|fromto B (f a) (df a da) (f a)|,\]
+  %
+  for any basic change structures |bchs(A)| and |bchs(B)|.
+\end{lemma}
+\begin{proof}
+  Follows from validity of |df| and |da|.
+
+  In detail, by definition of validity for function changes
+  (\cref{def:basic-change-structure-funs}), from |fromto (A -> B) f1 df f2| and
+  |fromto A a1 da a2| follows |fromto B (f1 a1) (df a1 da) (f2 a2)|. But here
+  |f1 = f2 = f| and |a1 = a2 = a|, hence follows the thesis |fromto B (f a) (df
+  a da) (f a)|.
+\end{proof}
+
+Also derivatives of curried $n$-ary functions |f| preserve nil changes. We only
+state this formally for curried binary functions |f : A -> B -> C|; higher
+arities require no new ideas.
+\begin{lemma}[Derivatives preserve nil changes, |A -> B -> C| case]
+  \label{lem:binary-derivatives-nil-changes}
+  Applying a derivative |fromto (A -> B -> C) f df f| to nil changes |fromto A a
+  da a| and |fromto B b db b| gives a nil change
+  \[|fromto C (f a b) (df a da b db) (f a b)|,\]
+  %
+  for any basic change structures |bchs(A)|, |bchs(B)| and |bchs(C)|.
+\end{lemma}
+\begin{proof}
+  Similarly to validity on |A -> B -> C| (\cref{lem:validity-binary-functions}),
+  the thesis follows by applying twice the fact that derivatives preserve nil
+  changes (\cref{lem:derivatives-nil-changes}).
+
+  Since derivatives preserve nil changes, |fromto (B -> C) (f a) (df a da) (f
+  a)|. But then, |df a da| is a nil change, that is a derivative, and since it
+  preserves nil changes we have |fromto C (f a b) (df a da b db) (f a b)|.
+\end{proof}
+
+\subsection{Basic change structures on types}
+After studying basic change structures in the abstract, we apply them to the
+study of our object language.
+
+For each type |tau|, we can define a basic change structure on domain
+|eval(tau)|, that we write |bchs(tau)|. We assume language plugins provide basic
+change structures for base types. To provide basic change structures for
+function types |sigma -> tau|, we simply construct basic change structures
+|bchs(sigma) -> bchs(tau)| on function spaces |eval(sigma -> tau)|.
+\begin{definition}[Basic change structures on types]
+  \label{def:bchs-types}
+  For each type |tau| we associate a basic change structure on domain
+  |eval(tau)|, written |bchs(tau)|.
+\begin{code}
+  bchs(iota) = ...
+  bchs(sigma -> tau) = bchs(sigma) -> bchs(tau)
+\end{code}%
+\end{definition}
+\begin{restatable}[Basic change structures on base
+  types]{requirement}{baseBasicChangeStructures}
+  \label{req:base-basic-change-structures}
+  For each base type |iota|, the plugin defines a basic change structure on
+  |eval(iota)| that we write |bchs(iota)|.
+\end{restatable}
+
+Crucially, for each type |tau| we can define a type |Dt^tau| of changes, that we
+call \emph{change type}, such that the change set |Dt^eval(tau)| is just the
+domain |eval(Dt^tau)| associated to change type |Dt^tau|.
+
+\begin{definition}[Change types]
+  The change type |Dt^tau| of a type |tau| is defined in
+  \cref{fig:change-types}.
+\end{definition}
+\begin{lemma}[|Dt| and |eval(param)| commute on types]
+  For each type |tau|, change set |Dt^eval(tau)| equals the domain of change
+  type |eval(Dt^tau)|.
+\end{lemma}
+\begin{proof}
+  By induction on types. For the case of function types, we simply prove
+  equationally that |Dt^eval(sigma -> tau) = Dt^(eval(sigma) -> eval(tau)) =
+  eval(sigma) -> Dt^eval(sigma) -> Dt^eval(tau) = eval(sigma) -> eval(Dt^sigma)
+  -> eval(Dt^tau) = eval(sigma -> Dt^sigma -> Dt^tau) = eval(Dt^(sigma ->
+  tau))|. The case for base types is delegates to plugins
+  (\cref{req:base-change-types}).
+\end{proof}
+\begin{restatable}[Base change types]{requirement}{baseChangeTypes}
+  \label{req:base-change-types}
+  For each base type |iota|, the plugin defines a change type |Dt^iota| such
+  that |Dt^eval(iota) = eval(Dt^iota)|.
+\end{restatable}
+
+We refer to values of change types as \emph{change values} or just \emph{changes}.
+
+\begin{notation}
+  We write |bchs(tau)|, not |bchs(eval(tau))|, and |fromto tau v1 dv v2|, not
+  |fromto (eval tau) v1 dv v2|. We also write consistently |eval(Dt^tau)|, not
+  |Dt^eval(tau)|.
+\end{notation}
+
+% We proceed in four steps: we (a) define a type |Dt^tau| of changes, that we call
+% \emph{change type}, (b) define a logical relation for validity that picks valid
+% changes out of all elements of change types (c) define a basic change structure
+% for each type (d) verify that the basic change structure on \pg{do it and *then*
+%   summarize it.}
+
+%We can also give \emph{equivalent} definitions for changes directly on types.
+
+Next, we show an equivalent definition of validity directly by induction on
+types. That is, we define \emph{validity} as a ternary \emph{logical relation}
+relating a change with its \emph{source} and \emph{destination}. A typical
+logical relation constrains \emph{functions} to map related input to related
+outputs. In a twist, validity constrains \emph{function changes} to map related
+inputs to related outputs.
+\begin{definition}[Change validity]
+We say that |dv| is a (valid) change from |v1| to |v2| (on type |tau|), and write
+|fromto tau v1 dv v2|, if |dv : eval(Dt^tau)|, |v1, v2 :
+eval(tau)| and |dv| is a ``valid'' description of the difference
+from |v1| to |v2|, as we define in \cref{fig:validity}.
+\end{definition}
+
+The key equations for function types are:
 \begin{align*}
   |Dt^(sigma -> tau)| &= |sigma -> Dt ^ sigma -> Dt ^ tau|\\
   |fromto (sigma -> tau) f1 df f2| &=
-  |forall (fromto (sigma) a1 da a2). fromto (tau) (f1 a1) (df a1 da) (f2 a2)|
+  |forall (fromto sigma a1 da a2) ^^ . ^^ fromto tau (f1 a1) (df a1 da) (f2 a2)|
 \end{align*}
 
-Both definitions place requirements on language plugins:
-\begin{restatable}[Base change types]{requirement}{baseChangeTypes}
-  \label{req:base-change-types}
-  For each base type |iota|, the plugin defines a change type
-  |Dt^iota|.
-\end{restatable}
-\begin{restatable}[Validity on base types]{requirement}{baseValidity}
-  \label{req:base-validity}
-  For each base type |iota|, the plugin defines validity.
-\end{restatable}
-In \cref{ex:valid-bag-int,ex:invalid-nat} we exemplified
-informally change types and validity on naturals, integers and
-bags.\pg{revise if we add more examples.}
 
-To describe changes to the inputs of a term, we now also
-introduce change contexts |Dt^Gamma| environment changes |drho :
-eval(Dt^Gamma)|, and validity for environment changes |fromto
-Gamma rho1 drho rho2|.
+\pg{resume here and integrate this definition}
+
+To describe changes to the inputs of a term, we now also introduce change
+contexts |Dt^Gamma|, environment changes |drho : eval(Dt^Gamma)|, and validity
+for environment changes |fromto Gamma rho1 drho rho2|.
 
 A valid environment change from |rho1 : eval(Gamma)| to |rho2:
 eval(Gamma)| is an environment |drho : eval(Dt^Gamma)| that
 extends environment |rho1| with valid changes for each entry. We
-first define the shape of change environments through
+first define the shape of environment changes through
 \emph{change contexts}:
 
 \begin{definition}[Change contexts]
@@ -110,13 +364,13 @@ first define the shape of change environments through
 \end{align*}
 \end{definition}
 
-Then, we describe validity of change
-environments via a judgment.
+Then, we describe validity of environment changes via a judgment.
 \begin{definition}[Environment change validity]
-We define judgment |fromto Gamma rho1 drho rho2|, pronounced
-``|drho| is an environment change from |rho1| to
-|rho2| (at context |Gamma|)'', where |rho1, rho2 : eval(Gamma), drho :
-eval(Dt^Gamma)|, via the following inference rules:
+  \label{def:env-ch-validity}
+  We define validity for environment changes through judgment |fromto Gamma rho1
+  drho rho2|, pronounced ``|drho| is an environment change from |rho1| to |rho2|
+  (at context |Gamma|)'', where |rho1, rho2 : eval(Gamma), drho :
+  eval(Dt^Gamma)|, via the following inference rules:
 \begin{typing}
   \Axiom
   {\validfromto{\EmptyContext}{\EmptyEnv}{\EmptyEnv}{\EmptyEnv}}
@@ -130,6 +384,29 @@ eval(Dt^Gamma)|, via the following inference rules:
 \end{typing}
 \end{definition}
 
+\begin{definition}[Basic change structures for contexts]
+  \label{def:bchs-contexts}
+  To each context |Gamma| we associate a basic change structure on set
+  |eval(Gamma)|. We take |eval(Dt^Gamma)| as change set and reuse validity on
+  environment changes (\cref{def:env-ch-validity}).
+\end{definition}
+\begin{notation}
+  We write |fromto Gamma rho1 drho rho2| rather than |fromto (eval(Gamma)) rho1
+  drho rho2|.
+\end{notation}
+
+Finally, we define basic change structures on the semantics of terms. A term
+|Gamma /- t : tau| has semantics |eval(t)| living in function space |eval(Gamma)
+-> eval(tau)|. On this function space we can associate a basic change structure.
+\begin{definition}%[Basic change structures for contexts and types]
+  \label{def:bchs-contexts-types}
+  To each context |Gamma| and type |tau| we associate a basic change structure
+  |bchs(Gamma) -> bchs(tau)|.
+\end{definition}
+
+Equipped with such a family of basic change structures, we can proceed to show
+correctness of differentiation.
+
 \section{Correctness of differentiation}
 \label{sec:correct-derive}
 In this section we state and prove correctness of
@@ -138,7 +415,7 @@ differentiation, a term-to-term transformation written
 all our results apply only to well-typed terms (since we
 formalize no other ones).
 
-We previously sketched |derive(param)|'s through
+We previously sketched |derive(param)|'s invariant through
 \cref{slogan:derive}, which we repeat for reference:
 %
 \sloganDerive*
@@ -152,16 +429,19 @@ to |eval(t) rho2|.\footnote{If |tau| is a function type, |df =
   be a valid function change, it will also map them to valid
   outputs as required by our slogan.}
 \pg{Replace with derivative.}
-That is, |derive(t)| must be a \emph{correct
-  change} for |t| as defined next:
-\begin{definition}[Correct change]
+\pg{Define derivative earlier as a nil change.}
+\pg{Don't revise things TOO MUCH.}
+That is, |derive(t)| must be a \emph{derivative} for |t| as defined next:
+\begin{definition}[Derivative]
   We say a term |Dt ^ Gamma /- dt : Dt^tau| is a correct change for term |Gamma
-  /- t : tau|, and write |correct dt t|, if |eval(dt) drho| is a change from
+  /- t : tau|, and write |correct dt t|, if |eval(dt)| is a derivative of
+  |eval(t)|, that is, a change from |eval(t)| to |eval(t)|, that is,
+  |eval(dt) drho| is a change from
   |eval(t) rho1| to |eval(t) rho2| for all |fromto Gamma rho1 drho rho2|.
 \end{definition}
-In other words, |eval(dt)| must be a function that takes changes
-|drho| from old to new inputs of |t|, and maps them to changes
-from old to new outputs of |t|.
+% In other words, |eval(dt)| must be a function that takes changes
+% |drho| from old to new inputs of |t|, and maps them to changes
+% from old to new outputs of |t|.
 
 % Next, we constrain |derive(t)|'s dynamic semantics, that is the
 % result of evaluating it.
@@ -179,13 +459,13 @@ static semantics:
 
 \begin{restatable}[Typing of |derive(param)|]{lemma}{deriveTyping}
   \label{lem:derive-typing}
-  Rule
+  Typing rule
   \begin{typing}
     \Rule[Derive]
     {|Gamma /- t : tau|}
     {|Dt ^ Gamma /- derive(t) : Dt ^ tau|}
   \end{typing}
-  is a derived typing rule.
+  is derivable.
 \end{restatable}
 
 After we'll define |`oplus`|, in next chapter, we'll be able to relate |`oplus`|
@@ -243,7 +523,7 @@ must prove their extensions correct.
 
 \begin{restatable}[Typing of |deriveConst(param)|]{requirement}{constDifferentiation}
   \label{req:const-differentiation}
-  For all |c| such that $\ConstTyping{c}{\tau}$, the plugin defines
+  For all $\ConstTyping{c}{\tau}$, the plugin defines
   |deriveConst(c)| satisfying |/- deriveConst(c) :
   Dt^tau| .
 \end{restatable}
@@ -440,7 +720,7 @@ rho1) (eval(derive(t)) drho) (eval(t) rho2)| (and |a1, da, a2| as needed) gives 
 \end{proof}
 
 \section{Discussion}
-\paragraph{The correctness statement}
+\subsection{The correctness statement}
 We might have asked for the following
 correctness property:
 
@@ -467,7 +747,7 @@ changes between functions are in turn functions that take valid input
 changes to valid output changes. This is why we
 formalize validity as a logical relation.
 
-\paragraph{Invalid input changes}
+\subsection{Invalid input changes}
 To see concretely why invalid changes, in general, can cause
 derivatives to produce
 incorrect results, consider again |grand_total = \ xs ys -> sum
@@ -645,8 +925,8 @@ and |m[x -> dx]| extend |m| with a new mapping from |x| to |dx|.
 \section{Plugin requirement summary}
 For reference, we repeat here plugin requirements spread through the chapter.
 
+\baseBasicChangeStructures*
 \baseChangeTypes*
-\baseValidity*
 \constDifferentiation*
 \deriveConstCorrect*
 
@@ -654,7 +934,7 @@ For reference, we repeat here plugin requirements spread through the chapter.
 \pg{tenses?}
 
 In this chapter, we have formally defined changes for values and environments of
-our language, when they are valid. Through these definitions, we have explained
+our language, and when changes are valid. Through these definitions, we have explained
 that |derive(t)| is correct, that is, that it maps changes to the input
 environment to changes to the output environment. All of this assumes, among
 other things, that language plugins define valid changes for their base types
