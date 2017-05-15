@@ -46,6 +46,189 @@ structures generalize groups.
 But before defining |`oplus`|, we need to introduce a few more
 concepts, as we do next.
 % but also |nilc| and |`ominus`| and
+\section{Formally defining ⊕ and change structures}
+%\subsection{Updating values by changes with ⊕}
+\label{sec:change-structures-formal}
+\label{sec:oplus}
+\label{sec:invalid}
+Next, we will formally introduce \emph{change operators} |`oplus`|, |`ominus`|
+and |nilc| and relate them to validity. In particular, we will
+prove that |fromto tau v1 dv v2| implies |v1 `oplus` dv = v2|.
+% and explain why the converse is not true.
+\pg{Make sure we explain \emph{somewhere} why the converse is not true.}
+
+To introduce these operators, we first define the notion of
+\emph{change structure} on a set |V| by taking a basic change
+structure on |V| and adding requirements. Then, to understand
+their definition better, we prove a few corollaries of their
+definition in \cref{sec:chs-properties,sec:chs-derivable-ops}.
+Then, we show how to take change structures on |A| and |B| and
+define new ones on |A -> B| in \cref{sec:chs-fun-chs}. Using
+these structures, we finally show that starting from change
+structures for base types, we can define change structures for
+all types |tau| and contexts |Gamma|.
+
+\begin{definition}
+  \label{def:change-structure}
+  A change structure |chs(V)| over a set |V| is given by:
+  \begin{subdefinition}
+  \item a basic change structure for |V| (hence change set |Dt^V| and validity |fromto V v1 dv v2|);
+  \item an update operation \[|`oplus` : V -> Dt^V -> V|\] that
+    \emph{updates} a value with a change;
+  \item proof that |`oplus`| agrees with validity: if |fromto V v1 dv
+    v2| then |v1 `oplus` dv = v2|;
+  \item a nil change operation \[|nilc : V -> Dt^V|;\]
+  \item proof that for every |v : V|, change |nil v| is a valid
+    nil change for |v|, that is, |fromto V v (nil v) v|;
+  \item a difference operation |`ominus` : V -> V -> Dt^V| that
+    produces a change across two values;
+  \item proof that |`ominus`| produces valid changes: for all |v1, v2 :
+    V| we have
+    \[|fromto V v1 (v2 `ominus` v1) v2|;\]
+  \item a change composition operation \[|`ocompose` : Dt^V -> V -> Dt^V
+      -> Dt^V|,\]
+    that composes together two changes relative to a base value.
+  \item proof that |`ocompose`| preserves validity: if |fromto V
+    v1 dv1 v2| and |fromto V v2 dv2 v3| then
+    \[|fromto V v1 (ocompose dv1 v1 dv2) v3|.\] It's useful to
+    compare the statement of this law to the transitivity of a
+    relation or to the typing of function
+    composition.\footnote{This analogy can be made formal by
+      saying that triples |(v1, dv, v2)| such that |fromto V v1
+      dv v2| are the arrows of a category under change
+      composition, where objects are individual values.}
+  \end{subdefinition}
+\end{definition}
+
+\paragraph{Notation}
+Operators |`oplus`| and |`ominus`| can be subscripted to
+highlight their base set, but we will usually omit such
+subscripts. Moreover, |`oplus`| is left-associative, so that
+|v `oplus` dv1 `oplus` dv2| means |(v `oplus` dv1) `oplus` dv2|.
+
+Finally, whenever we have a change structure such as
+|chs(A)|, |chs(B)|, |chs(V)|, and so on, we write respectively
+|A|, |B|, |V| to refer to its base set.
+%$\ocompose$
+
+\subsection{Properties of change structures}
+\label{sec:chs-properties}
+To understand better the definition of change structures, we
+present next a few lemmas following from this definition.
+
+\begin{restatable}[|`ominus`| inverts |`oplus`|]{lemma}{oplusOminusChS}
+  \label{thm:oplusOminusChS}
+  |`oplus`| inverts |`ominus`|, that is
+  \[|v1 `oplus` (v2 `ominus` v1) = v2|,\] for change structure
+  |chs(V)| and any values |v1, v2 : V|.
+\end{restatable}
+\begin{proof}
+  For change structures, we know |fromto V v1 (v2 `ominus` v1)
+  v2|, and |v1 `oplus` (v2 `ominus` v1) = v2| follows.
+
+  More in detail: Change |dv = v2 `ominus` v1| is a valid change
+  from |v1| to |v2| (because |`ominus`| produces valid changes,
+  |fromto V v1 (v2 `ominus` v1) v2|), so updating |dv|'s source
+  |v1| with |dv| produces |dv|'s destination |v2| (because
+  |`oplus`| agrees with validity, that is if |fromto V v1 dv v2|
+  then |v1 `oplus` dv = v2|).
+\end{proof}
+
+%format v2a = "v_{2a}"
+%format v2b = "v_{2b}"
+\begin{lemma}[A change can't be valid for two destinations with the same source]
+  Given a change |dv : Dt^V| and a source |v1 : V|, |dv| can only
+  be valid with |v1| as source for a \emph{single} destination.
+  That is, if |fromto V v1 dv v2a| and |fromto V v1 dv v2b| then |v2a =
+  v2b|.
+\end{lemma}
+\begin{proof}
+  The proof follows, intuitively, because |`oplus`| also maps
+  change |dv| and its source |v1| to its destination, and
+  |`oplus`| is a function.
+
+  More technically, since |`oplus`| respects validity, the
+  hypotheses mean that |v2a = v1 `oplus` dv = v2b| as required.
+\end{proof}
+Beware that, changes can be valid for multiple sources, and associate
+them to different destination. For instance, integer |0| is a
+valid change for all integers.\pg{For this we need to know that
+  there's a change structure for integers.}
+
+Sometimes it's useful to specify that a change |dv| is valid for
+a source |v| without naming |dv|'s destination, which is just |v
+`oplus` dv|. So we give the following
+\begin{definition}[One-sided validity]
+We define relation |valid V v dv| as an abbreviation for
+|fromto V v dv (v `oplus` dv)|.
+\end{definition}
+
+We use this definition right away:
+\begin{lemma}[|`ocompose`| and |`oplus`| interact correctly]
+  If |valid V v1 dv1| and |valid V (v1 `oplus` dv1) dv2| then
+  |v1 `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus` dv2|.
+\end{lemma}
+\begin{proof}
+  We know that |`ocompose`| preserves validity, so under the
+  hypotheses |valid V v1 dv1| and |valid V (v1 `oplus` dv1) dv2|
+  we get that |dv = ocompose dv1 v1 dv2| is a valid change from
+  |v1| to |v1 `oplus` dv1 `oplus` dv2|:
+  \[|fromto V v1 (ocompose dv1
+    v1 dv2) v1 `oplus` dv1 `oplus` dv2|.\]
+  Hence, updating |dv|'s source |v1| with |dv|
+  produces |dv|'s destination |v1 `oplus` dv1 `oplus` dv2|:
+  \[|v1 `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus`
+    dv2|.\]
+\end{proof}
+
+% \begin{lemma}[|`ocompose`| and |`oplus`| interact correctly]
+%   If |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3| then |v1
+%   `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus` dv2|.
+% \end{lemma}
+% \begin{proof}
+%   We know that |`ocompose`| preserves validity, so under the
+%   hypotheses |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3| we get
+%   that |dv = ocompose dv1 v1 dv2| is a valid change from |v1| to
+%   |v3| (|fromto V v1 (ocompose dv1 v1 dv2) v3|). Hence, updating
+%   |dv|'s source |v1| with |dv| produces |dv|'s destination |v3|.
+% \end{proof}
+
+\subsection{Derivable operations}
+\label{sec:chs-derivable-ops}
+We can define |nilc| and |`ocompose`| in terms of other
+operations, and prove they satisfy their requirements for change
+structures.
+
+\begin{code}
+  nil v = v `ominus` v
+  ocompose dv1 v1 dv2 = v1 `oplus` dv1 `oplus` dv2 `ominus` v1
+\end{code}
+\begin{lemma}
+  If we define |nil v = v `ominus` v|, then |nilc| produces
+  valid changes as required (|fromto V v (nil v) v|), for any
+  change structure |chs(V)| and value |v : V|.
+\end{lemma}
+\begin{proof}
+  This follows from validity of |`ominus`| (|fromto V v1 (v2
+  `ominus` v1) v2|) instantiated with |v1 = v| and |v2 = v|.
+\end{proof}
+\begin{lemma}
+  If we define |ocompose dv1 v1 dv2 = v1 `oplus` dv1 `oplus` dv2
+  `ominus` v1|, then |`ocompose`| preserves validity as required,
+  that is, if |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3|
+  then |fromto V v1 (ocompose dv1 v1 dv2) v3|.
+\end{lemma}
+\begin{proof}
+  We need to show that |`ocompose`| preserves validity. So we can
+  assume hypotheses |fromto V v1 dv1 v2| and |fromto V v2 dv2
+  v3|. Since |`oplus`| agrees with validity, we have |v2 = v1 `oplus`
+  dv1|, and |v3 = v2 `oplus` dv2 = v1 `oplus` dv1 `oplus` dv2|.
+
+  Inlining |`ocompose`|'s definition and substituting |v3|, the
+  thesis becomes that if then |fromto V v1 (v1 `oplus` dv1
+  `oplus` dv2 `ominus` v1) (v1 `oplus` dv1 `oplus` dv2)|, which
+  is true because |`ominus`| produces valid changes.
+\end{proof}
 
 \section{Change structures, informally}
 \pg{Move after change structures and drop parts made redundant.}
@@ -254,191 +437,7 @@ Instantiating |dv| with |nil v| gives equation
 which is not only a requirement on |`oplus`| for functions but
 also defines |`oplus`| effectively.
 
-\section{Formally defining ⊕ and change structures}
-%\subsection{Updating values by changes with ⊕}
-\label{sec:change-structures-formal}
-\label{sec:oplus}
-\label{sec:invalid}
-Next, we will formally introduce \emph{change operators} |`oplus`|, |`ominus`|
-and |nilc| and relate them to validity. In particular, we will
-prove that |fromto tau v1 dv v2| implies |v1 `oplus` dv = v2|.
-% and explain why the converse is not true.
-\pg{Make sure we explain \emph{somewhere} why the converse is not true.}
-
-To introduce these operators, we first define the notion of
-\emph{change structure} on a set |V| by taking a basic change
-structure on |V| and adding requirements. Then, to understand
-their definition better, we prove a few corollaries of their
-definition in \cref{sec:chs-properties,sec:chs-derivable-ops}.
-Then, we show how to take change structures on |A| and |B| and
-define new ones on |A -> B| in \cref{sec:chs-fun-chs}. Using
-these structures, we finally show that starting from change
-structures for base types, we can define change structures for
-all types |tau| and contexts |Gamma|.
-
-But first, we give the definition of change structures:
-\begin{definition}
-  \label{def:change-structure}
-  A change structure |chs(V)| over a set |V| is given by:
-  \begin{subdefinition}
-  \item a basic change structure for |V| (hence change set |Dt^V| and validity |fromto V v1 dv v2|);
-  \item an update operation \[|`oplus` : V -> Dt^V -> V|\] that
-    \emph{updates} a value with a change;
-  \item proof that |`oplus`| agrees with validity: if |fromto V v1 dv
-    v2| then |v1 `oplus` dv = v2|;
-  \item a nil change operation \[|nilc : V -> Dt^V|;\]
-  \item proof that for every |v : V|, change |nil v| is a valid
-    nil change for |v|, that is, |fromto V v (nil v) v|;
-  \item a difference operation |`ominus` : V -> V -> Dt^V| that
-    produces a change across two values;
-  \item proof that |`ominus`| produces valid changes: for all |v1, v2 :
-    V| we have
-    \[|fromto V v1 (v2 `ominus` v1) v2|;\]
-  \item a change composition operation \[|`ocompose` : Dt^V -> V -> Dt^V
-      -> Dt^V|,\]
-    that composes together two changes relative to a base value.
-  \item proof that |`ocompose`| preserves validity: if |fromto V
-    v1 dv1 v2| and |fromto V v2 dv2 v3| then
-    \[|fromto V v1 (ocompose dv1 v1 dv2) v3|.\] It's useful to
-    compare the statement of this law to the transitivity of a
-    relation or to the typing of function
-    composition.\footnote{This analogy can be made formal by
-      saying that triples |(v1, dv, v2)| such that |fromto V v1
-      dv v2| are the arrows of a category under change
-      composition, where objects are individual values.}
-  \end{subdefinition}
-\end{definition}
-
-\paragraph{Notation}
-Operators |`oplus`| and |`ominus`| can be subscripted to
-highlight their base set, but we will usually omit such
-subscripts. Moreover, |`oplus`| is left-associative, so that
-|v `oplus` dv1 `oplus` dv2| means |(v `oplus` dv1) `oplus` dv2|.
-
-Finally, whenever we have a change structure such as
-|chs(A)|, |chs(B)|, |chs(V)|, and so on, we write respectively
-|A|, |B|, |V| to refer to its base set.
-%$\ocompose$
-
-\subsection{Properties of change structures}
-\label{sec:chs-properties}
-To understand better the definition of change structures, we
-present next a few lemmas following from this definition.
-
-\begin{restatable}[|`ominus`| inverts |`oplus`|]{lemma}{oplusOminusChS}
-  \label{thm:oplusOminusChS}
-  |`oplus`| inverts |`ominus`|, that is
-  \[|v1 `oplus` (v2 `ominus` v1) = v2|,\] for change structure
-  |chs(V)| and any values |v1, v2 : V|.
-\end{restatable}
-\begin{proof}
-  For change structures, we know |fromto V v1 (v2 `ominus` v1)
-  v2|, and |v1 `oplus` (v2 `ominus` v1) = v2| follows.
-
-  More in detail: Change |dv = v2 `ominus` v1| is a valid change
-  from |v1| to |v2| (because |`ominus`| produces valid changes,
-  |fromto V v1 (v2 `ominus` v1) v2|), so updating |dv|'s source
-  |v1| with |dv| produces |dv|'s destination |v2| (because
-  |`oplus`| agrees with validity, that is if |fromto V v1 dv v2|
-  then |v1 `oplus` dv = v2|).
-\end{proof}
-
-%format v2a = "v_{2a}"
-%format v2b = "v_{2b}"
-\begin{lemma}[A change can't be valid for two destinations with the same source]
-  Given a change |dv : Dt^V| and a source |v1 : V|, |dv| can only
-  be valid with |v1| as source for a \emph{single} destination.
-  That is, if |fromto V v1 dv v2a| and |fromto V v1 dv v2b| then |v2a =
-  v2b|.
-\end{lemma}
-\begin{proof}
-  The proof follows, intuitively, because |`oplus`| also maps
-  change |dv| and its source |v1| to its destination, and
-  |`oplus`| is a function.
-
-  More technically, since |`oplus`| respects validity, the
-  hypotheses mean that |v2a = v1 `oplus` dv = v2b| as required.
-\end{proof}
-Beware that, changes can be valid for multiple sources, and associate
-them to different destination. For instance, integer |0| is a
-valid change for all integers.\pg{For this we need to know that
-  there's a change structure for integers.}
-
-Sometimes it's useful to specify that a change |dv| is valid for
-a source |v| without naming |dv|'s destination, which is just |v
-`oplus` dv|. So we give the following
-\begin{definition}[One-sided validity]
-We define relation |valid V v dv| as an abbreviation for
-|fromto V v dv (v `oplus` dv)|.
-\end{definition}
-
-We use this definition right away:
-\begin{lemma}[|`ocompose`| and |`oplus`| interact correctly]
-  If |valid V v1 dv1| and |valid V (v1 `oplus` dv1) dv2| then
-  |v1 `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus` dv2|.
-\end{lemma}
-\begin{proof}
-  We know that |`ocompose`| preserves validity, so under the
-  hypotheses |valid V v1 dv1| and |valid V (v1 `oplus` dv1) dv2|
-  we get that |dv = ocompose dv1 v1 dv2| is a valid change from
-  |v1| to |v1 `oplus` dv1 `oplus` dv2|:
-  \[|fromto V v1 (ocompose dv1
-    v1 dv2) v1 `oplus` dv1 `oplus` dv2|.\]
-  Hence, updating |dv|'s source |v1| with |dv|
-  produces |dv|'s destination |v1 `oplus` dv1 `oplus` dv2|:
-  \[|v1 `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus`
-    dv2|.\]
-\end{proof}
-
-% \begin{lemma}[|`ocompose`| and |`oplus`| interact correctly]
-%   If |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3| then |v1
-%   `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus` dv2|.
-% \end{lemma}
-% \begin{proof}
-%   We know that |`ocompose`| preserves validity, so under the
-%   hypotheses |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3| we get
-%   that |dv = ocompose dv1 v1 dv2| is a valid change from |v1| to
-%   |v3| (|fromto V v1 (ocompose dv1 v1 dv2) v3|). Hence, updating
-%   |dv|'s source |v1| with |dv| produces |dv|'s destination |v3|.
-% \end{proof}
-
-\subsection{Derivable operations}
-\label{sec:chs-derivable-ops}
-We can define |nilc| and |`ocompose`| in terms of other
-operations, and prove they satisfy their requirements for change
-structures.
-
-\begin{code}
-  nil v = v `ominus` v
-  ocompose dv1 v1 dv2 = v1 `oplus` dv1 `oplus` dv2 `ominus` v1
-\end{code}
-\begin{lemma}
-  If we define |nil v = v `ominus` v|, then |nilc| produces
-  valid changes as required (|fromto V v (nil v) v|), for any
-  change structure |chs(V)| and value |v : V|.
-\end{lemma}
-\begin{proof}
-  This follows from validity of |`ominus`| (|fromto V v1 (v2
-  `ominus` v1) v2|) instantiated with |v1 = v| and |v2 = v|.
-\end{proof}
-\begin{lemma}
-  If we define |ocompose dv1 v1 dv2 = v1 `oplus` dv1 `oplus` dv2
-  `ominus` v1|, then |`ocompose`| preserves validity as required,
-  that is, if |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3|
-  then |fromto V v1 (ocompose dv1 v1 dv2) v3|.
-\end{lemma}
-\begin{proof}
-  We need to show that |`ocompose`| preserves validity. So we can
-  assume hypotheses |fromto V v1 dv1 v2| and |fromto V v2 dv2
-  v3|. Since |`oplus`| agrees with validity, we have |v2 = v1 `oplus`
-  dv1|, and |v3 = v2 `oplus` dv2 = v1 `oplus` dv1 `oplus` dv2|.
-
-  Inlining |`ocompose`|'s definition and substituting |v3|, the
-  thesis becomes that if then |fromto V v1 (v1 `oplus` dv1
-  `oplus` dv2 `ominus` v1) (v1 `oplus` dv1 `oplus` dv2)|, which
-  is true because |`ominus`| produces valid changes.
-\end{proof}
-\subsection{Defining new change structures from existing ones}
+\section{Defining new change structures from existing ones}
 \label{sec:chs-fun-chs}
 
 In this section, we derive a change structure for |A -> B| from
