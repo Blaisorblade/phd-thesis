@@ -246,7 +246,7 @@ to |v2|.
 
 Finally, we introduce change composition: if |dv1| is a valid
 change from |v1| to |v2| and |dv2| is a valid change from |v2| to
-|v3|, then |ocompose dv1 v1 dv2| is a valid change from |v1| to
+|v3|, then |ocompose dv1 dv2| is a valid change from |v1| to
 |v3|. This operation will be useful later.
 
 Definitions of these operations and concepts for a type form a
@@ -414,7 +414,7 @@ differentiation in \cref{sec:informal-derive}.
 %   type Dt t
 %   oplus :: t -> Dt t -> t
 %   ominus :: t -> t -> Dt t
-%   (`ocompose`) :: Dt t -> t -> Dt t -> Dt t
+%   (`ocompose`) :: Dt t -> Dt t -> Dt t
 % \end{code}
 % We'll come back to this definition and refine it,
 % describing the laws it satisfies, in \cref{sec:change-struct-tc}.
@@ -574,7 +574,7 @@ pointwise change using change composition:
 %
 \begin{code}
    df a1 da
-=  ocompose (f' a1 da) (f a1) (nabla ^ f (a1 `oplus` da))
+=  ocompose (f' a1 da) (nabla ^ f (a1 `oplus` da))
 \end{code}
 
 One can also compute a pointwise change from a function change:

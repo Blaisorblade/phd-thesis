@@ -97,7 +97,7 @@ change for |v|.
 Finally, change composition |`ocompose`| (``ocompose'') ``pastes
 changes together'': if |dv1| is a valid change from |v1| to |v2|
 and |dv2| is a valid change from |v2| to |v3|, then |ocompose dv1
-v1 dv2| (read ``|dv1| composed with |dv2|'') is a valid change from |v1| to |v3|.
+dv2| (read ``|dv1| composed with |dv2|'') is a valid change from |v1| to |v3|.
 % It's useful to
 % compare the statement of this law to the transitivity of a
 % relation or to the typing of function
@@ -123,11 +123,11 @@ We summarize these descriptions in the following definition.
     produces a change across two values: for all |v1, v2 : V| we require
     |fromto V v1 (v2 `ominus` v1) v2|.
   \item a change composition operation
-    |`ocompose` : Dt^V -> V -> Dt^V -> Dt^V|,
+    |`ocompose` : Dt^V -> Dt^V -> Dt^V|,
     that composes together two changes relative to a base value.
     Change composition must preserve validity:
     for all |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3|
-    we require |fromto V v1 (ocompose dv1 v1 dv2) v3|.
+    we require |fromto V v1 (ocompose dv1 dv2) v3|.
   \end{subdefinition}
 \end{definition}
 
@@ -197,42 +197,40 @@ We define relation |valid V v dv| as an abbreviation for
 We use this definition right away:
 \begin{lemma}[|`ocompose`| and |`oplus`| interact correctly]
   If |valid V v1 dv1| and |valid V (v1 `oplus` dv1) dv2| then
-  |v1 `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus` dv2|.
+  |v1 `oplus` (ocompose dv1 dv2) = v1 `oplus` dv1 `oplus` dv2|.
 \end{lemma}
 \begin{proof}
   We know that |`ocompose`| preserves validity, so under the
   hypotheses |valid V v1 dv1| and |valid V (v1 `oplus` dv1) dv2|
-  we get that |dv = ocompose dv1 v1 dv2| is a valid change from
+  we get that |dv = ocompose dv1 dv2| is a valid change from
   |v1| to |v1 `oplus` dv1 `oplus` dv2|:
-  \[|fromto V v1 (ocompose dv1
-    v1 dv2) v1 `oplus` dv1 `oplus` dv2|.\]
+  \[|fromto V v1 (ocompose dv1 dv2) v1 `oplus` dv1 `oplus` dv2|.\]
   Hence, updating |dv|'s source |v1| with |dv|
   produces |dv|'s destination |v1 `oplus` dv1 `oplus` dv2|:
-  \[|v1 `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus`
+  \[|v1 `oplus` (ocompose dv1 dv2) = v1 `oplus` dv1 `oplus`
     dv2|.\]
 \end{proof}
 
 % \begin{lemma}[|`ocompose`| and |`oplus`| interact correctly]
 %   If |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3| then |v1
-%   `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus` dv2|.
+%   `oplus` (ocompose dv1 dv2) = v1 `oplus` dv1 `oplus` dv2|.
 % \end{lemma}
 % \begin{proof}
 %   We know that |`ocompose`| preserves validity, so under the
 %   hypotheses |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3| we get
-%   that |dv = ocompose dv1 v1 dv2| is a valid change from |v1| to
-%   |v3| (|fromto V v1 (ocompose dv1 v1 dv2) v3|). Hence, updating
+%   that |dv = ocompose dv1 dv2| is a valid change from |v1| to
+%   |v3| (|fromto V v1 (ocompose dv1 dv2) v3|). Hence, updating
 %   |dv|'s source |v1| with |dv| produces |dv|'s destination |v3|.
 % \end{proof}
 
 \subsection{Derivable operations}
 \label{sec:chs-derivable-ops}
-We can define |nilc| and |`ocompose`| in terms of other
+We can define |nilc| in terms of other
 operations, and prove they satisfy their requirements for change
 structures.
 
 \begin{code}
   nil v = v `ominus` v
-  ocompose dv1 v1 dv2 = v1 `oplus` dv1 `oplus` dv2 `ominus` v1
 \end{code}
 \begin{lemma}
   If we define |nil v = v `ominus` v|, then |nilc| produces
@@ -243,23 +241,6 @@ structures.
   This follows from validity of |`ominus`| (|fromto V v1 (v2
   `ominus` v1) v2|) instantiated with |v1 = v| and |v2 = v|.
 \end{proof}
-\begin{lemma}
-  If we define |ocompose dv1 v1 dv2 = v1 `oplus` dv1 `oplus` dv2
-  `ominus` v1|, then |`ocompose`| preserves validity as required,
-  that is, if |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3|
-  then |fromto V v1 (ocompose dv1 v1 dv2) v3|.
-\end{lemma}
-\begin{proof}
-  We need to show that |`ocompose`| preserves validity. So we can
-  assume hypotheses |fromto V v1 dv1 v2| and |fromto V v2 dv2
-  v3|. Since |`oplus`| agrees with validity, we have |v2 = v1 `oplus`
-  dv1|, and |v3 = v2 `oplus` dv2 = v1 `oplus` dv1 `oplus` dv2|.
-
-  Inlining |`ocompose`|'s definition and substituting |v3|, the
-  thesis becomes that if then |fromto V v1 (v1 `oplus` dv1
-  `oplus` dv2 `ominus` v1) (v1 `oplus` dv1 `oplus` dv2)|, which
-  is true because |`ominus`| produces valid changes.
-\end{proof}
 
 \section{Operations on function changes, informally}
 \pg{Move after change structures and drop parts made redundant.}
@@ -267,7 +248,7 @@ structures.
 \pg{Change structures make this whole section redundant.}
 \label{sec:nil-changes-intro}
 When we define change structures, each element is going to be
-associated to at least one nil change, as we're going to show later:
+associated to at least one nil change.
 \begin{restatable}[Existence of nil changes]{lemma}{nilChangesExist}
   \label{lem:nilChangesExist}
   Given a change structure for |V|, to each element |v
@@ -516,11 +497,11 @@ plugins for types |sigma `times` tau| and |sigma + tau|.
   \item We define |nilc| through \[|nil f = f `ominus` f|,\] like in
     \cref{sec:chs-derivable-ops}, and reuse its generic
     correctness proof.
-  \item We define change composition as \[|ocompose df1 f1 df2 =
-    \a da -> ocompose (df1 a (nil a)) (f1 a) (df2 a da)|.\]
+  \item We define change composition as \[|ocompose df1 df2 =
+    \a da -> ocompose (df1 a (nil a)) (df2 a da)|.\]
   \item We prove that change composition preserves validity on |A
     -> B|. That is, we must prove \[|fromto B (f1 a1) (ocompose
-    (df1 a1 (nil a1)) (f1 a1) (df2 a1 da)) (f3 a2)|\] for every |f1,
+    (df1 a1 (nil a1)) (df2 a1 da)) (f3 a2)|\] for every |f1,
     f2, f3, df1, df2, a1, da, a2| satifsfying |fromto (A -> B) f1
     df1 f2|, |fromto (A -> B) f2 df2 f3| and |fromto A a1 da a2|.
 
@@ -612,9 +593,9 @@ dv| where |dv : eval(Dt^tau)|.
   nil emptyRho                                                                    = emptyRho
   nil (rho, x = v)                                                                = (nil rho, x = v, dx = nil v)
 
-  ocompose emptyRho emptyRho emptyRho                                             = emptyRho
-  ocompose ((drho1, x = v1, dx = dv1)) (rho, x = v1) ((drho2, x = v2, dx = dv2))  =
-      (ocompose drho1 rho drho2, x = v1, dx = ocompose dv1 v1 dv2)
+  ocompose emptyRho emptyRho                                             = emptyRho
+  ocompose ((drho1, x = v1, dx = dv1)) ((drho2, x = v2, dx = dv2))  =
+      (ocompose drho1 drho2, x = v1, dx = ocompose dv1 dv2)
 \end{code}
 \end{definition}
 
@@ -752,15 +733,17 @@ As a summary of definitions on types, we show that:
 % \begin{code}
 %   v1 `oplus` (v2 `ominus` v1) = v2
 %   v1 `oplus` (nil v1) = v1
-%   v1 `oplus` (ocompose dv1 v1 dv2) = v1 `oplus` dv1 `oplus` dv2
+%   v1 `oplus` (ocompose dv1 dv2) = v1 `oplus` dv1 `oplus` dv2
 % \end{code}
 % Later, once we define a suitable equivalence relation |`doe`| on
 % changes, we'll also be able to state a few further algebraic laws:
 % \begin{code}
 %   nil v1 `doe` v1 `ominus` v1
 %   (v1 `oplus` dv) `ominus` v1 `doe` dv
-%   ocompose dv1 v1 dv2 = v1 `oplus` dv1 `oplus` dv2 `ominus` v1
 % \end{code}
+
+% Now this equation is a bit more confusing.
+%   ocompose dv1 dv2 = v1 `oplus` dv1 `oplus` dv2 `ominus` v1
 
 % We can define
 % \begin{code}
@@ -778,7 +761,7 @@ As a summary of definitions on types, we show that:
 
 %   oplus : (v1 : V) -> {v2 : V} -> (dv : Dt2 v1 v2) -> V
 %   ominus : (v2 v1 : V) -> (Dt2 v2 v1)
-%   `ocompose` : (v1 : V) -> {v2 v3 : V} -> (dv1 : Dt2 v1 v2) -> (dv2 : Dt2 v2 v3) -> Dt2 v1 v3
+%   `ocompose` : {v1 v2 v3 : V} -> (dv1 : Dt2 v1 v2) -> (dv2 : Dt2 v2 v3) -> Dt2 v1 v3
 % \end{code}
 
 \subsection{Alternative definitions of change validity}
@@ -1469,11 +1452,11 @@ clearer, we only give the first such proof in full.
     ((a, b)) ((nil a, nil b)) ((a, b))|, because |nilc| is
     correct on each component.
   \item We define change composition to distribute componentwise:
-    \[|ocompose ((da1, db1)) ((a1, b1)) ((da2, db2)) =
-    (ocompose da1 a1 da2, ocompose db1 b1 db2)|.\]
+    \[|ocompose ((da1, db1)) ((da2, db2)) =
+    (ocompose da1 da2, ocompose db1 db2)|.\]
   \item Change composition is correct on |A `times` B|, that is
-    \[|fromto (A `times` B) ((a1, b1)) ((ocompose da1 a1 da2,
-      ocompose db1 b1 db2)) ((a3, b3))|\] if |fromto (A `times` B)
+    \[|fromto (A `times` B) ((a1, b1)) ((ocompose da1 da2,
+      ocompose db1 db2)) ((a3, b3))|\] if |fromto (A `times` B)
     ((a1, b1)) ((da1, db1)) ((a2, b2))| and |fromto (A `times` B)
     ((a2, b2)) ((da2, db2)) ((a3, b3))|, because change composition is correct on
     both |A| and |B|.
