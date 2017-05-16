@@ -87,30 +87,24 @@ Key properties of change structures follow in
   A change structure |chs(V)| over a set |V| is given by:
   \begin{subdefinition}
   \item a basic change structure for |V| (hence change set |Dt^V| and validity |fromto V v1 dv v2|);
-  \item an update operation \[|`oplus` : V -> Dt^V -> V|\] that
+  \item an update operation |`oplus` : V -> Dt^V -> V| that
     \emph{updates} a value with a change;
   \item proof that |`oplus`| agrees with validity: if |fromto V v1 dv
     v2| then |v1 `oplus` dv = v2|;
-  \item a nil change operation \[|nilc : V -> Dt^V|;\]
+  \item a nil change operation |nilc : V -> Dt^V|;
   \item proof that for every |v : V|, change |nil v| is a valid
     nil change for |v|, that is, |fromto V v (nil v) v|;
   \item a difference operation |`ominus` : V -> V -> Dt^V| that
     produces a change across two values;
   \item proof that |`ominus`| produces valid changes: for all |v1, v2 :
     V| we have
-    \[|fromto V v1 (v2 `ominus` v1) v2|;\]
-  \item a change composition operation \[|`ocompose` : Dt^V -> V -> Dt^V
-      -> Dt^V|,\]
+    |fromto V v1 (v2 `ominus` v1) v2|;
+  \item a change composition operation |`ocompose` : Dt^V -> V -> Dt^V
+      -> Dt^V|,
     that composes together two changes relative to a base value.
   \item proof that |`ocompose`| preserves validity: if |fromto V
     v1 dv1 v2| and |fromto V v2 dv2 v3| then
-    \[|fromto V v1 (ocompose dv1 v1 dv2) v3|.\] It's useful to
-    compare the statement of this law to the transitivity of a
-    relation or to the typing of function
-    composition.\footnote{This analogy can be made formal by
-      saying that triples |(v1, dv, v2)| such that |fromto V v1
-      dv v2| are the arrows of a category under change
-      composition, where objects are individual values.}
+    |fromto V v1 (ocompose dv1 v1 dv2) v3|.
   \end{subdefinition}
 \end{definition}
 
