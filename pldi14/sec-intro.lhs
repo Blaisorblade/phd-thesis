@@ -4,12 +4,14 @@
 
 \chapter{Change theory}
 \label{ch:change-theory}
+\pg{Rewrite this chapter and this intro.}
 In the previous chapter, we have shown that evaluating the result
 of differentiation produces a valid change |dv| from the old
-output |v1| to the new one |v2|. We also want a way to
-\emph{compute} |v2| from |v1| and |dv|, that is, we want to
-\emph{define} the operator |`oplus`| that we have talked so much
-about.
+output |v1| to the new one |v2|.
+%
+To \emph{compute} |v2| from |v1| and |dv|, in this chapter we
+introduce formally the operator |`oplus`| that we have talked so
+much about.
 
 Moreover, it is not yet clear concretely how plugins should
 define differentiation on primitives. To write derivatives on
@@ -21,46 +23,37 @@ change operations behave as specified. In particular, such
 guarantees are required to prove that the derivatives of some
 primitives are correct.
 
-Hence, we continue exploring how changes behave, and introduce
-operations (including |`oplus`|) that manipulate them. We will
-define these operations both at the semantic level to operate on
-change values, and on the syntactic level to use in object
-programs, such as derivatives of primitives. While often the same
-definitions are applicable, additional performance concerns apply
-to object-level implementations.
+% We define next the concept of \emph{change structures}, to
 
-We will summarize this section in \cref{fig:change-structures};
-readers might want to jump there for the definitions. However, we
-first build up to those definitions.
+% Hence, we continue exploring how changes behave, and introduce
+% operations (including |`oplus`|) that manipulate them. We will
+% define these operations both at the semantic level to operate on
+% change values, and on the syntactic level to use in object
+% programs, such as derivatives of primitives. While often the same
+% definitions are applicable, additional performance concerns apply
+% to object-level implementations.
 
-% The notion of basic change structure is somewhat weak, since we
-% place no constraints on validity, but we are going to build on it
-% a more interesting notion of \emph{change structure}, which adds
-% operations including |`oplus`| and requirements on them.
+% We will summarize this section in \cref{fig:change-structures};
+% readers might want to jump there for the definitions. However, we
+% first build up to those definitions.\pg{Correct when revising figures.}
+
+% % The notion of basic change structure is somewhat weak, since we
+% % place no constraints on validity, but we are going to build on it
+% % a more interesting notion of \emph{change structure}, which adds
+% % operations including |`oplus`| and requirements on them.
 
 As anticipated, we use changes to generalize the calculus of
 finite differences from groups (see
 \cref{sec:generalize-fin-diff}). We'll later see how change
 structures generalize groups.
 
-But before defining |`oplus`|, we need to introduce a few more
-concepts, as we do next.
-% but also |nilc| and |`ominus`| and
-\section{Formally defining ⊕ and change structures}
-\label{sec:change-structures-formal}
-\label{sec:oplus}
-\label{sec:invalid}
-Next, we will formally introduce \emph{change operators} |`oplus`|, |`ominus`|
-and |nilc| and relate them to validity. In particular, we will
-prove that |fromto tau v1 dv v2| implies |v1 `oplus` dv = v2|.
-% and explain why the converse is not true.
-\pg{Make sure we explain \emph{somewhere} why the converse is not true.}
+% But before defining |`oplus`|, we need to introduce a few more
+% concepts, as we do next.
+% % but also |nilc| and |`ominus`| and
 
-To introduce these operators, we first define the notion of
-\emph{change structure} on a set |V| by taking a basic change
-structure on |V| and adding requirements. Then, to understand
-their definition better, we prove a few corollaries of their
-definition in \cref{sec:chs-properties,sec:chs-derivable-ops}.
+The remainder of this chapter is organized as follows.
+We define change structures in
+\cref{sec:change-structures-formal}.\pg{Fix summary}.
 Then, we show how to take change structures on |A| and |B| and
 define new ones on |A -> B| in \cref{sec:chs-fun-chs}. Using
 these structures, we finally show that starting from change
