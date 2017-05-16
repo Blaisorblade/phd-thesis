@@ -47,7 +47,6 @@ But before defining |`oplus`|, we need to introduce a few more
 concepts, as we do next.
 % but also |nilc| and |`ominus`| and
 \section{Formally defining ⊕ and change structures}
-%\subsection{Updating values by changes with ⊕}
 \label{sec:change-structures-formal}
 \label{sec:oplus}
 \label{sec:invalid}
@@ -67,6 +66,28 @@ define new ones on |A -> B| in \cref{sec:chs-fun-chs}. Using
 these structures, we finally show that starting from change
 structures for base types, we can define change structures for
 all types |tau| and contexts |Gamma|.
+
+\section{Formally defining ⊕ and change structures}
+%\subsection{Updating values by changes with ⊕}
+\label{sec:change-structures-formal}
+\label{sec:oplus}
+%\label{sec:invalid}
+In this section, we define what is a \emph{change structure} on a
+set |V|. A change structure extends a basic change structure with
+\emph{change operators} |`oplus`|, |`ominus`|, |`ocompose`| and
+|nilc|. Change structures also require change operators to
+respect validity.
+For instance, updating a value |v1| with a valid change |fromto
+tau v1 dv v2| must produce its destination |v2| (that is, |v1
+`oplus` dv = v2|).
+Key properties of change structures follow in
+\cref{sec:chs-properties,sec:chs-derivable-ops}.
+
+% For instance, updating a value |v1| with a valid change |fromto
+% tau v1 dv v2| must produce its destination |v2| (that is, |v1
+% `oplus` dv = v2|).
+% and explain why the converse is not true.
+\pg{Make sure we explain \emph{somewhere} why the converse is not true.}
 
 \begin{definition}
   \label{def:change-structure}
@@ -100,7 +121,7 @@ all types |tau| and contexts |Gamma|.
   \end{subdefinition}
 \end{definition}
 
-\paragraph{Notation}
+\begin{notation}
 Operators |`oplus`| and |`ominus`| can be subscripted to
 highlight their base set, but we will usually omit such
 subscripts. Moreover, |`oplus`| is left-associative, so that
@@ -109,7 +130,7 @@ subscripts. Moreover, |`oplus`| is left-associative, so that
 Finally, whenever we have a change structure such as
 |chs(A)|, |chs(B)|, |chs(V)|, and so on, we write respectively
 |A|, |B|, |V| to refer to its base set.
-%$\ocompose$
+\end{notation}
 
 \subsection{Properties of change structures}
 \label{sec:chs-properties}
@@ -230,7 +251,7 @@ structures.
   is true because |`ominus`| produces valid changes.
 \end{proof}
 
-\section{Change structures, informally}
+\section{Operations on function changes, informally}
 \pg{Move after change structures and drop parts made redundant.}
 \subsection{Nil changes}
 \pg{Change structures make this whole section redundant.}
