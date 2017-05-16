@@ -84,19 +84,20 @@ As usual, we'll use metavariables |v, v1, v2, ...| will range over elements of
 % and explain why the converse is not true.
 \pg{Make sure we explain \emph{somewhere} why the converse is not true.}
 
+\pg{Update earlier mention in chapter 11}.
 Let's first recall change operators.
-Operator |`oplus`| updates a value with a change: If |dv| is a
+Operator |`oplus`| (``oplus'') updates a value with a change: If |dv| is a
 valid change from |v1| to |v2|, then |v1 `oplus` dv| (read as
 ``|v1| updated by |dv|'' or ``|v1| oplus |dv|'') is guaranteed to
 return |v2|.
-Operator |`ominus`| produces a difference between two values: |v2
+Operator |`ominus`| (``ominus'') produces a difference between two values: |v2
 `ominus` v1| is a valid change from |v1| to |v2|.
-Operator |nilc| produces nil changes: |nil v| is a
-nil change for |v|.
-Finally, change composition ``pastes changes together'': if |dv1|
-is a valid change from |v1| to |v2| and |dv2| is a valid change
-from |v2| to |v3|, then |ocompose dv1 v1 dv2| is a valid change
-from |v1| to |v3|.
+Operator |nilc| (``nil'') produces nil changes: |nil v| is a nil
+change for |v|.
+Finally, change composition |`ocompose`| (``ocompose'') ``pastes
+changes together'': if |dv1| is a valid change from |v1| to |v2|
+and |dv2| is a valid change from |v2| to |v3|, then |ocompose dv1
+v1 dv2| (read ``|dv1| composed with |dv2|'') is a valid change from |v1| to |v3|.
 % It's useful to
 % compare the statement of this law to the transitivity of a
 % relation or to the typing of function
@@ -109,27 +110,24 @@ We summarize these descriptions in the following definition.
 
 \begin{definition}
   \label{def:change-structure}
-  A change structure |chs(V)| over a set |V| is given by:
+  A change structure |chs(V)| over a set |V| requires:
   \begin{subdefinition}
-  \item a basic change structure for |V| (hence change set |Dt^V| and validity |fromto V v1 dv v2|);
-  \item an update operation |`oplus` : V -> Dt^V -> V| that
-    \emph{updates} a value with a change;
-  \item proof that |`oplus`| agrees with validity: if |fromto V v1 dv
-    v2| then |v1 `oplus` dv = v2|;
-  \item a nil change operation |nilc : V -> Dt^V|;
-  \item proof that for every |v : V|, change |nil v| is a valid
-    nil change for |v|, that is, |fromto V v (nil v) v|;
+  \item A basic change structure for |V| (hence change set |Dt^V|
+    and validity |fromto V v1 dv v2|).
+  \item An update operation |`oplus` : V -> Dt^V -> V| that
+    \emph{updates} a value with a change. Update must agree with
+    validity: for all |fromto V v1 dv v2| we require |v1 `oplus` dv = v2|.
+  \item A nil change operation |nilc : V -> Dt^V|, that must
+    produce nil changes: for all |v : V| we require |fromto V v (nil v) v|.
   \item a difference operation |`ominus` : V -> V -> Dt^V| that
-    produces a change across two values;
-  \item proof that |`ominus`| produces valid changes: for all |v1, v2 :
-    V| we have
-    |fromto V v1 (v2 `ominus` v1) v2|;
-  \item a change composition operation |`ocompose` : Dt^V -> V -> Dt^V
-      -> Dt^V|,
+    produces a change across two values: for all |v1, v2 : V| we require
+    |fromto V v1 (v2 `ominus` v1) v2|.
+  \item a change composition operation
+    |`ocompose` : Dt^V -> V -> Dt^V -> Dt^V|,
     that composes together two changes relative to a base value.
-  \item proof that |`ocompose`| preserves validity: if |fromto V
-    v1 dv1 v2| and |fromto V v2 dv2 v3| then
-    |fromto V v1 (ocompose dv1 v1 dv2) v3|.
+    Change composition must preserve validity:
+    for all |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3|
+    we require |fromto V v1 (ocompose dv1 v1 dv2) v3|.
   \end{subdefinition}
 \end{definition}
 
