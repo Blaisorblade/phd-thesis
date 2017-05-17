@@ -531,6 +531,7 @@ validity by recursion on types, that is, as a \emph{logical relation} (see
 %% = \x -> x + y|.
 
 \subsubsection{Pointwise changes}
+\label{ssec:pointwise-changes}
 % We can also describe the difference from function |f| to function
 % |f `oplus` df| as |nabla^f = \x -> f2 x `ominus` f1 x|.
 \pg{Our definition of function change might seem to defy intuitions. In

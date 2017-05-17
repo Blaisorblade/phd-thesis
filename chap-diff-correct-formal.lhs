@@ -124,6 +124,7 @@ using the following notation.%
 
 We can have multiple basic change structures on the same set.
 \begin{example}[Replacement changes]
+\label{ex:replacement}
 For instance, for any set |V| we can talk about \emph{replacement changes} on
 |V|: a replacement change |dv = !v2| for a value |v1 : V| simply specifies
 directly a new value |v2 : V|, so that |fromto V v1 (! v2) v2|. We read |!| as
@@ -380,7 +381,7 @@ The key equations for function types are:
   changes to valid output changes. As seen in
   \cref{sec:higher-order-intro,lem:validity-binary-functions,lem:binary-derivatives-nil-changes},
   such valid outputs can in turn be valid function changes. We'll see the same
-  idea at work in \cref{def:bchs-contexts-types}, in the correctness proof of
+  idea at work in \cref{lem:bchs-contexts-types}, in the correctness proof of
   |derive(param)|.
 
   As we have finally seen in this section, this definition of validity can be

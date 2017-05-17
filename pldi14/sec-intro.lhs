@@ -2,7 +2,7 @@
 %include polycode.fmt
 %include changes.fmt
 
-\chapter{Change theory}
+\chapter{Change structures}
 \label{ch:change-theory}
 \pg{Rewrite this chapter and this intro.}
 In the previous chapter, we have shown that evaluating the result
@@ -1231,33 +1231,178 @@ of changes.
 % \cref{eq:correctness-math-funs}.\footnote{A few technical details
 %   complicate the picture, but we'll discuss them later.}
 
-\section{Based changes}
-\pg{We can study }
+% \section{Based changes}
+% \pg{We can study }
 
-\section{Change equivalence}
-\label{sec:change-equivalence}
-\pg{We can use based changes.}
+\chapter{Discussing changes syntactically}
+To define derivatives of primitives, we will often discuss
+changes directly on programs.
+We'll need language to say that term |dt| is a change from term
+|t1| to term |t2|, or to term |t1 `oplus` dt|, that |dx| is a
+change from |x| to |x `oplus` dx|, and so on. In such a
+statement, we evaluate |t1| and |t2| in \emph{the same} environment.
 
-Next, we define an equivalence relation on changes, that
-describes when two changes |dv1, dv2| can be substituted for one
-another.
+But currently we lack the language to do so. We can use the
+change structure on |eval Gamma -> eval tau|, and write |fromto
+() t1 dt t2|.\pg{How to write Gamma, tau there?}
+But in such a statement means that for all
 
-\begin{definition}[Change equivalence]
-  Two changes |dv1|, |dv2| are equivalent if and only if there
-  exists |v1, v2| such that both |dv1| and |dv2| are valid from
-  |v1| to |v2|.
+\pg{notation?}
+\begin{definition}[Syntactic validity]
+  \label{def:syntactic-validity}
+  |fromto (Gamma, tau) t1 dt t2|
+  |fromtosyn Gamma tau t1 dt t2|.
+  %|fromtosyn Gamma tau t1 dt t2 = forall (fromto Gamma rho1 drho rho2). fromto tau (eval t1 rho1) (eval dt drho) (eval t2 rho1)|.
 \end{definition}
 
+% We write substitution as |t [x := s]|, and parallel substitution
+% as 
+% |t [Gamma := Gamma `oplus` Dt^Gamma]|
+% \begin{theorem}[Syntactic correctness for |derive(param)|]
+%   |fromtosyn Gamma tau t (derive t) (t [Gamma := Gamma `oplus` Dt^Gamma])|.
+% \end{theorem}
+% \begin{lemma}[Substitution lemma]
+%   Take terms |Gamma /- s : sigma| and |Gamma , x : sigma /- t :
+%   tau|. Then for all environments |rho : eval(Gamma)|
+%   substitution commutes with evaluation:
+%   |eval (t [x := s]) rho = eval t (rho, x = eval(s) rho)|.
+% \end{lemma}
+
+% This 
+% We will discuss changes on terms directly, without referencing
+% explicitly a denotational semantics.
+% Up to now, we have only discussed what 
+
+\begin{lemma}
+\end{lemma}
+\section{Change equivalence}
+\label{sec:change-equivalence}
+\pg{We can use based changes. Better not.}
+
+To enable optimizations on programs manipulating changes,
+we next define an equivalence relation on changes called
+\emph{change equivalence}. When it is clear we talk about
+changes, we will just talk about equivalence.
+
+Change equivalence is defined in terms of validity so that
+validity-preserving operations preserve change equivalence: If
+two changes |dv1, dv2| are change-equivalent, one can be
+substituted for the other in a validity-preserving context.
+
+\begin{definition}[Change equivalence]
+  Two changes |dv1|, |dv2| are equivalent, relative to source
+  |v1|, if and only if there exists |v2| such that both |dv1| and
+  |dv2| are valid from |v1| to |v2| (that is |fromto V v1 dv1
+  v2|, |fromto V v1 dv2 v2|).
+  We write then |fromto V v1 (dv1 `doe` dv2) v2|, or simply |dv1
+  (doeIdx(v1) dv2|, or just |dv1 `doe` dv2| when the source |v1| is
+  clear from context.
+\end{definition}
+
+Two changes are often equivalent relative to a source but not
+others. Hence |dv1 `doe` dv2| is always an abbreviation for
+change equivalence at a specific source.
+For instance, we later use a change structure for integers using
+both replacement changes and differences (\cref{ex:replacement}).
+In this structure, change |0| is nil for all numbers, while
+change |!5| (``bang 5'') replaces any number with 5. Hence,
+changes |0| and |!5| are equivalent only relative to source 5,
+and we write |0 doeIdx(5) !5|.
+
+\paragraph{Change equivalence is an equivalence}
+By applying definitions, one can verify that change equivalence
+relative to a source is a symmetric and transitive relation.
+However, it is only reflexive on valid changes.
+\begin{lemma}[Change equivalence is an equivalence relation.]
+  For each set |V| and source |v `elem` V|, change equivalence
+  relative to source |v| is an equivalence relation over the sets
+  of changes |dv `elem` Dt^V| that are valid with source |v|.
+\end{lemma}
+Readers with the relevant expertise should recognize that change
+equivalence is a partial equivalence relation (PER).
+
+\paragraph{Preserving change equivalence}
 Change equivalence is respected by all validity-preserving
-operations, such as valid function changes |df|.
+operations. We state few lemmas as examples.
 
-Viceversa, two function changes that map equivalent sources to
-equivalent destinations are also equivalent.
+\begin{lemma}[Valid function changes respect change equivalence]
+Any valid function change |fromto (A -> B) f1 df f2| respect
+change equivalence: if |fromto A v1 (dv1 `doe` dv2) v2| then
+|fromto B (f1 v1) (df v1 dv1 `doe` df v1 dv2) (f2 v2)|.
+\end{lemma}
+\begin{proof}
+  To prove this, simply show that both |df v1 dv1| and |df v1
+  dv2| have the expected source and destination because of |df|'s
+  validity.
+\end{proof}
+This lemma holds because the source and destination of |df v1 dv|
+don't depend on |dv|, only on its source and destination. Source
+and destination are shared by equivalent changes. Hence,
+validity-preserving functions map equivalent changes to
+equivalent changes.
 
-\pg{Hm. Do the theorems we want work with this definition?}
+Change equivalence can be extended to terms.
+\begin{definition}[Term change equivalence]
+Two change terms |Dt^Gamma /- dt1 : Dt^tau|, |Dt^Gamma /- dt2 :
+Dt^tau| are change equivalent, relative to source |Gamma /- t :
+tau|, if for all |fromto Gamma rho1 drho rho2| we have that |eval
+dt1 drho (doeIdx(eval t rho1)) (eval dt2 drho)|. We write then |dt1
+(doeIdx t) dt2| or simply |dt1 `doe` dt2|.
+%|fromto tau v1 (dv1 `doe` dv2) v2|,
+\end{definition}
+The equivalence of |dt1| and |dt2| relative to |t| does not
+require that the destination is again |t|.
+\pg{Use \cref{def:syntactic-validity} to also state the destination.}
+\pg{Introduce this earlier}
 
-Earlier we have sometimes written that two changes are equal.
-However, that's often too restrictive.
+If two change terms are change equivalent with respect to the
+right source, we can replace one for the other to optimize a
+program, as long as the program context is validity-preserving.
+
+% Since differentiation produces valid changes, 
+% Differentiation produces validity-preserving operations.
+\begin{lemma}[|derive(param)| preserves change equivalence]
+For any term |Gamma /- t : tau|, |derive(t)| preserves change
+equivalence: |derive(t) `doe` derive(t)|, that is |fromto (Gamma
+-> tau) (eval t) (eval (derive t) `doe` eval (derive t)) (eval
+t)|, that is, for all |fromto Gamma rho1 drho rho2| we have
+|fromto (Gamma -> tau) (eval t rho1) (eval dt1 drho `doe` eval
+dt2 drho) (eval t rho2)|.
+\end{lemma}
+
+There are further operations that preserve validity. To represent
+terms with ``holes'' where other terms can be inserted, 
+we can define \emph{one-level contexts} |F|, and contexts |E|, as
+is commonly done:
+\begin{code}
+  F ::= [] t dt | ds t [] | \x dx -> [] | t `oplus` [] | dt1 `ocompose` [] | [] `ocompose` dt2
+  E ::= [] | F[E]
+\end{code}
+If |fromto tau t1 (dt1 `doe` dt2) t2| and our context |E|
+preserves changes from |t1| to |t2| then |F[dt1]| and |F[dt2]|
+are change equivalent. It is easy to prove such lemmas for each
+possible shape of one-level context |F|. For instance \pg{resume}.
+
+% or more concisely
+% |fromto (Gamma -> tau) (eval t) (eval dt1 `doe` eval dt2) (eval t)|.
+
+  % E ::= [] | E v dv | df v E | \v dv -> E | v `oplus` E | dv1
+  % `ocompose` E | E `ocompose` dv2
+
+% such as valid function changes |df|. We only state
+% here one relevant lemma.
+
+% That's because
+% validity-respecting operations
+% This follows
+% because of how validity preservation is defined:
+
+% And conversely, two function changes that map equivalent sources
+% to equivalent destinations are also equivalent.
+
+Earlier (say, in \cref{ssec:pointwise-changes}) we have sometimes
+written that two changes are equal. However, that's often too
+restrictive.
 
 \section{The relation with parametricity and the abstraction theorem}
 

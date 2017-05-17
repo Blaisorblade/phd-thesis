@@ -37,6 +37,7 @@
 
 %format (oplusIdx(t)) = "\oplus_{" t "}"
 %format (ominusIdx(t)) = "\ominus_{" t "}"
+%format (doeIdx(v)) = "\Doe_{" v "}"
 
 %format `ocompose` = "\circledcirc "
 %format ocompose (dv1) (dv2) = dv1 "\circledcirc" dv2
@@ -82,6 +83,9 @@
 %format dv1
 %format dv2
 %format dv3
+
+%format dt1
+%format dt2
 
 %format x0
 %format x1
@@ -142,8 +146,13 @@
 %format tau2
 %format iota = "\iota"
 
+% Hook into forall.fmt:
+
+%format exists(x) = exists_ x "\hsforall "
+%format exists_ = "\exists "
 
 %format fromto (tau) (v1) (dv) (v2) = "\validfromto{" tau "}{" v1 "}{" dv "}{" v2 "}"
+%format fromtosyn (gamma) (tau) (v1) (dv) (v2) = "\validfromto{" gamma "," tau "}{" v1 "}{" dv "}{" v2 "}"
 
 %format (new(v)) = "\New{" v "}"
 %format (old(v)) = "\Old{" v "}"
