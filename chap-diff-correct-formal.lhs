@@ -450,9 +450,15 @@ function space |eval(Gamma) -> eval(tau)|.
 \begin{lemma}%[Basic change structures for contexts and types]
   \label{lem:bchs-contexts-types}
   The construction of basic change structures on function spaces
-  (\cref{def:basic-change-structure-funs}) associates a basic change structure
-  |bchs(Gamma) -> bchs(tau)| to each context |Gamma| and type |tau|.
+  (\cref{def:basic-change-structure-funs}) associates to each context |Gamma|
+  and type |tau| a basic change structure |bchs(Gamma) -> bchs(tau)| on function
+  space |eval Gamma -> eval tau|.
 \end{lemma}
+\begin{notation}
+As usual, we write the change set as |Dt^(eval Gamma -> eval tau)|; for
+validity, we write |fromtosem Gamma tau f1 df f2| rather than |fromto (eval
+Gamma -> eval tau) f1 df f2|.
+\end{notation}
 
 \section{Correctness of differentiation}
 \label{sec:correct-derive}

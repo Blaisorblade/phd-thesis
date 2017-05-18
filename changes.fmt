@@ -152,6 +152,7 @@
 %format exists_ = "\exists "
 
 %format fromto (tau) (v1) (dv) (v2) = "\validfromto{" tau "}{" v1 "}{" dv "}{" v2 "}"
+%format fromtosem (gamma) (tau) (v1) (dv) (v2) = "\validfromto{" gamma, tau "}{" v1 "}{" dv "}{" v2 "}"
 %format fromtosyn (gamma) (tau) (v1) (dv) (v2) = "\validfromto{" gamma "," tau "}{" v1 "}{" dv "}{" v2 "}"
 
 %format (new(v)) = "\New{" v "}"
