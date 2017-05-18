@@ -601,11 +601,20 @@ to validity, by proving \cref{thm:valid-oplus}, which we state in advance here:
 Hence, updating base result |eval(t) rho1| by change
 |eval(derive(t)) drho| via |`oplus`| gives the updated result
 |eval(t) rho2|.
+\begin{fullCompile}
 \begin{restatable*}[|derive(param)| is correct, corollary]{corollary}{deriveCorrectOplus}
   \label{thm:derive-correct-oplus}
   If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
   |eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|.
 \end{restatable*}
+\end{fullCompile}
+\begin{partCompile}
+\begin{restatable}[|derive(param)| is correct, corollary]{corollary}{deriveCorrectOplus}
+  \label{thm:derive-correct-oplus}
+  If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
+  |eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|.
+\end{restatable}
+\end{partCompile} 
 We anticipate the proof of this corollary:
 \begin{proof}
   First, differentiation is correct (\cref{thm:derive-correct}), so under the hypotheses

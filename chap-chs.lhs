@@ -562,7 +562,16 @@ agrees with validity (\cref{thm:valid-oplus}) and |derive(param)|
 is correct (\cref{thm:derive-correct}) we get
 \cref{thm:derive-correct-oplus}:
 
+\begin{fullCompile}
 \deriveCorrectOplus
+\end{fullCompile}
+\begin{partCompile}
+\begin{restatable}[|derive(param)| is correct, corollary]{corollary}{deriveCorrectOplus}
+  \label{thm:derive-correct-oplus}
+  If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
+  |eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|.
+\end{restatable}
+\end{partCompile} 
 
 We can also define a change structure for environments. Each
 change structure operation for environments acts
