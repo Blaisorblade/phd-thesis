@@ -7,9 +7,14 @@
 \input{pldi14/fig-differentiation}
 
 To support incrementalization, in this chapter we introduce differentiation and
-state and prove its correctness, making our previous discussion precise. We
-formalize what are valid changes, what are derivatives, and we show how to
-produce derivatives using |derive(param)|.
+formally prove it correct. That is, we prove that |eval(derive(t))| produces
+derivatives. As we explain in \cref{sec:derivative-formal}, derivatives
+transform valid input changes into valid output changes (\cref{slogan:derive}).
+Hence, we define what are valid changes (\cref{sec:changes-formally}). As we'll
+explain in \cref{sec:validity-logical}, validity is a logical relation. As we
+explain in \cref{sec:derive-correct-proof}, our correctness theorem is the
+\emph{fundamental lemma} for the validity logical relation, proved by induction
+over the structure of terms.
 %
 Crucial definitions or derived facts are summarized in \cref{fig:differentiation}.
 %
@@ -17,17 +22,17 @@ Later, in \cref{ch:change-theory} we study consequences of correctness and
 change operations.
 
 All definitions and proofs in this and next chapter is mechanized in Agda,
-except where otherwise indicated. We typically include full proofs anyway,
-because we believe they clarify the meaning and consequences of our definitions.
-To make proofs accessible, we try and provide enough detail that our target
-readers can follow along \emph{without} pencil and paper, at the expense of
-making our proofs look longer than they would usually be. As we target readers
-proficient with STLC (but not necessarily proficient with logical relations),
-we'll still omit routine steps needed to reason on STLC, such as typing
-derivations.
+except where otherwise indicated. To this writer, given these definitions all
+proofs have become straightforward and unsurprising. Nevertheless, first
+obtaining these proofs took a while. So we typically include full proofs.
+We also believe these proofs clarify the meaning and consequences of our definitions.
+To make proofs as accessible as possible, we try and provide enough detail that
+our target readers can follow along \emph{without} pencil and paper, at the
+expense of making our proofs look longer than they would usually be. As we
+target readers proficient with STLC (but not necessarily proficient with logical
+relations), we'll still omit routine steps needed to reason on STLC, such as
+typing derivations or binding issues.
 
-% We also elaborate on the effect of
-% differentiation on higher-order programs.
 \section{Changes and validity}
 \label{sec:changes-formally}
 In this section we introduce formally (a) a description of changes; (b) a
@@ -105,14 +110,14 @@ multigraph because our definition allows multiple edges between |v1| and |v2|.
 A change |dv| can be valid from |v1| to |v2| and from |v3| to |v4|, but we'll
 still want to talk about \emph{the} source and \emph{the} destination of a
 change. When we talk about a change |dv| valid from |v1| to |v2|, value |v1| is
-|dv|'s source and |v2| is |dv|'s destination. Hence we'll always quantify
+|dv|'s source and |v2| is |dv|'s destination. Hence we'll systematically quantify
 theorems over valid changes |dv| with their sources |v1| and destination |v2|,
 using the following notation.%
 \footnote{If you prefer, you can tag a change with its source and destination by
   using a triple, and regard the whole triple |(v1, dv, v2)| as a change.
   Mathematically, this gives the correct results, but we'll typically not use
   such triples as changes in programs for performance reasons.}
-\begin{notation}
+\begin{notation}[Quantification over valid changes]
   We write \[|forall (fromto V v1 dv v2)^^ . ^^ P|,\] and say ``for all (valid)
   changes |dv| from |v1| to |v2| on set |V| we have |P|'', as a shortcut for
   \[|forall
@@ -156,13 +161,8 @@ Next, we define a basic change structure that we call |bchs(A) ->
 bchs(B)| for an arbitrary function space |A -> B|, assuming we have basic change
 structures for both |A| and |B|.
 %
-Take function values |f1, f2 : A -> B|. As sketched,
-valid function changes map valid input changes to valid output
-changes. More precisely, |df| is a valid function change
-from |f1| to |f2| if, for all changes |da| from |a1| to |a2| on set |A|,
-value |df a1 da|
-is a valid change from |f1 a1| to |f2 a2|. Formally, we define
-a basic change structure on function spaces as follows.
+We claimed earlier that valid function changes map valid input changes to valid
+output changes. We make this claim formal through next definition.
 \begin{definition}[Basic change structure on |A -> B|]
   \label{def:basic-change-structure-funs}
   Given basic change structures on |A| and |B|, we define a basic change
@@ -171,12 +171,17 @@ a basic change structure on function spaces as follows.
   \item Change set |Dt^(A -> B)| is |A -> Dt^A -> Dt^B|.
   \item Function change |df| is valid from |f1|
     to |f2| (that is, |fromto (A -> B) f1 df f2|) if and only if,
-    for all |fromto A a1 da a2|, we have
-    |fromto B (f1 a1) (df a1 da) (f2 a2)|.
+    for all valid input changes |fromto A a1 da a2|, value |df a1 da| is a valid
+    output change from |f1 a1| to |f2 a2| (that is, |fromto B (f1 a1) (df a1 da) (f2 a2)|).
   \end{subdefinition}
 \end{definition}
 
-\begin{notation}
+% More precisely, |df| is a valid function change
+% from |f1| to |f2| if, for all changes |da| from |a1| to |a2| on set |A|,
+% value |df a1 da|
+% is a valid change from |f1 a1| to |f2 a2|.
+
+\begin{notation}[Applying function changes to changes]
   When reading out |df a1 da| we'll often talk for brevity about applying |df|
   to |da|, leaving |da|'s source |a1| implicit when it can be deduced from
   context.
@@ -188,25 +193,23 @@ omit similar statements for higher arities, as they add no new ideas.
 \begin{lemma}[Validity on |A -> B -> C|]
   \label{lem:validity-binary-functions}
   For any basic change structures |bchs(A)|, |bchs(B)| and |bchs(C)|, function
-  change |df : Dt^(A -> B -> C)| is valid from |f1| to |f2| (where |f1, f2 : A
-  -> B|) (that is, |fromto (A -> B -> C) f1 df f2|) \emph{if and only if}
-  applying |df| to valid input changes |fromto A a1 da a2| and |fromto B b1 db
-  b2| gives a valid output change
-  \[|fromto C (f a1 b1) (df a1 da b1 db) (f a2 b2)|\]
+  change |df: ^^ Dt^(A -> B -> C)| is valid from |f1| to |f2| (that is, |fromto
+  (A -> B -> C) f1 df f2|) \emph{if and only if} applying |df| to valid input
+  changes |fromto A a1 da a2| and |fromto B b1 db b2| gives a valid output change
+  \[|fromto C (f a1 b1) (df a1 da b1 db) (f a2 b2)|.\]
 \end{lemma}
 \begin{proof}
-  Follows from unrolling the definition of function validity of |df| twice.
+  The equivalence follows from applying the definition of function validity of |df| twice.
 
   That is: function change |df| is valid (|fromto (A -> (B -> C)) f1 df f2|) if
   and only if it maps valid input change |fromto A a1 da a2| to valid output
   change
   \[|fromto (B -> C) (f1 a1) (df a1 da) (f2 a2)|.
   \]
-  In turn, |df a1 da| is a function change, that is valid if and only if
+  In turn, |df a1 da| is a function change, which is valid if and only if
   it maps valid input change |fromto B b1 db b2| to
-  \[|fromto C (f a1 b1) (df a1 da b1 db) (f a2 b2)|
-  \]
-  as required by the thesis.
+  \[|fromto C (f a1 b1) (df a1 da b1 db) (f a2 b2)|\]
+  as required by the lemma.
 \end{proof}
 
 \subsection{Derivatives}
@@ -214,18 +217,32 @@ omit similar statements for higher arities, as they add no new ideas.
 Among valid function changes, derivatives play a central role, especially in the
 statement of correctness of differentiation.
 
-Take a function |f: A -> B|. We want to say that a function |df : A -> Dt^A ->
-Dt^B| is a derivative for |f| if, for all changes |da| from |a1| to |a2| on set
-|A|, change |df a1 da| is valid from |f a1| to |f a2|. Comparing with the
-definition of validity for function changes, we see that a derivative is exactly
-a change from |f| to |f|, that is, a nil change for |f|. Hence, we give the
-following definition.
-
-\begin{definition}[Derivatives as nil function changes]
-  \label{def:derivative}
-  Given function |f : A -> B|, function |df : A -> Dt^A -> Dt^B| is a derivative
-  of |f| if |df| is a nil change of |f| (|fromto (A -> B) f df f|).
+\begin{definition}
+  \label{def:derivative-raw} 
+  Given function |f: ^^ A -> B|, function |df: ^^ A -> Dt^A -> Dt^B| is a
+  derivative for |f| if, for all changes |da| from |a1| to |a2| on set |A|, change
+  |df a1 da| is valid from |f a1| to |f a2|.
 \end{definition}
+
+However, it follows that derivatives are nil function changes:
+
+\begin{lemma}[Derivatives as nil function changes]
+  \label{def:derivative}
+  Given function |f: ^^ A -> B|, function |df: ^^ Dt^(A -> B)| is a derivative
+  of |f| if and only if |df| is a nil change of |f| (|fromto (A -> B) f df f|).
+\end{lemma}
+\begin{proof}
+  We show that nil changes are derivatives.
+  First, |df| has the right type to be a derivative, because |A -> Dt^A -> Dt^B = Dt^(A -> B)|.
+  Then, by expanding definitions, since |df| is a nil change from |f| to |f|, it maps valid input changes
+  |fromto A a1 da a2| to valid output changes
+  |fromto B (f a1) (df a1 da) (f a2)|. Hence |df| is a derivative as required.
+
+  In fact, all proof steps are equivalences, and by tracing them backward, we
+  can show that derivatives are nil changes: Since a derivative |df| maps valid
+  input changes |fromto A a1 da a2| to valid output changes |fromto B (f a1) (df
+  a1 da) (f a2)|, |df| is a change from |f| to |f| as required.
+\end{proof}
 
 Applying derivatives to nil changes gives again nil changes. This fact is useful
 when reasoning on derivatives. The proof is a useful exercise on using validity.
@@ -279,10 +296,11 @@ After studying basic change structures in the abstract, we apply them to the
 study of our object language.
 
 For each type |tau|, we can define a basic change structure on domain
-|eval(tau)|, that we write |bchs(tau)|. We assume language plugins provide basic
+|eval(tau)|, which we write |bchs(tau)|. Language plugins must provide basic
 change structures for base types. To provide basic change structures for
-function types |sigma -> tau|, we simply construct basic change structures
-|bchs(sigma) -> bchs(tau)| on function spaces |eval(sigma -> tau)|.
+function types |sigma -> tau|, we use the earlier construction for basic change
+structures |bchs(sigma) -> bchs(tau)| on function spaces |eval(sigma -> tau)|
+(\cref{def:basic-change-structure-funs}).
 \begin{definition}[Basic change structures on types]
   \label{def:bchs-types}
   For each type |tau| we associate a basic change structure on domain
