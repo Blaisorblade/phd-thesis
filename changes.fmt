@@ -7,6 +7,10 @@
 
 %else
 
+%format param = "\text{\textendash}"
+
+%subst dummy = "\text{\textendash}"
+
 %format alpha = "\alpha"
 %format Nat = "\mathbb{N}"
 %format Int = "\mathbb{Z}"
@@ -173,8 +177,6 @@
 
 %format Theta(n) = "\Theta(" n ")"
 %format o(n) = "o(" n ")"
-
-%format param = "\text{\textendash}"
 
 %format cache1
 %format cache2
