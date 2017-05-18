@@ -885,8 +885,8 @@ preservation, change |df a1 da| has destination |(f1 `oplus` df)
 to mechanized proving with old-style definitions.
 
 \paragraph{Credits and related work}
-The proof presented in this chapter is an evolution of the
-original one by \citet{CaiEtAl2014ILC}.
+The proof presented in this and the previous chapter is an
+evolution of the original one by \citet{CaiEtAl2014ILC}.
 %
 While this formalization and the mechanization are both original
 with this thesis, some ideas were suggested by other
