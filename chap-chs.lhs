@@ -551,7 +551,10 @@ provide change structures for all types:
   This can be verified by induction on types. For each case, it
   is sufficient to compare definitions.
 \end{proof}
-\validOplus
+\begin{restatable}[|`oplus`| agrees with validity]{lemma}{validOplus}
+  \label{thm:valid-oplus}
+  If |fromto tau v1 dv v2| then |v1 `oplus` dv = v2|.
+\end{restatable}
 \begin{proof}
   This is required by the requirements of change structures on
   |chs(tau)|.
