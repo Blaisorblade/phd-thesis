@@ -603,10 +603,18 @@ static semantics:
 
 After we'll define |`oplus`|, in next chapter, we'll be able to relate |`oplus`|
 to validity, by proving \cref{thm:valid-oplus}, which we state in advance here:
+\begin{fullCompile}
 \begin{restatable*}[|`oplus`| agrees with validity]{lemma}{validOplus}
   \label{thm:valid-oplus}
   If |fromto tau v1 dv v2| then |v1 `oplus` dv = v2|.
 \end{restatable*}
+\end{fullCompile}
+\begin{partCompile}
+\begin{restatable}[|`oplus`| agrees with validity]{lemma}{validOplus}
+  \label{thm:valid-oplus}
+  If |fromto tau v1 dv v2| then |v1 `oplus` dv = v2|.
+\end{restatable}
+\end{partCompile}
 
 Hence, updating base result |eval(t) rho1| by change
 |eval(derive(t)) drho| via |`oplus`| gives the updated result
