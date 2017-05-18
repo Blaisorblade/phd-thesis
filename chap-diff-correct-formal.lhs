@@ -486,24 +486,30 @@ differentiation, a term-to-term transformation written
 all our results apply only to well-typed terms (since we
 formalize no other ones).
 
-We previously sketched |derive(param)|'s invariant through
-\cref{slogan:derive}, which we repeat for reference:
+Earlier, we described how |derive(param)| behaves through
+\cref{slogan:derive}---here is it again, for reference:
 %
 \sloganDerive*
-
-After stating our slogan, we have learned how such valid output changes behave
-(\cref{rem:validity-logical-recursion}). Valid output changes can be in turn
-function changes, that map valid changes to \emph{their} inputs to valid changes
-to \emph{their} outputs, and so on---validity is defined to recurse over types.
-We are going to say, in essence, that |derive t| produces a valid function
-change from |t| to |t|.
-
-More formally, the input of a term |Gamma /- t : tau| is an environment for
-|Gamma|. So evaluating |derive(t)| must map an environment change |drho| from
+In our slogan, we intentionally did not specify what we meant by inputs.
+Now we can be more precise. Transformation |derive| must satisfy our slogan for
+two sorts of inputs:
+\begin{enumerate}
+\item Evaluating |derive(t)| must map an environment change |drho| from
 |rho1| to |rho2| into a valid result change |eval(derive(t)) drho|, going from
-|eval(t) rho1| to |eval(t) rho2|. In other words, function |evalInc t = \rho drho ->
-eval(derive t) drho| must be a \emph{nil change} for |eval t|, that is, a \emph{derivative} for |eval t|.
-We give a name to this function change, and state |derive(param)|'s correctness theorem.
+|eval(t) rho1| to |eval(t) rho2|.
+\item As we learned since stating our slogan, validity is defined by recursion
+over types. If term |t| has type |sigma -> tau|, change |eval(derive t) drho|
+can in turn be a (valid) function change
+(\cref{rem:validity-logical-recursion}). Function changes map valid changes for
+\emph{their} inputs to valid changes for \emph{their} outputs.
+\end{enumerate}
+
+Instead of saying that |eval(derive t)| maps |fromto Gamma rho1 drho rho2| to a
+change from |eval t rho1| to |eval t rho2|, we can say that function |evalInc t
+= \rho drho -> eval(derive t) drho| must be a \emph{nil change} for |eval t|,
+that is, a \emph{derivative} for |eval t|.
+We give a name to this function change, and state |derive(param)|'s correctness
+theorem.
 
 \begin{definition}[Incremental semantics]
   \label{def:inc-semantics}
@@ -521,14 +527,16 @@ We give a name to this function change, and state |derive(param)|'s correctness 
   rho2)|.
 \end{restatable}
 
-We defer the proof to \cref{sec:derive-correct-proof}.
+For now we discuss this statement further; we defer the proof to
+\cref{sec:derive-correct-proof}.
 
+\begin{remark}[Why |evalInc| ignores |rho1|]
 You might wonder why |evalInc t = \rho1 drho -> eval(derive(t)) drho| appears to
 ignore |rho1|. But for all |fromto Gamma rho1 drho rho2|, change environment
 |drho| extends |rho1|, which hence provides no further information. We are only
 interested in applying |evalInc t| to valid environment changes |drho|, so
 |evalInc t rho1 drho| can safely ignore |rho1|.
-
+\end{remark}
 \begin{remark}[Term derivatives]
   In \cref{ch:static-diff-intro}, we suggested that |derive t| only produced a
   derivative for closed terms, not for open ones. But |evalInc t = \rho drho ->
