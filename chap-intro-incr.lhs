@@ -328,11 +328,11 @@ approach gives the correct result in this example.
 Our approach requires a derivative that is asymptotically faster
 than its base program. Here, derivative |dgrand_total| simply
 \emph{ignores} base inputs, so its time complexity depends only
-on the size of changes |dn|. The complexity of |dgrand_total| is
+on the total size of changes |dn|. The complexity of |dgrand_total| is
 in particular |Theta(dn) = o(n)|.
 
-Moreover, we propose to generate derivatives by a program
-transformation |derive(param)| on base terms |t|, assuming that
+Moreover, we propose to generate derivatives, such as |dgrand_total|, by a program
+transformation |derive| on base terms |t|, such as |grand_total|. We assume that
 we already have derivatives for primitive functions they use.
 We call this program transformation \emph{differentiation} (or,
 sometimes, simply \emph{derivation}); we write |derive(t)| to
@@ -342,13 +342,45 @@ Differentiation only produces derivatives on closed terms, but it is defined as
 a structurally recursive program transformation, hence it is also defined on
 open terms.
 
-Informally, |derive(t)| describes how |t| changes, that is,
+Informally, |derive(t)| maps changes to the inputs of |t| to changes to the
+outputs of |t|. For instance, as claimed, |dgrand_total = derive grand_total|
+and |dgrand_total xs1 dxs ys1 dxs|
+computes the change in |grand_total|'s output |s| based on the changes to inputs
+|xs| and |ys|. In short, |derive grand_total| maps input changes to output
+changes.
 
-\begin{restatable}[|derive(t)| maps input changes to output changes]{slogan}{sloganDerive}
+More in general, |derive t| maps input changes to output changes for any term
+|t|, even if |t| is not a closed function term. In next chapter we define this
+invariant formally; we
+prove that |derive| satisfies this invariant in \cref{thm:derive-correct}.
+For now, we just anticipate what this means in a few classes of cases.
+In general, we can evaluate |t| to its value |eval t rho|
+if we have an environment |rho|; for closed terms this environment will be
+empty. Then, if |t| has function type, |eval t rho| will accept other inputs. In
+all those cases, |eval (derive t)| will map (valid) changes to all inputs to
+changes to the output. For any term |t|, |eval (derive t) drho| produces a
+change from |eval t rho1| to |eval t rho2| when |drho| is a change from |rho1|
+to |rho2|.
+If |t| is a unary function, then |eval (derive t) drho a1 da| is a change from
+|eval t rho1 a1| to |eval t rho2 a2| if |drho| is a change from |rho1| to |rho2|
+and |da| is a change from |a1| to |a2|.
+If |t| is a binary function, like |grand_total|, then |eval (derive t) drho a1
+da b1 db| is a change from |eval t rho1 a1 b1| to |eval t rho2 a2 b2| if |drho|
+is a change from |rho1| to |rho2|, |da| is a change from |a1| to |a2| and |db|
+is a change from |b1| to |b2|. And so on for ternary, ...,  |n|-ary functions.
+In next chapter, \cref{thm:derive-correct} will cover all these cases in a single
+statement, using properties defined by induction.
+
+To sum up this discussion, we state the following informal slogan, where we use
+``input'' to refer to both environments |rho| and function arguments |a, b| and
+so on:
+
+\begin{restatable}{slogan}{sloganDerive}
   \label{slogan:derive}
-  Term |derive(t)| applied to base inputs and valid \emph{input changes} gives a
-  valid \emph{output change} from |t| applied on old inputs to |t| applied on
-  new inputs.
+  Term |derive(t)| maps input changes to output changes.
+  That is, |derive(t)| applied to old base inputs and valid \emph{input changes}
+  (from old inputs to new inputs) gives a valid \emph{output change} from |t|
+  applied on old inputs to |t| applied on new inputs.
 \end{restatable}
 
 Notice |derive(t)|'s behavior parallels the behavior of |t|,
@@ -359,6 +391,8 @@ valid input changes to valid output changes.
 % |derive(t)| is defined in terms of |derive(param)| applied to
 % subterms of |t|.
 
+\pg{I was trying to keep myself to first-order differentiation when I wrote this
+contorted text, but now I'm not any more.}
 In our example, we have applied |derive(param)| to
 |grand_total|'s body, and simplify the result via
 $\beta$-reduction to produce |dgrand_total|'s body.

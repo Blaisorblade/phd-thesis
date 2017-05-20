@@ -493,15 +493,17 @@ Earlier, we described how |derive(param)| behaves through
 \sloganDerive*
 \end{fullCompile}
 \begin{partCompile}
-\begin{restatable}[|derive(t)| maps input changes to output changes]{slogan}{sloganDerive}
+\begin{restatable}{slogan}{sloganDerive}
   \label{slogan:derive}
-  Term |derive(t)| applied to base inputs and valid \emph{input changes} gives a
-  valid \emph{output change} from |t| applied on old inputs to |t| applied on
-  new inputs.
+  Term |derive(t)| maps input changes to output changes.
+  That is, |derive(t)| applied to old base inputs and valid \emph{input changes}
+  (from old inputs to new inputs) gives a valid \emph{output change} from |t|
+  applied on old inputs to |t| applied on new inputs.
 \end{restatable}
 \end{partCompile}
-In our slogan, we intentionally did not specify what we meant by inputs.
-Now we can be more precise. Transformation |derive| must satisfy our slogan for
+In our slogan we do not specify what we meant by inputs, though we gave examples
+during the discussion. We have now the notions needed for a more precise statement.
+Term |derive t| must satisfy our slogan for
 two sorts of inputs:
 \begin{enumerate}
 \item Evaluating |derive(t)| must map an environment change |drho| from
