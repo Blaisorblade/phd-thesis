@@ -308,15 +308,33 @@ approach, we incrementalize our example program. We propose to compute
 the output change |ds| from |s1| to |s2| by
 calling a new function |dgrand_total|, the \emph{derivative} of
 |grand_total| on base inputs and their respective changes. We can
-then compute the updated output |s2| as the old s
-|s1| updated by change |ds|. We have successfully
-incrementalized our program |grand_total| if not only we get the
-correct result for |s2|, but if we also get it faster than
-by just calling |grand_total xs2 ys2|.
+then compute the updated output |s2| \emph{incrementally}: that is, to compute
+|s2| we can update the old output |s1| by change |ds|. Usually, instead, we
+would have to compute the updated output |s2| by executing |grand_total xs2 ys2|
+\emph{non-incrementally} or from scratch, without taking advantage of the
+computation already done to compute |s1 = grand_total xs1 ys1|.
+To incrementalize our program |grand_total| successfully, we must first compute
+updated output |s2| correctly, and second, we must compute |s2| faster than we
+would compute it non-incrementally.
 
-Below we give |dgrand_total| and show our
-approach gives the correct result in this example.
+Below we give |dgrand_total| and show that in this example incremental
+computation computes |s2| correctly.
 
+For ease of reference, we recall inputs, changes and outputs:
+\begin{code}
+  xs1                         = {{1, 2, 3}}
+  dxs                         = {{1}}
+  xs2                         = {{1, 1, 2, 3}}
+  ys1                         = {{4}}
+  dys                         = {{5}}
+  ys2                         = {{4, 5}}
+  s1                          = grand_total xs1 ys1
+                              = 10
+  s2                          = grand_total xs2 ys2
+                              = 16
+\end{code}
+Incremental computation uses the following definitions to compute |s2| correctly
+and with fewer steps, as desired.
 \begin{code}
   dgrand_total xs dxs ys dys  = sum (merge dxs dys)
   ds                          = dgrand_total xs1 dxs ys1 dys =
@@ -325,11 +343,13 @@ approach gives the correct result in this example.
                               = 10 + 6 = 16
 \end{code}
 
-Our approach requires a derivative that is asymptotically faster
-than its base program. Here, derivative |dgrand_total| simply
-\emph{ignores} base inputs, so its time complexity depends only
-on the total size of changes |dn|. The complexity of |dgrand_total| is
-in particular |Theta(dn) = o(n)|.
+Incremental computation should be asymptotically faster than non-incremental
+computation; hence, the derivative we run should be asymptotically faster than
+the base program.
+Here, derivative |dgrand_total| is faster simply because it \emph{ignores} base
+inputs altogether. Therefore, its time complexity depends only on the total size
+of changes |dn|. In particular, the complexity of |dgrand_total| is |Theta(dn) =
+o(n)|.
 
 Moreover, we propose to generate derivatives, such as |dgrand_total|, by a program
 transformation |derive| on base terms |t|, such as |grand_total|. We assume that
@@ -342,38 +362,51 @@ Differentiation only produces derivatives on closed terms, but it is defined as
 a structurally recursive program transformation, hence it is also defined on
 open terms.
 
-Informally, |derive(t)| maps changes to the inputs of |t| to changes to the
-outputs of |t|. For instance, as claimed, |dgrand_total = derive grand_total|
-and |dgrand_total xs1 dxs ys1 dxs|
-computes the change in |grand_total|'s output |s| based on the changes to inputs
-|xs| and |ys|. In short, |derive grand_total| maps input changes to output
+Informally, |derive t| maps changes to the inputs of |t| to changes to the
+outputs of |t|. Take |t = grand_total|: as discussed,
+|dgrand_total xs1 dxs ys1 dxs| computes the change in |grand_total|'s output |s|
+based on the changes to inputs |xs| and |ys|. In short, we say that
+|dgrand_total|, that is |derive grand_total|, maps input changes to output
 changes.
 
-More in general, |derive t| maps input changes to output changes for any term
-|t|, even if |t| is not a closed function term. In next chapter we define this
-invariant formally; we
-prove that |derive| satisfies this invariant in \cref{thm:derive-correct}.
-For now, we just anticipate what this means in a few classes of cases.
-In general, we can evaluate |t| to its value |eval t rho|
-if we have an environment |rho|; for closed terms this environment will be
-empty. Then, if |t| has function type, |eval t rho| will accept other inputs. In
-all those cases, |eval (derive t)| will map (valid) changes to all inputs to
-changes to the output. For any term |t|, |eval (derive t) drho| produces a
-change from |eval t rho1| to |eval t rho2| when |drho| is a change from |rho1|
-to |rho2|.
-If |t| is a unary function, then |eval (derive t) drho a1 da| is a change from
-|eval t rho1 a1| to |eval t rho2 a2| if |drho| is a change from |rho1| to |rho2|
-and |da| is a change from |a1| to |a2|.
-If |t| is a binary function, like |grand_total|, then |eval (derive t) drho a1
-da b1 db| is a change from |eval t rho1 a1 b1| to |eval t rho2 a2 b2| if |drho|
-is a change from |rho1| to |rho2|, |da| is a change from |a1| to |a2| and |db|
-is a change from |b1| to |b2|. And so on for ternary, ...,  |n|-ary functions.
-In next chapter, \cref{thm:derive-correct} will cover all these cases in a single
-statement, using properties defined by induction.
+More in general, for any term |t|, even if |t| is not a closed function term,
+|derive t| still maps input changes to output changes. However, ``input'' means
+different things for different kind of terms:
+(a) Evaluating an open term takes an environment as input.
+(b) Evaluating a closed function term gives a function that takes arguments as
+inputs.
+(c) Evaluating an open function term |t| takes both sorts of inputs: evaluating |t|
+takes an environment, and the result takes in turn arguments.
+(d) Evaluating a closed term that is not a function gives a value directly,
+without taking any inputs.
+In all those cases, |derive| maps input changes (if there are any inputs) to
+output changes. This is the key correctness property of |derive|,
+\cref{thm:derive-correct}, that we state formally and prove in next chapter. Our
+formal statement will cover all these cases at once: we will say that |derive t|
+can be evaluated on a change to the contents of an environment, and will produce
+a valid change from the old output to the new output. But we will have to define
+the concept of (valid) change in a suitable way for functions, with a definition
+by induction on types that we defer to next chapter.
+% In next chapter we define this
+% invariant formally; we
+% prove that |derive| satisfies this invariant in 
+% For now, we just anticipate what this means in a few classes of examples.
+% Recall that we can evaluate |t| to its value |eval t rho|
+% if we have an environment |rho|; for closed terms this environment will be
+% empty. Then, if |t| has function type, |eval t rho| will accept other inputs.
+% Analogously,
+% for any term |t|, |eval (derive t) drho| produces a
+% change from |eval t rho1| to |eval t rho2| when |drho| is a change from |rho1|
+% to |rho2|.
+% If |t| is a unary function, then |eval (derive t) drho a1 da| is a change from
+% |eval t rho1 a1| to |eval t rho2 a2| if |drho| is a change from |rho1| to |rho2|
+% and |da| is a change from |a1| to |a2|.
+% If |t| is a binary function, like |grand_total|, then |eval (derive t) drho a1
+% da b1 db| is a change from |eval t rho1 a1 b1| to |eval t rho2 a2 b2| if |drho|
+% is a change from |rho1| to |rho2|, |da| is a change from |a1| to |a2| and |db|
+% is a change from |b1| to |b2|. And so on for ternary, ...,  |n|-ary functions.
 
-To sum up this discussion, we state the following informal slogan, where we use
-``input'' to refer to both environments |rho| and function arguments |a, b| and
-so on:
+We sum up the previous paragraph with the following slogan:
 
 \begin{restatable}{slogan}{sloganDerive}
   \label{slogan:derive}
@@ -383,6 +416,8 @@ so on:
   applied on old inputs to |t| applied on new inputs.
 \end{restatable}
 
+In our slogan, ``input'' refers both to environments |rho| and to any function
+arguments of |t|.
 Notice |derive(t)|'s behavior parallels the behavior of |t|,
 because |t| maps inputs to outputs just like |derive(t)| maps
 valid input changes to valid output changes.
@@ -391,11 +426,9 @@ valid input changes to valid output changes.
 % |derive(t)| is defined in terms of |derive(param)| applied to
 % subterms of |t|.
 
-\pg{I was trying to keep myself to first-order differentiation when I wrote this
-contorted text, but now I'm not any more.}
 In our example, we have applied |derive(param)| to
-|grand_total|'s body, and simplify the result via
-$\beta$-reduction to produce |dgrand_total|'s body.
+|grand_total|, and simplify the result via
+$\beta$-reduction to produce |dgrand_total|.
 %
 Correctness of |derive(param)| guarantees
 that |sum (merge dxs dys)| evaluates to a change from
