@@ -52,24 +52,20 @@ incrementalize a few programs, but for others we run into problems:
   inspected at runtime, preventing a few optimizations. For instance, applying a
   derivative to a nil change always produces a nil change, but we never take
   advantage of this to optimize derivatives, except sometimes at compile time.
+\item Applying a derivative to a nil change always produce a nil change, but we
+  never take advantage of this to optimize derivatives, except sometimes at
+  compile time.
+% \item No support for change composition: there is no direct way to compose a
+%   sequence of changes |dx1, dx2, dx3, ...| across |x0, x1, x2, x3, ...| and
+%   produce a single change, except by applying all those changes and computing a
+%   difference with |x0 `oplus` dx1 `oplus` dx2 `oplus` dx3|.
+\item Change structures must provide a difference operation, even though most
+  often we are not supposed to use it.
 \end{enumerate}
  % In fact, while a function change can replace
  %  a function with an arbitrary other function, actual changes often simply
  %  replace a closure with another closure using the same code but closing over a
  %  changed environment.
-
-A few other limitations include:
-\begin{enumerate}
-\item Applying a derivative to a nil change always produce a nil change, but we
-  never take advantage of this to optimize derivatives, except sometimes at
-  compile time.
-\item No support for change composition: there is no direct way to compose a
-  sequence of changes |dx1, dx2, dx3, ...| across |x0, x1, x2, x3, ...| and
-  produce a single change, except by applying all those changes and computing a
-  difference with |x0 `oplus` dx1 `oplus` dx2 `oplus` dx3|.
-\item Change structures must provide a difference operation, even though most
-  often we are not supposed to use it.
-\end{enumerate}
 
 %include defunc.lhs
 \chapter{Misc to integrate}

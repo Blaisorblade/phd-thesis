@@ -81,7 +81,9 @@ encodings in Haskell, while also studying language plugins for non-trivial
 primitives, such as different sorts of collections. We make liberal use of GHC
 extensions where needed.
 
-As sketched before, we internalize change structures in Haskell as follows:
+As sketched before, we define change structure inside Haskell. We choose for now
+a different subset of operations.
+We proceed as follows.
 \begin{code}
 class ChangeStruct t where
   -- Next line declares |Dt^t| as an injective type function
@@ -93,6 +95,7 @@ class ChangeStruct t where
 class ChangeStruct t => NilChangeStruct t where
   nil :: t -> Dt^t
 \end{code}
+%ocompose :: Dt^t -> Dt^t -> Dt^t
 With this code we define type classes |ChangeStruct| and |NilChangeStruct|. We
 explain each of the declared members in turn.
 
@@ -146,10 +149,13 @@ As visible here, polymorphism does not cause particular problems. However, we
 only support ML (or prenex) polymorphism polymorphism, not first-class
 polymorphism, for two reasons.
 
+%format T1
+%format T2
+
 First, with first-class polymorphism, we can encode
-existential types |exists X. T|, and two values of the same existential type
-|v1, v2 :: exists X. T| can pack different types inside. Hence, a change between
-|v1| and |v2| requires handling changes between types.
+existential types |exists X. T|, and two values |v1, v2| of the same existential type
+|exists X. T| can hide different types |T1, T2|,
+Hence, a change between |v1| and |v2| requires handling changes between types.
 
 Second, prenex polymorphism is a small extension of simply-typed lambda calculus
 metatheoretically. We can treat prenex-polymorphic definitions as families of
@@ -260,10 +266,11 @@ type |sigma -> tau| is replaced by a value of a new GADT |Fun sigma tau|, that
 represents defunctionalized function values and has a constructor for each
 different function. If a first-class function |t1| closes over |x :: tau1|, the
 corresponding constructor |C1| will take |x :: tau1| as an argument. The
-interpreter for defunctionalized function values becomes |applyFun :: Fun sigma tau
--> sigma -> tau|. The resulting programs are expressed in a first-order subset
-of the original programming language, where all true functions left are
-first-order functions defined at the top-level.
+interpreter for defunctionalized function values has type signature |applyFun ::
+Fun sigma tau -> sigma -> tau|. The resulting programs are expressed in a
+first-order subset of the original programming language.
+In defunctionalized programs, all remaining functions are first-order top-level
+functions.
 
 For instance, consider the program on sequences in \cref{fig:defunc-example}.
 \begin{figure}[h]
@@ -317,6 +324,7 @@ applyFun0     (MapPair0 ys)      x = mapDF0 (Pair0 x) ys
 
 We need to also transform the rest of the program accordingly.
 
+\begin{figure}[h!]
 \begin{code}
 successors0 :: [Int] -> [Int]
 successors0 xs = map (\x -> x + 1) xs
@@ -331,6 +339,8 @@ mapDF0 f (x : xs) = applyFun0 f x : mapDF0 f xs
 concatMapDF0 :: Fun0 sigma [tau] -> [sigma] -> [tau]
 concatMapDF0 f xs = concat (mapDF0 f xs)
 \end{code}
+\label{prog:defunc-curried}
+\end{figure}
 
 Some readers might notice this program still uses first-class function, because
 it encodes multi-argument functions through currying. To get a fully first-order
@@ -371,8 +381,11 @@ nestedLoopDF01 (xs, ys) = concatMapDF01 (MapPair0 ys, xs)
 \end{code}
 %}
 
-\pg{Revise this.} But for now we'll avoid using tuples and stick to currying, as
-it makes for more idiomatic Haskell.
+However, we'll often write such defunctionalized programs using Haskell's
+typical curried syntax, as in \cref{prog:defunc-curried}. Such programs must not
+contain partial applications.
+% \pg{Revise this.} But for now we'll avoid using tuples and stick to currying, as
+% it makes for more idiomatic Haskell syntax.
 
 In general, defunctionalization creates a constructor |C| of type |Fun sigma
 tau| for each first-class function expression |Gamma /- t : sigma -> tau| in the
@@ -391,6 +404,10 @@ Next, we show a slight variant of defunctionalization, that we use to achieve
 our goals with less code duplication, even at the expense of some efficiency; we
 call this variant \emph{defunctionalization with separate function codes}.
 
+We first encode contexts as types and environments as values. Empty environments
+are encoded as empty tuples. Environments for a context such as |x :: tau1, y ::
+tau2, ...| are encoded as values of type |tau1 `times` tau2 `times` ...|
+
 In this defunctionalization variant, instead of defining directly a GADT of
 defunctionalized functions |Fun sigma tau|, we define a GADT of \emph{function
   codes} |Code env sigma tau|, whose values contain no environment. Type |Code|
@@ -399,9 +416,6 @@ and has a constructor for each first-class function expression in the source
 program, like |Fun sigma tau| does in conventional defunctionalization. We then
 define |Fun sigma tau| as a pair of a function code of type |Code env sigma tau|
 and an environment of type |env|.
-Empty environments are encoded as empty tuples.
-Environments for a context such as |x :: tau1,
-y :: tau2, ...| are encoded as values of type |tau1 `times` tau2 `times` ...|
 
 As a downside, separating function codes adds a few indirections to the memory
 representation of closures: for instance we use |(AddOne, ())| instead of
