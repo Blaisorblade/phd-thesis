@@ -41,8 +41,38 @@ But in such a statement means that for all
 % explicitly a denotational semantics.
 % Up to now, we have only discussed what 
 
-\begin{lemma}
-\end{lemma}
+% We can also prove a different corollary.
+% \begin{corollary}
+% If |Gamma /- t : tau| then |eval t `oplus` evalInc t = eval t|. That is,
+% |eval t rho `oplus` evalInc t rho (nil rho) = eval t rho|.
+% \end{corollary}
+% \begin{proof}
+%   The proof is similar to the one of \cref{thm:derive-correct-oplus}. 
+%   Again, differentiation is correct (\cref{thm:derive-correct}), and |`oplus`|
+%   agrees with validity. But this time we write correctness of differentiation as
+%   |fromto (Gamma -> tau) (eval t) (evalInc t) (eval t)|, so that we obtain
+%   |eval t `oplus` evalInc t = eval t|. Recalling that |(f `oplus` df) v = f v `oplus` f
+%   v (nil v)|, that is equivalent to 
+%   |eval t rho `oplus` evalInc t rho (nil rho) = eval t rho|.
+% \end{proof}
+
+% \begin{remark}
+%   We'll later define a polymorphic term |/- `oplus` : t -> Dt^t -> t| which
+% represents the semantic |`oplus`| inside the calculus, that is, such that
+% |eval(`oplus`) emptyRho = `oplus`|. One might try to conclude that 
+% \end{remark}
+% Our \cref{thm:derive-correct-oplus} on |derive(t)| can also be written through
+% the equation
+% \begin{equation}
+%   \label{eq:derive-correct-oplus-higher-order}
+% |eval t `oplus` evalInc t = eval t|.
+% \end{equation}
+% \pg{move into theorem.}
+% But we need to be
+% careful. We later define |`oplus`| also as a family of terms (one for each type),
+% but it does not follow in general from
+% \cref{eq:derive-correct-oplus-higher-order} that |t `oplus` derive t `cong` t|.
+
 \section{Change equivalence}
 \label{sec:change-equivalence}
 \pg{We can use based changes. Better not.}
