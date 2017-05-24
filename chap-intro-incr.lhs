@@ -380,15 +380,23 @@ Differentiation only produces derivatives on closed terms of function type, in s
 ``functions'', but it is defined as a structurally recursive program
 transformation, hence it is also defined on open terms.
 
-A derivative of a function accepts initial inputs and changes from initial
+A derivative of a function can be applied to initial inputs and changes from initial
 inputs to updated inputs, and returns a change from an initial output to an
-updated output. In our example, symbolically, that means that |ds = dgrand_total
-xs1 dxs ys1 dys| is a change from initial output |s1 = grand_total xs1 ys1| to
-updated output |s2 = grand_total xs2 ys2|.
-\pg{State slogan here.}
+updated output. For instance, for derivative |dgrand_total|, initial inputs
+|xs1| and |ys1|, and changes |dxs| and |dys| from initial inputs to updated
+inputs, change |dgrand_total xs1 dxs ys1 dys| (that is |ds|) goes from initial
+output |grand_total xs1 ys1| (that is |s1|) to updated output |grand_total xs2
+ys2| (that is |s2|).
 We often just say that a derivative
 of function |f| maps changes to the inputs of |f| to changes to the outputs of
-|f|, leaving the initial inputs implicit.
+|f|, leaving the initial inputs implicit. In short:
+\begin{restatable}{slogan}{sloganDerive}
+  \label{slogan:derive}
+  \emph{Term |derive(t)| maps input changes to output changes.}
+  That is, |derive(t)| applied to initial base inputs and valid \emph{input changes}
+  (from initial inputs to updated inputs) gives a valid \emph{output change} from |t|
+  applied on old inputs to |t| applied on new inputs.
+\end{restatable}
 
 Since |ds| is a valid change from |s1| to |s2|, it follows as a corollary that
 |s2 = s1 `oplus` ds|, and this equation justifies incrementalization. For a
@@ -398,21 +406,28 @@ generic unary function |f|, this corollary can be stated as:
   \label{eq:correctness}
   |f a2 `cong` f a1 `oplus` (derive f) a1 da|
 \end{equation}
+or as
+\begin{equation}
+  % \label{eq:derivative-requirement}
+  \label{eq:correctness-alt}
+  |f (a1 `oplus` da) `cong` f a1 `oplus` (derive f) a1 da|
+\end{equation}
 where we use |`cong`| to mean denotational equality (that is, |t1
-`cong` t2| if and only if |eval(t1) = eval(t2)|). Again, this equation does not
-capture validity. 
-We will prove this equation as a consequence of \cref{thm:derive-correct}.\pg{resume} 
+`cong` t2| if and only if |eval(t1) = eval(t2)|), and where |da| is a valid
+change from |a1| to |a2| (and |f, a1, a2| have compatible types).
+But |(derive f) a1 da| is also a valid change, a fact not captured by these equations.
+We will prove these equations as a consequence of \cref{thm:derive-correct}.\pg{where?}\pg{resume}
 
-\pg{Reintegrate}
-Informally, |derive t| maps changes to the inputs of |t| to changes to the
-outputs of |t|. Take |t = grand_total|: as discussed,
-|dgrand_total xs1 dxs ys1 dxs| computes the change in |grand_total|'s output |s|
-based on the changes to inputs |xs| and |ys|. In short, we say that
-|dgrand_total|, that is |derive grand_total|, maps input changes to output
-changes.
+% Informally, |derive t| maps changes to the inputs of |t| to changes to the
+% outputs of |t|. Take |t = grand_total|: as discussed,
+% |dgrand_total xs1 dxs ys1 dxs| computes the change in |grand_total|'s output |s|
+% based on the changes to inputs |xs| and |ys|. In short, we say that
+% |dgrand_total|, that is |derive grand_total|, maps input changes to output
+% changes.
 
-More in general, for any term |t|, even if |t| is not a closed function term,
-|derive t| still maps input changes to output changes. However, ``input'' means
+\pg{Maybe move this paragraph to the next section?}
+Our slogan extends beyond closed unary functions---it applies to arbitrary terms |t|.
+However, ``input'' means
 different things for different kind of terms:
 (a) Evaluating an open term takes an environment as input.
 (b) Evaluating a closed function term gives a function that takes arguments as
@@ -448,16 +463,17 @@ by induction on types that we defer to next chapter.
 % is a change from |rho1| to |rho2|, |da| is a change from |a1| to |a2| and |db|
 % is a change from |b1| to |b2|. And so on for ternary, ...,  |n|-ary functions.
 
-We sum up the previous paragraph with the following slogan:
+% We sum up the previous paragraph with the following slogan:
 
-\begin{restatable}{slogan}{sloganDerive}
-  \label{slogan:derive}
-  Term |derive(t)| maps input changes to output changes.
-  That is, |derive(t)| applied to old base inputs and valid \emph{input changes}
-  (from old inputs to new inputs) gives a valid \emph{output change} from |t|
-  applied on old inputs to |t| applied on new inputs.
-\end{restatable}
+% \begin{restatable}{slogan}{sloganDerive}
+%   \label{slogan:derive}
+%   Term |derive(t)| maps input changes to output changes.
+%   That is, |derive(t)| applied to old base inputs and valid \emph{input changes}
+%   (from old inputs to new inputs) gives a valid \emph{output change} from |t|
+%   applied on old inputs to |t| applied on new inputs.
+% \end{restatable}
 
+\pg{rewrite, move}
 In our slogan, ``input'' refers both to environments |rho| and to any function
 arguments of |t|.
 Notice |derive(t)|'s behavior parallels the behavior of |t|,
@@ -468,49 +484,50 @@ valid input changes to valid output changes.
 % |derive(t)| is defined in terms of |derive(param)| applied to
 % subterms of |t|.
 
+\pg{So we still need to say ``a derivative'', not ``the derivative''.}
 In our example, we have applied |derive(param)| to
 |grand_total|, and simplify the result via
-$\beta$-reduction to produce |dgrand_total|.
-%
+$\beta$-reduction to produce |dgrand_total|, as we show in \cref{sec:derive-example-merge}.
+%\pg{drop?}
 Correctness of |derive(param)| guarantees
 that |sum (merge dxs dys)| evaluates to a change from
 |sum (merge xs ys)| evaluated on old inputs |xs1, ys1| to
 |sum (merge xs ys)| evaluated on new inputs |xs2, ys2|.
 
-\pg{rerevise and drop}
+% \pg{rerevise and drop}
 % Here, a derivative of |grand_total| is a function in the same language as
 % |grand_total|, that accepts changes from initial inputs |xs1| and |ys1| to
 % updated inputs |xs2| and |ys2| and evaluates to the change from the base result
 % |grand_total xs1 ys1| to the updated result |grand_total xs2 ys2|.
 
-\pg{rerevise and drop}
-More in general, for a unary function |f|, a derivative |df|
-takes an input |a| and a change |da| for |a| and produces a
-change from base output |f a| to updated output |f (a `oplus`
-da)|. Symbolically we write
-%   \label{eq:correctness}
+% \pg{rerevise and drop}
+% More in general, for a unary function |f|, a derivative |df|
+% takes an input |a| and a change |da| for |a| and produces a
+% change from base output |f a| to updated output |f (a `oplus`
+% da)|. Symbolically we write
+% %   \label{eq:correctness}
+% % \begin{equation}
+% %   \label{eq:derivative-requirement}
+% %   |f (a `oplus` da) `cong` f a `oplus` df a da|
+% % \end{equation}
+% where we use |`cong`| to mean denotational equality (that is, |t1
+% `cong` t2| if and only if |eval(t1) = eval(t2)|).
+
+% \pg{rerevise and drop}
+% We claim that differentiation produces derivatives. Hence, we can
+% take \cref{eq:derivative-requirement}, replace |df| by
+% |derive(f)|, and obtain as a corollary the following equation:
 % \begin{equation}
-%   \label{eq:derivative-requirement}
-%   |f (a `oplus` da) `cong` f a `oplus` df a da|
+%   \label{eq:correctness}
+%   |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
 % \end{equation}
-where we use |`cong`| to mean denotational equality (that is, |t1
-`cong` t2| if and only if |eval(t1) = eval(t2)|).
+% We will prove this equation as a consequence of \cref{thm:derive-correct}.\pg{resume} 
 
-\pg{rerevise and drop}
-We claim that differentiation produces derivatives. Hence, we can
-take \cref{eq:derivative-requirement}, replace |df| by
-|derive(f)|, and obtain as a corollary the following equation:
-\begin{equation}
-  \label{eq:correctness}
-  |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
-\end{equation}
-We will prove this equation as a consequence of \cref{thm:derive-correct}.\pg{resume} 
-
-\pg{rerevise and drop}
-For functions |f| of multiple arguments, a derivative |df| takes
-all base inputs of |f| together with changes to each of them, and
-produces a change from the base output to the updated output. We
-will make this more formal in next section.
+% \pg{rerevise and drop}
+% For functions |f| of multiple arguments, a derivative |df| takes
+% all base inputs of |f| together with changes to each of them, and
+% produces a change from the base output to the updated output. We
+% will make this more formal in next section.
 
 In this section, we have sketched the meaning of differentiation
 informally. Next, we discuss incrementalization on higher-order
