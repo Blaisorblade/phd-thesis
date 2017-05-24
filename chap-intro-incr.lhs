@@ -228,7 +228,9 @@ A change value |dv| can be a valid change from |v1| to |v2|. We
 can also consider a valid change as an edge from |v1| to |v2| in
 a graph associated to |tau| (where the vertexes are values of
 type |tau|), and we call |v1| the source of |dv| and |v2| the
-destination of |dv|. We'll discuss examples of valid and invalid
+destination of |dv|. We only talk of source and destination for valid changes:
+so a change from |v1| to |v2| is (implicitly) valid.
+We'll discuss examples of valid and invalid
 changes in \cref{ex:valid-bag-int,ex:invalid-nat}. \pg{What about
   changes with multiple valid sources?}
 
@@ -236,9 +238,9 @@ We also introduce an operator |`oplus`| on values and changes: if
 |dv| is a valid change from |v1| to |v2|, then |v1 `oplus` dv|
 (read as ``|v1| updated by |dv|'') is guaranteed to return |v2|.
 However, we later show that often |v1 `oplus` dv| can be defined
-even if |dv| is not a valid change from |v1| to |v1 `oplus` dv|;
-in fact, |`oplus`| is overloaded over types, and for each type
-|tau| it has an overload of signature |tau -> Dt ^ tau -> tau|.
+even if |dv| is not a valid change from |v1| to |v1 `oplus` dv|.
+Again, if |dv| is not valid from |v1| to |v1 `oplus` dv|, then we do not talk of
+the source and destination of |dv|.
 
 We also introduce operator |`ominus`|: given two values |v1, v2|
 for the same type, |v2 `ominus` v1| is a valid change from |v1|
@@ -247,11 +249,15 @@ to |v2|.
 Finally, we introduce change composition: if |dv1| is a valid
 change from |v1| to |v2| and |dv2| is a valid change from |v2| to
 |v3|, then |ocompose dv1 dv2| is a valid change from |v1| to
-|v3|. This operation will be useful later.
+|v3|.
 
-Definitions of these operations and concepts for a type form a
-\emph{change structure}. We'll define change structures more
-formally later in \cref{def:change-structure}.
+Change operators are overloaded over different types.
+Coherent definitions of validity and of operators |`oplus`, `ominus`| and
+|`ocompose`| for a type |tau| form a \emph{change structure} over values of type
+|tau| (\cref{def:change-structure}).
+For each type |tau| we'll define a change structure (\cref{def:chs-types}),
+and operators will have types |`oplus` : tau -> Dt ^ tau -> tau|, |`ominus` :
+tau -> tau -> Dt ^ tau|, |`ocompose` : Dt^tau -> Dt^tau -> Dt^tau|.
 
 \begin{example}[Changes on integers and bags]
   \label{ex:valid-bag-int}
@@ -262,7 +268,7 @@ describe valid changes for integers and bags.
 %
 For now, a change
 |das| to a bag |as1| simply contains all elements to be added to
-the base bag |as1| to obtain the updated bag |as2| (we'll ignore
+the initial bag |as1| to obtain the updated bag |as2| (we'll ignore
 removing elements for this section and discuss it later). In our
 example, the change from |xs1| (that is |{{1, 2, 3}}|) to |xs2|
 (that is |{{1, 1, 2, 3}}|) is |dxs = {{1}}|, while the change
@@ -302,23 +308,33 @@ invalid changes would work.\footnote{In fact, we could leave
   restricting the domain, achieving similar results.}
 \end{example}
 \pg{bags with removals? where?}
-\subsection{Incrementalizing with changes}
-After introducing these notions, we describe how, in our
-approach, we incrementalize our example program. We propose to compute
-the output change |ds| from |s1| to |s2| by
-calling a new function |dgrand_total|, the \emph{derivative} of
-|grand_total| on base inputs and their respective changes. We can
-then compute the updated output |s2| \emph{incrementally}: that is, to compute
-|s2| we can update the old output |s1| by change |ds|. Usually, instead, we
-would have to compute the updated output |s2| by executing |grand_total xs2 ys2|
-\emph{non-incrementally} or from scratch, without taking advantage of the
-computation already done to compute |s1 = grand_total xs1 ys1|.
-To incrementalize our program |grand_total| successfully, we must first compute
-updated output |s2| correctly, and second, we must compute |s2| faster than we
-would compute it non-incrementally.
 
-Below we give |dgrand_total| and show that in this example incremental
-computation computes |s2| correctly.
+\subsection{Incrementalizing with changes}
+After introducing changes and related notions, we describe how we incrementalize
+our example program.
+
+We consider again the scenario of \cref{sec:motiv-example}: we need to compute
+the updated output |s2|, the result of calling our program |grand_total| on
+updated inputs |xs2| and |ys2|. And we have the initial output |s1| from calling our
+program on initial inputs |xs1| and |ys1|. In this scenario we can compute |s2|
+\emph{non-incrementally} by calling |grand_total| on the updated inputs, but
+we would like to obtain the same result faster.
+Hence, we compute |s2| \emph{incrementally}: that is, we first compute the
+\emph{output change} |ds| from |s1| to |s2|; then we update the old output |s1|
+by change |ds|. Successful incremental computation must compute the correct |s2|
+asymptotically faster than non-incremental computation. This speedup is possible
+because we take advantage of the computation already done to compute |s1|.
+
+To compute the output change |ds| from |s1| to |s2|, we propose to transform our
+\emph{base program} |grand_total| to a new program |dgrand_total|, that we call
+the \emph{derivative} of |grand_total|, and call |dgrand_total| on initial inputs
+and their respective changes.
+Unlike other approaches to incrementalization, |dgrand_total| is a regular
+program in the same language as |grand_total|, hence can be further optimized
+with existing technology.
+
+Below, we give the code for |dgrand_total| and show that in this example
+incremental computation computes |s2| correctly.
 
 For ease of reference, we recall inputs, changes and outputs:
 \begin{code}
@@ -346,22 +362,48 @@ and with fewer steps, as desired.
 Incremental computation should be asymptotically faster than non-incremental
 computation; hence, the derivative we run should be asymptotically faster than
 the base program.
-Here, derivative |dgrand_total| is faster simply because it \emph{ignores} base
+Here, derivative |dgrand_total| is faster simply because it \emph{ignores} initial
 inputs altogether. Therefore, its time complexity depends only on the total size
 of changes |dn|. In particular, the complexity of |dgrand_total| is |Theta(dn) =
 o(n)|.
 
-Moreover, we propose to generate derivatives, such as |dgrand_total|, by a program
-transformation |derive| on base terms |t|, such as |grand_total|. We assume that
-we already have derivatives for primitive functions they use.
-We call this program transformation \emph{differentiation} (or,
-sometimes, simply \emph{derivation}); we write |derive(t)| to
-denote the result of this transformation on a term |t|.
+We generate derivatives through a program transformation from terms to terms,
+which we call \emph{differentiation} (or, sometimes, simply \emph{derivation}).
+We write |derive t| for the result of
+differentiating term |t|. We apply |derive| on terms of our non-incremental
+programs or \emph{base terms}, such as |grand_total|. To define differentiation,
+we assume that we already have derivatives for primitive functions they use; we
+discuss later how to write such derivatives by hand.
 %
-Differentiation only produces derivatives on closed terms, but it is defined as
-a structurally recursive program transformation, hence it is also defined on
-open terms.
+\pg{Move this below, after we explain the case for functions.}
+Differentiation only produces derivatives on closed terms of function type, in short
+``functions'', but it is defined as a structurally recursive program
+transformation, hence it is also defined on open terms.
 
+A derivative of a function accepts initial inputs and changes from initial
+inputs to updated inputs, and returns a change from an initial output to an
+updated output. In our example, symbolically, that means that |ds = dgrand_total
+xs1 dxs ys1 dys| is a change from initial output |s1 = grand_total xs1 ys1| to
+updated output |s2 = grand_total xs2 ys2|.
+\pg{State slogan here.}
+We often just say that a derivative
+of function |f| maps changes to the inputs of |f| to changes to the outputs of
+|f|, leaving the initial inputs implicit.
+
+Since |ds| is a valid change from |s1| to |s2|, it follows as a corollary that
+|s2 = s1 `oplus` ds|, and this equation justifies incrementalization. For a
+generic unary function |f|, this corollary can be stated as:
+\begin{equation}
+  % \label{eq:derivative-requirement}
+  \label{eq:correctness}
+  |f a2 `cong` f a1 `oplus` (derive f) a1 da|
+\end{equation}
+where we use |`cong`| to mean denotational equality (that is, |t1
+`cong` t2| if and only if |eval(t1) = eval(t2)|). Again, this equation does not
+capture validity. 
+We will prove this equation as a consequence of \cref{thm:derive-correct}.\pg{resume} 
+
+\pg{Reintegrate}
 Informally, |derive t| maps changes to the inputs of |t| to changes to the
 outputs of |t|. Take |t = grand_total|: as discussed,
 |dgrand_total xs1 dxs ys1 dxs| computes the change in |grand_total|'s output |s|
@@ -435,23 +477,26 @@ that |sum (merge dxs dys)| evaluates to a change from
 |sum (merge xs ys)| evaluated on old inputs |xs1, ys1| to
 |sum (merge xs ys)| evaluated on new inputs |xs2, ys2|.
 
-Here, a derivative of |grand_total| is a function in the same language as
-|grand_total|, that accepts changes from initial inputs |xs1| and |ys1| to
-updated inputs |xs2| and |ys2| and evaluates to the change from the base result
-|grand_total xs1 ys1| to the updated result |grand_total xs2 ys2|.
+\pg{rerevise and drop}
+% Here, a derivative of |grand_total| is a function in the same language as
+% |grand_total|, that accepts changes from initial inputs |xs1| and |ys1| to
+% updated inputs |xs2| and |ys2| and evaluates to the change from the base result
+% |grand_total xs1 ys1| to the updated result |grand_total xs2 ys2|.
 
+\pg{rerevise and drop}
 More in general, for a unary function |f|, a derivative |df|
 takes an input |a| and a change |da| for |a| and produces a
 change from base output |f a| to updated output |f (a `oplus`
 da)|. Symbolically we write
 %   \label{eq:correctness}
-\begin{equation}
-  \label{eq:derivative-requirement}
-  |f (a `oplus` da) `cong` f a `oplus` df a da|
-\end{equation}
+% \begin{equation}
+%   \label{eq:derivative-requirement}
+%   |f (a `oplus` da) `cong` f a `oplus` df a da|
+% \end{equation}
 where we use |`cong`| to mean denotational equality (that is, |t1
 `cong` t2| if and only if |eval(t1) = eval(t2)|).
 
+\pg{rerevise and drop}
 We claim that differentiation produces derivatives. Hence, we can
 take \cref{eq:derivative-requirement}, replace |df| by
 |derive(f)|, and obtain as a corollary the following equation:
@@ -459,7 +504,9 @@ take \cref{eq:derivative-requirement}, replace |df| by
   \label{eq:correctness}
   |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
 \end{equation}
+We will prove this equation as a consequence of \cref{thm:derive-correct}.\pg{resume} 
 
+\pg{rerevise and drop}
 For functions |f| of multiple arguments, a derivative |df| takes
 all base inputs of |f| together with changes to each of them, and
 produces a change from the base output to the updated output. We
