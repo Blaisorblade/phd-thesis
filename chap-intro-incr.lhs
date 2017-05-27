@@ -79,16 +79,19 @@ discussed in \cref{sec:intro-stlc}. We call our approach
   \emph{Incremental Lambda Calculus}, an extension of
   $\lambda$-calculus with additional operations. Such extensions
   are no more needed, so we don't have any more an incremental
-  lambda calculus per se, but the name stuck.} We discuss
-inspiration for differentiation in
-\cref{sec:generalize-fin-diff}. We show a motivating example for
-our approach in \cref{sec:motiv-example}. We introduce informally
-the concept of \emph{changes} as values in
-\cref{sec:change-intro}, and introduce \emph{changes to
-  functions} in \cref{sec:higher-order-intro}. We define
-differentiation and motivate it informally in
-\cref{sec:informal-derive}. We apply differentiation to our
-motivating example in \cref{sec:derive-example}.
+  lambda calculus per se, but the name stuck.}
+The rest of this chapter is organized as follows.
+In \cref{sec:generalize-fin-diff} we explain that 
+differentiation generalizes the calculus of finite differences, a relative of
+differential calculus.
+In \cref{sec:motiv-example} we show a motivating example for
+our approach.
+In \cref{sec:change-intro} we introduce informally 
+the concept of \emph{changes} as values, and in \cref{sec:higher-order-intro} we
+introduce \emph{changes to functions}.
+In \cref{sec:informal-derive} we define differentiation and motivate it
+informally.
+In \cref{sec:derive-example} we apply differentiation to our motivating example.
 %
 \pg{check later this TOC} In \cref{ch:derive-formally,ch:change-theory}, we
 introduce a formal theory of changes, and we use it to formalize
