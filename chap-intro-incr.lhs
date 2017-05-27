@@ -8,9 +8,11 @@
 
 Incremental computation (or incrementalization) has a long-standing history in
 computer science~\citep{Ramalingam93}.
-Often, a program needs to update the output of some nontrivial function $f$
-when the input to the computation changes.
-Programmers typically have to choose between a few undesirable options.
+Often, a program needs to update quickly the output of some nontrivial function $f$
+when the input to the computation changes. In this scenario, we assume we have
+computed |y1 = f x1| and we need to compute |y2| that equals |f x2|.
+In this scenario, programmers typically have to choose between a few undesirable
+options.
 \begin{itemize}
 \item They can call again function $f$ on the updated input and
   repeat the computation from scratch. This choice guarantees
