@@ -2,7 +2,7 @@
 %% http://bibdesk.sourceforge.net/
 
 
-%% Created for Paolo Giosué Giarrusso at 2017-05-25 21:17:27 +0200 
+%% Created for Paolo Giosué Giarrusso at 2017-05-25 21:32:46 +0200 
 
 
 %% Saved with string encoding Unicode (UTF-8) 
@@ -233,6 +233,27 @@
 @string{wrt = {Proc.\ ECOOP Workshop on Refactoring Tools (WRT)}}
 
 
+@inproceedings{Nikolic2014linview,
+	Abstract = {Many analytics tasks and machine learning problems can be naturally expressed by iterative linear algebra programs. In this paper, we study the incremental view maintenance problem for such complex analytical queries. We develop a framework, called LINVIEW, for capturing deltas of linear algebra programs and understanding their computational cost. Linear algebra operations tend to cause an avalanche effect where even very local changes to the input matrices spread out and infect all of the intermediate results and the final view, causing incremental view maintenance to lose its performance benefit over re-evaluation. We develop techniques based on matrix factorizations to contain such epidemics of change. As a consequence, our techniques make incremental view maintenance of linear algebra practical and usually substantially cheaper than re-evaluation. We show, both analytically and experimentally, the usefulness of these techniques when applied to standard analytics tasks. Our evaluation demonstrates the efficiency of LINVIEW in generating parallel incremental programs that outperform re-evaluation techniques by more than an order of magnitude.},
+	Address = {New York, NY, USA},
+	Author = {Nikolic, Milos and ElSeidy, Mohammed and Koch, Christoph},
+	Booktitle = {Proceedings of the 2014 {{ACM SIGMOD International Conference}} on {{Management}} of {{Data}}},
+	Date-Added = {2017-05-25 19:32:45 +0000},
+	Date-Modified = {2017-05-25 19:32:45 +0000},
+	Doi = {10.1145/2588555.2610519},
+	File = {Nikolic et al - 2014 - LINVIEW - Incremental View Maintenance for Complex Analytical Queries.pdf:/Users/pgiarrusso/Library/Application Support/Zotero/Profiles/0lm7uqnz.default/zotero/storage/6D9KEZSD/Nikolic et al - 2014 - LINVIEW - Incremental View Maintenance for Complex Analytical Queries.pdf:application/pdf},
+	Isbn = {978-1-4503-2376-5},
+	Keywords = {Compilation,Incremental view maintenance,linear algebra,machine learning,spark},
+	Pages = {253--264},
+	Publisher = {{ACM}},
+	Series = {SIGMOD '14},
+	Shorttitle = {{{LINVIEW}}},
+	Timestamp = {2017-05-25T19:30:34Z},
+	Title = {{{LINVIEW}}: {{Incremental View Maintenance}} for {{Complex Analytical Queries}}},
+	Urldate = {2017-05-25},
+	Year = {2014},
+	Bdsk-Url-1 = {http://dx.doi.org/10.1145/2588555.2610519}}
+
 @inproceedings{Flanagan1993essence,
 	Abstract = {In order to simplify the compilation process, many compilers for higher-order languages use the continuation-passing style (CPS) transformation in a first phase to generate an intermediate representation of the source program. The salient aspect of this intermediate form is that all procedures take an argument that represents the rest of the computation (the ``continuation''). Since the nai\textasciidieresis{}ve CPS transformation considerably increases the size of programs, CPS compilers perform reductions to produce a more compact intermediate representation. Although often implemented as a part of the CPS transformation, this step is conceptually a second phase. Finally, code generators for typical CPS compilers treat continuations specially in order to optimize the interpretation of continuation parameters.
 A thorough analysis of the abstract machine for CPS terms show that the actions of the code generator invert the nai\textasciidieresis{}ve CPS translation step. Put differently, the combined effect of the three phases is equivalent to a source-to-source transformation that simulates the compaction phase. Thus, fully developed CPS compilers do not need to employ the CPS transformation but can achieve the same results with a simple source-level transformation.},
@@ -252,14 +273,6 @@ A thorough analysis of the abstract machine for CPS terms show that the actions 
 	Urldate = {2017-05-25},
 	Year = {1993},
 	Bdsk-Url-1 = {http://dx.doi.org/10.1145/155090.155113}}
-
-@phdthesis{CaiPhD,
-	Author = {Yufei Cai},
-	Date-Added = {2017-05-10 14:27:52 +0000},
-	Date-Modified = {2017-05-10 14:30:31 +0000},
-	Note = {In preparation},
-	School = {University of T{\"u}bingen},
-	Year = {2017}}
 
 @misc{Atkey2015ILC,
 	Author = {Robert Atkey},
@@ -2263,6 +2276,42 @@ We evaluate the effectiveness of our approach by considering a range of benchmar
 	Year = {2012},
 	Bdsk-Url-1 = {http://doi.acm.org/10.1145/2254064.2254100},
 	Bdsk-Url-2 = {http://dx.doi.org/10.1145/2254064.2254100}}
+
+@inproceedings{Chen2014,
+ author = {Chen, Yan and Acar, Umut A. and Tangwongsan, Kanat},
+ title = {Functional Programming for Dynamic and Large Data with Self-adjusting Computation},
+ booktitle = {Proceedings of the 19th ACM SIGPLAN International Conference on Functional Programming},
+ series = {ICFP '14},
+ year = {2014},
+ isbn = {978-1-4503-2873-9},
+ location = {Gothenburg, Sweden},
+ pages = {227--240},
+ numpages = {14},
+ url = {http://doi.acm.org/10.1145/2628136.2628150},
+ doi = {10.1145/2628136.2628150},
+ acmid = {2628150},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {granularity control, incremental graph algorithms, information-flow type system, performance, self-adjusting computation},
+} 
+
+@inproceedings{Hammer2015,
+ author = {Hammer, Matthew A. and Dunfield, Joshua and Headley, Kyle and Labich, Nicholas and Foster, Jeffrey S. and Hicks, Michael and Van Horn, David},
+ title = {Incremental Computation with Names},
+ booktitle = {Proceedings of the 2015 ACM SIGPLAN International Conference on Object-Oriented Programming, Systems, Languages, and Applications},
+ series = {OOPSLA 2015},
+ year = {2015},
+ isbn = {978-1-4503-3689-5},
+ location = {Pittsburgh, PA, USA},
+ pages = {748--766},
+ numpages = {19},
+ url = {http://doi.acm.org/10.1145/2814270.2814305},
+ doi = {10.1145/2814270.2814305},
+ acmid = {2814305},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {call-by-push-value (CBPV), demanded computation graph (DCG), incremental compu- tation, laziness, memoization, nominal matching, self-adjusting computation, structural matching, thunks},
+}
 
 @inproceedings{Kennedy05gadtoo,
 	Acmid = {1094814},
