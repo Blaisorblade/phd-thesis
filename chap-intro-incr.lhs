@@ -14,25 +14,25 @@ computed |y1 = f x1| and we need to compute |y2| that equals |f x2|.
 In this scenario, programmers typically have to choose between a few undesirable
 options.
 \begin{itemize}
-\item They can call again function $f$ on the updated input and
+\item Programmers can call again function |f| on the updated input |x2| and
   repeat the computation from scratch. This choice guarantees
   correct results and is easy to implement, but typically wastes
   computation time. Often, if the updated input is close to the
   original input, the same result can be computed much faster.
-\item They can write by hand a new function $df$ that updates the
+\item Programmers can write by hand a new function |df| that updates the
   output based on input changes, using various techniques.
   Writing |df| by hand can be much more efficient than rerunning
   |f|, but it requires significant developer effort, is
   error-prone, and requires updating |df| to keep it consistent
   with |f|. This complicates code maintenance significantly in
   practice~\citep{Salvaneschi13reactive}.
-\item They can write |f| using domain-specific languages that
+\item Programmers can write |f| using domain-specific languages that
   support incrementalization, for tasks where such languages are
   available. For instance, build scripts (our |f|) are written in
   domain-specific languages that support (coarse-grained)
   incremental builds. Database query languages also have often
   support for incrementalization. \pg{Mention here limits?}
-\item They can attempt using general-purpose techniques for
+\item Programmers can attempt using general-purpose techniques for
   incrementalizing programs, such as \emph{self-adjusting
     computation} and variants such as \emph{Adapton}. Self-adjusting
   computation applies to arbitrary purely functional programs and
