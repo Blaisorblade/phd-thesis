@@ -1052,19 +1052,21 @@ where |m^(x)| represents lookup of |x| in map |m|,
 |dx| is now a fresh variable that does not appear in |t|,
 and |m[x -> dx]| extend |m| with a new mapping from |x| to |dx|.
 
-  But this change affects the interface of differentiation, in
-  particular, which variables are free in output terms. With this
-  change, |derive(s, emptyMap)| gives a result
-  $\alpha$-equivalent to |derive(s)| if term |s| is closed and
-  triggers no capture issues. But if |s| is open, we must
-  initialize |m| with mappings from |s|'s free variables to fresh
-  variables for their changes. Such variables appear free in |derive(s,
-  m)|, so we must modify
-  Hence
-  hence we must also use modify |Dt ^ Gamma| to use |m| to
-  keep rule \textsc{Derive} valid.
+  But this approach, that is using a map from base variables to change
+  variables, affects the interface of differentiation. In
+  particular, it affects which variables are free in output terms, hence we must
+  also update the definition of |Dt^Gamma| and derived typing rule
+  \textsc{Derive}.
+  With this appr,ach, if term |s| is closed then |derive(s, emptyMap)| gives a result
+  $\alpha$-equivalent to the old |derive(s)|, as long
+  as |s| triggers no capture issues. But if instead |s| is open, invoking
+  |derive(s, emptyMap)| is not meaningful: we must
+  pass an initial map |m| containing mappings from |s|'s free variables to fresh
+  variables for their changes. These change variables appear free in |derive(s,
+  m)|, hence we must update typing rule \textsc{Derive}, and modify |Dt ^ Gamma|
+  to use |m|.
 
-  Hence we define $\Delta_m \Gamma$ by adding |m| as a parameter to
+  We define $\Delta_m \Gamma$ by adding |m| as a parameter to
   |Dt^Gamma|, and use it in a modified rule \textsc{Derive'}:
 \begin{align*}
   \Delta_m\EmptyContext &= \EmptyContext \\

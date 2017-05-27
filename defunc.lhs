@@ -146,7 +146,7 @@ dapply f df x dx = df x dx
 \end{code}
 \paragraph{Which polymorphism?}
 As visible here, polymorphism does not cause particular problems. However, we
-only support ML (or prenex) polymorphism polymorphism, not first-class
+only support ML (or prenex) polymorphism, not first-class
 polymorphism, for two reasons.
 
 %format T1
