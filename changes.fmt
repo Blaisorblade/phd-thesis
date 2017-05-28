@@ -83,6 +83,13 @@
 %format db1
 %format db2
 
+%format g1
+%format g2
+%format g3
+
+%format dg1
+%format dg2
+
 %format dv0
 %format dv1
 %format dv2
