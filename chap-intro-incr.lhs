@@ -40,19 +40,29 @@ options.
   guarantees efficient incrementalization when applied to base
   programs that are \emph{designed} for efficient
   incrementalization.\pg{Citations}
+  Nevertheless, self-adjusting computation allowed incrementalizing programs
+  that had never been incrementalized by hand before.
 \end{itemize}
 
 \pg{Continue discussing dependencies minimization and the
   relation with parallelism. Build scripts might be a good
   example.}
 
-No approach guarantees automatic efficient incrementalization for
-arbitrary programs. We propose instead to design functional
-domain-specific languages (DSLs) with carefully designed
-primitives, so that programs in such DSLs can be incrementalized
-efficiently. To incrementalize such programs, we use a
-transformation that we call \emph{differentiation}. We propose
-functional DSLs, so that language primitive can be parameterized
+No approach guarantees automatic efficient incrementalization for arbitrary
+programs.
+We propose instead to design domain-specific languages
+(DSLs) that can be efficiently incrementalized, that we call \emph{incremental}
+DSLs (IDSLs).
+An incremental DSL is a higher-order purely functional language, composed of a
+$\lambda$-calculus core extended with base types and primitives.
+To incrementalize such programs, we use a transformation that we call
+\emph{differentiation}. Differentiation produces programs in the same language,
+that can be optimized further and compiled to efficient code.
+For primitives, IDSL designers must specify the result of
+differentiation: IDSL designers are to choose primitives that encapsulate
+efficiently incrementalizable computation schemes, while IDSL users are to
+express their computation using the primitives provided by the IDSL.
+We propose that IDSLs be higher-order, so that primitives can be parameterized
 over functions and hence highly flexible.\pg{why not
   defunctionalize/closure convert/...?}
 
@@ -73,7 +83,7 @@ Flattening? Nested data? Sharding?
 % We will discuss later why we favor this
 % approach.\pg{where?}
 
-We build our domain-specific functional languages based on
+We build our incremental DSLs based on
 simply-typed $\lambda$-calculus (STLC), extended with
 \emph{language plugins} to define the domain-specific parts, as
 discussed in \cref{sec:intro-stlc}. We call our approach
