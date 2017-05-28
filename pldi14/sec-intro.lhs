@@ -399,17 +399,18 @@ clearer, we only give the first such proof in full.
     (ocompose da1 da2, ocompose db1 db2)|.\]
   \item Change composition is correct on |A `times` B|, that is
     \[|fromto (A `times` B) ((a1, b1)) ((ocompose da1 da2,
-      ocompose db1 db2)) ((a3, b3))|\] if |fromto (A `times` B)
+      ocompose db1 db2)) ((a3, b3))|\] whenever |fromto (A `times` B)
     ((a1, b1)) ((da1, db1)) ((a2, b2))| and |fromto (A `times` B)
-    ((a2, b2)) ((da2, db2)) ((a3, b3))|, because change composition is correct on
-    both |A| and |B|.
+    ((a2, b2)) ((da2, db2)) ((a3, b3))|, in essence because
+    change composition is correct on both |A| and |B|. We leave a
+    full proof as an exercise.
   \end{subdefinition}
 \end{definition}
 
 \section{A change structure for sums}
 \label{sec:chs-sums}
-We can define change structures on products |A + B|, given change
-structures on |A| and |B|.
+We can define change structures on disjoint sums |A + B|, given
+change structures on |A| and |B|.
 \pg{resume.}
 
 
