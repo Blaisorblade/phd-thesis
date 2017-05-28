@@ -21,11 +21,11 @@ options.
   original input, the same result can be computed much faster.
 \item Programmers can write by hand a new function |df| that updates the
   output based on input changes, using various techniques.
-  Writing |df| by hand can be much more efficient than rerunning
-  |f|, but it requires significant developer effort, is
-  error-prone, and requires updating |df| to keep it consistent
-  with |f|. This complicates code maintenance significantly in
-  practice~\citep{Salvaneschi13reactive}.
+  Running a hand-written function |df| can be much more efficient than rerunning
+  |f|, but writing |df| requires significant developer effort, is
+  error-prone, and requires updating |df| by hand to keep it consistent with |f|
+  whenever |f| is modified. In practice, this complicates code maintenance
+  significantly~\citep{Salvaneschi13reactive}.
 \item Programmers can write |f| using domain-specific languages that
   support incrementalization, for tasks where such languages are
   available. For instance, build scripts (our |f|) are written in
