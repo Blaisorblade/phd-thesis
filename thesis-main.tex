@@ -22,10 +22,17 @@
 \excludecomment{nontechrep}
 \includecomment{forNonBeamer}
 
+% For adapting to compiling the whole thesis, or only parts.
+\newtoggle{full}
+\togglefalse{full}
+
+\iftoggle{full}{
+\includecomment{fullCompile}
+\excludecomment{partCompile}
+}{% else
 \excludecomment{fullCompile}
 \includecomment{partCompile}
-% \includecomment{fullCompile}
-% \excludecomment{partCompile}
+}
 
 % Number floats and figures together. Documented at
 % http://stackoverflow.com/a/43266057/53974.
