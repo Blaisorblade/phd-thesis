@@ -66,7 +66,7 @@ As usual, we'll use metavariables |v, v1, v2, ...| will range over elements of
 % and explain why the converse is not true.
 \pg{Make sure we explain \emph{somewhere} why the converse is not true.}
 
-\pg{Update earlier mention in chapter 11}.
+\pg{Update earlier mention in chapter 11}
 Let's first recall change operators.
 Operator |`oplus`| (``oplus'') updates a value with a change: If |dv| is a
 valid change from |v1| to |v2|, then |v1 `oplus` dv| (read as
