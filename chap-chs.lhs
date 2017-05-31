@@ -784,122 +784,229 @@ As a summary of definitions on types, we show that:
 \subsection{Alternative definitions of change validity}
 \label{sec:alt-change-validity}
 
-\pg{Correct the claim of equivalence, that's false (and we
-  already correct it later).}
+\newcommand{\ilcA}{ILC'14}
+\newcommand{\ilcB}{ILC'17}
 
-In this section we compare our \emph{new-style} formalization
+In this section we compare the formalization of ILC in this thesis (\ilcB)
 with the one we and others used in our \emph{old-style}
 formalization, that is, our first formalization of change
-theory~\citep{CaiEtAl2014ILC}. In particular, we focus on change
-validity for function spaces, and its role in the overall proof
-of |derive(param)|'s correctness. Specifically, we compare
-new-style valid function changes to old-style ones, and sketch in
-which sense they are equivalent.
+theory~\citep{CaiEtAl2014ILC} (\ilcA).
+We discuss both formalizations using our current notation and terminology, except for concepts
+that are not present here.
+Both formalizations model function changes semantically, but the two models we
+present are different. Overall, \ilcB{} uses simpler machinery and seems easier
+to extend to more general base languages. Instead, \ilcA{} studies additional
+entities, which however are in some ways better behaved.
 
-Let's assume |fromto (A -> B) f1 df f2| and |fromto A a1 da
-a2|. We know that then |fromto B (f1 a1) (df a1 da) (f2
-a2)|.
+In \ilcB{} function changes whose input and output domains contain
+\emph{invalid} changes; but function changes must map valid changes to valid
+changes. As shown, |eval(derive t)| maps valid changes to valid changes.
 
+Instead, \ilcA{} does not define validity on change set |Dt^A|. For each value
+|a : A| \ilcA{} defines a \emph{based} change set |Dt^a|; elements of |Dt^a|
+\emph{correspond} to changes that are valid with respect to |a|.
+Changes |df : Dt^f| for a function |f : A -> B| have a dependent type |df : (a :
+A) -> Dt^a -> Dt^(f a)|, hence their input and output domains are restricted to
+\emph{only} contain ``valid'' changes. Based change sets are in some ways better
+behaved. However, |eval(derive t)| does not belong to any based change set, because
+it has the ``wrong'' domain, even though |eval(derive t)|, when applied to
+``valid changes'', has in some sense the ``correct behavior''. More precisely,
+\ilcA{} introduces an incremental semantics |evalInc t| (different from the one in \ilcB{}), proves it
+has a ``correct behavior'', and shows that |eval(derive t)| has a behavior that ``matches''
+|evalInc t|. In turn, to make this precise, \ilcA{} defines formally when when a
+based change and a change have ``matching behaviors'' through a logical
+relation called \emph{erasure}: function change |df : (a : A) -> Dt^a -> Dt^(f
+a)| (with source |f : A -> B)| erases to erased change |df' : A -> Dt^A -> Dt^B|
+(written |erase f df df'|)
+if, given any change |da : Dt^a| with source |a| that erases to |da' : Dt^A|,
+output change |df a da : Dt^(f a)| erases to |df' a da' : Dt^B|.
+For base types, erasure simply connects corresponding |da' : Dt^a| with |da :
+Dt^A| in a manner dependent from the base type (often, just throwing away any
+embedded proofs of validity).
+This relation is called erasure because it goes from dependently-typed functions
+to non-dependently-typed functions. This style of relation resembles the ones
+used to show that a compiler produces outputs that relate to their inputs.
+Changes are then ``well-behaved'' if they are the erasure of a based
+change.\footnote{\citeauthor{CaiEtAl2014ILC} use different terminology: They say
+``changes'' instead of ``based changes'', and ``erased changes'' instead of
+``changes''. Here we change terms to use a single, consistent terminology.}
+
+\paragraph{Relating the two models}
+The two approaches have a different architecture, but reach similar results.
+In particular, they give the same definition and predict the same behavior for
+|eval(derive t)| in any example we are aware of.
+
+Based on a partial mechanized proof, we conjecture that a change is valid in
+\ilcB{} if and only if it is the erasure of a based change in \ilcA{}.
+
+We have sketched a mechanized proof of this conjecture, and have a partial proof
+for functions. To complete this proof, we would however need to combine the two
+definitions of change structures (the one in \ilcA{} using based change sets and
+the one in \ilcB{} using plain change sets), and show each operation mirrors the
+other one. For instance, we'd need proofs relating the different definitions of
+|`oplus`|, so that |erases a da da' -> a `oplus` da = a `oplus` da'|.
+We have not completed such proofs as of this writing.
+
+% We have also sketched a proof of our conjecture. However,
+
+% In this thesis we have given a novel semantic model of function changes.
+
+% In particular, we focus on change
+% validity for function spaces, and its role in the overall proof
+% of |derive(param)|'s correctness. Specifically, we compare
+% new-style valid function changes to old-style ones, and sketch in
+% which sense they are equivalent.
+
+We have seen that based function changes have type |df : (a : A) -> Dt^a ->
+Dt^(f a)|. However, based function changes have to also satisfy an additional
+equation called \emph{preservation of future}:\footnote{Name suggested by Yufei Cai.}
+  \[|f1 a1 `oplus` df a1 da = (f1 `oplus` df) (a1 `oplus` da)|.\]
+This equation appears inelegant, and formal proofs were often complicated by the
+need to perform rewritings using it.
+If we replace |f1 `oplus` df| with |f2| and |a1 `oplus` da| with |a2|, this
+equation becomes |f1 a1 `oplus` df a1 da = f2 a2|, a consequence of |fromto f1
+df f2|. So one might suspect that valid function changes also satisfy this
+equation. We show this is indeed the case:
+
+% This equation is one requirement that old-style function changes
+% had to satisfy. What we have seen is that the new-style
+% definition of validity, although different (and we believe
+% simpler), implies the same equation.
+% First, we show that our valid function changes satisfy
+\begin{lemma}
+  A valid function change |fromto (A -> B) f1 df f2| satisfies equation
+  \[|f1 a1 `oplus` df a1 da = (f1 `oplus` df) (a1 `oplus` da)|\]
+  on any valid input |fromto (A -> B) a1 da a2|.
+\end{lemma}
+\begin{proof}
+Assume |fromto (A -> B) f1 df f2| and |fromto A a1 da
+a2|.
+We have to show |f1 a1 `oplus` df a1 da = (f1 `oplus` df) (a1 `oplus` da)|.
+
+From the hypotheses one can briefly show that |fromto B (f1 a1) (df a1 da) (f2
+a2)|, that |f2 = f1 `oplus` df| and that |a2 = a1 `oplus` da|.
 We have seen in \cref{eq:fun-preserv-eq} that |f2 a2 = f1 a1
-`oplus` df a1 da|, and we have defined |(f1 `oplus` df) a1 = f1
-a1 `oplus` df a1 (nil a)|.
+`oplus` df a1 da|.
+Combining these equations, it follows as desired that
+\begin{equational}
+  \begin{code}
+  f1 a1 `oplus` df a1 da
+=
+  f2 a2
+=
+  (f1 `oplus` df) (a1 `oplus` da)
+  \end{code}
+\end{equational}
+% \[
+%   |f1 a1 `oplus` df a1 da = (f1 `oplus` df) (a1 `oplus` da) = f1
+%   (a1 `oplus` da) `oplus` df (a1 `oplus` da) (nil (a1 `oplus`
+%   da))|.\]
+\end{proof}
+Beware, however, this equation on changes is not actually equivalent to the same
+equation for based changes, since variables quantify over different sets (based
+change sets versus change sets) and since operators like |`oplus`| refer to
+different (though related) operations.
 
-Combining these two equations, it follows that
-\[
-  |f1 a1 `oplus` df a1 da = (f1 `oplus` df) (a1 `oplus` da) = f1
-  (a1 `oplus` da) `oplus` df (a1 `oplus` da) (nil (a1 `oplus`
-  da))|.\]
+Also beware the two models are unlikely to be isomorphic in any straightforward
+sense. Initially, we conjectured such an isomorphism would actually exist and
+tried defining it. Please keep in mind we work in a constructive setting, hence
+we tried defining a constructive isomorphism.
 %
-This equation is one requirement that old-style function changes
-had to satisfy. What we have seen is that the new-style
-definition of validity, although different (and we believe
-simpler), implies the same equation.
+However, try converting a based function change |df' : Dt^f| with source |f : A
+-> B| to a valid function change |df : Dt^(A -> B) = \(a : A) (da : Dt^A) ->
+dt|. We would expect |dt| to compute |df' a da|, modulo a few conversions. But
+first, |da| need not be valid. We'd have to generate some output change anyway.
+We can pick |df a (nil a)|, or |nil (f a)|, or something else. But then, if
+|df'| results from converting a valid function change |df0|, |df| will not have
+the same behavior as |df0| on invalid changes. Hence, our conversion would not
+be an isomorphism.
+Worse, in a constructive and proof-relevant setting, we need to a decision
+procedure that given |a : A| and |da : Dt^A| produces either a proof that |da|
+is valid for |a|, or a proof that it is not valid. But validity might be
+undecidable in general, especially if |A| is in turn a set of functions.
 
-Old-style valid function changes also had to map a valid change
-|da| with source |a1| to a valid change |df a1 da| with source
-|f1 a1|. New-style function changes also satisfy this
-requirement.
+Overall, the relation between the two models is vaguely similar to the relation
+between two models of the same language: while their elements have different
+characteristics, they enable showing similar facts about the language (though
+not necessarily the same ones).
 
-This suggests the two definitions should be equivalent. However,
-new-style function changes are also defined on invalid input
-changes, unlike old-style valid function changes.
-However, we can
-fix this issue by restricting the input domain of function
-changes to valid changes. Indeed, we believe that sets of valid
-new-style function changes, restricted this way, are isomorphic
-to sets of old-style function changes, but only as long as we
-stick to the on-paper old-style formalization, presented in set
-theory.
+% While that formulation has lots of conceptual elegance, programs
+% produced by |derive(param)| are expressed in STLC, which does not
+% support dependent types and cannot express proofs; hence
+% |derive(param)| cannot produce changes that are valid according
+% to \citeauthor{CaiEtAl2014ILC}. Instead,
+% \citeauthor{CaiEtAl2014ILC} need to give a separate semantics
+% mapping terms to their validity-embedding changes, and then
+% relate validity-embedding changes to the ``erased changes''
+% produced by |derive(param)|.\footnote{While we didn't realize
+%   back then, we could have probably reused the theory of
+%   realizability to perform erasure and extract the computational
+%   content from validity-embedding changes.} While this additional
+% step is not conceptually hard, mechanizing it took significant
+% work; moreover, dealing with both validity-embedding changes and
+% erased changes introduced significant inelegant noise in quite a
+% few definitions and theorem statements.
 
-However, the actual mechanized proofs use type theory, where
-proofs have first-class status. Old-style changes embed proofs of
-their own validity, while new-style changes don't. Moreover, a
-change |dv| for source |v| has type |Dt^v|, which can only be
-expressed using dependent types.
-%
-While that formulation has lots of conceptual elegance, programs
-produced by |derive(param)| are expressed in STLC, which does not
-support dependent types and cannot express proofs; hence
-|derive(param)| cannot produce changes that are valid according
-to \citeauthor{CaiEtAl2014ILC}. Instead,
-\citeauthor{CaiEtAl2014ILC} need to give a separate semantics
-mapping terms to their validity-embedding changes, and then
-relate validity-embedding changes to the ``erased changes''
-produced by |derive(param)|.\footnote{While we didn't realize
-  back then, we could have probably reused the theory of
-  realizability to perform erasure and extract the computational
-  content from validity-embedding changes.} While this additional
-step is not conceptually hard, mechanizing it took significant
-work; moreover, dealing with both validity-embedding changes and
-erased changes introduced significant inelegant noise in quite a
-few definitions and theorem statements.
+% Using our formalization, we have also defined a type of
+% validity-embedding changes |Dt^v|, with elements that pair a
+% change and its validity proof:
+% \[|Dt^v = Sigma [ dv `elem` Dt^V ] valid v dv|.\]
 
-Using our formalization, we have also defined a type of
-validity-embedding changes |Dt^v|, with elements that pair a
-change and its validity proof:
-\[|Dt^v = Sigma [ dv `elem` Dt^V ] valid v dv|.\]
+% However, such new-style validity-embedding changes are not
+% equivalent to old-style changes on function spaces, even if we
+% restrict our attention to valid inputs; we need one last step to
+% relate them together. Take an arbitrary function |f1 : A -> B|.
+% For \citeauthor{CaiEtAl2014ILC}, |df' : Dt^f1| means that |df'|
+% maps validity-embedding changes to validity-embedding changes;
+% for us, |df' : Dt^f1| means that |df'| contains (1) a map |df|
+% from changes to changes and (2) a proof that |df| preserves
+% validity: in a sense, new-style changes split what was a map of
+% validity-embedding changes into its action on changes and its
+% action on validity proofs. This ``splitting'' becomes trickier
+% for higher-order function types, such as |(A -> B) -> (C -> D)|,
+% so it must be defined by induction on types; essentially, we need
+% to adapt \citeauthor{CaiEtAl2014ILC}'s erasure.
 
-However, such new-style validity-embedding changes are not
-equivalent to old-style changes on function spaces, even if we
-restrict our attention to valid inputs; we need one last step to
-relate them together. Take an arbitrary function |f1 : A -> B|.
-For \citeauthor{CaiEtAl2014ILC}, |df' : Dt^f1| means that |df'|
-maps validity-embedding changes to validity-embedding changes;
-for us, |df' : Dt^f1| means that |df'| contains (1) a map |df|
-from changes to changes and (2) a proof that |df| preserves
-validity: in a sense, new-style changes split what was a map of
-validity-embedding changes into its action on changes and its
-action on validity proofs. This ``splitting'' becomes trickier
-for higher-order function types, such as |(A -> B) -> (C -> D)|,
-so it must be defined by induction on types; essentially, we need
-to adapt \citeauthor{CaiEtAl2014ILC}'s erasure.
-
-We have not attempted a mechanization of the full equivalence,
-but we have been satisfied with mechanizing several fragments
-without further issues.
+% We have not attempted a mechanization of the full equivalence,
+% but we have been satisfied with mechanizing several fragments
+% without further issues.
 
 \paragraph{Mechanization overhead}
-The formalization presented in this thesis appears simpler and
-smaller than the original one, because we avoid needing erasure,
+The mechanization of \ilcB{} appears simpler and
+smaller than the mechanization for \ilcA{}, because we avoid needing erasure,
 but also for other smaller simplifications.
 
 Most importantly, our fundamental relation is ``two-sided''
-(|fromto V v1 dv v2|) rather than ``one-sided'' (|valid V v dv|);
+(|fromto V v1 dv v2|) rather than ``one-sided'' (|valid V v dv| or |dv : Dt^v|);
 that is, validity specifies both the source and the destination
 explicitly. This is easier now that validity proofs are separate
 from changes. While this might seem trivial, it's somewhat
-significant for functions.
+significant for functions, especially in terms of mechanization
+overhead in Agda.
 %
-Indeed, new-style validity allows stating that |df : Dt^(A -> B)|
+Indeed, \ilcB{} validity allows stating that |df : Dt^(A -> B)|
 is a change from |f1| to |f2|, instead of stating that |df| is a
 change from |f1| to |f1 `oplus` df = \a -> f1 a `oplus` df a (nil
 a)|. What's more, assume |fromto A a1 da a2|: according to
-new-style validity preservation, change |df a1 da| has
-destination |f2 a2|. Instead, according to old-style validity
+\ilcB validity preservation, change |df a1 da| has
+destination |f2 a2|. Instead, according to \ilcA{} validity
 preservation, change |df a1 da| has destination |(f1 `oplus` df)
 (a1 `oplus` da)|, that is |f1 (a1 `oplus` da) `oplus` df (a1
 `oplus` da) (nil (a1 `oplus` da))|, which adds significant noise
-to mechanized proving with old-style definitions.
+to mechanized proving with \ilcA definitions.
+
+\paragraph{Future work}
+A model without junk still has desirable attributes. We conjecture we could combine
+the benefits of the two models by defining change sets indexed from both sides:
+
+|Dt2 (A -> B) f1 f2 = Dt2 A a1 a2 -> Dt2 B (f1 a1) (f2 a2)|.
+
+One could then define a set of valid changes containing their source and
+destination:
+
+|Dt^V = exists v1 : V, v2 : V. ^^ Dt2^V v1 v2|.
+
+But the main questions are about reducing the formalization overhead.
 
 \paragraph{Credits and related work}
 The proof presented in this and the previous chapter is an
@@ -911,92 +1018,26 @@ with this thesis, some ideas were suggested by other
 Régis-Gianas. Yufei Cai showed a simpler set-theoretic proof by
 separating validity, while we noticed separating validity works
 equally well in a mechanized type theory and simplifies the
-mechanization. Yann Régis-Gianas has an almost complete proof
-using a two-sided validity relation that simplified the proof
-significantly. Since his proof was about an untyped
-$\lambda$-calculus, the proof uses a step-indexed logical
-relation to define validity, a necessary choice which however
-adds nontrivial overhead. That proof also uses step-indexed
-big-step semantics; because of this choice, mechanizing the proof
-would be harder in Agda, since Agda has limited support for proof
-automation compared to Coq.
-%
+mechanization.
+The first to use a two-sided validity relation was Yann Régis-Gianas, though in
+a different formal setting and in a proof that is yet incomplete.
 I gave the first complete and mechanized ILC correctness proof
 using two-sided validity, again for a simply-typed
 $\lambda$-calculus with a denotational semantics. Based on
 two-sided validity, I also reconstructed the rest of the theory
 of changes.
 
-% For \citeauthor{CaiEtAl2014ILC}, function changes map
-% validity-embedding changes to validity-embedding changes: a
-% function change |df' : Dt^f| has type |(a : A) -> (da : Dt^a) ->
-% Dt^(f1 a)|.
-
-% Instead, with our definition, if |df' : Dt^f1| then |df'| pairs a
-% function change |df : Dt^(A -> B)| (that is, |A -> Dt^A -> Dt^B|)
-% and a proof of validity preservation, that
-% |(a1 a2 : A) -> (da : Dt^A) -> fromto A a1 da a2 -> fromto B (f1 a1) (df a1 da) (f2 a2)| (with |f2 = f1 `oplus` df|).
-% This is equivalent to
-% |(a : A) -> (da : Dt^A) -> valid A a da -> valid B (f1 a) (df a da)|.
-
-
-% when they write |df a1 da|, change |da| is in fact a pair of an
-% ``actual change'' and its validity proof. Similarly, |df a1 da|
-% is also a pair of an ``actual change'' and a validity proof. For
-% that reason, to relate valid changes with
-
-% %
-% We defined |evalInc t = (\rho1 drho -> eval(derive t) drho)|
-% essentially as the semantics of |derive(t)|; function
-% |evalInc(t)| is only a valid function change in our
-% formalization, but not in \citeauthor{CaiEtAl2014ILC}'s. More in
-% general, in that earlier formalization the semantics of a lambda
-% term is almost never be a valid change.
-% There, one must define a
-% separate incremental semantics that is a valid function change
-% and that \emph{erases} to |eval(derive t)|. That's because in
-% \citeauthor{CaiEtAl2014ILC} the input to function changes embeds
-% validity proofs, while for us it doesn't.
-
-% While this difference is conceptually innocuous, it
-% makes the earlier proof trickier than ours.
-
-% In our mechanization, we treat changes |dv : Dt^V| and their
-% proofs of validity |dvv : valid V v dv| as two separate objects,
-% while \citeauthor{CaiEtAl2014ILC} combine them. For
-% \citeauthor{CaiEtAl2014ILC}, instead, changes belong to change
-% sets |Dt^v| indexed by the source |v|, and each change in |Dt^v|
-% contains a proof that it's valid for |v|.
+One of the closest available proofs in the literature might be the correctness
+proof by \citet{Acar08}, which proves correctness of incrementalization with an
+step-indexed logical relation for an untyped language using a big-step
+semantics. Based on a few preliminary experiments, we conjecture it should be
+possible to adapt that proof to a correctness proof of ILC on an untyped
+language using an operational semantics.
 
 % \citeauthor{CaiEtAl2014ILC}'s definition resembles our definition
 % of |Dt^v = Sigma [ dv `elem` Dt V ] valid v dv| in
 % \cref{sec:chs-alg}; indeed, for any natural |n : Nat| the two
 % definitions of |Dt^n| are the same.
-
-% But on function spaces the two definitions diverge.
-% Take |f1 : A -> B|.
-
-% For us, |Dt^f| pairs a ``raw'' function change with a proof of
-% its validity: |Dt^f = Sigma [ df `elem` Dt^(A -> B) ] valid (A ->
-% B) f df|, where |valid (A -> B) f df| means that |df| preserves
-% validity, taking a valid change |da| (|fromto A a1 da a2|) to a
-% valid change |df a1 da| (|fromto B (f1 a1) (df a1 da) ((f1
-% `oplus` df) a2)|).
-%
-
-% % Instead, for \citeauthor{CaiEtAl2014ILC}, function changes map
-% % validity-embedding changes to validity-embedding changes: a
-% % function change |df : Dt^f| has type |(a1 : A) -> (da : Dt^a1) ->
-% % Dt^(f a1)|.
-
-% % when they write |df a1 da|, change |da| is in fact a pair of an
-% % ``actual change'' and its validity proof. Similarly, |df a1 da|
-% % is also a pair of an ``actual change'' and a validity proof. For
-% % that reason, to relate valid changes with
-
-% Remember |valid (A -> B) f df = fromto (A -> B) f df (f `oplus` df) = forall |
-% that is:
-% \[|Dt^f = Sigma [ df `elem` A -> Dt^A -> Dt^B ] (forall (a1 : A) ())|\]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
