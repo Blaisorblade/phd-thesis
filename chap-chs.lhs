@@ -220,21 +220,6 @@ structures.
   `ominus` v1) v2|) instantiated with |v1 = v| and |v2 = v|.
 \end{proof}
 
-\section{Operations on function changes, informally}
-\label{sec:chs-funs-informal}
-\pg{Move after change structures and drop parts made redundant.}
-\subsection{Nil changes}
-\pg{Change structures make this whole section redundant.}
-\label{sec:nil-changes-intro}
-When we define change structures, each element is going to be
-associated to at least one nil change.
-\begin{restatable}[Existence of nil changes]{lemma}{nilChangesExist}
-  \label{lem:nilChangesExist}
-  Given a change structure for |V|, to each element |v
-  `elem` V| is associated a distinguished nil change that we
-  denote by |nil v|.
-\end{restatable}
-
 Moreover, nil changes are a right identity element for |`oplus`|:
 \begin{restatable}[Nil changes are identity elements]{corollary}{nilChangesRightId}
   \label{lem:nilChangesRightId}
@@ -247,17 +232,26 @@ Moreover, nil changes are a right identity element for |`oplus`|:
   This follows from \cref{thm:valid-oplus} and the definition of
   nil changes.
 \end{proof}
+
 The converse of this theorem does not hold: there exists changes
 |dv| such that |v `oplus` dv = v| yet |dv| is not a valid change
-from |v| to |v|. For instance, under earlier definitions for
+from |v| to |v|.
+More in general, |v1 `oplus` dv = v2| does not imply that |dv| is a valid
+change.
+For instance, under earlier definitions for
 changes on naturals, if we take |v = 0| and |dv = -5|, we have |v
 `oplus` dv = v| even though |dv| is not valid; examples of
 invalid changes on functions are discussed at \cref{sec:invalid}.
 However, we prefer to define ``|dv| is a nil change'' as we do,
 to imply that |dv| is valid, not just a neutral element.
 
-We can already show some values have nil changes even though we
-haven't proved \cref{lem:nilChangesExist}.
+\section{Operations on function changes, informally}
+\label{sec:chs-funs-informal}
+\subsection{Examples of nil changes}
+\label{sec:nil-changes-intro}
+
+We have not defined any change structure yet, but we can already exhibit nil
+changes for some values, including a few functions.
 \begin{examples}
   \begin{itemize}
   \item
@@ -316,25 +310,28 @@ operations. We require that
   \label{eq:search-nil-fun}
   |fromto (A -> B) f (nil f) f|.
 \end{equation}
-That is, whenever |fromto A a1 da a2| then |fromto B (f1 a1) (nil f a1
-da) (f2 a2)|. By \cref{thm:valid-oplus}, this implies that
+Equivalently, whenever |fromto A a1 da a2| then |fromto B (f a1) (nil f a1
+da) (f a2)|. By \cref{thm:valid-oplus}, it follows that
 \begin{equation}
   \label{eq:search-nil-fun-oplus}
-  |f1 a1 `oplus` nil f a1 da = f2 a2|,
+  |f a1 `oplus` nil f a1 da = f a2|,
 \end{equation}
-where |a1 `oplus` da = a2|. To solve this equation, we
-\emph{introduce operator |`ominus`|}, such that |a2 `ominus` a1|
-produces a valid change from |a1| to |a2|, and see that |nil f|
-must be
+where |a1 `oplus` da = a2|.
 
+Let's use an analogy. We write |`oplus`| and |`ominus`| because they are
+intended to resemble |+| and |-|.
+To solve |f a1 + nil f a1 da = f a2|, we subtract |f a1|
+from both sides and write |nil f a1 da = f a2 - f a1|.
+
+Similarly, here we use operator |`ominus`|: |nil f| must equal
 \begin{equation}
   \label{eq:define-nil-fun}
 |nil f = \a1 da -> f (a1 `oplus` da) `ominus` f a1|.
 \end{equation}
-
-We can verify, in particular, that this definition for |nil f|
-solves not just \cref{eq:search-nil-fun-oplus} but also
-\cref{eq:search-nil-fun}.
+Because |fromto B b1 (b2 `ominus` b1) b2| for all |b1, b2 : B|, we can verify
+that |nil f| as defined by \cref{eq:define-nil-fun} satisfies our original
+requirement \cref{eq:search-nil-fun}, not just its weaker consequence
+\cref{eq:search-nil-fun-oplus}.
 
 We have shown that, to define |nilc| on functions |f : A -> B|,
 we can use |`ominus`| at type |B|. Without using |f|'s intension,
@@ -373,9 +370,9 @@ which is the same definition as
 
 We have made this definition at the meta-level. We can also use
 the same definition in object programs, but there we face
-additional concerns. The produced function change is rather slow,
-because it recomputes the old output |f1 a1|, while also computes
-the new output |f2 a2| and taking the difference.
+additional concerns. The produced function change |df| is slower than needed,
+because it recomputes the old output |f1 a1|, computes the new output |f2 a2|
+and takes the difference.
 
 However, we can implement |`ominus`| using replacement changes, if
 they are supported on the relevant types. If we define |`ominus`|
@@ -388,7 +385,7 @@ themselves. However, here the bang operator needs to be defined
 to produce a function change that can be applied, hence
 \[|!f2 = \a1 da -> ! (f2 (a1 `oplus` da))|.\]
 
-Alternatively, as we'll see later in
+Alternatively, as we see in
 \cref{ch:defunc-fun-changes}, we could represent function changes
 not as functions but as data through \emph{defunctionalization},
 and provide a function applying defunctionalized function changes
@@ -402,12 +399,6 @@ Next, we discuss how |`oplus`| must be defined on functions, and
 show informally why we must define |f1 `oplus` df = \v -> f1 x
 `oplus` df v (nil v)| to prove that |`oplus`| on functions agrees
 with validity (that is, \cref{thm:valid-oplus}).
-
-% Take functions
-% |f1 `oplus` df|
-% Take a value |v|.
-% Assume there exists a valid nil change for |v|, and
-% write it |nil v| (see \cref{lem:nilChangesExist}).
 
 We know that a valid function change |fromto (A -> B) f1 df
 f2| takes valid input changes |fromto A v1 dv v2| to a valid
@@ -428,7 +419,7 @@ Instantiating |dv| with |nil v| gives equation
 which is not only a requirement on |`oplus`| for functions but
 also defines |`oplus`| effectively.
 
-\section{Defining new change structures from existing ones}
+\section{Instances of change structures}
 \label{sec:chs-fun-chs}
 
 In this section, we derive a change structure for |A -> B| from
@@ -715,7 +706,7 @@ As a summary of definitions on types, we show that:
 \end{subfigure}
 \validOplus*
   \deriveCorrectOplus*
-  \nilChangesExist*
+  %\nilChangesExist*
 
   \caption{Defining change structures.}
   \label{fig:change-structures}

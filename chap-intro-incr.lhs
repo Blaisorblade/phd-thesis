@@ -163,7 +163,10 @@ which were removed and which were subjected to change themselves?
 
 In ILC, we generalize the calculus of finite differences by
 using distinct types for base values and changes, and adapting
-the surrounding theory.
+the surrounding theory. ILC generalizes operators |+| and |-| as operators
+|`oplus`| (pronounced ``oplus'' or ``update'') and |`ominus`| (pronounced
+``ominus'' or ``difference''). We show how ILC subsumes groups in
+\cref{sec:change-structure-groups}.
 
 %format s1
 %format s2
