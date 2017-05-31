@@ -318,8 +318,9 @@ da) (f a2)|. By \cref{thm:valid-oplus}, it follows that
 \end{equation}
 where |a1 `oplus` da = a2|.
 
-Let's use an analogy. We write |`oplus`| and |`ominus`| because they are
-intended to resemble |+| and |-|.
+To define |nil f| we solve \cref{eq:search-nil-fun-oplus}. To understand how, we
+use an analogy.
+|`oplus`| and |`ominus`| are intended to resemble |+| and |-|.
 To solve |f a1 + nil f a1 da = f a2|, we subtract |f a1|
 from both sides and write |nil f a1 da = f a2 - f a1|.
 
@@ -355,29 +356,31 @@ define
 \end{equation}
 
 One can verify that \cref{eq:ominus-fun-1} defines |f2 `ominus`
-f1| as a valid function from |f1| to |f2|, as desired. What's
-more, our earlier specialized definition of |nil f| in
-\cref{eq:define-nil-fun} becomes now redundant. We can just use
-general definition |nil f = f `ominus` f|, simplify through the definition
-of |`ominus`| in \cref{eq:ominus-fun-1}, and obtain
+f1| as a valid function from |f1| to |f2|, as desired.
+And after defining |f2 `ominus` f1|, we need no more to define
+|nil f| separately using \cref{eq:define-nil-fun}.
+We can just define |nil f = f `ominus` f| simplify through the definition
+of |`ominus`| in \cref{eq:ominus-fun-1}, and reobtain \cref{eq:define-nil-fun}
+as a derived equation:
 %
 \[
   |nil f = f `ominus` f = \a1 da -> f (a1 `oplus` da) `ominus` f
   a1|,
 \]
-which is the same definition as
-\cref{eq:define-nil-fun}.
 
-We have made this definition at the meta-level. We can also use
-the same definition in object programs, but there we face
-additional concerns. The produced function change |df| is slower than needed,
-because it recomputes the old output |f1 a1|, computes the new output |f2 a2|
-and takes the difference.
+We defined |f2 `ominus` f1| on metalanguage functions. We can also internalize
+change operators in our object language, that is, define for each type |tau|
+object-level terms |oplusIdx(tau)|, |ominusIdx(tau)|, and so on, with the same
+behavior.
+We can define object-language change operators such as |`ominus`| using the same
+equations. However, the produced function change |df| is slow, because it
+recomputes the old output |f1 a1|, computes the new output |f2 a2| and takes the
+difference.
 
-However, we can implement |`ominus`| using replacement changes, if
-they are supported on the relevant types. If we define |`ominus`|
-on set |B| as |b2 `ominus` b1 = !b2| and simplify \cref{eq:ominus-fun-1},
-we obtain
+However, we can implement |ominusIdx(sigma -> tau)| using replacement changes, if
+they are supported by the change structure on type |tau|.
+Let us define |ominusIdx(tau)| as |b2 `ominus` b1 = !b2| and simplify
+\cref{eq:ominus-fun-1}; we obtain
 \[|f2 `ominus` f1 = \a1 da -> ! (f2 (a1 `oplus` da))|.\]
 
 We could even imagine allowing replacement changes on functions
