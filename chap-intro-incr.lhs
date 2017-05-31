@@ -548,8 +548,8 @@ that |sum (merge dxs dys)| evaluates to a change from
 % will make this more formal in next section.
 
 In this section, we have sketched the meaning of differentiation
-informally. Next, we discuss incrementalization on higher-order
-terms in \cref{sec:higher-order-intro}, before defining
+informally. We discuss incrementalization on higher-order
+terms in \cref{sec:higher-order-intro}, and actually define
 differentiation in \cref{sec:informal-derive}.
 
 % \pg{Why show a change structure in Haskell terms?}
@@ -575,8 +575,9 @@ differentiation in \cref{sec:informal-derive}.
 \section{Function changes}
 \label{sec:higher-order-intro}
 \subsection{Producing function changes}
+
 A first-class function can close over free variables that can
-change, hence functions values can change themselves; hence, we
+change, hence functions values themselves can change; hence, we
 introduce \emph{function changes} to describe these changes.
 
 % Mapping from variables to values:
@@ -598,7 +599,7 @@ Consider again \cref{slogan:derive} and how it applies to term
 %
 \sloganDerive*
 %
-Since |y| is free in |tf|, |y| is an input of
+Since |y| is free in |tf|, the value for |y| is an input of
 |tf|. So, continuing our example, |dtf = derive(tf)| must map
 a valid input change |dv| from |v1| to |v2| for variable |y| to
 a valid output change |df| from |f1| to |f2|; more precisely, we must
