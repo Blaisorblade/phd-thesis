@@ -966,6 +966,25 @@ Bool|; its change context is |Dt^Gamma = Int, Dt^Int, Bool,
 Dt^Bool|. This solution is correct and robust, and is the one we
 rely on.
 
+Alternatively, we can mechanize ILC using separate syntax for change terms |dt|
+that use separate namespaces for base variables and change variables.
+
+\begin{code}
+  ds , dt   ::=  dc
+            |    \ (x : sigma) (dx : Dt^sigma) -> dt
+            |    ds t dt
+            |    dx
+\end{code}
+
+In that case, change variables live in a separate namespace. Example context
+|Gamma = Int, Bool| gives rise to a different sort of change context, |Dt^Gamma
+= Dt^Int, Dt^Bool|. And a change term in context |Gamma| is evaluted with
+separate environments for |Gamma| and |Dt^Gamma|.
+This is appealing, because it allows defining differentiation and proving it
+correct without using weakening and applying its proof of soundness.
+We still need to use weakening to convert change terms to their equivalents in
+the base language, but proving that conversion correct is more straightforward.
+
 \paragraph{Using names}
 Next, we discuss issues in implementing this transformation with
 names rather than de Bruijn indexes. Using names rather than de
@@ -999,10 +1018,13 @@ A few workarounds and fixes are possible.
 \item As a better workaround, instead of prefixing variable names
   with |d|, we can add change variables as a separate construct
   to the syntax of variables and forbid differentiation on terms
-  that containing change variables. While we used this approach
+  that containing change variables. This is a variant of the earlier approach
+  using separate change terms.
+  While we used this approach
   in our prototype implementation in
   Scala~\citep{CaiEtAl2014ILC}, it makes our output language
-  annoyingly non-standard.
+  annoyingly non-standard. Converting to a standard language using names (not
+  de Bruijn indexes) raises again capture issues.
   % A slight downside is that
   % this unnecessarily prevents attempting iterated
   % differentiation, as in |derive(derive(t))|.
@@ -1057,7 +1079,7 @@ and |m[x -> dx]| extend |m| with a new mapping from |x| to |dx|.
   particular, it affects which variables are free in output terms, hence we must
   also update the definition of |Dt^Gamma| and derived typing rule
   \textsc{Derive}.
-  With this appr,ach, if term |s| is closed then |derive(s, emptyMap)| gives a result
+  With this approach, if term |s| is closed then |derive(s, emptyMap)| gives a result
   $\alpha$-equivalent to the old |derive(s)|, as long
   as |s| triggers no capture issues. But if instead |s| is open, invoking
   |derive(s, emptyMap)| is not meaningful: we must
