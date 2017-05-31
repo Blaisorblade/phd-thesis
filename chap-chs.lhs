@@ -4,61 +4,43 @@
 
 \chapter{Change structures}
 \label{ch:change-theory}
-\pg{Rewrite this chapter and this intro.}
 In the previous chapter, we have shown that evaluating the result
 of differentiation produces a valid change |dv| from the old
 output |v1| to the new one |v2|.
 %
 To \emph{compute} |v2| from |v1| and |dv|, in this chapter we
-introduce formally the operator |`oplus`| that we have talked so
-much about.
+introduce formally the operator |`oplus`| mentioned earlier.
 
-Moreover, it is not yet clear concretely how plugins should
-define differentiation on primitives. To write derivatives on
-primitives, we will need operations on changes, such as
-|`oplus`|, |`ominus`|, |`ocompose`| and |nilc|, and
-guarantees on their behavior. Guarantees on the behavior of
-change operations will be needed to prove that programs using
-change operations behave as specified. In particular, such
-guarantees are required to prove that the derivatives of some
-primitives are correct.
+To define differentiation on primitives, plugins need a few operations on
+changes,
+% Moreover, it is not yet clear concretely how plugins should
+% define differentiation on primitives.
+% To write derivatives on
+% primitives, we will need operations on changes,
+not just |`oplus`|, |`ominus`|, |`ocompose`| and |nilc|.
 
-% We define next the concept of \emph{change structures}, to
+To formalize these operators and specify their behavior, we extend the notion of
+basic change structure into the notion of \emph{change structure} in
+\cref{sec:change-structures-formal}.
+The change structure for function spaces is not entirely intuitive, so we
+motivate it in \cref{sec:chs-funs-informal}.
+Then, we show how to take change structures on |A| and |B| and
+define new ones on |A -> B| in \cref{sec:chs-fun-chs}. Using
+these structures, we finally show that starting from change
+structures for base types, we define change structures for
+all types |tau| and contexts |Gamma| in \cref{sec:chs-types-contexts},
+completing the core theory of changes.
+Finally, we relate this formalization of changes with the one by
+\citet{CaiEtAl2014ILC} in \cref{sec:alt-change-validity}.
 
-% Hence, we continue exploring how changes behave, and introduce
-% operations (including |`oplus`|) that manipulate them. We will
-% define these operations both at the semantic level to operate on
-% change values, and on the syntactic level to use in object
-% programs, such as derivatives of primitives. While often the same
-% definitions are applicable, additional performance concerns apply
-% to object-level implementations.
+% \pg{elsewhere, where?}
+% As anticipated, we use changes to generalize the calculus of finite differences
+% from groups (see \cref{sec:generalize-fin-diff}). We show how change structures
+% generalize groups in \cref{sec:change-structure-groups}.
 
 % We will summarize this section in \cref{fig:change-structures};
 % readers might want to jump there for the definitions. However, we
 % first build up to those definitions.\pg{Correct when revising figures.}
-
-% % The notion of basic change structure is somewhat weak, since we
-% % place no constraints on validity, but we are going to build on it
-% % a more interesting notion of \emph{change structure}, which adds
-% % operations including |`oplus`| and requirements on them.
-
-As anticipated, we use changes to generalize the calculus of
-finite differences from groups (see
-\cref{sec:generalize-fin-diff}). We'll later see how change
-structures generalize groups.
-
-% But before defining |`oplus`|, we need to introduce a few more
-% concepts, as we do next.
-% % but also |nilc| and |`ominus`| and
-
-The remainder of this chapter is organized as follows.
-We define change structures in
-\cref{sec:change-structures-formal}.\pg{Fix summary}.
-Then, we show how to take change structures on |A| and |B| and
-define new ones on |A -> B| in \cref{sec:chs-fun-chs}. Using
-these structures, we finally show that starting from change
-structures for base types, we can define change structures for
-all types |tau| and contexts |Gamma|.
 
 \section{Formally defining ⊕ and change structures}
 %\subsection{Updating values by changes with ⊕}
@@ -66,13 +48,13 @@ all types |tau| and contexts |Gamma|.
 \label{sec:oplus}
 %\label{sec:invalid}
 In this section, we define what is a \emph{change structure} on a
-set |V|. A change structure extends a basic change structure
+set |V|. A change structure |chs(V)| extends a basic change structure
 |bchs(V)| with
 \emph{change operators} |`oplus`|, |`ominus`|, |`ocompose`| and
 |nilc|. Change structures also require change operators to
 respect validity, as described below.
 Key properties of change structures follow in
-\cref{sec:chs-properties,sec:chs-derivable-ops}.
+\cref{sec:chs-properties}.
 
 As usual, we'll use metavariables |v, v1, v2, ...| will range over elements of
 |V|, while |dv, dv1, dv2, ...| will range over elements of
@@ -186,12 +168,12 @@ them to different destination. For instance, integer |0| is a
 valid change for all integers.\pg{For this we need to know that
   there's a change structure for integers.}
 
-Sometimes it's useful to specify that a change |dv| is valid for
-a source |v| without naming |dv|'s destination, which is just |v
-`oplus` dv|. So we give the following
+If a change |dv| has source |v|, |dv|'s destination equals |v `oplus` dv|.
+So, to specify that |dv| is valid with source |v|, without mentioning |dv|'s
+destination, we introduce the following definition.
 \begin{definition}[One-sided validity]
-We define relation |valid V v dv| as an abbreviation for
-|fromto V v dv (v `oplus` dv)|.
+  We define relation |validV(A)| as
+  |{(v, dv) `elem` A `times` Dt^A `such` fromto V v dv (v `oplus` dv)}|.
 \end{definition}
 
 We use this definition right away:
@@ -223,16 +205,12 @@ We use this definition right away:
 %   |dv|'s source |v1| with |dv| produces |dv|'s destination |v3|.
 % \end{proof}
 
-\subsection{Derivable operations}
-\label{sec:chs-derivable-ops}
 We can define |nilc| in terms of other
 operations, and prove they satisfy their requirements for change
 structures.
 
-\begin{code}
-  nil v = v `ominus` v
-\end{code}
-\begin{lemma}
+\begin{lemma}[|nilc| can be derived from |`ominus`|]
+  \label{lem:nilc-derived}
   If we define |nil v = v `ominus` v|, then |nilc| produces
   valid changes as required (|fromto V v (nil v) v|), for any
   change structure |chs(V)| and value |v : V|.
@@ -243,6 +221,7 @@ structures.
 \end{proof}
 
 \section{Operations on function changes, informally}
+\label{sec:chs-funs-informal}
 \pg{Move after change structures and drop parts made redundant.}
 \subsection{Nil changes}
 \pg{Change structures make this whole section redundant.}
@@ -495,7 +474,7 @@ plugins for types |sigma `times` tau| and |sigma + tau|.
     `oplus` da) `ominus` f1 a1) (f2 (a1 `oplus` da))|, which is
     true because |`ominus`| produces valid changes on |B|.
   \item We define |nilc| through \[|nil f = f `ominus` f|,\] like in
-    \cref{sec:chs-derivable-ops}, and reuse its generic
+    \cref{lem:nilc-derived}, and reuse its generic
     correctness proof.
   \item We define change composition as \[|ocompose df1 df2 =
     \a da -> ocompose (df1 a (nil a)) (df2 a da)|.\]
@@ -520,7 +499,8 @@ plugins for types |sigma `times` tau| and |sigma + tau|.
 \end{definition}
 %\paragraph{Aside}\pg{mention alternative definition of change composition?}
 
-\subsection{Change structures for types and contexts}
+\section{Change structures for types and contexts}
+\label{sec:chs-types-contexts}
 
 As promised, given change structures for base types we can
 provide change structures for all types:
@@ -781,7 +761,7 @@ As a summary of definitions on types, we show that:
 %   `ocompose` : {v1 v2 v3 : V} -> (dv1 : Dt2 v1 v2) -> (dv2 : Dt2 v2 v3) -> Dt2 v1 v3
 % \end{code}
 
-\subsection{Alternative definitions of change validity}
+\section{Alternative definitions of change validity}
 \label{sec:alt-change-validity}
 
 \newcommand{\ilcA}{ILC'14}

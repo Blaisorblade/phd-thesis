@@ -166,6 +166,9 @@
 %format fromtosem (gamma) (tau) (v1) (dv) (v2) = "\validfromto{" gamma, tau "}{" v1 "}{" dv "}{" v2 "}"
 %format fromtosyn (gamma) (tau) (v1) (dv) (v2) = "\validfromto{" gamma "," tau "}{" v1 "}{" dv "}{" v2 "}"
 
+%format validV (tau) = "\mathcal{V}_{" tau "}"
+%format valid (tau) (v) (dv) = "(" v " , " dv ") \in V_{" tau "}"
+
 %format (new(v)) = "\New{" v "}"
 %format (old(v)) = "\Old{" v "}"
 %format `betaeq` = "=_{\beta}"
