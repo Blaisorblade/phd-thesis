@@ -414,46 +414,6 @@ change structures on |A| and |B|.
 \pg{resume.}
 
 
-\section{A change structure for groups}
-\label{sec:change-structure-groups}
-
-To define aggregation, we will need to use a change structure on
-groups.
-\begin{definition}[Change structure on groups |G|]
-\label{def:chs-group}
-Given any group |(G, e, +, -)| we can define a change structure
-|chs(G)| on carrier set |G| as follows.
-\begin{subdefinition}
-\item The change set is |G|.
-\item Validity is defined as |fromto G g1 dg g2| if and only if
-  |g2 = g1 + dg|.
-\item Change update coincides with |+|: |g1 `oplus` dg = g1 +
-  dg|. Hence |`oplus`| agrees \emph{perfectly} with validity: for all |g1
-  `elem` G|, all
-  changes |dg| are valid from |g1| to |g1 `oplus` dg| (that is
-  |fromto G g1 dg (g1 `oplus` dg)|).
-\item We define difference as |g2 `ominus` g1 = (- g1) + g2|.
-  Verifying |fromto G g1 (g2 `ominus` g1) g2| reduces to
-  verifying |g1 + ((- g1) + g2) = g2|, which follows from group axioms.
-\item The only nil change is the identity element: |nil g = e|.
-  Validity |fromto G g (nil g) g| reduces to |g + e = g| which
-  follows from group axioms.
-\item Change composition also coincides with |+|: |ocompose dg1
-  dg2 = dg1 + dg2|. Let's prove that composition respects
-  validity. Our hypothesis is |fromto G g1 dg1 g2| and |fromto G
-  g2 dg2 g3|.
-  Because |`oplus`| agrees perfectly with validity, the
-  hypothesis is equivalent to |g2 = g1 `oplus` dg1| and
-  \[|g3 = g2 `oplus` dg2 = (g1 `oplus` dg1) `oplus` dg2|.\]
-  Our thesis is |fromto G g1 (dg1 `ocompose` dg2) g3|, that is
-  \[|g3 = g1 `oplus` (dg1 `ocompose` dg2)|.\]
-  Hence the thesis reduces to
-  \[|(g1 `oplus` dg1) `oplus` dg2 = g1 `oplus` (dg1 `ocompose` dg2)|,\]
-  hence to |g1 + (dg1 + dg2) = (g1 + dg1) + dg2|, which is just
-  the associative law for group |G|.
-\end{subdefinition}
-\end{definition}
-
 % Missing sections from chap-intro-incr.lhs.
 
 \chapter{Misc}
