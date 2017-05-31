@@ -75,7 +75,7 @@ We define formally basic change structures on naturals and integers.
 Compared to validity for integers, validity for naturals ensures that the
 destination |v1 + dv| is again a natural. For instance, given source |v1 =
 1|, change |dv = -2| is valid (with destination |v2 = -1|) only on integers, not
-on naturals.\pg{Re-revise.}%
+on naturals.
 % \footnote{For convenience we're implicitly identifying naturals with
 %   non-negative integers, ignoring the isomorphism between them.}
 \end{example}
@@ -217,7 +217,7 @@ omit similar statements for higher arities, as they add no new ideas.
 Among valid function changes, derivatives play a central role, especially in the
 statement of correctness of differentiation.
 
-\begin{definition}
+\begin{definition}[Derivatives]
   \label{def:derivative-raw} 
   Given function |f: ^^ A -> B|, function |df: ^^ A -> Dt^A -> Dt^B| is a
   derivative for |f| if, for all changes |da| from |a1| to |a2| on set |A|, change
@@ -232,9 +232,9 @@ However, it follows that derivatives are nil function changes:
   of |f| if and only if |df| is a nil change of |f| (|fromto (A -> B) f df f|).
 \end{lemma}
 \begin{proof}
-  We show that nil changes are derivatives.
-  First, |df| has the right type to be a derivative, because |A -> Dt^A -> Dt^B = Dt^(A -> B)|.
-  Then, by expanding definitions, since |df| is a nil change from |f| to |f|, it maps valid input changes
+  First we show that nil changes are derivatives.
+  First, a nil change |fromto (A -> B) f df f| has the right type to be a derivative, because |A -> Dt^A -> Dt^B = Dt^(A -> B)|.
+  Since |df| is a nil change from |f| to |f|, by definition it maps valid input changes
   |fromto A a1 da a2| to valid output changes
   |fromto B (f a1) (df a1 da) (f a2)|. Hence |df| is a derivative as required.
 
@@ -271,13 +271,12 @@ state this formally for curried binary functions |f : A -> B -> C|; higher
 arities require no new ideas.
 \begin{lemma}[Derivatives preserve nil changes on |A -> B -> C|]
   \label{lem:binary-derivatives-nil-changes}
+  For any basic change structures |bchs(A)|, |bchs(B)| and |bchs(C)|,
   Change |df : Dt^(A -> B -> C)| is a derivative of |f : A -> B -> C|
   \emph{if and only if}
   applying |df| to nil changes |fromto A a
   da a| and |fromto B b db b| gives a nil change
-  \[|fromto C (f a b) (df a da b db) (f a b)|,\]
-  %
-  for any basic change structures |bchs(A)|, |bchs(B)| and |bchs(C)|.
+  \[|fromto C (f a b) (df a da b db) (f a b)|.\]
 \end{lemma}
 \begin{proof}
   Similarly to validity on |A -> B -> C| (\cref{lem:validity-binary-functions}),
@@ -304,7 +303,7 @@ structures |bchs(sigma) -> bchs(tau)| on function spaces |eval(sigma -> tau)|
 \begin{definition}[Basic change structures on types]
   \label{def:bchs-types}
   For each type |tau| we associate a basic change structure on domain
-  |eval(tau)|, written |bchs(tau)|.
+  |eval(tau)|, written |bchs(tau)| through the following equations:
 \begin{code}
   bchs(iota) = ...
   bchs(sigma -> tau) = bchs(sigma) -> bchs(tau)
@@ -373,7 +372,7 @@ We refer to values of change types as \emph{change values} or just \emph{changes
 \label{sec:validity-logical}
 
 Next, we show an equivalent definition of validity for values of terms, directly
-by induction on types. It will be apparent that validity is a ternary
+by induction on types, as a ternary
 \emph{logical} relation between a change, its source and
 destination. A typical logical relation constrains \emph{functions} to
 map related input to related outputs. In a twist, validity constrains
@@ -404,8 +403,8 @@ The key equations for function types are:
 
   As we have finally seen in this section, this definition of validity can be
   formalized as a logical relation, defined by induction on types. We'll later
-  take for granted the consequences of validity, togetherb with lemmas such as
-  \cref{lem:validity-binary-functions}.\pg{Re-revise.}
+  take for granted the consequences of validity, together with lemmas such as
+  \cref{lem:validity-binary-functions}.
 \end{remark}
 
 \subsection{Change structures on typing contexts}
@@ -1112,8 +1111,6 @@ For reference, we repeat here plugin requirements spread through the chapter.
 \deriveConstCorrect*
 
 \section{Chapter summary}
-\pg{tenses?}
-
 In this chapter, we have formally defined changes for values and environments of
 our language, and when changes are valid. Through these definitions, we have explained
 that |derive(t)| is correct, that is, that it maps changes to the input
@@ -1121,6 +1118,6 @@ environment to changes to the output environment. All of this assumes, among
 other things, that language plugins define valid changes for their base types
 and derivatives for their primitives.
 
-In next chapter, we will discuss operations we provide to construct and use
+In next chapter we discuss operations we provide to construct and use
 changes. These operations will be especially useful to provide derivatives of
 primitives.
