@@ -60,6 +60,7 @@
 %format f1
 %format f2
 %format f3
+%format f1' = "f_{1}\myquote"
 
 %format a0
 %format a1

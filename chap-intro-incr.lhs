@@ -680,7 +680,7 @@ validity by recursion on types, that is, as a \emph{logical relation} (see
 %% To see why that's needed, consider term |t = f v|, where again |f
 %% = \x -> x + y|.
 
-\subsubsection{Pointwise changes}
+\subsection{Pointwise changes}
 \label{ssec:pointwise-changes}
 % We can also describe the difference from function |f| to function
 % |f `oplus` df| as |nabla^f = \x -> f2 x `ominus` f1 x|.
@@ -691,23 +691,24 @@ validity by recursion on types, that is, as a \emph{logical relation} (see
 We can also decompose function changes into orthogonal (and
 possibly easier to understand) concepts.
 
+Consider two functions |f1, f2 : A -> B| and two inputs |a1, a2: A|.
 The difference between |f2 a2| and |f1 a1| is due to changes to
 both the function and its argument. We can compute the whole
 change at once via a function change |df| as |df a1 da|. Or we
 can compute separately the effects of the function change and of
-the argument change. We can account for changes from |a1| to |a2|
-using $f'$, a derivative of |f|: |f' a1 da = f (a1 `oplus` da)
-`ominus` f a1|.%
+the argument change. We can account for changes from |f1 a1| to |f2 a2|
+using |f1'|, a derivative of |f1|: |f1' a1 da = f1 a2 `ominus` f1 a2 = f1 (a1
+`oplus` da) `ominus` f a1|.%
 %
 \footnote{For simplicity, we use equality on changes, even though equality is
   too restrictive. Later (in \cref{sec:change-equivalence}) we'll define an
   equivalence relation on changes, called change equivalence and written
   |`doe`|, and use it systematically to relate changes in place of equality. For
-  instance, we'll write that |f' a1 da `doe` f (a1 `oplus` da) `ominus` f a1|.
+  instance, we'll write that |f1' a1 da `doe` f1 (a1 `oplus` da) `ominus` f1 a1|.
   But for the present discussion, equality will do.}
 
 We can account for changes from |f1| to |f2| using the
-\emph{pointwise difference} of two functions, |nabla ^ f1 = \a ->
+\emph{pointwise difference} of two functions, |nabla ^ f1 = \(a : A) ->
 f2 a `ominus` f1 a|; in particular, |f2 (a1 `oplus` da) `ominus`
 f1 (a1 `oplus` da) = nabla ^ f (a1 `oplus` da)|. Hence, a
 function change simply \emph{combines} a derivative with a
@@ -725,7 +726,9 @@ pointwise change using change composition:
 %
 \begin{code}
    df a1 da
-=  ocompose (f' a1 da) (nabla ^ f (a1 `oplus` da))
+=  f2 a2 `ominus` f1 a1
+=  ocompose ((f1 a2 `ominus` f1 a1)) ((f2 a2 `ominus` f1 a2))
+=  ocompose (f1' a1 da) (nabla ^ f (a1 `oplus` da))
 \end{code}
 
 One can also compute a pointwise change from a function change:
@@ -738,7 +741,7 @@ we find it easier to use our definitions of function changes,
 which combines both pointwise changes and derivatives into a
 single concept.
 
-\subsubsection{Passing change targets}
+\subsection{Passing change targets}
 It would be more symmetric to make function changes also take
 updated input |a2|, that is, have |df a1 da a2| computes a change
 from |f1 a1| to |f2 a2|. However, passing |a2| explicitly adds no
