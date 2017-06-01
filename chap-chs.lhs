@@ -1151,16 +1151,17 @@ reflexive graphs.
 Both parametricity and ILC define logical relations across program executions on
 different inputs. When studying parametricity, differences are only allowed in
 the implementations of abstractions (through abstract types or other
-mechanisms); all implementations considered must be related and give equivalent
-results. Indeed, parametricity defines not just a logical relation but a
-\emph{logical equivalence}, that can be shown to be equivalent to contextual
+mechanisms). To be related, different implementations of the same abstraction
+must give results that are equivalent according to the calling program.
+Indeed, parametricity defines not just a logical relation but a \emph{logical
+equivalence}, that can be shown to be equivalent to contextual
 equivalence~\citet{Ahmed2006stepindexed}.
 
 In ILC, instead, |fromto V v1 dv v2| holds even if |v1| and |v2| are different
 and this difference is observable in the program, but require that |dv| is a
 correct description of these differences.
 
-Similarly to our proof, \citet*{Acar08} proves correctness of incrementalization
+Similarly to our proof, \citet*{Acar08} prove correctness of incrementalization
 using a logical relation across executions of programs on base and updated
 inputs. There, incremental computation proceeds by executing the same program
 using an incremental semantics.
@@ -1173,22 +1174,29 @@ experiments by me and Yann Régis-Gianas, we conjecture it should be possible to
 adapt the approach to step-indexing in that proof to give a correctness proof of
 ILC on an untyped language using an operational semantics.
 
-The use of step-indexing by \citeauthor*{Acar08} to model incremental
-computation is very similar to the one by \citet{Ahmed2006stepindexed} to model
-parametricity and program equivalence. However,
-\citeauthor*{Ahmed2006stepindexed}'s program equivalence between computations
-|t1| and |t2| implies that if |t1| terminates then |t2| terminates and they give
-related results. Instead, \citeauthor*{Acar08}'s relation between computations
-|t1| and |t2| implies that if |t1| terminates \emph{and} |t2| terminates, \emph{then}
-they give related results, exactly because |t1| and |t2| need not be equivalent.
-To see why this change is related, consider incrementalizing program |t = if x then
-0 else loop| when |x| goes from |true| to |false|, assuming that |loop| is a
-diverging subterm. Such a change for |x| is valid, hence it must be mapped to a
-valid change from terminating term |if true then 0 else loop| to non-terminating
-term |if false then 0 else loop|.
-\footnote{This paragraph oversimplifies definitions
-  is not formally correct
-  because it ignores the step-indexes involved.}
+\Citeauthor*{Acar08}'s step-indexed logical relation for incremental computation
+resembles the step-indexed logical relation by \citet{Ahmed2006stepindexed} to
+model parametricity and program equivalence.
+However, if terms |t1| and |t2| are
+related according to \citeauthor*{Ahmed2006stepindexed}'s program equivalence
+(at a certain step count) and |t1| terminates (at certain step counts), then
+|t2| terminates and |t1| and |t2|'s results are related (at a certain step count).
+Instead, if terms |t1| and |t2| are related according to \citeauthor*{Acar08}'s
+relation (at a certain step count),
+|t1| terminates (at certain step counts) \emph{and} |t2| terminates,
+\emph{then} |t1| and |t2|'s results are related (at a certain step count).%
+\footnote{The step-indexing details we omit are the same in both definitions.}
+That is, with \citeauthor*{Acar08}'s logical relation, termination of |t1| in no
+way implies termination of |t2|, exactly because |t1| and |t2| need not be
+equivalent.
+
+Let us see concretely why a logical relation for incrementalization must relate |t1|
+and |t2| even if they are not equivalent and in particular |t1| terminates and |t2|
+doesn't. Consider incrementalizing function |t = if x then 0 else loop| when |x|
+goes from |true| to |false|, assuming that |loop| is a diverging subterm. Such a
+change for |x| is valid, hence it must be mapped (by function application and
+$\beta$-reduction) to a valid change from terminating term |if true then 0 else
+loop| to non-terminating term |if false then 0 else loop|.
 
 \paragraph{Credits}
 The proof presented in this and the previous chapter is an
