@@ -24,7 +24,7 @@
 
 % For adapting to compiling the whole thesis, or only parts.
 \newtoggle{full}
-\togglefalse{full}
+\toggletrue{full}
 
 \iftoggle{full}{
 \includecomment{fullCompile}
@@ -49,10 +49,11 @@
 % incremental runs: a first run has to be made without includeonly.
 %
 %\includeonly{pldi14/sec-preliminaries,chap-intro-incr,chap-diff-correct-formal,chap-chs,pldi14/sec-intro,new-stuff}
+\includeonly{pldi14/sec-preliminaries,chap-intro-incr,chap-diff-correct-formal,chap-chs,pldi14/sec-intro}
 %\includeonly{pldi14/sec-preliminaries}
-% \includeonly{chap-intro-incr}
-\includeonly{chap-diff-correct-formal}
-% \includeonly{chap-chs}
+%\includeonly{chap-intro-incr}
+%\includeonly{pldi14/sec-preliminaries,chap-diff-correct-formal}
+%\includeonly{chap-chs}
 %\includeonly{pldi14/sec-intro}
 %\includeonly{new-stuff}
 %\includeonly{chap-diff-correct-formal,pldi14/sec-intro}
