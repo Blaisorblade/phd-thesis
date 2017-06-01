@@ -467,19 +467,22 @@ Instantiating |dv| with |nil v| gives equation
 which is not only a requirement on |`oplus`| for functions but
 also defines |`oplus`| effectively.
 
-\section{Instances of change structures}
+\section{Families of change structures}
 \label{sec:chs-fun-chs}
 
-In this section, we derive a change structure for |A -> B| from
-two change structures |chs(A)| and |chs(B)|. The change structure
-on |A -> B| will enable defining a change structure for type
-|sigma -> tau| in terms of change structures for |sigma| and
-|tau|.
+In this section, we derive change structures for |A -> B| and |A `times` B| from
+two change structures |chs(A)| and |chs(B)|.
+The change structure on |A -> B| enables defining change structures for function
+types.
+Similarly, the change structure on |A `times` B| enables defining a change
+structure for product types in a language plugin, as described in
+\cref{ch:prod-sums}.
 
-In \cref{sec:chs-product,sec:chs-sums} we will also define change
-structures for |A `times` B| and |A + B|, for use in language
-plugins for types |sigma `times` tau| and |sigma + tau|.
+% In \cref{sec:chs-product,sec:chs-sums} we will also define change
+% structures for |A `times` B| and |A + B|, for use in language
+% plugins for types |sigma `times` tau| and |sigma + tau|.
 
+\subsection{Change structures for function spaces}
 \begin{definition}[Change structure for |A -> B|]
   Given change structures |chs(A)| and |chs(B)| we define a
   change structure on their function space |A -> B|, written |chs(A) -> chs(B)|,
@@ -537,6 +540,75 @@ plugins for types |sigma `times` tau| and |sigma + tau|.
   \end{subdefinition}
 \end{definition}
 %\paragraph{Aside}\pg{mention alternative definition of change composition?}
+
+\subsection{Change structures for products}
+\label{sec:chs-product}
+We can define change structures on products |A `times` B|, given
+change structures on |A| and |B|: a change on pairs is just a
+pair of changes; all other change structure definitions
+distribute componentwise the same way, and their correctness
+reduce to the correctness on components. Since all these proofs
+are similar, spelling out their details does not make them
+clearer, we only give the first such proof in full.
+
+\begin{definition}[Change structure for |A `times` B|]
+  \label{def:chs-prod}
+  Given change structures |chs(A)| and |chs(B)| we define a
+  change structure on their product |chs(A `times` B)|, that we
+  also write |chs(A) `times` chs(B)|.
+  \begin{subdefinition}
+  \item The change set is defined as: |Dt^(A `times` B) = Dt^A `times` Dt^B|.
+  \item Validity is defined as
+    \begin{multline*}
+      |fromto (A `times` B) ((a1, b1)) ((da, db)) ((a2, b2)) =| \\
+      |(fromto A a1 da a2)| \text{ and } |(fromto B b1 db b2)|.
+    \end{multline*}
+    %
+    In other words, validity distributes componentwise: a product change
+    is valid if each component is valid.
+  \item We define change update by
+    \[|(a1, b1) `oplus` (da , db) = (a1 `oplus` da, b1 `oplus` db)|.\]
+  \item |`oplus`| agrees with validity on |A `times` B| because
+    |`oplus`| agrees with validity on both |A| and |B|. For this
+    property we give a full proof.
+
+    For each |p1 , p2: A `times` B|
+    and |fromto (A `times` B) p1 dp p2|, we must show that |p1
+    `oplus` dp = p2|. Instead of quantifying over pairs |p : A
+    `times` B|, we can quantify equivalently over components |a :
+    A, b : B|.
+    Hence, consider |a1, a2: A|, |b1, b2: B|, and changes |da,
+    db| that are valid, that is, |fromto A a1 da a2| and |fromto
+    B b1 db b2|: We must show that \[|(a1, b1) `oplus` (da, db) =
+    (a2, b2)|.\] That follows from |a1 `oplus` da = a2| (which
+    follows from |fromto A a1 da a2|) and |b1 `oplus` db = b2|
+    (which follows from |fromto B b1 db b2|).
+  \item We define difference by
+    \[|(a2, b2) `ominus` (a1, b1) = (a2 `ominus` a1, b2 `ominus` b1)|.\]
+  \item |`ominus`| produces valid changes on |A `times` B|
+    because |`ominus`| produces valid changes on both |A| and
+    |B|. We omit a full proof; the key step reduces the thesis
+    \[|fromto (A `times` B) ((a1, b1)) ((a2, b2) `ominus` (a1, b1))
+    ((a2, b2))|\] to |fromto A a1 (a2 `ominus` a1) a2| and |fromto
+    B b1 (b2 `ominus` b1) b2| (where free variables range on
+    suitable domains).
+  \item We define |nilc| to distribute componentwise:
+    \[|nil (a, b) = (nil a, nil b)|.\]
+  \item |nil (a, b)| is correct, that is |fromto (A `times` B)
+    ((a, b)) ((nil a, nil b)) ((a, b))|, because |nilc| is
+    correct on each component.
+  \item We define change composition to distribute componentwise:
+    \[|ocompose ((da1, db1)) ((da2, db2)) =
+    (ocompose da1 da2, ocompose db1 db2)|.\]
+  \item Change composition is correct on |A `times` B|, that is
+    \[|fromto (A `times` B) ((a1, b1)) ((ocompose da1 da2,
+      ocompose db1 db2)) ((a3, b3))|\] whenever |fromto (A `times` B)
+    ((a1, b1)) ((da1, db1)) ((a2, b2))| and |fromto (A `times` B)
+    ((a2, b2)) ((da2, db2)) ((a3, b3))|, in essence because
+    change composition is correct on both |A| and |B|. We leave a
+    full proof as an exercise.
+  \end{subdefinition}
+\end{definition}
 
 \section{Change structures for types and contexts}
 \label{sec:chs-types-contexts}
