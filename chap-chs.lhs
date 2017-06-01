@@ -483,10 +483,14 @@ structure for product types in a language plugin, as described in
 % plugins for types |sigma `times` tau| and |sigma + tau|.
 
 \subsection{Change structures for function spaces}
+\Cref{sec:chs-funs-informal} introduces informally how to define change
+operations on |A -> B|. Next, we define formally change structures on function
+spaces, and then prove its operations respect their constraints.
+
 \begin{definition}[Change structure for |A -> B|]
-  Given change structures |chs(A)| and |chs(B)| we define a
-  change structure on their function space |A -> B|, written |chs(A) -> chs(B)|,
-  where:
+  \label{def:chs-fun}
+  Given change structures |chs(A)| and |chs(B)| we define a change structure on
+  their function space |A -> B|, written |chs(A) -> chs(B)|, where:
   \begin{subdefinition}
   \item The change set is defined as: |Dt^(A -> B) = A -> Dt^A -> Dt^B|.
   \item Validity is defined as
@@ -496,66 +500,72 @@ structure for product types in a language plugin, as described in
     \end{multline*}
   \item We define change update by
     \[|f1 `oplus` df = \a -> f1 a `oplus` df a (nil a)|.\]
-  \item We prove that |`oplus`| agrees with validity on |A -> B|.
-    Consider |f1 , f2: A -> B| and |fromto (A -> B) f1 df f2|; we
-    must show that |f1 `oplus` df = f2|. By functional
-    extensionality, we only need prove that |(f1 `oplus` df) a =
-    f2 a|, that is that |f1 a `oplus` df a (nil a) = f2 a|. Since
-    |`oplus`| agrees with validity on |B|, we just need to show that
-    |fromto B (f1 a) (df a (nil a)) (f2 a)|, which
-    follows because |nil a| is a valid change from |a| to
-    |a| and because |df| is a valid change from |f1| to |f2|.
-  \item We define difference by \[|f2 `ominus` f1 = \a da -> f2 (a `oplus` da) `ominus` f1 a|.\]
-  \item We prove that |`ominus`| produces valid changes on |A -> B|. Consider
-    |df = f2 `ominus` f1| for |f1, f2: A -> B|. For any valid
-    input |fromto A a1 da a2|, we must show that |df| produces a
-    valid output with the correct vertexes, that is, that |fromto
-    B (f1 a1) (df a1 da) (f2 a2)|. Since |`oplus`| agrees with
-    validity, |a2| equals |a1 `oplus` da|. By substituting away
-    |a2| and |df| the thesis becomes |fromto B (f1 a1) (f2 (a1
-    `oplus` da) `ominus` f1 a1) (f2 (a1 `oplus` da))|, which is
-    true because |`ominus`| produces valid changes on |B|.
-  \item We define |nilc| through \[|nil f = f `ominus` f|,\] like in
-    \cref{lem:nilc-derived}, and reuse its generic
-    correctness proof.
-  \item We define change composition as \[|ocompose df1 df2 =
-    \a da -> ocompose (df1 a (nil a)) (df2 a da)|.\]
-  \item We prove that change composition preserves validity on |A
-    -> B|. That is, we must prove \[|fromto B (f1 a1) (ocompose
-    (df1 a1 (nil a1)) (df2 a1 da)) (f3 a2)|\] for every |f1,
-    f2, f3, df1, df2, a1, da, a2| satifsfying |fromto (A -> B) f1
-    df1 f2|, |fromto (A -> B) f2 df2 f3| and |fromto A a1 da a2|.
-
-    Because change composition preserves validity on |B|, it's
-    enough to prove that (1) |fromto B (f1 a1) (df1 a1 (nil a1))
-    (f2 a1)| (2) |fromto B (f2 a1) (df2 a1 da) (f3 a2)|. That is,
-    intuitively, we create a composite change using |`ocompose`|,
-    and it goes from |f1 a1| to |f3 a2| passing through |f2 a1|.
-    Part (1) follows because |df1| is a valid function change
-    from |f1| to |f2|, applied to a valid change |nil a1| from
-    |a1| to |a1|.\pg{}
-    Part (2) follows because |df2| is a valid function change
-    from |f2| to |f3|, applied to a valid change |da| from
-    |a1| to |a2|.
+  \item We define difference by \[|f2 `ominus` f1 = \a da -> f2 (a `oplus` da)
+      `ominus` f1 a|.\]
+  \item We define |nilc| like in \cref{lem:nilc-derived} as \[|nil f = f
+      `ominus` f|.\]
+  \item We define change composition as \[|ocompose df1 df2 = \a da -> ocompose
+      (df1 a (nil a)) (df2 a da)|.\]
   \end{subdefinition}
 \end{definition}
-%\paragraph{Aside}\pg{mention alternative definition of change composition?}
+
+\begin{lemma}
+  \Cref{def:chs-fun} defines a correct change structure |chs(A) ->
+  chs(B)|.
+\end{lemma}
+\begin{proof}
+
+  \begin{itemize}
+  \item We prove that |`oplus`| agrees with validity on |A -> B|. Consider |f1 ,
+    f2: A -> B| and |fromto (A -> B) f1 df f2|; we must show that |f1 `oplus` df
+    = f2|. By functional extensionality, we only need prove that |(f1 `oplus`
+    df) a = f2 a|, that is that |f1 a `oplus` df a (nil a) = f2 a|. Since
+    |`oplus`| agrees with validity on |B|, we just need to show that |fromto B
+    (f1 a) (df a (nil a)) (f2 a)|, which follows because |nil a| is a valid
+    change from |a| to |a| and because |df| is a valid change from |f1| to |f2|.
+  \item We prove that |`ominus`| produces valid changes on |A -> B|. Consider
+    |df = f2 `ominus` f1| for |f1, f2: A -> B|. For any valid input |fromto A a1
+    da a2|, we must show that |df| produces a valid output with the correct
+    vertexes, that is, that |fromto B (f1 a1) (df a1 da) (f2 a2)|. Since
+    |`oplus`| agrees with validity, |a2| equals |a1 `oplus` da|. By substituting
+    away |a2| and |df| the thesis becomes |fromto B (f1 a1) (f2 (a1 `oplus` da)
+    `ominus` f1 a1) (f2 (a1 `oplus` da))|, which is true because |`ominus`|
+    produces valid changes on |B|.
+  \item |nilc| produces valid changes as proved in \cref{lem:nilc-derived}.
+  \item We prove that change composition preserves validity on |A -> B|. That
+    is, we must prove \[|fromto B (f1 a1) (ocompose (df1 a1 (nil a1)) (df2 a1
+      da)) (f3 a2)|\] for every |f1, f2, f3, df1, df2, a1, da, a2| satifsfying
+    |fromto (A -> B) f1 df1 f2|, |fromto (A -> B) f2 df2 f3| and |fromto A a1 da
+    a2|.
+
+    Because change composition preserves validity on |B|, it's enough to prove
+    that (1) |fromto B (f1 a1) (df1 a1 (nil a1)) (f2 a1)| (2) |fromto B (f2 a1)
+    (df2 a1 da) (f3 a2)|. That is, intuitively, we create a composite change
+    using |`ocompose`|, and it goes from |f1 a1| to |f3 a2| passing through |f2
+    a1|. Part (1) follows because |df1| is a valid function change from |f1| to
+    |f2|, applied to a valid change |nil a1| from |a1| to |a1|.\pg{} Part (2)
+    follows because |df2| is a valid function change from |f2| to |f3|, applied
+    to a valid change |da| from |a1| to |a2|.
+  \end{itemize}
+\end{proof}
+% \paragraph{Aside}\pg{mention alternative definition of change composition?}
 
 \subsection{Change structures for products}
 \label{sec:chs-product}
+
 We can define change structures on products |A `times` B|, given
 change structures on |A| and |B|: a change on pairs is just a
 pair of changes; all other change structure definitions
 distribute componentwise the same way, and their correctness
-reduce to the correctness on components. Since all these proofs
-are similar, spelling out their details does not make them
-clearer, we only give the first such proof in full.
+reduce to the correctness on components.
+
+Change structures on $n$-ary products or records present no additional
+difficulty.
 
 \begin{definition}[Change structure for |A `times` B|]
   \label{def:chs-prod}
   Given change structures |chs(A)| and |chs(B)| we define a
-  change structure on their product |chs(A `times` B)|, that we
-  also write |chs(A) `times` chs(B)|.
+  change structure |chs(A) `times` chs(B)| on product |A `times` B|.
   \begin{subdefinition}
   \item The change set is defined as: |Dt^(A `times` B) = Dt^A `times` Dt^B|.
   \item Validity is defined as
@@ -568,6 +578,24 @@ clearer, we only give the first such proof in full.
     is valid if each component is valid.
   \item We define change update by
     \[|(a1, b1) `oplus` (da , db) = (a1 `oplus` da, b1 `oplus` db)|.\]
+  \item We define difference by
+    \[|(a2, b2) `ominus` (a1, b1) = (a2 `ominus` a1, b2 `ominus` b1)|.\]
+  \item We define |nilc| to distribute componentwise:
+    \[|nil (a, b) = (nil a, nil b)|.\]
+  \item We define change composition to distribute componentwise:
+    \[|ocompose ((da1, db1)) ((da2, db2)) =
+    (ocompose da1 da2, ocompose db1 db2)|.\]
+  \end{subdefinition}
+\end{definition}
+
+\begin{lemma}
+  \Cref{def:chs-prod} defines a correct change structure |chs(A) `times`
+  chs(B)|.
+\end{lemma}
+\begin{proof}
+Since all these proofs are similar and spelling out their details does not make
+them clearer, we only give the first such proof in full.
+  \begin{itemize}
   \item |`oplus`| agrees with validity on |A `times` B| because
     |`oplus`| agrees with validity on both |A| and |B|. For this
     property we give a full proof.
@@ -583,8 +611,6 @@ clearer, we only give the first such proof in full.
     (a2, b2)|.\] That follows from |a1 `oplus` da = a2| (which
     follows from |fromto A a1 da a2|) and |b1 `oplus` db = b2|
     (which follows from |fromto B b1 db b2|).
-  \item We define difference by
-    \[|(a2, b2) `ominus` (a1, b1) = (a2 `ominus` a1, b2 `ominus` b1)|.\]
   \item |`ominus`| produces valid changes on |A `times` B|
     because |`ominus`| produces valid changes on both |A| and
     |B|. We omit a full proof; the key step reduces the thesis
@@ -592,23 +618,17 @@ clearer, we only give the first such proof in full.
     ((a2, b2))|\] to |fromto A a1 (a2 `ominus` a1) a2| and |fromto
     B b1 (b2 `ominus` b1) b2| (where free variables range on
     suitable domains).
-  \item We define |nilc| to distribute componentwise:
-    \[|nil (a, b) = (nil a, nil b)|.\]
   \item |nil (a, b)| is correct, that is |fromto (A `times` B)
     ((a, b)) ((nil a, nil b)) ((a, b))|, because |nilc| is
     correct on each component.
-  \item We define change composition to distribute componentwise:
-    \[|ocompose ((da1, db1)) ((da2, db2)) =
-    (ocompose da1 da2, ocompose db1 db2)|.\]
   \item Change composition is correct on |A `times` B|, that is
     \[|fromto (A `times` B) ((a1, b1)) ((ocompose da1 da2,
       ocompose db1 db2)) ((a3, b3))|\] whenever |fromto (A `times` B)
     ((a1, b1)) ((da1, db1)) ((a2, b2))| and |fromto (A `times` B)
     ((a2, b2)) ((da2, db2)) ((a3, b3))|, in essence because
-    change composition is correct on both |A| and |B|. We leave a
-    full proof as an exercise.
-  \end{subdefinition}
-\end{definition}
+    change composition is correct on both |A| and |B|. We omit details.
+  \end{itemize}
+\end{proof}
 
 \section{Change structures for types and contexts}
 \label{sec:chs-types-contexts}
@@ -652,8 +672,8 @@ provide change structures for all types:
   \end{restatable*}
 \end{partCompile}
 \begin{proof}
-  This is required by the requirements of change structures on
-  |chs(tau)|.
+  Because |chs(tau)| is a change structure and in change structures |`oplus`|
+  agrees with validity.
 \end{proof}
 
 As shortly proved in \cref{sec:correct-derive}, since |`oplus`|
@@ -672,20 +692,18 @@ is correct (\cref{thm:derive-correct}) we get
 \end{restatable}
 \end{partCompile} 
 
-We can also define a change structure for environments. Each
-change structure operation for environments acts
-``variable-wise''. Recall that a typing context |Gamma| is a list
-of variable assignment |x : tau|. For each such entry,
-environments |rho| and environment changes |drho| contain a base
-entry |x = v| where |v : eval(tau)|, and possibly a change |dx =
-dv| where |dv : eval(Dt^tau)|.
-
-% Each operation is defined componentwise
+We can also define a change structure for environments.
+Recall that change structures for products define their operations to act on
+each component.
+Each change structure operation for environments acts ``variable-wise''. Recall
+that a typing context |Gamma| is a list of variable assignment |x : tau|. For
+each such entry, environments |rho| and environment changes |drho| contain a
+base entry |x = v| where |v : eval(tau)|, and possibly a change |dx = dv| where
+|dv : eval(Dt^tau)|.
 
 %format drho1
 %format drho2
 
-\pg{Some comment on how things are defined.}
 \begin{definition}[Change structure for environments]
   \label{def:chs-envs}
   To each context |Gamma| we associate a change structure
@@ -706,16 +724,33 @@ dv| where |dv : eval(Dt^tau)|.
       (ocompose drho1 drho2, x = v1, dx = ocompose dv1 dv2)
 \end{code}
 \end{definition}
-
-Base values in environment changes are redundant. When consuming
-an environment change, they are never consumed. When producing an
-environment change, they are created to ensure validity of the
+Base values |v'| in environment changes are redundant with base values |v| in
+base environments, because for valid changes |v = v'|.
+So when consuming an environment change, we choose arbitrarily to use |v| instead
+of |v'|. Alternatively, we could also use |v'| and get the same results for
+valid inputs.
+When producing an environment change, they are created to ensure validity of the
 resulting environment change.
 
-The needed proofs can be done component-wise. We omit them here
-because they are very tedious to read. We will show similar
-proofs when introducing change structures for product types |A
-`times` B| in \cref{def:chs-prod}.
+\begin{lemma}
+  \Cref{def:chs-envs} defines a correct change structure |chs(Gamma)| for each
+  context |Gamma|.
+\end{lemma}
+\begin{proof}
+  All proofs are by structural induction on contexts.
+  Most details are analogous to the ones for products and add no
+  details, so we refer to our mechanization for most proofs.
+
+  However we show by induction that |`oplus`| agrees with validity.
+  For the empty context there's a single environment |emptyRho :
+  eval(emptyCtx)|, so |`oplus`| returns the correct environment |emptyRho|.
+  For the inductive case |Gamma', x: tau|,
+  inversion on the validity judgment reduces our hypothesis to |fromto tau v1 dv
+  v2| and |fromto Gamma rho1 drho rho2|, and our thesis to |(rho1, x = v1) `oplus`
+  (drho, x = v1, dx = dv) = (rho2, x = v2)|, where |v1| appears both in the base
+  environment and the environment change. The thesis follows because |`oplus`|
+  agrees with validity on both |Gamma| and |tau|.
+\end{proof}
 
 %%%%
 % What's below must be revised.
@@ -771,13 +806,13 @@ proofs when introducing change structures for product types |A
 % \end{proof}
 
 
-We only need |`ominus`| to be able to define nil changes on
-arbitrary functions |f : eval(sigma -> tau)|.
+% We only need |`ominus`| to be able to define nil changes on
+% arbitrary functions |f : eval(sigma -> tau)|.
 
-However, as anticipated earlier, if |f| is the semantics of a
-well-typed term |t|, that is |f = eval(t) emptyRho|, we can
-define the nil change of |f| through its derivative.\pg{See
-  before}
+% However, as anticipated earlier, if |f| is the semantics of a
+% well-typed term |t|, that is |f = eval(t) emptyRho|, we can
+% define the nil change of |f| through its derivative.\pg{See
+%   before}
 % no, we need full abstraction, unless the term is closed.
 
 \pg{figure}
@@ -787,10 +822,8 @@ define the nil change of |f| through its derivative.\pg{See
 % \)
 %     }}}
 
-As a summary of definitions on types, we show that:
+%As a summary of definitions on types, we show that:
 \begin{figure}
-  \pg{change structures}
-  \[|nil v = v `ominus` v |\]
 \begin{subfigure}[c]{0.6\textwidth}
   \RightFramedSignature{|oplusIdx(A): A -> Dt^A -> A|}
   \RightFramedSignature{|ominusIdx(A): A -> A -> Dt^A|}
@@ -826,7 +859,6 @@ As a summary of definitions on types, we show that:
 \end{subfigure}
 \validOplus*
   \deriveCorrectOplus*
-  %\nilChangesExist*
 
   \caption{Defining change structures.}
   \label{fig:change-structures}
