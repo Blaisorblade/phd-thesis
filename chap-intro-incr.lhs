@@ -44,6 +44,18 @@ options.
   that had never been incrementalized by hand before.
 \end{itemize}
 
+
+\pg{Resume and readd this text.}
+% To understand how to compute |f| incrementally, we can summarize the key idea
+% behing many incrementalization approaches.\pg{self-adjusting computation.}\pg{?}
+% Let us assume, for simplicity, our function |f| is written in a purely
+% functional language. During a computation such as |y = f x1|, each computation
+% step produce an output using some inputs. The new output can in turn be used as
+% input by further steps. We can record these computation steps as a directed
+% acyclic graph (DAG) representing dependencies: each node is either an initial
+% input or the output of some computation steps, and each output node has incoming
+% edges from all
+
 \pg{Continue discussing dependencies minimization and the
   relation with parallelism. Build scripts might be a good
   example.}
@@ -443,25 +455,8 @@ We will prove these equations as a consequence of \cref{thm:derive-correct}.\pg{
 % |dgrand_total|, that is |derive grand_total|, maps input changes to output
 % changes.
 
-\pg{Maybe move this paragraph to the next section?}
-Our slogan extends beyond closed unary functions---it applies to arbitrary terms |t|.
-However, ``input'' means
-different things for different kind of terms:
-(a) Evaluating an open term takes an environment as input.
-(b) Evaluating a closed function term gives a function that takes arguments as
-inputs.
-(c) Evaluating an open function term |t| takes both sorts of inputs: evaluating |t|
-takes an environment, and the result takes in turn arguments.
-(d) Evaluating a closed term that is not a function gives a value directly,
-without taking any inputs.
-In all those cases, |derive| maps input changes (if there are any inputs) to
-output changes. This is the key correctness property of |derive|,
-\cref{thm:derive-correct}, that we state formally and prove in next chapter. Our
-formal statement will cover all these cases at once: we will say that |derive t|
-can be evaluated on a change to the contents of an environment, and will produce
-a valid change from the old output to the new output. But we will have to define
-the concept of (valid) change in a suitable way for functions, with a definition
-by induction on types that we defer to next chapter.
+\pg{Moved from here.}
+
 % In next chapter we define this
 % invariant formally; we
 % prove that |derive| satisfies this invariant in 
@@ -491,12 +486,6 @@ by induction on types that we defer to next chapter.
 %   applied on old inputs to |t| applied on new inputs.
 % \end{restatable}
 
-\pg{rewrite, move}
-In our slogan, ``input'' refers both to environments |rho| and to any function
-arguments of |t|.
-Notice |derive(t)|'s behavior parallels the behavior of |t|,
-because |t| maps inputs to outputs just like |derive(t)| maps
-valid input changes to valid output changes.
 
 % What's more, we define |derive(param)| \emph{compositionally}:
 % |derive(t)| is defined in terms of |derive(param)| applied to
@@ -574,6 +563,25 @@ differentiation in \cref{sec:informal-derive}.
 %format dtf = "\Varid{dt}_f"
 \section{Function changes}
 \label{sec:higher-order-intro}
+We now look at |derive|'s behavior more in general.
+functions themselves can change.
+
+% \subsection{Open terms}
+The value of an open term |Gamma /- t : tau| depends on the environment |rho :
+eval(Gamma)|. If we evaluate |t| against two suitable different environments
+|rho1, rho2 : eval(Gamma)|, we will typically compute different results
+|v1 = eval t rho1| and |v2 = eval t rho2|.
+We can compute an output change (going from |v1| to |v2|) using |derive|.
+As promised informally by our slogan, evaluating our derivative via |eval
+(derive t)| maps an ``input change'' |drho| (in this case, an environment
+change, describing changes to each element of the environment) to an output
+change |dv| from |v1| to |v2|.
+%
+If |tau| is a function type, |dv| will be a \emph{function change}.
+
+Since the concept of function changes can be surprising, we examine it more
+closely next.
+
 \subsection{Producing function changes}
 
 A first-class function can close over free variables that can
@@ -643,6 +651,36 @@ map valid changes to their inputs to valid output changes (as we'll see in
 \cref{lem:validity-binary-functions}). We'll later formalize this and define
 validity by recursion on types, that is, as a \emph{logical relation} (see
 \cref{sec:validity-logical}).
+
+\subsection{Differentiation and function changes}
+According to our slogan, if term |t| is a closed unary functions, |derive t| map
+input changes to output changes.
+But our slogan extends beyond closed unary functions---|derive t| maps input
+changes to output changes for arbitrary terms |t|. But in general we must
+consider different sorts of inputs to |t|:
+(a) Evaluating an open term takes an environment as input.
+(b) Evaluating a closed function term gives a function that takes arguments as
+inputs.
+(c) Evaluating an open function term |t| takes both sorts of inputs: evaluating |t|
+takes an environment, and the result takes in turn arguments.
+(d) Evaluating a closed term that is not a function gives a value directly,
+without taking any inputs.
+In all those cases, |derive t| maps input changes to output changes. In general,
+if |Gamma /- t : tau|, evaluating term |derive t| requires as input a
+\emph{change environment} |drho| containing changes from the \emph{initial
+environment} |rho1| to the \emph{updated environment} |rho2|.
+The (environment) input change |drho| is mapped by |derive t| to output change
+|dv = eval (derive t) drho|, a change from \emph{initial output} |eval t
+rho1| to \emph{updated output} |eval t rho2|. If |t| is a function,
+|dv| maps in turn changes to the function arguments to changes to the function result.
+
+While the behavior of |derive t| might seem confusing, it parallels the behavior
+of |t|, because |t| maps inputs to outputs just like |derive(t)| maps valid
+input changes to valid output changes.
+
+We formalize this guarantee as \cref{thm:derive-correct} in next chapter.
+
+
 
 % x -> u
 % y -> v
