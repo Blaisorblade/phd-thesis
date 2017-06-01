@@ -39,12 +39,13 @@
 %format oplus = "(\oplus)"
 %format ominus = "(\ominus)"
 
-%format (oplusIdx(t)) = "\oplus_{" t "}"
-%format (ominusIdx(t)) = "\ominus_{" t "}"
-%format (doeIdx(v)) = "\Doe_{" v "}"
-
 %format `ocompose` = "\circledcirc "
 %format ocompose (dv1) (dv2) = dv1 "\circledcirc" dv2
+
+%format (oplusIdx(t)) = "\oplus_{" t "}"
+%format (ominusIdx(t)) = "\ominus_{" t "}"
+%format (ocomposeIdx(t)) = "\circledcirc_{" t "}"
+%format (doeIdx(v)) = "\Doe_{" v "}"
 
 %format `doe` = "\Doe"
 %format chs (v) = "\ChangeStruct{" v "}"

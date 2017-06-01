@@ -815,34 +815,27 @@ resulting environment change.
 %   before}
 % no, we need full abstraction, unless the term is closed.
 
-\pg{figure}
 % \NewDocumentCommand{\RightFramedSignatureML}{m}
 % {\vbox{\hfill\fbox{\(
 %         #1
 % \)
 %     }}}
 
-%As a summary of definitions on types, we show that:
+We summarize definitions on types in \cref{fig:change-structures}.
 \begin{figure}
-\begin{subfigure}[c]{0.6\textwidth}
-  \RightFramedSignature{|oplusIdx(A): A -> Dt^A -> A|}
-  \RightFramedSignature{|ominusIdx(A): A -> A -> Dt^A|}
-\begin{code}
-  f1 (oplusIdx(A -> B)) df = \v -> f1 v `oplus` df v (nil v)
-  f2 (ominusIdx(A -> B)) f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
-\end{code}
-\caption{Change structures for function spaces}
-\end{subfigure}
-\begin{subfigure}[c]{0.6\textwidth}
+\begin{subfigure}[c]{0.8\textwidth}
   \RightFramedSignature{|oplusIdx(tau): eval(tau -> Dt^tau -> tau)|}
   \RightFramedSignature{|ominusIdx(tau): eval(tau -> tau -> Dt^tau)|}
 \begin{code}
-  f1 (oplusIdx(sigma -> tau))   df = \v -> f1 v `oplus` df v (nil v)
-  v1 (oplusIdx iota)            dv = ...
-  f2 (ominusIdx(sigma -> tau))  f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
-  v2 (ominusIdx iota)           v1 = ...
+  f1 (oplusIdx(sigma -> tau))      df = \v -> f1 v `oplus` df v (nil v)
+  v1 (oplusIdx iota)               dv = ...
+  f2 (ominusIdx (sigma -> tau))    f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
+  v2 (ominusIdx iota)              v1 = ...
+                                   nil v = v (ominusIdx(tau)) v
+  dv1 (ocomposeIdx(iota))          dv2 = ...
+  df1 (ocomposeIdx(sigma -> tau))  df2 = \v dv -> df1 v (nil v) `ocompose` df2 v dv
 \end{code}
-\caption{|`oplus`| and |`ominus`| on semantic domains}
+\caption{|`oplus`| and |`ominus`| on types}
 \end{subfigure}
 \begin{subfigure}[c]{0.7\textwidth}
   \RightFramedSignature{|oplusIdx(Gamma): eval(Gamma -> Dt^Gamma -> Gamma)|}
