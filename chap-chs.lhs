@@ -1118,7 +1118,7 @@ preservation, change |df a1 da| has destination |(f1 `oplus` df)
 `oplus` da) (nil (a1 `oplus` da))|, which adds significant noise
 to mechanized proving with \ilcA definitions.
 
-\paragraph{Future work}
+\paragraph{Possible alternatives and related work}
 A model without junk still has desirable attributes. We conjecture we could combine
 the benefits of the two models by defining change sets indexed from both sides:
 
@@ -1129,11 +1129,70 @@ destination:
 
 |Dt^V = exists v1 : V, v2 : V. ^^ Dt2^V v1 v2|.
 
-But the main questions are about reducing the formalization overhead.
+In this approach, |Dt^(A -> B)| is not a set of functions, but we can still
+define an operation that applies an element of |Dt^(A -> B)| to an element of
+|Dt^A| and produces an element of |Dt^B|.
 
-\paragraph{Credits and related work}
+We believe the main open question is not whether defining such a model is
+possible, but about the formalization overhead and their exact properties.
+
+Such models are closely related to models based on directed graphs and reflexive
+graphs, where values are graphs vertexes, changes are edges between change
+source and change destination (as hinted earlier). In graph language, validity
+preservation means that function changes are graph homomorphisms.
+
+Based on similar insights, \citet{Atkey2015ILC} suggests modeling ILC using
+reflexive graphs, which have been used to construct parametric models for System
+F and extensions, and calls for research on the relation between ILC and
+parametricity.
+As a follow-up work \citet{CaiPhD} studies models of ILC based on directed and
+reflexive graphs.
+
+Both parametricity and ILC define logical relations across program executions on
+different inputs. When studying parametricity, differences are only allowed in
+the implementations of abstractions (through abstract types or other
+mechanisms); all implementations considered must be related and give equivalent
+results. Indeed, parametricity defines not just a logical relation but a
+\emph{logical equivalence}, that can be shown to be equivalent to contextual
+equivalence~\citet{Ahmed2006stepindexed}.
+
+In ILC, instead, |fromto V v1 dv v2| holds even if |v1| and |v2| are different
+and this difference is observable in the program, but require that |dv| is a
+correct description of these differences.
+
+Similarly to our proof, \citet*{Acar08} proves correctness of incrementalization
+using a logical relation across executions of programs on base and updated
+inputs. There, incremental computation proceeds by executing the same program
+using an incremental semantics.
+The proof is done on an untyped language using a step-indexed logical relation,
+and authors choose to use a step-indexed big-step semantics, where the
+step-indexing is sound relative to step counts for a standard small-step
+semantics.
+Based on a few preliminary
+experiments by me and Yann Régis-Gianas, we conjecture it should be possible to
+adapt the approach to step-indexing in that proof to give a correctness proof of
+ILC on an untyped language using an operational semantics.
+
+The use of step-indexing by \citeauthor*{Acar08} to model incremental
+computation is very similar to the one by \citet{Ahmed2006stepindexed} to model
+parametricity and program equivalence. However,
+\citeauthor*{Ahmed2006stepindexed}'s program equivalence between computations
+|t1| and |t2| implies that if |t1| terminates then |t2| terminates and they give
+related results. Instead, \citeauthor*{Acar08}'s relation between computations
+|t1| and |t2| implies that if |t1| terminates \emph{and} |t2| terminates, \emph{then}
+they give related results, exactly because |t1| and |t2| need not be equivalent.
+To see why this change is related, consider incrementalizing program |t = if x then
+0 else loop| when |x| goes from |true| to |false|, assuming that |loop| is a
+diverging subterm. Such a change for |x| is valid, hence it must be mapped to a
+valid change from terminating term |if true then 0 else loop| to non-terminating
+term |if false then 0 else loop|.
+\footnote{This paragraph oversimplifies definitions
+  is not formally correct
+  because it ignores the step-indexes involved.}
+
+\paragraph{Credits}
 The proof presented in this and the previous chapter is an
-evolution of the original one by \citet{CaiEtAl2014ILC}.
+significant evolution of the original one by \citet{CaiEtAl2014ILC}.
 %
 While this formalization and the mechanization are both original
 with this thesis, some ideas were suggested by other
@@ -1149,13 +1208,6 @@ using two-sided validity, again for a simply-typed
 $\lambda$-calculus with a denotational semantics. Based on
 two-sided validity, I also reconstructed the rest of the theory
 of changes.
-
-One of the closest available proofs in the literature might be the correctness
-proof by \citet{Acar08}, which proves correctness of incrementalization with an
-step-indexed logical relation for an untyped language using a big-step
-semantics. Based on a few preliminary experiments, we conjecture it should be
-possible to adapt that proof to a correctness proof of ILC on an untyped
-language using an operational semantics.
 
 % \citeauthor{CaiEtAl2014ILC}'s definition resembles our definition
 % of |Dt^v = Sigma [ dv `elem` Dt V ] valid v dv| in
