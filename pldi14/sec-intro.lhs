@@ -350,6 +350,87 @@ change structures on |A| and |B|.
 
 \chapter{Misc}
 
+\section{Completely invalid changes}
+\label{sec:very-invalid}
+\pg{Not sure that the reference to sec;invalid should go here. Ok, probably not.}
+In some change sets, some changes might not be valid relative to
+any source. In particular, we can construct examples in |Dt^(Int
+-> Int)|.
+
+To understand why this is plausible, we recall that as described
+in \cref{ssec:pointwise-changes}, |df| can be decomposed into a
+derivative, and a pointwise function change that is independent
+of |da|. While pointwise changes can be defined arbitrarily, the
+behavior of the derivative of |f| on changes is determined by the
+behavior of |f|.
+
+\begin{example}
+  We search for a function change |df : Dt^(Int -> Int)| such
+that there exist no |f1, f2: Int -> Int| for which
+|fromto (Int -> Int) f1 df f2|. To find |df|, we assume that there are |f1, f2| such that |fromto
+(Int -> Int) f1 df f2|, prove a few consequences, and construct
+|df| that cannot satisfy them. Alternatively, we could pick the
+desired definition for |df| right away, and prove by
+contradiction that there exist no |f1, f2| such that |fromto (Int -> Int) f1 df
+f2|.
+
+Recall that on integers |a1 `oplus` da = a1 + da|, and that
+|fromto Int a1 da a2| means |a2 = a1 `oplus` da = a1 + da|.
+So, for any numbers |a1, da, a2| such that |a1 + da = a2|, validity of |df| implies that
+\[|f2 (a1 + da) = f1 a1 + df a1 da|.\]
+
+For any two numbers |b1, db| such that |b1 + db = a1 + da|,
+we have that
+\[|f1 a1 + df a1 da = f2 (a1 + da) = f2 (b1 + db) = f1 b1 + df b1 db|.\]
+
+Rearranging terms, we have
+\[|df a1 da - df b1 db = f1 b1 - f1 a1|,\]
+that is, |df a1 da - df b1 db| does not depend on |da| and |db|.
+
+For concreteness, let us fix |a1 = 0|, |b1 = 1|, and |a1 + da = b1 + db = s|. We have then that
+\[|df 0 s - df 1 (s - 1) = f1 1 - f1 0|,\]
+Once we set |h = f1 1 - f1 0|, we have |df 0 s - df 1 (s - 1) =
+h|.
+Because |s| is just the sum of two arbitrary numbers, while |h|
+only depends on |f1|, this equation must hold for a fixed |h| and
+for all integers |s|.
+
+To sum up, we assumed for a given |df| there exists |f1, f2| such
+that |fromto (Int -> Int) f1 df f2|, and concluded that there
+exists |h = f1 1 - f1 0| such that for all |s|
+\[|df 0 s - df 1 (s - 1) = h|.\]
+
+At this point, we can try concrete families of functions |df| to
+obtain a contradiction. Substituting a linear polynomial $|df a
+da| = c_1 \cdot a + c_2 \cdot |da|$ fails to obtain a
+contradiction: in fact, we can construct various |f1, f2| such
+that |fromto (Int -> Int) f1 df f2|. So we try quadratic
+polynomials: Substituting $|df a da| = c \cdot |da|^2$ succeeds:
+we have that there is |h| such that for all integers |s|
+\[c \cdot \left(s^2 - (s - 1)^2\right) = h.\]
+
+However, $c \cdot \left(s^2 - (s - 1)^2\right) = 2 \cdot c \cdot
+s - c$ which isn't constant, so there can be no such |h|.
+\end{example}
+
+% Because of |fromto (Int -> Int) f1 df f2| and because |`oplus`|
+% respects validity we can show that, for any valid input |fromto
+% Int a1 da a2|, we have
+% \begin{equation}
+%   \label{eq:ex-invalid-int-int}
+%   |f2 a2 = f1 a1 `oplus` df a1 da|.
+% \end{equation}
+
+% Recall that on integers |a1 `oplus` da = a1 + da|, and that
+% |fromto Int a1 da a2| means |a2 = a1 `oplus` da = a1 + da|. So
+% \cref{eq:ex-invalid-int-int} becomes
+% \begin{equation}
+%   %\label{eq:ex-invalid-int-int}
+%   |f2 (a1 + da) = f1 a1 + df a1 da|.
+% \end{equation}
+
+
+
 \section{A higher-order example}
 \label{sec:differentiation-fold-example}
 \pg{write}
