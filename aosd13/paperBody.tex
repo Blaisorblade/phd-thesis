@@ -212,8 +212,7 @@ def titleFilterHandOpt(books: Set[Book],
     book <- books
     if book.publisher == publisher && book.title.contains(keyword)
     author <- book.authors
-  } yield (book.title, author.firstName + " " +
-           author.lastName)
+  } yield (book.title, author.firstName + " " + author.lastName)
 val res = titleFilterHandOpt(books,
   "Pearson Education", "Principles")
 \end{lstlisting}
@@ -246,18 +245,17 @@ val recordsQuery =
     book <- books.asSquopt
     if book.publisher ==# "Pearson Education"
     author <- book.authors
-  } yield new BookData(book.title,
-    author.firstName + " " + author.lastName,
+  } yield new BookData(book.title, author.firstName + " " + author.lastName,
     book.authors.size - 1)
 
 // ...
 val records = recordsQuery.eval
 
-def titleFilterQuery(records: Exp[Set[BookData]], 
-                keyword: Exp[String]) = for {
+def titleFilterQuery(records: Exp[Set[BookData]], keyword: Exp[String]) = for {
   record <- records
   if record.title.contains(keyword)
 } yield (record.title, record.authorName)
+
 val resQuery = titleFilterQuery(recordsQuery, "Principles")
 val res = resQuery.optimize.eval
 \end{lstlisting}
@@ -313,8 +311,7 @@ In our running example, the query scans all books to look for the ones having th
 
 We construct a \emph{query} representing the desired dictionary, and inform the optimizer that it should use this index where appropriate:
 \begin{lstlisting}
-val idxByPublisher =
-  books.asSquopt.indexBy(_.publisher)
+val idxByPublisher = books.asSquopt.indexBy(_.publisher)
 Optimization.addIndex(idxByPublisher)
 \end{lstlisting}
 
@@ -338,8 +335,8 @@ val indexedQuery =
   for {
     book <- idxByPublisher("Pearson Education")
     author <- book.authors
-  } yield new BookData(book.title, author.firstName
-    + " " + author.lastName, book.authors.size - 1)
+  } yield new BookData(book.title, author.firstName + " " + author.lastName,
+    book.authors.size - 1)
 \end{lstlisting}
 Since dictionaries in Scala are functions, in the above code, dictionary lookup on \code{idxByPublisher} is represented simply as function application. The above code iterates over books having the desired publisher, instead of scanning the whole library, and performs the remaining computation from the original query. Although the index use in the listing above is notated as 
 \code{idxByPublisher("Pearson Education")}, only the cached result of evaluating the index is used when
@@ -585,8 +582,7 @@ Since our query language and tree representation are statically typed,
 type-incorrect queries will be rejected statically.
 For instance, consider again \code{idxByPublisher}, described previously:
 \begin{lstlisting}
-val idxByPublisher =
-  books.asSquopt.indexBy(_.publisher)
+val idxByPublisher = books.asSquopt.indexBy(_.publisher)
 \end{lstlisting}
 Since \code{Book.publisher} returns a \code{String}, \code{idxByPublisher} has
 type \code{Exp[Map[String, Book]]}. Looking up a key of the wrong type, for

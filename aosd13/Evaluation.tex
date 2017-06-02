@@ -106,7 +106,8 @@ In total, we have \queryCount{} queries as listed in \cref{table:performance} (t
 for {
   classFile <- classFiles.asSquopt
   method <- classFile.methods
-  if method.isAbstract && method.name ==# "equals" && method.descriptor.returnType ==# BooleanType
+  if method.isAbstract && method.name ==# "equals" &&
+     method.descriptor.returnType ==# BooleanType
   parameterTypes <- Let(method.descriptor.parameterTypes)
   if parameterTypes.length ==# 1 && parameterTypes(0) ==# classFile.thisClass
 } yield (classFile, method)
