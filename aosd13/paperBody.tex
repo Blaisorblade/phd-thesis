@@ -78,16 +78,16 @@ One way to implement such an optimizer would be to extend the compiler of the la
 to add some kind of external preprocessor to the language. However, such solutions would be rather brittle (for instance, they lack
 composability with other language extensions) and they would preclude optimization opportunities that arise only at runtime.
 
-For this reason, our approach is implemented as an embedded domain-specific language, that is, as a regular library.
-We call this library \LoSDef. \LoS\ consists of a domain-specific language (DSL) for queries on collections based on the Scala collections API\@. 
-This DSL is implemented as an embedded DSL (EDSL) for Scala. An expression in this EDSL produces at run time an \emph{expression tree} in the host language: a data structure which represents the query to execute, similar to an abstract syntax tree (AST) or a query plan. Thanks to the extensibility of Scala, expressions in this language look almost identical to expressions with the same meaning in Scala.
+For this reason, our approach is implemented as an embedded domain-specific language (EDSL), that is, as a regular library.
+We call this library \LoSDef. \LoS\ consists of a Scala EDSL for queries on collections based on the Scala collections API\@.
+An expression in this EDSL produces at run time an \emph{expression tree} in the host language: a data structure which represents the query to execute, similar to an abstract syntax tree (AST) or a query plan. Thanks to the extensibility of Scala, expressions in this language look almost identical to expressions with the same meaning in Scala.
 When executing the query, \LoS\ optimizes and compiles these expression trees for more efficient execution. Doing optimization at run time, instead of compile-time, avoids the need for control-flow analyses to determine which code will be actually executed~\citep{Chambers10}, as we will see later.
 
-We have choosen Scala \citep{Odersky11book} to implement our library for two reasons: (i) Scala is a good meta-language for embedded DSLs, because it is syntactically
+We have chosen Scala \citep{Odersky11book} to implement our library for two reasons: (i) Scala is a good meta-language for EDSLs, because it is syntactically
 flexible and has a powerful type system, and (ii) Scala has a sophisticated collections library with an attractive syntax (for-comprehensions) to specify queries.
 
 To evaluate \LoS, we study queries of the FindBugs tool~\citep{DBLP:journals/sigplan/HovemeyerP04}.
-We rewrote a set of queries to use the Scala collections API and show that  modularization incurs significant performance overhead. Subsequently, we consider versions of the same queries using \LoS{}. 
+We rewrote a set of queries to use the Scala collections API and show that modularization incurs significant performance overhead. Subsequently, we consider versions of the same queries using \LoS{}.
 We demonstrate that the automatic optimization can reconcile modularity and performance in many cases. Adding advanced optimizations such as indexing can even improve the performance of the analyses beyond the original non-modular analyses.
  
 Overall, our main contributions are the following:

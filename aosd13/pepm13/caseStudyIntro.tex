@@ -34,7 +34,7 @@ In contrast, an automated domain-specific optimizer can inline the function to f
 Such optimizations are not possible within most ordinary collections API, such as the Scala collections API~\cite{odersky2009fighting}, because they
 do not reify queries on collections. Instead, each API function is defined compositionally in terms
 of the meaning of the other API functions.
-We regard the Scala collections API as a \emph{domain-specific embedded language} (EDSL); this style of compositional DSL implementation by libraries is often
+We regard the Scala collections API as a \emph{embedded domain-specific language} (EDSL); this style of compositional DSL implementation by libraries is often
 called \emph{shallow embedding}%
 %~\chk{add reference} %PG: I know it's crazy, but nobody gives a reference for this term.
 . The alternative, which we pursue, is a \emph{deep embedding} of the DSL, where programs written in the DSL (in our case: 
