@@ -708,21 +708,7 @@ base entry |x = v| where |v : eval(tau)|, and possibly a change |dx = dv| where
   \label{def:chs-envs}
   To each context |Gamma| we associate a change structure
   |chs(Gamma)|, that extends the basic change structure from \cref{def:bchs-contexts}.
-  Operations are defined as follows.
-\begin{code}
-  emptyRho `oplus` emptyRho                                                       = emptyRho
-  (rho, x = v) `oplus` (drho, x = v', dx = dv)                                    = (rho `oplus` drho, x = v `oplus` dv)
-
-  emptyRho `ominus` emptyRho                                                      = emptyRho
-  (rho2, x = v2) `ominus` (rho1, x = v1)                                          = (rho2 `ominus` rho1, x = v1, dx = v2 `ominus` v1)
-
-  nil emptyRho                                                                    = emptyRho
-  nil (rho, x = v)                                                                = (nil rho, x = v, dx = nil v)
-
-  ocompose emptyRho emptyRho                                             = emptyRho
-  ocompose ((drho1, x = v1, dx = dv1)) ((drho2, x = v2, dx = dv2))  =
-      (ocompose drho1 drho2, x = v1, dx = ocompose dv1 dv2)
-\end{code}
+  Operations are defined as shown in \cref{fig:chs-env}.
 \end{definition}
 Base values |v'| in environment changes are redundant with base values |v| in
 base environments, because for valid changes |v = v'|.
@@ -823,32 +809,45 @@ resulting environment change.
 
 We summarize definitions on types in \cref{fig:change-structures}.
 \begin{figure}
-\begin{subfigure}[c]{0.8\textwidth}
+\begin{subfigure}[c]{\textwidth}
   \RightFramedSignature{|oplusIdx(tau): eval(tau -> Dt^tau -> tau)|}
   \RightFramedSignature{|ominusIdx(tau): eval(tau -> tau -> Dt^tau)|}
+  \RightFramedSignature{|nil: eval(tau -> Dt^tau)|}
+  \RightFramedSignature{|ocomposeIdx(tau): eval(Dt^tau -> Dt^tau -> Dt^tau)|}
 \begin{code}
-  f1 (oplusIdx(sigma -> tau))      df = \v -> f1 v `oplus` df v (nil v)
-  v1 (oplusIdx iota)               dv = ...
-  f2 (ominusIdx (sigma -> tau))    f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
-  v2 (ominusIdx iota)              v1 = ...
-                                   nil v = v (ominusIdx(tau)) v
-  dv1 (ocomposeIdx(iota))          dv2 = ...
-  df1 (ocomposeIdx(sigma -> tau))  df2 = \v dv -> df1 v (nil v) `ocompose` df2 v dv
+  f1 (oplusIdx(sigma -> tau))      df   = \v -> f1 v `oplus` df v (nil v)
+  v1 (oplusIdx iota)               dv   = ...
+  f2 (ominusIdx (sigma -> tau))    f1   = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
+  v2 (ominusIdx iota)              v1   = ...
+  nil v                                 = v (ominusIdx(tau)) v
+  dv1 (ocomposeIdx(iota))          dv2  = ...
+  df1 (ocomposeIdx(sigma -> tau))  df2  = \v dv -> df1 v (nil v) `ocompose` df2 v dv
 \end{code}
-\caption{|`oplus`| and |`ominus`| on types}
+\caption{Change structure operations on types (see \cref{def:chs-envs}).}
 \end{subfigure}
-\begin{subfigure}[c]{0.7\textwidth}
+\begin{subfigure}[c]{\textwidth}
   \RightFramedSignature{|oplusIdx(Gamma): eval(Gamma -> Dt^Gamma -> Gamma)|}
   \RightFramedSignature{|ominusIdx(Gamma): eval(Gamma -> Gamma -> Dt^Gamma)|}
+  \RightFramedSignature{|nil: eval(Gamma -> Dt^Gamma)|}
+  \RightFramedSignature{|ocomposeIdx(Gamma): eval(Dt^Gamma -> Dt^Gamma -> Dt^Gamma)|}
 \begin{code}
-  emptyRho `oplus` emptyRho                    = emptyRho
-  (rho, x = v) `oplus` (drho, x = v, dx = dv)  = (rho `oplus` drho, x = v `oplus` dv)
-  emptyRho `ominus` emptyRho                   = emptyRho
-  (rho2, x = v2) `ominus` (rho1, x = v1)       = (rho2 `ominus` rho1, x = v1, dx = v2 `ominus` v1)
+  emptyRho `oplus` emptyRho                                                       = emptyRho
+  (rho, x = v) `oplus` (drho, x = v', dx = dv)                                    = (rho `oplus` drho, x = v `oplus` dv)
+
+  emptyRho `ominus` emptyRho                                                      = emptyRho
+  (rho2, x = v2) `ominus` (rho1, x = v1)                                          = (rho2 `ominus` rho1, x = v1, dx = v2 `ominus` v1)
+
+  nil emptyRho                                                                    = emptyRho
+  nil (rho, x = v)                                                                = (nil rho, x = v, dx = nil v)
+
+  ocompose emptyRho emptyRho                                             = emptyRho
+  ocompose ((drho1, x = v1, dx = dv1)) ((drho2, x = v2, dx = dv2))  =
+      (ocompose drho1 drho2, x = v1, dx = ocompose dv1 dv2)
 \end{code}
   % nil emptyRho = emptyRho
   % nil (rho, x = v) = nil rho, x = v, dx = nil v
-\caption{|`oplus`| and |`ominus`| on environments}
+\caption{Change structure operations on environments (see \cref{def:chs-envs}).}
+\label{fig:chs-env}
 \end{subfigure}
 \validOplus*
   \deriveCorrectOplus*
