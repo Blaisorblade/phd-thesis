@@ -1,4 +1,4 @@
-%\section{The DSEL interface: embedding Scala expressions}
+%\section{The EDSL interface: embedding Scala expressions}
 % Scala-virtualized has no polymorphic lift, unlike us.
 % 2. Embedding collections into Scala
 % When does one need asSquopt?
@@ -158,7 +158,7 @@ Hence, part of the expression is evaluated before being reified. This is harmles
 
 \section{Lifting higher-order expressions}
 \label{sec:lifting-ho}
-We have shown how to lift first-order expressions; however, the interface of collections also uses higher-order methods, that is, methods that accept functions as parameters, and we need to lift them as well to reify the complete collection DSEL. For instance, the \code{map} method applies a function to each element of a collection. In this section, we describe how we reify such expressions of function type.
+We have shown how to lift first-order expressions; however, the interface of collections also uses higher-order methods, that is, methods that accept functions as parameters, and we need to lift them as well to reify the complete collection EDSL. For instance, the \code{map} method applies a function to each element of a collection. In this section, we describe how we reify such expressions of function type.
 
 \smartParagraph{Higher-order abstract syntax}
 To represent functions, we have to represent the bound variables in the function bodies. For example, a reification of \code{str => str + "!"} needs to reify the variable \code{str} of type \code{String} in the body of the anonymous function. This reification should retain the information where \code{str} is bound. We achieve this by representing bound variables using \emph{higher-order abstract syntax} (HOAS)~\citep{Pfenning88hoas}, that is, we represent them by variables bound at the meta level. To continue the example, the above function is reified as \code{(str: Exp[String]) => str + "!"}. Note how the type of \code{str} in the body of this version is \code{Exp[String]}, because \code{str} is a reified variable now. Correspondingly, the expression \code{str + "!"} is lifted as described in the previous section. 
@@ -200,7 +200,7 @@ class ListOps(coll: Exp[List[T]]) {
 case class ListMapNode[T, U](coll: Exp[List[T]], mapping: Exp[T => U]) extends Exp[List[U]]
 \end{lstlisting}
 
-Note how \code{map}'s parameter \code{f} has type \code{Exp[T] => Exp[U]} as necessary to enable Scala's syntax for anonymous functions and automatic lifting of the function body. This implementation would work for queries on lists, but does not support other collection types or queries where the collection type changes. We show in Sec.~\ref{subsec:collections} how {\LoS} integrates with such advanced features of the Scala Collection DSEL.
+Note how \code{map}'s parameter \code{f} has type \code{Exp[T] => Exp[U]} as necessary to enable Scala's syntax for anonymous functions and automatic lifting of the function body. This implementation would work for queries on lists, but does not support other collection types or queries where the collection type changes. We show in Sec.~\ref{subsec:collections} how {\LoS} integrates with such advanced features of the Scala Collection EDSL.
 
 %\pg{Discuss this elsewhere? Better?}
 %Note, moreover, that while the interface of our representation is
@@ -214,7 +214,7 @@ Note how \code{map}'s parameter \code{f} has type \code{Exp[T] => Exp[U]} as nec
 
 \section{Lifting collections}
 \label{subsec:collections}
-In this section, we first explain how for-comprehensions are desugared to calls to library functions, allowing an external library to give them a different meaning. We summarize afterwards needed information about the subset of the Scala collection DSEL that we reify. Then we present how we perform this reification.
+In this section, we first explain how for-comprehensions are desugared to calls to library functions, allowing an external library to give them a different meaning. We summarize afterwards needed information about the subset of the Scala collection EDSL that we reify. Then we present how we perform this reification.
 We finally present the reification of the running example (Fig.~\ref{fig:reifiedQuery}).
 
 %\section*{How for-comprehensions work}
@@ -242,7 +242,7 @@ val records = books.
 
 The compiler performs type inference and type checking on a for-comprehension only \emph{after} desugaring it; this affords some freedom for the types of \code{map}, \code{flatMap} and \code{withFilter} methods.
 
-\smartParagraph{The Scala Collection DSEL}
+\smartParagraph{The Scala Collection EDSL}
 A Scala collection containing elements of type \code{T} implements the trait \code{Traversable[T]}.
 %where \code{Traversable} is a type constructor applied to the type parameter \code{T} (similarly to Java generics);
 On an expression \code{coll} of type \code{Traversable[T]} one can invoke methods declared (in first approximation) as follows:
@@ -270,7 +270,7 @@ val recordsSeq = for {
 \end{lstlisting}
 
 \smartParagraph{Precise static typing}
-The Scala collections DSEL achieves precise static typing while avoiding code duplication~\citep{odersky2009fighting}. Precise static typing is necessary because the return type of a query operation can depend on subtle details of the base collection and query arguments. 
+The Scala collections EDSL achieves precise static typing while avoiding code duplication~\citep{odersky2009fighting}. Precise static typing is necessary because the return type of a query operation can depend on subtle details of the base collection and query arguments. 
 To return the most specific static type, the Scala collection DSL defines a type-level relation between the source collection type, the element type for the transformed collection, and the type for the resulting collection. The relation is encoded through the concept pattern~\citep{Oliveira10TCOI}, i.e., through a type-class-style trait \code{CanBuildFrom[From, Elem, To]}, and elements of the relation are expressed as implicit instances.
 
 For example, a finite map can be treated as a set of pairs so that mapping a function from pairs to pairs over it produces another finite map. This behavior is encoded in an instance of type \code{CanBuildFrom[Map[K, V], (K1, V1), Map[K1, V1]}. The \code{Map[K, V]} is the type of the base collection, \code{(K1, V1)} is the return type of the function, and \code{Map[K1, V1]} is the return type of the map operation.
@@ -278,7 +278,7 @@ For example, a finite map can be treated as a set of pairs so that mapping a fun
 It is also possible to map some other function over the finite map, but the result will be a general collection instead of a finite map. This behavior is described by an instance of type \code{CanBuildFrom[Traversable[T], U, Traversable[U]}. Note that this instance is also applicable to finite maps, because \code{Map} is a subclass of \code{Traversable}. Together, these two instances describe how to compute the return type of mapping over a finite map.
 
 \smartParagraph{Code reuse}
-Even though these two use cases for mapping over a finite map have different return types, they are implemented as a single method that uses its implicit \code{CanBuildFrom} parameter to compute both the static type and the dynamic representation of its result. So the Scala Collections DSEL provides precise typing without code duplication. In our deep embedding, we want to preserve this property.
+Even though these two use cases for mapping over a finite map have different return types, they are implemented as a single method that uses its implicit \code{CanBuildFrom} parameter to compute both the static type and the dynamic representation of its result. So the Scala Collections EDSL provides precise typing without code duplication. In our deep embedding, we want to preserve this property.
 
 \code{CanBuildFrom} is used in the implementation of \code{map}, \code{flatMap} and \code{withFilter}. To further increase reuse, the implementations are provided in a helper trait \code{TraversableLike[T, Repr]}, with the following signatures:
 
@@ -316,7 +316,7 @@ implicit def expToTraversableLikeOps
 The query operations are defined in class \code{TraversableLikeOps[T, Repr]}; a few examples are shown in Fig.~\ref{fig:liftTrav}.%
 \footnote{Similar liftings are introduced for traits similar to \code{TraversableLike}, like \code{SeqLike}, \code{SetLike}, \code{MapLike}, and so on.}
 
-Note how the lifted query operations use \code{CanBuildFrom} to compute the same static return type as the corresponding non-lifted query operation would compute. This reuse of type-level machinery allows {\LoS} to provide the same interface as the Scala Collections DSEL.
+Note how the lifted query operations use \code{CanBuildFrom} to compute the same static return type as the corresponding non-lifted query operation would compute. This reuse of type-level machinery allows {\LoS} to provide the same interface as the Scala Collections EDSL.
 
 \smartParagraph{Code reuse, revisited}
 We already saw how we could reify \code{List[T].map} through a specific expression node, \code{ListMapNode}. However, this approach would require generating many variants for different collections with slightly different types; writing an optimizer able to handle all such variations would be unfeasible because of the amount of code duplication required.
@@ -400,7 +400,7 @@ class TraversableLikeOps[T, Repr <: Traversable[T]
 
 %\pg{\code{withFilter} actually returns \code{FilterMonadic[T, Repr]}, while in the embedding we do not and we want to explain why.}
 %\section{Embedding the collection API}
-%In this section, we describe how we implement the collection-specific portion of the language interface of our DSEL.
+%In this section, we describe how we implement the collection-specific portion of the language interface of our EDSL.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Methods from \code{Traversable[T]} are defined in \code{TraversableLike[T, Repr]}. \code{Repr} identifies the current collection; so \code{Traversable[T]} extends \code{TraversableLike[T, Traversable[T]]}, while \code{Set[T]} extends \code{TraversableLike[T, Set[T]]}.
@@ -410,7 +410,7 @@ class TraversableLikeOps[T, Repr <: Traversable[T]
 %\pg{The following text is too abstract yet, but I need to write it down to clarify my ideas.}
 %This section discusses how we lift operations on collections. We could apply the techniques in the previous sections directly, but three opposing design goals inform the design of our lifting:
 %\begin{itemize}
-%\item expressions in the Scala collections DSEL have an accurate static type~\citep{odersky2009fighting}, and we want to preserve that accuracy;
+%\item expressions in the Scala collections EDSL have an accurate static type~\citep{odersky2009fighting}, and we want to preserve that accuracy;
 %\item we want our expression trees to be reasonably simple to transform; we want to have just a single type of node to represent \code{flatMap} operations, and not a different one for each kind of collection.
 %\item we want to minimize the amount of code we need, and have minimal coupling to the collection library. For instance, the framework should support new implementation of dictionaries with as few changes as possible to the framework.
 %\end{itemize}
@@ -471,7 +471,7 @@ case class StringConcat(str1: Exp[String],
 }
 \end{lstlisting}
 
-The subset of Scala we reify roughly corresponds to a typed lambda calculus with subtyping and type constructors. It does not include constructs for looping or recursion, so it should be strongly normalizing as long as application programmers do not add expression nodes with non-terminating interpretations. However, query writers can use the host language to create a reified expression of infinite size. This should not be an issue if {\LoS} is used as a drop-in replacement for the Scala Collection DSEL.
+The subset of Scala we reify roughly corresponds to a typed lambda calculus with subtyping and type constructors. It does not include constructs for looping or recursion, so it should be strongly normalizing as long as application programmers do not add expression nodes with non-terminating interpretations. However, query writers can use the host language to create a reified expression of infinite size. This should not be an issue if {\LoS} is used as a drop-in replacement for the Scala Collection EDSL.
 
 During optimization, nodes of the expression tree might get duplicated, and the
 interpreter could, in principle, observe this sharing and treat the expression

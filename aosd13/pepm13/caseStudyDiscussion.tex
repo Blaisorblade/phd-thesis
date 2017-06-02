@@ -45,7 +45,7 @@ We also experienced problems with operators that cannot be overloaded, such as \
 It would also be desirable if we could enforce the absence of side effects in queries, but since Scala, like most practical programming languages except Haskell, does not track side effects in the type system this does not seem to be possible. 
 %However, we believe that the advantages of purely functional queries are a more desirable interface.
 
-Finally, compared to \emph{lightweight modular staging}~\citep{rompf2010lightweight} (the foundation of Delite) and to polymorphic embedding~\citep{hofer08polymorphic}, we have less static checking for some programming errors when writing queries; the recommended way to use Delite is to write a DSEL program in one trait, in terms of the DSEL interface only, and combine it with the implementation in another trait. In polymorphic embedding, the DSEL program is a function of the specific implementation (in this case, semantics).
+Finally, compared to \emph{lightweight modular staging}~\citep{rompf2010lightweight} (the foundation of Delite) and to polymorphic embedding~\citep{hofer08polymorphic}, we have less static checking for some programming errors when writing queries; the recommended way to use Delite is to write a EDSL program in one trait, in terms of the EDSL interface only, and combine it with the implementation in another trait. In polymorphic embedding, the EDSL program is a function of the specific implementation (in this case, semantics).
 Either approach ensures that the DSL program is \emph{parametric} in the implementation, and hence cannot refer to details of a specific implementation.
 However, we judged the syntactic overhead for the programmer to be too high to use those techniques -- in our implementation we rely on encapsulation and on dynamic checks at query construction time to achieve similar guarantees.
 
@@ -73,7 +73,7 @@ The choice of interpreting expressions turned out to be a significant performanc
 %\pg{Move discussion of type inference to the discussion Section}
 %%However, Scala only features \emph{local} type inference; one often needs to consider the type inference algorithm when writing method signatures, especially for higher-order methods, to ensure that the client code does not need redundant type annotations.
 %
-%Since \code{map} is part of the collection DSEL, and since for-comprehensions are desugared to expressions using \code{map}, we need to lift this method carefully. Clients should not need extra type annotations for using the lifted version; moreover, we want to receive a reified version of the parameter.
+%Since \code{map} is part of the collection EDSL, and since for-comprehensions are desugared to expressions using \code{map}, we need to lift this method carefully. Clients should not need extra type annotations for using the lifted version; moreover, we want to receive a reified version of the parameter.
 %
 %%one can often write type signatures to ensure that it works.
 %
@@ -93,9 +93,9 @@ The choice of interpreting expressions turned out to be a significant performanc
 %\smartParagraph{Limitations and discussion.}
 %
 %However, instead of just lifting those methods from \code{TraversableLike}, we modified them slightly. These differences, however, do not limit the ability to write queries with our framework, as we will illustrate.\pg{Any supporting evidence?}
-%This is not due to a limitation of our approach; we experimented with lifting the original signatures faithfully, but in the end abandoned this attempt because of opposing design goals for the interface of our DSEL:
+%This is not due to a limitation of our approach; we experimented with lifting the original signatures faithfully, but in the end abandoned this attempt because of opposing design goals for the interface of our EDSL:
 %\begin{itemize}
-%\item expressions in the Scala collections DSEL have an accurate static type, and we want to preserve that accuracy by making the lifting as faithful as possible;
+%\item expressions in the Scala collections EDSL have an accurate static type, and we want to preserve that accuracy by making the lifting as faithful as possible;
 %\item we want our expression trees to support different semantics reasonably well, including interpretation and optimization.
 %\item we want to minimize the amount of code we need, and have minimal coupling to the collection library. For instance, the framework should support new implementation of dictionaries with as few changes as possible to the framework.
 %\end{itemize}
@@ -165,7 +165,7 @@ The choice of interpreting expressions turned out to be a significant performanc
 %
 %\pg{Actually, the problem shows up with any two nested constructors of this kind.}
 %
-%DSEL programs need to resort to calling \code{asExp} extremely rarely, because operations of the DSEL already provide the needed context; but as soon as we try supporting nesting tuples such as \code{((a, b), c}, we face again type inference bugs, for which this time we found no reasonable workaround which does not affect surface syntax. The conversion above accepts a pair of expression trees; we can write a more general conversion which accepts a pair of values \emph{implicitly convertible} to expression trees, so that \code{asExp((a, b), c)} would have type \code{Exp[((A, B), C)]}, but the compiler cannot make use of this conversion\footnote{We reported \url{https://issues.scala-lang.org/browse/SI-5651}, probably a dup of \url{https://issues.scala-lang.org/browse/SI-3346}.}.
+%EDSL programs need to resort to calling \code{asExp} extremely rarely, because operations of the EDSL already provide the needed context; but as soon as we try supporting nesting tuples such as \code{((a, b), c}, we face again type inference bugs, for which this time we found no reasonable workaround which does not affect surface syntax. The conversion above accepts a pair of expression trees; we can write a more general conversion which accepts a pair of values \emph{implicitly convertible} to expression trees, so that \code{asExp((a, b), c)} would have type \code{Exp[((A, B), C)]}, but the compiler cannot make use of this conversion\footnote{We reported \url{https://issues.scala-lang.org/browse/SI-5651}, probably a dup of \url{https://issues.scala-lang.org/browse/SI-3346}.}.
 %The problem generalizes to any two nested generic constructors.
 %
 %We observe that these limitations of type inference make its behavior hard to predict and hinder DSL embedding. We discuss this point further in Sec.~\ref{sec:ScalaLessons}.
@@ -268,10 +268,10 @@ On the other hand, deep embedding requires to implement an interpreter or a comp
 
 On the one hand, interpretation overhead is significant in Scala, even when
 using HOAS to take advantage of the metalevel implementation of argument access.
-%Even when using an interpreter, however, the overhead can be compensated by the benefits for the user of the DSEL, which can write more declarative and modular queries, without paying an excessive cost because of interpretation.
+%Even when using an interpreter, however, the overhead can be compensated by the benefits for the user of the EDSL, which can write more declarative and modular queries, without paying an excessive cost because of interpretation.
 %However, we believe that domain-specific optimizations enable the benefits for modularity are significant.
 
-Instead of interpreting a program, one can compile a DSEL program to Scala and load it, as done by \citet{Rompf11BBlocks};
+Instead of interpreting a program, one can compile a EDSL program to Scala and load it, as done by \citet{Rompf11BBlocks};
 while we are using this approach, the disadvantage is the compilation delay,
 especially for Scala whose compilation process is complex and time-consuming.
 Possible alternatives include generating bytecode directly or combining
