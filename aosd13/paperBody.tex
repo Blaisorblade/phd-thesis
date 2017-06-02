@@ -525,7 +525,9 @@ many different implementations.
 
 To make changes to the optimizer more practical, we designed our query
 representation so that optimizations are easy to express; restricting to pure
-queries also helps. For instance, filter fusion can be implemented simply as:%
+queries also helps. For instance, filter fusion can be implemented in few lines of code:
+just match against expressions of form \code{coll.filter(pred2).filter(pred1)}
+and rewrite them:%
 \footnote{\code{Sym} nodes are part of the boilerplate we omitted earlier.}
 \begin{lstlisting}
   val mergeFilters = ExpTransformer {
@@ -533,8 +535,7 @@ queries also helps. For instance, filter fusion can be implemented simply as:%
       coll.filter(x => pred2(x) && pred1(x))
   }
 \end{lstlisting}
-The above code matches on reified expression of form
-\code{coll.} \code{filter(pred2).filter(pred1)} and rewrites it. A more complex
+A more complex
 optimization such as filter hoisting requires only 20 lines of code.
 
 We have implemented a prototype of the optimizer with the mentioned
