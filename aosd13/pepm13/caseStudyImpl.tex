@@ -62,7 +62,7 @@ This is an example of the well-known Scala \emph{enrich-my-library pattern}\foot
  
 With these declarations in scope, the Scala compiler rewrites \code{str1 + str2} to
 \code{expToStringOps(str1).+(str2)}, which evaluates to \code{StringConcat(str1, str2)} as desired.
-Note that the implicit conversion function \code{expToStringOps} is not applicable to \code{Exp[Boolean]} because it explicitly specifies the receiver of the \code{+}-call to have type \code{Exp[String]}.
+The implicit conversion function \code{expToStringOps} is not applicable to \code{Exp[Boolean]} because it explicitly specifies the receiver of the \code{+}-call to have type \code{Exp[String]}.
 In other words, expressions like \code{str1 + str2} are now \emph{lifted} on the level of expression trees in a type-safe way. For brevity, we refer to the defined operator as \code{Exp[String].+}.
 
 \smartParagraph{Literal values}
@@ -74,11 +74,11 @@ implicit def pure[T](t: T): Exp[T] = Const(t)
 \end{lstlisting}
 %Since this conversion evaluates its argument and does not preserve its structure, it is only appropriate for atomic expressions.
 
-The compiler will now rewrite \code{str1 + "foo"} to \code{expToStringOps(str1) + pure("foo")}.
+The compiler will now rewrite \code{str1 + "foo"} to \code{expToStringOps(str1) + pure("foo")}, and
+\code{str1 + "foo" + str2} to \code{expToStringOps(str1) + pure("foo") + str2}.
+Different implicit conversions cooperate successfully to lift the expression.
 %Since \code{Exp[String].+} requires an argument of type \code{Exp[String]} but \code{"foo"} has type \code{String},
 %the compiler wraps \code{"foo"} with a call to \code{pure}. Hence
-Similarly, \code{author. firstName + " " + author.lastName} is rewritten to \code{(expToStringOps(author.firstName) + pure(" ")) + author.lastName}.
-Note how the implicit conversions cooperate successfully to lift the expression.
 
 Analogously, it would be convenient if the similar expression \code{"bar" + str1} would be rewritten to \code{expToStringOps(pure("bar")) + str1}, but this is not the case, because implicit coercions are not chained automatically in Scala.
 Instead, we have to manually chain existing implicit conversions into a new one:
@@ -103,12 +103,23 @@ class AuthorOps(t: Exp[Author]) {
 }
 \end{lstlisting}
 
-\code{Author} is not part of {\LoS} or the standard Scala library but an application-specific class, hence it is not possible
-to pre-define the necessary lifting code as part of {\LoS}. Instead, the application programmer needs to provide this code to connect {\LoS} to his application. To support the application programmer with this tedious task, we provide a code generator which discovers the interface of a class through reflection on its compiled version and generates the boilerplate code such as the one above for \code{Author}. It also generates 
+Implicit conversions for user-defined types cooperate with other ones; for instance, \code{author.firstName + " " + author.lastName} is rewritten to
+\begin{lstlisting}
+(expToStringOps(expToAuthorOps(author).firstName) + pure(" ")) +
+  expToAuthorOps(author).lastName
+\end{lstlisting}
+
+\code{Author} is not part of {\LoS} or the standard Scala library, but an application-specific class, hence {\LoS} cannot
+pre-define the necessary lifting code. Instead, the application programmer needs
+to provide this code to connect {\LoS} to his application. To support the
+application programmer with this tedious task, we provide a code generator which
+discovers the interface of a class through reflection on its compiled version
+and generates the boilerplate code such as the one above for \code{Author}. It
+also generates
 the application-specific expression tree types such as \code{AuthorFirstName} as shown in Sec.~\ref{subsec:repexptrees}.
 In general, query writers need to generate and import the boilerplate lifting code for all application-specific types they want to use in a {\LoS} query.
 
-If desired, we can exclude some methods to \emph{restrict} the language supported in our deeply embedded programs. For instance \LoS{} requires the user to write side-effect-free queries, hence we do not lift methods which perform side effects.
+If desired, we can exclude some methods to \emph{restrict} the language supported in our deeply embedded programs. For instance, \LoS{} requires the user to write side-effect-free queries, hence we do not lift methods which perform side effects.
 
 Using similar techniques, we can also lift existing functions and implicit conversions.
 
@@ -139,7 +150,11 @@ So far, we have seen that for each first-order method \code{m} operating on inst
 \smartParagraph{Limitations of Lifting}
 Lifting methods of \code{Any} or \code{AnyRef} (Scala types at the root of the inheritance hierarchy) is not possible with this technique: \code{Exp[T]} inherits such methods and makes them directly available, hence the compiler will not insert an implicit conversion. Therefore, it is not possible to lift expressions such as \code{x == y}; rather, we have to rely on developer discipline to use \code{==\#} and \code{!=\#} instead of \code{==} and \code{!=}.
 
-An expression like \code{"foo" + "bar" + str1} is converted to \code{toStringOps("foo" + "bar") + str1}; hence, part of the expression is evaluated before being reified. This is harmless here since we want \code{"foo" + "bar"} to be evaluated at compile-time, that is constant-folded, but in other cases it is preferable to prevent the constant folding. We will see later examples where queries on collections are evaluated before reification, defeating the purpose of our framework, and how we work around those.
+An expression like \code{"foo" + "bar" + str1} is converted to
+\begin{lstlisting}
+toStringOps("foo" + "bar") + str1
+\end{lstlisting}
+Hence, part of the expression is evaluated before being reified. This is harmless here since we want \code{"foo" + "bar"} to be evaluated at compile-time, that is constant-folded, but in other cases it is preferable to prevent the constant folding. We will see later examples where queries on collections are evaluated before reification, defeating the purpose of our framework, and how we work around those.
 
 \section{Lifting higher-order expressions}
 \label{sec:lifting-ho}
