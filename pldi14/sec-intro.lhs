@@ -73,134 +73,319 @@ But in such a statement means that for all
 % but it does not follow in general from
 % \cref{eq:derive-correct-oplus-higher-order} that |t `oplus` derive t `cong` t|.
 
+\pg{Text on change equivalence follows.}
+
+% And conversely, two function changes that map equivalent sources
+% to equivalent destinations are also equivalent.
+\pg{that lemma disappeared now?}
+
 \section{Change equivalence}
 \label{sec:change-equivalence}
 \pg{We can use based changes. Better not.}
 
-To enable optimizations on programs manipulating changes,
-we next define an equivalence relation on changes called
-\emph{change equivalence}. When it is clear we talk about
-changes, we will just talk about equivalence.
+To optimize programs manipulate changes, we often want to replace a
+change-producing term by another one, while preserving the overall program
+meaning. Hence, we define an equivalence on valid changes that is preserved by
+change operations, that is a \emph{congruence}. We call this relation
+\emph{change equivalence}. When it is clear we talk about changes, we will just
+talk about equivalence.
 
-Change equivalence is defined in terms of validity so that
-validity-preserving operations preserve change equivalence: If
-two changes |dv1, dv2| are change-equivalent, one can be
-substituted for the other in a validity-preserving context.
+Earlier (say, in \cref{ssec:pointwise-changes}) we have sometimes required that
+changes be equal, but that's often too restrictive.
+
+Change equivalence is defined in terms of validity, to ensure that
+validity-preserving operations preserve change equivalence: If two changes |dv1|
+and |dv2| are equivalent, one can be substituted for the other in a
+validity-preserving context.
 
 \begin{definition}[Change equivalence]
-  Two changes |dv1|, |dv2| are equivalent, relative to source
-  |v1|, if and only if there exists |v2| such that both |dv1| and
-  |dv2| are valid from |v1| to |v2| (that is |fromto V v1 dv1
-  v2|, |fromto V v1 dv2 v2|).
-  We write then |fromto V v1 (dv1 `doe` dv2) v2|, or simply |dv1
-  (doeIdx(v1) dv2|, or just |dv1 `doe` dv2| when the source |v1| is
-  clear from context.
+  Given a change structure |chs(V)|,
+  changes |dva, dvb : Dt^V| are equivalent relative to source
+  |v1 : V| (written |fromto V v1 (dva `doe` dvb) v2|)
+  if and only if there exists |v2| such that both |dva| and
+  |dvb| are valid from |v1| to |v2| (that is |fromto V v1 dva
+  v2|, |fromto V v1 dvb v2|).
 \end{definition}
+\begin{notation}
+  We often abbreviate |fromto V v1 (dva `doe` dvb) v2| as |dva (doeIdx(v1) dvb|.
+  When the source |v1| can be inferred from context, we write |dva `doe` dvb|.
+\end{notation}
 
 Two changes are often equivalent relative to a source but not
-others. Hence |dv1 `doe` dv2| is always an abbreviation for
-change equivalence at a specific source.
+others. Hence |dva `doe` dvb| is always an abbreviation for
+change equivalence for a specific source.
+\begin{example}
 For instance, we later use a change structure for integers using
 both replacement changes and differences (\cref{ex:replacement}).
 In this structure, change |0| is nil for all numbers, while
 change |!5| (``bang 5'') replaces any number with 5. Hence,
 changes |0| and |!5| are equivalent only relative to source 5,
 and we write |0 doeIdx(5) !5|.
+\end{example}
 
-\paragraph{Change equivalence is an equivalence}
 By applying definitions, one can verify that change equivalence
-relative to a source is a symmetric and transitive relation.
-However, it is only reflexive on valid changes.
-\begin{lemma}[Change equivalence is an equivalence relation.]
+relative to a source |v| is a symmetric and transitive relation on |Dt^V|.
+However, it is not an equivalence relation on |Dt^V|, because it is only
+reflexive on changes valid for source |v|. Using the set-theoretic concept of
+subset we can then state the following lemma (whose proof we omit as it is
+brief):
+\begin{lemma}[|`doe`| is an equivalence on valid changes]
   For each set |V| and source |v `elem` V|, change equivalence
-  relative to source |v| is an equivalence relation over the sets
-  of changes |dv `elem` Dt^V| that are valid with source |v|.
+  relative to source |v| is an equivalence relation over the set
+  of changes $|dv `elem` Dt^V `such` dv| \text{ is valid with source } |v|$.
 \end{lemma}
-Readers with the relevant expertise should recognize that change
-equivalence is a partial equivalence relation (PER).
+We elaborate on this peculiar sort of equivalence in \cref{sec:doe-per}.
 
-\paragraph{Preserving change equivalence}
-Change equivalence is respected by all validity-preserving
-operations. We state few lemmas as examples.
+\subsection{Preserving change equivalence}
+Change equivalence relative to a source |v| is respected, in an appropriate
+sense, by all validity-preserving expression contexts that accept changes with
+source |v|.
+To explain what this means we study an example lemma: we show that because valid
+function changes preserve validity, they also respect change equivalence.
+At first, we use ``context'' informally to refer to expression contexts in the
+metalanguage. Later, we'll extend our discussion to actual expression contexts.
 
 \begin{lemma}[Valid function changes respect change equivalence]
-Any valid function change |fromto (A -> B) f1 df f2| respect
-change equivalence: if |fromto A v1 (dv1 `doe` dv2) v2| then
-|fromto B (f1 v1) (df v1 dv1 `doe` df v1 dv2) (f2 v2)|.
+  \label{lem:ch-respect-doe}
+Any valid function change
+\[|fromto (A -> B) f1 df f2|\]
+respects change equivalence: if |fromto A v1 (dva `doe` dvb) v2| then
+|fromto B (f1 v1) (df v1 dva `doe` df v1 dvb) (f2 v2)|.
 \end{lemma}
 \begin{proof}
-  To prove this, simply show that both |df v1 dv1| and |df v1
-  dv2| have the expected source and destination because of |df|'s
-  validity.
+The thesis means that |fromto B (f1 v1) (df v1 dva) (f2 v2)| and |fromto B (f1
+v1) (df v1 dvb) (f2 v2)|. Both equivalences follow in one step from validity of
+|df|, |dva| and |dvb|.
 \end{proof}
+
 This lemma holds because the source and destination of |df v1 dv|
 don't depend on |dv|, only on its source and destination. Source
 and destination are shared by equivalent changes. Hence,
 validity-preserving functions map equivalent changes to
 equivalent changes.
 
-Change equivalence can be extended to terms.
+However, \cref{lem:ch-respect-doe} does *not* mean that |df v1 dva = df v1 dvb|,
+because there can be multiple changes with the same source and destination.
+For instance, say that |dva| is a list change that removes an element and readds it,
+and |dvb| is a list change that describes no modification. They are both nil
+changes, but a function change might handle them differently.
+
+Moreover, we only proved that context |df v1 param| respects change equivalence
+relative to
+source |v1|. If value |v3| differs from |v1|, |df v3 dva| and |df v3 dvb| need
+not be equivalent. Hence, we say that context |df v1| \emph{accepts changes}
+with source |v1|. More in general, a context accepts changes with source |v1|
+if it preserves validity for changes with source |v1|; we can say informally
+that all such contexts also respect change equivalence.
+
+For another example, |v1 `oplus` param| is also a context that accepts changes
+with source |v1|. Since this context produces a base value and not a change, it
+maps equivalent changes to equal results:
+\begin{lemma}[|`oplus`| respects change equivalence]
+  \label{lem:oplus-respect-doe}
+  If |fromto V v1 (dva `doe` dvb) v2| then |v1 `oplus` param| respects the
+  equivalence between |dva| and |dvb|, that is, |v1 `oplus` dva = v1 `oplus` dvb|.
+\end{lemma}
+\begin{proof}
+  |v1 `oplus` dva = v2 = v1 `oplus` dvb|.
+\end{proof}
+
+There are more contexts that preserve equivalence. As discussed, function
+changes preserve contexts, and |derive| produces functions changes, so |derive
+t| preserves equivalence on its environment, and on any of its free variables.
+
+\begin{lemma}[|derive(param)| preserves change equivalence]
+  \label{lem:eval-derive-preserve-doe}
+For any term |Gamma /- t : tau|, |derive(t)| preserves change
+equivalence: |derive(t) `doe` derive(t)|, that is |fromto (Gamma
+-> tau) (eval t) (eval (derive t) `doe` eval (derive t)) (eval
+t)|, that is, for all |fromto Gamma rho1 (drhoa `doe` drhob) rho2| we have
+|fromto (Gamma -> tau) (eval t rho1) (eval (derive t) drhoa `doe` eval
+(derive t) drhob) (eval t rho2)|.
+\end{lemma}
+\begin{proof}
+  To verify this, just apply correctness of differentiation to both changes.
+\end{proof}
+
+To show more formally in what sense change equivalence is a congruence, we first
+lift it to terms:
 \begin{definition}[Term change equivalence]
-Two change terms |Dt^Gamma /- dt1 : Dt^tau|, |Dt^Gamma /- dt2 :
+Two change terms |Dt^Gamma /- dta : Dt^tau|, |Dt^Gamma /- dtb :
 Dt^tau| are change equivalent, relative to source |Gamma /- t :
 tau|, if for all |fromto Gamma rho1 drho rho2| we have that |eval
-dt1 drho (doeIdx(eval t rho1)) (eval dt2 drho)|. We write then |dt1
-(doeIdx t) dt2| or simply |dt1 `doe` dt2|.
+dta drho (doeIdx(eval t rho1)) (eval dtb drho)|. We write then |dta
+(doeIdx t) dtb| or simply |dta `doe` dtb|.
 %|fromto tau v1 (dv1 `doe` dv2) v2|,
 \end{definition}
-The equivalence of |dt1| and |dt2| relative to |t| does not
-require that the destination is again |t|.
+Saying that |dta| and |dtb| are equivalent relative to |t| does not specify the destination of |dta| and |dtb|, only their source.
+% Unlike in other similar definition, when changes |dta| and |dtb| are equivalent
+% relative to |t| and given equivalent contexts |fromto Gamma rho1 drho rho2|,
+% they need
+% The equivalence of |dta| and |dtb| relative to |t| does not
+% require that the destination is again |t|.
 \pg{Use \cref{def:syntactic-validity} to also state the destination.}
 \pg{Introduce this earlier}
 
 If two change terms are change equivalent with respect to the
 right source, we can replace one for the other to optimize a
-program, as long as the program context is validity-preserving.
+program, as long as the evaluation context is validity-preserving and accepts
+the change.
 
-% Since differentiation produces valid changes, 
-% Differentiation produces validity-preserving operations.
-\begin{lemma}[|derive(param)| preserves change equivalence]
-For any term |Gamma /- t : tau|, |derive(t)| preserves change
-equivalence: |derive(t) `doe` derive(t)|, that is |fromto (Gamma
--> tau) (eval t) (eval (derive t) `doe` eval (derive t)) (eval
-t)|, that is, for all |fromto Gamma rho1 drho rho2| we have
-|fromto (Gamma -> tau) (eval t rho1) (eval dt1 drho `doe` eval
-dt2 drho) (eval t rho2)|.
-\end{lemma}
+In particular, we can substitute equivalent changes in the terms resulting from
+differentiation and produce equivalent changes.
+\pg{broken theorem}
+\begin{theorem}
+  \label{thm:derive-preserve-doe}
+% If |Gamma, x : sigma /- t : tau| and |dsa `doeIdx(s)` dsb|, then |fromtosyn
+% Gamma tau t ((derive t)[x := s, dx := dsa] `doe` (derive t)[x := s, dx := dsa])
+% t|.
+If |Gamma, x : sigma /- t : tau| and
+\[|fromtosyn Gamma sigma s1 (dsa `doe` dsb) s2|\]
+then
+\[|fromtosyn Gamma tau (t [x := ]) ((derive t)[x := s, dx := dsa] `doe` (derive t)[x :=
+s, dx := dsb]) t|.\]
+\end{theorem}
+We have not mechanized this lemma.
+\begin{proof}
+  % A corollary of \cref{lem:eval-derive-preserve-doe} and of a substitution lemma
+  % relating substitution and denotational semantics: |eval (t) (x = eval s rho,
+  % rho) = eval(t [x := s]) rho|.
 
-There are further operations that preserve validity. To represent
-terms with ``holes'' where other terms can be inserted, 
-we can define \emph{one-level contexts} |F|, and contexts |E|, as
-is commonly done:
+  Assume |fromto Gamma rho1 (drhoa `doe` drhob) rho2|.
+
+  Because |dsa| and |dsb| are change-equivalent we have
+  % By definition of |dsa (doeIdx(s)) dsb| we have that
+  % |eval dsa drho (doeIdx(eval s rho1)) (eval dsb drho)|.
+  %
+  % Because |`oplus`| respects validity also syntactically \pg{?}
+  % we can show that |dsa, dsb| have destination |s `oplus` dsa|, that is
+  \[|fromto sigma (eval s rho1) (eval dsa drho `doe` eval dsb drho) (eval (s
+  `oplus` ds) rho1)|.\]
+
+  Hence, we can construct change-equivalent environments for
+  evaluating |derive t|, by combining |drho| and the values of
+  respectively |dsa| and |dsb|:
+  \begin{multline}
+  |fromto (Gamma, x : sigma)
+  ((rho1, x = eval s rho1))
+  ((drho, x = eval s rho1, dx = eval dsa drho)
+   `doe`
+   (drho, x = eval s rho1, dx = eval dsb drho) ^^^)
+   ((rho2, x = eval (s `oplus` dsa) rho1))|.
+  \end{multline}
+  This environment change equivalence is respected by |derive|, hence:
+  \begin{multline}
+    \label{eq:derive-preserve-doe-1}
+  |fromto (Gamma -> tau)
+    (eval t (rho1, x = eval s rho1))
+    (eval (derive t) (drho, x = eval s rho1, dx = eval dsa drho)
+     `doe`
+     eval (derive t) (drho, x = eval s rho1, dx = eval dsb drho)^^^)
+    (eval t (rho2, x = eval (s `oplus` dsa) rho1))|.
+  \end{multline}
+  We want to deduce the thesis by applying to this statement the substitution
+  lemma for denotational semantics:
+  |eval t (rho, x = eval s rho) = eval(t [x := s]) rho|.
+
+  To be able to apply the substitution lemma for the substitution
+  of |x| in next step, we must adjust \cref{eq:derive-preserve-doe-1}: using
+  soundness of weakening and the fact that |drho| extends |rho1|,
+  we replace some occurrences of |rho1| with bigger environments
+  containing |drho|.
+  We get:
+  \begin{multline}
+    \label{eq:derive-preserve-doe-2}
+  |fromto (Gamma -> tau)
+    (eval t (rho1, x = eval s rho1))
+    (eval (derive t) (drho, x = eval s drho, dx = eval dsa (drho, x = eval s drho))
+     `doe` ^^^
+     eval (derive t) (drho, x = eval s drho, dx = eval dsb (drho, x = eval s drho))^^^)
+    (eval t (rho2, x = eval (s `oplus` dsa) rho1))|.
+  \end{multline}
+
+  This equation can now be rewritten (by applying the
+  substitution lemma twice) to the following one:
+
+  \begin{multline}
+    \label{eq:derive-preserve-doe-3}
+  |fromto (Gamma -> tau)
+    (eval (t [x := s]) rho1)
+    (eval ((derive t)[dx := dsa][x := s]) drho
+     `doe` ^^^
+     eval ((derive t)[dx := dsb][x := s]) drho^^^)
+    (eval t (rho2, x = eval (s `oplus` dsa) rho1))|.
+  \end{multline}
+  \pg{Nice, the environments don't match in the end :-)!}
+
+\[|fromtosyn Gamma tau t ((derive t)[x := s, dx := dsa] `doe` (derive t)[x :=
+s, dx := dsb]) t|.\]
+\end{proof}
+In this theorem, if |x| appears once in |t|, then |dx| appears once in |derive
+t| (this follows by induction on |t|), hence |(derive t)[x := s, dx := param]|
+produces a one-hole expression context.
+
+There are further operations that preserve validity. To represent terms with
+``holes'' where other terms can be inserted, we can define \emph{one-level
+contexts} |F|, and contexts |E|, as is commonly done:
 \begin{code}
   F ::= [] t dt | ds t [] | \x dx -> [] | t `oplus` [] | dt1 `ocompose` [] | [] `ocompose` dt2
   E ::= [] | F[E]
 \end{code}
 If |fromto tau t1 (dt1 `doe` dt2) t2| and our context |E|
-preserves changes from |t1| to |t2| then |F[dt1]| and |F[dt2]|
-are change equivalent. It is easy to prove such lemmas for each
-possible shape of one-level context |F|. For instance \pg{resume}.
+accepts changes from |t1|, then |F[dt1]| and |F[dt2]|
+are change equivalent. It is easy to prove such a lemma for each possible shape
+of one-level context |F|, both on values (like
+\cref{lem:ch-respect-doe,lem:oplus-respect-doe}) and on terms. We have been
+unable to state a more general theorem because it's not clear how to formalize
+the notion of a context accepting a change in general: the syntax of a context
+does not always hint at the validity proofs embedded.
 
-% or more concisely
-% |fromto (Gamma -> tau) (eval t) (eval dt1 `doe` eval dt2) (eval t)|.
 
-  % E ::= [] | E v dv | df v E | \v dv -> E | v `oplus` E | dv1
-  % `ocompose` E | E `ocompose` dv2
+\pg{explain this type system elsewhere}
+\citet{CaiEtAl2014ILC} solve this problem for metalevel contexts by typing them
+with dependent types. However, it is not clear such a typesystem can be
+expressive enough. Consider a change |dv1| from |v1| to |v1 `oplus` dv1|, a
+value |v2| which is known to be (propositionally) equal to |v1 `oplus` dv1|, and
+a change |dv2| from |v2| to |v3|. Then, term |dv1 `ocompose` dv2| is not type
+correct (for instance in Agda): the typechecker will complain that |dv1| has
+destination |v1 `oplus` dv1| while |dv2| has source |v2|. When working in Agda,
+to solve this problem we can explicitly coerce terms through propositional
+equalities, and can use Agda to prove such equalities in the first place.
+Formalizing an object language including such facilities is highly nontrivial.
 
-% such as valid function changes |df|. We only state
-% here one relevant lemma.
+\subsection{Change equivalence is a PER}
+\label{sec:doe-per}
+Readers with relevant experience will recognize that this is a partial equivalence
+relation (PER):
+\begin{definition}[PER]
+  \pg{add}
+\end{definition}
 
-% That's because
-% validity-respecting operations
-% This follows
-% because of how validity preservation is defined:
+\begin{lemma}[|`doe`| is a PER]
+  \pg{write}
+\end{lemma}
 
-% And conversely, two function changes that map equivalent sources
-% to equivalent destinations are also equivalent.
+It is standard to use PERs to identify valid elements in a
+model~\citep{Harper1992constructing}.
+\pg{Any needed lemmas.}
 
-Earlier (say, in \cref{ssec:pointwise-changes}) we have sometimes
-written that two changes are equal. However, that's often too
-restrictive.
+Unlike ours, a typical PERs is defined
+similarly to logical relations: two functions are related if they map related
+inputs to related outputs. This helps showing that a PERs is a congruence.
+Luckily, our PER is equivalent to a standard definition.
+
+\begin{lemma}[Alternative definition for |`doe`|]
+Change equivalence is equivalent to the following logical relation:
+  \begin{code}
+  fromto iota v1 (dva `doe` dvb) v2            `eqdef`
+    fromto iota v1 dva v2 `and` fromto iota v1 dva v2
+  fromto (sigma -> tau) f1 (dfa `doe` dfb) f2  `eqdef`
+    forall (fromto sigma v1 (dva `doe` dvb) v2).
+    fromto tau (f1 v1) (dfa v1 dva `doe` dfb v2 dvb) (f2 v2)
+\end{code}
+\end{lemma}
+
+
 \section{Discussion}
 In this section we discuss our proof and compare it with alternative proof
 approaches.
