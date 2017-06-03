@@ -97,6 +97,15 @@
 %format dv2
 %format dv3
 
+%format dfa = df "_a"
+%format dfb = df "_b"
+%format dsa = ds "_a"
+%format dsb = ds "_b"
+%format dta = dt "_a"
+%format dtb = dt "_b"
+%format dva = dv "_a"
+%format dvb = dv "_b"
+
 %format dt1
 %format dt2
 
@@ -149,6 +158,8 @@
 %format emptyRho = "\EmptyEnv"
 %format rho = "\rho"
 %format drho = "\D\rho"
+%format drhoa = drho "_a"
+%format drhob = drho "_b"
 %format rho1
 %format rho2
 %format sigma = "\sigma"
@@ -166,7 +177,7 @@
 
 %format fromto (tau) (v1) (dv) (v2) = "\validfromto{" tau "}{" v1 "}{" dv "}{" v2 "}"
 %format fromtosem (gamma) (tau) (v1) (dv) (v2) = "\validfromto{" gamma, tau "}{" v1 "}{" dv "}{" v2 "}"
-%format fromtosyn (gamma) (tau) (v1) (dv) (v2) = "\validfromto{" gamma "," tau "}{" v1 "}{" dv "}{" v2 "}"
+%format fromtosyn (gamma) (tau) (v1) (dv) (v2) = "\validfromtosyn{" gamma "}{" tau "}{" v1 "}{" dv "}{" v2 "}"
 
 %format validV (tau) = "\mathcal{V}_{" tau "}"
 %format valid (tau) (v) (dv) = "(" v " , " dv ") \in V_{" tau "}"
