@@ -2,25 +2,67 @@
 %include polycode.fmt
 %include changes.fmt
 
-\chapter{Discussing changes syntactically}
+\chapter{Reasoning on changes syntactically}
 To define derivatives of primitives, we will often discuss
 changes directly on programs.
-We'll need language to say that term |dt| is a change from term
-|t1| to term |t2|, or to term |t1 `oplus` dt|, that |dx| is a
-change from |x| to |x `oplus` dx|, and so on. In such a
-statement, we evaluate |t1| and |t2| in \emph{the same} environment.
 
-But currently we lack the language to do so. We can use the
-change structure on |eval Gamma -> eval tau|, and write |fromto
-() t1 dt t2|.\pg{How to write Gamma, tau there?}
-But in such a statement means that for all
+\begin{definition}[Syntactic change operators]
+  We lift change operators |`oplus`|, |`ominus`|, |nilc| and |ocompose| to type-indexed families of terms.
+  \pg{elaborate with obvious details, type signatures... I might have them somewhere}
+\end{definition}
+\begin{lemma}[Evaluation commutes with change operators]
+  Evaluation maps change operators to their semantics counterpart.
+\end{lemma}
 
-\pg{notation?}
+We define language to say that term |dt| is a change from
+term |t1| to term |t2|, so that as a corollary
+|t1 `oplus` dt `cong` t2| hence |t1 `oplus` dt| and |t2| are interchangeable in all contexts.
+That is,
+\begin{equation}
+|forall (fromto Gamma rho1 drho rho2). eval (t1 `oplus` dt) drho = eval t2 drho|.
+\end{equation}
+Unlike equations we have seen before, in this equation all terms
+are evaluated with respect to the same environment.
+
+Because evaluation commutes with |`oplus`|, and because a valid
+environment change |drho| extends its source |rho1|, this
+equation is equivalent to
+\begin{equation}
+  \label{eq:syn-equiv-envs}
+|forall (fromto Gamma rho1 drho rho2). eval t1 rho1 `oplus` eval dt drho = eval t2 rho1|.
+\end{equation}
+Notably, in this equation |t2| is evaluated against environment |rho1|.
+
+We earlier defined a change structure on |eval Gamma -> eval tau|,
+allowing us to show, for instance, that |evalInc t| is a
+change from |eval t| to |eval t|. We might be tempted to say,
+then, that |derive t| is a change from |t| to |t|. But such a
+notion does not imply that |t `oplus` derive t = t|.
+Indeed, if we try to show \cref{eq:syn-equiv-envs} from
+|fromtosem Gamma tau (eval t) (evalInc t) (eval t)|, we obtain a
+different equation, namely
+\begin{equation}
+|forall (fromto Gamma rho1 drho rho2). eval t1 rho1 `oplus` eval dt drho = eval t2 rho2|.
+\end{equation}
+\pg{cite this from earlier!}
+
+In such a statement, we evaluate |t1| and |t2| in \emph{the same}
+environment.
+
+% or to term |t1 `oplus` dt|, that |dx| is a
+% change from |x| to |x `oplus` dx|, and so on.
+
+% But currently we lack the language to do so. We can use the
+% change structure on |eval Gamma -> eval tau|, and write |fromto
+% () t1 dt t2|.\pg{How to write Gamma, tau there?}
+% But in such a statement means that for all
+
 \begin{definition}[Syntactic validity]
   \label{def:syntactic-validity}
-  |fromto (Gamma, tau) t1 dt t2|
-  |fromtosyn Gamma tau t1 dt t2|.
-  %|fromtosyn Gamma tau t1 dt t2 = forall (fromto Gamma rho1 drho rho2). fromto tau (eval t1 rho1) (eval dt drho) (eval t2 rho1)|.
+  We say that term |Dt^Gamma /- dt : Dt^tau| is a (syntactic)
+  change from |Gamma /- t1 : tau| to |Gamma /- t2 : tau|, and write
+  |fromtosyn Gamma tau t1 dt t2|, if
+  |forall (fromto Gamma rho1 drho rho2). fromto tau (eval t1 rho1) (eval dt drho) (eval t2 rho1)|.
 \end{definition}
 
 % We write substitution as |t [x := s]|, and parallel substitution
