@@ -1190,14 +1190,15 @@ change for |x| is valid, hence it must be mapped (by function application and
 $\beta$-reduction) to a valid change from terminating term |if true then 0 else
 loop| to non-terminating term |if false then 0 else loop|.
 
-\paragraph{Credits}
+\subsection{Development history}
+\label{sec:ilc-dev-history}
 The proof presented in this and the previous chapter is an
 significant evolution of the original one by \citet{CaiEtAl2014ILC}.
 %
 While this formalization and the mechanization are both original
 with this thesis, some ideas were suggested by other
-(currently-unpublished) developments by Yufei Cai and by Yann
-Régis-Gianas. Yufei Cai showed a simpler set-theoretic proof by
+(currently unpublished) developments by Yufei Cai and by Yann
+Régis-Gianas. Yufei Cai gives a simpler pen-and-paper set-theoretic proof by
 separating validity, while we noticed separating validity works
 equally well in a mechanized type theory and simplifies the
 mechanization.

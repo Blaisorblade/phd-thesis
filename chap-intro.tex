@@ -67,12 +67,12 @@ work of the optimizer at the same time.
 
 In particular, this thesis is divided into two parts:
 \begin{itemize}
-\item we first describe, in \cref{sec:ch-aosd13}, work on optimizing collection queries by static program transformation.
-\item in the remaining chapters, we describe work on incrementalizing programs
+\item in \cref{part:ch-aosd13}, we describe work on optimizing collection queries by static program transformation~\citep{GiarrussoAOSD13}.
+\item in \cref{part:incr}, we describe work on incrementalizing programs
   by static program transformation. This thesis presents the first approach that
   handles higher-order programs by using program transformation; hence, while
   our main examples use collection queries, we phrase the work in terms of
-  $\lambda$-calculi with unspecified primitives.
+  $\lambda$-calculi with unspecified primitives~\citep{CaiEtAl2014ILC}.
 \end{itemize}
 
 \pg{rewrite this once we have a second part.}
@@ -106,16 +106,9 @@ The second part makes the following contributions:
 %  \pg{This contribution references text which is now commented
 %    out. I believe the text should be brought back in.}
 %
-We prove that our incrementalizing transformation $\DERIVE$
-is correct~(\cref{eq:correctness})
-by a machine-checked formalization in Agda~\citep{agda-head}.
-The proof gives insight into the definition of $\DERIVE$: we
-first construct the derivative $\EvalInc{-}$ of the denotational
-semantics of a simply-typed $\lambda$-calculus term, that is, its
-\emph{change semantics}.
-%
-Then, we show that $\DERIVE$ is produced by erasing
-$\EvalInc{-}$ to a simply-typed program.% (\cref{sec:correctness}).
+\item We prove that our incrementalizing transformation $\DERIVE$
+is correct~(\cref{eq:correctness}) by a novel machine-checked logical relation
+proof, mechanized in Agda~\citep{agda-head}.
 
 \item While we focus mainly on the theory of changes
 and derivatives, we also perform a performance case study.
@@ -128,11 +121,38 @@ incrementalize a variant of the MapReduce programming model~\citep{Lammel07}.
   incrementalization can reduce asymptotic complexity and can turn $O(n)$
   performance into $O(1)$, improving running time by over 4
   orders of magnitude on realistic inputs (\cref{sec:applying}).
-
 \end{itemize}
 
-\pg{Readdd section on excluded papers.
-% \section{Excluded papers}
+\subsection{Included papers}
+This thesis includes material from joint work with colleagues.
+
+\Cref{part:ch-aosd13} is based on work by \citet*{GiarrussoAOSD13}. While the
+work was in collaboration, a few clearer responsibilities arose.
+I did most of the implementation work: among other things I devised the
+embedding for collection operations, implemented optimizations and indexing,
+implemented interpretation when compilation did not work well, and performed the
+performance evaluation.
+% Michael Eichberg and Ralf Mitschke contributed to the
+% evaluation on FindBugs code.
+% Christian K{\"{a}}stner contributed, among other things,
+% to the experiment design for the performance evaluation.
+% Klaus Ostermann proposed the original idea and supervised the project.
+
+\Cref{part:incr} is originally based on work by \citet*{CaiEtAl2014ILC}, though
+significantly revised. This work was even more of a team effort. I designed the
+overall project and came up with the original notion of change structures; Cai
+Yufei contributed differentiation itself and its first correctness proof.
+\Cref{part:incr} contains a novel correctness proof; its history and
+contributions are discussed in \cref{sec:ilc-dev-history}.
+
+Furthermore, \cref{part:static} comes from a new, unpublished manuscript. I
+designed the overall approach, the transformation and the first case study on
+sequences, defining the change structure, designing the primitives and the first
+case study. Yann Régis-Gianas designed the proofs. Philipp Schuster contributed
+to the evaluation.
+
+\pg{Readd section on excluded papers.}
+% \subsection{Excluded papers}
 % During my PhD work I collaborated on several other papers.
 
 % \paragraph{Software Product Lines}
@@ -146,7 +166,6 @@ incrementalize a variant of the MapReduce programming model~\citep{Lammel07}.
 % \paragraph{DSL work}
 % While working on modular embedded DSLs I collaborated to \citet{ErdwegGR12},
 % \pg{TODO GADT paper}, \pg{TODO maybe manuscript on cake pattern?}.
-}
 
 % Modern libraries offer high-level APIs for manipulating (in-memory) collections;
 % equivalently, such an API is an embedded domain-specific language (EDSL).
