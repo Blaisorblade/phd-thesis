@@ -718,7 +718,7 @@ We formalize this guarantee as \cref{thm:derive-correct} in next chapter.
 %% To see why that's needed, consider term |t = f v|, where again |f
 %% = \x -> x + y|.
 
-\subsection{Pointwise changes}
+\subsection{Pointwise function changes}
 \label{ssec:pointwise-changes}
 % We can also describe the difference from function |f| to function
 % |f `oplus` df| as |nabla^f = \x -> f2 x `ominus` f1 x|.
@@ -762,13 +762,14 @@ pointwise change using change composition:
 %show the meaning of a function change $df$ in terms of
 %derivatives and pointwise changes:
 %
-\begin{code}
-   df a1 da
-=  f2 a2 `ominus` f1 a1
-=  ocompose ((f1 a2 `ominus` f1 a1)) ((f2 a2 `ominus` f1 a2))
-=  ocompose (f1' a1 da) (nabla ^ f (a1 `oplus` da))
-\end{code}
-
+\begin{equation}
+\begin{aligned}
+\label{eq:pointwise-rewrite}
+|df a1 da| & = |f2 a2 `ominus` f1 a1|\\
+           & = |ocompose ((f1 a2 `ominus` f1 a1)) ((f2 a2 `ominus` f1 a2))|\\
+           & = |ocompose (f1' a1 da) (nabla ^ f (a1 `oplus` da))|
+\end{aligned}
+\end{equation}
 One can also compute a pointwise change from a function change:
 \begin{code}
   nabla f a = df a (nil a)
