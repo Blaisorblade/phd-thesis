@@ -782,66 +782,6 @@ single concept.
 Some related works explore the use of pointwise changes; we discuss them in
 \cref{sec:rw-partial-differentials}.
 
-\pg{TMP}
-
-\newcommand{\ldiff}{\TitleLambda--diff}
-\subsection{\TitleLambda{}--diff and partial differentials}
-\label{sec:rw-partial-differentials}
-In work concurrent with \citet{CaiEtAl2014ILC}, \citet{Huesca2015incrementality}
-introduces an alternative formalism, called \ldiff, for incremental computation
-by program transformation. While \ldiff has some appealing features, it
-currently appears to require program transformations at
-runtime. Other systems appear to share this
-feature~\citep{Koch2014incremental,Koch2016incremental}. Hence, this section
-discusses the reason in some detail.
-
-Instead of differentiating terms relative to all inputs (free
-variables and function arguments) via |derive|, like ILC,
-\citeauthor{Huesca2015incrementality} differentiates terms
-relative to one input variable, and writes $\frac{\partial
-  t}{\partial x, d_x}$ for the result of differentiating $t$
-relative to $x$, a term that computes the change in $t$ when the
-value for $x$ is updated by change $d_x$. The formalism also uses
-pointwise function changes, similarly to what we discussed in
-\cref{ssec:pointwise-changes}.
-
-Unfortunately, it is not known how to define such a
-transformation for a $\lambda$-calculus with a standard
-semantics; it appears necessary to introduce term constructor |D t|, which
-differentiates |t| at runtime.
-To see why, consider differentiating $\frac{\partial
-s\;t}{\partial x, d_x}$, that is, the change $d$ of $s\;t$ when $x$x
-is updated by change $d_x$.
-Change $d$ depends (a) on the change of $t$ when $x$ is updated
-by $d_x$, that is
-$\frac{\partial t}{\partial x, d_x}$;
-(b) on how $s$ changes when its input $t$ is updated by
-$\frac{\partial t}{\partial x, d_x}$; \citeauthor{Huesca2015incrementality}
-expresses this as |D s| applied to |t| and $\frac{\partial t}{\partial x, d_x}$;
-(c) on the change of $s$ (applied to the updated $t$) when $x$ is
-updated by $d_x$, that is $\frac{\partial t}{\partial x, d_x}$.
-To compute component (b), \citeauthor{Huesca2015incrementality} writes |D s| to
-differentiate |s| not relative to |x|, but relative to the still unknown head
-variable of |s|.
-If |s| evaluates to |\y -> u|, then |y| is the head variable of |s|, and |D s|
-differentiates |u| relative to |y| and evaluates to $\lambda (y, d_y) \to
-\frac{\partial u}{\partial y, d_y}$.
-% Hence, \citeauthor{Huesca2015incrementality} adds term |D t| to
-% the syntax of $\lambda$-calculus; evaluating
-
-Overall, the rule for differentiating application in $\lambda$-diff is
-\[
-  \frac{\partial s\;t}{\partial x, d_x} = (D s)(t, \frac{\partial t}{\partial x,
-d_x}) \circledcirc \frac{\partial s}{\partial x, d_x}(t \oplus \frac{\partial
-t}{\partial x, d_x}).
-  \]
-
-This rule appears closely related to \cref{eq:pointwise-rewrite}.
-
-\pg{rewrite}
-However, in our experiments, it is often useful to derive programs relative to
-only some inputs. We typically provide specialized variants of functions for the
-case that some inputs are constant.
 \subsection{Passing change targets}
 It would be more symmetric to make function changes also take
 updated input |a2|, that is, have |df a1 da a2| computes a change
