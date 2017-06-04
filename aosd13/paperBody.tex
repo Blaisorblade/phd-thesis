@@ -695,11 +695,12 @@ for further improvement of our work by incorporating more advanced optimizations
 %For instance, while the formal analogous of folds in their calculus is a monoid homomorphism, computing the size of a Set can be expressed through a fold but not through a monoid homomorphism, since it is a fold from an idempotent to a non-idempotent monoid.
 
 % Klaus: I think this is not that relevant for ICSE
-%\citet{Henglein10} present an embedding of the relational algebra in Haskell.
-%Queries are not reified in their approach, but due to a particularly sophisticated
-%representation of multisets it is possible to execute some queries containing
-%cross-products using faster equi-joins.
-
+\citet{Henglein2010optimizing} and \citet{Henglein2010generic} embed relational algebra in
+Haskell. Queries are not reified in their approach, but due to a particularly
+sophisticated representation of multisets it is possible to execute some queries
+containing cross-products using faster equi-joins. While their approach appears
+to not rely on non-confluent rewriting rules and hence appears more robust, it
+is not yet clear how to incorporate other optimizations.
 
 \section{Deep Embeddings in Scala}
 \label{sec:rwdsl}
