@@ -2,7 +2,7 @@
 %include polycode.fmt
 %include changes.fmt
 
-\chapter{Introduction to static differentiation}
+\chapter{Introduction}
 \label{sec:intro}
 \label{ch:static-diff-intro}
 
