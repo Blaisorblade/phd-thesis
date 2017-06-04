@@ -476,8 +476,8 @@ The change structure on |A -> B| enables defining change structures for function
 types.
 Similarly, the change structure on |A `times` B| enables defining a change
 structure for product types in a language plugin, as described in
-\cref{ch:prod-sums}.
-
+\cref{ch:prod-sums}. In \cref{ch:prod-sums} we also discuss change structures
+for disjoint sums.
 % In \cref{sec:chs-product,sec:chs-sums} we will also define change
 % structures for |A `times` B| and |A + B|, for use in language
 % plugins for types |sigma `times` tau| and |sigma + tau|.
@@ -743,7 +743,7 @@ resulting environment change.
 We summarize definitions on types in \cref{fig:change-structures}.
 
 Finally, we can lift change operators from the semantic level to the syntactic
-level so that their meaning is coherent~\pg{?}.
+level so that their meaning is coherent.
 
 \begin{definition}[Term-level change operators]
   \label{def:term-change-ops}
@@ -769,7 +769,6 @@ and definitions:
   \end{code}
 \end{definition}
 
-\pg{not proven for compose.}
 \begin{lemma}[Term-level change operators agree with change structures]
   \label{lem:chops-coherent}
   The following equations hold for all types |tau|, contexts |Gamma|
@@ -787,9 +786,11 @@ eval (dt1 (ocomposeIdx(tau)) dt2) drho = eval dt1 drho `ocompose` eval dt2 drho
   By induction on types and simplifying both sides of the equalities. The proofs
   for |`oplus`| and |`ominus`| must be done by simultaneous induction.
 \end{proof}
-We have not mechanized the proof for |`ocompose`|.
+\pg{Fix this?}
+At the time of writing, we have not mechanized the proof for |`ocompose`|.
 
-This lifting imposes additional plugin requirements.
+To define the lifting and prove it coherent on base types, we must add a further
+plugin requirement.
 
 \begin{restatable}[Term-level change operators for base types]{requirement}{baseChOps}
   For each base type |iota| we define change operators as required by \cref{def:term-change-ops}
@@ -942,6 +943,15 @@ using two-sided validity, again for a simply-typed
 $\lambda$-calculus with a denotational semantics. Based on
 two-sided validity, I also reconstructed the rest of the theory
 of changes.
+
+\section{Chapter conclusion}
+In this chapter, we have seen how to define change operators, both on semantic
+values nad on terms, and what are their guarantees, via the notion of change
+structures. We have also defined change structures for groups, function spaces
+and products. Finally, we have explained and shown
+\cref{thm:derive-correct-oplus}.
+We continue in next chapter by discussing how to reason syntactically about
+changes, before finally showing how to define some language plugins.
 
 % \citeauthor{CaiEtAl2014ILC}'s definition resembles our definition
 % of |Dt^v = Sigma [ dv `elem` Dt V ] valid v dv| in
