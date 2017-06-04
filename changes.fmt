@@ -38,7 +38,9 @@
 %format `ominus` = "\ominus "
 %format oplus = "(\oplus)"
 %format ominus = "(\ominus)"
-
+%format nilc = "\NilC{}"
+%format (nil(v)) = "\NilC{" v "}"
+%format NIL = "\NILC"
 %format `ocompose` = "\circledcirc "
 %format ocompose (dv1) (dv2) = dv1 "\circledcirc" dv2
 
@@ -143,9 +145,6 @@
 %format DV = "\Delta V"
 
 %format Sigma = "\Sigma"
-%format nilc = "\NilC{}"
-%format (nil(v)) = "\NilC{" v "}"
-%format NIL = "\NILC"
 %format eval(t) = "\Eval{" t "}"
 %format evalInc(t) = "\EvalInc{" t "}"
 %format (evalConst(c)) = "\EvalConst{" c "}"
