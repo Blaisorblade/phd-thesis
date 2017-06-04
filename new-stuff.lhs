@@ -233,7 +233,3 @@ update :: Int -> a -> Seq a -> Seq a
   |mapInt| variants with the same type into functions with different cache
   types. Mapping different functions over different elements produces.}
 
-\input{pldi14/sec-rw}
-\chapter{Conclusions}
-\pg{Plan for things that complete the original paper's story: add them by
-  revising that text and in that chapter.}
