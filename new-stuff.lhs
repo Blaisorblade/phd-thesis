@@ -125,7 +125,7 @@ derApplyDFun1 (P _f _env) (DP (Replace newF) newEnv) = oreplace (newF newEnv)
 This is enabled by defunctionalizing both base functions and changes.
 
 \section{Mapping changeable functions over sequences}
-
+\label{sec:map-seq}
 \pg{By far not done.}
 
 In this section we demonstrate how we can incrementalize by hand |map| and
