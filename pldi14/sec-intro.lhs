@@ -875,6 +875,16 @@ change structures on |A| and |B|.
 \pg{resume.}
 
 
+\section{Aggregation}
+\pg{To move}
+To study aggregation we consider |foldNat|.
+% \begin{code}
+%   foldNat z s 0 = z
+%   foldNat z s (n + 1) = s (foldNat z s n)
+%   -- Assuming that dz and ds are nil.
+%   dfoldNat z dz s ds n 0 = foldNat z s n
+%   dfoldNat z dz s ds n dn = if dn > 0 then foldNat (foldNat z s n) s dn
+% \end{code}
 % Missing sections from chap-intro-incr.lhs.
 
 \chapter{Misc}

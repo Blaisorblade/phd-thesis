@@ -213,6 +213,8 @@ update :: Int -> a -> Seq a -> Seq a
 \label{sec:static-caching}
 \pg{Write it!}
 
+\section{Motivating Cache-passing Style}
+
 \pg{It'd be nice to type the smart approach to cache type variables. We can't
   generally. It would be good to characterize when it can be used, but we don't
   do that either. Instead, we just show examples of what would be possible.}
