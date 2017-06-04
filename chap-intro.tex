@@ -65,7 +65,7 @@ non-termination), because such programs can be more ``declarative'' and because
 avoiding side effects can enable more powerful optimization and simplify the
 work of the optimizer at the same time.
 
-In particular, this thesis is divided into two parts:
+In particular, this thesis is divided into three parts:
 \begin{itemize}
 \item in \cref{part:ch-aosd13}, we describe work on optimizing collection queries by static program transformation~\citep{GiarrussoAOSD13}.
 \item in \cref{part:incr}, we describe work on incrementalizing programs
@@ -73,9 +73,15 @@ In particular, this thesis is divided into two parts:
   handles higher-order programs by using program transformation; hence, while
   our main examples use collection queries, we phrase the work in terms of
   $\lambda$-calculi with unspecified primitives~\citep{CaiEtAl2014ILC}.
+\item in \cref{part:static}, we extend ILC with a further program transformation
+  step, so that base programs can store intermediate results and derivatives can
+  reuse them, but without resorting to dynamic memoization and necessarily
+  needing to look results up at runtime. To this end, we extend techniques
+  mentioned by \citet{Liu00} to a higher-order, typed setting.
 \end{itemize}
 
 \pg{rewrite this once we have a second part.}
+\cref{part:incr}
 The second part makes the following contributions:
 \begin{itemize}
 \item We present a novel mathematical theory of changes and derivatives, which is more
@@ -123,6 +129,7 @@ incrementalize a variant of the MapReduce programming model~\citep{Lammel07}.
   orders of magnitude on realistic inputs (\cref{sec:applying}).
 \end{itemize}
 
+\pg{Describe \cref{part:static}}
 \subsection{Included papers}
 This thesis includes material from joint work with colleagues.
 
@@ -157,8 +164,9 @@ to the evaluation.
 
 % \paragraph{Software Product Lines}
 % Initial work on Software Product Lines lead to \cite{KPO:VaMoS11} and
-% \cite{KGREOB:OOPSLA11}. On the same line I collaborated to experiments in \cite{SRKGAK:SPLC11} and its updated version\pg{TODO}.
-% \pg{Cite work on VarPL? Unlikely.}
+% \cite{KGREOB:OOPSLA11}. On the same line I collaborated to experiments in
+% \cite{SRKGAK:SPLC11} and its updated version\pg{TODO}.
+% % \pg{Cite work on VarPL? Unlikely.}
 
 % \paragraph{Modularity}
 % \cite{OGKR:ECOOP11}
