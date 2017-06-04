@@ -6,97 +6,108 @@
   simply-typed λ-calculus}
 \label{sec:preliminaries}
 
-Before discussing how we incrementalize programs and proving that
-our incrementalization technique gives correct results, we define
-what foundation we use for our proofs and what programs we
+To discuss how we incrementalize programs and prove that
+our incrementalization technique gives correct results, we specify
+which foundation we use for our proofs and what object language we
 study.
 
-We mechanize our correctness proof using Agda, hence we use Agda
-also as our foundation. We discuss what this means in
-\cref{sec:metalanguage}.
+We mechanize our correctness proof using Agda, hence we use
+Agda's underlying type theory as our foundation. We discuss
+what this means in \cref{sec:metalanguage}.
 
 Our object language is a standard simply-typed $\lambda$-calculus
-(STLC)~\citep[Ch. 9]{Pierce02TAPL},
-parameterized over base types and constants. We term the set of
-base types and constants a \emph{language plugin} (see
-\cref{sec:lang-plugins}). In our examples we assume that the
-language plugins supports needed base types and constants.
-Moreover, we will later add further requirements to language
-plugins, to support incrementalization of the features they add.
-We use a set-theoretic denotational semantics rather than
-operational semantics.
+(STLC)~\citep[Ch. 9]{Pierce02TAPL}, parameterized over base types
+and constants. We term the set of base types and constants a
+\emph{language plugin} (see \cref{sec:lang-plugins}). In our
+examples we assume that the language plugins supports needed base
+types and constants. Later (e.g., in \cref{ch:derive-formally})
+we add further requirements to language plugins, to support
+incrementalization of the language features they add to our STLC.
+%
+Rather than operational semantics we use a denotational
+semantics, which is however set-theoretic rather than
+domain-theoretic. Our object language and its semantics are
+summarized in \cref{fig:lambda-calc}.
 
 At this point, readers might want to skip to \cref{sec:intro}
-right away, or focus on denotational semantics; if needed, they
-might want to come back here where needed.
+right away, or focus on denotational semantics, and refer to this
+section as needed.
 
 \section{Our proof meta-language}
 \label{sec:metalanguage}
 In this section we describe the logic (or meta-language) used in our
 \emph{mechanized} correctness proof.
 
-First, as usual, we distinguish between ``formalization'' (which
-refers to on-paper formalized proofs) and ``mechanization''
-(which refers to proofs encoded in the language of a proof
-assistant for computer-aided \emph{mechanized} verification).
+First, as usual, we distinguish between ``formalization'' (that
+is, on-paper formalized proofs) and ``mechanization'' (that is,
+proofs encoded in the language of a proof assistant for
+computer-aided \emph{mechanized} verification).
 
 To prove the correctness of \ILC, we provide a mechanized proof
-in Agda~\citep{agda-head}. Agda is an implementation of
-intensional Martin-Löf type theory, so our proofs use a
-type-theoretic foundation.
+in Agda~\citep{agda-head}. Agda implements intensional Martin-Löf
+type theory (from now on, simply type theory), so type theory is
+also the foundation of our proofs.
 
 At times, we use conventional set-theoretic language to discuss
 our proofs, but the differences are only superficial. For
 instance, we might talk about a set of elements |S| and with
 elements such as |s `elem` S|, though we always mean that |S| is
-a type in our metalanguage, and that |s : S|. Talking about sets
+a metalanguage type, that |s| is a metalanguage value, and that |s : S|.
+Talking about sets
 avoids ambiguity between types of our meta-language and types of
 our object-language (that we discuss next in
 \cref{sec:intro-stlc}).
+\begin{notation}
+  We'll let uppercase latin letters |A, B, C ..., V, U| range
+  over sets, never over types.
+\end{notation}
 
-In our examples we consider a language plugin supporting
-\emph{bags}, a type of collection (described in
-\cref{sec:motiv-example}). We extend our logic by postulating a
-few standard axioms on the implementation of bags, to avoid
-proving correct an implementation of bags, or needing to account
-for different values representing the same bag (such different
-values typically arise when implementing bags as search trees).
+We do not prove correctness of all our language plugins. However,
+in earlier work~\citep{CaiEtAl2014ILC} we prove correctness for
+a language plugin supporting \emph{bags}, a type of collection (described in
+\cref{sec:motiv-example}). For that proof, we extend our logic by
+postulating a few standard axioms on the implementation of bags,
+to avoid proving correct an implementation of bags, or needing to
+account for different values representing the same bag (such
+different values typically arise when implementing bags as search
+trees).
 
 \subsection{Type theory versus set theory}
-Martin-Löf type theory is dependently typed, so we can form the
-dependent function type |(x : A) -> B| where |x| can appear free
-in |B|. Dependent function types are a powerful generalization of
-type |A -> B|: Such a type guarantees that if we apply a function
-|f : (x : A) -> B| to an argument |a : A|, the result has type |B
-[ x := a ]|, that is |B| where |x| is substituted by |a|. We will
-at times use dependent types in our presentation.
+Here we summarize a few features of type theory over set theory.
 
-For our purposes, the other differences between set theory and
-type theory affecting our formalization are limited:
+Type theory is dependently typed, so it generalizes
+function type |A -> B| to \emph{dependent} function type |(x : A)
+-> B|, where |x| can appear free in |B|. Such a type guarantees
+that if we apply a function |f : (x : A) -> B| to an argument |a
+: A|, the result has type |B [ x := a ]|, that is |B| where |x|
+is substituted by |a|. At times, we will use dependent types in
+our presentation.
+
+Moreover, by using type theory:
 \begin{itemize}
-\item We do not postulate the law of excluded middle, so our
-  logic is constructive.
+\item We do not postulate the law of excluded middle; that is,
+  our logic is constructive.
 \item Unlike set theory, type theory is proof-relevant: that is,
   proofs are first-class mathematical objects.
-\item Instead of sets, we use types; instead of subsets
+\item Instead of subsets
   $\{x \in A \mid P(x)\}$, we must use $\Sigma$-types
   $\Sigma (x : A) P(x)$ which contain pairs of elements $x$ and
   proofs they satisfy predicate $P$.
-\item In set theory we can assume functional extensionality, that
-  is, that functions that give equal results on all equal inputs
-  are equal themselves. Intuitionistic type theory does not prove
-  functional extensionality, so we need to add it as a postulate.
-  This postulate is known to be consistent with Agda's type
-  theory~\citep{Hofmann96}, hence it is safe to assume in Agda%
+\item In set theory, we can assume without further ado functional
+  extensionality, that is, that functions that give equal results
+  on all equal inputs are equal themselves. Intuitionistic type
+  theory does not prove functional extensionality, so we need to
+  add it as a postulate. In Agda, this postulate is known to be
+  consistent~\citep{Hofmann96}, hence it is safe to assume%
   \footnote{\url{http://permalink.gmane.org/gmane.comp.lang.agda/2343}}.
+%\item All our function spaces are limited to computable functions.
 \end{itemize}
 
 To handle binding issues in our object language, our
-formalization uses typed de Brujin indexes, because this
+formalization uses typed de Bruijn indexes, because this
 techniques takes advantage of Agda's support for type refinement
 in pattern matching. On top of that, we implement a HOAS-like
 frontend, which we use for writing specific terms.
-
 
 % Our Agda formalization, Scala implementation and benchmark
 % results are available at the URL
@@ -111,59 +122,113 @@ frontend, which we use for writing specific terms.
 \label{sec:intro-stlc}
 
 We consider as object language a strongly-normalizing
-simply-typed $\Gl$-calculus (STLC).
-
+simply-typed $\Gl$-calculus (STLC). We choose STLC as it is the
+simplest language with first-class functions and types, while
+being a sufficient model of realistic total languages.%
+\footnote{To know why we restrict to total languages see
+  \cref{sec:non-termination}.}
+%
 We recall the syntax and typing rules of STLC in
 \cref{fig:lambda-calc:syntax,fig:lambda-calc:typing}, together
-with the metavariables we use. Language plugins define base types
+with metavariables we use. Language plugins define base types
 |iota| and constants |c|. Types can be base types |iota| or
 function types |sigma -> tau|. Terms can be constants |c|,
-variables |x|, function applications |t1 t2| or lambda
-abstractions |\x -> t|. To describe assumptions on variable types
-when typing terms, we define typing contexts |Gamma| as being
-either empty |emptyCtx|, or as context extensions |Gamma, x :
-tau|, which extend context |Gamma| by asserting variable |x| has
-type |tau|. Typing is defined through a judgment |Gamma /- t :
-tau|, stating that term |t| under typing context |Gamma| has type
-|tau|. For a more proper introduction to STLC we refer the reader
-to \citet[Ch. 9]{Pierce02TAPL}.
+variables |x|, function applications |t1 t2| or
+$\lambda$-abstractions |\(x : sigma) -> t|. To describe
+assumptions on variable types when typing terms, we define (typing)
+contexts |Gamma| as being either empty |emptyCtx|, or as context
+extensions |Gamma, x : tau|, which extend context |Gamma| by
+asserting variable |x| has type |tau|. Typing is defined through
+a judgment |Gamma /- t : tau|, stating that term |t| under
+context |Gamma| has type |tau|.%
+%
+\footnote{We only formalize typed terms, not untyped ones, so
+  that each term has a unique type. That is, in the relevant
+  jargon, we use \emph{Church-style} typing as opposed to
+  \emph{Curry-style} typing. In fact, arguably we mechanize at
+  once both well-typed terms and their typing derivations. This
+  is even more clear in our mechanization; see discussion
+  in~\cref{sec:sem-style-and-rw}.}
+%
+For a proper introduction to STLC we refer the reader to
+\citet[Ch. 9]{Pierce02TAPL}. We will assume significant
+familiarity with it.
 
 \input{pldi14/fig-lambda-calc}
 
-In fact, the definition of base types might be mutually recursive
+\paragraph{An extensible grammar of types}
+In fact, the definition of base types can be mutually recursive
 with the definition of types. So a language plugin might add as
 base types, for instance, collections of elements of type |tau|,
 products and sums of type |sigma| and type |tau|, and so on.
 %
 However, this mutual recursion must satisfy a few technical
-restrictions, and dividing mutually recursive types into
-different modules runs into a few obstacles we do not fully
-address in practice. See \cref{sec:modularity-limits} for the gory details.
+restrictions to avoid introducing subtle inconsistencies, and
+Agda cannot enforce these restrictions across modules. Hence, if
+we define language plugins as separate modules in our
+mechanization, we need to verify \emph{by hand} that such
+restrictions are satisfied (which they are). See
+\cref{sec:modularity-limits} for the gory details.
+
+\begin{notation}
+We typically omit type annotations on $\lambda$-abstractions,
+that is we write |\x -> t| rather than |\(x : sigma) -> t|. Such
+type annotations can often be inferred from context (or type
+inference). Nevertheless, whenever we discuss terms of shape |\x
+-> t|, we're in fact discussing |\(x : sigma) -> t| for some
+arbitrary |sigma|. We write |\x -> t| instead of %
+$\Gl x .\ t$, %
+for consistency with the notation we use later for Haskell
+programs.
+
+We often omit |emptyCtx| from typing contexts with some assumptions.
+For instance we write |x : tau1, y : tau2| instead of |emptyCtx,
+x : tau1, y : tau2|.
+
+We overload symbols (often without warning) when they can be
+disambiguated from context, especially when we can teach modern
+programming languages to disambiguate such overloadings. For
+instance, we reuse |->| for lambda abstractions |\x -> t|,
+function spaces |A -> B|, and function types |sigma -> tau|, even
+though the first is the separator.
+\end{notation}
+
+\paragraph{Extensions}
+In our examples, we will use some unproblematic syntactic sugar
+over STLC, including let expressions, global definitions, type
+inference, and we will use a Haskell-like concrete syntax. In
+particular, when giving type signatures or type annotations in
+Haskell snippets, we will use |::| to separate terms or variables
+from their types, rather than |:| as in
+$\lambda$-calculus.
+
+At times, our concrete examples will use Hindley-Milner (prenex)
+polymorphism, but this is also not such a significant extension.
+A top-level definition using prenex polymorphism, that is of type
+|forall alpha. tau| (where |alpha| is free in |tau|), can be
+taken as sugar for a metalevel family of object-level programs,
+indexed by type argument |tau1| of definitions of type |tau
+[alpha := tau1]|. We use this trick without explicit mention in
+our first implementation of incrementalization in
+Scala~\citep{CaiEtAl2014ILC}.
 
 \subsection{Denotational semantics for STLC}
 \label{sec:denotational-sem}
-To prove that incrementalization preserves the final results of
-our object-language programs, we need to specify a semantics for
-STLC. To this end we use a naive set-theoretic denotational semantics. Since STLC is
-strongly normalizing~\citep[Ch. 12]{Pierce02TAPL}, our semantics need not
-handle partiality, in particular we can eschew
-using domain theory. Instead, we simply use sets, as provided by
-the ambient theory (see \cref{sec:metalanguage} for discussion).
+To prove that incrementalization preserves the semantics of our
+object-language programs, we define a semantics for STLC. We use
+a naive set-theoretic denotational semantics: Since STLC is
+strongly normalizing~\citep[Ch. 12]{Pierce02TAPL}, its semantics
+need not handle partiality. Hence, we can use denotational
+semantics but eschew using domain theory, and simply use sets
+from the metalanguage (see \cref{sec:metalanguage}). Likewise, we
+can use normal functions as domains for function types.
 
 We first associate, to every type |tau|, a set of values
 |eval(tau)|, so that terms of a type |tau| evaluate to values in
 |eval(tau)|. We call set |eval(tau)| a \emph{domain}. Domains
 associated to types |tau| depend on domain associated to base
-types |iota|, that must be specified by language plugins.
-
-Defining domains to collect values is standard in denotational
-semantics, but usually domains are not just sets, but they must
-be enriched by additional structure used to represent
-nonterminating programs. However, since our calculus is strongly
-normalizing and all functions are total, we can avoid using
-domain theory or other techniques to model partiality: our
-domains are simply sets. Likewise, we can use normal
-functions as the domain of function types.
+types |iota|, that must be specified by language plugins
+(\cref{req:base-types}).
 
 \begin{definition}[Domains and values]
   The domain $\Eval{\Gt}$ of a type $\Gt$ is defined as in
@@ -193,11 +258,15 @@ variables are provided in an environment.
     \Gr ::= \EmptyContext \mid \ExtendEnv{x}{v}
   \end{syntax}
 
-  We write $\Eval{\GG}$ for the set of environments that assign
-  values to the names bound in $\GG$ (see
-  \cref{fig:correctness:environments}).
+  We write $\Eval{\GG}$ for the set of
+  environments that assign values to the names bound in $\GG$
+  (see \cref{fig:correctness:environments}).
 \end{definition}
 
+\paragraph{Notation}
+We often omit |emptyRho| from environments with some assignments.
+For instance we write |x = v1, y = v2| instead of |emptyRho, x =
+v1, y = v2|.
 
 \begin{definition}[Evaluation]
   \label{def:evaluation}
@@ -210,8 +279,9 @@ This is a standard denotational semantics of the simply-typed
 $\Gl$-calculus.
 
 For each constant |c : tau|, the plugin provides |evalConst(c) :
-eval(tau)|, the semantics of |c|; since constants don't contain
-free variables, |evalConst(c)| does not depend on an environment.
+eval(tau)|, the semantics of |c| (by \cref{req:constants}); since
+constants don't contain free variables, |evalConst(c)| does not
+depend on an environment.
 
 % We define a program equivalence across terms of the same type |t1
 % `cong` t2| to mean |eval(t1) = eval(t2)|.
@@ -226,28 +296,11 @@ free variables, |evalConst(c)| does not depend on an environment.
 %   Program equivalence is indeed an equivalence relation.
 % \end{lemma}
 
-In our examples, we will use some unproblematic syntactic sugar
-over STLC, including let expressions, global definitions, type
-inference, and we will use a Haskell-like concrete syntax. In
-particular, when giving type signatures or type annotations in
-Haskell snippets, we will use |::| to separate terms or variables
-from their types, rather than |:| as in
-$\lambda$-calculus.\pg{Reconsider.}
-%
-At times, our concrete examples will use Hindley-Milner
-polymorphism, but this is also not a significant extension. A
-polymorphic definition of type |forall alpha. tau| (where |alpha|
-is free in |tau|) can be taken as sugar for a family, indexed by
-type argument |tau1| of definitions of type |tau [alpha :=
-tau1]|; we use this trick without explicit mention in our first
-implementation of incrementalization in
-Scala~\citep{CaiEtAl2014ILC}.
-
 \subsection{Weakening}
 While we don't discuss our formalization of variables in full, in
 this subsection we discuss briefly weakening on STLC terms and
 state as a lemma that weakening preserves meaning. This lemma is needed in
-a key proof, the one of \cref{thm:correct-derive}.
+a key proof, the one of \cref{thm:derive-correct}.
 
 As usual, if a term |t| is well-typed in a given context
 |Gamma1|, and context |Gamma2| extends |Gamma1| (which we
@@ -297,7 +350,8 @@ judgment using \emph{order preserving embeddings}.%
 mechanized proof for details, including auxiliary definitions and
 relevant lemmas.
 
-\subsection{Discussion: Our choice of semantics style}
+\subsection{Discussion: Our mechanization and semantic style}
+\label{sec:sem-style-and-rw}
 To formalize meaning of our programs, we use denotational
 semantics while nowadays most prefer operational semantics, in
 particular small-step. Hence, we next justify our choice and
@@ -331,18 +385,15 @@ of differentiation directly in the semantic domain, and take
 advantage of Agda's support for equational reasoning for proving
 equalities between Agda functions.
 
+\paragraph{Related work}
 Our variant is used for instance by
 \citet{McBride2010outrageous}, who attribute it to
 \citet{Augustsson1999exercise} and \citet{Altenkirch1999monadic}.
 In particular, \citet{Altenkirch1999monadic} already define our
-type |Term Gamma tau| of simply-typed lambda terms |t|,
+type |Term Gamma tau| of simply-typed $\lambda$-terms |t|,
 well-typed with type |tau| in context |Gamma|, while
-\citet{Augustsson1999exercise} defines semantic domains by
-induction over types.\footnote{We formalize through meta-level
-  type |Term Gamma tau| only well-typed terms, that is our
-  formalization of typing is Church-style. In fact, arguably
-  |Term Gamma tau| describes at once both well-typed terms and
-  their typing derivations.}
+\citet{Augustsson1999exercise} define semantic domains by
+induction over types.
 
 More in general, similar approaches are becoming more common when
 using proof assistants. Our denotational semantics could be
@@ -351,12 +402,14 @@ particular compositional), and mechanized formalizations using a
 variety of definitional interpreters are nowadays often
 advocated, either using denotational
 semantics~\citep{Chlipala08}, or using \emph{functional} big-step
-semantics, even for languages that are not strongly
-normalizing~\citep{Owens2016functional,Amin2017}.
+semantics. Functional semantics are so convenient that their use
+has been advocated even for languages that are \emph{not}
+strongly normalizing~\citep{Owens2016functional,Amin2017}, even
+at the cost of dealing with step-indexes.
 
 \subsection{Language plugins}
 \label{sec:lang-plugins}
-Our STLC is parameterized by \emph{language plugins} (or just
+Our object language is parameterized by \emph{language plugins} (or just
 plugins) that encapsulate its domain-specific aspects.
 
 In our examples, our language plugin will typically support
@@ -379,15 +432,16 @@ constants, as well as the types for primitive constants, are
 on purpose left unspecified and only defined by plugins ---
 they are \emph{extensions points}.
 %
-We use ellipses (``$\ldots$'') for some extension points, and
-give names to others when needed to refer to them.
+We write some extension points using ellipses (``$\ldots$''), and
+other ones by creating names, which typically use $^\CONST$ as a
+superscript.
 
 A plugin defines a set of base types $\iota$, primitives $c$ and
 their denotational semantics $\EvalConst{c}$. As usual, we
 require that $\EvalConst{c}: \Eval{\tau}$ whenever $c : \tau$.
 
 \paragraph{Summary}
-To sum up, we collect formally the plugin requirements we have
+To sum up the discussion of plugins, we collect formally the plugin requirements we have
 mentioned in this chapter.
 \begin{restatable}[Base types]{requirement}{baseTypes}
   \label{req:base-types}
@@ -428,8 +482,12 @@ mentioned in this chapter.
 
 % Our |grand_total| example requires a plugin that provides a types for integers
 % and bags and primitives such that we can implement |sum| and
-% |merge|.\pg{Elaborate.}
+% |merge|.
 
 % Our first implementation and our first correctness proof are
 % explicitly modularized to be parametric in the plugins, to
 % clarify precisely the interface that plugins must satisfy.
+
+After discussing the metalanguage of our proofs, the object
+language we study, and its semantics, we begin discussing
+incrementalization in next chapter.

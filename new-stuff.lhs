@@ -39,51 +39,63 @@
 
 \chapter{Incrementalizing more programs}
 \label{ch:inc-more-programs}
-\pg{Only a sketch for now}
+\pg{Only a very rough sketch for now}
 
-While the basic framework we presented is significant, applying it in practice
-to incrementalize programs is hard because of a few problems.
-\begin{enumerate}
-\item The incremental computation does not have accesss to intermediate results from the original computation.
-\item Since function changes are represented as functions, the derivative cannot
-  test if a function change is nil. In fact, while a function change can replace
-  a function with an arbitrary other function, actual changes often simply
-  replace a closure with another closure using the same code but closing over a
-  changed environment.
-\end{enumerate}
+In the previous chapters we have shown how to apply finite differencing to
+programs with first-class functions. With finite differencing we can
+incrementalize a few programs, but for others we run into problems:
 
-A few other annoyances include:
 \begin{enumerate}
+\item The incremental computation does not have accesss to intermediate results
+  from the original computation.
+\item Since function changes are represented as functions, they cannot be
+  inspected at runtime, preventing a few optimizations. For instance, applying a
+  derivative to a nil change always produces a nil change, but we never take
+  advantage of this to optimize derivatives, except sometimes at compile time.
 \item Applying a derivative to a nil change always produce a nil change, but we
   never take advantage of this to optimize derivatives, except sometimes at
   compile time.
-\item No support for change composition: there is no direct way to compose a
-  sequence of changes |dx1, dx2, dx3, ...| across |x0, x1, x2, x3, ...| and
-  produce a single change, except by applying all those changes and computing a
-  difference with |x0 `oplus` dx1 `oplus` dx2 `oplus` dx3|.
+% \item No support for change composition: there is no direct way to compose a
+%   sequence of changes |dx1, dx2, dx3, ...| across |x0, x1, x2, x3, ...| and
+%   produce a single change, except by applying all those changes and computing a
+%   difference with |x0 `oplus` dx1 `oplus` dx2 `oplus` dx3|.
 \item Change structures must provide a difference operation, even though most
   often we are not supposed to use it.
 \end{enumerate}
+ % In fact, while a function change can replace
+ %  a function with an arbitrary other function, actual changes often simply
+ %  replace a closure with another closure using the same code but closing over a
+ %  changed environment.
 
 %include defunc.lhs
-\subsection{Supporting function composition}
+\chapter{Misc to integrate}
+\subsection{Applying function changes to composed changes}
+\pg{Move somewhere else. About lists?}
+\pg{No subscript for |`ocompose`| here?}
+
+\pg{Status: this is still text where I figure this out.}
+
+To implement change composition |da1 `ocompose` da2|, we can represent changes
+by lists of individual or \emph{atomic} changes. Change composition is then just
+concatenation. We can then extend functions on atomic changes to functions on
+changes. Next, we show how.
 
 Imagine, in the setting of PLDI'14 extended with change composition, applying
 one function change |df| to a composed argument change |da1 `ocompose` da2|,
-where |f0 `oplus` df = f1|, |a0 `oplus` da1 = a1| and |a1 `oplus` da2 = a2|. We
-want to compute incrementally the difference |db| between |f1 a2| and |f0 a0|.
-The change |db1 = df a0 da1| goes from |f0 a0| to |f1 a1|. With a change |db2|
-going from |f1 a1| to |f1 a2|, we can assemble the desired change as |db = db1
+where |f1 `oplus` df = f2|, |a1 `oplus` da1 = a2| and |a2 `oplus` da2 = a3|. We
+want to compute incrementally the difference |db| between |f2 a3| and |f1 a1|.
+The change |db1 = df a1 da1| goes from |f1 a1| to |f2 a2|. With a change |db2|
+going from |f2 a2| to |f2 a3|, we can assemble the desired change as |db = db1
 `ocompose` db2|.
 
-However, to compute |db2| incrementally we cannot apply |df| to |da2|: |df a1
-da2| gives the difference between |f0 a1| and |f1 a2|, but |db2| should be the
-difference between |f1 a1| and |f1 a2|. Hence, we need to compute a nil change
-for |f1|, that is, .
+However, to compute |db2| incrementally we cannot apply |df| to |da2|: |df a2
+da2| gives the difference between |f1 a2| and |f2 a3|, but |db2| should be the
+difference between |f2 a2| and |f2 a3|. Hence, we need to compute a nil change
+for |f2|.
 
 Doing that efficiently from the available elements is hard. However, with
 defunctionalized changes this becomes much easier (assuming the function code
-stays the same). Given the code of |f0| and |f1| we can produce a derivative for
+stays the same). Given the code of |f1| and |f2| we can produce a derivative for
 the base function; we can then combine that derivative with an updated
 environment. \pg{continue and clarify}
 % Why are these methods around?
@@ -113,7 +125,7 @@ derApplyDFun1 (P _f _env) (DP (Replace newF) newEnv) = oreplace (newF newEnv)
 This is enabled by defunctionalizing both base functions and changes.
 
 \section{Mapping changeable functions over sequences}
-
+\label{sec:map-seq}
 \pg{By far not done.}
 
 In this section we demonstrate how we can incrementalize by hand |map| and
@@ -201,170 +213,25 @@ update :: Int -> a -> Seq a -> Seq a
 \label{sec:static-caching}
 \pg{Write it!}
 
-\input{pldi14/sec-rw}
-\chapter{Conclusions}
-\pg{Plan for things that complete the original paper's story: add them by
-  revising that text and in that chapter.}
+\section{Motivating Cache-passing Style}
 
-\bibliography{Bibs/DB,Bibs/ProgLang,Bibs/SoftEng,Bibs/own}
-
-\appendix
-\chapter{More on our formalization}
-\section{Mechanizing plugins modularly and limitations}
-\label{sec:modularity-limits}
-Next, we discuss our mechanization of language plugins in Agda, and its
-limitations. For the concerned reader, we can say these limitations affect
-essentially how modular our proofs are, and not their cogency.
-
-In essence, it's not possible to express in Agda the correct interface for
-language plugins, so some parts of language plugins can't be modularized as desirable.
-Alternatively, we can mechanize any fixed language plugin together with
-the main formalization, which is not truly modular, or mechanize a core
-formulation parameterized on a language plugin, which that runs into a few
-limitations, or encode plugins so they can be modularized and deal with encoding
-overhead.
-
-This section requires some Agda knowledge not provided here, but
-we hope that readers familiar with both Haskell and Coq will be
-able to follow along.
-
-Our mechanization is divided into multiple Agda modules. Most
-modules have definitions that depend on language plugins,
-directly or indirectly. Those take definitions from language
-plugins as \emph{module parameters}.
-
-For instance, STLC object types are formalized through Agda type
-|Type|, defined in module |Parametric.Syntax.Type|. The latter is
-parameterized over |Base|, the type of base types.
-
-For instance, |Base| can support a base type of integers, and a
-base type of bags of elements of type |iota| (where |iota :
-Base|). Simplifying a few details, our definition is equivalent
-to the following Agda code:
-\begin{code}
-module Parametric.Syntax.Type (Base : Set) where
-  data Type : Set where
-    base  :  ^^(iota : Base)                   -> Type
-    _=>_  :  ^^(sigma : Type)  -> (tau : Type) -> Type
-
--- Elsewhere, in plugin:
-
-data Base : Set where
-  baseInt  :  ^^Base
-  baseBag  :  ^^(iota : Base) -> Base
--- ...
-\end{code}
-
-But with these definitions, we only have bags of elements of base type. If
-|iota| is a base type, |base (baseBag iota)| is the type of bags with elements
-of type |base iota|. Hence, we have bags of elements of base type. But we don't
-have a way to encode |Bag tau| if |tau| is an arbitrary non-base type, such as
-|base baseInt => base baseInt| (the encoding of object type |Int -> Int|).
+\pg{It'd be nice to type the smart approach to cache type variables. We can't
+  generally. It would be good to characterize when it can be used, but we don't
+  do that either. Instead, we just show examples of what would be possible.}
 %
-Can we do better? If we ignore modularization, we can define types through the
-following mutually recursive datatypes:
+\pg{We conjecture that we can type using free type variables:
+  \begin{itemize}
 
-\begin{code}
-mutual
-  data Type : Set where
-    base  :  ^^(iota : Base Type)              -> Type
-    _=>_  :  ^^(sigma : Type)  -> (tau : Type) -> Type
-
-  data Base : Set where
-    baseInt  :  ^^Base
-    baseBag  :  ^^(iota : Type) -> Base
-\end{code}
-
-So far so good, but these types have to be defined together. We
-can go a step further by defining:
-
-\begin{code}
-mutual
-  data Type : Set where
-    base  :  ^^(iota : Base Type)              -> Type
-    _=>_  :  ^^(sigma : Type)  -> (tau : Type) -> Type
-
-  data Base (Type : Set) : Set where
-    baseInt  :  ^^Base Type
-    baseBag  :  ^^(iota : Type) -> Base Type
-\end{code}
-
-Here, |Base| takes the type of object types as a parameter, and
-|Type| uses |Base Type| to tie the recursion. This definition
-still works, but only as long as |Base| and |Type| are defined together.
-
-If we try to separate the definitions of |Base| and |Type| into
-different modules, we run into trouble.
-\begin{code}
-module Parametric.Syntax.Type (Base : Set -> Set) where
-  data Type : Set where
-    base  :  ^^(iota : Base Type)              -> Type
-    _=>_  :  ^^(sigma : Type)  -> (tau : Type) -> Type
-
--- Elsewhere, in plugin:
-
-data Base (Type : Set) : Set where
-  baseInt  :  ^^Base Type
-  baseBag  :  ^^(iota : Type) -> Base Type
-\end{code}
-
-Here, |Type| is defined for an arbitrary function on types |Base
-: Set -> Set|. However, this definition is rejected by Agda's
-\emph{positivity checker}. Like Coq, Agda forbids defining
-datatypes that are not strictly positive, as they can introduce
-inconsistencies.
-\pg{Add the ``Bad'' example from Agda's wiki, with link for credit.}
-
-The above definition of |Type| is \emph{not} strictly positive,
-because we could pass to it as argument |Base = \tau -> (tau ->
-tau)| so that |Base Type = Type -> Type|, making |Type| occur in
-a negative position. However, the actual uses of |Base| we are
-interested in are fine. The problem is that we cannot inform the
-positivity checker that |Base| is supposed to be a strictly
-positive type function, because Agda doesn't supply the needed
-expressivity.
-
-This problem is well-known. It could be solved if Agda function spaces supported
-positivity annotations,\footnote{As discussed in
-  \url{https://github.com/agda/agda/issues/570} and
-  \url{https://github.com/agda/agda/issues/2411}.} or by encoding a universe of
-strictly-positive type constructors. This encoding is not fully transparent and
-adds hard-to-hide noise to
-development~\citep{Schwaab2013modular}.\footnote{Using pattern synonyms and
-  \texttt{DISPLAY} pragmas might successfully hide this noise.}
-Few alternatives remain:
-\begin{itemize}
-\item We can forbid types from occurring in base types, as we did in our
-  original paper~\citep{CaiEtAl2014ILC}. There we did not discuss at all a
-  recursive definition of base types.
-\item We can use the modular mechanization, disable positivity checking and risk
-  introducing inconsistencies. We tried this successfully in a branch of that
-  formalization. We believe we did not introduce inconsistencies in that branch
-  but have no hard evidence.
-\item We can simply combine the core formalization with a sample plugin. This is
-  not truly modular because the core modularization can only be reused by
-  copy-and-paste. Moreover, in dependently-typed languages the content of a
-  definition can affect whether later definitions typecheck, so alternative
-  plugins using the same interface might not typecheck.\footnote{Indeed, if
-    |Base| were not strictly positive, the application |Type Base| would be
-    ill-typed as it would fail positivity checking, even though |Base: Set ->
-    Set| does not require |Base| to be strictly positive.}
+  \item second-class uses of higher-order functions (such as in map, flatMap, and so on)
+  \item but not first-class uses
+  \item we can probably thread type variables where possible and use the packing trick elsewhere.
 \end{itemize}
+}
 
-Sadly, giving up on modularity altogether appears the more conventional choice.
-Either way, as we claimed at the outset, these modularity concerns only limit
-the modularity of the mechanized proofs, not their cogency.
+\pg{In fact, assume a combinator |mapInt : (Int -> Int) -> List Int -> List
+  Int|. We can't prove that |mapInt f| uses its argument as we expect, maybe it
+  does nothing on the list elements, or maybe it maps |inc| on (some of) them.
+  Many such behaviors are allowed by its type; but our translation turns these
+  |mapInt| variants with the same type into functions with different cache
+  types. Mapping different functions over different elements produces.}
 
-\chapter*{Acknowledgments}
-% From AOSD13
-I thank Sebastian Erdweg for helpful discussions on
-this project, Katharina Haselhorst for help
-implementing the code generator, and the anonymous reviewers, Jacques Carette and Karl Klose
-for their helpful comments on this chapter.
-This work is supported in part by the European Research Council, grant \#203099 ``ScalPL''.
-
-% From PLDI14 (?)
-% From ILC17
-We thank Cai Yufei, Tillmann Rendel, Lourdes Del Carmen Gonz\`alez Huesca, Yann
-R\`egis-Gianas, Philipp Schuster, Sebastian Erdweg, Marc Lasson, Robert Atkey,
-... for helpful discussions on this project.

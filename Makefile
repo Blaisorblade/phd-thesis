@@ -17,10 +17,12 @@ PAPER_NAME = thesis-main
 PDF_NAME=$(PAPER_NAME).pdf
 # Sources that will be watched for changes.
 lhsFmt=$(wildcard *.fmt)
-lhsSources=$(patsubst %,%.lhs,new-stuff change-theory-reconstruct \
+lhsSources=$(patsubst %,%.lhs, \
+	chap-intro-incr chap-diff-correct-formal chap-chs \
+	new-stuff change-theory-reconstruct backmatter \
 	$(patsubst %,pldi14/%,sec-preliminaries sec-intro sec-change-theory \
 	sec-change-equiv sec-function-change sec-differentiate sec-correctness \
-	fig-differentiation))
+	fig-differentiation sec-rw))
 lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 # Sources to watch for changes but that don't need to be compiled on their own,
 # because they're included elsewhere.

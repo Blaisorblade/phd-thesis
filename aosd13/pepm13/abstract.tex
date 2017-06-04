@@ -12,14 +12,14 @@ We evaluate \LoS\ by re-implementing several code analyses of the Findbugs tool 
 reconcile modularity and efficiency in real-world applications.
 
 Overall, we present the collections APIs as a critical case study
-for DSEL-implementation techniques. From it, we extract lessons about the design of embedded DSLs and host-language design for 
+for EDSL-implementation techniques. From it, we extract lessons about the design of embedded DSLs and host-language design for 
 effective and type-safe embedding and optimizations. 
 
 %% Trying to follow Kent Beck's idea (http://www.sigplan.org/oopsla/oopsla96/how93.html).
 %% Domain-specific abstractions are not part of general-purpose languages. Such abstractions are important to close the abstraction gap between a solution to a problem and its encoding as a program. Domain-specific embedded languages support such abstractions but are only part of the solution: support for meta-programming on the embedded language is also essential, to support more powerful abstractions and to allow domain-specific optimizations.
 %%we argue that reifying programs in the embedded language is to support metaprogramming and domain-specific optimizations can be crucial.
-%% To investigate support for this requirements, we consider Scala, a language intended to support DSEL engineering, and present a case study on a query DSL for collections: without changes to the compiler, we reify queries on Scala collections while preserving typing and show how to implement algebraic optimizations to provide order-of-magnitude speed-ups and make declarative queries efficient; finally we extract lessons about how the host language supports the development of our DSEL.
-%% Finally we discuss lessons for DSEL developers and for programming languages.
+%% To investigate support for this requirements, we consider Scala, a language intended to support EDSL engineering, and present a case study on a query DSL for collections: without changes to the compiler, we reify queries on Scala collections while preserving typing and show how to implement algebraic optimizations to provide order-of-magnitude speed-ups and make declarative queries efficient; finally we extract lessons about how the host language supports the development of our EDSL.
+%% Finally we discuss lessons for EDSL developers and for programming languages.
 %
 %%Deeply embedded domain-specific languages are a worthwhile approach
 %%Domain-specific embedded languages
@@ -29,7 +29,7 @@ effective and type-safe embedding and optimizations.
 %%over databases, but are often not applied to collections. Employing the same techniques for queries over collections
 %%allow to improve performance, to make queries more compact and readable, or both.
 %%
-%%We implement a deeply-embedded DSEL for queries over collections in Scala, close to native query operators,
+%%We implement a deeply-embedded EDSL for queries over collections in Scala, close to native query operators,
 %%implement a few significant optimizations, and demonstrate their usefulness over bug-finding queries on source code
 %%extracted from FindBugs.
 \end{abstract}

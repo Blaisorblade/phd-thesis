@@ -7,18 +7,24 @@
 
 %else
 
+%format param = "\text{\textendash}"
+
+%subst dummy = "\text{\textendash}"
+
 %format alpha = "\alpha"
 %format Nat = "\mathbb{N}"
 %format Int = "\mathbb{Z}"
 
 %format `times` = "\times"
 %format Gamma = "\Gamma"
+%format Gamma' = "\Gamma\myquote"
 %format Gamma1
 %format Gamma2
 %format `preceq` = "\preceq"
 %format v1
 %format v2
 %format v3
+%format v4
 
 %format V1
 %format V2
@@ -33,16 +39,23 @@
 %format `ominus` = "\ominus "
 %format oplus = "(\oplus)"
 %format ominus = "(\ominus)"
+%format nilc = "\NilC{}"
+%format (nil(v)) = "\NilC{" v "}"
+%format NIL = "\NILC"
+%format `ocompose` = "\circledcirc "
+%format ocompose (dv1) (dv2) = dv1 "\circledcirc" dv2
 
 %format (oplusIdx(t)) = "\oplus_{" t "}"
 %format (ominusIdx(t)) = "\ominus_{" t "}"
-
-%format `ocompose` = "\circledcirc "
-%format ocompose (dv1) (v1) (dv2) = dv1 "\circledcirc_{" v1 "}" dv2
+%format (nilIdx(t)) = "\NilC{" t "}"
+%format (ocomposeIdx(t)) = "\circledcirc_{" t "}"
+%format (doeIdx(v)) = "\Doe_{" v "}"
 
 %format `doe` = "\Doe"
 %format chs (v) = "\ChangeStruct{" v "}"
+%format bchs(v) = "\widetilde{" v "}"
 
+%format `eqdef` = "\eqdef"
 %format `such` = "\mid"
 %format ^ = " "
 %format ^^ = "\;"
@@ -51,6 +64,13 @@
 %format f0
 %format f1
 %format f2
+%format f3
+%format f1' = "f_{1}\myquote"
+
+%format tf1
+%format tf2
+%format dtf1
+%format dtf2
 
 %format a0
 %format a1
@@ -59,6 +79,10 @@
 
 %format b1
 %format b2
+%format b3
+
+%format p1
+%format p2
 
 %format c1
 %format c2
@@ -70,10 +94,29 @@
 %format db1
 %format db2
 
+%format g1
+%format g2
+%format g3
+
+%format dg1
+%format dg2
+
 %format dv0
 %format dv1
 %format dv2
 %format dv3
+
+%format dfa = df "_a"
+%format dfb = df "_b"
+%format dsa = ds "_a"
+%format dsb = ds "_b"
+%format dta = dt "_a"
+%format dtb = dt "_b"
+%format dva = dv "_a"
+%format dvb = dv "_b"
+
+%format dt1
+%format dt2
 
 %format x0
 %format x1
@@ -109,9 +152,6 @@
 %format DV = "\Delta V"
 
 %format Sigma = "\Sigma"
-%format nilc = "\NilC{}"
-%format (nil(v)) = "\NilC{" v "}"
-%format NIL = "\NILC"
 %format eval(t) = "\Eval{" t "}"
 %format evalInc(t) = "\EvalInc{" t "}"
 %format (evalConst(c)) = "\EvalConst{" c "}"
@@ -124,6 +164,8 @@
 %format emptyRho = "\EmptyEnv"
 %format rho = "\rho"
 %format drho = "\D\rho"
+%format drhoa = drho "_a"
+%format drhob = drho "_b"
 %format rho1
 %format rho2
 %format sigma = "\sigma"
@@ -134,12 +176,23 @@
 %format tau2
 %format iota = "\iota"
 
-%format correct (tau) (dv) (v) = "\correctdt{" tau "}{" dv "}{" v "}"
+% Hook into forall.fmt:
+
+%format exists(x) = exists_ x "\hsforall "
+%format exists_ = "\exists "
+
 %format fromto (tau) (v1) (dv) (v2) = "\validfromto{" tau "}{" v1 "}{" dv "}{" v2 "}"
+%format fromtosem (gamma) (tau) (v1) (dv) (v2) = "\validfromto{" gamma, tau "}{" v1 "}{" dv "}{" v2 "}"
+%format fromtosyn (gamma) (tau) (v1) (dv) (v2) = "\validfromtosyn{" gamma "}{" tau "}{" v1 "}{" dv "}{" v2 "}"
+
+%format validV (tau) = "\mathcal{V}_{" tau "}"
+%format valid (tau) (v) (dv) = "(" v " , " dv ") \in V_{" tau "}"
 
 %format (new(v)) = "\New{" v "}"
 %format (old(v)) = "\Old{" v "}"
 %format `betaeq` = "=_{\beta}"
+%format `eq` = "="
+
 %format == = "\equiv"
 %format /- = "\vdash"
 
@@ -154,8 +207,6 @@
 %format Theta(n) = "\Theta(" n ")"
 %format o(n) = "o(" n ")"
 
-%format param = "\text{\textendash}"
-
 %format cache1
 %format cache2
 %format caches1
@@ -166,5 +217,29 @@
 %format cx2
 
 %format size(s) = "\left|{" s "}\right|"
+
+%endif
+
+\def\deriveDefCore{%
+\begin{align*}
+  |derive(\(x : sigma) -> t)| &= |\(x : sigma) (dx : Dt^sigma) -> derive(t)| \\
+  |derive(s t)| &= |derive(s) t (derive(t))| \\
+  |derive(x)| &= |dx| \\
+  |derive(c)| &= |deriveConst(c)|
+\end{align*}
+}
+
+%if false
+% derive(^^let x = t1 in t2) =
+%   let  x = t1
+%        dx = derive(t1)
+%        in   derive(t2)
+
+% \begin{code}
+% derive(\(x : sigma) -> t))  = \(x : sigma) (dx : Dt^sigma) -> derive(t)
+% derive(s t)                 = derive(s) t (derive(t))
+% derive(x)                   = dx
+% derive(c)                   = deriveConst(c)
+% \end{code}
 
 %endif

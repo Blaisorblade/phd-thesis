@@ -17,8 +17,22 @@
 % Corollary 3.3. The weather is always bad.
 %
 % http://tex.stackexchange.com/a/67251
-\theoremstyle{definition}
+
+%\theoremstyle{definition}
+% \theoremstyle{break}
+% \declaretheoremstyle[
+%   spaceabove=6pt, spacebelow=6pt,
+%   headfont=\normalfont\bfseries,
+%   notefont=\mdseries, notebraces={(}{)},
+%   bodyfont=\normalfont,
+%   break=true,
+%   qed=\qedsymbol
+% ]{mystyle}
+% %\declaretheoremstyle[bodyfont=\normalfont,postheadspace={\newline}]{mystyle}
+% \theoremstyle{mystyle}
 % \input{pldi14/QED}
+\theoremstyle{break}
+\theorembodyfont{\upshape}
 \theoremsymbol{\ensuremath{_\Box}}
 \declaretheorem[numberwithin=section,refname={Theorem,Theorems}]{theorem}
 \declaretheorem[numberlike=theorem,refname={Lemma,Lemmas}]{lemma}
@@ -28,6 +42,11 @@
 \declaretheorem[numberlike=theorem,name=Plugin Requirement,refname={Plugin Requirement,Plugin Requirements}]{requirement}
 \declaretheorem[numberlike=theorem,name=Remark,refname={Remark,Remarks}]{remark}
 \declaretheorem[numberlike=theorem,name=Example,refname={Example,Examples}]{examples}
+\declaretheorem[numberlike=theorem,name=Example,refname={Example,Examples}]{example}
+\declaretheorem[numberlike=theorem,name=Slogan,refname={Slogan,Slogans}]{slogan}
+% XXX Should *THESE* be numbered? Hopefully not?
+\declaretheorem[numberlike=theorem,name=Notation,refname={Notation,Notation}]{notation}
+
 
 % \newtheorem{theorem}{Theorem}
 % % http://tex.stackexchange.com/a/45358/1340

@@ -1,9 +1,8 @@
 \documentclass{book}
-\usepackage{mylhs2tex}
-\usepackage{natbib}
-\usepackage{rotating}
-\usepackage{comment}
 \bibliographystyle{abbrvnat}
+
+% lhs2TeX setup
+\usepackage{mylhs2tex}
 \input{packages}
 \input{macros}
 
@@ -21,8 +20,19 @@
 \excludecomment{extraEval}
 \includecomment{techrep}
 \excludecomment{nontechrep}
-\excludecomment{todos}
 \includecomment{forNonBeamer}
+
+% For adapting to compiling the whole thesis, or only parts.
+\newtoggle{full}
+\toggletrue{full}
+
+\iftoggle{full}{
+\includecomment{fullCompile}
+\excludecomment{partCompile}
+}{% else
+\excludecomment{fullCompile}
+\includecomment{partCompile}
+}
 
 % Number floats and figures together. Documented at
 % http://stackoverflow.com/a/43266057/53974.
@@ -38,9 +48,20 @@
 % Requires that other files are compiled with include, and can only be used in
 % incremental runs: a first run has to be made without includeonly.
 %
-%\includeonly{pldi14/sec-preliminaries,pldi14/sec-intro}
-%\includeonly{pldi14/sec-intro,new-stuff}
 %\includeonly{aosd13/graphs/evalResLos,aosd13/paperBody}
+%\includeonly{pldi14/sec-preliminaries,chap-intro-incr,chap-diff-correct-formal,chap-chs,pldi14/sec-intro,new-stuff}
+%\includeonly{pldi14/sec-preliminaries,chap-intro-incr,chap-diff-correct-formal,chap-chs,pldi14/sec-intro}
+%\includeonly{pldi14/sec-preliminaries,chap-intro-incr,chap-diff-correct-formal,chap-chs}
+%\includeonly{pldi14/sec-preliminaries}
+%\includeonly{chap-intro-incr}
+%\includeonly{pldi14/sec-preliminaries,chap-diff-correct-formal}
+%\includeonly{chap-diff-correct-formal,chap-chs,pldi14/sec-intro}
+%\includeonly{chap-intro-incr,new-stuff,pldi14/sec-rw}
+%\includeonly{pldi14/sec-intro}
+%\includeonly{new-stuff}
+%\includeonly{chap-diff-correct-formal,pldi14/sec-intro}
+%\includeonly{pldi14/sec-intro,new-stuff}
+%\includeonly{aosd13/graphs/evalResLos,aosd13/paperBody,pldi14/sec-intro,backmatter}
 %
 % Also, include can add extra page breaks, so maybe switch back to input at the end.
 % From http://web.science.mq.edu.au/~rdale/resources/writingnotes/latexstruct.html.
@@ -61,28 +82,31 @@
 \include{chap-intro}
 
 \part{Optimizing collection queries by reification}
-\label{sec:ch-aosd13}
+\label{part:ch-aosd13}
 
 \include{aosd13/graphs/evalResLos}
 \include{aosd13/paperBody}
 
 
-\part{Incrementalization}
+\part{Incrementalization by static differentiation}
 \label{part:incr}
 \include{pldi14/sec-preliminaries}
-\include{pldi14/sec-intro}
+\include{chap-intro-incr}
+\include{chap-diff-correct-formal}
+\include{chap-chs}
+\pg{READD}
+%\include{pldi14/sec-intro}
 
 % Include either-or, one includes the other.
 %\include{change-theory-reconstruct}
-\pg{readd some things here.}
+%\pg{readd some things here.}
 %\include{pldi14/sec-change-theory}
 
-\pg{readd a shorter version of this.}
+%\pg{readd a shorter version of this.}
 %\include{pldi14/sec-change-equiv}
 
 %\include{pldi14/sec-differentiate}
 \include{pldi14/sec-practice}
-\include{pldi14/sec-concl}
 
 % Appendixes, to integrate.
 % \include{pldi14/sec-evaluation}
@@ -96,7 +120,25 @@
 \include{pldi14/sec-informal}
 \end{oldSec}
 
-\include{new-stuff}
+\include{pldi14/sec-rw}
+\include{pldi14/sec-concl}
+
+\part{Static caching}
+\label{part:static}
+\pg{READD}
+%\include{new-stuff}
+
+% \chapter{Conclusions}
+% \pg{Plan for things that complete the original paper's story: add them by
+%   revising that text and in that chapter.}
+
+% Show Bibliography in TOC, % from https://tex.stackexchange.com/a/98995/1340
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\bibliography{Bibs/DB,Bibs/ProgLang,Bibs/SoftEng,Bibs/own}
+\include{backmatter}
 \end{document}
 %%% Local Variables:
 %%% mode: latex

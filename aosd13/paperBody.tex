@@ -1,4 +1,5 @@
 \chapter{Introduction}
+\label{sec:aosd13-intro}
 In-memory collections of data often need efficient processing. For on-disk
 data, efficient processing is already provided by database management systems~(DBMS) thanks to
 their query optimizers, which support many optimizations specific to the domain
@@ -77,16 +78,16 @@ One way to implement such an optimizer would be to extend the compiler of the la
 to add some kind of external preprocessor to the language. However, such solutions would be rather brittle (for instance, they lack
 composability with other language extensions) and they would preclude optimization opportunities that arise only at runtime.
 
-For this reason, our approach is implemented as an embedded domain-specific language, that is, as a regular library.
-We call this library \LoSDef. \LoS\ consists of a domain-specific language (DSL) for queries on collections based on the Scala collections API\@. 
-This DSL is implemented as an embedded DSL (EDSL) for Scala. An expression in this EDSL produces at run time an \emph{expression tree} in the host language: a data structure which represents the query to execute, similar to an abstract syntax tree (AST) or a query plan. Thanks to the extensibility of Scala, expressions in this language look almost identical to expressions with the same meaning in Scala.
+For this reason, our approach is implemented as an embedded domain-specific language (EDSL), that is, as a regular library.
+We call this library \LoSDef. \LoS\ consists of a Scala EDSL for queries on collections based on the Scala collections API\@.
+An expression in this EDSL produces at run time an \emph{expression tree} in the host language: a data structure which represents the query to execute, similar to an abstract syntax tree (AST) or a query plan. Thanks to the extensibility of Scala, expressions in this language look almost identical to expressions with the same meaning in Scala.
 When executing the query, \LoS\ optimizes and compiles these expression trees for more efficient execution. Doing optimization at run time, instead of compile-time, avoids the need for control-flow analyses to determine which code will be actually executed~\citep{Chambers10}, as we will see later.
 
-We have choosen Scala \citep{Odersky11book} to implement our library for two reasons: (i) Scala is a good meta-language for embedded DSLs, because it is syntactically
+We have chosen Scala \citep{Odersky11book} to implement our library for two reasons: (i) Scala is a good meta-language for EDSLs, because it is syntactically
 flexible and has a powerful type system, and (ii) Scala has a sophisticated collections library with an attractive syntax (for-comprehensions) to specify queries.
 
 To evaluate \LoS, we study queries of the FindBugs tool~\citep{DBLP:journals/sigplan/HovemeyerP04}.
-We rewrote a set of queries to use the Scala collections API and show that  modularization incurs significant performance overhead. Subsequently, we consider versions of the same queries using \LoS{}. 
+We rewrote a set of queries to use the Scala collections API and show that modularization incurs significant performance overhead. Subsequently, we consider versions of the same queries using \LoS{}.
 We demonstrate that the automatic optimization can reconcile modularity and performance in many cases. Adding advanced optimizations such as indexing can even improve the performance of the analyses beyond the original non-modular analyses.
  
 Overall, our main contributions are the following:
@@ -211,8 +212,7 @@ def titleFilterHandOpt(books: Set[Book],
     book <- books
     if book.publisher == publisher && book.title.contains(keyword)
     author <- book.authors
-  } yield (book.title, author.firstName + " " +
-           author.lastName)
+  } yield (book.title, author.firstName + " " + author.lastName)
 val res = titleFilterHandOpt(books,
   "Pearson Education", "Principles")
 \end{lstlisting}
@@ -245,18 +245,17 @@ val recordsQuery =
     book <- books.asSquopt
     if book.publisher ==# "Pearson Education"
     author <- book.authors
-  } yield new BookData(book.title,
-    author.firstName + " " + author.lastName,
+  } yield new BookData(book.title, author.firstName + " " + author.lastName,
     book.authors.size - 1)
 
 // ...
 val records = recordsQuery.eval
 
-def titleFilterQuery(records: Exp[Set[BookData]], 
-                keyword: Exp[String]) = for {
+def titleFilterQuery(records: Exp[Set[BookData]], keyword: Exp[String]) = for {
   record <- records
   if record.title.contains(keyword)
 } yield (record.title, record.authorName)
+
 val resQuery = titleFilterQuery(recordsQuery, "Principles")
 val res = resQuery.optimize.eval
 \end{lstlisting}
@@ -312,8 +311,7 @@ In our running example, the query scans all books to look for the ones having th
 
 We construct a \emph{query} representing the desired dictionary, and inform the optimizer that it should use this index where appropriate:
 \begin{lstlisting}
-val idxByPublisher =
-  books.asSquopt.indexBy(_.publisher)
+val idxByPublisher = books.asSquopt.indexBy(_.publisher)
 Optimization.addIndex(idxByPublisher)
 \end{lstlisting}
 
@@ -337,8 +335,8 @@ val indexedQuery =
   for {
     book <- idxByPublisher("Pearson Education")
     author <- book.authors
-  } yield new BookData(book.title, author.firstName
-    + " " + author.lastName, book.authors.size - 1)
+  } yield new BookData(book.title, author.firstName + " " + author.lastName,
+    book.authors.size - 1)
 \end{lstlisting}
 Since dictionaries in Scala are functions, in the above code, dictionary lookup on \code{idxByPublisher} is represented simply as function application. The above code iterates over books having the desired publisher, instead of scanning the whole library, and performs the remaining computation from the original query. Although the index use in the listing above is notated as 
 \code{idxByPublisher("Pearson Education")}, only the cached result of evaluating the index is used when
@@ -527,7 +525,9 @@ many different implementations.
 
 To make changes to the optimizer more practical, we designed our query
 representation so that optimizations are easy to express; restricting to pure
-queries also helps. For instance, filter fusion can be implemented simply as:%
+queries also helps. For instance, filter fusion can be implemented in few lines of code:
+just match against expressions of form \code{coll.filter(pred2).filter(pred1)}
+and rewrite them:%
 \footnote{\code{Sym} nodes are part of the boilerplate we omitted earlier.}
 \begin{lstlisting}
   val mergeFilters = ExpTransformer {
@@ -535,8 +535,7 @@ queries also helps. For instance, filter fusion can be implemented simply as:%
       coll.filter(x => pred2(x) && pred1(x))
   }
 \end{lstlisting}
-The above code matches on reified expression of form
-\code{coll.} \code{filter(pred2).filter(pred1)} and rewrites it. A more complex
+A more complex
 optimization such as filter hoisting requires only 20 lines of code.
 
 We have implemented a prototype of the optimizer with the mentioned
@@ -584,8 +583,7 @@ Since our query language and tree representation are statically typed,
 type-incorrect queries will be rejected statically.
 For instance, consider again \code{idxByPublisher}, described previously:
 \begin{lstlisting}
-val idxByPublisher =
-  books.asSquopt.indexBy(_.publisher)
+val idxByPublisher = books.asSquopt.indexBy(_.publisher)
 \end{lstlisting}
 Since \code{Book.publisher} returns a \code{String}, \code{idxByPublisher} has
 type \code{Exp[Map[String, Book]]}. Looking up a key of the wrong type, for
@@ -697,11 +695,12 @@ for further improvement of our work by incorporating more advanced optimizations
 %For instance, while the formal analogous of folds in their calculus is a monoid homomorphism, computing the size of a Set can be expressed through a fold but not through a monoid homomorphism, since it is a fold from an idempotent to a non-idempotent monoid.
 
 % Klaus: I think this is not that relevant for ICSE
-%\citet{Henglein10} present an embedding of the relational algebra in Haskell.
-%Queries are not reified in their approach, but due to a particularly sophisticated
-%representation of multisets it is possible to execute some queries containing
-%cross-products using faster equi-joins.
-
+\citet{Henglein2010optimizing} and \citet{Henglein2010generic} embed relational algebra in
+Haskell. Queries are not reified in their approach, but due to a particularly
+sophisticated representation of multisets it is possible to execute some queries
+containing cross-products using faster equi-joins. While their approach appears
+to not rely on non-confluent rewriting rules and hence appears more robust, it
+is not yet clear how to incorporate other optimizations.
 
 \section{Deep Embeddings in Scala}
 \label{sec:rwdsl}
@@ -728,6 +727,7 @@ Deep embedding of the whole query is necessary for many optimizations, as
 discussed in Sec.~\ref{sec:solution}.
 
 \subsection{LMS}
+\label{sec:rwdsl-lms}
 Our deep embedding is inspired by some of the Scala techniques presented by
 Lightweight Modular Staging (LMS)~\citep{rompf2010lightweight} for using
 implicits and for adding infix operators to a type. Like
@@ -739,7 +739,8 @@ highly efficient DSLs in Scala.
 An alternative to \LoS\ based on LMS and Delite, named OptiQL, was indeed built
 and presented in concurrent~\citep{Rompf13} and subsequent work~\citep{Arvind13}.
 Like \LoS, OptiQL enables writing and optimizing collection queries in Scala.
-On the minus side, OptiQL supports fewer collections types (\texttt{ArrayList} and \texttt{HashMap}).
+On the minus side, OptiQL supports fewer collections types (\texttt{ArrayList}
+and \texttt{HashMap}).
 
 On the plus side, OptiQL supports queries containing effects and can reuse support
 for automatic parallelization and multiple platforms present in Delite.
@@ -755,8 +756,8 @@ inlining heuristics in the Hotspot JIT compiler have never been tuned to bulk
 operators in functional programs.\footnote{See discussion by Cliff Click at \url{http://www.azulsystems.com/blog/cliff/2011-04-04-fixing-the-inlining-problem}.}\pg{Maybe elaborate and cite Cliff Click's blog post, turn it into a citation?}
 We did not investigate such lowerings. It is unclear how
 well these optimizations would extend to other collections which intrinsically
-carry further overhead.
-\pg{Resume and connect with \cref{sec:optim-vs-inc}.}
+carry further overhead. Moreover, it is unclear how to execute incrementally the
+result of these lowerings, as we discuss in \cref{sec:optim-vs-inc}.
 \pg{Cite Stream fusion to completeness~\citep{Kiselyov2017stream}!}
 
 Those works did not support embedding arbitrary libraries in an automated or

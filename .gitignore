@@ -13,8 +13,12 @@ comment.cut
 *.pdf
 
 ## lhs2TeX output
+chap-intro-incr.tex
+chap-diff-correct-formal.tex
+chap-chs.tex
 change-theory-reconstruct.tex
 new-stuff.tex
+backmatter.tex
 pldi14/sec-intro.tex
 pldi14/sec-change-theory.tex
 pldi14/sec-change-equiv.tex
@@ -23,6 +27,7 @@ pldi14/sec-differentiate.tex
 pldi14/sec-correctness.tex
 pldi14/fig-differentiation.tex
 pldi14/sec-preliminaries.tex
+pldi14/sec-rw.tex
 mylhs2tex.sty
 
 ## lhs2TeX extracted code

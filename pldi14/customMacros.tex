@@ -12,15 +12,16 @@
 %
 %   \App{\Lam*{x}{\Var{x}}}{\Lit{42}}  gives  (λx.x) 42
 
-\newenvironment{slogan}{\begin{quote}%
-    %\begin{center}%
-    }{%
-    %\end{center}%
-  \end{quote}}
+% Consider using.
+\newcommand{\eqdef}{\ensuremath{=_{\mathit{def}}}}
 
+\newcommand{\myquote}{\ensuremath{'}}
+
+\usepackage{wasysym}
 \usepackage{mathtools}
 \newcommand\validfromto[4]{#3 \;\rhd\; #2 \xhookrightarrow{#1} #4}
-\newcommand\correctdt[3]{#2 \;\rhd_{#1} \; #3}
+\newcommand\validfromtosyn[5]{#4 \;\RHD\; #3 \xhookrightarrow{#1 \to #2} #5}
+\newcommand\correctdt[2]{#1 \;\rhd \; #2}
 \DeclareMathAlphabet{\mathcal}{OT1}{pzc}{m}{it}
 
 \newcommand{\Keyword}[1]{\textbf{#1}}

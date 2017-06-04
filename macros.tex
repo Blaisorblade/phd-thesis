@@ -1,15 +1,15 @@
 % Emacs, this is -*- latex -*-!
 \usepackage[scaled=0.88]{beramono} % http://wbillingsley.blogspot.de/2008/06/latex-monospace-bold-computer-modern.html
-\usepackage{xcolor}
-\usepackage{amssymb}
 \usepackage{array}
-\usepackage{stmaryrd}
 \usepackage{booktabs}
 \usepackage{mathpartir}
 
 \usepackage[amsmath,thmmarks,amsthm]{ntheorem}
 \usepackage{thmtools}
 \usepackage{thm-restate}
+%
+% Allow to hyphenate URLs on hyphens.
+\PassOptionsToPackage{hyphens}{url}
 % Load hyperref as last package
 % (http://www.tex.ac.uk/cgi-bin/texfaq2html?label=hyperdupdest), except for
 % bookmark (which would otherwise load hyperref with other options).
@@ -18,6 +18,9 @@
 
 % Comments
 \iftoggle{todos}{%
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{xcolor}
 \newcommand{\mynote}[2]{
   \textcolor{red}
   {

@@ -34,16 +34,16 @@ In contrast, an automated domain-specific optimizer can inline the function to f
 Such optimizations are not possible within most ordinary collections API, such as the Scala collections API~\cite{odersky2009fighting}, because they
 do not reify queries on collections. Instead, each API function is defined compositionally in terms
 of the meaning of the other API functions.
-We regard the Scala collections API as a \emph{domain-specific embedded language} (DSEL); this style of compositional DSL implementation by libraries is often
+We regard the Scala collections API as a \emph{embedded domain-specific language} (EDSL); this style of compositional DSL implementation by libraries is often
 called \emph{shallow embedding}%
 %~\chk{add reference} %PG: I know it's crazy, but nobody gives a reference for this term.
 . The alternative, which we pursue, is a \emph{deep embedding} of the DSL, where programs written in the DSL (in our case: 
 queries on collections) are reified as data or, more specifically, as abstract syntax trees, which can be subject to non-compositional semantics. Among others, they can then be analyzed, optimized, transformed, interpreted, or compiled.
 
-In this paper we present \LoS, a deep embedding of the Scala collections DSEL with the goal of supporting more flexible semantics and especially automatic optimization.
-We chose to use the Scala language and its collections DSEL because (i) Scala has several features that make it an attractive host language for DSL embedding \citep{Odersky11book} and (ii) because it has a particularly sophisticated collections library with precisely-typed interfaces \citep{odersky2009fighting}, which makes it particularly challenging to embed the library deeply.
+In this paper we present \LoS, a deep embedding of the Scala collections EDSL with the goal of supporting more flexible semantics and especially automatic optimization.
+We chose to use the Scala language and its collections EDSL because (i) Scala has several features that make it an attractive host language for DSL embedding \citep{Odersky11book} and (ii) because it has a particularly sophisticated collections library with precisely-typed interfaces \citep{odersky2009fighting}, which makes it particularly challenging to embed the library deeply.
 
-%We target Scala collections DSEL because improved support for DSL embedding is among Scala design goals.
+%We target Scala collections EDSL because improved support for DSL embedding is among Scala design goals.
 
 \input{caseStudyGoals}
 
@@ -89,7 +89,7 @@ Overall, we make the following contributions:
 
 % % Good paragraph
 
-% One of the design goals for this DSEL is that embedded queries should be
+% One of the design goals for this EDSL is that embedded queries should be
 % as close as possible to their native equivalent, to simplify
 % transforming a native query into an embedded one. Ideally, querying a
 % ``smart'' collection instead of a native one should be enough to ensure

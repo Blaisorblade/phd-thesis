@@ -11,7 +11,7 @@
 \Gs, \Gt & \Gi           & \mid \Fun{\Gt}{\Gt}   & types\\
 \GG      & \EmptyContext & \mid \Extend{x}{\tau} & typing contexts\\
 c        & \rlap{\ldots} &                       & constants\\
-s, t     & c             & \mid \Lam{x}{t}
+s, t     & c             & \mid \Lam{(x : \Gs)}{t}
                            \mid \App{t}{t}
                            \mid x                & terms
 \end{tabular}
@@ -36,7 +36,7 @@ s, t     & c             & \mid \Lam{x}{t}
 
 \Rule[Lam]
   {\Typing[\Extend{x}{\Gs}]{t}{\Gt}}
-  {\Typing{\Lam{x}{t}}{\Fun{\Gs}{\Gt}}}
+  {\Typing{\Lam{(x : \Gs)}{t}}{\Fun{\Gs}{\Gt}}}
 
 \Rule[App]
   {\Typing{s}{\Fun{\Gs}{\Gt}}\\
@@ -77,8 +77,8 @@ s, t     & c             & \mid \Lam{x}{t}
     \Align{
       \EvalWith{c}{\rho}
         & =\EvalConst{c}\\
-      \EvalWith{\Lam{x}{t}}{\rho}
-        & = \lambda v.\ \EvalWith{t}{\ExtendEnv*{x}{v}}\\
+      \EvalWith{\Lam{(x : \Gs)}{t}}{\rho}
+        & = \lambda v : \Eval{\Gs}.\ \EvalWith{t}{\ExtendEnv*{x}{v}}\\
       \EvalWith{\App{s}{t}}{\rho}
         & = \App{\EvalWith*{s}{\rho}}{\EvalWith*{t}{\rho}}\\
       \EvalWith{x}{\Gr}
