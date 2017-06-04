@@ -30,8 +30,6 @@ these structures, we finally show that starting from change
 structures for base types, we define change structures for
 all types |tau| and contexts |Gamma| in \cref{sec:chs-types-contexts},
 completing the core theory of changes.
-Finally, we relate this formalization of changes with the one by
-\citet{CaiEtAl2014ILC} in \cref{sec:alt-change-validity}.
 
 % \pg{elsewhere, where?}
 % As anticipated, we use changes to generalize the calculus of finite differences

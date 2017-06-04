@@ -2,9 +2,16 @@
 %include polycode.fmt
 %include changes.fmt
 
-\chapter{Reasoning on changes syntactically}
+\chapter{Syntactic stuff}
+
+\pg{TODO add more.}
+Finally, we relate this formalization of changes with the one by
+\citet{CaiEtAl2014ILC} in \cref{sec:alt-change-validity}.
+
+\section{Reasoning on changes syntactically}
 To define derivatives of primitives, we will often discuss
 changes directly on programs.
+
 
 \begin{definition}[Syntactic change operators]
   We lift change operators |`oplus`|, |`ominus`|, |nilc| and |ocompose| to type-indexed families of terms.
