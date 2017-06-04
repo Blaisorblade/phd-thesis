@@ -27,6 +27,7 @@ pldi14/sec-differentiate.tex
 pldi14/sec-correctness.tex
 pldi14/fig-differentiation.tex
 pldi14/sec-preliminaries.tex
+pldi14/sec-rw.tex
 mylhs2tex.sty
 
 ## lhs2TeX extracted code

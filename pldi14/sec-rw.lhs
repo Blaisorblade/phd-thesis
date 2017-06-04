@@ -1,4 +1,7 @@
 % Emacs, this is -*- latex -*-!
+%include polycode.fmt
+%include changes.fmt
+
 \chapter{Related work}
 \label{sec:rw}
 
