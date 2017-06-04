@@ -727,6 +727,7 @@ Deep embedding of the whole query is necessary for many optimizations, as
 discussed in Sec.~\ref{sec:solution}.
 
 \subsection{LMS}
+\label{sec:rwdsl-lms}
 Our deep embedding is inspired by some of the Scala techniques presented by
 Lightweight Modular Staging (LMS)~\citep{rompf2010lightweight} for using
 implicits and for adding infix operators to a type. Like
@@ -738,7 +739,8 @@ highly efficient DSLs in Scala.
 An alternative to \LoS\ based on LMS and Delite, named OptiQL, was indeed built
 and presented in concurrent~\citep{Rompf13} and subsequent work~\citep{Arvind13}.
 Like \LoS, OptiQL enables writing and optimizing collection queries in Scala.
-On the minus side, OptiQL supports fewer collections types (\texttt{ArrayList} and \texttt{HashMap}).
+On the minus side, OptiQL supports fewer collections types (\texttt{ArrayList}
+and \texttt{HashMap}).
 
 On the plus side, OptiQL supports queries containing effects and can reuse support
 for automatic parallelization and multiple platforms present in Delite.
@@ -754,8 +756,8 @@ inlining heuristics in the Hotspot JIT compiler have never been tuned to bulk
 operators in functional programs.\footnote{See discussion by Cliff Click at \url{http://www.azulsystems.com/blog/cliff/2011-04-04-fixing-the-inlining-problem}.}\pg{Maybe elaborate and cite Cliff Click's blog post, turn it into a citation?}
 We did not investigate such lowerings. It is unclear how
 well these optimizations would extend to other collections which intrinsically
-carry further overhead.
-\pg{Resume and connect with \cref{sec:optim-vs-inc}.}
+carry further overhead. Moreover, it is unclear how to execute incrementally the
+result of these lowerings, as we discuss in \cref{sec:optim-vs-inc}.
 \pg{Cite Stream fusion to completeness~\citep{Kiselyov2017stream}!}
 
 Those works did not support embedding arbitrary libraries in an automated or

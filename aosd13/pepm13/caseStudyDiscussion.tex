@@ -3,10 +3,10 @@ for host and domain-specific language design.
 
 \section{Optimization limitations}
 \label{sec:optim-vs-inc}
-\pg{Resume}
-While indexing achieved significant speedups, when indexing does not apply
-speedups are more limited; in comparison, later projects working on collection
-query optimization gave better speedups.
+In our experiments indexing achieved significant speedups, but when indexing
+does not apply speedups are more limited; in comparison, later projects working
+on collection query optimization, such as OptiQL~\citep{Rompf13,Arvind13}, gave
+better speedups, as also discussed in \cref{sec:rwdsl-lms}.
 
 A design goal of this project was to incrementalize optimized queries, and while
 it is easy to incrementalize collection operators such as \texttt{map},
@@ -16,13 +16,21 @@ We considered using shortcut fusion, but we did
 not know a good way to incrementalize the resulting programs; later work, as
 described in \cref{part:incr}, clarified what is possible and what not.
 
-Another problem is that most fusion techniques are designed for sequential processing, hence conflict with incrementalization.
+Another problem is that most fusion techniques are designed for sequential
+processing, hence conflict with incrementalization.
 Most fusion techniques generally assume bulk operations scan collections in
 linear order. For instance, shortcut fusion rewrites operators in terms of
-\texttt{foldr}. It is not so clear how to extend them to parallel and
-incremental programs. \pg{Cite Guy Steele talk against cons, and Ingo Maier's
-  incremental library.}
-
+\texttt{foldr}.
+During parallel and/or incremental computation, instead, it is better to use
+\emph{tree-shaped folds}: that is, to split the task in a divide-and-conquer
+fashion, so that the various subproblems form a balanced tree. This division
+minimizes the height of the tree, hence the number of steps needed to combine
+results from subproblems into the final result, as also discussed by
+\citet{Steele2009organizing}. It is not so clear how to apply shortcut fusion to
+parallel and incremental programs.
+\citet{Maier2013} describe an incremental tree-shaped fold, where each
+subproblem that is small enough is solved by scanning its input in linear order,
+but does not perform code transformation and does not study how to perform fusion.
 
 \section{Deep embedding}
 \subsection{What worked well}
