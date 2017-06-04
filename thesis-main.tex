@@ -131,6 +131,12 @@
 % \chapter{Conclusions}
 % \pg{Plan for things that complete the original paper's story: add them by
 %   revising that text and in that chapter.}
+
+% Show Bibliography in TOC, % from https://tex.stackexchange.com/a/98995/1340
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
+
 \bibliography{Bibs/DB,Bibs/ProgLang,Bibs/SoftEng,Bibs/own}
 \include{backmatter}
 \end{document}
