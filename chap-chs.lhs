@@ -639,9 +639,7 @@ provide change structures for all types:
 \begin{restatable}[Change structures for base types]{requirement}{baseChs}
   For each base type |iota| we must have a change structure
   |chs(iota)| defined on base set |eval(iota)|, based on the
-  basic change structures defined earlier.\pg{?}
-  % including
-  % |oplusIdx(iota) : iota -> Dt^iota -> iota|?
+  basic change structures defined earlier.
 \end{restatable}
 
 \begin{definition}[Change structure for types]
@@ -656,7 +654,8 @@ provide change structures for all types:
 \begin{lemma}
   Change sets and validity, as defined in \cref{def:chs-types},
   give rise to the same basic change structures as the ones
-  defined earlier in \cref{def:bchs-types}.
+  defined earlier in \cref{def:bchs-types}, and to the change operations
+  described in \cref{fig:chs-types}.
 \end{lemma}
 \begin{proof}
   This can be verified by induction on types. For each case, it
@@ -741,33 +740,61 @@ resulting environment change.
 %%%%
 % What's below must be revised.
 %%%%
+We summarize definitions on types in \cref{fig:change-structures}.
 
-% To prove that |`oplus`| agrees with validity in general
-% (\cref{thm:valid-oplus}), we must require definitions from
-% plugins to satisfy this theorem on base types:
-% \begin{restatable}[|`oplus`| agrees with validity on base types]{requirement}{baseValidOplus}
-%   \label{req:base-valid-oplus}
-%   If\\ |fromto iota v1 dv v2| then |v1 `oplus` dv = v2|.
-% \end{restatable}
+Finally, we can lift change operators from the semantic level to the syntactic
+level so that their meaning is coherent~\pg{?}.
 
-% \begin{definition}
-%   For each type |tau| we define operators |oplusIdx(tau) : tau ->
-%   Dt^tau -> tau|, |ominusIdx(tau) : tau -> tau -> Dt^tau|.
-% \end{definition}
+\begin{definition}[Term-level change operators]
+  \label{def:term-change-ops}
+  We define type-indexed families of change operators at the term level with the following signatures:
+  %For each type |tau| we define type-indexed families  operators at the term-level
+  \begin{code}
+  oplusIdx(tau) : ^^ tau -> Dt^tau -> tau
+  ominusIdx(tau) : ^^ tau -> tau -> Dt^tau
+  nilIdx(tau, param) : ^^ tau -> Dt^tau
+  ocomposeIdx(tau) : ^^ Dt^tau -> Dt^tau -> Dt^tau
+\end{code}
+and definitions:
+\begin{code}
+  tf1 (oplusIdx(sigma -> tau)) dtf = \x -> tf1 x `oplus` dtf x (nil x)
+  tf2 (ominusIdx(sigma -> tau)) tf1 = \x dx -> tf2 (x `oplus` dx) `ominus` tf1 x
+  nilIdx(sigma -> tau, tf) = tf (ominusIdx(sigma -> tau)) tf
+  dtf1 (ocomposeIdx(sigma -> tau)) dtf2  = \x dx -> dtf1 x (nil x) `ocompose` dtf2 x dx
 
-% We define then |`oplus`|, |nilc| and |`ominus`| on function spaces:
-% \begin{code}
-%   nil v = v `ominus` v
-%   f1 (oplusIdx(A -> B)) df = \v -> f1 v `oplus` df v (nil v)
-%   f2 (ominusIdx(A -> B)) f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
-% \end{code}
+  tf1 (oplusIdx(iota)) dtf = ...
+  tf2 (ominusIdx(iota)) tf1 = ...
+  nilIdx(iota, tf) = ...
+  dtf1 (ocomposeIdx(iota)) dtf2  = ...
+  \end{code}
+\end{definition}
 
-% In particular, when |A -> B = eval(sigma) -> eval(tau)|, it follows that
-% \begin{code}
-%   f1 (oplusIdx(sigma -> tau)) df = \v -> f1 v `oplus` df v (nil v)
-%   f2 (ominusIdx(sigma -> tau)) f1 = \v dv -> f2 (v `oplus` dv) `ominus` f1 v
-% \end{code}
+\pg{not proven for compose.}
+\begin{lemma}[Term-level change operators agree with change structures]
+  \label{lem:chops-coherent}
+  The following equations hold for all types |tau|, contexts |Gamma|
+  well-typed terms |Gamma /- t1, t2 : tau|, |Dt^Gamma /- dt, dt1, dt2 : Dt^tau|
+  and environments |rho : eval(Gamma)| |drho : eval(Dt^Gamma)| such that all
+  expressions are defined.
+\begin{code}
+eval (t1 (oplusIdx(tau)) dt) drho = eval t1 drho `oplus` eval dt drho
+eval (t2 (ominusIdx(tau)) t1) rho = eval t2 rho `oplus` eval t1 rho
+eval (nilIdx(tau, t)) rho = nil (eval t rho)
+eval (dt1 (ocomposeIdx(tau)) dt2) drho = eval dt1 drho `ocompose` eval dt2 drho
+\end{code}
+\end{lemma}
+\begin{proof}
+  By induction on types and simplifying both sides of the equalities. The proofs
+  for |`oplus`| and |`ominus`| must be done by simultaneous induction.
+\end{proof}
+We have not mechanized the proof for |`ocompose`|.
 
+This lifting imposes additional plugin requirements.
+
+\begin{restatable}[Term-level change operators for base types]{requirement}{baseChOps}
+  For each base type |iota| we define change operators as required by \cref{def:term-change-ops}
+  and satisfying requirements for \cref{lem:chops-coherent}.
+\end{restatable}
 % \pg{Both change structure requirements, theorems on types}
 % \begin{restatable}[|`ominus`| produces valid changes]{lemma}{validOminus}
 %   \label{thm:valid-ominus}
@@ -807,7 +834,6 @@ resulting environment change.
 % \)
 %     }}}
 
-We summarize definitions on types in \cref{fig:change-structures}.
 \begin{figure}
 \begin{subfigure}[c]{\textwidth}
   \RightFramedSignature{|oplusIdx(tau): eval(tau -> Dt^tau -> tau)|}
@@ -823,7 +849,8 @@ We summarize definitions on types in \cref{fig:change-structures}.
   dv1 (ocomposeIdx(iota))          dv2  = ...
   df1 (ocomposeIdx(sigma -> tau))  df2  = \v dv -> df1 v (nil v) `ocompose` df2 v dv
 \end{code}
-\caption{Change structure operations on types (see \cref{def:chs-envs}).}
+\caption{Change structure operations on types (see \cref{def:chs-types}).}
+\label{fig:chs-types}
 \end{subfigure}
 \begin{subfigure}[c]{\textwidth}
   \RightFramedSignature{|oplusIdx(Gamma): eval(Gamma -> Dt^Gamma -> Gamma)|}

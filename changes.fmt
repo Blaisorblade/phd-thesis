@@ -17,6 +17,7 @@
 
 %format `times` = "\times"
 %format Gamma = "\Gamma"
+%format Gamma' = "\Gamma\myquote"
 %format Gamma1
 %format Gamma2
 %format `preceq` = "\preceq"
@@ -46,6 +47,7 @@
 
 %format (oplusIdx(t)) = "\oplus_{" t "}"
 %format (ominusIdx(t)) = "\ominus_{" t "}"
+%format (nilIdx(t)) = "\NilC{" t "}"
 %format (ocomposeIdx(t)) = "\circledcirc_{" t "}"
 %format (doeIdx(v)) = "\Doe_{" v "}"
 
@@ -64,6 +66,11 @@
 %format f2
 %format f3
 %format f1' = "f_{1}\myquote"
+
+%format tf1
+%format tf2
+%format dtf1
+%format dtf2
 
 %format a0
 %format a1
