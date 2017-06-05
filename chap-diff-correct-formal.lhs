@@ -26,7 +26,7 @@ except where otherwise indicated. To this writer, given these definitions all
 proofs have become straightforward and unsurprising. Nevertheless, first
 obtaining these proofs took a while. So we typically include full proofs.
 We also believe these proofs clarify the meaning and consequences of our definitions.
-To make proofs as accessible as possible, we try and provide enough detail that
+To make proofs as accessible as possible, we try to provide enough detail that
 our target readers can follow along \emph{without} pencil and paper, at the
 expense of making our proofs look longer than they would usually be. As we
 target readers proficient with STLC (but not necessarily proficient with logical
