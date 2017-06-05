@@ -12,40 +12,110 @@ Finally, we relate this formalization of changes with the one by
 To define derivatives of primitives, we will often discuss
 changes directly on programs.
 
-We define notions to say that term |dt| is a change from
-term |t1| to term |t2|, so that as a corollary
-|t1 `oplus` dt `cong` t2| hence |t1 `oplus` dt| and |t2| are interchangeable in all contexts.
+\begin{example}
+  We consider a basic change structure on lists and the
+derivative of |map|. We will describe this example very
+informally; to see how such a change structure might be
+formalized, compare with the change structure for environments
+described earlier in \cref{def:chs-envs}. We'll describe a more
+realistic change structure for sequences later.
+
+For instance, consider a basic change structure on cons-lists of type
+|List a|, where a list change is just a list of element changes
+|List (Dt^a)|. A list change |dxs| is valid for source |xs| if
+they have the same length and each element change is valid for
+its corresponding element.
+On this basic change structure, we can define |`oplus`| and
+|`ocompose`| but not |`ominus`|: such a change can't describe the
+difference between two lists of different lengths.
+
+If we define |map : List a -> List a| as a primitive, and not as
+a derived function defined in terms of some other primitive, we
+can write derivative |dmap| as follows (in Haskell notation):
+\begin{code}
+  dmap f df [] [] = []
+  dmap f df (x : xs) (dx : dxs) =
+    df x dx : dmap f df xs dxs
+\end{code}
+Focus on the case for cons nodes |x : xs|: Change |dx| describes
+the change between |x| and |x `oplus` dx|, and |df x dx|
+describes the change between |f x| and |f (x `oplus` dx)|.
+So, by induction on the length of |xs| and |dxs|, one could show
+that |dmap f df xs dxs| describes the change between |map f xs|
+and |map (f `oplus` df) (xs `oplus` dxs)|.
+
+However, the formal notions we have developed yet do not support
+this style of reasoning, where we say that a \emph{term} is a
+change across two terms. Hence we define such a notion of term
+change.
+\end{example}
+
+We defined earlier a change structure on |eval Gamma -> eval
+tau|, but it will not do for job; let us see why. This change
+structure allows us to show, for instance, correctness of
+differentiation, that is, that |evalInc t = \rho drho -> eval
+(derive t) drho| is a change from |eval t| to |eval t|. Recall
+that, according to validity as defined by this change structure,
+we say that |evalInc dt| is a valid change from |eval
+t1| to |eval t2| if for all valid environment changes |fromto
+Gamma rho1 drho rho2| we have that |eval dt drho| is a valid
+change from |eval t1 rho1| and |eval t2 rho2|. Hence we have
+\begin{equation}
+  \label{eq:sem-validity-oplus-eval}
+|forall (fromto Gamma rho1 drho rho2). eval t1 rho1 `oplus` eval dt drho = eval t2 rho2|.
+\end{equation}
+Applying correctness of differentiation to term |t = x|, we have
+that |eval x rho1 `oplus` eval dx drho = eval x rho2|.
+
+However, we seek to define validity on terms in a different way.
+We want to say when term |dt| is a valid change from term |t1| to
+term |t2|, so that as a corollary |t1 `oplus` dt `cong` t2| hence
+|t1 `oplus` dt| and |t2| are interchangeable in all contexts.
 That is,
 \begin{equation}
 |forall (fromto Gamma rho1 drho rho2). eval (t1 `oplus` dt) drho = eval t2 drho|.
 \end{equation}
-Unlike equations we have seen before, in this equation all terms
-are evaluated with respect to the same environment.
-
-Because evaluation commutes with |`oplus`|, and because a valid
-environment change |drho| extends its source |rho1|, this
-equation is equivalent to
+Because evaluation commutes with |`oplus`|
+(\cref{lem:chops-coherent}), and because a valid environment
+change |drho| extends its source |rho1|, this equation is
+equivalent to
 \begin{equation}
   \label{eq:syn-equiv-envs}
 |forall (fromto Gamma rho1 drho rho2). eval t1 rho1 `oplus` eval dt drho = eval t2 rho1|.
 \end{equation}
-Notably, in this equation |t2| is evaluated against environment |rho1|.
+This statement evaluates |t1| and |t2| in \emph{the same}
+environment |rho1|, while instead
+\cref{eq:sem-validity-oplus-eval} evaluates |t2| against |rho2|.
+Hence, we incorporate \cref{eq:syn-equiv-envs} into a new definition.
+\pg{Continue.}
 
-We earlier defined a change structure on |eval Gamma -> eval tau|,
-allowing us to show, for instance, that |evalInc t| is a
-change from |eval t| to |eval t|. We might be tempted to say,
-then, that |derive t| is a change from |t| to |t|. But such a
-notion does not imply that |t `oplus` derive t = t|.
-Indeed, if we try to show \cref{eq:syn-equiv-envs} from
-|fromtosem Gamma tau (eval t) (evalInc t) (eval t)|, we obtain a
-different equation, namely
-\begin{equation}
-|forall (fromto Gamma rho1 drho rho2). eval t1 rho1 `oplus` eval dt drho = eval t2 rho2|.
-\end{equation}
-\pg{cite this from earlier!}
+% Earlier equations evaluate |t2| against |rho2|.
+% \pg{revise}
+% Consider the equations that must hold for all |fromto Gamma rho1
+% drho rho2|
+% for validity in the change structure for |eval Gamma -> eval tau|\pg{cref}:
+% |eval t1 rho1 `oplus` eval dt drho = eval t2 rho2|
+% % \pg{cite this from earlier!}
+% and
+% for correctness of differentiation (\cref{thm:derive-correct-oplus}):
+% |eval t rho1 `oplus` eval (derive t) drho = eval t rho2|.
+% \pg{any other ones?}
+% Unlike equations we have seen before, in this equation all terms
+% are evaluated with respect to the same environment.
 
-In such a statement, we evaluate |t1| and |t2| in \emph{the same}
-environment.
+% \pg{Earlier attempt...}
+% \pg{Bad transition.}
+% We might be tempted to say,
+% then, that |derive t| is a change from |t| to |t|. But such a
+% notion does not imply that |t `oplus` derive t = t|.
+% Indeed, if we try to show \cref{eq:syn-equiv-envs} from
+% |fromtosem Gamma tau (eval t) (evalInc t) (eval t)|, we obtain a
+% different equation, namely
+% \begin{equation}
+% |forall (fromto Gamma rho1 drho rho2). eval t1 rho1 `oplus` eval dt drho = eval t2 rho2|.
+% \end{equation}
+% \pg{cite this from earlier!}
+
 
 % or to term |t1 `oplus` dt|, that |dx| is a
 % change from |x| to |x `oplus` dx|, and so on.
@@ -62,6 +132,14 @@ environment.
   |fromtosyn Gamma tau t1 dt t2|, if
   |forall (fromto Gamma rho1 drho rho2). fromto tau (eval t1 rho1) (eval dt drho) (eval t2 rho1)|.
 \end{definition}
+\begin{notation}
+  We often simply say that |dt| is a change from |t1| to |t2|,
+  leaving everything else implicit when not important.
+\end{notation}
+
+This notion supports the reasoning we did earlier.
+\pg{Made this up, check and show this.}
+\pg{Define change structures on terms?}
 
 % We write substitution as |t [x := s]|, and parallel substitution
 % as 
