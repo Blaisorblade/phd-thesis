@@ -12,16 +12,7 @@ Finally, we relate this formalization of changes with the one by
 To define derivatives of primitives, we will often discuss
 changes directly on programs.
 
-
-\begin{definition}[Syntactic change operators]
-  We lift change operators |`oplus`|, |`ominus`|, |nilc| and |ocompose| to type-indexed families of terms.
-  \pg{elaborate with obvious details, type signatures... I might have them somewhere}
-\end{definition}
-\begin{lemma}[Evaluation commutes with change operators]
-  Evaluation maps change operators to their semantics counterpart.
-\end{lemma}
-
-We define language to say that term |dt| is a change from
+We define notions to say that term |dt| is a change from
 term |t1| to term |t2|, so that as a corollary
 |t1 `oplus` dt `cong` t2| hence |t1 `oplus` dt| and |t2| are interchangeable in all contexts.
 That is,
