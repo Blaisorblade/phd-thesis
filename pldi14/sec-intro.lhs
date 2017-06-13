@@ -43,15 +43,32 @@ describes the change between |f x| and |f (x `oplus` dx)|.
 So, by induction on the length of |xs| and |dxs|, one could show
 that |dmap f df xs dxs| describes the change between |map f xs|
 and |map (f `oplus` df) (xs `oplus` dxs)|.
-
-But most of this reasoning can't be done directly in terms of the
-concepts we studied. We can't even say that |dx| is a change from
-|x| to |x `oplus` dx|. More generally, we can't yet say that a
-\emph{term} is a change across two terms.
-To fix that, we define next a notion of term
-change.
 \end{example}
 
+To support this reasoning, we define the concept of \emph{syntactic
+validity}, that is, when a change term |dt| is a (valid) change
+from source |t1| to destination |t2|.
+\begin{definition}[Syntactic validity]
+  \label{def:syntactic-validity}
+  We say that term |Dt^Gamma /- dt : Dt^tau| is a (syntactic)
+  change from |Gamma /- t1 : tau| to |Gamma /- t2 : tau|, and write
+  |fromtosyn Gamma tau t1 dt t2|, if
+  |forall (fromto Gamma rho1 drho rho2). fromto tau (eval t1 rho1) (eval dt drho) (eval t2 rho1)|.
+\end{definition}
+\begin{notation}
+  We often simply say that |dt| is a change from |t1| to |t2|,
+  leaving everything else implicit when not important.
+\end{notation}
+Using syntactic validity, we can show for instance that |dx| is a change
+from |x| to |x `oplus` dx|.\pg{False if we use |dx|.}
+
+We can also do the reasoning in earlier
+example \cref{ex:syn-changes-map}.\pg{check}
+\pg{Made this up, check and show this.}
+\pg{continue}
+
+\pg{Define change structures on terms?}
+\paragraph{Discussion}
 We defined earlier a change structure on the domain of the
 \emph{denotations} of terms, that is |eval Gamma -> eval tau|.
 We could try to use this as a change structure on terms, but this
@@ -142,22 +159,6 @@ Hence, we incorporate \cref{eq:syn-equiv-envs} into a new definition.
 % change structure on |eval Gamma -> eval tau|, and write |fromto
 % () t1 dt t2|.\pg{How to write Gamma, tau there?}
 % But in such a statement means that for all
-
-\begin{definition}[Syntactic validity]
-  \label{def:syntactic-validity}
-  We say that term |Dt^Gamma /- dt : Dt^tau| is a (syntactic)
-  change from |Gamma /- t1 : tau| to |Gamma /- t2 : tau|, and write
-  |fromtosyn Gamma tau t1 dt t2|, if
-  |forall (fromto Gamma rho1 drho rho2). fromto tau (eval t1 rho1) (eval dt drho) (eval t2 rho1)|.
-\end{definition}
-\begin{notation}
-  We often simply say that |dt| is a change from |t1| to |t2|,
-  leaving everything else implicit when not important.
-\end{notation}
-
-This notion supports the reasoning we did earlier.
-\pg{Made this up, check and show this.}
-\pg{Define change structures on terms?}
 
 % We write substitution as |t [x := s]|, and parallel substitution
 % as 
