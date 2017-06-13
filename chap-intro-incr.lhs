@@ -99,11 +99,8 @@ We build our incremental DSLs based on
 simply-typed $\lambda$-calculus (STLC), extended with
 \emph{language plugins} to define the domain-specific parts, as
 discussed in \cref{sec:intro-stlc}. We call our approach
-\emph{ILC} for \emph{Incrementalizing Lambda Calculus}.\footnote{Originally, ILC stood for
-  \emph{Incremental Lambda Calculus}, an extension of
-  $\lambda$-calculus with additional operations. Such extensions
-  are no more needed, so we don't have any more an incremental
-  lambda calculus per se, but the name stuck.}
+\emph{ILC} for \emph{Incremental Lambda Calculus}.
+
 The rest of this chapter is organized as follows.
 In \cref{sec:generalize-fin-diff} we explain that 
 differentiation generalizes the calculus of finite differences, a relative of
@@ -116,18 +113,11 @@ introduce \emph{changes to functions}.
 In \cref{sec:informal-derive} we define differentiation and motivate it
 informally.
 In \cref{sec:derive-example} we apply differentiation to our motivating example.
-%
-\pg{check later this TOC} In \cref{ch:derive-formally,ch:change-theory}, we
-introduce a formal theory of changes, and we use it to formalize
-differentiation and prove it correct.
 
-% \section{Our object language: STLC}
-% \label{sec:intro-stlc}
-
-% We will define differentiation as a recursive program transformation on terms.
-% To be able to define the transformation and state the invariant it satisfies, we
-% need to first recall the object language we develop the transformation in.
-
+Correctness of ILC is far from obvious. In
+\cref{ch:derive-formally,ch:change-theory}, we introduce a formal theory of
+changes, and we use it to formalize differentiation and prove it correct.
+\pg{check later this TOC}
 
 \section{Generalizing the calculus of finite differences}
 \label{sec:generalize-fin-diff}

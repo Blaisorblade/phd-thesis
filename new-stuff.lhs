@@ -37,11 +37,11 @@
 % \citet{CaiEtAl2014ILC}, dropping the requirement that |a = da|. Thanks to change negation, a
 % derivative |dgroupFold| could react to the removal of collection elements.
 
-\chapter{Incrementalizing more programs}
+\chapter{Incrementalization beyond ILC}
 \label{ch:inc-more-programs}
 \pg{Only a very rough sketch for now}
 
-In the previous chapters we have shown how to apply finite differencing to
+In previous chapters we have shown how to apply finite differencing to
 programs with first-class functions. With finite differencing we can
 incrementalize a few programs, but for others we run into problems:
 
@@ -55,17 +55,16 @@ incrementalize a few programs, but for others we run into problems:
 \item Applying a derivative to a nil change always produce a nil change, but we
   never take advantage of this to optimize derivatives, except sometimes at
   compile time.
+\end{enumerate}
+
+To show these limitations
 % \item No support for change composition: there is no direct way to compose a
 %   sequence of changes |dx1, dx2, dx3, ...| across |x0, x1, x2, x3, ...| and
 %   produce a single change, except by applying all those changes and computing a
 %   difference with |x0 `oplus` dx1 `oplus` dx2 `oplus` dx3|.
-\item Change structures must provide a difference operation, even though most
-  often we are not supposed to use it.
-\end{enumerate}
- % In fact, while a function change can replace
- %  a function with an arbitrary other function, actual changes often simply
- %  replace a closure with another closure using the same code but closing over a
- %  changed environment.
+
+% \item Change structures must provide a difference operation, even though most
+%   often we are not supposed to use it.
 
 %include defunc.lhs
 \chapter{Misc to integrate}
@@ -235,3 +234,7 @@ update :: Int -> a -> Seq a -> Seq a
   |mapInt| variants with the same type into functions with different cache
   types. Mapping different functions over different elements produces.}
 
+
+\chapter{Conclusion and future work}
+\section{Primitives}
+\label{sec:fw-primitives}

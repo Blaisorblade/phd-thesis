@@ -78,8 +78,6 @@ incremental on collections. \citet{Willis08} use dynamic techniques
  to incrementalize JQL queries.
 
 \section{Static approaches}
-\pg{If we discuss partial evaluation, we should compare to
-  \citep{Sundaresh91}}
 Static approaches analyze a program at compile-time and produce an
 incremental version that efficiently updates the output
 of the original program according to changing inputs.
@@ -95,6 +93,13 @@ Our aim is to apply static incrementalization to more expressive languages;
 in particular, \ILC\ supports first-class functions and an open
 set of base types with associated primitive operations.
 
+\citet{Sundaresh91} propose to incrementalize programs using
+partial evaluation: given a partitioning of program inputs in parts
+that change and parts that stay constant,
+\citeauthor{Sundaresh91} partially evaluates a given program relative
+to the constant input parts, and combine the result with the
+changing inputs.
+
 \subsection{Finite differencing}
 \label{sec:finite-diff}
 \citet{Paige82FDC} present derivatives for a first-order language
@@ -106,7 +111,8 @@ this work to queries on relational data, such as in \emph{algebraic
 terminology. However, most of this work does not apply to nested
 collections or algebraic data types, but only to relational
 (flat) data, and no previous approach handles first-class
-functions. Incremental support is typically designed
+functions or programs resulting from defunctionalization or
+closure conversion. Incremental support is typically designed
 monolithically for a whole language, rather than piecewise.
 Improving on algebraic differencing, \citet{Koch10IQE}
 \emph{guarantees} asymptotic speedups with a compositional query
@@ -119,6 +125,13 @@ our support for bags and the use of groups is inspired by their work,
 but their architecture is still rather restrictive: they lack
 support for function changes and restrict incrementalization to
 self-maintainable views, without hinting at a possible solution.
+
+Unlike later approaches to higher-order differentiation, we do
+not restrict our base types to
+groups~\citep{Koch2016incremental}, and transformed programs we
+produce do not require further runtime
+transformation~\citep{Koch2016incremental,Huesca2015incrementality},
+as we discuss further next.
 
 \newcommand{\ldiff}{\TitleLambda--diff}
 \subsection{\TitleLambda{}--diff and partial differentials}
@@ -163,11 +176,13 @@ unfeasible.
 On the other hand, it is not clear how often this worst-case is
 realized, or how big |n| grows in typical programs, or if it is
 simply feasible to perform differentiation at runtime, similarly
-to JIT compilation.
-Overall, an efficient implementation of \ldiff{} and similar
-systems remains an open problem.
+to JIT compilation. Overall, an efficient implementation of
+\ldiff{} remains an open problem.
+It appears also \citet{Koch2014incremental,Koch2016incremental}
+suffer similar problems, but a few details appear simpler since
+they restrict focus to functions over groups.
 
-To see why introducing |D t| is necessary, consider
+To see why \ldiff{} need introduce |D t|, consider
 differentiating $\frac{\partial s\;t}{\partial x, d_x}$, that is,
 the change $d$ of $s\;t$ when $x$x is updated by change $d_x$.
 Change $d$ depends (a) on the change of $t$ when $x$ is updated

@@ -13,7 +13,7 @@ To define derivatives of primitives, we will often discuss
 changes directly on programs.
 
 \begin{example}
-  We consider a basic change structure on lists and the
+We consider a basic change structure on lists and the
 derivative of |map|. We will describe this example very
 informally; to see how such a change structure might be
 formalized, compare with the change structure for environments
@@ -26,7 +26,7 @@ For instance, consider a basic change structure on cons-lists of type
 they have the same length and each element change is valid for
 its corresponding element.
 On this basic change structure, we can define |`oplus`| and
-|`ocompose`| but not |`ominus`|: such a change can't describe the
+|`ocompose`| but not |`ominus`|: such list changes can't describe the
 difference between two lists of different lengths.
 
 If we define |map : List a -> List a| as a primitive, and not as
@@ -44,33 +44,51 @@ So, by induction on the length of |xs| and |dxs|, one could show
 that |dmap f df xs dxs| describes the change between |map f xs|
 and |map (f `oplus` df) (xs `oplus` dxs)|.
 
-However, the formal notions we have developed yet do not support
-this style of reasoning, where we say that a \emph{term} is a
-change across two terms. Hence we define such a notion of term
+But most of this reasoning can't be done directly in terms of the
+concepts we studied. We can't even say that |dx| is a change from
+|x| to |x `oplus` dx|. More generally, we can't yet say that a
+\emph{term} is a change across two terms.
+To fix that, we define next a notion of term
 change.
 \end{example}
 
-We defined earlier a change structure on |eval Gamma -> eval
-tau|, but it will not do for job; let us see why. This change
-structure allows us to show, for instance, correctness of
-differentiation, that is, that |evalInc t = \rho drho -> eval
-(derive t) drho| is a change from |eval t| to |eval t|. Recall
-that, according to validity as defined by this change structure,
-we say that |evalInc dt| is a valid change from |eval
-t1| to |eval t2| if for all valid environment changes |fromto
-Gamma rho1 drho rho2| we have that |eval dt drho| is a valid
-change from |eval t1 rho1| and |eval t2 rho2|. Hence we have
+We defined earlier a change structure on the domain of the
+\emph{denotations} of terms, that is |eval Gamma -> eval tau|.
+We could try to use this as a change structure on terms, but this
+won't do. In particular, if |\rho drho -> eval dt drho| is a change from |eval t1|
+to |eval t2|, it does not follow that |t1 `oplus` dt `cong` t2|.
+Indeed, in the latter statement, all terms are evaluated in the
+same environment; instead, when we say that |\rho drho -> eval dt
+drho| is a change from |eval t1| to |eval t2|, we in fact
+evaluate |t2| according to an updated environment.
+So we can satisfy |t1 `oplus` dt `cong` t2| with |t1 = x|, |dt =
+dx| and |t2 = x `oplus` dx|. Yet, |\rho drho -> eval dx drho| is
+a change from |eval x| to |eval x|, not to |eval (x `oplus` dx)|.
+
+%but rather that |eval t1 rho `oplus` eval dt (nil rho) = eval t2 rho|
+Let us see why in more detail by recalling earlier notions.
+When we state correctness of differentiation using the change
+structure on |eval Gamma -> eval tau|, we say that |evalInc t =
+\rho drho -> eval (derive t) drho| is a change from |eval t| to
+|eval t|. Recall that, according to validity as defined by this
+change structure, we say that |\rho1 drho -> eval dt drho| is a
+valid change from |eval t1| to |eval t2| if for all valid
+environment changes |fromto Gamma rho1 drho rho2| we have that
+|eval dt drho| is a valid change from |eval t1 rho1| and |eval t2
+rho2|. Hence we have
 \begin{equation}
   \label{eq:sem-validity-oplus-eval}
 |forall (fromto Gamma rho1 drho rho2). eval t1 rho1 `oplus` eval dt drho = eval t2 rho2|.
 \end{equation}
-Applying correctness of differentiation to term |t = x|, we have
-that |eval x rho1 `oplus` eval dx drho = eval x rho2|.
+For instance, applying correctness of differentiation to term |t
+= x|, we have that |eval x rho1 `oplus` eval dx drho = eval x
+rho2|.
 
 However, we seek to define validity on terms in a different way.
 We want to say when term |dt| is a valid change from term |t1| to
-term |t2|, so that as a corollary |t1 `oplus` dt `cong` t2| hence
+term |t2|, so that as a corollary |t1 `oplus` dt `cong` t2| and
 |t1 `oplus` dt| and |t2| are interchangeable in all contexts.
+\pg{Uh! Not all contexts! Only contexts with valid environments!}
 That is,
 \begin{equation}
 |forall (fromto Gamma rho1 drho rho2). eval (t1 `oplus` dt) drho = eval t2 drho|.
