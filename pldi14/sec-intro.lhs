@@ -47,20 +47,26 @@ and |map (f `oplus` df) (xs `oplus` dxs)|.
 
 To support this reasoning, we define the concept of \emph{syntactic
 validity}, that is, when a change term |dt| is a (valid) change
-from source |t1| to destination |t2|.
+from source |t1| to destination |t2|. Intuitively, |dt| is valid
+from |t1| to |t2| if evaluating |dt|, |t1| and |t2|, all
+against the same valid environment change |drho|, produces a
+valid change, together with its source and destination. Formally:
 \begin{definition}[Syntactic validity]
   \label{def:syntactic-validity}
   We say that term |Dt^Gamma /- dt : Dt^tau| is a (syntactic)
-  change from |Gamma /- t1 : tau| to |Gamma /- t2 : tau|, and write
+  change from |Dt^Gamma /- t1 : tau| to |Dt^Gamma /- t2 : tau|, and write
   |fromtosyn Gamma tau t1 dt t2|, if
-  |forall (fromto Gamma rho1 drho rho2). fromto tau (eval t1 rho1) (eval dt drho) (eval t2 rho1)|.
+  |forall (fromto Gamma rho1 drho rho2). fromto tau (eval t1 drho) (eval dt drho) (eval t2 drho)|.
 \end{definition}
 \begin{notation}
   We often simply say that |dt| is a change from |t1| to |t2|,
   leaving everything else implicit when not important.
 \end{notation}
 Using syntactic validity, we can show for instance that |dx| is a change
-from |x| to |x `oplus` dx|.\pg{False if we use |dx|.}
+from |x| to |x `oplus` dx|. In general, if |dt| is a change from
+|t1| to |t2| then |t1 `oplus` dt| and |t2| evaluate to equal
+results in any valid change environment |drho|.
+\pg{lemma! or start making all these facts?}
 
 We can also do the reasoning in earlier
 example \cref{ex:syn-changes-map}.\pg{check}
