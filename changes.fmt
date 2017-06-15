@@ -4,12 +4,19 @@
 
 %format ^ = " "
 %format ^^ = " "
+%format lett = "let"
 
 %else
 
 %format param = "\text{\textendash}"
 
 %subst dummy = "\text{\textendash}"
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+%format lett = "\mathbf{let}"
 
 %format alpha = "\alpha"
 %format Nat = "\mathbb{N}"

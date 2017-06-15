@@ -1217,7 +1217,7 @@ we consider are closures |rho[\x -> t]|.
 %format drho' = drho "\myquote"
 
 % indexed big-step eval
-%format ibseval (t)  rho (n) v = rho "\vdash" t "\Downarrow_{" n "}" v
+%format ibseval (t) rho (n) v = rho "\vdash" t "\Downarrow_{" n "}" v
 % without environments
 %format ibseval' (t) (n) (v) = t "\Downarrow_{" n "}" v
 % big-step eval
@@ -1234,7 +1234,7 @@ we consider are closures |rho[\x -> t]|.
 
 \begin{code}
   w ::= x | \x -> t
-  t ::= w | w w | let x = t in t
+  t ::= w | w w | lett x = t in t
   v ::= rho[\x -> t]
   rho ::= x1 := v1 , ... , xn := vn
 \end{code}
@@ -1251,7 +1251,7 @@ For instance, since a function change is applied to a base input
 and a change for it at once, the syntax for change term has a
 special binary application node |dw1 w dw2|; otherwise, in ANF,
 such syntax must be encoded through separate applications via
-|let dwa = dw1 w in let dwb = dwa dw2 in dwb|.
+|lett dwa = dw1 w in lett dwb = dwa dw2 in dwb|.
 Various other changes in the same spirit simplify similar
 formalization and mechanization details.
 %}
@@ -1261,7 +1261,7 @@ formalization and mechanization details.
 
 \begin{code}
   dw ::= dx | \x dx -> dt
-  dt ::= dw | dw w dw | let x = t; dx = dt in dt
+  dt ::= dw | dw w dw | lett x = t; dx = dt in dt
   dv ::= rho `stoup` drho[\x dx -> dt]
   drho ::= dx1 := dv1 , ..., dxn := dvn
 \end{code}
@@ -1271,7 +1271,7 @@ one-to-one to constructs in the language of change terms:
   |derive(x)| &= |dx| \\
   |derive(\(x : sigma) -> t)| &= |\(x : sigma) (dx : Dt^sigma) -> derive(t)| \\
   |derive(w1 w2)| &= |(derive w1) t (derive w2)| \\
-  \Derive{|let x = t1 in t2|} &= |let x = t1; dx = derive(t1) in derive(t2)|
+  |derive(lett x = t1 in t2)| &= |lett x = t1; dx = derive t1 in derive t2|
 \end{align*}
   %|derive(c)| &= |deriveConst(c)|
 
@@ -1325,7 +1325,7 @@ derivations for typed terms.
 \Rule[T-Let]
   {|Gamma /- t1 : sigma|\\
   |Gamma , x : sigma /- t2 : tau|}
-  {|Gamma /- let x = t1 in t2 : tau|}
+  {|Gamma /- lett x = t1 in t2 : tau|}
 \end{typing}
 
 \begin{typing}
@@ -1349,7 +1349,7 @@ derivations for typed terms.
   |Gamma /- t1 : sigma|\\
   |Gamma /-- dt1 : sigma|\\
   |Gamma , x : sigma /-- dt2 : tau|}
-  {|Gamma /-- let x = t1 ; dx = dt1 in dt2 : tau|}
+  {|Gamma /-- lett x = t1 ; dx = dt1 in dt2 : tau|}
 \end{typing}
 \pg{where?}%
 
@@ -1367,7 +1367,7 @@ same (\cref{sec:sanity-check-big-step}).
 
   \Rule[E-App]{|ibseval w1 rho 0 rho'[\x -> t]|\\|ibseval w2 rho 0 v2|\\|ibseval t (rho', x := v2) n v'|}{|ibseval (w1 w2) rho (1 + n) v'|}
 
-  \Rule[E-Let]{|ibseval t1 rho n1 v1|\\|ibseval t2 (rho, x := v1) n2 v2|}{|ibseval (let x = t1 in t2) rho (1 + n1 + n2) v2|}
+  \Rule[E-Let]{|ibseval t1 rho n1 v1|\\|ibseval t2 (rho, x := v1) n2 v2|}{|ibseval (lett x = t1 in t2) rho (1 + n1 + n2) v2|}
 \end{typing}
 When we need to omit indexes, we write |bseval t rho v| to mean
 that for some |n| we have |ibseval t rho n v|.
@@ -1390,7 +1390,7 @@ semantics for change terms.
     |bseval  t1  rho v1|\\
     |dbseval dt1 rho drho dv1|\\
     |dbseval dt2 (rho, x := v1) (drho; dx := dv1) dv2|}
-  {|dbseval (let x = t1; dx = dt1 in dt2) rho drho dv2|}
+  {|dbseval (lett x = t1; dx = dt1 in dt2) rho drho dv2|}
 \end{typing}
 
 \section{Sanity-checking our semantics}
@@ -1438,7 +1438,7 @@ rho t| and |starv v| can be defined in a mutually recursive way:
   |star rho x| &= |starv (rho(x))|\\
   |star rho (\x -> t)| &= |\x -> star rho t|\\
   |star rho (w1 w2)| &= |(star rho w1) (star rho w2)|\\
-  \rho^*(|let x = t1 in t2|) &= |let x = star rho t1  in star rho t2|\\
+  |star rho (lett x = t1 in t2)| &= |lett x = star rho t1  in star rho t2|\\
   \\
   |starv (rho[\x -> t])| &= |\x -> star rho t|
 \end{align*}
@@ -1461,7 +1461,7 @@ following \citeauthor*{Acar08}):
 
   \Rule[Let']{|ibseval' t1 n1 w1|\\
     |ibseval' (t2[x := w1]) n2 w2|}
-  {|ibseval' (let x = t1 in t2) (1 + n1 + n2) w2|}
+  {|ibseval' (lett x = t1 in t2) (1 + n1 + n2) w2|}
 \end{typing}
 In this form, it is more apparent that the step indexes count
 steps of $\beta$-reduction or substitution.
