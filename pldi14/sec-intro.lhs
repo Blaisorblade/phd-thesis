@@ -1243,13 +1243,18 @@ Next, we consider a separate language for change terms, which can
 be transformed into the base language. This language supports
 directly the structure of change terms.
 
+%{
+%format dwa = dw "_a"
+%format dwb = dw "_b"
+
 For instance, since a function change is applied to a base input
 and a change for it at once, the syntax for change term has a
-special binary application node |dw w dw|; otherwise, in ANF,
+special binary application node |dw1 w dw2|; otherwise, in ANF,
 such syntax must be encoded through separate applications via
-|let dfa = df a in let db = dfa da in ...|.
+|let dwa = dw1 w in let dwb = dwa dw2 in dwb|.
 Various other changes in the same spirit simplify similar
 formalization and mechanization details.
+%}
 % In particular, values for
 % function changes are again closures, but we require they bind
 % two variables at the out
@@ -1257,19 +1262,98 @@ formalization and mechanization details.
 \begin{code}
   dw ::= dx | \x dx -> dt
   dt ::= dw | dw w dw | let x = t; dx = dt in dt
-  dv = rho `stoup` drho[\x dx -> dt]
+  dv ::= rho `stoup` drho[\x dx -> dt]
   drho ::= dx1 := dv1 , ..., dxn := dvn
 \end{code}
 Differentiation maps constructs in the language of base terms
 one-to-one to constructs in the language of change terms:
+\begin{align*}
+  |derive(x)| &= |dx| \\
+  |derive(\(x : sigma) -> t)| &= |\(x : sigma) (dx : Dt^sigma) -> derive(t)| \\
+  |derive(w1 w2)| &= |(derive w1) t (derive w2)| \\
+  \Derive{|let x = t1 in t2|} &= |let x = t1; dx = derive(t1) in derive(t2)|
+\end{align*}
+  %|derive(c)| &= |deriveConst(c)|
+
+%format /-- = "\vdash_{\Delta}"
+
+We define change types as before, but we modify the definition of
+change contexts and environment changes to \emph{not} contain
+entries for base values:
 \begin{code}
-  derive x = dx
-  derive (\x -> t) = \x dx -> derive t
-  derive (w1 w2) = derive(w1) w2 (derive w2)
-  derive(let x = t1 in t2) = let x = t1; dx = derive(t1) in derive(t2)
+  Dt^emptyCtx = emptyCtx
+  Dt^(Gamma, x : tau) = Dt^Gamma, dx : Dt^tau
 \end{code}
-\pg{derivation, change semantics, where?}%
-Following \citeauthor*{Acar08}, to define step-indexed logical relations
+
+We can also define typing judgement for base terms and for change
+terms. Typing for base terms is standard. For change terms, a
+natural type system would only prove judgements with shape
+|Gamma, Dt^Gamma /- dt : Dt^tau| (where |Gamma, Dt^Gamma| stands
+for the concatenation of |Gamma| and |Dt^Gamma|).
+To simplify inversion on such judgements (especially in Agda), we
+write instead |Gamma /-- dt : tau|.
+
+One can verify the following derived typing rule for |derive|:
+\begin{typing}
+  \Rule[T-Derive]
+  {|Gamma /- t : tau|}
+  {|Gamma /-- derive t : tau|}
+\end{typing}
+% if |Gamma /- t : tau| then |Gamma /-- derive
+% t : tau|.
+
+In our mechanization for typed ANF $\lambda$-calculus, we stick
+in both cases to Church typing, hence only defining typing
+derivations for typed terms.
+
+\begin{typing}
+\Rule[T-Var]
+  {|x : tau `elem` Gamma|}
+  {|Gamma /- x : tau|}
+
+\Rule[T-App]
+  {|Gamma /- w1 : sigma -> tau|\\
+  |Gamma /- w2 : sigma|}
+  {|Gamma /- w1 w2 : tau|}
+
+\raisebox{0.5\baselineskip}{\fbox{|Gamma /- t : tau|}}
+
+\Rule[T-Lam]
+  {|Gamma , x : sigma /- t : tau|}
+  {|Gamma /- \(x : sigma) -> t : sigma -> tau|}
+
+\Rule[T-Let]
+  {|Gamma /- t1 : sigma|\\
+  |Gamma , x : sigma /- t2 : tau|}
+  {|Gamma /- let x = t1 in t2 : tau|}
+\end{typing}
+
+\begin{typing}
+\Rule[T-DVar]
+  {|x : tau `elem` Gamma|}
+  {|Gamma /-- dx : tau|}
+
+\raisebox{0.5\baselineskip}{\fbox{|Gamma /-- - dt : tau|}}
+
+\Rule[T-DApp]
+  {|Gamma /-- dw1 : sigma -> tau|\\
+    |Gamma /- w2 : sigma|\\
+    |Gamma /-- dw2 : sigma|}
+  {|Gamma /- dw1 w2 dw2 : tau|}
+
+\Rule[T-DLam]
+  {|Gamma , x : sigma /-- dt : tau|}
+  {|Gamma /-- \(x : sigma) (dt : Dt^sigma) -> dt : sigma -> tau|}
+
+\Rule[T-DLet]{
+  |Gamma /- t1 : sigma|\\
+  |Gamma /-- dt1 : sigma|\\
+  |Gamma , x : sigma /-- dt2 : tau|}
+  {|Gamma /-- let x = t1 ; dx = dt1 in dt2 : tau|}
+\end{typing}
+\pg{where?}%
+
+Following \citet*{Acar08}, to define step-indexed logical relations
 we consider a call-by-value big-step semantics, where derivations
 are indexed by a step count, which counts in essence
 $\beta$-reduction steps. Since our semantics uses environments,
@@ -1277,13 +1361,13 @@ $\beta$-reduction steps are implemented not via substitution but
 via environment extension, but the resulting step-counts are the
 same (\cref{sec:sanity-check-big-step}).
 \begin{typing}
-  \Rule[Var]{|rho(x) = v|}{|ibseval x rho 0 v|}
+  \Rule[E-Var]{|rho(x) = v|}{|ibseval x rho 0 v|}
 
-  \Axiom[Lam]{|ibseval (\x -> t) rho 0 (rho[\x -> t])|}
+  \Axiom[E-Lam]{|ibseval (\x -> t) rho 0 (rho[\x -> t])|}
 
-  \Rule[App]{|ibseval w1 rho 0 rho'[\x -> t]|\\|ibseval w2 rho 0 v2|\\|ibseval t (rho', x := v2) n v'|}{|ibseval (w1 w2) rho (1 + n) v'|}
+  \Rule[E-App]{|ibseval w1 rho 0 rho'[\x -> t]|\\|ibseval w2 rho 0 v2|\\|ibseval t (rho', x := v2) n v'|}{|ibseval (w1 w2) rho (1 + n) v'|}
 
-  \Rule[Let]{|ibseval t1 rho n1 v1|\\|ibseval t2 (rho, x := v1) n2 v2|}{|ibseval (let x = t1 in t2) rho (1 + n1 + n2) v2|}
+  \Rule[E-Let]{|ibseval t1 rho n1 v1|\\|ibseval t2 (rho, x := v1) n2 v2|}{|ibseval (let x = t1 in t2) rho (1 + n1 + n2) v2|}
 \end{typing}
 When we need to omit indexes, we write |bseval t rho v| to mean
 that for some |n| we have |ibseval t rho n v|.
@@ -1291,18 +1375,18 @@ that for some |n| we have |ibseval t rho n v|.
 We can also define a straightforward non-indexed big-step
 semantics for change terms.
 \begin{typing}
-  \Rule[DVar]{|drho(x) = v|}{|dbseval x rho drho v|}
+  \Rule[E-DVar]{|drho(x) = v|}{|dbseval x rho drho v|}
 
-  \Axiom[DLam]{|dbseval (\x dx -> dt) rho drho (rho `stoup` drho[\x dx -> dt])|}
+  \Axiom[E-DLam]{|dbseval (\x dx -> dt) rho drho (rho `stoup` drho[\x dx -> dt])|}
 
-  \Rule[DApp]{%
+  \Rule[E-DApp]{%
     |dbseval dw1 rho drho (rho' `stoup` drho'[\x dx -> dt])|\\
     |bseval  w2  rho v2|\\
     |dbseval dw2 rho drho dv2|\\
     |dbseval dt  (rho', x := v2) (drho', dx := dv2) dv'|}
   {|dbseval (dw1 w2 dw2) rho drho dv'|}
 
-  \Rule[DLet]{
+  \Rule[E-DLet]{
     |bseval  t1  rho v1|\\
     |dbseval dt1 rho drho dv1|\\
     |dbseval dt2 (rho, x := v1) (drho; dx := dv1) dv2|}
@@ -1380,7 +1464,7 @@ following \citeauthor*{Acar08}):
   {|ibseval' (let x = t1 in t2) (1 + n1 + n2) w2|}
 \end{typing}
 In this form, it is more apparent that the step indexes count
-$beta$-reduction/substitution steps.
+steps of $\beta$-reduction or substitution.
 
 It's also easy to see that this big-step semantics agrees with a
 standard small-step semantics $\mapsto$ (which we omit):
@@ -1480,7 +1564,7 @@ step-indexed logical relation, we can say that two terms are
 equivalent for $k$ or fewer steps, even if they might have
 different behavior with more steps available.
 In our case, we can say that a change appears valid at
-step count $k$ if it behaves like a valid change in tests using
+step count $k$ if it behaves like a valid change in observations using
 at most $k$ steps.
 
 % Instead of observing the behavior of terms with an unbounded
@@ -1489,10 +1573,12 @@ at most $k$ steps.
 % we give a bound $k$, and observe
 % behavior with at most $k$
 
-For untyped $\lambda$-calculus, instead, we'll need to define the
-relation by well-founded recursion on step-indexes. But first,
-we index the relation by both types and step-indexes, since this
-is the one we use in our formal proof.
+First, we index the relation by both types and step-indexes,
+since this is the one we use in our mechanized proof. This
+relation is defined by structural induction on types.
+For untyped $\lambda$-calculus, instead, we'll need to drop
+types. The resulting definition is instead defined by
+well-founded recursion on step-indexes.
 
 \begin{align*}
   |valset Nat| ={}& \{|(k, n1, dn, n2) `such` n1, n2 `elem` Nat, dn
