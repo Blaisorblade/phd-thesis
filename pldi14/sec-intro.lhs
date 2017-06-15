@@ -1157,6 +1157,406 @@ s - c$ which isn't constant, so there can be no such |h|.
 % % needlessly recomputes $\Merge\Xs\Ys$. However, the result is a
 % % base input to $\FOLD'$.
 
-\section{Nontermination}
+\section{General recursion}
 \label{sec:non-termination}
 \pg{write, and put somewhere}
+
+\chapter{Syntactic correctness proofs for ILC}
+We can also prove ILC correct without using denotational
+semantics, but using only operational semantics and logical
+relations.
+
+This simplifies extending the proofs to more expressive languages
+where a denotational semantics requires more sophistication. In
+particular, using this approach we prove correctness of ILC for
+pure untyped $\lambda$-calculus using an environment-based
+call-by-value semantics. We present this development is this
+chapter.
+
+Compared to earlier chapters, this one will be more technical and
+concise.
+
+Also, using operational semantics, we can show more formally
+whence function changes arise: we model function values as
+closures and function change values as either closure changes
+(which only modify environments) or replacement closures.
+
+Our development is inspired significantly by
+\citet{Ahmed2006stepindexed} and \citet*{Acar08}. We refer to
+those works and to Ahmed's lectures at OPLSS
+2013\footnote{\url{https://www.cs.uoregon.edu/research/summerschool/summer13/curriculum.html}}
+for an introduction to (step-indexed) logical relations.
+
+We can prove ILC correct using, in increasing order of complexity,
+\begin{enumerate}
+\item a typed language and standard syntactic logical relations;
+\item a typed language and step-indexed logical relations;
+\item an untyped language and step-indexed logical relations.
+\end{enumerate}
+We have fully mechanized the second proof, and done the others
+manually.
+
+For convenience, we consider a $\lambda$-calculus in a variant of
+A-normal form.
+We let meta-variable |t| range over arbitrary terms, |w| range
+over neutral forms and |v| range over syntactic values (which are
+always closed). Our environments are finite maps |rho| from
+variables to syntactic values. The only form of syntactic values
+we consider are closures |rho[\x -> t]|.
+\pg{Add v ::= n production and fix sentence.}
+
+%format `stoup` = "\mid"
+
+%format n1
+%format n2
+%format w1
+%format w2
+%format dw1
+%format dw2
+%format rho' = rho "\myquote"
+%format drho' = drho "\myquote"
+
+% indexed big-step eval
+%format ibseval (t)  rho (n) v = rho "\vdash" t "\Downarrow_{" n "}" v
+% without environments
+%format ibseval' (t) (n) (v) = t "\Downarrow_{" n "}" v
+% big-step eval
+%format bseval  (t)  rho v = rho "\vdash" t "\Downarrow" v
+% change big-step eval
+%format dbseval (dt) rho drho dv = rho `stoup` drho "\vdash" dt "\Downarrow" dv
+
+%format vn = "v_n"
+%format dvn = dv "_n"
+%format dxn = dx "_n"
+
+%format (star rho (t)) = rho "^*(" t ")"
+%format starv v = v "^*"
+
+\begin{code}
+  w ::= x | \x -> t
+  t ::= w | w w | let x = t in t
+  v ::= rho[\x -> t]
+  rho ::= x1 := v1 , ... , xn := vn
+\end{code}
+
+Next, we consider a separate language for change terms, which can
+be transformed into the base language. This language supports
+directly the structure of change terms.
+
+For instance, since a function change is applied to a base input
+and a change for it at once, the syntax for change term has a
+special binary application node |dw w dw|; otherwise, in ANF,
+such syntax must be encoded through separate applications via
+|let dfa = df a in let db = dfa da in ...|.
+Various other changes in the same spirit simplify similar
+formalization and mechanization details.
+% In particular, values for
+% function changes are again closures, but we require they bind
+% two variables at the out
+
+\begin{code}
+  dw ::= dx | \x dx -> dt
+  dt ::= dw | dw w dw | let x = t; dx = dt in dt
+  dv = rho `stoup` drho[\x dx -> dt]
+  drho ::= dx1 := dv1 , ..., dxn := dvn
+\end{code}
+Differentiation maps constructs in the language of base terms
+one-to-one to constructs in the language of change terms:
+\begin{code}
+  derive x = dx
+  derive (\x -> t) = \x dx -> derive t
+  derive (w1 w2) = derive(w1) w2 (derive w2)
+  derive(let x = t1 in t2) = let x = t1; dx = derive(t1) in derive(t2)
+\end{code}
+\pg{derivation, change semantics, where?}%
+Following \citeauthor*{Acar08}, to define step-indexed logical relations
+we consider a call-by-value big-step semantics, where derivations
+are indexed by a step count, which counts in essence
+$\beta$-reduction steps. Since our semantics uses environments,
+$\beta$-reduction steps are implemented not via substitution but
+via environment extension, but the resulting step-counts are the
+same (\cref{sec:sanity-check-big-step}).
+\begin{typing}
+  \Rule[Var]{|rho(x) = v|}{|ibseval x rho 0 v|}
+
+  \Axiom[Lam]{|ibseval (\x -> t) rho 0 (rho[\x -> t])|}
+
+  \Rule[App]{|ibseval w1 rho 0 rho'[\x -> t]|\\|ibseval w2 rho 0 v2|\\|ibseval t (rho', x := v2) n v'|}{|ibseval (w1 w2) rho (1 + n) v'|}
+
+  \Rule[Let]{|ibseval t1 rho n1 v1|\\|ibseval t2 (rho, x := v1) n2 v2|}{|ibseval (let x = t1 in t2) rho (1 + n1 + n2) v2|}
+\end{typing}
+When we need to omit indexes, we write |bseval t rho v| to mean
+that for some |n| we have |ibseval t rho n v|.
+
+We can also define a straightforward non-indexed big-step
+semantics for change terms.
+\begin{typing}
+  \Rule[DVar]{|drho(x) = v|}{|dbseval x rho drho v|}
+
+  \Axiom[DLam]{|dbseval (\x dx -> dt) rho drho (rho `stoup` drho[\x dx -> dt])|}
+
+  \Rule[DApp]{%
+    |dbseval dw1 rho drho (rho' `stoup` drho'[\x dx -> dt])|\\
+    |bseval  w2  rho v2|\\
+    |dbseval dw2 rho drho dv2|\\
+    |dbseval dt  (rho', x := v2) (drho', dx := dv2) dv'|}
+  {|dbseval (dw1 w2 dw2) rho drho dv'|}
+
+  \Rule[DLet]{
+    |bseval  t1  rho v1|\\
+    |dbseval dt1 rho drho dv1|\\
+    |dbseval dt2 (rho, x := v1) (drho; dx := dv1) dv2|}
+  {|dbseval (let x = t1; dx = dt1 in dt2) rho drho dv2|}
+\end{typing}
+
+\section{Sanity-checking our semantics}
+\label{sec:sanity-check-big-step}
+In this section, we show how we ensure the step counts in our
+semantics are set correctly, by relating our semantics first with
+a big-step semantics based on substitution (rather than
+environments) and then relating this alternative semantics to a
+small-step semantics. Results in this section are useful to
+understand better our semantics and as a design aide to modify
+it, but are not necessary to the proof, so we have not mechanized
+them.
+
+In proofs using step-indexed logical relations, the use of
+step-counts in definitions is often delicate and tricky to get
+right.
+But \citeauthor*{Acar08} provide a robust recipe to ensure
+correct step-indexing in the semantics.
+To be able to prove the fundamental lemma of logical relations,
+we ensure step-counts agree with the ones induced by small-step
+semantics (which counts $\beta$-reductions). Such a lemma is not
+actually needed in other proofs, but only useful as a sanity
+check.
+We also attempted using the style of step-indexing
+used by \citet{Amin2017}, but were unable to produce a proof. To
+the best of our knowledge all proofs using step-indexed logical
+relations, even with functional big-step semantics
+\citep{Owens2016functional}, use step-indexing that agrees with
+small-step semantics.
+
+Unlike \citeauthor*{Acar08} we use environments in our big-step
+semantics; this avoids the need to define substitution in our
+mechanized proof. Nevertheless, one can show the two semantics
+correspond to each other.
+Our environments |rho| can be regarded as closed value
+substitutions, as long as we also substitute away environments in values.
+Formally,
+we write |star rho t| for the ``homomorphic extension'' of
+substitution |rho| to terms, which produces other terms.
+If |v| is a value using environments, we write |w = starv v| for the
+result of translating that value to not use environments; this
+operation produces a closed neutral form |w|. Operations |star
+rho t| and |starv v| can be defined in a mutually recursive way:
+\begin{align*}
+  |star rho x| &= |starv (rho(x))|\\
+  |star rho (\x -> t)| &= |\x -> star rho t|\\
+  |star rho (w1 w2)| &= |(star rho w1) (star rho w2)|\\
+  \rho^*(|let x = t1 in t2|) &= |let x = star rho t1  in star rho t2|\\
+  \\
+  |starv (rho[\x -> t])| &= |\x -> star rho t|
+\end{align*}
+If |ibseval t rho n v| in our semantics,
+a standard induction over the derivation of |ibseval t rho n v|
+shows that |ibseval' (star rho t) n (starv v)|
+%$|star rho t| \Downarrow_n |starv v|$
+in a more conventional big-step
+semantics using substitution rather than environments (also
+following \citeauthor*{Acar08}):
+
+\begin{typing}
+  \Axiom[Var']{|ibseval' x 0 x|}
+
+  \Axiom[Lam']{|ibseval' (\x -> t) 0 (\x -> t)|}
+
+  \Rule[App']{
+    |ibseval' (t[x := w2]) n w'|}
+  {|ibseval' ((\x -> t) w2) (1 + n) w'|}
+
+  \Rule[Let']{|ibseval' t1 n1 w1|\\
+    |ibseval' (t2[x := w1]) n2 w2|}
+  {|ibseval' (let x = t1 in t2) (1 + n1 + n2) w2|}
+\end{typing}
+In this form, it is more apparent that the step indexes count
+$beta$-reduction/substitution steps.
+
+It's also easy to see that this big-step semantics agrees with a
+standard small-step semantics $\mapsto$ (which we omit):
+if |ibseval' t n w| then $|t| \mapsto^{n} |w|$.
+Overall, the two statements can be composed, so our original
+semantics agrees with small-step semantics:
+if |ibseval t rho n v| then |ibseval' (star rho t) n (starv v)|
+and finally
+$|star rho t| \mapsto^{n} |starv v|$.
+Hence, we can translate evaluation derivations using big-step
+semantics to derivations using small-step semantics \emph{with
+  the same step count}.
+
+However, to state and prove the fundamental lemma we need not
+prove that our semantics is sound relative to some other
+semantics. We simply define the appropriate logical relation for
+validity and show it agrees with a suitable definition for |`oplus`|.
+
+Now that we defined our semantics, we proceed to define validity.
+\section{Validity as a logical relations}
+For simply-typed $\lambda$-calculus we can define logical
+relations without using step-indexes, simply by using structural
+recursion on types. We present the needed definitions as a
+stepping stone to the definitions using step-indexed logical relations.
+
+%format (valset (tau)) = "\mathcal{V}\left\llbracket" tau "\right\rrbracket"
+%format (compset (tau)) = "\mathcal{C}\left\llbracket" tau "\right\rrbracket"
+%format (envset (gamma)) = "\mathcal{G}\left\llbracket" gamma "\right\rrbracket"
+Following \citet{Ahmed2006stepindexed} our validity logical
+relation through two type-indexed families of relations.
+Relation |valset tau| relates values |v1|, |dv| and |v2|
+if |dv| is a valid change from |v1| to |v2| at type |tau|.
+Relation |compset tau| relates tuples of environments and
+computations,
+|<rho1, t1>|, |<rho, drho, dt>| and |<rho2, t2>| if |dt| is a valid
+change from |t1| and |t2|, considering the environments.
+More precisely, if |t1| evaluates in environment |rho1| to |v1|,
+and |t2| evaluates in environment |rho2| to |v2|, then
+|dt| must evaluate in environments |rho| and |drho| to a change
+value |dv|, with |v1, dv, v2| related by |valset tau|.
+%
+In this definition, the environments themselves need not be
+related: this definition characterizes validity
+\emph{extensionally}, that is, it allows unrelated
+|t1|, |dt| and |t2| to have unrelated implementations.
+We discuss a more intentional definition of validity in
+\cref{sec:intentional-step-indexed-validity}.
+
+In particular, for function types the relation |valset (sigma ->
+tau)| relates function values |f1|, |df| and |f2| if they map
+\emph{related input values} (and for |df| input changes) to
+\emph{related output computations}.
+\begin{figure}[h!]
+\begin{align*}
+  |valset Nat| ={}& \{|(n1, dn, n2) `such` n1, n2 `elem` Nat, dn
+                     `elem` Int `and` n1 + dn = n2|\}\\
+  |valset (sigma -> tau)| ={}&
+                               \{|(rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2]) `such`| \\
+                            & |forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
+                              ^&^ (<(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, | \\
+  |^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)|\}\\
+  |compset tau| ={}&
+                  \{|(<rho1, t1>, <rho , drho, dt>, <rho2, t2>) `such` ^^^
+                  ^&^ (bseval t1 rho1 v1) `and` (bseval t2 rho2 v2) => ^^^
+                  ^&^ (dbseval dt rho drho dv) `and` (v1, dv, v2 `elem` valset tau)|\}\\
+                  \\
+  |envset emptyCtx| ={} & \{|(<emptyRho, emptyRho, emptyRho)>|\} \\
+  |envset (Gamma, x : tau)| ={} &
+                                  \{|<(rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)> `such` ^^^
+                                  ^&^ <rho1, drho, rho2> `elem` envset Gamma `and` <v1, dv, v2> `elem` valset tau|\} \\
+  |fromtosyn Gamma tau t1 dt t2| ={}&
+                                      |forall ((<rho1, drho, rho2>) `elem` envset Gamma) . ^^^
+                                      ^&^ (<rho1, t1>, <rho1, drho, dt>, <rho2, t2>) `elem` compset tau|
+\end{align*}
+\caption{Defining validity using big-step semantics}
+\label{fig:big-step-validity-ext-nosi}
+\end{figure}
+\pg{environments, semantic entailment and fundamental lemma.}
+
+Given these definitions, one can prove the fundamental lemma.
+\begin{theorem}[Fundamental lemma]
+  For every well-typed term |Gamma /- t : tau| we have that
+  |fromtosyn Gamma tau t (derive t) t|.
+\end{theorem}
+\begin{proof}
+  By induction on the structure on terms, using ideas similar to
+  \cref{thm:derive-correct}.
+\end{proof}
+\section{Step-indexed logical relations}
+Step-indexed logical relations define approximations to a
+relation, to enable dealing with non-terminating programs.
+Logical relations relate the behavior of multiple terms during
+evaluation; with step-indexed logical relations, we can take a
+bound $k$ and restrict attention to evaluations that take at most
+$k$ steps. For instance, if we define equivalence as a
+step-indexed logical relation, we can say that two terms are
+equivalent for $k$ or fewer steps, even if they might have
+different behavior with more steps available.
+In our case, we can say that a change appears valid at
+step count $k$ if it behaves like a valid change in tests using
+at most $k$ steps.
+
+% Instead of observing the behavior of terms with an unbounded
+% number of computation steps, as we did before, we observe the
+% behavior of terms having a bounded
+% we give a bound $k$, and observe
+% behavior with at most $k$
+
+For untyped $\lambda$-calculus, instead, we'll need to define the
+relation by well-founded recursion on step-indexes. But first,
+we index the relation by both types and step-indexes, since this
+is the one we use in our formal proof.
+
+\begin{align*}
+  |valset Nat| ={}& \{|(k, n1, dn, n2) `such` n1, n2 `elem` Nat, dn
+                     `elem` Int `and` n1 + dn = n2|\}\\
+  |valset (sigma -> tau)| ={}&
+                               \{|(k, rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2])`such`| \\
+                  & |forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
+                    ^&^ forall j. ^^ j < k => ^^^
+                       ^&^ (j, <(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, <(rho2, x:= v2), t2>) `elem` (compset tau)|\}\\
+  |compset tau| ={}&
+                  \{|(k, <rho1, t1>, <rho `stoup` drho, dt>, <rho2, t2>) `such` ^^^
+                     ^&^ forall j . ^^ j < k `and` ^^^
+                        ^&^ (ibseval t1 rho1 k v1) `and` (bseval t2 rho2 v2) => ^^^
+                           ^&^ (dbseval dt rho1 drho dv) `and` (k - j , v1, dv, v2 `elem` valset tau)|\}
+\end{align*}
+
+Unlike \citeauthor{Ahmed2006stepindexed} we use only Church
+typing and do not formalize untyped terms, so we require that all
+terms are well-typed as expected.
+
+At this moment, we do not require that related closures contain
+related environments: we are defining validity only based on
+extensional behavior.
+
+\section{An intentional characterization of valid function changes}
+\label{sec:intentional-step-indexed-validity}
+
+Up to now, we have defined when a function change is valid purely
+based on its behavior, like we have done earlier when using
+denotational semantics.
+We expect it should still be possible to define |`oplus`| and
+prove it agrees with validity. However, we do not do so.
+
+To ensure that |f1 `oplus` df = f2| (for a suitable |`oplus`|) we
+choose to require that closures |f1|, |df| and |f2| close over
+environments of matching shapes.
+\pg{Continue here.}
+
+\begin{align*}
+  |valset Nat| ={}& \{|(n1, dn, n2) `such` n1, n2 `elem` Nat, dn
+                     `elem` Int `and` n1 + dn = n2|\}\\
+  |valset (sigma -> tau)| ={}&
+                               \{|(rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2]) `such`| \\
+  & |exists Gamma . ^^ Gamma, x : sigma /- t1 : tau `and` Dt^(Gamma, x : sigma) /- dt : Dt^tau `and` Gamma, x : sigma /- t2 : tau `and`|\\
+                            & |forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
+                            ^&^ (<(rho1, x := v1), t1>, <(rho, x := v1) (drho, dx := dv), dt>, <(rho2, x:= v2), t2>) `elem` (compset tau)|\}\\
+  |compset tau| ={}&
+                  \{|(<rho1, t1>, <rho , drho, dt>, <rho2, t2>) `such` ^^^
+                  ^&^ (bseval t1 rho1 v1) `and` (bseval t2 rho2 v2) => ^^^
+                  ^&^ (dbseval dt rho drho dv) `and` (v1, dv, v2 `elem` valset tau)|\}
+\end{align*}
+
+\begin{align*}
+  |valset Nat| ={}& \{|(k, n1, dn, n2) `such` n1, n2 `elem` Nat, dn
+                     `elem` Int `and` n1 + dn = n2|\}\\
+  |valset (sigma -> tau)| ={}&
+                               \{|(k, rho1[\x -> t1], drho[\x dx -> dt], rho2[\x -> t2])`such`| \\
+  & |exists Gamma . ^^ Gamma, x : sigma /- t1 : tau `and` Dt^(Gamma, x : sigma) /- dt : Dt^tau `and` Gamma, x : sigma /- t2 : tau `and`|\\
+                  & |forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
+                    ^&^ forall j. ^^ j < k => ^^^
+                       ^&^ (j, <(rho1, x := v1), t1>, <(drho, dx := dv), dt>, <(rho2, x:= v2), t2>) `elem` (compset tau)|\}\\
+  |compset tau| ={}&
+                  \{|(k, <rho1, t1>, <drho, dt>, <rho2, t2>) `such` ^^^
+                     ^&^ forall j . ^^ j < k `and` ^^^
+                        ^&^ (ibseval t1 rho1 k v1) `and` (bseval t2 rho2 v2) => ^^^
+                           ^&^ (dbseval dt rho1 drho dv) `and` (k - j , v1, dv, v2 `elem` valset tau)|\}
+\end{align*}
