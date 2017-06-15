@@ -1251,7 +1251,7 @@ For instance, since a function change is applied to a base input
 and a change for it at once, the syntax for change term has a
 special binary application node |dw1 w dw2|; otherwise, in ANF,
 such syntax must be encoded through separate applications via
-|lett dwa = dw1 w in lett dwb = dwa dw2 in dwb|.
+|lett dwa = dw1 w in dwa dw2|.
 Various other changes in the same spirit simplify similar
 formalization and mechanization details.
 %}
