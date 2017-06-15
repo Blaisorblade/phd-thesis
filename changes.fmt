@@ -146,6 +146,7 @@
 %format dx2
 %format dx3
 
+%format : = ":\,"
 %format Dt = "\Delta"
 %format DtIdx(t) = "\Delta_{" t "}"
 %format Dt2 = "\Delta_2"
@@ -159,7 +160,7 @@
 %format (deriveConst(t)) = "\DeriveConst{" t "}"
 
 %format `cong` = "\cong"
-%format `congDt` = "\cong_\Delta"
+%format `congDt` = "\mathrel{\cong_\Delta}"
 
 %format nabla = "\nabla"
 %format emptyCtx = "\EmptyContext"
