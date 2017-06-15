@@ -157,7 +157,9 @@
 %format (evalConst(c)) = "\EvalConst{" c "}"
 %format (derive(t)) = "\Derive{" t "}"
 %format (deriveConst(t)) = "\DeriveConst{" t "}"
+
 %format `cong` = "\cong"
+%format `congDt` = "\cong_\Delta"
 
 %format nabla = "\nabla"
 %format emptyCtx = "\EmptyContext"
