@@ -1162,29 +1162,32 @@ s - c$ which isn't constant, so there can be no such |h|.
 \pg{write, and put somewhere}
 
 \chapter{Syntactic correctness proofs for ILC}
-We can also prove ILC correct without using denotational
-semantics, but using only operational semantics and logical
-relations.
-
-This simplifies extending the proofs to more expressive languages
-where a denotational semantics requires more sophistication. In
-particular, using this approach we prove correctness of ILC for
-pure untyped $\lambda$-calculus using an environment-based
-call-by-value semantics. We present this development is this
-chapter.
-
+In this chapter, we prove correctness of ILC without using
+denotational semantics, but using only operational semantics and
+logical relations, and extend our proof to pure call-by-value
+(CBV) untyped $\lambda$-calculus using \emph{step-indexed logical
+relations}.
 Compared to earlier chapters, this one will be more technical and
-concise.
+concise, because we already introduced the ideas behind both ILC
+and logical relation proofs.
 
-Also, using operational semantics, we can show more formally
-whence function changes arise: we model function values as
-closures and function change values as either closure changes
-(which only modify environments) or replacement closures.
+Using operational semantics simplifies extending the proofs to
+more expressive languages, where denotational semantics would
+require more sophistication.
+In particular, using this approach we prove correctness of ILC
+for pure untyped $\lambda$-calculus using an environment-based
+call-by-value semantics.
+
+Also, using operational semantics, we can show more formally how
+function changes arise: we model function values as closures, and
+in \cref{sec:intensional-step-indexed-validity} we model function
+change values as either closure changes (which only modify
+environments) or replacement closures.
 
 Our development is inspired significantly by
 \citet{Ahmed2006stepindexed} and \citet*{Acar08}. We refer to
-those works and to Ahmed's lectures at OPLSS
-2013\footnote{\url{https://www.cs.uoregon.edu/research/summerschool/summer13/curriculum.html}}
+those works and to Ahmed's lectures at OPLSS 2013%
+\footnote{\url{https://www.cs.uoregon.edu/research/summerschool/summer13/curriculum.html};}
 for an introduction to (step-indexed) logical relations.
 
 We can prove ILC correct using, in increasing order of complexity,
@@ -1196,6 +1199,8 @@ We can prove ILC correct using, in increasing order of complexity,
 We have fully mechanized the second proof, and done the others
 manually.
 
+\section{Formalization}
+\subsection{Syntax}
 For convenience, we consider a $\lambda$-calculus in a variant of
 A-normal form.
 We let meta-variable |t| range over arbitrary terms, |w| range
@@ -1265,6 +1270,8 @@ formalization and mechanization details.
   dv ::= rho `stoup` drho[\x dx -> dt]
   drho ::= dx1 := dv1 , ..., dxn := dvn
 \end{code}
+
+\subsection{Differentiation}
 Differentiation maps constructs in the language of base terms
 one-to-one to constructs in the language of change terms:
 \begin{align*}
@@ -1277,6 +1284,7 @@ one-to-one to constructs in the language of change terms:
 
 %format /-- = "\vdash_{\Delta}"
 
+\subsection{Typing}
 We define change types as before, but we modify the definition of
 change contexts and environment changes to \emph{not} contain
 entries for base values:
@@ -1286,25 +1294,7 @@ entries for base values:
 \end{code}
 
 We can also define typing judgement for base terms and for change
-terms. Typing for base terms is standard. For change terms, a
-natural type system would only prove judgements with shape
-|Gamma, Dt^Gamma /- dt : Dt^tau| (where |Gamma, Dt^Gamma| stands
-for the concatenation of |Gamma| and |Dt^Gamma|).
-To simplify inversion on such judgements (especially in Agda), we
-write instead |Gamma /-- dt : tau|.
-
-One can verify the following derived typing rule for |derive|:
-\begin{typing}
-  \Rule[T-Derive]
-  {|Gamma /- t : tau|}
-  {|Gamma /-- derive t : tau|}
-\end{typing}
-% if |Gamma /- t : tau| then |Gamma /-- derive
-% t : tau|.
-
-In our mechanization for typed ANF $\lambda$-calculus, we stick
-in both cases to Church typing, hence only defining typing
-derivations for typed terms.
+terms. Typing for base terms is standard.
 
 \begin{typing}
 \Rule[T-Var]
@@ -1328,12 +1318,28 @@ derivations for typed terms.
   {|Gamma /- lett x = t1 in t2 : tau|}
 \end{typing}
 
+For change terms, a
+natural type system would only prove judgements with shape
+|Gamma, Dt^Gamma /- dt : Dt^tau| (where |Gamma, Dt^Gamma| stands
+for the concatenation of |Gamma| and |Dt^Gamma|).
+To simplify inversion on such judgements (especially in Agda), we
+write instead |Gamma /-- dt : tau|.
+
+One can verify the following derived typing rule for |derive|:
+\begin{typing}
+  \Rule[T-Derive]
+  {|Gamma /- t : tau|}
+  {|Gamma /-- derive t : tau|}
+\end{typing}
+% if |Gamma /- t : tau| then |Gamma /-- derive
+% t : tau|.
+
 \begin{typing}
 \Rule[T-DVar]
   {|x : tau `elem` Gamma|}
   {|Gamma /-- dx : tau|}
 
-\raisebox{0.5\baselineskip}{\fbox{|Gamma /-- - dt : tau|}}
+\raisebox{0.5\baselineskip}{\fbox{|Gamma /-- dt : tau|}}
 
 \Rule[T-DApp]
   {|Gamma /-- dw1 : sigma -> tau|\\
@@ -1351,7 +1357,11 @@ derivations for typed terms.
   |Gamma , x : sigma /-- dt2 : tau|}
   {|Gamma /-- lett x = t1 ; dx = dt1 in dt2 : tau|}
 \end{typing}
-\pg{where?}%
+
+\subsection{Semantics}
+In our mechanization for typed ANF $\lambda$-calculus, we stick
+in both cases to Church typing, hence only defining typing
+derivations for typed terms.
 
 Following \citet*{Acar08}, to define step-indexed logical relations
 we consider a call-by-value big-step semantics, where derivations
@@ -1362,6 +1372,8 @@ via environment extension, but the resulting step-counts are the
 same (\cref{sec:sanity-check-big-step}).
 \begin{typing}
   \Rule[E-Var]{|rho(x) = v|}{|ibseval x rho 0 v|}
+
+\raisebox{0.5\baselineskip}{\fbox{|ibseval t rho n v|}}
 
   \Axiom[E-Lam]{|ibseval (\x -> t) rho 0 (rho[\x -> t])|}
 
@@ -1376,6 +1388,8 @@ We can also define a straightforward non-indexed big-step
 semantics for change terms.
 \begin{typing}
   \Rule[E-DVar]{|drho(x) = v|}{|dbseval x rho drho v|}
+
+\raisebox{0.5\baselineskip}{\fbox{|ibseval t rho n v|}}
 
   \Axiom[E-DLam]{|dbseval (\x dx -> dt) rho drho (rho `stoup` drho[\x dx -> dt])|}
 
@@ -1493,30 +1507,47 @@ stepping stone to the definitions using step-indexed logical relations.
 %format (valset (tau)) = "\mathcal{V}\left\llbracket" tau "\right\rrbracket"
 %format (compset (tau)) = "\mathcal{C}\left\llbracket" tau "\right\rrbracket"
 %format (envset (gamma)) = "\mathcal{G}\left\llbracket" gamma "\right\rrbracket"
-Following \citet{Ahmed2006stepindexed} our validity logical
-relation through two type-indexed families of relations.
-Relation |valset tau| relates values |v1|, |dv| and |v2|
-if |dv| is a valid change from |v1| to |v2| at type |tau|.
+Following \citet{Ahmed2006stepindexed}, we encode validity
+through two mutually recursive type-indexed families of ternary
+logical relations, |valset tau| over closed values and |compset
+tau| over terms (and environments).
+\pg{Maybe give their arities.}
+
+These relations are analogous to notions we considered earlier
+and express similar informal notions.
+\begin{itemize}
+\item With denotational semantics, we write |fromto tau v1 dv v2| to say
+  that change value |dv `elem` eval(Dt^tau)| is a valid change from
+  |v1| to |v2| at type |tau|. With operational semantics instead we
+  write |(v1, dv, v2) `elem` valset tau|, where |v1|, |dv| and |v2|
+  are now closed syntactic values.
+\item For terms, with denotational semantics we write |fromto tau (eval
+  t1 rho1) (eval dt drho) (eval t2 rho2)| to say that |dt| is a
+  valid change from |t1| and |t2|, considering the respective
+  environments. With operational semantics instead we write
+  |(<rho1, t1>, <rho, drho, dt>, <rho2, t2>) `elem` compset tau|.
+\end{itemize}
+
 Relation |compset tau| relates tuples of environments and
 computations,
-|<rho1, t1>|, |<rho, drho, dt>| and |<rho2, t2>| if |dt| is a valid
-change from |t1| and |t2|, considering the environments.
-More precisely, if |t1| evaluates in environment |rho1| to |v1|,
+|<rho1, t1>|, |<rho, drho, dt>| and |<rho2, t2>|: it holds
+if |t1| evaluates in environment |rho1| to |v1|,
 and |t2| evaluates in environment |rho2| to |v2|, then
 |dt| must evaluate in environments |rho| and |drho| to a change
 value |dv|, with |v1, dv, v2| related by |valset tau|.
-%
-In this definition, the environments themselves need not be
-related: this definition characterizes validity
-\emph{extensionally}, that is, it allows unrelated
-|t1|, |dt| and |t2| to have unrelated implementations.
-We discuss a more intentional definition of validity in
-\cref{sec:intentional-step-indexed-validity}.
+The environments themselves need not be related: this definition
+characterizes validity \emph{extensionally}, that is, it allows
+unrelated |t1|, |dt| and |t2| to have unrelated implementations.
+We discuss a more intensional definition of validity in
+\cref{sec:intensional-step-indexed-validity}.
 
 In particular, for function types the relation |valset (sigma ->
 tau)| relates function values |f1|, |df| and |f2| if they map
 \emph{related input values} (and for |df| input changes) to
 \emph{related output computations}.
+
+Since we use Church typing and only mechanize typed terms, we
+must include in all cases appropriate typing assumptions.
 \begin{figure}[h!]
 \begin{align*}
   |valset Nat| ={}& \{|(n1, dn, n2) `such` n1, n2 `elem` Nat, dn
@@ -1549,10 +1580,10 @@ tau)| relates function values |f1|, |df| and |f2| if they map
 \caption{Defining validity logical relations using big-step semantics.}
 \label{fig:big-step-validity-ext-nosi}
 \end{figure}
-\pg{environments, semantic entailment and fundamental lemma.}
 
 Given these definitions, one can prove the fundamental lemma.
-\begin{theorem}[Fundamental lemma]
+\begin{theorem}[Fundamental lemma: correctness of |derive|]
+  \label{thm:fund-lemma-derive-correct-types-nosi}
   For every well-typed term |Gamma /- t : tau| we have that
   |fromtosyn Gamma tau t (derive t) t|.
 \end{theorem}
@@ -1602,16 +1633,19 @@ well-founded recursion on step-indexes.
                            ^&^ (dbseval dt rho1 drho dv) `and` (k - j , v1, dv, v2 `elem` valset tau)|\}
 \end{align*}
 
-Unlike \citeauthor{Ahmed2006stepindexed} we use only Church
-typing and do not formalize untyped terms, so we require that all
-terms are well-typed as expected.
+Again, since we use Church typing and only mechanize typed terms, we
+must include in all cases appropriate typing assumptions. This
+choice does not match \citet{Ahmed2006stepindexed} but is
+one alternative she describes as equivalent. Indeed, while
+adapting the proof the extra typing assumptions and proof
+obligations were not a problem.
 
 At this moment, we do not require that related closures contain
 related environments: we are defining validity only based on
 extensional behavior.
 
-\section{An intentional characterization of valid function changes}
-\label{sec:intentional-step-indexed-validity}
+\section{An intensional characterization of valid function changes}
+\label{sec:intensional-step-indexed-validity}
 
 Up to now, we have defined when a function change is valid purely
 based on its behavior, like we have done earlier when using
