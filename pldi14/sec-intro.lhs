@@ -1522,14 +1522,21 @@ tau)| relates function values |f1|, |df| and |f2| if they map
   |valset Nat| ={}& \{|(n1, dn, n2) `such` n1, n2 `elem` Nat, dn
                      `elem` Int `and` n1 + dn = n2|\}\\
   |valset (sigma -> tau)| ={}&
-                               \{|(rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2]) `such`| \\
-                            & |forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
-                              ^&^ (<(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, | \\
-  |^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)|\}\\
+                               \{|(rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2]) `such` ^^^
+                    ^&^ (forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
+                    ^&^ (<(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
+                    ^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)) ^^ `and` ^^^
+                    ^&^ (exists Gamma1 Gamma Gamma2 . ^^^
+                    ^&^ Gamma1 , x : sigma /- t1 : tau ^^ `and` ^^^
+                    ^&^ Gamma, x : sigma /-- dt : tau ^^ `and` ^^^
+                    ^&^ Gamma2 , x : sigma /- t2 : tau)
+                       |\}\\
   |compset tau| ={}&
                   \{|(<rho1, t1>, <rho , drho, dt>, <rho2, t2>) `such` ^^^
-                  ^&^ (bseval t1 rho1 v1) `and` (bseval t2 rho2 v2) => ^^^
-                  ^&^ (dbseval dt rho drho dv) `and` (v1, dv, v2 `elem` valset tau)|\}\\
+                    ^&^ ((bseval t1 rho1 v1) `and` (bseval t2 rho2 v2) => ^^^
+                    ^&^ (dbseval dt rho drho dv) `and` (v1, dv, v2 `elem` valset tau)) ^^ `and` ^^^
+                    ^&^ exists Gamma1 Gamma Gamma2 . ^^ (Gamma1 /- t1 : tau) ^^ `and` ^^ (Gamma /-- dt : tau) ^^ `and` ^^ (Gamma2 /- t2 : tau)
+                       |\}\\
                   \\
   |envset emptyCtx| ={} & \{|(<emptyRho, emptyRho, emptyRho)>|\} \\
   |envset (Gamma, x : tau)| ={} &
@@ -1539,7 +1546,7 @@ tau)| relates function values |f1|, |df| and |f2| if they map
                                       |forall ((<rho1, drho, rho2>) `elem` envset Gamma) . ^^^
                                       ^&^ (<rho1, t1>, <rho1, drho, dt>, <rho2, t2>) `elem` compset tau|
 \end{align*}
-\caption{Defining validity using big-step semantics}
+\caption{Defining validity logical relations using big-step semantics.}
 \label{fig:big-step-validity-ext-nosi}
 \end{figure}
 \pg{environments, semantic entailment and fundamental lemma.}
