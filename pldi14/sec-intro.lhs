@@ -1197,18 +1197,55 @@ We can prove ILC correct using, in increasing order of complexity,
 \item an untyped language and step-indexed logical relations.
 \end{enumerate}
 We have fully mechanized the second proof, and done the others
-manually.
+on paper.
+
+To present the proofs, we describe our formal model of ANF
+$\lambda$-calculus. We define an untyped and typed variant
+sharing the same syntax and semantics, hence using Curry-style
+typing here. In our mechanization, however, we find it more
+convenient to define a Church-style type system (that
+is, a syntax that only describes typing derivations for
+well-typed terms) separately from the untyped language.
+
+In our mechanized formalization, we have additionally proved
+lemmas to ensure that our semantics is sound relative to our
+earlier denotational semantics (adapted for the ANF syntax). To
+ensure that our semantics is complete for the typed language, we
+proved that all terms (of type |tau|) evaluate to a value of type
+|tau| according to our denotational semantics, by adapting a
+standard proof of strong normalization for STLC~\citep[Ch.
+12]{Pierce02TAPL}.
 
 \section{Formalization}
+\subsection{Types and contexts}
+We introduce types for functions, binary products and naturals.
+Tuples can be encoded as usual through nested pairs.
+Change types are mostly like earlier, but this time we use
+naturals as change for naturals (hence, we cannot define a total
+|`ominus`| operation).
+
+We modify the definition of change contexts and environment
+changes to \emph{not} contain entries for base values: in this
+presentation we use separate environments for base variables and
+change variables. This choice avoids the need to define weakening
+lemmas.
+\begin{code}
+  tau ::= nat | tau1 `times` tau2 | sigma -> tau
+
+  Dt^nat = nat
+  Dt^(tau1 `times` tau2) = Dt^tau1 `times` Dt^tau2
+  Dt^(sigma -> tau) = sigma -> Dt^sigma -> Dt^tau
+
+  Dt^emptyCtx = emptyCtx
+  Dt^(Gamma, x : tau) = Dt^Gamma, dx : Dt^tau
+\end{code}
+
 \subsection{Syntax}
-For convenience, we consider a $\lambda$-calculus in a variant of
-A-normal form.
-We let meta-variable |t| range over arbitrary terms, |w| range
-over neutral forms and |v| range over syntactic values (which are
-always closed). Our environments are finite maps |rho| from
-variables to syntactic values. The only form of syntactic values
-we consider are closures |rho[\x -> t]|.
-\pg{Add v ::= n production and fix sentence.}
+\label{sec:bsos-anf-syntax}
+For convenience, we consider a $\lambda$-calculus in
+A-normal form. We do not parameterize this calculus over language
+plugins to reduce mechanization overhead, but we define separate syntactic
+categories for possible extension points.
 
 %format `stoup` = "\mid"
 
@@ -1237,26 +1274,58 @@ we consider are closures |rho[\x -> t]|.
 %format (star rho (t)) = rho "^*(" t ")"
 %format starv v = v "^*"
 
+Meta-variable |v| ranges over (closed) syntactic values, that is
+evaluation results. Values are numbers, pairs of values or
+closures. A closure is a pair of a function and an environment as
+usual.
+Environments |rho| are finite maps from variables to syntactic
+values; in our mechanization using de Bruijn indexes,
+environments are in particular finite lists of syntactic values.
+
+Meta-variable |t| ranges over arbitrary terms and |w|
+ranges over neutral forms. Neutral forms evaluate to values in
+zero steps, but unlike values they can be open: a neutral form is
+either a variable, a constant value |c|, a $\lambda$-abstraction or a
+pair of neutral forms.
+
+A term is either a neutral form, an application of neutral forms,
+a let expression or an application of a primitive function |p| to
+a neutral form. Multi-argument primitives are encoded as
+primitives taking (nested) tuples of arguments.
+
 \begin{code}
-  w ::= x | \x -> t
-  t ::= w | w w | lett x = t in t
-  v ::= rho[\x -> t]
+  c ::= n | ...
+  p ::= succ | add
+  w ::= x | \x -> t | (w, w) | c
+  t ::= w | w w | lett x = t in t | p w
+  v ::= rho[\x -> t] | (v, v) | c
   rho ::= x1 := v1 , ... , xn := vn
 \end{code}
 
+\subsection{Change syntax}
+\label{sec:bsos-anf-change-syntax}
+
 Next, we consider a separate language for change terms, which can
 be transformed into the base language. This language supports
-directly the structure of change terms.
+directly the structure of change terms: base variables and change
+variables live in separate namespaces. As we show later, for the typed language
+those namespaces are represented by typing contexts |Gamma| and
+|Dt^Gamma|: that is, the typing context for change variables is
+always the change context for |Gamma|.
 
 %{
 %format dwa = dw "_a"
 %format dwb = dw "_b"
 
-For instance, since a function change is applied to a base input
+Change terms often take or bind two parameters at once, one for a
+base value and one for its change.
+Since a function change is applied to a base input
 and a change for it at once, the syntax for change term has a
 special binary application node |dw1 w dw2|; otherwise, in ANF,
 such syntax must be encoded through separate applications via
-|lett dwa = dw1 w in dwa dw2|.
+|lett dwa = dw1 w in dwa dw2|. In the same way, closure changes
+|rho `stoup` drho[\x dx -> dt]| bind two variables at once and
+close over separate environments for base and change variables.
 Various other changes in the same spirit simplify similar
 formalization and mechanization details.
 %}
@@ -1264,49 +1333,67 @@ formalization and mechanization details.
 % function changes are again closures, but we require they bind
 % two variables at the out
 
+In change terms, we reuse primitives to stand for their
+derivatives. The semantics evaluates the derivatives of
+primitives correctly.
+While strictly speaking differentiation \emph{must} map
+primitives to standard terms, so that the resulting programs can
+be executed by a standard semantics, doing so in a new
+formalization yields little additional insight, and requires
+writing concrete derivatives of primitives as de Bruijn terms.
+
 \begin{code}
-  dw ::= dx | \x dx -> dt
-  dt ::= dw | dw w dw | lett x = t; dx = dt in dt
+  dc = 0
+  dw ::= dx | \x dx -> dt | (dw, dw) | dc
+  dt ::= dw | dw w dw | lett x = t; dx = dt in dt | p w dw
   dv ::= rho `stoup` drho[\x dx -> dt]
   drho ::= dx1 := dv1 , ..., dxn := dvn
 \end{code}
 
 \subsection{Differentiation}
+\label{sec:bsos-anf-derive}
 Differentiation maps constructs in the language of base terms
 one-to-one to constructs in the language of change terms:
 \begin{align*}
-  |derive(x)| &= |dx| \\
+  |deriveConst n| &= |0|\\
+  \\
+  |derive x| &= |dx| \\
   |derive(\(x : sigma) -> t)| &= |\(x : sigma) (dx : Dt^sigma) -> derive(t)| \\
+  |derive ((w1, w2))| &= |derive w1 ,  derive w2|\\
+  |derive c| &= |deriveConst c|\\
+  \\
+  |derive(p w)| &= |p w (derive w)| \\
   |derive(w1 w2)| &= |(derive w1) t (derive w2)| \\
   |derive(lett x = t1 in t2)| &= |lett x = t1; dx = derive t1 in derive t2|
 \end{align*}
-  %|derive(c)| &= |deriveConst(c)|
 
 %format /-- = "\vdash_{\Delta}"
 
 \subsection{Typing}
-We define change types as before, but we modify the definition of
-change contexts and environment changes to \emph{not} contain
-entries for base values:
-\begin{code}
-  Dt^emptyCtx = emptyCtx
-  Dt^(Gamma, x : tau) = Dt^Gamma, dx : Dt^tau
-\end{code}
+\label{sec:bsos-anf-typing}
 
 We can also define typing judgement for base terms and for change
 terms. Typing for base terms is standard.
+
+% Do sth. special for primitives and constants
+%format `vdashConst` = "\vdash_{\CONST}"
+%format `vdashPrim` = "\vdash_{\mathcal{P}}"
 
 \begin{typing}
 \Rule[T-Var]
   {|x : tau `elem` Gamma|}
   {|Gamma /- x : tau|}
 
+\Rule[T-Const]
+ {|`vdashConst` c : tau|}
+ {|Gamma /- c : tau|}
+
+\raisebox{0.5\baselineskip}{\fbox{|Gamma /- t : tau|}}
+
 \Rule[T-App]
   {|Gamma /- w1 : sigma -> tau|\\
   |Gamma /- w2 : sigma|}
   {|Gamma /- w1 w2 : tau|}
-
-\raisebox{0.5\baselineskip}{\fbox{|Gamma /- t : tau|}}
 
 \Rule[T-Lam]
   {|Gamma , x : sigma /- t : tau|}
@@ -1316,16 +1403,24 @@ terms. Typing for base terms is standard.
   {|Gamma /- t1 : sigma|\\
   |Gamma , x : sigma /- t2 : tau|}
   {|Gamma /- lett x = t1 in t2 : tau|}
+
+\Rule[T-Pair]
+  {|Gamma /- w1 : tau1|\\
+  |Gamma /- w2 : tau2|}
+  {|Gamma /- (w1 , w2) : tau1 `times` tau2|}
+
+\Rule[T-Prim]
+  {|`vdashPrim` p : sigma -> tau|\\
+   |Gamma /- w : sigma|}
+ {|Gamma /- p w : tau|}
 \end{typing}
 
-For change terms, a
-natural type system would only prove judgements with shape
-|Gamma, Dt^Gamma /- dt : Dt^tau| (where |Gamma, Dt^Gamma| stands
-for the concatenation of |Gamma| and |Dt^Gamma|).
-To simplify inversion on such judgements (especially in Agda), we
-write instead |Gamma /-- dt : tau|.
-
-One can verify the following derived typing rule for |derive|:
+For change terms, a natural type system would only prove
+judgements with shape |Gamma, Dt^Gamma /- dt : Dt^tau| (where
+|Gamma, Dt^Gamma| stands for the concatenation of |Gamma| and
+|Dt^Gamma|). To simplify inversion on such judgements (especially
+in Agda), we write instead |Gamma /-- dt : tau|, so that
+one can verify the following derived typing rule for |derive|:
 \begin{typing}
   \Rule[T-Derive]
   {|Gamma /- t : tau|}
@@ -1334,6 +1429,7 @@ One can verify the following derived typing rule for |derive|:
 % if |Gamma /- t : tau| then |Gamma /-- derive
 % t : tau|.
 
+Typing rules are as follows:
 \begin{typing}
 \Rule[T-DVar]
   {|x : tau `elem` Gamma|}
@@ -1359,10 +1455,7 @@ One can verify the following derived typing rule for |derive|:
 \end{typing}
 
 \subsection{Semantics}
-In our mechanization for typed ANF $\lambda$-calculus, we stick
-in both cases to Church typing, hence only defining typing
-derivations for typed terms.
-
+\label{sec:bsos-anf-semantics}
 Following \citet*{Acar08}, to define step-indexed logical relations
 we consider a call-by-value big-step semantics, where derivations
 are indexed by a step count, which counts in essence
@@ -1407,10 +1500,16 @@ semantics for change terms.
   {|dbseval (lett x = t1; dx = dt1 in dt2) rho drho dv2|}
 \end{typing}
 
-\section{Sanity-checking our semantics}
+\section{Sanity-checking our step-indexed semantics}
 \label{sec:sanity-check-big-step}
 In this section, we show how we ensure the step counts in our
-semantics are set correctly, by relating our semantics first with
+semantics are set correctly, and how we can relate this
+environment-based semantics to more conventional ones. We only
+consider the core calculus, without primitives, constants and
+pairs. Results from this section are not needed later and we have
+proved them formally on paper but not mechanized them.
+
+To this end we relate our semantics first with
 a big-step semantics based on substitution (rather than
 environments) and then relating this alternative semantics to a
 small-step semantics. Results in this section are useful to
@@ -1498,7 +1597,8 @@ semantics. We simply define the appropriate logical relation for
 validity and show it agrees with a suitable definition for |`oplus`|.
 
 Now that we defined our semantics, we proceed to define validity.
-\section{Validity as a logical relations}
+
+\section{Validity through syntactic logical relations}
 For simply-typed $\lambda$-calculus we can define logical
 relations without using step-indexes, simply by using structural
 recursion on types. We present the needed definitions as a
@@ -1528,6 +1628,9 @@ and express similar informal notions.
   |(<rho1, t1>, <rho, drho, dt>, <rho2, t2>) `elem` compset tau|.
 \end{itemize}
 
+Since we use Church typing and only mechanize typed terms, we
+must include in all cases appropriate typing assumptions.
+
 Relation |compset tau| relates tuples of environments and
 computations,
 |<rho1, t1>|, |<rho, drho, dt>| and |<rho2, t2>|: it holds
@@ -1536,18 +1639,25 @@ and |t2| evaluates in environment |rho2| to |v2|, then
 |dt| must evaluate in environments |rho| and |drho| to a change
 value |dv|, with |v1, dv, v2| related by |valset tau|.
 The environments themselves need not be related: this definition
-characterizes validity \emph{extensionally}, that is, it allows
-unrelated |t1|, |dt| and |t2| to have unrelated implementations.
-We discuss a more intensional definition of validity in
-\cref{sec:intensional-step-indexed-validity}.
+characterizes validity \emph{extensionally}, that is, it can relate
+|t1|, |dt| and |t2| that have unrelated implementations and
+unrelated environments---in fact, even unrelated typing contexts.
+This flexibility is useful to when relating closures of type
+|sigma -> tau|: two closures might be related even if they have
+close over environments of different shape. For instance,
+|v1 = emptyRho[\x -> 0]| and |v2 = (y = 0)[\x -> y]| are values
+related by a nil change, such as |dv = emptyRho[\x dx -> 0]|.
+In \cref{sec:intensional-step-indexed-validity}, we discuss a
+more intensional definition of validity.
 
 In particular, for function types the relation |valset (sigma ->
 tau)| relates function values |f1|, |df| and |f2| if they map
 \emph{related input values} (and for |df| input changes) to
 \emph{related output computations}.
 
-Since we use Church typing and only mechanize typed terms, we
-must include in all cases appropriate typing assumptions.
+We also extend the relation on values to environments via |envset
+Gamma|: environments are related if their corresponding entries
+are related.
 \begin{figure}[h!]
 \begin{align*}
   |valset Nat| ={}& \{|(n1, dn, n2) `such` n1, n2 `elem` Nat, dn
