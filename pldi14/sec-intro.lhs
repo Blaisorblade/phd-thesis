@@ -917,14 +917,14 @@ In this section we discuss similarities between correctness of |derive(param)|
 for the case of binary logical relations. This section is intended for logical
 relation experts, and we keep it rather informal.
 
-%format p(t) = "\mathcal{P}(" t ")"
+%format ppp(t) = "\mathcal{P}(" t ")"
 
 Most studies of logical relations mention no term transformation that relates to
 |derive(param)|; one exception is given by \citet{Bernardy2011realizability}.
 They study relational parametricity, a particular binary logical relation, where
 the fundamental theorem of logical relations becomes the abstraction theorem. To
 prove the abstraction theorem, \citeauthor{Bernardy2011realizability} present a
-term transformation |p(param)|; we'll show the analogy between this term
+term transformation |ppp(param)|; we'll show the analogy between this term
 transformation and
 |derive(param)|.%
 %
@@ -932,7 +932,7 @@ transformation and
   such a transformation, but we base our comparison off their presentation and
   avoid discussing their related work.}
 
-Transformation |p(t)| takes a term |t| to a proof term |p(t)| in a suitable
+Transformation |ppp(t)| takes a term |t| to a proof term |ppp(t)| in a suitable
 object logic (related to the one of |t|), that proves that |t| maps logically
 related inputs to logically related outputs. For binary logical relations and
 simply-typed $\lambda$-calculus, we can specialize their definition to the
@@ -944,12 +944,12 @@ following:
 \begin{code}
   (t1, t2) `elem` r(sigma -> tau) =
     forall x1 x2 : sigma, px : (x1, x2) `elem` r(sigma). (t1 x1, t2 x2) `elem` r(tau)
-  p(x) =
+  ppp(x) =
       px
-  p(\(x : sigma) -> t) =
-    \(x1 x2 : sigma) (px : (x1, x2) `elem` r(sigma)) -> p(t)
-  p(s t) =
-    p(s) (idx1 s) (idx2 s) p(t)
+  ppp(\(x : sigma) -> t) =
+    \(x1 x2 : sigma) (px : (x1, x2) `elem` r(sigma)) -> ppp(t)
+  ppp(s t) =
+    ppp(s) (idx1 s) (idx2 s) ppp(t)
 \end{code}
 
 where |idx1 s| and |idx2 s| subscript variables in terms with 1 and 2:
