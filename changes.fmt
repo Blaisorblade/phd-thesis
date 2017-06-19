@@ -8,6 +8,8 @@
 
 %else
 
+%format (pair (a) (b)) = "\langle" a , b "\rangle"
+
 %format param = "\text{\textendash}"
 
 %subst dummy = "\text{\textendash}"
@@ -228,6 +230,59 @@
 
 %format size(s) = "\left|{" s "}\right|"
 
+%format succ = "\mathbf{succ}"
+%format add = "\mathbf{add}"
+
+%format `stoup` = "\filleddiamond"
+%  format `stoup` = "\blackdiamond"
+
+%format n1
+%format n2
+%format dn1
+%format dn2
+
+%format w1
+%format w2
+%format dw1
+%format dw2
+%format rho' = rho "\myquote"
+%format drho' = drho "\myquote"
+
+% indexed big-step eval
+%format ibseval (t) rho (n) (v) = rho "\vdash" t "\Downarrow_{" n "}" v
+% without environments
+%format ibseval' (t) (n) (v) = t "\Downarrow_{" n "}" v
+% big-step eval
+%format bseval  (t)  rho (v) = rho "\vdash" t "\Downarrow" v
+% change big-step eval
+%format dbseval (dt) rho drho (dv) = rho `stoup` drho "\vdash" dt "\Downarrow_{\Delta}" dv
+
+%format vn = "v_n"
+%format dvn = dv "_n"
+%format dxn = dx "_n"
+
+%format (star rho (t)) = rho "^*(" t ")"
+%format starv v = v "^*"
+
+%format /-- = "\vdash_{\Delta}"
+%format `vdashConst` = "\vdash_{\CONST}"
+%format `vdashPrim` = "\vdash_{\mathcal{P}}"
+
+%format evalVal (w) rho = "\mathcal{V}\left\llbracket" w "\right\rrbracket" rho
+%format evalPrim p v = "\mathcal{P}\left\llbracket" p "\right\rrbracket" v
+
+%format devalVal (w) rho = "\mathcal{V}_{\Delta}\left\llbracket" w "\right\rrbracket" rho
+%format devalPrim p v = "\mathcal{P}_{\Delta}\left\llbracket" p "\right\rrbracket" v
+
+%format (valset (tau)) = "\mathcal{RV}\left\llbracket" tau "\right\rrbracket"
+%format (compset (tau)) = "\mathcal{RC}\left\llbracket" tau "\right\rrbracket"
+%format (envset (gamma)) = "\mathcal{RG}\left\llbracket" gamma "\right\rrbracket"
+
+%format ilcTau = "\ilcTau"
+%format ilcUntau = "\ilcUntau"
+%format dilcTau = "\dilcTau"
+%format dilcUntau = "\dilcUntau"
+
 %endif
 
 \def\deriveDefCore{%
@@ -240,16 +295,14 @@
 }
 
 %if false
-% derive(^^let x = t1 in t2) =
-%   let  x = t1
-%        dx = derive(t1)
-%        in   derive(t2)
-
+% derive(lett x = t1 in t2) =
+%   lett  x = t1
+%         dx = derive(t1)
+%         in   derive(t2)
 % \begin{code}
 % derive(\(x : sigma) -> t))  = \(x : sigma) (dx : Dt^sigma) -> derive(t)
 % derive(s t)                 = derive(s) t (derive(t))
 % derive(x)                   = dx
 % derive(c)                   = deriveConst(c)
 % \end{code}
-
 %endif

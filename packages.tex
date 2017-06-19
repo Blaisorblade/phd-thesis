@@ -9,6 +9,15 @@
 \usepackage{xparse}
 \usepackage{microtype}
 
+\usepackage{mathtools}
+% Combine mathtools and MnSymbol.
+% https://tex.stackexchange.com/a/28662/1340
+\let\originallhook\lhook
+\usepackage{MnSymbol}
+\newcommand{\lhook}{\mathrel{\raise.018ex\hbox{$\originallhook$}}}
+
+\usepackage{wasysym}
+
 \usepackage{subcaption}
 
 % This package allows hyphenation of compound words. Use \-/

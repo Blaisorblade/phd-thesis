@@ -126,7 +126,7 @@ simply-typed $\Gl$-calculus (STLC). We choose STLC as it is the
 simplest language with first-class functions and types, while
 being a sufficient model of realistic total languages.%
 \footnote{To know why we restrict to total languages see
-  \cref{sec:non-termination}.}
+  \cref{sec:general-recursion}.}
 %
 We recall the syntax and typing rules of STLC in
 \cref{fig:lambda-calc:syntax,fig:lambda-calc:typing}, together

@@ -1158,31 +1158,68 @@ s - c$ which isn't constant, so there can be no such |h|.
 % % base input to $\FOLD'$.
 
 \section{General recursion}
-\label{sec:non-termination}
+\label{sec:general-recursion}
 \pg{write, and put somewhere}
 
-\chapter{Syntactic correctness proofs for ILC}
-In this chapter, we prove correctness of ILC without using
-denotational semantics, but using only operational semantics and
-logical relations, and extend our proof to pure call-by-value
-(CBV) untyped $\lambda$-calculus using \emph{step-indexed logical
-relations}.
-Compared to earlier chapters, this one will be more technical and
-concise, because we already introduced the ideas behind both ILC
-and logical relation proofs.
+\chapter{(Un)typed ILC, operationally}
 
-Using operational semantics simplifies extending the proofs to
-more expressive languages, where denotational semantics would
-require more sophistication.
-In particular, using this approach we prove correctness of ILC
-for pure untyped $\lambda$-calculus using an environment-based
-call-by-value semantics.
+In \cref{ch:derive-formally} we have proved ILC correct for a
+simply-typed $\lambda$-calculus. What about other languages, with more expressive
+type systems or no type system at all?
+
+In this chapter, we prove that ILC is still correct in untyped
+call-by-value (CBV) $\lambda$-calculus. We do so without using
+denotational semantics, but using only an environment-based
+big-step operational semantics and \emph{step-indexed logical
+relations}. The formal development in this chapter stands alone
+from the rest of the thesis, though we do not repeat ideas
+present elsewhere.
+
+We prove ILC correct using, in increasing order of complexity,
+\begin{enumerate}
+\item STLC and standard syntactic logical relations;
+\item STLC and step-indexed logical relations;
+\item an untyped $\lambda$-calculus and step-indexed logical relations.
+\end{enumerate}
+We have fully mechanized the second proof in Agda, and done the others
+on paper. The proof for untyped $\lambda$-calculus is the most
+interesting, but the others can serve as stepping stones. We are
+currently working (together with Yann-Régis Gianas) on
+mechanizing the proof for untyped $\lambda$-calculus.
+
+Using operational semantics and step-indexed logical relations
+simplifies extending the proofs to more expressive languages,
+where denotational semantics or other forms of logical relations
+would require more sophistication, as argued by
+\citet{Ahmed2006stepindexed}.
+
+On the technical side, we are able to mechanize our proof without
+needing any technical lemmas about binding or weakening, thanks
+to a number of choices we mention later.
+
+Proofs by (step-indexed) logical relations also promises
+scalable. All these proofs appear to be a slight variants of
+proof techniques for logical program equivalence and
+parametricity, which are extremely well-studied topics,
+suggesting the approach might scale to more expressive type
+systems. The relation with parametricity has also been noticed
+earlier more than once, and these proofs appear to vindicate it.
+However, actually proving ILC correct for a polymorphic language
+(such as System F) is left as future work.
 
 Also, using operational semantics, we can show more formally how
 function changes arise: we model function values as closures, and
-in \cref{sec:intensional-step-indexed-validity} we model function
-change values as either closure changes (which only modify
-environments) or replacement closures.
+in the model we show in
+\cref{sec:intensional-step-indexed-validity}, function change
+values are either closure changes (which only modify
+environments) or replacement closures, that is replacement
+changes for closures that produce replacement changes as result.
+
+This proof implies correctness of ILC in the presence of general recursion.
+because untyped $\lambda$-calculus supports general recursion via
+fixpoint combinators. Efficient support for general recursion is
+however a separate problem that we do not tackle here (see
+\cref{sec:general-recursion} for discussion).
 
 Our development is inspired significantly by
 \citet{Ahmed2006stepindexed} and \citet*{Acar08}. We refer to
@@ -1190,34 +1227,42 @@ those works and to Ahmed's lectures at OPLSS 2013%
 \footnote{\url{https://www.cs.uoregon.edu/research/summerschool/summer13/curriculum.html};}
 for an introduction to (step-indexed) logical relations.
 
-We can prove ILC correct using, in increasing order of complexity,
-\begin{enumerate}
-\item a typed language and standard syntactic logical relations;
-\item a typed language and step-indexed logical relations;
-\item an untyped language and step-indexed logical relations.
-\end{enumerate}
-We have fully mechanized the second proof, and done the others
-on paper.
+Compared to earlier chapters, this one will be more technical and
+concise, because we already introduced the ideas behind both ILC
+and logical relation proofs.
 
-To present the proofs, we describe our formal model of ANF
-$\lambda$-calculus. We define an untyped and typed variant
-sharing the same syntax and semantics, hence using Curry-style
-typing here. In our mechanization, however, we find it more
+\section{Formalization}
+\label{sec:bsos-formalization}
+To present the proofs, we first describe our formal model of CBV
+ANF $\lambda$-calculus.
+We define an untyped ANF language, called |ilcUntau|.
+We also define a simply-typed variant, called |ilcTau|, by adding on top
+of |ilcUntau| a separate Curry-style type system.
+
+In our mechanization of |ilcTau|, however, we find it more
 convenient to define a Church-style type system (that
 is, a syntax that only describes typing derivations for
 well-typed terms) separately from the untyped language.
 
-In our mechanized formalization, we have additionally proved
-lemmas to ensure that our semantics is sound relative to our
-earlier denotational semantics (adapted for the ANF syntax). To
-ensure that our semantics is complete for the typed language, we
-proved that all terms (of type |tau|) evaluate to a value of type
-|tau| according to our denotational semantics, by adapting a
-standard proof of strong normalization for STLC~\citep[Ch.
-12]{Pierce02TAPL}.
+Terms resulting from differentiation satisfy additional
+invariants, and exploiting those invariants helps simplify the
+proof. Hence we define separate languages for change terms
+produced from differentiation, again in untyped (|dilcUntau|) and
+typed (|dilcTau|) variants.
 
-\section{Formalization}
+The syntax is summarized in \cref{fig:anf-lambda-calculus}, the
+type systems in \cref{fig:anf-lambda-calculus-typing}, and the
+semantics in \cref{fig:anf-lambda-calculus-semantics}. The base
+languages are mostly standard, while the change languages pick a
+few different choices.
+
+\input{fig-syntactic-ilc}
+
 \subsection{Types and contexts}
+\label{sec:bsos-anf-types}
+%
+We show the syntax of types, contexts and change types in
+\cref{sfig:anf-types}.
 We introduce types for functions, binary products and naturals.
 Tuples can be encoded as usual through nested pairs.
 Change types are mostly like earlier, but this time we use
@@ -1229,50 +1274,15 @@ changes to \emph{not} contain entries for base values: in this
 presentation we use separate environments for base variables and
 change variables. This choice avoids the need to define weakening
 lemmas.
-\begin{code}
-  tau ::= nat | tau1 `times` tau2 | sigma -> tau
 
-  Dt^nat = nat
-  Dt^(tau1 `times` tau2) = Dt^tau1 `times` Dt^tau2
-  Dt^(sigma -> tau) = sigma -> Dt^sigma -> Dt^tau
-
-  Dt^emptyCtx = emptyCtx
-  Dt^(Gamma, x : tau) = Dt^Gamma, dx : Dt^tau
-\end{code}
-
-\subsection{Syntax}
+\subsection{Base syntax for \ilcUntau}
 \label{sec:bsos-anf-syntax}
 For convenience, we consider a $\lambda$-calculus in
 A-normal form. We do not parameterize this calculus over language
 plugins to reduce mechanization overhead, but we define separate syntactic
 categories for possible extension points.
 
-%format `stoup` = "\mid"
-
-%format n1
-%format n2
-%format w1
-%format w2
-%format dw1
-%format dw2
-%format rho' = rho "\myquote"
-%format drho' = drho "\myquote"
-
-% indexed big-step eval
-%format ibseval (t) rho (n) v = rho "\vdash" t "\Downarrow_{" n "}" v
-% without environments
-%format ibseval' (t) (n) (v) = t "\Downarrow_{" n "}" v
-% big-step eval
-%format bseval  (t)  rho v = rho "\vdash" t "\Downarrow" v
-% change big-step eval
-%format dbseval (dt) rho drho dv = rho `stoup` drho "\vdash" dt "\Downarrow" dv
-
-%format vn = "v_n"
-%format dvn = dv "_n"
-%format dxn = dx "_n"
-
-%format (star rho (t)) = rho "^*(" t ")"
-%format starv v = v "^*"
+We show the syntax of terms in \cref{sfig:anf-syntax}.
 
 Meta-variable |v| ranges over (closed) syntactic values, that is
 evaluation results. Values are numbers, pairs of values or
@@ -1291,20 +1301,12 @@ pair of neutral forms.
 A term is either a neutral form, an application of neutral forms,
 a let expression or an application of a primitive function |p| to
 a neutral form. Multi-argument primitives are encoded as
-primitives taking (nested) tuples of arguments.
+primitives taking (nested) tuples of arguments. Here we use
+literal numbers as constants and +1 and addition as primitives,
+but further primitives are possible.
 
-\begin{code}
-  c ::= n | ...
-  p ::= succ | add
-  w ::= x | \x -> t | (w, w) | c
-  t ::= w | w w | lett x = t in t | p w
-  v ::= rho[\x -> t] | (v, v) | c
-  rho ::= x1 := v1 , ... , xn := vn
-\end{code}
-
-\subsection{Change syntax}
+\subsection{Change syntax for \dilcUntau}
 \label{sec:bsos-anf-change-syntax}
-
 Next, we consider a separate language for change terms, which can
 be transformed into the base language. This language supports
 directly the structure of change terms: base variables and change
@@ -1313,6 +1315,7 @@ those namespaces are represented by typing contexts |Gamma| and
 |Dt^Gamma|: that is, the typing context for change variables is
 always the change context for |Gamma|.
 
+We show the syntax of change terms in \cref{sfig:anf-change-syntax}.
 %{
 %format dwa = dw "_a"
 %format dwb = dw "_b"
@@ -1329,10 +1332,11 @@ close over separate environments for base and change variables.
 Various other changes in the same spirit simplify similar
 formalization and mechanization details.
 %}
+
 % In particular, values for
 % function changes are again closures, but we require they bind
 % two variables at the out
-
+%
 In change terms, we reuse primitives to stand for their
 derivatives. The semantics evaluates the derivatives of
 primitives correctly.
@@ -1342,79 +1346,21 @@ be executed by a standard semantics, doing so in a new
 formalization yields little additional insight, and requires
 writing concrete derivatives of primitives as de Bruijn terms.
 
-\begin{code}
-  dc = 0
-  dw ::= dx | \x dx -> dt | (dw, dw) | dc
-  dt ::= dw | dw w dw | lett x = t; dx = dt in dt | p w dw
-  dv ::= rho `stoup` drho[\x dx -> dt]
-  drho ::= dx1 := dv1 , ..., dxn := dvn
-\end{code}
-
 \subsection{Differentiation}
 \label{sec:bsos-anf-derive}
+We show differentiation in \cref{sfig:anf-derive}.
 Differentiation maps constructs in the language of base terms
-one-to-one to constructs in the language of change terms:
-\begin{align*}
-  |deriveConst n| &= |0|\\
-  \\
-  |derive x| &= |dx| \\
-  |derive(\(x : sigma) -> t)| &= |\(x : sigma) (dx : Dt^sigma) -> derive(t)| \\
-  |derive ((w1, w2))| &= |derive w1 ,  derive w2|\\
-  |derive c| &= |deriveConst c|\\
-  \\
-  |derive(p w)| &= |p w (derive w)| \\
-  |derive(w1 w2)| &= |(derive w1) t (derive w2)| \\
-  |derive(lett x = t1 in t2)| &= |lett x = t1; dx = derive t1 in derive t2|
-\end{align*}
-
-%format /-- = "\vdash_{\Delta}"
-
-\subsection{Typing}
+one-to-one to constructs in the language of change terms.
+\subsection{Typing \ilcTau{} and \dilcTau}
 \label{sec:bsos-anf-typing}
-
+We use judgements |`vdashPrim` p| and |`vdashConst` c| to specify
+typing of primitive functions and constant values.
+%
 We can also define typing judgement for base terms and for change
-terms. Typing for base terms is standard.
-
-% Do sth. special for primitives and constants
-%format `vdashConst` = "\vdash_{\CONST}"
-%format `vdashPrim` = "\vdash_{\mathcal{P}}"
-
-\begin{typing}
-\Rule[T-Var]
-  {|x : tau `elem` Gamma|}
-  {|Gamma /- x : tau|}
-
-\Rule[T-Const]
- {|`vdashConst` c : tau|}
- {|Gamma /- c : tau|}
-
-\raisebox{0.5\baselineskip}{\fbox{|Gamma /- t : tau|}}
-
-\Rule[T-App]
-  {|Gamma /- w1 : sigma -> tau|\\
-  |Gamma /- w2 : sigma|}
-  {|Gamma /- w1 w2 : tau|}
-
-\Rule[T-Lam]
-  {|Gamma , x : sigma /- t : tau|}
-  {|Gamma /- \(x : sigma) -> t : sigma -> tau|}
-
-\Rule[T-Let]
-  {|Gamma /- t1 : sigma|\\
-  |Gamma , x : sigma /- t2 : tau|}
-  {|Gamma /- lett x = t1 in t2 : tau|}
-
-\Rule[T-Pair]
-  {|Gamma /- w1 : tau1|\\
-  |Gamma /- w2 : tau2|}
-  {|Gamma /- (w1 , w2) : tau1 `times` tau2|}
-
-\Rule[T-Prim]
-  {|`vdashPrim` p : sigma -> tau|\\
-   |Gamma /- w : sigma|}
- {|Gamma /- p w : tau|}
-\end{typing}
-
+terms. Typing for base terms is mostly standard and shown in
+\cref{sfig:anf-base-typing}.
+%
+%
 For change terms, a natural type system would only prove
 judgements with shape |Gamma, Dt^Gamma /- dt : Dt^tau| (where
 |Gamma, Dt^Gamma| stands for the concatenation of |Gamma| and
@@ -1426,79 +1372,41 @@ one can verify the following derived typing rule for |derive|:
   {|Gamma /- t : tau|}
   {|Gamma /-- derive t : tau|}
 \end{typing}
-% if |Gamma /- t : tau| then |Gamma /-- derive
-% t : tau|.
 
-Typing rules are as follows:
-\begin{typing}
-\Rule[T-DVar]
-  {|x : tau `elem` Gamma|}
-  {|Gamma /-- dx : tau|}
-
-\raisebox{0.5\baselineskip}{\fbox{|Gamma /-- dt : tau|}}
-
-\Rule[T-DApp]
-  {|Gamma /-- dw1 : sigma -> tau|\\
-    |Gamma /- w2 : sigma|\\
-    |Gamma /-- dw2 : sigma|}
-  {|Gamma /- dw1 w2 dw2 : tau|}
-
-\Rule[T-DLam]
-  {|Gamma , x : sigma /-- dt : tau|}
-  {|Gamma /-- \(x : sigma) (dt : Dt^sigma) -> dt : sigma -> tau|}
-
-\Rule[T-DLet]{
-  |Gamma /- t1 : sigma|\\
-  |Gamma /-- dt1 : sigma|\\
-  |Gamma , x : sigma /-- dt2 : tau|}
-  {|Gamma /-- lett x = t1 ; dx = dt1 in dt2 : tau|}
-\end{typing}
+Change typing rules are shown in \cref{sfig:anf-change-typing}.
 
 \subsection{Semantics}
 \label{sec:bsos-anf-semantics}
+We present our semantics for base terms in \cref{sfig:anf-base-semantics}.
 Following \citet*{Acar08}, to define step-indexed logical relations
-we consider a call-by-value big-step semantics, where derivations
+we consider a CBV big-step semantics, where derivations
 are indexed by a step count, which counts in essence
 $\beta$-reduction steps. Since our semantics uses environments,
 $\beta$-reduction steps are implemented not via substitution but
 via environment extension, but the resulting step-counts are the
 same (\cref{sec:sanity-check-big-step}).
-\begin{typing}
-  \Rule[E-Var]{|rho(x) = v|}{|ibseval x rho 0 v|}
 
-\raisebox{0.5\baselineskip}{\fbox{|ibseval t rho n v|}}
+In our mechanized formalization, we have additionally proved
+lemmas to ensure that this semantics is sound relative to our
+earlier denotational semantics (adapted for the ANF syntax). To
+ensure that our semantics is complete for the typed language, we
+proved that all terms (of type |tau|) evaluate to a value of type
+|tau| according to our denotational semantics, by adapting a
+standard proof of strong normalization for STLC~\citep[Ch.
+12]{Pierce02TAPL}.
 
-  \Axiom[E-Lam]{|ibseval (\x -> t) rho 0 (rho[\x -> t])|}
+For simplicity we assume evaluation of primitives takes one step.
+We conjecture higher-order primitives might need to be assigned
+different costs, but leave details for future work.
 
-  \Rule[E-App]{|ibseval w1 rho 0 rho'[\x -> t]|\\|ibseval w2 rho 0 v2|\\|ibseval t (rho', x := v2) n v'|}{|ibseval (w1 w2) rho (1 + n) v'|}
-
-  \Rule[E-Let]{|ibseval t1 rho n1 v1|\\|ibseval t2 (rho, x := v1) n2 v2|}{|ibseval (lett x = t1 in t2) rho (1 + n1 + n2) v2|}
-\end{typing}
+We can evaluate neutral forms |w| to syntactic values |v| using a simple
+evaluation function |evalVal w rho|, and use |evalPrim p v| to
+evaluate primitives.
 When we need to omit indexes, we write |bseval t rho v| to mean
 that for some |n| we have |ibseval t rho n v|.
 
-We can also define a straightforward non-indexed big-step
-semantics for change terms.
-\begin{typing}
-  \Rule[E-DVar]{|drho(x) = v|}{|dbseval x rho drho v|}
-
-\raisebox{0.5\baselineskip}{\fbox{|ibseval t rho n v|}}
-
-  \Axiom[E-DLam]{|dbseval (\x dx -> dt) rho drho (rho `stoup` drho[\x dx -> dt])|}
-
-  \Rule[E-DApp]{%
-    |dbseval dw1 rho drho (rho' `stoup` drho'[\x dx -> dt])|\\
-    |bseval  w2  rho v2|\\
-    |dbseval dw2 rho drho dv2|\\
-    |dbseval dt  (rho', x := v2) (drho', dx := dv2) dv'|}
-  {|dbseval (dw1 w2 dw2) rho drho dv'|}
-
-  \Rule[E-DLet]{
-    |bseval  t1  rho v1|\\
-    |dbseval dt1 rho drho dv1|\\
-    |dbseval dt2 (rho, x := v1) (drho; dx := dv1) dv2|}
-  {|dbseval (lett x = t1; dx = dt1 in dt2) rho drho dv2|}
-\end{typing}
+We can also define an analogous non-indexed big-step
+semantics for change terms, and we present it in \cref{sfig:anf-change-semantics}.
 
 \section{Sanity-checking our step-indexed semantics}
 \label{sec:sanity-check-big-step}
@@ -1598,20 +1506,17 @@ validity and show it agrees with a suitable definition for |`oplus`|.
 
 Now that we defined our semantics, we proceed to define validity.
 
-\section{Validity through syntactic logical relations}
-For simply-typed $\lambda$-calculus we can define logical
-relations without using step-indexes, simply by using structural
-recursion on types. We present the needed definitions as a
-stepping stone to the definitions using step-indexed logical relations.
+\section{Validity through syntactic logical relations (\ilcTau{}, \dilcTau)}
+For our typed language |ilcTau| we can define logical
+relations without using step-indexes. The resulting relations are
+well-founded only because they use structural recursion on types.
+We present the needed definitions as a stepping stone to the
+definitions using step-indexed logical relations.
 
-%format (valset (tau)) = "\mathcal{V}\left\llbracket" tau "\right\rrbracket"
-%format (compset (tau)) = "\mathcal{C}\left\llbracket" tau "\right\rrbracket"
-%format (envset (gamma)) = "\mathcal{G}\left\llbracket" gamma "\right\rrbracket"
 Following \citet{Ahmed2006stepindexed}, we encode validity
 through two mutually recursive type-indexed families of ternary
 logical relations, |valset tau| over closed values and |compset
 tau| over terms (and environments).
-\pg{Maybe give their arities.}
 
 These relations are analogous to notions we considered earlier
 and express similar informal notions.
@@ -1625,7 +1530,7 @@ and express similar informal notions.
   t1 rho1) (eval dt drho) (eval t2 rho2)| to say that |dt| is a
   valid change from |t1| and |t2|, considering the respective
   environments. With operational semantics instead we write
-  |(<rho1, t1>, <rho, drho, dt>, <rho2, t2>) `elem` compset tau|.
+  |(<rho1, t1>, <rho `stoup` drho, dt>, <rho2, t2>) `elem` compset tau|.
 \end{itemize}
 
 Since we use Church typing and only mechanize typed terms, we
@@ -1633,7 +1538,7 @@ must include in all cases appropriate typing assumptions.
 
 Relation |compset tau| relates tuples of environments and
 computations,
-|<rho1, t1>|, |<rho, drho, dt>| and |<rho2, t2>|: it holds
+|<rho1, t1>|, |<rho `stoup` drho, dt>| and |<rho2, t2>|: it holds
 if |t1| evaluates in environment |rho1| to |v1|,
 and |t2| evaluates in environment |rho2| to |v2|, then
 |dt| must evaluate in environments |rho| and |drho| to a change
@@ -1645,8 +1550,8 @@ unrelated environments---in fact, even unrelated typing contexts.
 This flexibility is useful to when relating closures of type
 |sigma -> tau|: two closures might be related even if they have
 close over environments of different shape. For instance,
-|v1 = emptyRho[\x -> 0]| and |v2 = (y = 0)[\x -> y]| are values
-related by a nil change, such as |dv = emptyRho[\x dx -> 0]|.
+closures |v1 = emptyRho[\x -> 0]| and |v2 = (y := 0)[\x -> y]| are
+related by a nil change such as |dv = emptyRho[\x dx -> 0]|.
 In \cref{sec:intensional-step-indexed-validity}, we discuss a
 more intensional definition of validity.
 
@@ -1673,21 +1578,21 @@ are related.
                     ^&^ Gamma2 , x : sigma /- t2 : tau)
                        |\}\\
   |compset tau| ={}&
-                  \{|(<rho1, t1>, <rho , drho, dt>, <rho2, t2>) `such` ^^^
-                    ^&^ ((bseval t1 rho1 v1) `and` (bseval t2 rho2 v2) => ^^^
-                    ^&^ (dbseval dt rho drho dv) `and` (v1, dv, v2 `elem` valset tau)) ^^ `and` ^^^
-                    ^&^ exists Gamma1 Gamma Gamma2 . ^^ (Gamma1 /- t1 : tau) ^^ `and` ^^ (Gamma /-- dt : tau) ^^ `and` ^^ (Gamma2 /- t2 : tau)
+                  \{|(<rho1, t1>, <rho `stoup` drho, dt>, <rho2, t2>) `such` ^^^
+                    ^&^ (forall v1 v2 . ^^ (bseval t1 rho1 v1) `and` (bseval t2 rho2 v2) => ^^^
+                    ^&^ exists dv . (dbseval dt rho drho dv) `and` ((v1, dv, v2) `elem` valset tau)) ^^ `and` ^^^
+                    ^&^ (exists Gamma1 Gamma Gamma2 . ^^ (Gamma1 /- t1 : tau) ^^ `and` ^^ (Gamma /-- dt : tau) ^^ `and` ^^ (Gamma2 /- t2 : tau))
                        |\}\\
                   \\
-  |envset emptyCtx| ={} & \{|(<emptyRho, emptyRho, emptyRho)>|\} \\
+  |envset emptyCtx| ={} & \{|(emptyRho, emptyRho, emptyRho)|\} \\
   |envset (Gamma, x : tau)| ={} &
-                                  \{|<(rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)> `such` ^^^
-                                  ^&^ <rho1, drho, rho2> `elem` envset Gamma `and` <v1, dv, v2> `elem` valset tau|\} \\
+                                  \{|((rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
+                                  ^&^ (rho1, drho, rho2) `elem` envset Gamma `and` (v1, dv, v2) `elem` valset tau|\} \\
   |fromtosyn Gamma tau t1 dt t2| ={}&
-                                      |forall ((<rho1, drho, rho2>) `elem` envset Gamma) . ^^^
-                                      ^&^ (<rho1, t1>, <rho1, drho, dt>, <rho2, t2>) `elem` compset tau|
+                                      |forall ((rho1, drho, rho2) `elem` envset Gamma) . ^^^
+                                      ^&^ (<rho1, t1>, <rho1 `stoup` drho, dt>, <rho2, t2>) `elem` compset tau|
 \end{align*}
-\caption{Defining validity logical relations using big-step semantics.}
+\caption{Defining validity via logical relations and big-step semantics.}
 \label{fig:big-step-validity-ext-nosi}
 \end{figure}
 
@@ -1728,20 +1633,38 @@ For untyped $\lambda$-calculus, instead, we'll need to drop
 types. The resulting definition is instead defined by
 well-founded recursion on step-indexes.
 
+\begin{figure}[h!]
 \begin{align*}
   |valset Nat| ={}& \{|(k, n1, dn, n2) `such` n1, n2 `elem` Nat, dn
                      `elem` Int `and` n1 + dn = n2|\}\\
   |valset (sigma -> tau)| ={}&
-                               \{|(k, rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2])`such`| \\
-                  & |forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
-                    ^&^ forall j. ^^ j < k => ^^^
-                       ^&^ (j, <(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, <(rho2, x:= v2), t2>) `elem` (compset tau)|\}\\
+                               \{|(k, rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2])`such` ^^^
+                  ^&^ forall ((j, v1, dv, v2) `elem` (valset sigma)). ^^ j < k => ^^^
+                  ^&^ (j, <(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
+                  ^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)) ^^ `and` ^^^
+                    ^&^ (exists Gamma1 Gamma Gamma2 . ^^^
+                    ^&^ Gamma1 , x : sigma /- t1 : tau ^^ `and` ^^^
+                    ^&^ Gamma, x : sigma /-- dt : tau ^^ `and` ^^^
+                    ^&^ Gamma2 , x : sigma /- t2 : tau) |\}\\
   |compset tau| ={}&
                   \{|(k, <rho1, t1>, <rho `stoup` drho, dt>, <rho2, t2>) `such` ^^^
-                     ^&^ forall j . ^^ j < k `and` ^^^
-                        ^&^ (ibseval t1 rho1 k v1) `and` (bseval t2 rho2 v2) => ^^^
-                           ^&^ (dbseval dt rho1 drho dv) `and` (k - j , v1, dv, v2 `elem` valset tau)|\}
+                     ^&^ (forall j v1 v2 . ^^^
+                     ^&^ j < k ^^ `and`(ibseval t1 rho1 j v1) `and` (bseval t2 rho2 v2) => ^^^
+                     ^&^ exists dv . (dbseval dt rho1 drho dv) `and` ((k - j , v1, dv, v2) `elem` valset tau)) ^^ `and` ^^^
+                     ^&^ (exists Gamma1 Gamma Gamma2 . ^^ (Gamma1 /- t1 : tau) ^^ `and` ^^ (Gamma /-- dt : tau) ^^ `and` ^^ (Gamma2 /- t2 : tau))
+                           |\}\\
+                  \\
+  |envset emptyCtx| ={} & \{|(k, emptyRho, emptyRho, emptyRho)|\} \\
+  |envset (Gamma, x : tau)| ={} &
+                                  \{|(k, (rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
+                                  ^&^ (k, rho1, drho, rho2) `elem` envset Gamma `and` (k, v1, dv, v2) `elem` valset tau|\} \\
+  |fromtosyn Gamma tau t1 dt t2| ={}&
+                                      |forall ((k, rho1, drho, rho2) `elem` envset Gamma) . ^^^
+                                      ^&^ (k, <rho1, t1>, <rho1 `stoup` drho, dt>, <rho2, t2>) `elem` compset tau|
 \end{align*}
+\caption{Defining validity via \emph{step-indexed} logical relations and big-step semantics.}
+\label{fig:big-step-validity-ext-si}
+\end{figure}
 
 Again, since we use Church typing and only mechanize typed terms, we
 must include in all cases appropriate typing assumptions. This
@@ -1754,6 +1677,54 @@ At this moment, we do not require that related closures contain
 related environments: we are defining validity only based on
 extensional behavior.
 
+Given these definitions, we can prove that all relations are
+\emph{downward-closed}: that is, relations at step-count $n$
+imply relations at step-count $k < n$.
+\pg{recheck and complete, and add title}
+\begin{lemma}[Validity is downward-closed]
+  \label{lem:validity-typed-downward-closed}
+  Assume $k \le n$.
+  \begin{enumerate}
+  \item If |(n, v1, dv, v2) `elem` valset tau| then |(k, v1, dv,
+    v2) `elem` valset tau|.
+  \item If |(n, <rho1, t1>, <rho `stoup` drho, dt>, <rho2 , t2>) `elem`
+    compset tau| then |(k, <rho1, t1>, <rho `stoup` drho,
+    dt>, <rho2 , t2>) `elem` compset tau|.
+  \item If |(n, rho1, drho, rho2) `elem` envset Gamma| then
+    |(k, rho1, drho, rho2) `elem` envset Gamma|.
+  \end{enumerate}
+\end{lemma}
+\begin{proof}[Proof sketch]
+  For |valset tau|, case split on |tau| and expand hypothesis and
+thesis. If |tau = Nat| they coincide. For |valset (sigma ->
+tau)|, parts of the hypothesis and thesis match.
+For some relation |P|,
+the rest of the hypothesis has shape |forall j < n. ^^ P(j, v1, dv, v2)|
+and the rest of the thesis has shape |forall j < k. ^^ P(j, v1, dv,
+v2)|. Assume $j < k$. We must prove |P(j, v1, dv, v2)|, but since
+$j < k \le n$ we can just apply the hypothesis.
+
+The proof for |compset tau| follows the same idea as
+|valset (sigma -> tau)|.
+
+For |envset Gamma|, apply the theorem for |valset tau| to each
+environments entry |x : tau|.
+\end{proof}
+
+\pg{fundamental property!}
+At this point, we prove the fundamental lemma.
+\begin{theorem}[Fundamental lemma: correctness of |derive|]
+  \pg{recheck, state missing definitions.}
+  For every well-typed term |Gamma /- t : tau| we have that
+  |fromtosyn Gamma tau t (derive t) t|.
+\end{theorem}
+\begin{proof}
+  \label{thm:fund-lemma-derive-correct-types-si}
+  By induction on the structure on terms, using ideas similar to
+\cref{thm:fund-lemma-derive-correct-types-nosi} and relying on
+\cref{lem:validity-typed-downward-closed} to reduce step counts
+where needed.
+\end{proof}
 \section{An intensional characterization of valid function changes}
 \label{sec:intensional-step-indexed-validity}
 

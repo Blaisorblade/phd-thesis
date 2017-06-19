@@ -20,6 +20,7 @@ lhsFmt=$(wildcard *.fmt)
 lhsSources=$(patsubst %,%.lhs, \
 	chap-intro-incr chap-diff-correct-formal chap-chs \
 	new-stuff change-theory-reconstruct backmatter \
+	fig-syntactic-ilc \
 	$(patsubst %,pldi14/%,sec-preliminaries sec-intro sec-change-theory \
 	sec-change-equiv sec-function-change sec-differentiate sec-correctness \
 	fig-differentiation sec-rw))
