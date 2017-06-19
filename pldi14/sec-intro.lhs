@@ -1895,14 +1895,54 @@ environments of matching shapes.
 \section{Future work}
 We have shown that |`oplus`| agrees with validity, which we
 consider a key requirement of a core ILC proof. However, change
-structures support further operators. We leave proofs of their
-validity for future work.
+structures support further operators. We have defined and proved
+correct a |nilc| operator. We leave operator |`ominus`| for
+future work, though we are not aware of particular difficulties.
 
+\subsection{Issues with change composition}
+We have looked into change composition, and it appears that
+composition of change expression is not always valid, but we
+conjecture that composition of change values preserves validity.
 Showing that change composition is valid appears related to
 showing that \citet{Ahmed2006stepindexed}'s logical equivalence
 is a transitive relation, which is a subtle issue. She only
-proves transitivity in a typed setting;
-proof carries over.
+proves transitivity in a typed setting and with a stronger
+relation, and her proof does not carry over directly; indeed,
+there is no corresponding proof in the untyped setting of
+\citet*{Acar08}.
+
+However, the failure of transitivity we have verified is not
+overly worrisome: the problem is that transitivity is too strong
+an expectation in general. Assume that |fromtosynuntyped Gamma e1
+de1 e2| and |fromtosynuntyped Gamma e2 de2 e3|, and try to show
+that |fromtosynuntyped Gamma e1 (de1 `ocompose` de2) e3|: that
+is, very roughly and ignoring the environments, we can assume
+that |e1| and |e3| terminate, and have to show that their result
+satisfy some properties. To use both our hypotheses, we need to
+know that |e1|, |e2| and |e3| all terminate, but we have no such
+guaranteed for |e2|. Indeed, if |e2| always diverges (because it
+is, say, the diverging term |omega = (\x -> x x) (\x -> x x)|), then |de1| and |de2|
+are vacuously valid. If |e1| and |e3| terminate, we can't expect
+|de1 `ocompose` de2| to be a change between them. To wit, take
+|e1 = 0|, |e2 = omega|, |e3 = 10|, and |de1 = de2 = 0|. We can
+verify that for any |Gamma| we have |fromtosynuntyped Gamma e1 de1 e2| and
+|fromtosynuntyped Gamma e2 de2 e3|, while |fromtosynuntyped
+Gamma e1 (de2 `ocompose` de3) e3| means the absurd
+|fromtosynuntyped 0 (0 `ocompose` 0) 10|.
+
+\paragraph{A possible fix}
+Does transitivity hold if |e2| terminates?
+we cannot conclude anything from
+|(k, e1, de1, e2) `elem` compset tau `and` (k, e2, de2, e3)
+`elem` compset tau|.
+
+But like in \citet{Ahmed2006stepindexed}, if |e2| amd |e3| are
+related at all step counts, that is, if |(k, e1, de1, e2) `elem`
+compset tau `and` (forall n. (n, e2, de2, e3) `elem` compset
+tau)|, and if on top |e2| terminates, we conjecture that
+\citeauthor{Ahmed2006stepindexed}'s proof goes through. We have
+however not yet examined all details.
+
 % transitivity requires using a typed setting.
 % However, her
 % logical relation is indeed transitive, and we believe
