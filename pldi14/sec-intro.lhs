@@ -1225,7 +1225,7 @@ however a separate problem that we do not tackle here (see
 Our development is inspired significantly by
 \citet{Ahmed2006stepindexed} and \citet*{Acar08}. We refer to
 those works and to Ahmed's lectures at OPLSS 2013%
-\footnote{\url{https://www.cs.uoregon.edu/research/summerschool/summer13/curriculum.html};}
+\footnote{\url{https://www.cs.uoregon.edu/research/summerschool/summer13/curriculum.html}.}
 for an introduction to (step-indexed) logical relations.
 
 Compared to earlier chapters, this one will be more technical and
@@ -1932,7 +1932,7 @@ We have looked into change composition, and it appears that
 composition of change expression is not always valid, but we
 conjecture that composition of change values preserves validity.
 Showing that change composition is valid appears related to
-showing that \citet{Ahmed2006stepindexed}'s logical equivalence
+showing that \citeauthor{Ahmed2006stepindexed}'s logical equivalence
 is a transitive relation, which is a subtle issue. She only
 proves transitivity in a typed setting and with a stronger
 relation, and her proof does not carry over directly; indeed,
@@ -1955,8 +1955,8 @@ are vacuously valid. If |e1| and |e3| terminate, we can't expect
 |e1 = 0|, |e2 = omega|, |e3 = 10|, and |de1 = de2 = 0|. We can
 verify that for any |Gamma| we have |fromtosynuntyped Gamma e1 de1 e2| and
 |fromtosynuntyped Gamma e2 de2 e3|, while |fromtosynuntyped
-Gamma e1 (de2 `ocompose` de3) e3| means the absurd
-|fromtosynuntyped 0 (0 `ocompose` 0) 10|.
+Gamma e1 (de1 `ocompose` de2) e3| means the absurd
+|fromtosynuntyped Gamma 0 (0 `ocompose` 0) 10|.
 
 \paragraph{A possible fix}
 Does transitivity hold if |e2| terminates?

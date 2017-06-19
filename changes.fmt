@@ -38,6 +38,12 @@
 %format V1
 %format V2
 
+%format e1
+%format e2
+%format e3
+%format de1
+%format de2
+
 %format t1
 %format t2
 
