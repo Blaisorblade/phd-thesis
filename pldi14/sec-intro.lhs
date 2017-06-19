@@ -1513,7 +1513,7 @@ well-founded only because they use structural recursion on types.
 We present the needed definitions as a stepping stone to the
 definitions using step-indexed logical relations.
 
-Following \citet{Ahmed2006stepindexed}, we encode validity
+Following \citet{Ahmed2006stepindexed} and \citet*{Acar08}, we encode validity
 through two mutually recursive type-indexed families of ternary
 logical relations, |valset tau| over closed values and |compset
 tau| over terms (and environments).
@@ -1562,7 +1562,7 @@ tau)| relates function values |f1|, |df| and |f2| if they map
 
 We also extend the relation on values to environments via |envset
 Gamma|: environments are related if their corresponding entries
-are related.
+are related values.
 \begin{figure}[h!]
 \begin{align*}
   |valset Nat| ={}& \{|(n1, dn, n2) `such` n1, n2 `elem` Nat, dn
@@ -1606,7 +1606,48 @@ Given these definitions, one can prove the fundamental property.
   By induction on the structure on terms, using ideas similar to
   \cref{thm:derive-correct}.
 \end{proof}
-\section{Step-indexed logical relations}
+
+%{
+%format (valset' (tau)) = "\mathcal{RV'}\left\llbracket" tau "\right\rrbracket"
+%format (compset' (tau)) = "\mathcal{RC'}\left\llbracket" tau "\right\rrbracket"
+\begin{remark}
+  These relations are unusual for two reasons. First, instead of
+  just relating two executions of a term, we relate two
+  executions with an execution of a change term.
+  Second, most such logical relations (including
+  \citet{Ahmed2006stepindexed}'s one, but except \citet{Acar08}'s
+  one) are intended to define some form of program equivalence.
+  Imagine studying equivalence through some suitable binary
+  logical relations |(compset' tau)| and |(valset' tau)|.
+  If |t1| terminating and |(t1, t2) `elem` (compset' tau)| holds
+  then |t2| also terminates, and their results are in turn related.
+  And at base types like |Nat|, |(v1, v2) `elem` (valset' Nat)|
+  means that |v1 = v2|.
+
+  Here. instead, the fundamental property relates two executions
+  of a terms on \emph{different} inputs, which might take
+  different paths during execution. In a suitably extended language,
+  we could even write term |t = \x -> if x = 0 then 1 else loop|
+  and run it on inputs |v1 = 0| and |v2 = 1|: these inputs are
+  related by change |dv = +1|, but |t| will converge on |v1| and
+  diverge on |v2|. We must use a semantics that allow such
+  behavioral difference.
+  Hence, at base type |Nat|, |(v1, dv, v2) `elem` valset Nat|
+means just that |dv| is a change from |v1| to |v2|, hence that
+|v1 `oplus` dv| is equivalent to |v2| because |`oplus`| agrees
+with validity in this context as well. And if |(<rho1, t1>, <rho
+`stoup` drho, dt>, <rho2, t2>) `elem` compset tau|, |t1| might
+converge while |t2| diverges: only if both converge must their
+results be related.
+
+These subtleties become more relevant for untyped language
+|ilcUntau|, since it does support general recursion and
+non-terminating programs.
+\end{remark}
+%}
+
+\section{Step-indexed logical relations (\ilcTau{}, \dilcTau)}
+\label{sec:silr-typed-proof}
 Step-indexed logical relations define approximations to a
 relation, to enable dealing with non-terminating programs.
 Logical relations relate the behavior of multiple terms during
