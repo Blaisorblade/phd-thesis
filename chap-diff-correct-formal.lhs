@@ -13,7 +13,7 @@ transform valid input changes into valid output changes (\cref{slogan:derive}).
 Hence, we define what are valid changes (\cref{sec:changes-formally}). As we'll
 explain in \cref{sec:validity-logical}, validity is a logical relation. As we
 explain in \cref{sec:derive-correct-proof}, our correctness theorem is the
-\emph{fundamental lemma} for the validity logical relation, proved by induction
+\emph{fundamental property} for the validity logical relation, proved by induction
 over the structure of terms.
 %
 Crucial definitions or derived facts are summarized in \cref{fig:differentiation}.

@@ -913,7 +913,7 @@ loop| to non-terminating term |if false then 0 else loop|.
 \section{The relation with parametricity and the abstraction theorem}
 
 In this section we discuss similarities between correctness of |derive(param)|
-(\cref{thm:derive-correct}) and the fundamental theorem of logical relations,
+(\cref{thm:derive-correct}) and the fundamental property of logical relations,
 for the case of binary logical relations. This section is intended for logical
 relation experts, and we keep it rather informal.
 
@@ -922,7 +922,7 @@ relation experts, and we keep it rather informal.
 Most studies of logical relations mention no term transformation that relates to
 |derive(param)|; one exception is given by \citet{Bernardy2011realizability}.
 They study relational parametricity, a particular binary logical relation, where
-the fundamental theorem of logical relations becomes the abstraction theorem. To
+the fundamental property of logical relations becomes the abstraction theorem. To
 prove the abstraction theorem, \citeauthor{Bernardy2011realizability} present a
 term transformation |ppp(param)|; we'll show the analogy between this term
 transformation and
@@ -1021,7 +1021,7 @@ regard the proof of the abstraction theorem as an interpreter.
 
 
 % Here we discuss the relation with parametricity, the abstraction theorem, and
-% the fundamental theorem of logical relations, for readers familiar with these
+% the fundamental property of logical relations, for readers familiar with these
 % topics. Parametricity is typically studied for type systems containing System F,
 % but \citet{Bernardy2011realizability} generalize it to arbitrary PTSs.
 
@@ -1430,7 +1430,7 @@ step-counts in definitions is often delicate and tricky to get
 right.
 But \citeauthor*{Acar08} provide a robust recipe to ensure
 correct step-indexing in the semantics.
-To be able to prove the fundamental lemma of logical relations,
+To be able to prove the fundamental property of logical relations,
 we ensure step-counts agree with the ones induced by small-step
 semantics (which counts $\beta$-reductions). Such a lemma is not
 actually needed in other proofs, but only useful as a sanity
@@ -1499,7 +1499,7 @@ Hence, we can translate evaluation derivations using big-step
 semantics to derivations using small-step semantics \emph{with
   the same step count}.
 
-However, to state and prove the fundamental lemma we need not
+However, to state and prove the fundamental property we need not
 prove that our semantics is sound relative to some other
 semantics. We simply define the appropriate logical relation for
 validity and show it agrees with a suitable definition for |`oplus`|.
@@ -1596,8 +1596,8 @@ are related.
 \label{fig:big-step-validity-ext-nosi}
 \end{figure}
 
-Given these definitions, one can prove the fundamental lemma.
-\begin{theorem}[Fundamental lemma: correctness of |derive|]
+Given these definitions, one can prove the fundamental property.
+\begin{theorem}[Fundamental property: correctness of |derive|]
   \label{thm:fund-lemma-derive-correct-types-nosi}
   For every well-typed term |Gamma /- t : tau| we have that
   |fromtosyn Gamma tau t (derive t) t|.
@@ -1711,9 +1711,8 @@ For |envset Gamma|, apply the theorem for |valset tau| to each
 environments entry |x : tau|.
 \end{proof}
 
-\pg{fundamental property!}
-At this point, we prove the fundamental lemma.
-\begin{theorem}[Fundamental lemma: correctness of |derive|]
+At this point, we prove the fundamental property.
+\begin{theorem}[Fundamental property: correctness of |derive|]
   \pg{recheck, state missing definitions.}
   For every well-typed term |Gamma /- t : tau| we have that
   |fromtosyn Gamma tau t (derive t) t|.
