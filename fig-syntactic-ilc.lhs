@@ -208,8 +208,8 @@
     |dbseval dw1 rho drho (rho' `stoup` drho'[\x dx -> dt])|\\
     |bseval  w2  rho v2|\\
     |dbseval dw2 rho drho dv2|\\
-    |dbseval dt  (rho', x := v2) (drho', dx := dv2) dv'|}
-  {|dbseval (dw1 w2 dw2) rho drho dv'|}
+    |dbseval dt  (rho', x := v2) (drho', dx := dv2) dv|}
+  {|dbseval (dw1 w2 dw2) rho drho dv|}
 
   \Rule[E-DLet]{
     |bseval  t1  rho v1|\\

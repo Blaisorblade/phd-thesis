@@ -1787,10 +1787,6 @@ used in the relations can only be proved to be well-founded
 because of the use of step-indexes; we omit
 details~\citep{Ahmed2006stepindexed}.
 
-%format fromtosynuntyped (gamma) (v1) (dv) (v2) = "\validfromtosyn{" gamma "}{}{" v1 "}{" dv "}{" v2 "}"
-
-%format valsetunt = "\mathcal{RV}"
-%format compsetunt = "\mathcal{RC}"
 \begin{figure}[h!]
 \begin{align*}
   |valsetunt| ={}& \{|(k, n1, dn, n2) `such` n1, n2 `elem` Nat, dn
@@ -1848,56 +1844,88 @@ prove it agrees with validity. However, we do not do so.
 
 To ensure that |f1 `oplus` df = f2| (for a suitable |`oplus`|) we
 choose to require that closures |f1|, |df| and |f2| close over
-environments of matching shapes.
-\pg{Continue here.}
+environments of matching shapes. This change does not complicate
+the proof of the fundamental lemma: all the additional
+obligations are automatically preserved.
 
+However, it can still be necessary to replace a function value
+with a different one. Hence we extend our definition of values to
+allow replacement values. Closure replacements produce
+replacements as results, so we make replacement values
+into valid changes for all types. We must also extend the change
+semantics, both to allow evaluating closure replacements, and to
+allow derivatives of primitive to handle replacement values.
+
+We have not added replacement values to the syntax, so currently
+they can just be added to change environments, but we don't
+expect adding them to the syntax would cause any significant trouble.
+
+We present the changes described above for the typed semantics. We have
+successfully mechanized this variant of the semantics as well.
+Adding replacement values |!v| requires the following changes (we
+elude the extra equations for derivatives of primitives):
+\begin{code}
+  dv := ... | ! v
+\end{code}
+\begin{typing}
+   \Rule[E-BangApp]{%
+    |dbseval dw1 rho drho (!(rho'[\x -> t]))|\\
+    |bseval  w2  (rho `oplus` drho) v2|\\
+    |bseval  t  (rho', x := v2) v|}
+  {|dbseval (dw1 w2 dw2) rho drho (!v)|}
+\end{typing}
+  %  \Rule[E-BangApp]{%
+  %   |dbseval dw1 rho drho (!(rho'[\x -> t]))|\\
+  %   |bseval  w2  rho v2|\\
+  %   |dbseval dw2 rho drho dv2|\\
+  %   |bseval t  (rho', x := v2 `oplus` dv2) v|}
+  % {|dbseval (dw1 w2 dw2) rho drho (!v)|}
+
+We ensure replacement values are accepted as valid for all types,
+by requiring the following equation (hence, modifying all
+equations for |valset|):
 \begin{align*}
-  |valset Nat| ={}& \{|(n1, dn, n2) `such` n1, n2 `elem` Nat, dn
-                     `elem` Int `and` n1 + dn = n2|\}\\
+  |valset tau| \supseteq {}& \{| (k, v1, !v2, v2) `such` ^^ /- v1 : tau ^^ `and` ^^ /- v2 : tau |\}
+\end{align*}
+where we write |/- v : tau| to state that value |v| has type
+|tau|; we omit the rules for this judgement.
+
+Finally, to restrict closure changes themselves, we modify the
+definition for |valset (sigma -> tau)|. We require that the base
+closure environment |rho1| and the base environment of the
+closure change |rho| coincide, that |rho2 = rho1 `oplus` drho|,
+that |t1| and |t2| coincide with |t| and that |dt = derive t|. We
+also include explicitly replacement closures, by way of example.
+\begin{align*}
   |valset (sigma -> tau)| ={}&
-                               \{|(rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2]) `such`| \\
-  & |exists Gamma . ^^ Gamma, x : sigma /- t1 : tau `and` Dt^(Gamma, x : sigma) /- dt : Dt^tau `and` Gamma, x : sigma /- t2 : tau `and`|\\
-                            & |forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
-                            ^&^ (<(rho1, x := v1), t1>, <(rho, x := v1) (drho, dx := dv), dt>, <(rho2, x:= v2), t2>) `elem` (compset tau)|\}\\
-  |compset tau| ={}&
-                  \{|(<rho1, t1>, <rho , drho, dt>, <rho2, t2>) `such` ^^^
-                  ^&^ (bseval t1 rho1 v1) `and` (bseval t2 rho2 v2) => ^^^
-                  ^&^ (dbseval dt rho drho dv) `and` (v1, dv, v2 `elem` valset tau)|\}
+                               \{|(k, rho1[\x -> t], rho1 `stoup` drho[\x dx -> derive t], rho2[\x -> t]) `such` ^^^
+                  ^&^ rho1 `oplus` drho = rho2 ^^ `and` ^^^
+                  ^&^ forall ((j, v1, dv, v2) `elem` (valset sigma)). ^^ j < k => ^^^
+                  ^&^ (j, <(rho1, x := v1), t1>, <(rho1, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
+                  ^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)) ^^ `and` ^^^
+                  ^&^ (exists Gamma . ^^ (Gamma , x : sigma /- t : tau)) |\} |^^ `union` ^^^
+                  ^&^| \{| (k, f1, !f2, f2) `such` ^^ /- f1 : sigma -> tau ^^ `and` ^^ /- f2 : sigma -> tau |\}
 \end{align*}
 
-\begin{align*}
-  |valset Nat| ={}& \{|(k, n1, dn, n2) `such` n1, n2 `elem` Nat, dn
-                     `elem` Int `and` n1 + dn = n2|\}\\
-  |valset (sigma -> tau)| ={}&
-                               \{|(k, rho1[\x -> t1], drho[\x dx -> dt], rho2[\x -> t2])`such`| \\
-  & |exists Gamma . ^^ Gamma, x : sigma /- t1 : tau `and` Dt^(Gamma, x : sigma) /- dt : Dt^tau `and` Gamma, x : sigma /- t2 : tau `and`|\\
-                  & |forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
-                    ^&^ forall j. ^^ j < k => ^^^
-                       ^&^ (j, <(rho1, x := v1), t1>, <(drho, dx := dv), dt>, <(rho2, x:= v2), t2>) `elem` (compset tau)|\}\\
-  |compset tau| ={}&
-                  \{|(k, <rho1, t1>, <drho, dt>, <rho2, t2>) `such` ^^^
-                     ^&^ forall j . ^^ j < k `and` ^^^
-                        ^&^ (ibseval t1 rho1 k v1) `and` (bseval t2 rho2 v2) => ^^^
-                           ^&^ (dbseval dt rho1 drho dv) `and` (k - j , v1, dv, v2 `elem` valset tau)|\}
-\end{align*}
 
+Under this condition, we can again prove the fundamental
+property, and we can also define |`oplus`| on closures
+intentionally and prove it agrees with validity.
 
-\pg{Add bang values, bang evaluation, and so on!}
-% \begin{typing}
-%   \Rule[E-]{
-%     |bseval  t1  rho v1|\\
-%     |dbseval dt1 rho drho dv1|\\
-%     |dbseval dt2 (rho, x := v1) (drho; dx := dv1) dv2|}
-%   {|dbseval (lett x = t1; dx = dt1 in dt2) rho drho dv2|}
-% \end{typing}
-
+\pg{Continue here, and revise.}
 \pg{Proof that |`oplus`| agrees with validity}
+
 \section{Future work}
 We have shown that |`oplus`| agrees with validity, which we
 consider a key requirement of a core ILC proof. However, change
 structures support further operators. We have defined and proved
 correct a |nilc| operator. We leave operator |`ominus`| for
 future work, though we are not aware of particular difficulties.
+
+It would be interesting to add a primitive fixpoint operator to
+|ilcTau|, implement derivation and prove it correct. It seems
+clear that the model is expressive enough to handle
+nontermination, since it can handle |ilcUntau| without trouble.
 
 \subsection{Issues with change composition}
 We have looked into change composition, and it appears that
@@ -1964,13 +1992,23 @@ general strategy and the first partial proofs for untyped $\lambda$-calculi.
 After we both struggled for a while to set up step-indexing correctly enough for a
 full proof, I first managed to give the definitions in this chapter and
 complete the proofs here described.
-% We struggled for a while with correct step-indexing till
-% Setting up step-indexing correctly
-% step-indexing corr
-% We struggled for a while to setup the proof in our context.
 
-% unable to com
-% proof sketch and the first
-% The first sketch of this proof is due to
-% was the first to sketch a proof along these lines.
-\pg{Credit Yann for the first variants!}
+\section{Conclusion}
+In this chapter we have shown how to construct novel models for
+ILC by using (step-indexed) logical relations, and have used this
+technique to deliver a new syntactic proof of correctness for ILC
+for simply-typed $lambda$-calculus and to deliver the first proof
+of correctness of ILC for untyped $\lambda$-calculus. Moreover,
+our proof appears rather close to existing
+logical-relations proofs, hence we believe it should be possible
+to translate other results to ILC theorems.
+
+This proof was made much simpler by \citet{Ahmed2006stepindexed}'s
+work on step-indexed logical relations, which enable handling of
+powerful semantics feature using rather elementary techniques.
+The only downside is that it can be tricky to set up the correct
+definitions, especially for a slightly non-standard semantics
+like ours.
+As a simple exercise, we have shown that the our semantics is
+equivalent to more conventional presentations, down to the
+produced step counts.

@@ -66,10 +66,13 @@
 
 %format `eqdef` = "\eqdef"
 %format `such` = "\mid"
+%format `union` = "\cup"
+
 %format ^ = " "
 %format ^^ = "\;"
 %format ^^^ = "\\"
 %format ^&^ = "&"
+
 %format f0
 %format f1
 %format f2
@@ -196,6 +199,8 @@
 %format fromto (tau) (v1) (dv) (v2) = "\validfromto{" tau "}{" v1 "}{" dv "}{" v2 "}"
 %format fromtosem (gamma) (tau) (v1) (dv) (v2) = "\validfromto{" gamma, tau "}{" v1 "}{" dv "}{" v2 "}"
 %format fromtosyn (gamma) (tau) (v1) (dv) (v2) = "\validfromtosyn{" gamma "}{" tau "}{" v1 "}{" dv "}{" v2 "}"
+%format fromtosynuntyped (gamma) (v1) (dv) (v2) = "\validfromtosynunt{" gamma "}{" v1 "}{" dv "}{" v2 "}"
+
 
 %format validV (tau) = "\mathcal{V}_{" tau "}"
 %format valid (tau) (v) (dv) = "(" v " , " dv ") \in V_{" tau "}"
@@ -277,6 +282,9 @@
 %format (valset (tau)) = "\mathcal{RV}\left\llbracket" tau "\right\rrbracket"
 %format (compset (tau)) = "\mathcal{RC}\left\llbracket" tau "\right\rrbracket"
 %format (envset (gamma)) = "\mathcal{RG}\left\llbracket" gamma "\right\rrbracket"
+
+%format valsetunt = "\mathcal{RV}"
+%format compsetunt = "\mathcal{RC}"
 
 %format ilcTau = "\ilcTau"
 %format ilcUntau = "\ilcUntau"
