@@ -1162,6 +1162,7 @@ s - c$ which isn't constant, so there can be no such |h|.
 \pg{write, and put somewhere}
 
 \chapter{(Un)typed ILC, operationally}
+\label{ch:bsos}
 
 In \cref{ch:derive-formally} we have proved ILC correct for a
 simply-typed $\lambda$-calculus. What about other languages, with more expressive
@@ -1879,3 +1880,57 @@ environments of matching shapes.
                         ^&^ (ibseval t1 rho1 k v1) `and` (bseval t2 rho2 v2) => ^^^
                            ^&^ (dbseval dt rho1 drho dv) `and` (k - j , v1, dv, v2 `elem` valset tau)|\}
 \end{align*}
+
+
+\pg{Add bang values, bang evaluation, and so on!}
+% \begin{typing}
+%   \Rule[E-]{
+%     |bseval  t1  rho v1|\\
+%     |dbseval dt1 rho drho dv1|\\
+%     |dbseval dt2 (rho, x := v1) (drho; dx := dv1) dv2|}
+%   {|dbseval (lett x = t1; dx = dt1 in dt2) rho drho dv2|}
+% \end{typing}
+
+\pg{Proof that |`oplus`| agrees with validity}
+\section{Future work}
+We have shown that |`oplus`| agrees with validity, which we
+consider a key requirement of a core ILC proof. However, change
+structures support further operators. We leave proofs of their
+validity for future work.
+
+Showing that change composition is valid appears related to
+showing that \citet{Ahmed2006stepindexed}'s logical equivalence
+is a transitive relation, which is a subtle issue. She only
+proves transitivity in a typed setting;
+proof carries over.
+% transitivity requires using a typed setting.
+% However, her
+% logical relation is indeed transitive, and we believe
+% We conjecture
+
+% Defining |nil| should not be a a problem: the nil change of a
+% closure just takes nil changes or each environment entry.
+
+% As explained by \citeauthor{Ahmed2006stepindexed}, transitivity
+% of her logical relation is subtle.
+% For us this corresponds to two questions that we leave open:
+% \pg{resume; it's composition and transitivity of change equivalence.}
+
+\section{Development history}
+\label{sec:ilc-bsos-dev-history}
+The proof strategy used in this chapter comes from a
+collaboration between me and Yann Régis-Gianas, who came up with the
+general strategy and the first partial proofs for untyped $\lambda$-calculi.
+After we both struggled for a while to set up step-indexing correctly enough for a
+full proof, I first managed to give the definitions in this chapter and
+complete the proofs here described.
+% We struggled for a while with correct step-indexing till
+% Setting up step-indexing correctly
+% step-indexing corr
+% We struggled for a while to setup the proof in our context.
+
+% unable to com
+% proof sketch and the first
+% The first sketch of this proof is due to
+% was the first to sketch a proof along these lines.
+\pg{Credit Yann for the first variants!}

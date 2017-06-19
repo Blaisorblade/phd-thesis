@@ -934,8 +934,9 @@ Régis-Gianas. Yufei Cai gives a simpler pen-and-paper set-theoretic proof by
 separating validity, while we noticed separating validity works
 equally well in a mechanized type theory and simplifies the
 mechanization.
-The first to use a two-sided validity relation was Yann Régis-Gianas, though in
-a different formal setting and in a proof that is yet incomplete.
+The first to use a two-sided validity relation was Yann Régis-Gianas, but using
+a big-step operational semantics, while we were collaborating on an ILC
+correctness proof for untyped $\lambda$-calculus (as in \cref{ch:bsos}).
 I gave the first complete and mechanized ILC correctness proof
 using two-sided validity, again for a simply-typed
 $\lambda$-calculus with a denotational semantics. Based on
