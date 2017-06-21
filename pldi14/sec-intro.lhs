@@ -1568,6 +1568,10 @@ are related values.
 \begin{align*}
   |valset Nat| ={}& \{|(n1, dn, n2) `such` n1, n2 `elem` Nat, dn
                      `elem` Int `and` n1 + dn = n2|\}\\
+  |valset (tau1 `times` tau2)| ={} & \{|(pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
+                                   ^&^ (va1, dva, va2) `elem` valset tau1
+                                      ^^ `and` ^^
+                                      (vb1, dvb, vb2) `elem` valset tau2 |\}\\
   |valset (sigma -> tau)| ={}&
                                \{|(rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2]) `such` ^^^
                     ^&^ (forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
@@ -1684,6 +1688,10 @@ well-founded recursion on step-indexes.
 \begin{align*}
   |valset Nat| ={}& \{|(k, n1, dn, n2) `such` n1, n2 `elem` Nat, dn
                      `elem` Int `and` n1 + dn = n2|\}\\
+  |valset (tau1 `times` tau2)| ={} & \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
+                                   ^&^ (k, va1, dva, va2) `elem` valset tau1
+                                      ^^ `and` ^^
+                                      (k, vb1, dvb, vb2) `elem` valset tau2 |\}\\
   |valset (sigma -> tau)| ={}&
                                \{|(k, rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2])`such` ^^^
                   ^&^ forall ((j, v1, dv, v2) `elem` (valset sigma)). ^^ j < k => ^^^
@@ -1794,7 +1802,11 @@ details~\citep{Ahmed2006stepindexed}.
               & \{|(k, rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2])`such` ^^^
                   ^&^ forall ((j, v1, dv, v2) `elem` valsetunt). ^^ j < k => ^^^
                   ^&^ (j, <(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
-                  ^&^ <(rho2, x:= v2), t2>) `elem` compsetunt)|\}\\
+                  ^&^ <(rho2, x:= v2), t2>) `elem` compsetunt)|\} ^^ \cup\\
+                 & \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
+                   ^&^ (k, va1, dva, va2) `elem` valsetunt
+                      ^^ `and` ^^
+                      (k, vb1, dvb, vb2) `elem` valsetunt |\}\\
   |compsetunt| ={}&
                   \{|(k, <rho1, t1>, <rho `stoup` drho, dt>, <rho2, t2>) `such` ^^^
                      ^&^ (forall j v1 v2 . ^^^

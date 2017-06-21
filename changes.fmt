@@ -132,6 +132,10 @@
 %format dtb = dt "_b"
 %format dva = dv "_a"
 %format dvb = dv "_b"
+%format va1
+%format va2
+%format vb1
+%format vb2
 
 %format dt1
 %format dt2
