@@ -1888,8 +1888,9 @@ elude the extra equations for derivatives of primitives):
 \begin{typing}
    \Rule[E-BangApp]{%
     |dbseval dw1 rho drho (!(rho'[\x -> t]))|\\
-    |bseval  w2  (rho `oplus` drho) v2|\\
-    |bseval  t  (rho', x := v2) v|}
+    |bseval  w2  rho v2|\\
+    |dbseval dw2 rho drho dv2|\\
+    |bseval  t  (rho', x := v2 `oplus` dv2) v|}
   {|dbseval (dw1 w2 dw2) rho drho (!v)|}
 \end{typing}
   %  \Rule[E-BangApp]{%
