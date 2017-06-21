@@ -1511,7 +1511,8 @@ Now that we defined our semantics, we proceed to define validity.
 For our typed language |ilcTau| we can define logical
 relations without using step-indexes. The resulting relations are
 well-founded only because they use structural recursion on types.
-We present the needed definitions as a stepping stone to the
+We present in \cref{fig:big-step-validity-ext-nosi}
+the needed definitions as a stepping stone to the
 definitions using step-indexed logical relations.
 
 Following \citet{Ahmed2006stepindexed} and \citet*{Acar08}, we encode validity
@@ -1607,7 +1608,7 @@ Given these definitions, one can prove the fundamental property.
   For every well-typed term |Gamma /- t : tau| we have that
   |fromtosyn Gamma tau t (derive t) t|.
 \end{theorem}
-\begin{proof}
+\begin{proof}[Proof sketch]
   By induction on the structure on terms, using ideas similar to
   \cref{thm:derive-correct}.
 \end{proof}
@@ -1667,9 +1668,12 @@ In our case, we can say that a change appears valid at
 step count $k$ if it behaves like a valid change in observations using
 at most $k$ steps. The details or the relation definitions are
 subtle, but follow closely the use of step-indexing by
-\citet*{Acar08}. The only choice we make, in the definition of
-|compset tau| is to not bound the number of evaluation steps
-taken by change term |dt|, as no bound is necessary for our proofs.
+\citet*{Acar08}. We add mention of changes, and must decide
+whether how to use step-indexing for them.
+In the definition of |compset tau|, we allow change term |dt| to
+evaluate to |dv| in an unbounded number of steps, as no bound is
+necessary for our proofs. This is why the semantics we defined
+for change terms has no step counts.
 
 % Instead of observing the behavior of terms with an unbounded
 % number of computation steps, as we did before, we observe the
@@ -1677,11 +1681,13 @@ taken by change term |dt|, as no bound is necessary for our proofs.
 % we give a bound $k$, and observe
 % behavior with at most $k$
 
-First, we index the relation by both types and step-indexes,
+In this section we index the relation by both types and step-indexes,
 since this is the one we use in our mechanized proof. This
 relation is defined by structural induction on types.
-For untyped $\lambda$-calculus, instead, we'll need to drop
-types. The resulting definition is instead defined by
+We show this definition in \cref{fig:big-step-validity-ext-si}.
+Instead, in \cref{sec:silr-untyped-proof} we consider
+untyped $\lambda$-calculus and drop types.
+The resulting definition is very similar, but is defined by
 well-founded recursion on step-indexes.
 
 \begin{figure}[h!]
@@ -1772,14 +1778,13 @@ At this point, we prove the fundamental property.
   For every well-typed term |Gamma /- t : tau| we have that
   |fromtosyn Gamma tau t (derive t) t|.
 \end{theorem}
-\begin{proof}
+\begin{proof}[Proof sketch]
   By structural induction on typing derivations, using ideas
 similar to \cref{thm:fund-lemma-derive-correct-types-nosi} and
 relying on \cref{lem:validity-typed-downward-closed} to reduce
 step counts where needed.
 \end{proof}
 
-\pg{Everywhere, we're still missing the cases for products!}
 \section{Untyped step-indexed logical relations (\ilcUntau{}, \dilcUntau{})}
 \label{sec:silr-untyped-proof}
 By removing mentions of types from this step-indexed logical
@@ -1789,6 +1794,7 @@ matching on values themselves, instead of matching on types.
 Without types, typing contexts |Gamma| now degenerate to lists of
 free variables of a term; we still use them to ensure that
 environments contain enough entries to evaluate a term.
+We show resulting definitions in \cref{fig:big-step-validity-ext-si-untyped}.
 
 The main difference in the proof is that this time, the recursion
 used in the relations can only be proved to be well-founded
@@ -1939,7 +1945,7 @@ It would be interesting to add a primitive fixpoint operator to
 clear that the model is expressive enough to handle
 nontermination, since it can handle |ilcUntau| without trouble.
 
-\subsection{Issues with change composition}
+\subsection{Change composition}
 We have looked into change composition, and it appears that
 composition of change expression is not always valid, but we
 conjecture that composition of change values preserves validity.
