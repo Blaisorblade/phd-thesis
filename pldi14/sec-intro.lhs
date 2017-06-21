@@ -1804,12 +1804,12 @@ details~\citep{Ahmed2006stepindexed}.
 \begin{figure}[h!]
 \begin{align*}
   |valsetunt| ={}& \{|(k, n1, dn, n2) `such` n1, n2 `elem` Nat, dn
-                     `elem` Int `and` n1 + dn = n2|\} ^^ \cup \\
-              & \{|(k, rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2])`such` ^^^
+                     `elem` Int `and` n1 + dn = n2| \} |^^ `union` ^^^
+                  ^&^| \{|(k, rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2])`such` ^^^
                   ^&^ forall ((j, v1, dv, v2) `elem` valsetunt). ^^ j < k => ^^^
                   ^&^ (j, <(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
-                  ^&^ <(rho2, x:= v2), t2>) `elem` compsetunt)|\} ^^ \cup\\
-                 & \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
+                  ^&^ <(rho2, x:= v2), t2>) `elem` compsetunt)| \} | ^^ `union` ^^^
+                  ^&^ | \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
                    ^&^ (k, va1, dva, va2) `elem` valsetunt
                       ^^ `and` ^^
                       (k, vb1, dvb, vb2) `elem` valsetunt |\}\\
