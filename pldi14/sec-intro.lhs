@@ -1900,12 +1900,43 @@ elude the extra equations for derivatives of primitives):
   %   |bseval t  (rho', x := v2 `oplus` dv2) v|}
   % {|dbseval (dw1 w2 dw2) rho drho (!v)|}
 
+Evaluation rule \textsc{E-BangApp} requires defining |`oplus`| on
+syntactic values:
+
+\begin{definition}
+  Operator |`oplus`| is defined on values by the following equations:
+
+  \begin{code}
+    v1 `oplus` ! v2 = v2
+    -- If rho and drho are environments for the same typing context |Gamma|:
+    rho[\x -> t] `oplus` drho[\x dx -> dt] = (rho `oplus` drho)[\x -> t]
+    -- otherwise
+    rho[\x -> t] `oplus` drho[\x dx -> dt] = rho[\x -> t]
+    n `oplus` dn                       = n + dn
+    pair va1 vb1 `oplus` pair dva dvb  = pair (va1 `oplus` dva) (vb1 `oplus` dvb)
+    -- An additional equation is needed for the untyped case.
+    v1 `oplus` dv = v1
+  \end{code}
+
+  We also define |`oplus`| on environments for matching contexts
+  to combine values and changes pointwise:
+  \begin{code}
+    (x1 := v1, ..., xn := vn) `oplus` (dx1 := dv1, ..., dxn := dvn) =
+        (x1 := v1 `oplus` dv1, ..., xn := vn `oplus` dvn)
+  \end{code}
+\end{definition}
+
+The definition of update for closures is very limited, but we
+restrict validity to only the changes for which it is correct, as
+we show in a moment.
+
 We ensure replacement values are accepted as valid for all types,
-by requiring the following equation (hence, modifying all
-equations for |valset|):
-\begin{align*}
+by requiring the following equation holds (hence, modifying all
+equations for |valset|---we omit details):
+\begin{align}
+  \label{eq:val-replacement}
   |valset tau| \supseteq {}& \{| (k, v1, !v2, v2) `such` ^^ /- v1 : tau ^^ `and` ^^ /- v2 : tau |\}
-\end{align*}
+\end{align}
 where we write |/- v : tau| to state that value |v| has type
 |tau|; we omit the rules for this judgement.
 
@@ -1913,8 +1944,10 @@ Finally, to restrict closure changes themselves, we modify the
 definition for |valset (sigma -> tau)|. We require that the base
 closure environment |rho1| and the base environment of the
 closure change |rho| coincide, that |rho2 = rho1 `oplus` drho|,
-that |t1| and |t2| coincide with |t| and that |dt = derive t|. We
-also include explicitly replacement closures, by way of example.
+that |t1| and |t2| coincide with |t| and that |dt = derive t|.
+
+As an example for \cref{eq:val-replacement}, we also include explicitly
+replacement closures in the definition of |valset (sigma -> tau)|.
 \begin{align*}
   |valset (sigma -> tau)| ={}&
                                \{|(k, rho1[\x -> t], rho1 `stoup` drho[\x dx -> derive t], rho2[\x -> t]) `such` ^^^
@@ -1926,10 +1959,32 @@ also include explicitly replacement closures, by way of example.
                   ^&^| \{| (k, f1, !f2, f2) `such` ^^ /- f1 : sigma -> tau ^^ `and` ^^ /- f2 : sigma -> tau |\}
 \end{align*}
 
-
 Under this condition, we can again prove the fundamental
 property, and we can also define |`oplus`| on closures
-intentionally and prove it agrees with validity.
+intensionally and prove it agrees with validity.
+
+\begin{theorem}[|`oplus`| agrees with intensional step-indexed validity]
+If |(k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
+\end{theorem}
+\begin{proof}
+  By induction on types. For |Nat| validity coincides with the
+  thesis. For |pair tau1 tau2|, we must simply apply the
+  induction hypothesis on pair components.
+
+  For closures, validity requires that |v1 = rho1[\x -> t], dv =
+  drho[\x dx -> derive t], v2 = rho2[\x -> t]| with |rho1 `oplus`
+  drho = rho2|, and there exists |Gamma| such that |Gamma, x :
+  sigma /- t : tau|. Moreover, from validity we can show that |rho|
+  and |drho| have matching shapes: |rho| is an environment
+  matching |Gamma| and |drho| is a change environment matching
+  |Dt^Gamma|. Hence, |v1 `oplus` dv| can update the stored
+  environment, and we can show the thesis by the following
+  calculation:
+  \begin{multline*}
+    |v1 `oplus` dv = rho1[\x -> t] `oplus` drho[\x dx -> dt] =|\\
+    |(rho1 `oplus` drho)[\x -> t] = rho2[\x -> t] = v2|
+  \end{multline*}
+\end{proof}
 
 \pg{Continue here, and revise.}
 \pg{Proof that |`oplus`| agrees with validity}
