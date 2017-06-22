@@ -499,11 +499,13 @@ validity and show it agrees with a suitable definition for |`oplus`|.
 
 Having defined our semantics, we proceed to define extensional validity.
 
-\section{Extensional validity through syntactic logical relations (\ilcTau{}, \dilcTau)}
+\section{Validity, syntactically (\ilcTau{}, \dilcTau)}
 \label{sec:typed-proof}
-For our typed language |ilcTau| we can define logical
-relations without using step-indexes. The resulting relations are
-well-founded only because they use structural recursion on types.
+For our typed language |ilcTau|, at least as long as we do not add
+fixpoint operators, we can define logical
+relations using big-step semantics but without using
+step-indexes. The resulting relations are well-founded only
+because they use structural recursion on types.
 We present in \cref{fig:big-step-validity-ext-nosi}
 the needed definitions as a stepping stone to the
 definitions using step-indexed logical relations.
@@ -786,7 +788,7 @@ relying on \cref{lem:validity-typed-downward-closed} to reduce
 step counts where needed.
 \end{proof}
 
-\section{Step-indexed intensional validity for function changes}
+\section{Step-indexed intensional validity}
 \label{sec:intensional-step-indexed-validity}
 
 Up to now, we have defined when a function change is valid
@@ -959,12 +961,15 @@ If |(k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
 We can also define |nilc| intensionally on values and
 environments, and prove it correct. We omit the standard
 definition of |nil| on environments.
-For closures, we  on the environment.
+For closures, we recurse on the environment.
+\begin{definition}[Nil changes |nilc|]
+  Nil changes on values are defined as follows:
 \begin{code}
-  nil (rho[\x -> t]) = (nil rho)[\x dx -> derive t]
+  nil (rho[\x -> t]) = rho `stoup` (nil rho)[\x dx -> derive t]
   nil (pair a b) = pair (nil a) (nil b)
   nil n = 0
 \end{code}
+\end{definition}
 \begin{lemma}[|nilc| produces valid changes]
   For all values |/- v : tau| and indexes |k|, |(k, v, nil v, v)
   `elem` valset tau|.
@@ -986,7 +991,7 @@ We conclude with the overall correctness theorem, analogous to
   \cref{thm:oplus-validity-intensional}.
 \end{proof}
 
-\section{Untyped step-indexed extensional validity (\ilcUntau{}, \dilcUntau{})}
+\section{Untyped step-indexed validity (\ilcUntau{}, \dilcUntau{})}
 \label{sec:silr-untyped-proof}
 By removing mentions of types from step-indexed validity
 (intensional or extensional), we can adapt it to an untyped
@@ -1068,17 +1073,17 @@ smaller step counts.
 \end{proof}
 
 \section{Future work}
-We have shown that |`oplus`| agrees with validity, which we
-consider a key requirement of a core ILC proof. However, change
-structures support further operators. We have defined and proved
-correct a |nilc| operator. We leave operator |`ominus`| for
-future work, though we are not aware of particular difficulties.
-
 It would be interesting to add a primitive fixpoint operator to
 |ilcTau|, implement derivation and prove it correct. It seems
 clear that the model is expressive enough to handle
 nontermination, since it can handle |ilcUntau| without trouble.
 
+We have shown that |`oplus`| and |nilc| agree with validity,
+which we consider a key requirement of a core ILC proof. However,
+change structures support further operators. We leave operator
+|`ominus`| for future work, though we are not aware of particular
+difficulties.
+However, |`ocompose`| deserves special attention.
 \subsection{Change composition}
 We have looked into change composition, and it appears that
 composition of change expression is not always valid, but we
