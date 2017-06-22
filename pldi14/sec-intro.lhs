@@ -1529,7 +1529,13 @@ proved that all terms (of type |tau|) evaluate to a value of type
 standard proof of strong normalization for STLC~\citep[Ch.
 12]{Pierce02TAPL}.
 
-For simplicity we assume evaluation of primitives takes one step.
+Evaluation of primitives is delegated to function |evalPrim|. We show
+complete equations for the typed case; for the untyped case, we
+must turn |evalPrim| and |devalPrim| into relations (or add explicit error
+results), but we omit the standard details (see also
+\cref{sec:silr-untyped-proof}).
+
+For simplicity, we assume evaluation of primitives takes one step.
 We conjecture higher-order primitives might need to be assigned
 different costs, but leave details for future work.
 
@@ -1896,7 +1902,6 @@ validity.
 Given these definitions, we can prove that all relations are
 \emph{downward-closed}: that is, relations at step-count $n$
 imply relations at step-count $k < n$.
-\pg{recheck and complete, and add title}
 \begin{lemma}[Extensional validity is downward-closed]
   \label{lem:validity-typed-downward-closed}
   Assume $k \le n$.
@@ -2142,18 +2147,23 @@ We conclude with the overall correctness theorem, analogous to
 
 \section{Untyped step-indexed extensional validity (\ilcUntau{}, \dilcUntau{})}
 \label{sec:silr-untyped-proof}
-\pg{Did I do the proof with primitives?}
-\pg{By looking at definitions, I can only have done the proof
-  with the pure fragment, but nothing else.}
-\pg{Drop primitives here.}
-By removing mentions of types from this step-indexed logical
-relation we can adapt it to an untyped language.
+By removing mentions of types from step-indexed validity
+(intensional or extensional), we can adapt it to an untyped
+language.
 We can still distinguish between functions, numbers and pairs by
 matching on values themselves, instead of matching on types.
 Without types, typing contexts |Gamma| now degenerate to lists of
 free variables of a term; we still use them to ensure that
-environments contain enough entries to evaluate a term.
-We show resulting definitions in \cref{fig:big-step-validity-ext-si-untyped}.
+environments contain enough valid entries to evaluate a term.
+Validity applies to terminating executions, hence we need not
+consider executions producing dynamic type errors when proving
+the fundamental property.
+
+We show resulting definitions for extensional validity in
+\cref{fig:big-step-validity-ext-si-untyped}; but we can also define
+intensional validity and prove the fundamental lemma for it.
+As mentioned earlier, for \ilcUntau{} we must turn |evalPrim| and |devalPrim|
+into relations and update |E-Prim| accordingly.
 
 The main difference in the proof is that this time, the recursion
 used in the relations can only be proved to be well-founded
@@ -2190,7 +2200,6 @@ details~\citep{Ahmed2006stepindexed}.
 \caption{Defining extensional validity via \emph{untyped step-indexed} logical relations and big-step semantics.}
 \label{fig:big-step-validity-ext-si-untyped}
 \end{figure}
-\pg{drop types from figure!}
 
 Otherwise, the proof proceeds just as earlier in
 \cref{sec:silr-typed-proof}: We prove that the relations are
@@ -2208,9 +2217,14 @@ lemma by induction on the structure of terms (not of typing derivations).
 \begin{proof}[Proof sketch]
   Similar to the proof of
 \cref{thm:fund-lemma-derive-correct-types-si}, but by structural
-induction on step counts and terms, not on typing derivations.
-\end{proof}
+induction on terms and complete induction on step counts, not on
+typing derivations.
 
+However, we can use the induction hypothesis in the same ways as
+in earlier proofs for typed languages: all uses of the induction
+hypothesis in the proof are on smaller terms, and some also at
+smaller step counts.
+\end{proof}
 
 \section{Future work}
 We have shown that |`oplus`| agrees with validity, which we
@@ -2264,7 +2278,7 @@ we cannot conclude anything from
 But like in \citet{Ahmed2006stepindexed}, if |e2| amd |e3| are
 related at all step counts, that is, if |(k, e1, de1, e2) `elem`
 compset tau `and` (forall n. (n, e2, de2, e3) `elem` compset
-tau)|, and if on top |e2| terminates, we conjecture that
+tau)|, and if additionally |e2| terminates, we conjecture that
 \citeauthor{Ahmed2006stepindexed}'s proof goes through. We have
 however not yet examined all details.
 
