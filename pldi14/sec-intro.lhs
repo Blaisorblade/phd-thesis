@@ -1183,10 +1183,17 @@ We prove ILC correct using, in increasing order of complexity,
 \item an untyped $\lambda$-calculus and step-indexed logical relations.
 \end{enumerate}
 We have fully mechanized the second proof in Agda, and done the others
-on paper. The proof for untyped $\lambda$-calculus is the most
+on paper. In all cases we prove the fundamental property for
+validity; we detail later which corollaries we prove in which
+case.
+The proof for untyped $\lambda$-calculus is the most
 interesting, but the others can serve as stepping stones. We are
 currently working (together with Yann-Régis Gianas) on
-mechanizing the proof for untyped $\lambda$-calculus.
+mechanizing the proof for untyped $\lambda$-calculus in
+Coq.\footnote{Mechanizing the proof for untyped
+  $\lambda$-calculus is harder for purely technical reasons:
+  mechanizing well-founded induction in Agda is harder than
+  mechanizing structural induction.}
 
 Using operational semantics and step-indexed logical relations
 simplifies extending the proofs to more expressive languages,
@@ -1198,40 +1205,167 @@ On the technical side, we are able to mechanize our proof without
 needing any technical lemmas about binding or weakening, thanks
 to a number of choices we mention later.
 
-Proofs by (step-indexed) logical relations also promises
-scalable. All these proofs appear to be a slight variants of
+Proofs by (step-indexed) logical relations also promise to be
+scalable. All these proofs appear to be slight variants of
 proof techniques for logical program equivalence and
-parametricity, which are extremely well-studied topics,
-suggesting the approach might scale to more expressive type
-systems. The relation with parametricity has also been noticed
-earlier more than once, and these proofs appear to vindicate it.
-However, actually proving ILC correct for a polymorphic language
-(such as System F) is left as future work.
-
-Also, using operational semantics, we can show more formally how
-function changes arise: we model function values as closures, and
-in the model we show in
-\cref{sec:intensional-step-indexed-validity}, function change
-values are either closure changes (which only modify
-environments) or replacement closures, that is replacement
-changes for closures that produce replacement changes as result.
-
-This proof implies correctness of ILC in the presence of general recursion.
-because untyped $\lambda$-calculus supports general recursion via
-fixpoint combinators. Efficient support for general recursion is
-however a separate problem that we do not tackle here (see
-\cref{sec:general-recursion} for discussion).
-
-Our development is inspired significantly by
-\citet{Ahmed2006stepindexed} and \citet*{Acar08}. We refer to
-those works and to Ahmed's lectures at OPLSS 2013%
-\footnote{\url{https://www.cs.uoregon.edu/research/summerschool/summer13/curriculum.html}.}
-for an introduction to (step-indexed) logical relations.
+parametricity, which are well-studied topics, suggesting the
+approach might scale to more expressive type systems. Hence, we
+believe these proofs clarify the relation with parametricity that
+has been noticed earlier \citep{Atkey2015ILC}. However, actually
+proving ILC correct for a polymorphic language (such as System F)
+is left as future work.
 
 Compared to earlier chapters, this one will be more technical and
 concise, because we already introduced the ideas behind both ILC
 and logical relation proofs.
 
+\paragraph{Background/related work}
+Our development is inspired significantly by the use of
+step-indexed logical relations by \citet{Ahmed2006stepindexed}
+and \citet*{Acar08}. We refer to
+those works and to Ahmed's lectures at OPLSS 2013%
+\footnote{\url{https://www.cs.uoregon.edu/research/summerschool/summer13/curriculum.html}.}
+for an introduction to (step-indexed) logical relations.
+
+\paragraph{Intensional and extensional validity}
+Until this point, change validity only specifies how function
+changes behave, that is, their \emph{extension}.
+Using operational semantics, we can specify how valid function
+changes are concretely defined, that is, their \emph{intension}.
+To distinguish the two concepts, we contrast extensional validity
+and intensional validity.
+Some extensionally valid changes are not intensionally valid, but
+such changes are never created by derivation.
+Defining intensional validity helps to understand function
+changes:
+function changes are produced from changes to values in
+environments or from functions being replaced altogether.
+Requiring intensional validity helps to implement
+change operations such as |`oplus`| more efficiently, by
+operating on environments.
+Later, in \cref{ch:defunc-fun-changes},
+we use similar ideas to implement change operations on
+\emph{defunctionalized} function changes: intensional validity
+helps put such efforts on more robust foundations, even though we
+do not account formally for defunctionalization but only for
+the use of closures in the semantics.
+
+We use operational semantics to define extensional validity in
+\cref{sec:typed-proof} (using plain logical relations) and
+\cref{sec:silr-typed-proof} (using step-indexed logical
+relations). We switch to intensional validity definition in
+\cref{sec:intensional-step-indexed-validity}.
+
+% Thanks to operational semantics, we can choose to define change
+% validity \emph{intensionally} rather than \emph{extensionally},
+% that is, based on how changes are defined internally, rather than
+% just how they behave.
+
+% Our earlier definition of validity is based on behavior, hence
+% \emph{extensional}. We present a step-indexed definition of
+% extensional validity in \cref{sec:silr-typed-proof}.
+% We introduce a concept of intensional validity, that captures
+% formally that function changes arise from changing environments
+% or functions being replaced altogether
+% (\cref{sec:intensional-step-indexed-validity}).
+% which introduces
+% intensional validity as a variant of extensional validity,
+% defined in
+
+% According to earlier definitions, functions
+% We earlier defined va
+% Also, using operational semantics, we can show more formally how
+% function changes arise: we model function values as closures, and
+% in the model we show in
+% \cref{sec:intensional-step-indexed-validity}, function change
+% values are either closure changes (which only modify
+% environments) or replacement closures, that is replacement
+% changes for closures that produce replacement changes as result.
+
+\paragraph{Non-termination and general recursion}
+This proof implies correctness of ILC in the presence of general recursion,
+because untyped $\lambda$-calculus supports general recursion via
+fixpoint combinators. However, the proof only applies to
+terminating executions of base programs, like for earlier
+authors~\citep*{Acar08}: we prove that if a function terminates
+against both a base input |v1| and an updated one |v2|, its derivative
+terminates against the base input and a valid input change |dv|
+from |v1| to |v2|.
+
+We also conjecture we could also add a fixpoint construct to
+our \emph{typed} $\lambda$-calculus and to our mechanization,
+without significant changes to our relations. However, a
+mechanical proof would require use of well-founded induction,
+which our current mechanization avoids.
+
+While this support for general recursion is effective in some
+scenarios, other scenarios can still be incrementalized better
+using structural recursion.
+More efficient support for general recursion is
+a separate problem that we do not tackle here and leave for
+future work. We refer to discussion in
+\cref{sec:general-recursion}.
+
+\paragraph{Correctness statement}
+Our final correctness theorem is a variant of
+\cref{thm:derive-correct-oplus}, that we repeat for comparison:
+
+\begin{fullCompile}
+\deriveCorrectOplus*
+\end{fullCompile}
+\begin{partCompile}
+\begin{restatable*}[|derive(param)| is correct, corollary]{corollary}{deriveCorrectOplus}
+  \label{thm:derive-correct-oplus}
+  If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
+  |eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|.
+\end{restatable*}
+\end{partCompile}
+
+We present our final correctness theorem statement in
+\cref{sec:intensional-step-indexed-validity}. We anticipate it
+here for illustration: the new statement is more explicit about
+evaluation, but otherwise broadly similar.
+
+\begin{restatable*}[|derive(param)| is correct, corollary]{corollary}{deriveCorrectOplusSI}
+  \label{thm:derive-correct-types-si-intensional}
+  Take any term |t| that is well-typed (|Gamma /- t : tau|) and
+  any suitable environments |rho1, drho, rho2|, intensionally
+  valid at any step count (|forall k. (k, rho1, drho, rho2) `elem`
+  envset Gamma|).
+  Assume |t| terminates in both the old environment |rho1| and
+  the new environment |rho2|, evaluating to output values |v1| and
+  |v2| (|bseval t rho1 v1| and |bseval t rho2 v2|).
+  Then |derive t| evaluates in environment |rho| and change environment |drho|
+  to a change value |dv| (|dbseval t rho1 drho dv|),
+  and |dv| is a valid change from |v1| to |v2|, so that |v1
+  `oplus` dv = v2|.
+\end{restatable*}
+
+Overall, in this chapter we present the following contributions:
+\begin{itemize}
+\item We give an alternative presentation of derivation, that can
+  be mechanized without any binding-related lemmas, not even
+  weakening-related ones, by introducing a separate syntax for
+  change terms (\cref{sec:bsos-formalization}).
+\item We prove formally ILC correct for STLC
+  using big-step semantics and logical relations (\cref{sec:typed-proof}).
+\item We show formally (with pen-and-paper proofs) that our
+  semantics is equivalent to small-step semantics definitions
+  (\cref{sec:sanity-check-big-step}).
+\item We introduce a formalized step-indexed variant of our definitions and
+  proofs for simply-typed $\lambda$-calculus
+  (\cref{sec:typed-proof}), which scales directly to definitions
+  and proofs for \emph{untyped} $\lambda$-calculus.
+\item For typed $\lambda$-calculus, we also mechanize our
+  step-indexed proof.
+\item In addition to (extensional) validity, we introduce a
+concept of intensional validity, that captures formally that
+function changes arise from changing environments or functions
+being replaced altogether
+(\cref{sec:intensional-step-indexed-validity}).
+\end{itemize}
+
+\pg{Move untyped definition after typed one.}
 \section{Formalization}
 \label{sec:bsos-formalization}
 To present the proofs, we first describe our formal model of CBV
@@ -1409,14 +1543,17 @@ that for some |n| we have |ibseval t rho n v|.
 We can also define an analogous non-indexed big-step
 semantics for change terms, and we present it in \cref{sfig:anf-change-semantics}.
 
-\section{Sanity-checking our step-indexed semantics}
+\section{Validating our step-indexed semantics}
 \label{sec:sanity-check-big-step}
 In this section, we show how we ensure the step counts in our
-semantics are set correctly, and how we can relate this
-environment-based semantics to more conventional ones. We only
+base semantics are set correctly, and how we can relate this
+environment-based semantics to more conventional semantics, based
+on substitution and/or small-step. We only
 consider the core calculus, without primitives, constants and
 pairs. Results from this section are not needed later and we have
-proved them formally on paper but not mechanized them.
+proved them formally on paper but not mechanized them, as our
+goal is to use environment-based big-step semantics in our
+mechanization.
 
 To this end we relate our semantics first with
 a big-step semantics based on substitution (rather than
@@ -1425,6 +1562,15 @@ small-step semantics. Results in this section are useful to
 understand better our semantics and as a design aide to modify
 it, but are not necessary to the proof, so we have not mechanized
 them.
+
+As a consequence, we also conjecture that our logical relations
+and proofs could be adapted to small-step semantics, along the lines
+of \citet{Ahmed2006stepindexed}. We however do
+not find that necessary. While small-step
+semantics gives meaning to non-terminating programs, and that is
+important for type soundness proofs, it does not seem useful (or
+possible) to try to incrementalize them, or to ensure we do so
+correctly.
 
 In proofs using step-indexed logical relations, the use of
 step-counts in definitions is often delicate and tricky to get
@@ -1505,9 +1651,10 @@ prove that our semantics is sound relative to some other
 semantics. We simply define the appropriate logical relation for
 validity and show it agrees with a suitable definition for |`oplus`|.
 
-Now that we defined our semantics, we proceed to define validity.
+Having defined our semantics, we proceed to define extensional validity.
 
-\section{Validity through syntactic logical relations (\ilcTau{}, \dilcTau)}
+\section{Extensional validity through syntactic logical relations (\ilcTau{}, \dilcTau)}
+\label{sec:typed-proof}
 For our typed language |ilcTau| we can define logical
 relations without using step-indexes. The resulting relations are
 well-founded only because they use structural recursion on types.
@@ -1515,7 +1662,8 @@ We present in \cref{fig:big-step-validity-ext-nosi}
 the needed definitions as a stepping stone to the
 definitions using step-indexed logical relations.
 
-Following \citet{Ahmed2006stepindexed} and \citet*{Acar08}, we encode validity
+Following \citet{Ahmed2006stepindexed} and \citet*{Acar08}, we
+encode extensional validity
 through two mutually recursive type-indexed families of ternary
 logical relations, |valset tau| over closed values and |compset
 tau| over terms (and environments).
@@ -1554,8 +1702,8 @@ This flexibility is useful to when relating closures of type
 close over environments of different shape. For instance,
 closures |v1 = emptyRho[\x -> 0]| and |v2 = (y := 0)[\x -> y]| are
 related by a nil change such as |dv = emptyRho[\x dx -> 0]|.
-In \cref{sec:intensional-step-indexed-validity}, we discuss a
-more intensional definition of validity.
+In \cref{sec:intensional-step-indexed-validity}, we discuss instead
+an \emph{intensional} definition of validity.
 
 In particular, for function types the relation |valset (sigma ->
 tau)| relates function values |f1|, |df| and |f2| if they map
@@ -1598,7 +1746,7 @@ are related values.
                                       |forall ((rho1, drho, rho2) `elem` envset Gamma) . ^^^
                                       ^&^ (<rho1, t1>, <rho1 `stoup` drho, dt>, <rho2, t2>) `elem` compset tau|
 \end{align*}
-\caption{Defining validity via logical relations and big-step semantics.}
+\caption{Defining extensional validity via logical relations and big-step semantics.}
 \label{fig:big-step-validity-ext-nosi}
 \end{figure}
 
@@ -1617,21 +1765,28 @@ Given these definitions, one can prove the fundamental property.
 %format (valset' (tau)) = "\mathcal{RV'}\left\llbracket" tau "\right\rrbracket"
 %format (compset' (tau)) = "\mathcal{RC'}\left\llbracket" tau "\right\rrbracket"
 \begin{remark}
-  These relations are unusual for two reasons. First, instead of
+  Compared to prior work,
+  these relations are unusual for two reasons. First, instead of
   just relating two executions of a term, we relate two
-  executions with an execution of a change term.
+  executions of a term with an execution of a change term.
   Second, most such logical relations (including
   \citet{Ahmed2006stepindexed}'s one, but except \citet{Acar08}'s
-  one) are intended to define some form of program equivalence.
-  Imagine studying equivalence through some suitable binary
-  logical relations |(compset' tau)| and |(valset' tau)|.
-  If |t1| terminating and |(t1, t2) `elem` (compset' tau)| holds
-  then |t2| also terminates, and their results are in turn related.
+  one) define a logical relation (sometimes called \emph{logical
+    equivalence}) that characterizes contextual equivalence, while we
+  don't.
+
+  Consider a logical equivalence defined through sets |(compset'
+  tau)| and |(valset' tau)|.
+  If |(t1, t2) `elem` (compset' tau)| holds and |t1| terminates
+  (with result |v1|),
+  then |t2| must terminate as well (with result |v2|), and their
+  results |v1| and |v2| must in turn be logically equivalent (
+  |v1, v2 `elem` valset' tau|).
   And at base types like |Nat|, |(v1, v2) `elem` (valset' Nat)|
   means that |v1 = v2|.
 
   Here. instead, the fundamental property relates two executions
-  of a terms on \emph{different} inputs, which might take
+  of a term on \emph{different} inputs, which might take
   different paths during execution. In a suitably extended language,
   we could even write term |t = \x -> if x = 0 then 1 else loop|
   and run it on inputs |v1 = 0| and |v2 = 1|: these inputs are
@@ -1639,20 +1794,21 @@ Given these definitions, one can prove the fundamental property.
   diverge on |v2|. We must use a semantics that allow such
   behavioral difference.
   Hence, at base type |Nat|, |(v1, dv, v2) `elem` valset Nat|
-means just that |dv| is a change from |v1| to |v2|, hence that
-|v1 `oplus` dv| is equivalent to |v2| because |`oplus`| agrees
-with validity in this context as well. And if |(<rho1, t1>, <rho
-`stoup` drho, dt>, <rho2, t2>) `elem` compset tau|, |t1| might
-converge while |t2| diverges: only if both converge must their
-results be related.
+  means just that |dv| is a change from |v1| to |v2|, hence that
+  |v1 `oplus` dv| is equivalent to |v2| because |`oplus`| agrees
+  with extensional validity in this context as well. And if |(<rho1, t1>, <rho
+  `stoup` drho, dt>, <rho2, t2>) `elem` compset tau|, |t1| might
+  converge while |t2| diverges: only if both converge must their
+  results be related.
 
-These subtleties become more relevant for untyped language
-|ilcUntau|, since it does support general recursion and
-non-terminating programs.
+  These subtleties become more relevant in the presence of
+  general recursion and non-terminating programs, as in
+  untyped language |ilcUntau|, or in a hypothetical extension of
+  |ilcTau| with fixpoint operators.
 \end{remark}
 %}
 
-\section{Step-indexed logical relations (\ilcTau{}, \dilcTau)}
+\section{Step-indexed extensional validity (\ilcTau{}, \dilcTau)}
 \label{sec:silr-typed-proof}
 Step-indexed logical relations define approximations to a
 relation, to enable dealing with non-terminating programs.
@@ -1723,7 +1879,7 @@ well-founded recursion on step-indexes.
                                       |forall ((k, rho1, drho, rho2) `elem` envset Gamma) . ^^^
                                       ^&^ (k, <rho1, t1>, <rho1 `stoup` drho, dt>, <rho2, t2>) `elem` compset tau|
 \end{align*}
-\caption{Defining validity via \emph{step-indexed} logical relations and big-step semantics.}
+\caption{Defining extensional validity via \emph{step-indexed} logical relations and big-step semantics.}
 \label{fig:big-step-validity-ext-si}
 \end{figure}
 
@@ -1735,14 +1891,14 @@ adapting the proof the extra typing assumptions and proof
 obligations were not a problem.
 
 At this moment, we do not require that related closures contain
-related environments: we are defining validity only based on
-extensional behavior.
+related environments: again, we are defining \emph{extensional}
+validity.
 
 Given these definitions, we can prove that all relations are
 \emph{downward-closed}: that is, relations at step-count $n$
 imply relations at step-count $k < n$.
 \pg{recheck and complete, and add title}
-\begin{lemma}[Validity is downward-closed]
+\begin{lemma}[Extensional validity is downward-closed]
   \label{lem:validity-typed-downward-closed}
   Assume $k \le n$.
   \begin{enumerate}
@@ -1785,8 +1941,12 @@ relying on \cref{lem:validity-typed-downward-closed} to reduce
 step counts where needed.
 \end{proof}
 
-\section{Untyped step-indexed logical relations (\ilcUntau{}, \dilcUntau{})}
+\section{Untyped step-indexed extensional validity (\ilcUntau{}, \dilcUntau{})}
 \label{sec:silr-untyped-proof}
+\pg{Did I do the proof with primitives?}
+\pg{By looking at definitions, I can only have done the proof
+  with the pure fragment, but nothing else.}
+\pg{Drop primitives here.}
 By removing mentions of types from this step-indexed logical
 relation we can adapt it to an untyped language.
 We can still distinguish between functions, numbers and pairs by
@@ -1828,7 +1988,7 @@ details~\citep{Ahmed2006stepindexed}.
                                       |forall ((k, rho1, drho, rho2) `elem` envset Gamma) . ^^^
                                       ^&^ (k, <rho1, t1>, <rho1 `stoup` drho, dt>, <rho2, t2>) `elem` compsetunt|
 \end{align*}
-\caption{Defining validity via \emph{untyped step-indexed} logical relations and big-step semantics.}
+\caption{Defining extensional validity via \emph{untyped step-indexed} logical relations and big-step semantics.}
 \label{fig:big-step-validity-ext-si-untyped}
 \end{figure}
 \pg{drop types from figure!}
@@ -1851,20 +2011,24 @@ lemma by induction on the structure of terms (not of typing derivations).
 \cref{thm:fund-lemma-derive-correct-types-si}, but by structural
 induction on step counts and terms, not on typing derivations.
 \end{proof}
-\section{An intensional characterization of valid function changes}
+
+\section{Step-indexed intensional validity for function changes}
 \label{sec:intensional-step-indexed-validity}
 
-Up to now, we have defined when a function change is valid purely
-based on its behavior, like we have done earlier when using
-denotational semantics.
-We expect it should still be possible to define |`oplus`| and
-prove it agrees with validity. However, we do not do so.
+Up to now, we have defined when a function change is valid
+\emph{extensionally}, that is, purely based on its behavior, as
+we have done earlier when using denotational semantics.
+We conjecture that with these one can define |`oplus`| and prove
+it agrees with extensional validity. However, we have not done
+so.
 
+Instead, we modify definitions in \cref{sec:silr-typed-proof} to
+define validity \emph{intensionally}.
 To ensure that |f1 `oplus` df = f2| (for a suitable |`oplus`|) we
 choose to require that closures |f1|, |df| and |f2| close over
 environments of matching shapes. This change does not complicate
-the proof of the fundamental lemma: all the additional
-obligations are automatically preserved.
+the proof of the fundamental lemma: all the additional proof obligations
+are automatically satisfied.
 
 However, it can still be necessary to replace a function value
 with a different one. Hence we extend our definition of values to
@@ -1880,11 +2044,27 @@ expect adding them to the syntax would cause any significant trouble.
 
 We present the changes described above for the typed semantics. We have
 successfully mechanized this variant of the semantics as well.
-Adding replacement values |!v| requires the following changes (we
-elude the extra equations for derivatives of primitives):
+Adding replacement values |!v| requires extending the definition
+of change values, evaluation and validity.
+We add replacement values to change values:
 \begin{code}
   dv := ... | ! v
 \end{code}
+Derivatives of primitives, when applied to replacement changes,
+must recompute their output. The required additional equations
+are not interesting, but we show them anyway for completeness:
+
+  %devalPrim add (pair n1 n2) (pair dn1 dn2)  = dn1 + dn2
+\begin{code}
+  devalPrim succ n (!n2)                        = !(n2 + 1)
+  devalPrim add (pair _ _) (!(pair n1 n2))      = !(n1 + n2)
+  devalPrim add p1 (dp1 @ (pair dn1 (!n2)))     = !(evalPrim add (p1 `oplus` dp1))
+  devalPrim add p1 (dp1 @ (pair (!n1) dv2))     = !(evalPrim add (p1 `oplus` dp1))
+\end{code}
+
+Evaluation requires a new rule, \textsc{E-BangApp}, to evaluate
+change applications where the function change evaluates to a
+replacement change:
 \begin{typing}
    \Rule[E-BangApp]{%
     |dbseval dw1 rho drho (!(rho'[\x -> t]))|\\
@@ -1901,22 +2081,30 @@ elude the extra equations for derivatives of primitives):
   % {|dbseval (dw1 w2 dw2) rho drho (!v)|}
 
 Evaluation rule \textsc{E-BangApp} requires defining |`oplus`| on
-syntactic values:
+syntactic values. We define it \emph{intensionally}:
 
-\begin{definition}
-  Operator |`oplus`| is defined on values by the following equations:
+\begin{definition}[Update operator |`oplus`|]
+  Operator |`oplus`| is defined on values by the following
+  equations:
 
   \begin{code}
     v1 `oplus` ! v2 = v2
-    -- If rho and drho are environments for the same typing context |Gamma|:
-    rho[\x -> t] `oplus` drho[\x dx -> dt] = (rho `oplus` drho)[\x -> t]
-    -- otherwise
-    rho[\x -> t] `oplus` drho[\x dx -> dt] = rho[\x -> t]
+    rho[\x -> t] `oplus` drho[\x dx -> dt] =
+      if match rho  drho then
+        -- If |rho| and |drho| are environments for the same typing context |Gamma|:
+        (rho `oplus` drho)[\x -> t]
+      else
+        -- otherwise, the input change is invalid, so just give
+        -- any type-correct result:
+        rho[\x -> t]
     n `oplus` dn                       = n + dn
     pair va1 vb1 `oplus` pair dva dvb  = pair (va1 `oplus` dva) (vb1 `oplus` dvb)
-    -- An additional equation is needed for the untyped case.
+    -- An additional equation is needed in the untyped language,
+    -- not in the typed one. This equation is for invalid
+    -- changes, so we can just return |v1|:
     v1 `oplus` dv = v1
   \end{code}
+  We omit the definition of |match rho drho|.
 
   We also define |`oplus`| on environments for matching contexts
   to combine values and changes pointwise:
@@ -1932,13 +2120,13 @@ we show in a moment.
 
 We ensure replacement values are accepted as valid for all types,
 by requiring the following equation holds (hence, modifying all
-equations for |valset|---we omit details):
+equations for |valset|; we omit details):
 \begin{align}
   \label{eq:val-replacement}
   |valset tau| \supseteq {}& \{| (k, v1, !v2, v2) `such` ^^ /- v1 : tau ^^ `and` ^^ /- v2 : tau |\}
 \end{align}
 where we write |/- v : tau| to state that value |v| has type
-|tau|; we omit the rules for this judgement.
+|tau|; we omit the unsurprising rules for this judgement.
 
 Finally, to restrict closure changes themselves, we modify the
 definition for |valset (sigma -> tau)|. We require that the base
@@ -1959,16 +2147,24 @@ replacement closures in the definition of |valset (sigma -> tau)|.
                   ^&^| \{| (k, f1, !f2, f2) `such` ^^ /- f1 : sigma -> tau ^^ `and` ^^ /- f2 : sigma -> tau |\}
 \end{align*}
 
-Under this condition, we can again prove the fundamental
-property, and we can also define |`oplus`| on closures
-intensionally and prove it agrees with validity.
+Using these updated definitions, we can again prove the
+fundamental property, with the same statement as
+\cref{thm:fund-lemma-derive-correct-types-si}, and we can also
+prove that |`oplus`| agrees
+with validity.
 
-\begin{theorem}[|`oplus`| agrees with intensional step-indexed validity]
+\begin{theorem}[Fundamental property: correctness of |derive|]
+  \label{thm:fund-lemma-derive-correct-types-si-intensional}
+  For every well-typed term |Gamma /- t : tau| we have that
+  |fromtosyn Gamma tau t (derive t) t|.
+\end{theorem}
+\begin{theorem}[|`oplus`| agrees with step-indexed intensional validity]
+  \label{thm:oplus-validity-intensional}
 If |(k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
 \end{theorem}
 \begin{proof}
-  By induction on types. For |Nat| validity coincides with the
-  thesis. For |pair tau1 tau2|, we must simply apply the
+  By induction on types. For type |Nat| validity coincides with the
+  thesis. For type |pair tau1 tau2|, we must simply apply the
   induction hypothesis on pair components.
 
   For closures, validity requires that |v1 = rho1[\x -> t], dv =
@@ -1986,8 +2182,35 @@ If |(k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
   \end{multline*}
 \end{proof}
 
-\pg{Continue here, and revise.}
-\pg{Proof that |`oplus`| agrees with validity}
+We can also define |nilc| intensionally on values and
+environments, and prove it correct. We omit the standard
+definition of |nil| on environments.
+For closures, we  on the environment.
+\begin{code}
+  nil (rho[\x -> t]) = (nil rho)[\x dx -> derive t]
+  nil (pair a b) = pair (nil a) (nil b)
+  nil n = 0
+\end{code}
+\begin{lemma}[|nilc| produces valid changes]
+  For all values |/- v : tau| and indexes |k|, |(k, v, nil v, v)
+  `elem` valset tau|.
+\end{lemma}
+\begin{proof}[Proof sketch]
+  By induction on |v|. For closures we must apply the fundamental
+  property
+  (\cref{thm:fund-lemma-derive-correct-types-si-intensional}) to
+  |derive t|.
+\end{proof}
+
+We conclude with the overall correctness theorem, analogous to
+\cref{thm:derive-correct-oplus}.
+
+\deriveCorrectOplusSI
+\begin{proof}
+  Follows immediately from
+  \cref{thm:fund-lemma-derive-correct-types-si-intensional} and
+  \cref{thm:oplus-validity-intensional}.
+\end{proof}
 
 \section{Future work}
 We have shown that |`oplus`| agrees with validity, which we
@@ -2077,12 +2300,16 @@ our proof appears rather close to existing
 logical-relations proofs, hence we believe it should be possible
 to translate other results to ILC theorems.
 
+By formally defining intensional validity for closures, we
+provide a solid foundation for the use of defunctionalized
+function changes (\cref{ch:defunc-fun-changes}).
+
 This proof was made much simpler by \citet{Ahmed2006stepindexed}'s
 work on step-indexed logical relations, which enable handling of
 powerful semantics feature using rather elementary techniques.
 The only downside is that it can be tricky to set up the correct
 definitions, especially for a slightly non-standard semantics
 like ours.
-As a simple exercise, we have shown that the our semantics is
+As an exercise, we have shown that the our semantics is
 equivalent to more conventional presentations, down to the
 produced step counts.
