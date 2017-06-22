@@ -1365,7 +1365,6 @@ being replaced altogether
 (\cref{sec:intensional-step-indexed-validity}).
 \end{itemize}
 
-\pg{Move untyped definition after typed one.}
 \section{Formalization}
 \label{sec:bsos-formalization}
 To present the proofs, we first describe our formal model of CBV
@@ -1941,77 +1940,6 @@ relying on \cref{lem:validity-typed-downward-closed} to reduce
 step counts where needed.
 \end{proof}
 
-\section{Untyped step-indexed extensional validity (\ilcUntau{}, \dilcUntau{})}
-\label{sec:silr-untyped-proof}
-\pg{Did I do the proof with primitives?}
-\pg{By looking at definitions, I can only have done the proof
-  with the pure fragment, but nothing else.}
-\pg{Drop primitives here.}
-By removing mentions of types from this step-indexed logical
-relation we can adapt it to an untyped language.
-We can still distinguish between functions, numbers and pairs by
-matching on values themselves, instead of matching on types.
-Without types, typing contexts |Gamma| now degenerate to lists of
-free variables of a term; we still use them to ensure that
-environments contain enough entries to evaluate a term.
-We show resulting definitions in \cref{fig:big-step-validity-ext-si-untyped}.
-
-The main difference in the proof is that this time, the recursion
-used in the relations can only be proved to be well-founded
-because of the use of step-indexes; we omit
-details~\citep{Ahmed2006stepindexed}.
-
-\begin{figure}[h!]
-\begin{align*}
-  |valsetunt| ={}& \{|(k, n1, dn, n2) `such` n1, n2 `elem` Nat, dn
-                     `elem` Int `and` n1 + dn = n2| \} |^^ `union` ^^^
-                  ^&^| \{|(k, rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2])`such` ^^^
-                  ^&^ forall ((j, v1, dv, v2) `elem` valsetunt). ^^ j < k => ^^^
-                  ^&^ (j, <(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
-                  ^&^ <(rho2, x:= v2), t2>) `elem` compsetunt)| \} | ^^ `union` ^^^
-                  ^&^ | \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
-                   ^&^ (k, va1, dva, va2) `elem` valsetunt
-                      ^^ `and` ^^
-                      (k, vb1, dvb, vb2) `elem` valsetunt |\}\\
-  |compsetunt| ={}&
-                  \{|(k, <rho1, t1>, <rho `stoup` drho, dt>, <rho2, t2>) `such` ^^^
-                     ^&^ (forall j v1 v2 . ^^^
-                     ^&^ j < k ^^ `and`(ibseval t1 rho1 j v1) `and` (bseval t2 rho2 v2) => ^^^
-                     ^&^ exists dv . (dbseval dt rho1 drho dv) `and` ((k - j , v1, dv, v2) `elem` valsetunt))
-                           |\}\\
-                  \\
-  |envset emptyCtx| ={} & \{|(k, emptyRho, emptyRho, emptyRho)|\} \\
-  |envset (Gamma, x)| ={} &
-                                  \{|(k, (rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
-                                  ^&^ (k, rho1, drho, rho2) `elem` envset Gamma `and` (k, v1, dv, v2) `elem` valsetunt|\} \\
-  |fromtosynuntyped Gamma t1 dt t2| ={}&
-                                      |forall ((k, rho1, drho, rho2) `elem` envset Gamma) . ^^^
-                                      ^&^ (k, <rho1, t1>, <rho1 `stoup` drho, dt>, <rho2, t2>) `elem` compsetunt|
-\end{align*}
-\caption{Defining extensional validity via \emph{untyped step-indexed} logical relations and big-step semantics.}
-\label{fig:big-step-validity-ext-si-untyped}
-\end{figure}
-\pg{drop types from figure!}
-
-Otherwise, the proof proceeds just as earlier in
-\cref{sec:silr-typed-proof}: We prove that the relations are
-downward-closed, just like in \cref{lem:validity-typed-downward-closed}
-(we omit the new statement), and we prove the new fundamental
-lemma by induction on the structure of terms (not of typing derivations).
-
-%format `subset` = "\subseteq"
-
-\begin{theorem}[Fundamental property: correctness of |derive|]
-  \label{thm:fund-lemma-derive-correct-untyped-si}
-  If |FV(t) `subset` Gamma| then we have that |fromtosynuntyped
-  Gamma t (derive t) t|.
-\end{theorem}
-\begin{proof}[Proof sketch]
-  Similar to the proof of
-\cref{thm:fund-lemma-derive-correct-types-si}, but by structural
-induction on step counts and terms, not on typing derivations.
-\end{proof}
-
 \section{Step-indexed intensional validity for function changes}
 \label{sec:intensional-step-indexed-validity}
 
@@ -2211,6 +2139,78 @@ We conclude with the overall correctness theorem, analogous to
   \cref{thm:fund-lemma-derive-correct-types-si-intensional} and
   \cref{thm:oplus-validity-intensional}.
 \end{proof}
+
+\section{Untyped step-indexed extensional validity (\ilcUntau{}, \dilcUntau{})}
+\label{sec:silr-untyped-proof}
+\pg{Did I do the proof with primitives?}
+\pg{By looking at definitions, I can only have done the proof
+  with the pure fragment, but nothing else.}
+\pg{Drop primitives here.}
+By removing mentions of types from this step-indexed logical
+relation we can adapt it to an untyped language.
+We can still distinguish between functions, numbers and pairs by
+matching on values themselves, instead of matching on types.
+Without types, typing contexts |Gamma| now degenerate to lists of
+free variables of a term; we still use them to ensure that
+environments contain enough entries to evaluate a term.
+We show resulting definitions in \cref{fig:big-step-validity-ext-si-untyped}.
+
+The main difference in the proof is that this time, the recursion
+used in the relations can only be proved to be well-founded
+because of the use of step-indexes; we omit
+details~\citep{Ahmed2006stepindexed}.
+
+\begin{figure}[h!]
+\begin{align*}
+  |valsetunt| ={}& \{|(k, n1, dn, n2) `such` n1, n2 `elem` Nat, dn
+                     `elem` Int `and` n1 + dn = n2| \} |^^ `union` ^^^
+                  ^&^| \{|(k, rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2])`such` ^^^
+                  ^&^ forall ((j, v1, dv, v2) `elem` valsetunt). ^^ j < k => ^^^
+                  ^&^ (j, <(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
+                  ^&^ <(rho2, x:= v2), t2>) `elem` compsetunt)| \} | ^^ `union` ^^^
+                  ^&^ | \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
+                   ^&^ (k, va1, dva, va2) `elem` valsetunt
+                      ^^ `and` ^^
+                      (k, vb1, dvb, vb2) `elem` valsetunt |\}\\
+  |compsetunt| ={}&
+                  \{|(k, <rho1, t1>, <rho `stoup` drho, dt>, <rho2, t2>) `such` ^^^
+                     ^&^ (forall j v1 v2 . ^^^
+                     ^&^ j < k ^^ `and`(ibseval t1 rho1 j v1) `and` (bseval t2 rho2 v2) => ^^^
+                     ^&^ exists dv . (dbseval dt rho1 drho dv) `and` ((k - j , v1, dv, v2) `elem` valsetunt))
+                           |\}\\
+                  \\
+  |envset emptyCtx| ={} & \{|(k, emptyRho, emptyRho, emptyRho)|\} \\
+  |envset (Gamma, x)| ={} &
+                                  \{|(k, (rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
+                                  ^&^ (k, rho1, drho, rho2) `elem` envset Gamma `and` (k, v1, dv, v2) `elem` valsetunt|\} \\
+  |fromtosynuntyped Gamma t1 dt t2| ={}&
+                                      |forall ((k, rho1, drho, rho2) `elem` envset Gamma) . ^^^
+                                      ^&^ (k, <rho1, t1>, <rho1 `stoup` drho, dt>, <rho2, t2>) `elem` compsetunt|
+\end{align*}
+\caption{Defining extensional validity via \emph{untyped step-indexed} logical relations and big-step semantics.}
+\label{fig:big-step-validity-ext-si-untyped}
+\end{figure}
+\pg{drop types from figure!}
+
+Otherwise, the proof proceeds just as earlier in
+\cref{sec:silr-typed-proof}: We prove that the relations are
+downward-closed, just like in \cref{lem:validity-typed-downward-closed}
+(we omit the new statement), and we prove the new fundamental
+lemma by induction on the structure of terms (not of typing derivations).
+
+%format `subset` = "\subseteq"
+
+\begin{theorem}[Fundamental property: correctness of |derive|]
+  \label{thm:fund-lemma-derive-correct-untyped-si}
+  If |FV(t) `subset` Gamma| then we have that |fromtosynuntyped
+  Gamma t (derive t) t|.
+\end{theorem}
+\begin{proof}[Proof sketch]
+  Similar to the proof of
+\cref{thm:fund-lemma-derive-correct-types-si}, but by structural
+induction on step counts and terms, not on typing derivations.
+\end{proof}
+
 
 \section{Future work}
 We have shown that |`oplus`| agrees with validity, which we
