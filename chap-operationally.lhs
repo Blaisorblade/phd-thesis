@@ -133,11 +133,12 @@ against both a base input |v1| and an updated one |v2|, its derivative
 terminates against the base input and a valid input change |dv|
 from |v1| to |v2|.
 
-We also conjecture we could also add a fixpoint construct to
+We can also add a fixpoint construct to
 our \emph{typed} $\lambda$-calculus and to our mechanization,
 without significant changes to our relations. However, a
 mechanical proof would require use of well-founded induction,
 which our current mechanization avoids.
+We return to this point in \cref{sec:bos-fixpoints}.
 
 While this support for general recursion is effective in some
 scenarios, other scenarios can still be incrementalized better
@@ -1070,6 +1071,139 @@ However, we can use the induction hypothesis in the same ways as
 in earlier proofs for typed languages: all uses of the induction
 hypothesis in the proof are on smaller terms, and some also at
 smaller step counts.
+\end{proof}
+
+\subsection{General recursion in \ilcTau{} and \dilcTau}
+\label{sec:bos-fixpoints}
+
+%format rec = "\mathbf{rec}"
+%format drec = "\mathbf{drec}"
+
+We have sketched informally in \cref{sec:general-recursion} how to support
+fixpoint combinators.
+
+We have also extended our typed languages with a
+fixpoint combinators and proved them correct formally (not
+mechanically, yet). In this section, we include the needed
+definitions to make our claim precise. They are mostly
+unsurprising, if long to state.
+
+Since we are in a call-by-value setting, we only add recursive
+functions, not recursive values in general.
+To this end, we replace $\lambda$-abstraction |\x -> t| with recursive
+function |rec f x -> t|, which binds both |f| and |x| in |t|, and
+replaces |f| with the function itself upon evaluation.
+
+The associated small-step reduction rule would be
+|(rec f x -> t) v -> t [x := v, f := rec f x -> t]|. As before,
+we formalize reduction using big-step semantics.
+
+Typing rule \textsc{T-Lam} is replaced by a rule for recursive functions:
+\begin{typing}
+  \Rule[T-Rec]{|Gamma , f : sigma -> tau, x : sigma /- t : tau|}
+  {|Gamma /- rec f x -> t : sigma -> tau|}
+\end{typing}
+We replace closures with recursive closures in the definition of values:
+\begin{code}
+  w ::= rec f x -> t | ...
+  v ::= rho[rec f x -> t] | ...
+\end{code}
+And the evaluation rules:
+\begin{code}
+evalVal (rec f x -> t) rho     = rho[rec f x -> t]
+\end{code}
+We also replace rule \textsc{E-App} with \textsc{E-AppRec}:
+\begin{typing}
+  \Rule[E-AppRec]{
+    |ibseval w2 rho 0 v2|\\
+    |ibseval w1 rho 0 v1|\\
+    |v1 = rho'[rec f x -> t]|\\
+    |ibseval t (rho', f := v1, x := v2) n v|
+  }{
+    |ibseval (w1 w2) rho (1 + n) v|
+  }
+\end{typing}
+
+We also modify the language of changes and its evaluation rules.
+Since the derivative of a recursive function |f = rec f x -> t| can call the base
+function, we remember the original function body |t| in the
+derivative, together with its derivative |derive t|. The
+definitions are otherwise unsurprising, if long.
+
+{\footnotesize
+\begin{code}
+dw ::= drec f df x dx -> t `stoup` dt | ...
+dv ::= rho `stoup` drho[drec f df x dx -> t `stoup` dt] | ...
+
+derive (rec f x -> t) = drec f df x dx -> t `stoup` derive t
+
+devalVal (drec f df x dx -> dt) rho drho =
+  rho `stoup` drho[drec f df x dx -> t `stoup` dt]
+\end{code}
+
+\begin{typing}
+  \Rule[T-DRec]{
+    |Gamma , f : sigma -> tau, x : sigma /- t : tau|\\
+    |Gamma , f : sigma -> tau, x : sigma /-- dt : tau|
+  }
+  {|Gamma /-- drec f df x dx -> t `stoup` dt : sigma -> tau|}
+
+  \Rule[E-DAppRec]{%
+    |bseval  w2  rho v2|\\
+    |dbseval dw2 rho drho dv2|\\
+    |dbseval dw1 rho drho dv1|\\
+    |dv1 = rho' `stoup` drho'[drec f df x dx -> t `stoup` dt]|\\
+    |v1 = rho'[rec f x -> t]|\\
+    |dbseval dt  (rho', f := v1, x := v2) (drho', df := dv1, dx := dv2) dv|}
+  {|dbseval (dw1 w2 dw2) rho drho dv|}
+\end{typing}
+}
+
+We must also update the logical relations to use the new
+definition of application between values. We omit details.
+
+\begin{theorem}[Fundamental property: correctness of |derive|]
+  \label{thm:fund-lemma-derive-correct-types-si-intensional}
+  For every well-typed term |Gamma /- t : tau| we have that
+  |fromtosyn Gamma tau t (derive t) t|.
+\end{theorem}
+\begin{proof}[Proof sketch]
+  Essentially as before.
+
+  Going through the proof will reveal one interesting difference:
+  To prove the fundamental property for recursive
+  functions at step-count |k|, this time we must use the
+  fundamental property inductively on the same term, but at
+  step-count |j < k|.
+
+  This happens because to evaluate |dw = derive(rec f x -> t)| we
+  evaluate |derive t| with the value |dv| for |dw| in the
+  environment: to show this invocation is valid, we must show |dw|
+  is itself a valid change. But the step-indexed
+  definition to |valset (sigma -> tau)| constrains the evaluation
+  of the body only |forall j < k|.
+
+  % Consider the case for recursive abstraction |dw' = derive(rec f
+  % x -> t)| at step-count |k|. After unfolding a few definitions
+  % (which we skip here), we must show for any |j < k| and for any
+  % |j|-valid argument change that running the derivative of the
+  % recursive abstraction evaluates (using rule \textsc{E-DAppRec})
+  % |derive t| with an environment change that is valid. But this
+  % time, the value of the recursive function change |dw'| is itself
+  % in the environment! Luckily, we can show that |dw'| is valid at
+  % step-count |j| by using the fundamental property inductively,
+  % since |j < k|. The proof otherwise proceeds similarly to the
+  % proof for abstraction.
+
+  % In a bit more detail, for recursive abstractions in the end we
+  % must roughly show that for all |j < k| the recursive abstractions
+  % in question, applied to |j|-valid arguments, give |j|-valid
+  % resulting computations. The proof uses the fundamental property
+  % recursively on |t| and on a |j|-valid environment. But this time,
+  % the environment contains closures
+
+  % There is \emph{one} critical difference in the proof
+  % a recursive function is valid at step-count
 \end{proof}
 
 \section{Future work}
