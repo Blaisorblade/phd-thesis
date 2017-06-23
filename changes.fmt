@@ -241,6 +241,7 @@
 %format /- = "\vdash"
 
 %format `and` = "\land"
+%format `wand` = "\text{ and }"
 
 %format => = "\Rightarrow"
 %format _ = "\text{\textunderscore}"

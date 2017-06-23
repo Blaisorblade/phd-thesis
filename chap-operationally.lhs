@@ -571,8 +571,7 @@ Gamma|: environments are related if their corresponding entries
 are related values.
 \begin{figure}[h!]
 \begin{align*}
-  |valset Nat| ={}& \{|(n1, dn, n2) `such` n1, n2 `elem` Nat, dn
-                     `elem` Int `and` n1 + dn = n2|\}\\
+  |valset Nat| ={}& \{|(n1, dn, n2) `such` n1, dn, n2 `elem` Nat `wand` n1 + dn = n2|\}\\
   |valset (tau1 `times` tau2)| ={} & \{|(pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
                                    ^&^ (va1, dva, va2) `elem` valset tau1
                                       ^^ `and` ^^
@@ -704,8 +703,7 @@ well-founded recursion on step-indexes.
 
 \begin{figure}[h!]
 \begin{align*}
-  |valset Nat| ={}& \{|(k, n1, dn, n2) `such` n1, n2 `elem` Nat, dn
-                     `elem` Int `and` n1 + dn = n2|\}\\
+  |valset Nat| ={}& \{|(k, n1, dn, n2) `such` n1, dn, n2 `elem` Nat `wand` n1 + dn = n2|\}\\
   |valset (tau1 `times` tau2)| ={} & \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
                                    ^&^ (k, va1, dva, va2) `elem` valset tau1
                                       ^^ `and` ^^
@@ -1026,8 +1024,8 @@ details~\citep{Ahmed2006stepindexed}.
 
 \begin{figure}[h!]
 \begin{align*}
-  |valsetunt| ={}& \{|(k, n1, dn, n2) `such` n1, n2 `elem` Nat, dn
-                     `elem` Int `and` n1 + dn = n2| \} |^^ `union` ^^^
+  |valsetunt| ={}& \{|(k, n1, dn, n2) `such` n1, dn, n2 `elem` Nat
+                   `wand` n1 + dn = n2|\} | ^^ `union` ^^^
                   ^&^| \{|(k, rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2])`such` ^^^
                   ^&^ forall ((j, v1, dv, v2) `elem` valsetunt). ^^ j < k => ^^^
                   ^&^ (j, <(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
