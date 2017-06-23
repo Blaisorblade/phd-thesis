@@ -115,7 +115,7 @@
    |Gamma /- w : sigma|}
  {|Gamma /- p w : tau|}
 \end{typing}
-\caption{Base typing for \ilcTau{}.}
+\caption{\ilcTau{} base typing.}
 \label{sfig:anf-base-typing}
 \end{subfigure}
 
@@ -158,13 +158,13 @@
     |Gamma /-- dw : sigma|}
  {|Gamma /-- p w dw : tau|}
 \end{typing}
-\caption{Change typing for \dilcTau{}. Judgement |Gamma /-- dt : tau| means that variables from
+\caption{\dilcTau{} change typing. Judgement |Gamma /-- dt : tau| means that variables from
   both |Gamma| and |Dt^Gamma| are in scope in |dt|, and the final type is in fact
   |Dt^tau|.}
 \label{sfig:anf-change-typing}
 \end{subfigure}
 
-\caption{ANF $\lambda$-calculus, type system: \ilcTau{} amd \dilcTau{}.}
+\caption{ANF $\lambda$-calculus, \ilcTau{} and \dilcTau{} type system.}
 \label{fig:anf-lambda-calculus-typing}
 \end{figure}
 
