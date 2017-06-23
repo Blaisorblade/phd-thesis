@@ -281,6 +281,11 @@ primitives taking (nested) tuples of arguments. Here we use
 literal numbers as constants and +1 and addition as primitives,
 but further primitives are possible.
 
+\begin{notation}
+  We use subscripts ${}_a {}_b$ for pair components, ${}_f {}_a$ for
+  function and argument, and keep using ${}_1 {}_2$ for old and new
+  values.
+\end{notation}
 \subsection{Change syntax for \dilcUntau}
 \label{sec:bsos-anf-change-syntax}
 Next, we consider a separate language for change terms, which can
@@ -292,22 +297,18 @@ those namespaces are represented by typing contexts |Gamma| and
 always the change context for |Gamma|.
 
 We show the syntax of change terms in \cref{sfig:anf-change-syntax}.
-%{
-%format dwa = dw "_a"
-%format dwb = dw "_b"
 
 Change terms often take or bind two parameters at once, one for a
 base value and one for its change.
 Since a function change is applied to a base input
 and a change for it at once, the syntax for change term has a
-special binary application node |dw1 w dw2|; otherwise, in ANF,
+special binary application node |dwf wa dwa|; otherwise, in ANF,
 such syntax must be encoded through separate applications via
-|lett dwa = dw1 w in dwa dw2|. In the same way, closure changes
+|lett dfa = dwf wa in dfa dwa|. In the same way, closure changes
 |rho `stoup` drho[\x dx -> dt]| bind two variables at once and
 close over separate environments for base and change variables.
 Various other changes in the same spirit simplify similar
 formalization and mechanization details.
-%}
 
 % In particular, values for
 % function changes are again closures, but we require they bind
@@ -354,13 +355,19 @@ Change typing rules are shown in \cref{sfig:anf-change-typing}.
 \subsection{Semantics}
 \label{sec:bsos-anf-semantics}
 We present our semantics for base terms in \cref{sfig:anf-base-semantics}.
-Following \citet*{Acar08}, to define step-indexed logical relations
-we consider a CBV big-step semantics, where derivations
-are indexed by a step count, which counts in essence
-$\beta$-reduction steps. Since our semantics uses environments,
-$\beta$-reduction steps are implemented not via substitution but
-via environment extension, but the resulting step-counts are the
-same (\cref{sec:sanity-check-big-step}).
+We write |envpair rho t| for a pair of environment |rho| and term |t|; our
+semantics gives meaning to such pairs.
+Judgement |envpair rho t (downto n) v| says that |envpair rho t| evaluates to
+value |v| in |n| steps. The definition is given via a CBV big-step semantics.
+Following \citet*{Acar08}, we index our evaluation judgements via a step count,
+which counts in essence $\beta$-reduction steps; we use such step counts later,
+to define step-indexed logical relations.
+Since our semantics uses environments, $\beta$-reduction steps are implemented
+not via substitution but via environment extension, but the resulting
+step-counts are the same (\cref{sec:sanity-check-big-step}).
+Applying closure |vf = rho'[\x -> t]| to argument |va| produces environment-term
+pair |envpair ((rho', x := va)) t|, which we abbreviate as |vapply vf va|. We'll
+reuse this syntax later to define logical relations.
 
 In our mechanized formalization, we have additionally proved
 lemmas to ensure that this semantics is sound relative to our

@@ -2,11 +2,13 @@
 %include polycode.fmt
 %include changes.fmt
 
+%{
 \begin{figure}[h]
   \small
 \begin{subfigure}[c]{0.5\textwidth}
 \begin{code}
   p     ::=  succ | add | ...
+  m, n  ::=  ... -- numbers
   c     ::=  n | ...
   w     ::=  x | \x -> t | pair w w | c
   s, t  ::=  w | w w | p w | lett x = t in t
@@ -168,6 +170,11 @@
 \label{fig:anf-lambda-calculus-typing}
 \end{figure}
 
+%format ns = n "_s"
+%format nt = n "_t"
+%format vs = v "_s"
+%format vt = v "_t"
+
 \begin{figure}
   \footnotesize
 \begin{subfigure}[t]{\textwidth}
@@ -178,20 +185,29 @@
 
   \raisebox{0.5\baselineskip}{\fbox{|ibseval t rho n v|}}
 
-  \Rule[E-Let]{|ibseval t1 rho n1 v1|\\|ibseval t2 (rho, x := v1) n2 v2|}{|ibseval (lett x = t1 in t2) rho (1 + n1 + n2) v2|}
+  \Rule[E-Let]{|ibseval s rho ns vs|\\|ibseval t (rho, x := vs) nt vt|}{|ibseval (lett x = s in t) rho (1 + ns + nt) vt|}
 
-  \Rule[E-App]{|ibseval w1 rho 0 rho'[\x -> t]|\\|ibseval w2 rho 0 v2|\\|ibseval t (rho', x := v2) n v|}{|ibseval (w1 w2) rho (1 + n) v|}
+  \Rule[E-App]{
+    |ibseval wf rho 0 vf|\\
+    |ibseval wa rho 0 va|\\
+    |vapply vf va (downto n) v|
+  }{|ibseval (wf wa) rho (1 + n) v|}
 \end{typing}
 \begin{code}
-  evalVal x rho             = rho(x)
-  evalVal (\x -> t) rho     = rho[\x -> t]
-  evalVal (pair w1 w2) rho  = pair (evalVal w1 rho) (evalVal w2 rho)
-  evalVal c rho             = c
+  vapply (rho'[\x -> t]) va  = envpair ((rho', x := va)) t
 
-  evalPrim succ n           = 1 + n
-  evalPrim add (n1, n2)     = n1 + n2
+  evalVal x rho              = rho(x)
+  evalVal (\x -> t) rho      = rho[\x -> t]
+  evalVal (pair wa wb) rho   = pair (evalVal wa rho) (evalVal wb rho)
+  evalVal c rho              = c
+
+  evalPrim succ n            = 1 + n
+  evalPrim add (m, n)        = m + n
 \end{code}
-\caption{Base semantics.}
+\caption{Base semantics.
+  Judgement |envpair rho t (downto n) v| says that |envpair rho t|, a pair of
+  environment |rho| and term |t|, evaluates to value |v| in |n| steps, and
+  |vapply vf va (downto n) v| constructs the pair to evaluate via |vapply vf va|.}
 \label{sfig:anf-base-semantics}
 \end{subfigure}
 
@@ -205,31 +221,37 @@
     (devalPrim p (evalVal w rho) (devalVal dw rho drho))|}
 
   \Rule[E-DApp]{%
-    |dbseval dw1 rho drho (rho' `stoup` drho'[\x dx -> dt])|\\
-    |bseval  w2  rho v2|\\
-    |dbseval dw2 rho drho dv2|\\
-    |dbseval dt  (rho', x := v2) (drho', dx := dv2) dv|}
-  {|dbseval (dw1 w2 dw2) rho drho dv|}
+    |dbseval dwf rho drho dvf|\\
+    |bseval  wa  rho va|\\
+    |dbseval dwa rho drho dva|\\
+    |dvapply dvf va dva ddown dv|}
+  {|dbseval (dwf wa dwa) rho drho dv|}
 
   \Rule[E-DLet]{
-    |bseval  t1  rho v1|\\
-    |dbseval dt1 rho drho dv1|\\
-    |dbseval dt2 (rho, x := v1) (drho; dx := dv1) dv2|}
-  {|dbseval (lett x = t1; dx = dt1 in dt2) rho drho dv2|}
+    |bseval  s  rho vs|\\
+    |dbseval ds rho drho dvs|\\
+    |dbseval dt (rho, x := vs) (drho; dx := dvs) dvt|}
+  {|dbseval (lett x = s; dx = ds in dt) rho drho dvt|}
 \end{typing}
 \begin{code}
-  devalVal dx rho drho                       = drho(dx)
-  devalVal (\x dx -> dt) rho drho            = rho `stoup` drho[\x dx -> dt]
-  devalVal (pair dw1 dw2) rho drho           = pair (devalVal dw1 rho drho) (devalVal dw2 rho drho)
-  devalVal c rho drho                        = c
+  dvapply (rho' `stoup` drho' [\x dx -> dt]) va dva  = denvpair ((rho', x := va)) ((drho' , dx := dva)) dt
 
-  devalPrim succ n dn                        = dn
-  devalPrim add (pair n1 n2) (pair dn1 dn2)  = dn1 + dn2
+  devalVal dx rho drho                               = drho(dx)
+  devalVal (\x dx -> dt) rho drho                    = rho `stoup` drho[\x dx -> dt]
+  devalVal (pair dwa dwb) rho drho                   = pair (devalVal dwa rho drho) (devalVal dwb rho drho)
+  devalVal c rho drho                                = c
+
+  devalPrim succ n dn                                = dn
+  devalPrim add (pair m n) (pair dm dn)              = dm + dn
 \end{code}
-\caption{Change semantics.}
+\caption{Change semantics.
+  Judgement |denvpair rho drho t ddown dv| says that |denvpair rho drho dt|, a triple of environment
+  |rho|, change environment |drho| and change term |t|, evaluates to change value |dv|. and |dvapply dvf va dva
+  ddown dv| constructs the triple to evaluate via |dvapply dvf va dva|.}
 \label{sfig:anf-change-semantics}
 \end{subfigure}
 
 \caption{ANF $\lambda$-calculus (\ilcUntau{} and \dilcUntau{}), CBV semantics.}
 \label{fig:anf-lambda-calculus-semantics}
 \end{figure}
+%}

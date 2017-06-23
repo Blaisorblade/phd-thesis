@@ -280,6 +280,28 @@
 %format rho' = rho "\myquote"
 %format drho' = drho "\myquote"
 
+
+% Cancel the effect of \;
+%format undoapp = "{\mskip-\thickmuskip}"
+
+% To understand that, compare with the standard definitions of opposite commands \, and \!:
+% \def\,{\mskip\thinmuskip} \def\!{\mskip-\thinmuskip}
+% \def\;{\mskip\thickmuskip}
+
+%format envpair (rho) t = rho /- t
+%format denvpair (rho) (drho) t = rho `stoup` drho /-- t
+
+%format vapply = "\mathbf{app}"
+%format dvapply = "\mathbf{dapp}"
+%format vapplyev vf va n v = vapply vf va "\Downarrow_{" n "}" v
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+%format (downto n) = undoapp "\Downarrow_{" n "}" undoapp
+%format down = undoapp "\Downarrow" undoapp
+%format ddown = undoapp "\Downarrow" undoapp
+
 % indexed big-step eval
 %format ibseval (t) rho (n) (v) = rho "\vdash" t "\Downarrow_{" n "}" v
 % without environments
@@ -287,7 +309,7 @@
 % big-step eval
 %format bseval  (t)  rho (v) = rho "\vdash" t "\Downarrow" v
 % change big-step eval
-%format dbseval (dt) rho drho (dv) = rho `stoup` drho "\vdash" dt "\Downarrow_{\Delta}" dv
+%format dbseval (dt) rho drho (dv) = rho `stoup` drho "\vdash_{\Delta}" dt "\Downarrow" dv
 
 %format vn = "v_n"
 %format dvn = dv "_n"
