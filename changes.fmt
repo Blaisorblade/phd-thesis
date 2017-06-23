@@ -125,6 +125,9 @@
 %format dv2
 %format dv3
 
+%format taua = tau "_a"
+%format taub = tau "_b"
+
 %format dfa = df "_a"
 %format dfb = df "_b"
 %format dsa = ds "_a"
@@ -133,10 +136,22 @@
 %format dtb = dt "_b"
 %format dva = dv "_a"
 %format dvb = dv "_b"
-%format va1
-%format va2
-%format vb1
-%format vb2
+%format dwa = dw "_a"
+%format dwb = dw "_b"
+
+%format va = v "_a"
+%format vb = v "_b"
+%format vf = v "_f"
+%format dvf = dv "_f"
+%format wa = w "_a"
+%format wb = w "_b"
+%format wf = w "_f"
+%format dwf = dw "_f"
+
+%format va1 = v "_{a1}"
+%format va2 = v "_{a2}"
+%format vb1 = v "_{b1}"
+%format vb2 = v "_{b2}"
 
 %format dt1
 %format dt2
@@ -186,6 +201,7 @@
 %format `congDt` = "\mathrel{\cong_\Delta}"
 
 %format nabla = "\nabla"
+%format emptyTau = "\mathbf{0}"
 %format emptyCtx = "\EmptyContext"
 %format emptyRho = "\EmptyEnv"
 %format rho = "\rho"

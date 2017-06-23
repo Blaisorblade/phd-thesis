@@ -6,12 +6,12 @@
   \small
 \begin{subfigure}[c]{0.5\textwidth}
 \begin{code}
-  p    ::=  succ | add | ...
-  c    ::=  n | ...
-  w    ::=  x | \x -> t | pair w w | c
-  t    ::=  w | w w | p w | lett x = t in t
-  v    ::=  rho[\x -> t] | pair v v | c
-  rho  ::=  x1 := v1 , ... , xn := vn
+  p     ::=  succ | add | ...
+  c     ::=  n | ...
+  w     ::=  x | \x -> t | pair w w | c
+  s, t  ::=  w | w w | p w | lett x = t in t
+  v     ::=  rho[\x -> t] | pair v v | c
+  rho   ::=  x1 := v1 , ... , xn := vn
 \end{code}
 \caption{Base terms (\ilcUntau).}
 \label{sfig:anf-syntax}
@@ -21,12 +21,12 @@
 %
 \begin{subfigure}[c]{0.5\textwidth}
 \begin{code}
-  dc    ::=  0
-  dw    ::=  dx | \x dx -> dt | pair dw dw | dc
-  dt    ::=  dw | dw w dw | p w dw |
-             lett x = t; dx = dt in dt
-  dv    ::=  rho `stoup` drho[\x dx -> dt] | pair dv dv | dc
-  drho  ::=  dx1 := dv1 , ..., dxn := dvn
+  dc      ::=  0
+  dw      ::=  dx | \x dx -> dt | pair dw dw | dc
+  ds, dt  ::=  dw | dw w dw | p w dw |
+               lett x = t; dx = dt in dt
+  dv      ::=  rho `stoup` drho[\x dx -> dt] | pair dv dv | dc
+  drho    ::=  dx1 := dv1 , ..., dxn := dvn
 \end{code}
 \caption{Change terms (\dilcUntau).}
 \label{sfig:anf-change-syntax}
@@ -38,12 +38,12 @@
   \\
   |derive x| &= |dx| \\
   |derive(\x -> t)| &= |\x dx -> derive(t)| \\
-  |derive (pair w1 w2)| &= |pair (derive w1) (derive w2)|\\
+  |derive (pair wa wb)| &= |pair (derive wa) (derive wb)|\\
   |derive c| &= |deriveConst c|\\
   \\
-  |derive(w1 w2)| &= |(derive w1) w2 (derive w2)| \\
+  |derive(wf wa)| &= |(derive wf) wa (derive wa)| \\
   |derive(p w)| &= |p w (derive w)| \\
-  |derive(lett x = t1 in t2)| &= |lett x = t1; dx = derive t1 in derive t2|
+  |derive(lett x = s in t)| &= |lett x = s; dx = derive s in derive t|
 \end{align*}
 \caption{Differentiation.}
 %\caption{Differentiation, from base terms to change terms}
@@ -52,10 +52,10 @@
 %
 \begin{subfigure}[t]{0.5\textwidth}
 \begin{code}
-  tau ::= Nat | tau1 `times` tau2 | sigma -> tau
+  tau ::= Nat | taua `times` taub | sigma -> tau
 
   Dt^Nat                  = Nat
-  Dt^(tau1 `times` tau2)  = Dt^tau1 `times` Dt^tau2
+  Dt^(taua `times` taub)  = Dt^taua `times` Dt^taub
   Dt^(sigma -> tau)       = sigma -> Dt^sigma -> Dt^tau
 
   Dt^emptyCtx             = emptyCtx
@@ -92,23 +92,23 @@
 \raisebox{0.5\baselineskip}{\fbox{|Gamma /- t : tau|}}
 
 \Rule[T-App]
-  {|Gamma /- w1 : sigma -> tau|\\
-  |Gamma /- w2 : sigma|}
-  {|Gamma /- w1 w2 : tau|}
+  {|Gamma /- wf : sigma -> tau|\\
+  |Gamma /- wa : sigma|}
+  {|Gamma /- wf wa : tau|}
 
 \Rule[T-Lam]
   {|Gamma , x : sigma /- t : tau|}
   {|Gamma /- \(x : sigma) -> t : sigma -> tau|}
 
 \Rule[T-Let]
-  {|Gamma /- t1 : sigma|\\
-  |Gamma , x : sigma /- t2 : tau|}
-  {|Gamma /- lett x = t1 in t2 : tau|}
+  {|Gamma /- s : sigma|\\
+  |Gamma , x : sigma /- t : tau|}
+  {|Gamma /- lett x = s in t : tau|}
 
 \Rule[T-Pair]
-  {|Gamma /- w1 : tau1|\\
-  |Gamma /- w2 : tau2|}
-  {|Gamma /- pair w1 w2 : tau1 `times` tau2|}
+  {|Gamma /- wa : taua|\\
+  |Gamma /- wb : taub|}
+  {|Gamma /- pair wa wb : taua `times` taub|}
 
 \Rule[T-Prim]
   {|`vdashPrim` p : sigma -> tau|\\
@@ -132,25 +132,25 @@
 \raisebox{0.5\baselineskip}{\fbox{|Gamma /-- dt : tau|}}
 
 \Rule[T-DApp]
-  {|Gamma /-- dw1 : sigma -> tau|\\
-    |Gamma /- w2 : sigma|\\
-    |Gamma /-- dw2 : sigma|}
-  {|Gamma /-- dw1 w2 dw2 : tau|}
+  {|Gamma /-- dwf : sigma -> tau|\\
+    |Gamma /- wa : sigma|\\
+    |Gamma /-- dwa : sigma|}
+  {|Gamma /-- dwf wa dwa : tau|}
 
 \Rule[T-DLet]{
-  |Gamma /- t1 : sigma|\\
-  |Gamma /-- dt1 : sigma|\\
-  |Gamma , x : sigma /-- dt2 : tau|}
-  {|Gamma /-- lett x = t1 ; dx = dt1 in dt2 : tau|}
+  |Gamma /- s : sigma|\\
+  |Gamma /-- ds : sigma|\\
+  |Gamma , x : sigma /-- dt : tau|}
+  {|Gamma /-- lett x = s ; dx = ds in dt : tau|}
 
 \Rule[T-DLam]
   {|Gamma , x : sigma /-- dt : tau|}
   {|Gamma /-- \x dx -> dt : sigma -> tau|}
 
 \Rule[T-DPair]
-  {|Gamma /-- dw1 : tau1|\\
-  |Gamma /-- dw2 : tau2|}
-  {|Gamma /-- pair dw1 dw2 : tau1 `times` tau2|}
+  {|Gamma /-- dwa : taua|\\
+  |Gamma /-- dwb : taub|}
+  {|Gamma /-- pair dwa dwb : taua `times` taub|}
 
 \Rule[T-DPrim]
   {|`vdashPrim` p : sigma -> tau|\\
