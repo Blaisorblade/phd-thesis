@@ -574,16 +574,16 @@ are related values.
   |valset Nat| ={}& \{|(n1, dn, n2) `such` n1, dn, n2 `elem` Nat `wand` n1 + dn = n2|\}\\
   |valset (tau1 `times` tau2)| ={} & \{|(pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
                                    ^&^ (va1, dva, va2) `elem` valset tau1
-                                      ^^ `and` ^^
+                                      ^^ `wand` ^^
                                       (vb1, dvb, vb2) `elem` valset tau2 |\}\\
   |valset (sigma -> tau)| ={}&
                                \{|(rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2]) `such` ^^^
                     ^&^ (forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
                     ^&^ (<(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
-                    ^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)) ^^ `and` ^^^
+                    ^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)) ^^ `wand` ^^^
                     ^&^ (exists Gamma1 Gamma Gamma2 . ^^^
-                    ^&^ Gamma1 , x : sigma /- t1 : tau ^^ `and` ^^^
-                    ^&^ Gamma, x : sigma /-- dt : tau ^^ `and` ^^^
+                    ^&^ Gamma1 , x : sigma /- t1 : tau ^^ `wand` ^^^
+                    ^&^ Gamma, x : sigma /-- dt : tau ^^ `wand` ^^^
                     ^&^ Gamma2 , x : sigma /- t2 : tau)
                        |\}\\
   |compset tau| ={}&
@@ -596,7 +596,7 @@ are related values.
   |envset emptyCtx| ={} & \{|(emptyRho, emptyRho, emptyRho)|\} \\
   |envset (Gamma, x : tau)| ={} &
                                   \{|((rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
-                                  ^&^ (rho1, drho, rho2) `elem` envset Gamma `and` (v1, dv, v2) `elem` valset tau|\} \\
+                                  ^&^ (rho1, drho, rho2) `elem` envset Gamma `wand` (v1, dv, v2) `elem` valset tau|\} \\
   |fromtosyn Gamma tau t1 dt t2| ={}&
                                       |forall ((rho1, drho, rho2) `elem` envset Gamma) . ^^^
                                       ^&^ (<rho1, t1>, <rho1 `stoup` drho, dt>, <rho2, t2>) `elem` compset tau|
@@ -706,29 +706,29 @@ well-founded recursion on step-indexes.
   |valset Nat| ={}& \{|(k, n1, dn, n2) `such` n1, dn, n2 `elem` Nat `wand` n1 + dn = n2|\}\\
   |valset (tau1 `times` tau2)| ={} & \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
                                    ^&^ (k, va1, dva, va2) `elem` valset tau1
-                                      ^^ `and` ^^
+                                      ^^ `wand` ^^
                                       (k, vb1, dvb, vb2) `elem` valset tau2 |\}\\
   |valset (sigma -> tau)| ={}&
                                \{|(k, rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2])`such` ^^^
                   ^&^ forall ((j, v1, dv, v2) `elem` (valset sigma)). ^^ j < k => ^^^
                   ^&^ (j, <(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
-                  ^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)) ^^ `and` ^^^
+                  ^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)) ^^ `wand` ^^^
                     ^&^ (exists Gamma1 Gamma Gamma2 . ^^^
-                    ^&^ Gamma1 , x : sigma /- t1 : tau ^^ `and` ^^^
-                    ^&^ Gamma, x : sigma /-- dt : tau ^^ `and` ^^^
+                    ^&^ Gamma1 , x : sigma /- t1 : tau ^^ `wand` ^^^
+                    ^&^ Gamma, x : sigma /-- dt : tau ^^ `wand` ^^^
                     ^&^ Gamma2 , x : sigma /- t2 : tau) |\}\\
   |compset tau| ={}&
                   \{|(k, <rho1, t1>, <rho `stoup` drho, dt>, <rho2, t2>) `such` ^^^
                      ^&^ (forall j v1 v2 . ^^^
-                     ^&^ j < k ^^ `and`(ibseval t1 rho1 j v1) `and` (bseval t2 rho2 v2) => ^^^
-                     ^&^ exists dv . (dbseval dt rho1 drho dv) `and` ((k - j , v1, dv, v2) `elem` valset tau)) ^^ `and` ^^^
-                     ^&^ (exists Gamma1 Gamma Gamma2 . ^^ (Gamma1 /- t1 : tau) ^^ `and` ^^ (Gamma /-- dt : tau) ^^ `and` ^^ (Gamma2 /- t2 : tau))
+                     ^&^ j < k ^^ `wand`(ibseval t1 rho1 j v1) `wand` (bseval t2 rho2 v2) => ^^^
+                     ^&^ exists dv . (dbseval dt rho1 drho dv) `wand` ((k - j , v1, dv, v2) `elem` valset tau)) ^^ `wand` ^^^
+                     ^&^ (exists Gamma1 Gamma Gamma2 . ^^ (Gamma1 /- t1 : tau) ^^ `wand` ^^ (Gamma /-- dt : tau) ^^ `wand` ^^ (Gamma2 /- t2 : tau))
                            |\}\\
                   \\
   |envset emptyCtx| ={} & \{|(k, emptyRho, emptyRho, emptyRho)|\} \\
   |envset (Gamma, x : tau)| ={} &
                                   \{|(k, (rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
-                                  ^&^ (k, rho1, drho, rho2) `elem` envset Gamma `and` (k, v1, dv, v2) `elem` valset tau|\} \\
+                                  ^&^ (k, rho1, drho, rho2) `elem` envset Gamma `wand` (k, v1, dv, v2) `elem` valset tau|\} \\
   |fromtosyn Gamma tau t1 dt t2| ={}&
                                       |forall ((k, rho1, drho, rho2) `elem` envset Gamma) . ^^^
                                       ^&^ (k, <rho1, t1>, <rho1 `stoup` drho, dt>, <rho2, t2>) `elem` compset tau|
@@ -905,7 +905,7 @@ by requiring the following equation holds (hence, modifying all
 equations for |valset|; we omit details):
 \begin{align}
   \label{eq:val-replacement}
-  |valset tau| \supseteq {}& \{| (k, v1, !v2, v2) `such` ^^ /- v1 : tau ^^ `and` ^^ /- v2 : tau |\}
+  |valset tau| \supseteq {}& \{| (k, v1, !v2, v2) `such` ^^ /- v1 : tau ^^ `wand` ^^ /- v2 : tau |\}
 \end{align}
 where we write |/- v : tau| to state that value |v| has type
 |tau|; we omit the unsurprising rules for this judgement.
@@ -921,12 +921,12 @@ replacement closures in the definition of |valset (sigma -> tau)|.
 \begin{align*}
   |valset (sigma -> tau)| ={}&
                                \{|(k, rho1[\x -> t], rho1 `stoup` drho[\x dx -> derive t], rho2[\x -> t]) `such` ^^^
-                  ^&^ rho1 `oplus` drho = rho2 ^^ `and` ^^^
+                  ^&^ rho1 `oplus` drho = rho2 ^^ `wand` ^^^
                   ^&^ forall ((j, v1, dv, v2) `elem` (valset sigma)). ^^ j < k => ^^^
                   ^&^ (j, <(rho1, x := v1), t1>, <(rho1, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
-                  ^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)) ^^ `and` ^^^
+                  ^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)) ^^ `wand` ^^^
                   ^&^ (exists Gamma . ^^ (Gamma , x : sigma /- t : tau)) |\} |^^ `union` ^^^
-                  ^&^| \{| (k, f1, !f2, f2) `such` ^^ /- f1 : sigma -> tau ^^ `and` ^^ /- f2 : sigma -> tau |\}
+                  ^&^| \{| (k, f1, !f2, f2) `such` ^^ /- f1 : sigma -> tau ^^ `wand` ^^ /- f2 : sigma -> tau |\}
 \end{align*}
 
 Using these updated definitions, we can again prove the
@@ -1032,19 +1032,19 @@ details~\citep{Ahmed2006stepindexed}.
                   ^&^ <(rho2, x:= v2), t2>) `elem` compsetunt)| \} | ^^ `union` ^^^
                   ^&^ | \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
                    ^&^ (k, va1, dva, va2) `elem` valsetunt
-                      ^^ `and` ^^
+                      ^^ `wand` ^^
                       (k, vb1, dvb, vb2) `elem` valsetunt |\}\\
   |compsetunt| ={}&
                   \{|(k, <rho1, t1>, <rho `stoup` drho, dt>, <rho2, t2>) `such` ^^^
                      ^&^ (forall j v1 v2 . ^^^
-                     ^&^ j < k ^^ `and`(ibseval t1 rho1 j v1) `and` (bseval t2 rho2 v2) => ^^^
-                     ^&^ exists dv . (dbseval dt rho1 drho dv) `and` ((k - j , v1, dv, v2) `elem` valsetunt))
+                     ^&^ j < k ^^ `wand`(ibseval t1 rho1 j v1) `wand` (bseval t2 rho2 v2) => ^^^
+                     ^&^ exists dv . (dbseval dt rho1 drho dv) `wand` ((k - j , v1, dv, v2) `elem` valsetunt))
                            |\}\\
                   \\
   |envset emptyCtx| ={} & \{|(k, emptyRho, emptyRho, emptyRho)|\} \\
   |envset (Gamma, x)| ={} &
                                   \{|(k, (rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
-                                  ^&^ (k, rho1, drho, rho2) `elem` envset Gamma `and` (k, v1, dv, v2) `elem` valsetunt|\} \\
+                                  ^&^ (k, rho1, drho, rho2) `elem` envset Gamma `wand` (k, v1, dv, v2) `elem` valsetunt|\} \\
   |fromtosynuntyped Gamma t1 dt t2| ={}&
                                       |forall ((k, rho1, drho, rho2) `elem` envset Gamma) . ^^^
                                       ^&^ (k, <rho1, t1>, <rho1 `stoup` drho, dt>, <rho2, t2>) `elem` compsetunt|
@@ -1257,12 +1257,12 @@ Gamma e1 (de1 `ocompose` de2) e3| means the absurd
 \paragraph{A possible fix}
 Does transitivity hold if |e2| terminates?
 we cannot conclude anything from
-|(k, e1, de1, e2) `elem` compset tau `and` (k, e2, de2, e3)
+|(k, e1, de1, e2) `elem` compset tau `wand` (k, e2, de2, e3)
 `elem` compset tau|.
 
 But like in \citet{Ahmed2006stepindexed}, if |e2| amd |e3| are
 related at all step counts, that is, if |(k, e1, de1, e2) `elem`
-compset tau `and` (forall n. (n, e2, de2, e3) `elem` compset
+compset tau `wand` (forall n. (n, e2, de2, e3) `elem` compset
 tau)|, and if additionally |e2| terminates, we conjecture that
 \citeauthor{Ahmed2006stepindexed}'s proof goes through. We have
 however not yet examined all details.
