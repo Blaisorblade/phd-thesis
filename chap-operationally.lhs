@@ -438,7 +438,7 @@ Evaluation preserves types in the expected way.
 \begin{lemma}[Big-step preservation]
   \begin{enumerate}
   \item If |Gamma /- t : tau|, |//= rho : Gamma| and |ibseval t rho n v| then
-|//= v : tau|.\\
+|//= v : tau|.
 \item If |Gamma /-- dt : tau|, |//= rho : Gamma|, |//== drho : Gamma| and
 |dbseval dt rho drho dv| then |//== dv : tau|.
    \end{enumerate}
@@ -648,10 +648,10 @@ are related values.
 \begin{figure}[h!]
 \begin{align*}
   |valset Nat| ={}& \{|(n1, dn, n2) `such` n1, dn, n2 `elem` Nat `wand` n1 + dn = n2|\}\\
-  |valset (tau1 `times` tau2)| ={} & \{|(pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
-                                   ^&^ (va1, dva, va2) `elem` valset tau1
+  |valset (taua `times` taub)| ={} & \{|(pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
+                                   ^&^ (va1, dva, va2) `elem` valset taua
                                       ^^ `wand` ^^
-                                      (vb1, dvb, vb2) `elem` valset tau2 |\}\\
+                                      (vb1, dvb, vb2) `elem` valset taub |\}\\
   |valset (sigma -> tau)| ={}
                   |^&^ |\{|(vf1, dvf, vf2) `such` ^^^
                       ^&^ //= vf1 : sigma -> tau `wand`
@@ -769,7 +769,12 @@ related at any step count $j < k$. Conversely, the higher the step count, the
 more precise the defined relation. In the limit, if entities are related at all
 step counts, we simply say they are related.
 This construction of limits resembles various other approaches to constructing
-relations by approximations, but the entire framework remains elementary.
+relations by approximations, but the entire framework remains elementary. In
+particular, the relations are defined simply because they are well-founded (that
+is, only defined by induction on smaller numbers).
+Proofs of logical relation statement need to deal with step-indexes, but when
+they work (as here) they are otherwise not much harder than other syntactic or
+logical relation proofs.
 
 For instance, if we define equivalence as a step-indexed logical relation, we
 can say that two terms are equivalent for $k$ or fewer steps, even if they might
@@ -791,10 +796,21 @@ step-indexing for them.
 
 \paragraph{How step-indexing proceeds}
 We explain gradually in words how the definition proceeds.
+
 First, we say $k$-related function values take $j$-related arguments to $j$-related
 results for all $j$ less than $k$. That is reflected in the definition for
-|valset (sigma -> tau)|.
-Roughly speaking, computations are $k$-related if, after $j$
+|valset (sigma -> tau)|: it contains |(k, vf1, dvf, vf2)| if, for all
+|(j, v1, dv, v2) `elem` (valset sigma))| with |j < k|, the result of
+applications are also |j|-related.
+However, the result of application are not syntactic applications encoding |vf1
+v1|\footnote{That happens to be illegal syntax in this presentation, but can be
+encoded for instance as |envpair (f := vf1, x := v1) (f x)|; and the problem is
+more general.}.
+It is instead necessary to use |vapply vf1 v1|, the result of one step of
+reduction. The two definitions are not equivalent because a syntactic
+application would take one extra step to reduce.
+
+The definition for computations takes longer to describe. Roughly speaking, computations are $k$-related if, after $j$
 steps of evaluations (with $j < k$), they produce values related at $k - j$
 steps; in particular, if the computations happen to be neutral forms and
 evaluate in zero steps, they're $k$-related as computations if the values they
@@ -816,6 +832,12 @@ to allow change term |dt| to evaluate to |dv| in an unbounded number of steps
 (like |t2|), as no bound is necessary for our proofs.
 This is why the semantics we defined for change terms has no step counts.
 
+Well-foundedness of step-indexed logical relations has a small wrinkle, because
+|k - j| need not be strictly less than |k|. But we define the two relations in a
+mutually recursive way, and the pair of relations at step-count |k| is defined
+in terms of the pair of relation at smaller step-count. All other recursive uses
+of relations are at smaller step-indexes.
+
 % Instead of observing the behavior of terms with an unbounded
 % number of computation steps, as we did before, we observe the
 % behavior of terms having a bounded
@@ -834,10 +856,10 @@ well-founded recursion on step-indexes.
 \begin{figure}[h!]
 \begin{align*}
   |valset Nat| ={}& \{|(k, n1, dn, n2) `such` n1, dn, n2 `elem` Nat `wand` n1 + dn = n2|\}\\
-  |valset (tau1 `times` tau2)| ={} & \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
-                                   ^&^ (k, va1, dva, va2) `elem` valset tau1
+  |valset (taua `times` taub)| ={} & \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
+                                   ^&^ (k, va1, dva, va2) `elem` valset taua
                                       ^^ `wand` ^^
-                                      (k, vb1, dvb, vb2) `elem` valset tau2 |\}\\
+                                      (k, vb1, dvb, vb2) `elem` valset taub |\}\\
   |valset (sigma -> tau)| ={}
                   |^&^ |\{|(k, vf1, dvf, vf2) `such` ^^^
                       ^&^ //= vf1 : sigma -> tau `wand`
@@ -998,7 +1020,6 @@ replacement change:
 
 Evaluation rule \textsc{E-BangApp} requires defining |`oplus`| on
 syntactic values. We define it \emph{intensionally}:
-
 \begin{definition}[Update operator |`oplus`|]
   %{
   %format matchGamma = "\mathsf{match\Gamma}"
@@ -1032,10 +1053,9 @@ syntactic values. We define it \emph{intensionally}:
   \end{code}
   %}
 \end{definition}
-
-The definition of update for closures is very limited, but we
-restrict validity to only the changes for which it is correct, as
-we show in a moment.
+The definition of update for closures can only update them in few cases, but
+this is not a problem: as we show in a moment, we restrict validity to the
+closure changes for which it is correct.
 
 We ensure replacement values are accepted as valid for all types,
 by requiring the following equation holds (hence, modifying all
@@ -1099,7 +1119,7 @@ If |(k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
 \end{theorem}
 \begin{proof}
   By induction on types. For type |Nat| validity coincides with the
-  thesis. For type |pair tau1 tau2|, we must simply apply the
+  thesis. For type |pair taua taub|, we must simply apply the
   induction hypothesis on pair components.
 
   For closures, validity requires that |v1 = rho1[\x -> t], dv =
@@ -1153,8 +1173,8 @@ We conclude with the overall correctness theorem, analogous to
 \section{Untyped step-indexed validity (\ilcUntau{}, \dilcUntau{})}
 \label{sec:silr-untyped-proof}
 By removing mentions of types from step-indexed validity
-(intensional or extensional), we can adapt it to an untyped
-language.
+(intensional or extensional, though we show extensional definitions), we can
+adapt it to an untyped language.
 We can still distinguish between functions, numbers and pairs by
 matching on values themselves, instead of matching on types.
 Without types, typing contexts |Gamma| now degenerate to lists of
@@ -1168,7 +1188,7 @@ We show resulting definitions for extensional validity in
 \cref{fig:big-step-validity-ext-si-untyped}; but we can also define
 intensional validity and prove the fundamental lemma for it.
 As mentioned earlier, for \ilcUntau{} we must turn |evalPrim| and |devalPrim|
-into relations and update |E-Prim| accordingly.
+into relations and update \textsc{E-Prim} accordingly.
 
 The main difference in the proof is that this time, the recursion
 used in the relations can only be proved to be well-founded
