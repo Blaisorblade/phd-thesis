@@ -1199,28 +1199,26 @@ details~\citep{Ahmed2006stepindexed}.
 \begin{align*}
   |valsetunt| ={}& \{|(k, n1, dn, n2) `such` n1, dn, n2 `elem` Nat
                    `wand` n1 + dn = n2|\} | ^^ `union` ^^^
-                  ^&^| \{|(k, rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2])`such` ^^^
-                  ^&^ forall ((j, v1, dv, v2) `elem` valsetunt). ^^ j < k => ^^^
-                  ^&^ (j, <(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
-                  ^&^ <(rho2, x:= v2), t2>) `elem` compsetunt)| \} | ^^ `union` ^^^
+                  ^&^ |\{|(k, vf1, dvf, vf2) `such` ^^^
+                      ^&^ forall ((j, v1, dv, v2) `elem` valsetunt). ^^ j < k => ^^^
+                      ^&^ qua ((j, vapply vf1 v1, dvapply dvf v1 dv, vapply vf2 v2) `elem` compsetunt) |\}| ^^ `union` ^^^
                   ^&^ | \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
                    ^&^ (k, va1, dva, va2) `elem` valsetunt
                       ^^ `wand` ^^
                       (k, vb1, dvb, vb2) `elem` valsetunt |\}\\
   |compsetunt| ={}&
-                  \{|(k, <rho1, t1>, <rho `stoup` drho, dt>, <rho2, t2>) `such` ^^^
-                     ^&^ (forall j v1 v2 . ^^^
-                     ^&^ j < k ^^ `wand`(ibseval t1 rho1 j v1) `wand` (bseval t2 rho2 v2) => ^^^
-                     ^&^ exists dv . (dbseval dt rho1 drho dv) `wand` ((k - j , v1, dv, v2) `elem` valsetunt))
-                           |\}\\
-                  \\
+                  \{|(k, envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `such` ^^^
+                    ^&^ forall j v1 v2 . ^^^
+                    ^&^ qua ((j < k `wand` bseval t1 rho1 v1 `wand` bseval t2 rho2 v2)) => ^^^
+                    ^&^ qua (exists dv . ^^ dbseval dt rho drho dv `wand` (k - j, v1, dv, v2) `elem` valsetunt) |\}\\
+  \\
   |envset emptyCtx| ={} & \{|(k, emptyRho, emptyRho, emptyRho)|\} \\
   |envset (Gamma, x)| ={} &
                                   \{|(k, (rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
                                   ^&^ (k, rho1, drho, rho2) `elem` envset Gamma `wand` (k, v1, dv, v2) `elem` valsetunt|\} \\
   |fromtosynuntyped Gamma t1 dt t2| ={}&
                                       |forall ((k, rho1, drho, rho2) `elem` envset Gamma) . ^^^
-                                      ^&^ (k, <rho1, t1>, <rho1 `stoup` drho, dt>, <rho2, t2>) `elem` compsetunt|
+                                      ^&^ (k, envpair rho1 t1, denvpair rho1 drho dt, envpair rho2 t2) `elem` compsetunt|
 \end{align*}
 \caption{Defining extensional validity via \emph{untyped step-indexed} logical relations and big-step semantics.}
 \label{fig:big-step-validity-ext-si-untyped}
