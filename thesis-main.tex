@@ -70,10 +70,12 @@
 %
 % Also, include can add extra page breaks, so maybe switch back to input at the end.
 % From http://web.science.mq.edu.au/~rdale/resources/writingnotes/latexstruct.html.
-\begin{document}
-\maketitle
 \input{pldi14/agda}
+\begin{document}
 
+
+\iftoggle{full}{
+\maketitle
 \section*{Abstract}
 % Programs manipulating data collections require
 
@@ -83,6 +85,7 @@
 
 \listoffigures
 \listoftables
+}{}
 
 \include{chap-intro}
 
