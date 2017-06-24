@@ -100,7 +100,7 @@
 
 \Rule[T-Lam]
   {|Gamma , x : sigma /- t : tau|}
-  {|Gamma /- \(x : sigma) -> t : sigma -> tau|}
+  {|Gamma /- \x -> t : sigma -> tau|}
 
 \Rule[T-Let]
   {|Gamma /- s : sigma|\\

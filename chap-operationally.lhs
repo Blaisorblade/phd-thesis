@@ -365,35 +365,37 @@ one can verify the following derived typing rule for |derive|:
   {|Gamma /-- derive t : tau|}
 \end{typing}
 
-We also use mutually recursive typing judgment |/- v : tau| for values and |/-
-rho : Gamma| for environments, and similarly |/-- dv : tau| for change values
-and |/-- drho : Gamma| for change environments.
-We only show the (unsurprising) rules for |/- v : tau| and omit the others. One
+We also use mutually recursive typing judgment |//= v : tau| for values and |//=
+rho : Gamma| for environments, and similarly |//== dv : tau| for change values
+and |//== drho : Gamma| for change environments.
+We only show the (unsurprising) rules for |//= v : tau| and omit the others. One
 could alternatively and equivalently define typing on syntactic values |v| by
 translating them to neutral forms |w = v*| (using unsurprising definitions in
 \cref{sec:sanity-check-big-step}) and reusing typing on terms, but as usual we
 prefer to avoid substitution.
 \begin{typing}
-\Axiom[TV-Nat]{|/- n : Nat|}
+\Axiom[TV-Nat]{|//= n : Nat|}
 
 \Rule[TV-Pair]
-  {|/- va : taua|\\
-  |/- vb : taub|}
-  {|/- pair va vb : taua `times` taub|}
+  {|//= va : taua|\\
+  |//= vb : taub|}
+  {|//= pair va vb : taua `times` taub|}
 
-\raisebox{0.5\baselineskip}{\fbox{|/- v : tau|}}
+\raisebox{0.5\baselineskip}{\fbox{|//= v : tau|}}
 
 \Rule[TV-Lam]
 {|Gamma , x : sigma /- t : tau|\\
-  |/- rho : Gamma|}
-{|/- rho[\x -> t] : sigma -> tau|}
+  |//= rho : Gamma|}
+{|//= rho[\x -> t] : sigma -> tau|}
 \end{typing}
 
 \subsection{Semantics}
 \label{sec:bsos-anf-semantics}
 We present our semantics for base terms in \cref{sfig:anf-base-semantics}.
-We write |envpair rho t| for a pair of environment |rho| and term |t|; our
-semantics gives meaning to such pairs.
+Our semantics gives meaning to pairs of a environment |rho| and term |t|,
+consistent with each other, that we write |envpair rho t|. By ``consistent'' we mean that
+|rho| contains values for all free variables of |t|, and (in a typed language)
+values with compatible values (if |Gamma /- t : tau| then |//= rho : Gamma|).
 Judgement |envpair rho t (downto n) v| says that |envpair rho t| evaluates to
 value |v| in |n| steps. The definition is given via a CBV big-step semantics.
 Following \citet*{Acar08}, we index our evaluation judgements via a step count,
@@ -434,9 +436,12 @@ semantics for change terms, and we present it in \cref{sfig:anf-change-semantics
 
 Evaluation preserves types in the expected way.
 \begin{lemma}[Big-step preservation]
-If |Gamma /- t : tau|, |/- rho : Gamma| and |ibseval t rho n v| then |/- v : tau|.
-If |Gamma /-- dt : tau|, |/- rho : Gamma|, |/-- drho : Gamma| and |dbseval dt
-rho drho dv| then |/-- dv : tau|.
+  \begin{enumerate}
+  \item If |Gamma /- t : tau|, |//= rho : Gamma| and |ibseval t rho n v| then
+|//= v : tau|.\\
+\item If |Gamma /-- dt : tau|, |//= rho : Gamma|, |//== drho : Gamma| and
+|dbseval dt rho drho dv| then |//== dv : tau|.
+   \end{enumerate}
 \end{lemma}
 \begin{proof}
   By structural induction on evaluation judgements. In our intrinsically typed
@@ -607,7 +612,7 @@ and express similar informal notions.
   t1 rho1) (eval dt drho) (eval t2 rho2)| to say that |dt| is a
   valid change from |t1| and |t2|, considering the respective
   environments. With operational semantics instead we write
-  |(<rho1, t1>, <rho `stoup` drho, dt>, <rho2, t2>) `elem` compset tau|.
+  |(envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `elem` compset tau|.
 \end{itemize}
 
 Since we use Church typing and only mechanize typed terms, we
@@ -615,7 +620,7 @@ must include in all cases appropriate typing assumptions.
 
 Relation |compset tau| relates tuples of environments and
 computations,
-|<rho1, t1>|, |<rho `stoup` drho, dt>| and |<rho2, t2>|: it holds
+|envpair rho1 t1|, |denvpair rho drho dt| and |envpair rho2 t2|: it holds
 if |t1| evaluates in environment |rho1| to |v1|,
 and |t2| evaluates in environment |rho2| to |v2|, then
 |dt| must evaluate in environments |rho| and |drho| to a change
@@ -647,22 +652,21 @@ are related values.
                                    ^&^ (va1, dva, va2) `elem` valset tau1
                                       ^^ `wand` ^^
                                       (vb1, dvb, vb2) `elem` valset tau2 |\}\\
-  |valset (sigma -> tau)| ={}&
-                               \{|(rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2]) `such` ^^^
-                    ^&^ (forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
-                    ^&^ (<(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
-                    ^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)) ^^ `wand` ^^^
-                    ^&^ (exists Gamma1 Gamma Gamma2 . ^^^
-                    ^&^ Gamma1 , x : sigma /- t1 : tau ^^ `wand` ^^^
-                    ^&^ Gamma, x : sigma /-- dt : tau ^^ `wand` ^^^
-                    ^&^ Gamma2 , x : sigma /- t2 : tau)
-                       |\}\\
+  |valset (sigma -> tau)| ={}
+                  |^&^ |\{|(vf1, dvf, vf2) `such` ^^^
+                      ^&^ //= vf1 : sigma -> tau `wand`
+                         //== dvf : sigma -> tau `wand`
+                         //= vf2 : sigma -> tau ^^^
+                      ^&^ `wandnosp` ^^^
+                      ^&^ forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
+                      ^&^ qua ((vapply vf1 v1, dvapply dvf v1 dv, vapply vf2 v2) `elem` (compset tau)) |\}\\
   |compset tau| ={}&
-                  \{|(<rho1, t1>, <rho `stoup` drho, dt>, <rho2, t2>) `such` ^^^
-                    ^&^ (forall v1 v2 . ^^ (bseval t1 rho1 v1) `and` (bseval t2 rho2 v2) => ^^^
-                    ^&^ exists dv . (dbseval dt rho drho dv) `and` ((v1, dv, v2) `elem` valset tau)) ^^ `and` ^^^
-                    ^&^ (exists Gamma1 Gamma Gamma2 . ^^ (Gamma1 /- t1 : tau) ^^ `and` ^^ (Gamma /-- dt : tau) ^^ `and` ^^ (Gamma2 /- t2 : tau))
-                       |\}\\
+                  \{|(envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `such` ^^^
+                    ^&^ (exists Gamma1 Gamma Gamma2 . ^^ Gamma1 /- t1 : tau `wand` ^^ Gamma /-- dt : tau `wand` Gamma2 /- t2 : tau) ^^^
+                    ^&^ `wandnosp` ^^^
+                    ^&^ forall v1 v2 . ^^^
+                    ^&^ qua ((bseval t1 rho1 v1 `wand` bseval t2 rho2 v2)) => ^^^
+                    ^&^ qua (exists dv . ^^ dbseval dt rho drho dv `wand` (v1, dv, v2) `elem` valset tau) |\}\\
                   \\
   |envset emptyCtx| ={} & \{|(emptyRho, emptyRho, emptyRho)|\} \\
   |envset (Gamma, x : tau)| ={} &
@@ -670,7 +674,7 @@ are related values.
                                   ^&^ (rho1, drho, rho2) `elem` envset Gamma `wand` (v1, dv, v2) `elem` valset tau|\} \\
   |fromtosyn Gamma tau t1 dt t2| ={}&
                                       |forall ((rho1, drho, rho2) `elem` envset Gamma) . ^^^
-                                      ^&^ (<rho1, t1>, <rho1 `stoup` drho, dt>, <rho2, t2>) `elem` compset tau|
+                                      ^&^ (envpair rho1 t1, denvpair rho1 drho dt, envpair rho2 t2) `elem` compset tau|
 \end{align*}
 \caption{Defining extensional validity via logical relations and big-step semantics.}
 \label{fig:big-step-validity-ext-nosi}
@@ -724,8 +728,8 @@ dv| and |(v, dv, v) `elem` valset tau|.
   If |(t1, t2) `elem` (compset' tau)| holds and |t1| terminates
   (with result |v1|),
   then |t2| must terminate as well (with result |v2|), and their
-  results |v1| and |v2| must in turn be logically equivalent (
-  |v1, v2 `elem` valset' tau|).
+  results |v1| and |v2| must in turn be logically equivalent
+  (|v1, v2 `elem` valset' tau|).
   And at base types like |Nat|, |(v1, v2) `elem` (valset' Nat)|
   means that |v1 = v2|.
 
@@ -734,14 +738,14 @@ dv| and |(v, dv, v) `elem` valset tau|.
   different paths during execution. In a suitably extended language,
   we could even write term |t = \x -> if x = 0 then 1 else loop|
   and run it on inputs |v1 = 0| and |v2 = 1|: these inputs are
-  related by change |dv = +1|, but |t| will converge on |v1| and
+  related by change |dv = 1|, but |t| will converge on |v1| and
   diverge on |v2|. We must use a semantics that allow such
   behavioral difference.
   Hence, at base type |Nat|, |(v1, dv, v2) `elem` valset Nat|
   means just that |dv| is a change from |v1| to |v2|, hence that
   |v1 `oplus` dv| is equivalent to |v2| because |`oplus`| agrees
-  with extensional validity in this context as well. And if |(<rho1, t1>, <rho
-  `stoup` drho, dt>, <rho2, t2>) `elem` compset tau|, |t1| might
+  with extensional validity in this context as well. And if |(envpair rho1 t1,
+  denvpair rho drho dt, envpair rho2 t2) `elem` compset tau|, term |t1| might
   converge while |t2| diverges: only if both converge must their
   results be related.
 
@@ -759,21 +763,58 @@ relation, to enable dealing with non-terminating programs.
 Logical relations relate the behavior of multiple terms during
 evaluation; with step-indexed logical relations, we can take a
 bound $k$ and restrict attention to evaluations that take at most
-$k$ steps overall, as made precise by the definitions. For
-instance, if we define equivalence as a
-step-indexed logical relation, we can say that two terms are
-equivalent for $k$ or fewer steps, even if they might have
-different behavior with more steps available.
-In our case, we can say that a change appears valid at
-step count $k$ if it behaves like a valid change in observations using
-at most $k$ steps. The details or the relation definitions are
+$k$ steps overall, as made precise by the definitions.
+Crucially, entities related at step count $k$ are also
+related at any step count $j < k$. Conversely, the higher the step count, the
+more precise the defined relation. In the limit, if entities are related at all
+step counts, we simply say they are related.
+This construction of limits resembles various other approaches to constructing
+relations by approximations, but the entire framework remains elementary.
+
+For instance, if we define equivalence as a step-indexed logical relation, we
+can say that two terms are equivalent for $k$ or fewer steps, even if they might
+have different behavior with more steps available. In our case, we can say that
+a change appears valid at step count $k$ if it behaves like a valid change in
+``observations'' using at most $k$ steps.
+
+Like before, we define a relation on values and one on computations as sets
+|valset tau| and |compset tau|.
+Instead of indexing the sets with the step-count, we add the step counts to the
+tuples they contain: so for instance |(k, v1, dv, v2) `elem` valset tau| means
+that value |v1|, change value |dv| and value |v2| are related at step count $k$
+(or $k$-related), and similarly for |compset tau|.
+
+The details or the relation definitions are
 subtle, but follow closely the use of step-indexing by
-\citet*{Acar08}. We add mention of changes, and must decide
-whether how to use step-indexing for them.
-In the definition of |compset tau|, we allow change term |dt| to
-evaluate to |dv| in an unbounded number of steps, as no bound is
-necessary for our proofs. This is why the semantics we defined
-for change terms has no step counts.
+\citet*{Acar08}. We add mention of changes, and must decide how to use
+step-indexing for them.
+
+\paragraph{How step-indexing proceeds}
+We explain gradually in words how the definition proceeds.
+First, we say $k$-related function values take $j$-related arguments to $j$-related
+results for all $j$ less than $k$. That is reflected in the definition for
+|valset (sigma -> tau)|.
+Roughly speaking, computations are $k$-related if, after $j$
+steps of evaluations (with $j < k$), they produce values related at $k - j$
+steps; in particular, if the computations happen to be neutral forms and
+evaluate in zero steps, they're $k$-related as computations if the values they
+produce are $k$-related.
+In fact, the rule for evaluation has a wrinkle.
+Formally, instead of saying that computations |(envpair rho1 t1, denvpair rho
+drho dt, envpair rho2 t2)| are $k$-related, we say that |(k, envpair rho1 t1,
+denvpair rho drho dt, envpair rho2 t2) `elem` compset tau|. We do not require
+all three computations to take $j$ steps. Instead, if the first computation
+|envpair rho1 t1| evaluates to a value in $j < k$ steps, and the second
+computation |envpair rho2 t2| evaluates to a value in any number of steps,
+\emph{then} the change computation |denvpair rho drho dt| must also terminate to
+a change value |dv| (in an unspecified number of steps), and the resulting
+values must be related at step-count $k-j$ (that is,
+|(k - j, v1, dv, v2) `elem` valset tau|).
+
+What is new in the above definition is the addition of changes, and the choice
+to allow change term |dt| to evaluate to |dv| in an unbounded number of steps
+(like |t2|), as no bound is necessary for our proofs.
+This is why the semantics we defined for change terms has no step counts.
 
 % Instead of observing the behavior of terms with an unbounded
 % number of computation steps, as we did before, we observe the
@@ -797,22 +838,21 @@ well-founded recursion on step-indexes.
                                    ^&^ (k, va1, dva, va2) `elem` valset tau1
                                       ^^ `wand` ^^
                                       (k, vb1, dvb, vb2) `elem` valset tau2 |\}\\
-  |valset (sigma -> tau)| ={}&
-                               \{|(k, rho1[\x -> t1], rho `stoup` drho[\x dx -> dt], rho2[\x -> t2])`such` ^^^
-                  ^&^ forall ((j, v1, dv, v2) `elem` (valset sigma)). ^^ j < k => ^^^
-                  ^&^ (j, <(rho1, x := v1), t1>, <(rho, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
-                  ^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)) ^^ `wand` ^^^
-                    ^&^ (exists Gamma1 Gamma Gamma2 . ^^^
-                    ^&^ Gamma1 , x : sigma /- t1 : tau ^^ `wand` ^^^
-                    ^&^ Gamma, x : sigma /-- dt : tau ^^ `wand` ^^^
-                    ^&^ Gamma2 , x : sigma /- t2 : tau) |\}\\
+  |valset (sigma -> tau)| ={}
+                  |^&^ |\{|(k, vf1, dvf, vf2) `such` ^^^
+                      ^&^ //= vf1 : sigma -> tau `wand`
+                         //== dvf : sigma -> tau `wand`
+                         //= vf2 : sigma -> tau ^^^
+                      ^&^ `wandnosp` ^^^
+                      ^&^ forall ((j, v1, dv, v2) `elem` (valset sigma)). ^^ j < k => ^^^
+                      ^&^ qua ((j, vapply vf1 v1, dvapply dvf v1 dv, vapply vf2 v2) `elem` (compset tau)) |\}\\
   |compset tau| ={}&
-                  \{|(k, <rho1, t1>, <rho `stoup` drho, dt>, <rho2, t2>) `such` ^^^
-                     ^&^ (forall j v1 v2 . ^^^
-                     ^&^ j < k ^^ `wand`(ibseval t1 rho1 j v1) `wand` (bseval t2 rho2 v2) => ^^^
-                     ^&^ exists dv . (dbseval dt rho1 drho dv) `wand` ((k - j , v1, dv, v2) `elem` valset tau)) ^^ `wand` ^^^
-                     ^&^ (exists Gamma1 Gamma Gamma2 . ^^ (Gamma1 /- t1 : tau) ^^ `wand` ^^ (Gamma /-- dt : tau) ^^ `wand` ^^ (Gamma2 /- t2 : tau))
-                           |\}\\
+                  \{|(k, envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `such` ^^^
+                    ^&^ (exists Gamma1 Gamma Gamma2 . ^^ Gamma1 /- t1 : tau `wand` ^^ Gamma /-- dt : tau `wand` Gamma2 /- t2 : tau) ^^^
+                    ^&^ `wandnosp` ^^^
+                    ^&^ forall j v1 v2 . ^^^
+                    ^&^ qua ((j < k `wand` bseval t1 rho1 v1 `wand` bseval t2 rho2 v2)) => ^^^
+                    ^&^ qua (exists dv . ^^ dbseval dt rho drho dv `wand` (k - j, v1, dv, v2) `elem` valset tau) |\}\\
                   \\
   |envset emptyCtx| ={} & \{|(k, emptyRho, emptyRho, emptyRho)|\} \\
   |envset (Gamma, x : tau)| ={} &
@@ -820,7 +860,7 @@ well-founded recursion on step-indexes.
                                   ^&^ (k, rho1, drho, rho2) `elem` envset Gamma `wand` (k, v1, dv, v2) `elem` valset tau|\} \\
   |fromtosyn Gamma tau t1 dt t2| ={}&
                                       |forall ((k, rho1, drho, rho2) `elem` envset Gamma) . ^^^
-                                      ^&^ (k, <rho1, t1>, <rho1 `stoup` drho, dt>, <rho2, t2>) `elem` compset tau|
+                                      ^&^ (k, envpair rho1 t1, denvpair rho1 drho dt, envpair rho2 t2) `elem` compset tau|
 \end{align*}
 \caption{Defining extensional validity via \emph{step-indexed} logical relations and big-step semantics.}
 \label{fig:big-step-validity-ext-si}
@@ -846,9 +886,9 @@ imply relations at step-count $k < n$.
   \begin{enumerate}
   \item If |(n, v1, dv, v2) `elem` valset tau| then |(k, v1, dv,
     v2) `elem` valset tau|.
-  \item If |(n, <rho1, t1>, <rho `stoup` drho, dt>, <rho2 , t2>) `elem`
+  \item If |(n, envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `elem`
     compset tau| then
-    \[|(k, <rho1, t1>, <rho `stoup` drho, dt>, <rho2 , t2>) `elem` compset tau|.\]
+    \[|(k, envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `elem` compset tau|.\]
   \item If |(n, rho1, drho, rho2) `elem` envset Gamma| then
     |(k, rho1, drho, rho2) `elem` envset Gamma|.
   \end{enumerate}
@@ -927,23 +967,28 @@ are not interesting, but we show them anyway for completeness:
 
   %devalPrim add (pair n1 n2) (pair dn1 dn2)  = dn1 + dn2
 \begin{code}
-  devalPrim succ n (!n2)                        = !(n2 + 1)
-  devalPrim add (pair _ _) (!(pair n1 n2))      = !(n1 + n2)
-  devalPrim add p1 (dp1 @ (pair dn1 (!n2)))     = !(evalPrim add (p1 `oplus` dp1))
-  devalPrim add p1 (dp1 @ (pair (!n1) dv2))     = !(evalPrim add (p1 `oplus` dp1))
+  devalPrim succ n1 (!n2)                   = !(n2 + 1)
+  devalPrim add (pair _ _) (!(pair m2 n2))  = !(m2 + n2)
+  devalPrim add p1 (dp @ (pair dm (!n2)))   = !(evalPrim add (p1 `oplus` dp))
+  devalPrim add p1 (dp @ (pair (!m) dv))    = !(evalPrim add (p1 `oplus` dp))
 \end{code}
 
 Evaluation requires a new rule, \textsc{E-BangApp}, to evaluate
 change applications where the function change evaluates to a
 replacement change:
+
+{\footnotesize
 \begin{typing}
    \Rule[E-BangApp]{%
-    |dbseval dw1 rho drho (!(rho'[\x -> t]))|\\
-    |bseval  w2  rho v2|\\
-    |dbseval dw2 rho drho dv2|\\
-    |bseval  t  (rho', x := v2 `oplus` dv2) v|}
-  {|dbseval (dw1 w2 dw2) rho drho (!v)|}
+    %|dbseval dwf rho drho (!(rho'[\x -> t]))|\\
+    |dbseval dwf rho drho (!vf)|\\
+    |bseval  wa  rho va|\\
+    |dbseval dwa rho drho dva|\\
+    %|bseval  t  (rho', x := va `oplus` dva) v|\\
+    |vapply  vf (va `oplus` dva) down v|}
+  {|dbseval (dwf wa dwa) rho drho (!v)|}
 \end{typing}
+}
   %  \Rule[E-BangApp]{%
   %   |dbseval dw1 rho drho (!(rho'[\x -> t]))|\\
   %   |bseval  w2  rho v2|\\
@@ -955,13 +1000,15 @@ Evaluation rule \textsc{E-BangApp} requires defining |`oplus`| on
 syntactic values. We define it \emph{intensionally}:
 
 \begin{definition}[Update operator |`oplus`|]
+  %{
+  %format matchGamma = "\mathsf{match\Gamma}"
   Operator |`oplus`| is defined on values by the following
   equations:
 
   \begin{code}
     v1 `oplus` ! v2 = v2
     rho[\x -> t] `oplus` drho[\x dx -> dt] =
-      if match rho  drho then
+      if matchGamma rho  drho then
         -- If |rho| and |drho| are environments for the same typing context |Gamma|:
         (rho `oplus` drho)[\x -> t]
       else
@@ -975,7 +1022,7 @@ syntactic values. We define it \emph{intensionally}:
     -- changes, so we can just return |v1|:
     v1 `oplus` dv = v1
   \end{code}
-  We omit the definition of |match rho drho|.
+  We omit the definition of |matchGamma rho drho|.
 
   We also define |`oplus`| on environments for matching contexts
   to combine values and changes pointwise:
@@ -983,6 +1030,7 @@ syntactic values. We define it \emph{intensionally}:
     (x1 := v1, ..., xn := vn) `oplus` (dx1 := dv1, ..., dxn := dvn) =
         (x1 := v1 `oplus` dv1, ..., xn := vn `oplus` dvn)
   \end{code}
+  %}
 \end{definition}
 
 The definition of update for closures is very limited, but we
@@ -994,28 +1042,44 @@ by requiring the following equation holds (hence, modifying all
 equations for |valset|; we omit details):
 \begin{align}
   \label{eq:val-replacement}
-  |valset tau| \supseteq {}& \{| (k, v1, !v2, v2) `such` ^^ /- v1 : tau ^^ `wand` ^^ /- v2 : tau |\}
+  |valset tau| \supseteq {}& \{| (k, v1, !v2, v2) `such` ^^ //= v1 : tau ^^ `wand` ^^ //= v2 : tau |\}
 \end{align}
-where we write |/- v : tau| to state that value |v| has type
+where we write |//= v : tau| to state that value |v| has type
 |tau|; we omit the unsurprising rules for this judgement.
 
 Finally, to restrict closure changes themselves, we modify the
-definition for |valset (sigma -> tau)|. We require that the base
+definition for |valset (sigma -> tau)| by requiring that related elements
+satisfy predicate |matchImpl vf1 dvf vf2|, defined by pattern matching syntax
+(informally) via the following equations:
+
+%format matchImpl = "\mathsf{matchImpl}"
+\begin{code}
+  matchImpl
+    (rho1[\x -> t])
+    (rho1 `stoup` drho[\x dx -> derive t])
+    ((rho1 `oplus` drho)[\x -> t]) =
+  matchImpl _ _ _ = False
+\end{code}
+Via |matchImpl| we require that the base
 closure environment |rho1| and the base environment of the
-closure change |rho| coincide, that |rho2 = rho1 `oplus` drho|,
-that |t1| and |t2| coincide with |t| and that |dt = derive t|.
+closure change coincide, that |rho2 = rho1 `oplus` drho|,
+and that |vf1| and |vf2| have |\x -> t| as body while |dvf| has body |\x dx ->
+derive t|.
 
 As an example for \cref{eq:val-replacement}, we also include explicitly
 replacement closures in the definition of |valset (sigma -> tau)|.
 \begin{align*}
-  |valset (sigma -> tau)| ={}&
-                               \{|(k, rho1[\x -> t], rho1 `stoup` drho[\x dx -> derive t], rho2[\x -> t]) `such` ^^^
-                  ^&^ rho1 `oplus` drho = rho2 ^^ `wand` ^^^
-                  ^&^ forall ((j, v1, dv, v2) `elem` (valset sigma)). ^^ j < k => ^^^
-                  ^&^ (j, <(rho1, x := v1), t1>, <(rho1, x := v1) `stoup` (drho, dx := dv), dt>, ^^^
-                  ^&^ <(rho2, x:= v2), t2>) `elem` (compset tau)) ^^ `wand` ^^^
-                  ^&^ (exists Gamma . ^^ (Gamma , x : sigma /- t : tau)) |\} |^^ `union` ^^^
-                  ^&^| \{| (k, f1, !f2, f2) `such` ^^ /- f1 : sigma -> tau ^^ `wand` ^^ /- f2 : sigma -> tau |\}
+  |valset (sigma -> tau)| ={}
+                  |^&^ |\{|(k, vf1, dvf, vf2) `such` ^^^
+                      ^&^ //= vf1 : sigma -> tau `wand`
+                         //== dvf : sigma -> tau `wand`
+                         //= vf2 : sigma -> tau ^^^
+                      ^&^ `wandnosp` ^^^
+                      ^&^ matchImpl vf1 dvf vf2 ^^^
+                      ^&^ `wandnosp` ^^^
+                      ^&^ forall ((j, v1, dv, v2) `elem` (valset sigma)). ^^ j < k => ^^^
+                      ^&^ qua ((j, vapply vf1 v1, dvapply dvf v1 dv, vapply vf2 v2) `elem` (compset tau))|\}| ^^ `union` ^^^
+                  ^&^| \{| (k, f1, !f2, f2) `such` ^^ //= f1 : sigma -> tau ^^ `wand` ^^ //= f2 : sigma -> tau |\}
 \end{align*}
 
 Using these updated definitions, we can again prove the
@@ -1066,7 +1130,7 @@ For closures, we recurse on the environment.
 \end{code}
 \end{definition}
 \begin{lemma}[|nilc| produces valid changes]
-  For all values |/- v : tau| and indexes |k|, |(k, v, nil v, v)
+  For all values |//= v : tau| and indexes |k|, we have |(k, v, nil v, v)
   `elem` valset tau|.
 \end{lemma}
 \begin{proof}[Proof sketch]
@@ -1167,7 +1231,7 @@ hypothesis in the proof are on smaller terms, and some also at
 smaller step counts.
 \end{proof}
 
-\subsection{General recursion in \ilcTau{} and \dilcTau}
+\section{General recursion in \ilcTau{} and \dilcTau}
 \label{sec:bos-fixpoints}
 
 %format rec = "\mathbf{rec}"
@@ -1202,29 +1266,24 @@ We replace closures with recursive closures in the definition of values:
   w ::= rec f x -> t | ...
   v ::= rho[rec f x -> t] | ...
 \end{code}
-And the evaluation rules:
+We also modify the semantics for abstraction and application. Rules
+\textsc{E-Val} and \textsc{E-App} are unchanged: it is sufficient to adapt the
+definitions of |evalVal| and |vapply|.
 \begin{code}
 evalVal (rec f x -> t) rho     = rho[rec f x -> t]
-\end{code}
-We also replace rule \textsc{E-App} with \textsc{E-AppRec}:
-\begin{typing}
-  \Rule[E-AppRec]{
-    |ibseval w2 rho 0 v2|\\
-    |ibseval w1 rho 0 v1|\\
-    |v1 = rho'[rec f x -> t]|\\
-    |ibseval t (rho', f := v1, x := v2) n v|
-  }{
-    |ibseval (w1 w2) rho (1 + n) v|
-  }
-\end{typing}
 
-We also modify the language of changes and its evaluation rules.
+vapply vf va =
+  case vf of rho'[rec f x -> t] ->
+    envpair ((rho', f := vf, x := va)) t
+\end{code}
+
+We also modify the language of changes and some of its evaluation rules.
 Since the derivative of a recursive function |f = rec f x -> t| can call the base
 function, we remember the original function body |t| in the
 derivative, together with its derivative |derive t|. The
 definitions are otherwise unsurprising, if long.
 
-{\footnotesize
+{
 \begin{code}
 dw ::= drec f df x dx -> t `stoup` dt | ...
 dv ::= rho `stoup` drho[drec f df x dx -> t `stoup` dt] | ...
@@ -1233,6 +1292,13 @@ derive (rec f x -> t) = drec f df x dx -> t `stoup` derive t
 
 devalVal (drec f df x dx -> dt) rho drho =
   rho `stoup` drho[drec f df x dx -> t `stoup` dt]
+
+dvapply dvf va dva =
+  case dvf of
+    rho' `stoup` drho' [rec f df x dx -> dt] ->
+      let vf = rho'[rec f x -> t]
+      in
+        denvpair ((rho', f := vf , x := va)) ((drho' , df := dvf , dx := dva)) dt
 \end{code}
 
 \begin{typing}
@@ -1241,15 +1307,6 @@ devalVal (drec f df x dx -> dt) rho drho =
     |Gamma , f : sigma -> tau, x : sigma /-- dt : tau|
   }
   {|Gamma /-- drec f df x dx -> t `stoup` dt : sigma -> tau|}
-
-  \Rule[E-DAppRec]{%
-    |bseval  w2  rho v2|\\
-    |dbseval dw2 rho drho dv2|\\
-    |dbseval dw1 rho drho dv1|\\
-    |dv1 = rho' `stoup` drho'[drec f df x dx -> t `stoup` dt]|\\
-    |v1 = rho'[rec f x -> t]|\\
-    |dbseval dt  (rho', f := v1, x := v2) (drho', df := dv1, dx := dv2) dv|}
-  {|dbseval (dw1 w2 dw2) rho drho dv|}
 \end{typing}
 }
 
@@ -1257,7 +1314,7 @@ We must also update the logical relations to use the new
 definition of application between values. We omit details.
 
 \begin{theorem}[Fundamental property: correctness of |derive|]
-  \label{thm:fund-lemma-derive-correct-types-si-intensional}
+  \label{thm:fund-lemma-derive-correct-types-si-intensional-rec}
   For every well-typed term |Gamma /- t : tau| we have that
   |fromtosyn Gamma tau t (derive t) t|.
 \end{theorem}
@@ -1281,7 +1338,7 @@ definition of application between values. We omit details.
   % x -> t)| at step-count |k|. After unfolding a few definitions
   % (which we skip here), we must show for any |j < k| and for any
   % |j|-valid argument change that running the derivative of the
-  % recursive abstraction evaluates (using rule \textsc{E-DAppRec})
+  % recursive abstraction evaluates (using rule \textsc{E-DApp})
   % |derive t| with an environment change that is valid. But this
   % time, the value of the recursive function change |dw'| is itself
   % in the environment! Luckily, we can show that |dw'| is valid at

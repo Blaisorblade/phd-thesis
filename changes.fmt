@@ -78,7 +78,7 @@
 %format ^^ = "\;"
 %format ^^^ = "\\"
 %format ^&^ = "&"
-%format qua = "\quad"
+%format qua (x) = "\quad" x
 
 %format f0
 %format f1
@@ -241,10 +241,19 @@
 %format `eq` = "="
 
 %format == = "\equiv"
+
 %format /- = "\vdash"
+%format /-- = "\vdash_{\Delta}"
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+%format //= = "\vDash"
+%format //== = "\vDash_{\Delta}"
+%format `vdashConst` = "\vdash_{\CONST}"
+%format `vdashPrim` = "\vdash_{\mathcal{P}}"
 
 %format `and` = "\land"
 %format `wand` = "\text{ and }"
+%format `wandnosp` = "\text{and}"
 
 %format => = "\Rightarrow"
 %format _ = "\text{\textunderscore}"
@@ -272,6 +281,8 @@
 %format `stoup` = "\filleddiamond"
 %  format `stoup` = "\blackdiamond"
 
+%format m1
+%format m2
 %format n1
 %format n2
 %format dn1
@@ -295,8 +306,8 @@
 %format envpair (rho) t = rho /- t
 %format denvpair (rho) (drho) t = rho `stoup` drho /-- t
 
-%format vapply = "\mathbf{app}"
-%format dvapply = "\mathbf{dapp}"
+%format vapply = "\mathsf{app}"
+%format dvapply = "\mathsf{dapp}"
 %format vapplyev vf va n v = vapply vf va "\Downarrow_{" n "}" v
 
 % Use as in |vapply vf va (downto n) v|.
@@ -321,10 +332,6 @@
 
 %format (star rho (t)) = rho "^*(" t ")"
 %format starv v = v "^*"
-
-%format /-- = "\vdash_{\Delta}"
-%format `vdashConst` = "\vdash_{\CONST}"
-%format `vdashPrim` = "\vdash_{\mathcal{P}}"
 
 %format evalVal (w) rho = "\mathcal{V}\left\llbracket" w "\right\rrbracket" rho
 %format evalPrim p v = "\mathcal{P}\left\llbracket" p "\right\rrbracket" v
