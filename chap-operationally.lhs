@@ -1298,8 +1298,12 @@ vapply vf va =
 We also modify the language of changes and some of its evaluation rules.
 Since the derivative of a recursive function |f = rec f x -> t| can call the base
 function, we remember the original function body |t| in the
-derivative, together with its derivative |derive t|. The
-definitions are otherwise unsurprising, if long.
+derivative, together with its derivative |derive t|. This should not be
+surprising: in \cref{sec:general-recursion}, where recursive functions are
+defined using |letrec|, a recursive function |f| is in scope in the body of its
+derivative |df| Here we use a different syntax, but still ensure that |f| is in
+scope in the body of derivative |df|.
+The definitions are otherwise unsurprising, if long.
 
 {
 \begin{code}
@@ -1376,11 +1380,6 @@ definition of application between values. We omit details.
 \end{proof}
 
 \section{Future work}
-It would be interesting to add a primitive fixpoint operator to
-|ilcTau|, implement derivation and prove it correct. It seems
-clear that the model is expressive enough to handle
-nontermination, since it can handle |ilcUntau| without trouble.
-
 We have shown that |`oplus`| and |nilc| agree with validity,
 which we consider a key requirement of a core ILC proof. However,
 change structures support further operators. We leave operator
