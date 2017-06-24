@@ -78,6 +78,7 @@
 %format ^^ = "\;"
 %format ^^^ = "\\"
 %format ^&^ = "&"
+%format qua = "\quad"
 
 %format f0
 %format f1
@@ -152,6 +153,8 @@
 %format va2 = v "_{a2}"
 %format vb1 = v "_{b1}"
 %format vb2 = v "_{b2}"
+%format vf1 = v "_{f1}"
+%format vf2 = v "_{f2}"
 
 %format dt1
 %format dt2

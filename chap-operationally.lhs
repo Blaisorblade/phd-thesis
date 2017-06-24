@@ -23,8 +23,9 @@ We prove ILC correct using, in increasing order of complexity,
 \item STLC and step-indexed logical relations;
 \item an untyped $\lambda$-calculus and step-indexed logical relations.
 \end{enumerate}
-We have fully mechanized the second proof in Agda, and done the others
-on paper. In all cases we prove the fundamental property for
+We have fully mechanized the second proof in Agda\footnote{Source code available
+in this GitHub repo: \url{https://github.com/inc-lc/ilc-agda}.}, and done the
+others on paper. In all cases we prove the fundamental property for
 validity; we detail later which corollaries we prove in which
 case.
 The proof for untyped $\lambda$-calculus is the most
@@ -42,10 +43,6 @@ where denotational semantics or other forms of logical relations
 would require more sophistication, as argued by
 \citet{Ahmed2006stepindexed}.
 
-On the technical side, we are able to mechanize our proof without
-needing any technical lemmas about binding or weakening, thanks
-to a number of choices we mention later.
-
 Proofs by (step-indexed) logical relations also promise to be
 scalable. All these proofs appear to be slight variants of
 proof techniques for logical program equivalence and
@@ -59,6 +56,23 @@ is left as future work.
 Compared to earlier chapters, this one will be more technical and
 concise, because we already introduced the ideas behind both ILC
 and logical relation proofs.
+
+\paragraph{Binding and environments}
+On the technical side, we are able to mechanize our proof without
+needing any technical lemmas about binding or weakening, thanks
+to a number of choices we mention later.
+
+Among other reasons, we avoid lemmas on binding because instead of substituting
+variables with arbitrary terms, we record mappings from variables to closed
+values via environments. We also used environments in \cref{sec:preliminaries},
+but this time we use syntactic values rather than semantic ones.
+As a downside, on paper, using environments makes for
+more and bigger definitions, because we need to carry around both an environment
+and a term, instead of merging them into a single term via substitution, and
+because values are not a subset of terms but an entirely separate category.
+But on paper the extra work is straightforward, and in a mechanized setting it
+is simpler than substitution, especially in a setting with an intrinsically
+typed term representation (see \cref{sec:sem-style-and-rw}).
 
 \paragraph{Background/related work}
 Our development is inspired significantly by the use of
@@ -278,8 +292,8 @@ A term is either a neutral form, an application of neutral forms,
 a let expression or an application of a primitive function |p| to
 a neutral form. Multi-argument primitives are encoded as
 primitives taking (nested) tuples of arguments. Here we use
-literal numbers as constants and +1 and addition as primitives,
-but further primitives are possible.
+literal numbers as constants and +1 and addition as primitives (to illustrate
+different arities), but further primitives are possible.
 
 \begin{notation}
   We use subscripts ${}_a {}_b$ for pair components, ${}_f {}_a$ for
@@ -328,17 +342,18 @@ writing concrete derivatives of primitives as de Bruijn terms.
 We show differentiation in \cref{sfig:anf-derive}.
 Differentiation maps constructs in the language of base terms
 one-to-one to constructs in the language of change terms.
+
 \subsection{Typing \ilcTau{} and \dilcTau}
 \label{sec:bsos-anf-typing}
-We use judgements |`vdashPrim` p| and |`vdashConst` c| to specify
-typing of primitive functions and constant values.
+
+We define typing judgement for |ilcTau| base terms and for |dilcTau| change
+terms. We show typing rules in
+\cref{sfig:anf-change-typing}.
+
+Typing for base terms is mostly standard. We use judgements |`vdashPrim` p| and
+|`vdashConst` c| to specify typing of primitive functions and constant values.
 %
-We can also define typing judgement for base terms and for change
-terms. Typing for base terms is mostly standard and shown in
-\cref{sfig:anf-base-typing}.
-%
-%
-For change terms, a natural type system would only prove
+For change terms, one could expect a type system only proving
 judgements with shape |Gamma, Dt^Gamma /- dt : Dt^tau| (where
 |Gamma, Dt^Gamma| stands for the concatenation of |Gamma| and
 |Dt^Gamma|). To simplify inversion on such judgements (especially
@@ -350,7 +365,29 @@ one can verify the following derived typing rule for |derive|:
   {|Gamma /-- derive t : tau|}
 \end{typing}
 
-Change typing rules are shown in \cref{sfig:anf-change-typing}.
+We also use mutually recursive typing judgment |/- v : tau| for values and |/-
+rho : Gamma| for environments, and similarly |/-- dv : tau| for change values
+and |/-- drho : Gamma| for change environments.
+We only show the (unsurprising) rules for |/- v : tau| and omit the others. One
+could alternatively and equivalently define typing on syntactic values |v| by
+translating them to neutral forms |w = v*| (using unsurprising definitions in
+\cref{sec:sanity-check-big-step}) and reusing typing on terms, but as usual we
+prefer to avoid substitution.
+\begin{typing}
+\Axiom[TV-Nat]{|/- n : Nat|}
+
+\Rule[TV-Pair]
+  {|/- va : taua|\\
+  |/- vb : taub|}
+  {|/- pair va vb : taua `times` taub|}
+
+\raisebox{0.5\baselineskip}{\fbox{|/- v : tau|}}
+
+\Rule[TV-Lam]
+{|Gamma , x : sigma /- t : tau|\\
+  |/- rho : Gamma|}
+{|/- rho[\x -> t] : sigma -> tau|}
+\end{typing}
 
 \subsection{Semantics}
 \label{sec:bsos-anf-semantics}
@@ -371,12 +408,7 @@ reuse this syntax later to define logical relations.
 
 In our mechanized formalization, we have additionally proved
 lemmas to ensure that this semantics is sound relative to our
-earlier denotational semantics (adapted for the ANF syntax). To
-ensure that our semantics is complete for the typed language, we
-proved that all terms (of type |tau|) evaluate to a value of type
-|tau| according to our denotational semantics, by adapting a
-standard proof of strong normalization for STLC~\citep[Ch.
-12]{Pierce02TAPL}.
+earlier denotational semantics (adapted for the ANF syntax).
 
 Evaluation of primitives is delegated to function |evalPrim|. We show
 complete equations for the typed case; for the untyped case, we
@@ -396,6 +428,45 @@ that for some |n| we have |ibseval t rho n v|.
 
 We can also define an analogous non-indexed big-step
 semantics for change terms, and we present it in \cref{sfig:anf-change-semantics}.
+
+\subsection{Type soundness}
+\label{sec:bsos-anf-soundness}
+
+Evaluation preserves types in the expected way.
+\begin{lemma}[Big-step preservation]
+If |Gamma /- t : tau|, |/- rho : Gamma| and |ibseval t rho n v| then |/- v : tau|.
+If |Gamma /-- dt : tau|, |/- rho : Gamma|, |/-- drho : Gamma| and |dbseval dt
+rho drho dv| then |/-- dv : tau|.
+\end{lemma}
+\begin{proof}
+  By structural induction on evaluation judgements. In our intrinsically typed
+  mechanization, this is actually part of the definition of values and big-step
+  evaluation rules.
+\end{proof}
+
+To ensure that our semantics for \ilcTau{} is complete for the typed language,
+instead of proving a small-step progress lemma or extending the semantics with
+errors, we just prove that all typed terms normalize in the standard way.
+As usual, this fails if we add fixpoints or for untyped terms. IF we wanted to
+ensure type safety in such a case, we could switch to functional big-step
+semantics or definitional interpreters~\citep{Amin2017,Owens2016functional}.
+
+\begin{theorem}[CBV normalization]
+  \label{thm:bsos-normalization}
+For any well-typed and closed term |/- t : tau|, there exist a step count |n| and value |v| such that |/- t (downto n) v|.
+\end{theorem}
+\begin{proof}
+A variant of standard proofs of normalization for STLC~\citep[Ch.
+12]{Pierce02TAPL}, adapted for big-step semantics rather than small-step
+semantics (similarly to \cref{sec:typed-proof}).
+We omit needed definitions and refer interested readers to our Agda
+mechanization.
+\end{proof}
+
+We haven't attempted to prove this lemma for arbitrary change terms (though we
+expect we could prove it by defining an erasure to the base language and
+relating evaluation results), but we prove it for the result of differentiating
+well-typed terms in \cref{thm:bsos-derive-normalization}.
 
 \section{Validating our step-indexed semantics}
 \label{sec:sanity-check-big-step}
@@ -616,6 +687,24 @@ Given these definitions, one can prove the fundamental property.
   \cref{thm:derive-correct}.
 \end{proof}
 
+It also follows that |derive t| normalizes:
+
+\begin{corollary}[|derive | normalizes to a nil change]
+  \label{thm:bsos-derive-normalization}
+For any well-typed and closed term |/- t : tau|, there exist value |v| and
+change value |dv| such that |/- t down v|, |/-- derive t ddown dv| and |(v, dv,
+v) `elem` valset tau|.
+\end{corollary}
+\begin{proof}
+A corollary of the fundamental property and of the normalization theorem
+(\cref{thm:bsos-normalization}): since |t| is well-typed and closed it
+normalizes to a value |v| for some step count (|/- t down v|).
+The empty environment change is valid: |(emptyRho, emptyRho, emptyRho) `elem`
+envset emptyCtx|, so from the fundamental property we get that |(/- t, /-- derive
+t, /- t) `elem` compset tau|. From the definition of |compset tau| and
+|/- t down v| it follows that there exists |dv| such that |/-- derive t ddown
+dv| and |(v, dv, v) `elem` valset tau|.
+\end{proof}
 %{
 %format (valset' (tau)) = "\mathcal{RV'}\left\llbracket" tau "\right\rrbracket"
 %format (compset' (tau)) = "\mathcal{RC'}\left\llbracket" tau "\right\rrbracket"

@@ -145,7 +145,10 @@ context |Gamma| has type |tau|.%
 \footnote{We only formalize typed terms, not untyped ones, so
   that each term has a unique type. That is, in the relevant
   jargon, we use \emph{Church-style} typing as opposed to
-  \emph{Curry-style} typing. In fact, arguably we mechanize at
+  \emph{Curry-style} typing.
+  Alternatively, we use an
+  intrinsically-typed term representation.
+  In fact, arguably we mechanize at
   once both well-typed terms and their typing derivations. This
   is even more clear in our mechanization; see discussion
   in~\cref{sec:sem-style-and-rw}.}
@@ -394,6 +397,10 @@ type |Term Gamma tau| of simply-typed $\lambda$-terms |t|,
 well-typed with type |tau| in context |Gamma|, while
 \citet{Augustsson1999exercise} define semantic domains by
 induction over types.
+\citet{Benton2012strongly} and \citet{Allais2017typeandscope}
+also discuss this approach to formalizing $\lambda$ terms, and
+discuss how to best prove various lemmas needed to reason, for
+instance, about substitution.
 
 More in general, similar approaches are becoming more common when
 using proof assistants. Our denotational semantics could be
