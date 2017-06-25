@@ -53,6 +53,10 @@ has been noticed earlier \citep{Atkey2015ILC}. However, actually
 proving ILC correct for a polymorphic language (such as System F)
 is left as future work.
 
+We also expect that from our logical relations, one might derive a logical
+\emph{partial equivalence relation} among changes, similarly to
+\cref{sec:change-equivalence}, but we leave a development for future work.
+
 Compared to earlier chapters, this one will be more technical and
 concise, because we already introduced the ideas behind both ILC
 and logical relation proofs.

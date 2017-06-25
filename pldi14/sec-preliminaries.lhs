@@ -286,9 +286,6 @@ eval(tau)|, the semantics of |c| (by \cref{req:constants}); since
 constants don't contain free variables, |evalConst(c)| does not
 depend on an environment.
 
-% We define a program equivalence across terms of the same type |t1
-% `cong` t2| to mean |eval(t1) = eval(t2)|.
-
 % \begin{definition}[Program equivalence]
 %   Take two terms |t1, t2| with the same context and type, that
 %   is, such that |Gamma /- t1 : tau| and |Gamma /- t2 : tau|. We
@@ -298,6 +295,26 @@ depend on an environment.
 % \begin{lemma}
 %   Program equivalence is indeed an equivalence relation.
 % \end{lemma}
+
+We define a program equivalence across terms of the same type |t1
+`cong` t2| to mean |eval t1 = eval t2|.
+
+\begin{restatable}[Denotational equality]{definition}{denotEqual}
+  \label{def:denot-equality}
+  We say that two terms |Gamma /- t1 : tau| and |Gamma /- t2:
+  tau| are denotationally equal, and write |Gamma //= t1 `cong` t2
+  : tau| (or sometimes |t1 `cong` t2|), if for all environments
+  |rho : eval Gamma| we have that |eval t1 rho = eval t2 rho|.
+\end{restatable}
+\begin{remark}
+  Beware that denotational equality cannot always be weakened:
+  that is, |Gamma, x : sigma //= t1 `cong` t2 : tau| does not
+  imply |Gamma //= t1 `cong` t2 : tau|. Counterexamples
+  rely on |sigma| being an empty type. For instance, we cannot weaken
+  |x : emptyTau //= 0 `cong` 1 : Int| (where |emptyTau| is an
+  empty type): this equality is only true vacuously, because
+  there exists no environment for context |x : emptyTau|.
+\end{remark}
 
 \subsection{Weakening}
 While we don't discuss our formalization of variables in full, in
@@ -352,6 +369,27 @@ judgment using \emph{order preserving embeddings}.%
   who attributes them to Conor McBride.} We refer to our
 mechanized proof for details, including auxiliary definitions and
 relevant lemmas.
+
+\subsection{Substitution}
+Some facts can be presented using (capture-avoiding) substitution
+rather than environments, and we do so at some points, so let us
+fix notation. We write |t [x := s]| for the result of
+substituting variable |x| in term |t| by term |s|.
+
+We have mostly avoided mechanizing proofs about substitution, but
+we have mechanized substitution following
+\citet{Keller2010hereditary} and proved the following
+substitution lemma:
+\begin{lemma}[Substitution lemma]
+  For any term |Gamma /- t : tau|, variable |x :
+  sigma| bound in |Gamma|, we write |Gamma - x| for the result of
+  removing variable |x| from |Gamma| (as defined by \citeauthor{Keller2010hereditary}).
+  Take term |Gamma - x /- s : sigma|, and
+  environment |rho : eval (Gamma - x)|.
+  Then, we have that substitution and evaluation commute as follows:
+  \[|eval (t [x := s]) rho = eval t (rho, x = eval s rho)|.\]
+\end{lemma}
+% subst-lemma : ∀ {σ τ Γ} (t : Term Γ τ) (x : Var Γ σ) s rho → ⟦ subst t x s ⟧Term rho ≡ ⟦ t ⟧Term (extend-env x rho (⟦ s ⟧Term rho))
 
 \subsection{Discussion: Our mechanization and semantic style}
 \label{sec:sem-style-and-rw}
