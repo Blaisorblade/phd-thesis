@@ -565,7 +565,7 @@ interested in applying |evalInc t| to valid environment changes |drho|, so
   We summarize this remark with the following definition and corollary.
 \end{remark}
 \begin{definition}[Derivatives of terms]
-  For all closed terms of function type |/- t : sigma -> tau| we call |derive t| the (term) derivative of |t|.
+  For all closed terms of function type |/- t : sigma -> tau|, we call |derive t| the (term) derivative of |t|.
 \end{definition}
 \begin{restatable}[Term derivatives evaluate to
   derivatives]{corollary}{deriveCorrectClosed}

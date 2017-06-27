@@ -307,9 +307,11 @@ We define a program equivalence across terms of the same type |t1
   |rho : eval Gamma| we have that |eval t1 rho = eval t2 rho|.
 \end{restatable}
 \begin{remark}
-  Beware that denotational equality cannot always be weakened:
+  Beware that denotational equality cannot always be strengthened
+  by dropping unused variables:
   that is, |Gamma, x : sigma //= t1 `cong` t2 : tau| does not
-  imply |Gamma //= t1 `cong` t2 : tau|. Counterexamples
+  imply |Gamma //= t1 `cong` t2 : tau|, even if |x| does not
+  occur free in either |t1| or |t2|. Counterexamples
   rely on |sigma| being an empty type. For instance, we cannot weaken
   |x : emptyTau //= 0 `cong` 1 : Int| (where |emptyTau| is an
   empty type): this equality is only true vacuously, because

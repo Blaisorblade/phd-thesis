@@ -63,7 +63,6 @@ mechanized proofs involving substitutions, but we include them
 here, even though they are not especially interesting.
 
 But first, we exemplify informally these notions.
-\pg{If this isn't a primitive, the motivation does not make sense!}
 \pg{Maybe: We have a derivative we can generate but that is inadequate,
   we need to write better ones by hand. Or: we can't derive this yet.
 Or: just change motivation.}
@@ -85,7 +84,6 @@ follows (in Haskell notation):\footnote{
   builtin list syntax, which uses |:| for cons cells.}
 \begin{code}
   data List a = Nil | Cons a (List a)
-  type Dt^(List a) = List (Dt^a)
 \end{code}
 
 A list change |dxs| is valid for source |xs| if
@@ -93,13 +91,28 @@ they have the same length and each element change is valid for
 its corresponding element.
 On this basic change structure, we can define |`oplus`| and
 |`ocompose`| but not |`ominus`|: such list changes can't express the
-difference between two lists of different lengths.
+difference between two lists of different lengths. We discuss
+product and sum types more in general in \cref{ch:prod-sums}.
 Nevertheless, this basic change structure is sufficient to define
 derivatives that act correctly on the changes that can be expressed.
+We can describe this change structure in Haskell using a
+typeclass instance for class |BasicChangeStruct| (included):
+\pg{Not the name we use elsewhere. And not the proper location.}
+\begin{code}
+class BasicChangeStruct a where
+  type Dt^a
+  oplus :: a -> Dt^a -> a
+instance BasicChangeStruct (List a) where
+  type Dt^(List a) = List (Dt^a)
+  Nil `oplus` Nil = Nil
+  (Cons x xs) `oplus` (Cons dx dxs) = Cons (x `oplus` xs) (dx `oplus` dxs)
+  _ `oplus` _ = Nil
+\end{code}
 
 The following |dmap| function is a derivative for the
-standard |map| function (included for comparison). We defer to
-\cref{sec:general-recursion} discussion of how to generate such derivatives.
+standard |map| function (included for comparison) and the given
+change structure. We discuss derivatives for recursive functions
+in \cref{sec:general-recursion}.
 % We can write a standard |map| function on this list, and also its derivative |dmap| as follows:
 % If we define |map : List a -> List a| as a primitive, and not as
 % a derived function defined in terms of some other primitive, we
@@ -110,21 +123,57 @@ map f Nil = Nil
 map f (Cons x xs) = Cons (f x) (map f xs)
 
 dmap : (a -> b) -> Dt^(a -> b) -> List a -> Dt^List a -> Dt^List b
+-- A valid list change has the same length as the base list:
 dmap f df Nil Nil = Nil
 dmap f df (Cons x xs) (Cons dx dxs) =
   Cons (df x dx) (dmap f df xs dxs)
+-- Remaining cases deal with invalid changes, and a dummy
+-- result is sufficient.
+dmap f df xs dxs = Nil
 \end{code}
-In the equation for cons nodes |Cons x xs|, change |dx| describes
-the change between |x| and |x `oplus` dx|, and |df x dx|
-describes the change between |f x| and |f (x `oplus` dx)|.
-So, by induction on the length of |xs| and |dxs|, one can show
-that |dmap f df xs dxs| describes the change between |map f xs|
-and |map (f `oplus` df) (xs `oplus` dxs)|. And as a consequence,
-terms |map (f `oplus` df) (xs `oplus` dxs)| and |map f xs `oplus`
-dmap f df xs dxs| are interchangeable in all valid contexts, that
-is, contexts that bind |df| and |dxs| to valid changes,
-respectively, for |f| and |xs|.
 \end{example}
+
+In our example, one can show that |dmap| is a correct derivative
+for |map|. As a consequence, terms |map (f `oplus` df) (xs
+`oplus` dxs)| and |map f xs `oplus` dmap f df xs dxs| are
+interchangeable in all valid contexts, that is, contexts that
+bind |df| and |dxs| to valid changes, respectively, for |f| and
+|xs|.
+
+ We sketch an informal proof directly on terms.
+\begin{proof}[Proof sketch]
+We must show that |dy = dmap f df xs dxs| is a change change from
+initial output |y1 = map f xs| to updated output |y2 = map (f
+`oplus` df) (xs `oplus` dxs)|, for valid inputs |df| and |dxs|.
+
+We proceed by structural induction on |xs| and |dxs| (technically, on a
+proof of validity of |dxs|). Since |dxs| is valid, those two
+lists have to be of the same length. If |xs| and |dxs| are both
+empty, |y1 = dy = y2 = Nil| so |dy| is a valid change as required.
+
+For the inductive step, both lists are |Cons| nodes, so we need
+to show that output change
+\[|dy = dmap f df (Cons x xs) (Cons dx dxs)|\]
+is a valid change from
+\[|y1 = map f (Cons x xs)|\] to
+\[|y2 = map (f `oplus` df) (Cons (x `oplus` dx) (xs `oplus`
+dxs))|.\]
+
+To restate validity we name heads and tails of |dy, y1, y2|.
+If we write |dy = Cons dh dt|, |y1 = Cons h1 t1| and |y2 = Cons
+h2 t2|, we need to show that |dh| is a change from |h1| to |h2|
+and |dt| is a change from |t1| to |t2|.
+
+Indeed, head change |dh = df x dx| is a valid change from
+|h1 = f x| to |h2 = f (x `oplus` dx)|.
+And tail change |dt = dmap f df xs dxs| is a valid change from |t1 = map f xs| to
+|t2 = map (f `oplus` df) (xs `oplus` dxs)| by
+induction. Hence |dy| is a valid change from |y1| to |y2|.
+\end{proof}
+Hopefully this proof is already convincing, but it relies on
+undefined concepts. On a metalevel function, we could already
+make this proof formal, but not so on terms yet. In this section,
+we define the required concepts.
 
 \subsection{Denotational equality for valid changes}
 \label{sec:denot-equality-valid}
@@ -200,9 +249,18 @@ valid change, its source and destination. Formally:
   leaving everything else implicit when not important.
 \end{notation}
 
-Using syntactic validity, we can show for instance that |dx| is a change
-from |x| to |x `oplus` dx|. In general, we have:
-\begin{lemma}[|`oplus`| agrees with syntactic validity]
+Using syntactic validity, we can show for instance that |dx| is a
+change from |x| to |x `oplus` dx|, that |df x dx| is a change
+from |f x| to |(f `oplus` df) (x `oplus` dx)|; both examples
+follow from a general statement about |derive|
+(\cref{thm:derive-correct-syntactic}). Our earlier informal proof
+of the correctness of |dmap| (\cref{ex:syn-changes-map}) can also
+be justified in terms of syntactic validity.
+
+Just like (semantic) |`oplus`| agrees with validity, term-level
+(or syntactic) |`oplus`| agrees with syntactic validity, up to
+denotational equality for valid changes.
+\begin{lemma}[Term-level |`oplus`| agrees with syntactic validity]
 If |dt| is a change from |t1| to |t2| (|fromtosyn Gamma tau t1 dt
 t2|) then |t1 `oplus` dt| and |t2| are denotationally equal for
 valid changes (|Dt^Gamma //= t1 `oplus` dt `congDt` t2 : tau|).
@@ -236,6 +294,44 @@ why we have that |dx| is a change from |x| to |x `oplus` dx|
 while |eval dx| is a valid change from |eval x| to |eval x|
 (where the destination |eval x| gets applied to environment |rho2|).
 
+\paragraph{Is syntactic validity trivial?}
+Without needing syntactic validity, based on earlier chapters one
+can show that
+|dv| is a valid change from |v| to |v `oplus` dv|, or that |df v
+dv| is a valid change from |f v| to |(f `oplus` df) (v `oplus`
+dv)|, or further examples.
+But that's all about values. In this section we are just translating these
+notions to the level of terms, and formalize them.
+
+Our semantics is arguably (intuitively) a trivial one, similar to
+a metainterpreter interpreting object-language functions in terms of
+metalanguage functions: our semantics simply embeds an
+object-level $\lambda$-calculus into a meta-level and more
+expressive $\lambda$-calculus, mapping for instance |\f x -> f x|
+(an AST) into |\f v -> f v| (syntax for a metalevel function).
+Hence, proofs in this section about syntactic validity deal
+mostly with this translation. We don't expect the proofs to give
+special insights, and we expect most development would keep such
+issues informal (which is certainly reasonable).
+
+Nevertheless, we write out the statements to help readers refer
+to them, and write out (mostly) full proofs to help ourselves
+(and readers) verify them. Proofs are mostly standard but
+with a few twists, since we must often consider and relate
+\emph{three} computations: the computation on initial values and
+the ones on the change and on updated values.
+
+We're also paying a proof debt. Had we used substitution and
+small step semantics, we'd have directly simple statements on terms,
+instead of trickier ones involving terms and environments. We
+produce those statements now.
+% \emph{except} that
+% we must always require and propagate validity of changes, or
+% substitute variables producing initial values |xi| with terms
+% producing updated values
+% updated values |xi `oplus` dxi|.
+
+\subsubsection{Differentiation and syntactic validity}
 We can also show that |derive t| produces a syntactically valid
 change from |t|, but we need to specify its destination.
 In general, |derive t| is not a change from |t| to |t|. The
@@ -284,8 +380,14 @@ Here's the technical lemma to complete the proof.
   \[|eval t[Gamma := Gamma `oplus` Dt^Gamma] drho = eval t (rho1 `oplus` drho)|.\]
 \end{lemma}
 \begin{proof}
-  We can show the thesis by induction over environments: in the empty
-  case the two sides become equal. For the case of |Gamma, x :
+  This follows from the structure of valid environment changes,
+  because term-level |`oplus`| (used on the left-hand side) agrees with
+  value-level |`oplus`| (used on the right-hand side) by
+  \cref{lem:chops-coherent}, and because of the substitution lemma.
+
+  More formally, we can show the thesis by induction over environments:
+  for empty environments, the equations reduces to |eval t
+  emptyRho = eval t emptyRho|. For the case of |Gamma, x :
   sigma| (where $x \not\in \Gamma$), the thesis can be rewritten as
   \[
     |eval
@@ -297,30 +399,22 @@ Here's the technical lemma to complete the proof.
 \begin{equational}
   \begin{code}
    eval ((t[Gamma := Gamma `oplus` Dt^Gamma])[x := x `oplus` dx]) (drho, x = v1, dx = dv)
-=  {- substitution lemma on |x| -}
+=  {- Substitution lemma on |x|. -}
    eval ((t[Gamma := Gamma `oplus` Dt^Gamma])) (drho, x = (eval (x `oplus` dx) (drho, x = v1, dx = dv)), dx = dv)
-=  {- term-level |`oplus`| agrees with |`oplus`|
-      (\cref{lem:chops-coherent}), then simplify |eval x| and |eval dx| -}
+=  {- Term-level |`oplus`| agrees with |`oplus`|
+      (\cref{lem:chops-coherent}). -}
+   {- Then simplify |eval x| and |eval dx|. -}
    eval ((t[Gamma := Gamma `oplus` Dt^Gamma])) (drho, x = v1 `oplus` dv, dx = dv)
-=  {- |t| does not mention |dx|, so we can replace its value to have
-      a valid environment change -}
+=  {- |t[Gamma := Gamma `oplus` Dt^Gamma]| does not mention |dx|. -}
+   {- So we can modify the environment entry for |dx|. -}
+   {- This makes the environment into a valid environment change. -}
    eval ((t[Gamma := Gamma `oplus` Dt^Gamma])) (drho, x = v1 `oplus` dv, dx = nil(v1 `oplus` dv))
-=  {- by applying the induction hypothesis and simplifying |nilc| away -}
+=  {- By applying the induction hypothesis and simplifying |nilc| away. -}
    eval t (rho1 `oplus` drho, x = v1 `oplus` dv)
   \end{code}
 \end{equational}
 \end{proof}
-% evaluate to equal
-% results in any valid change environment |drho|.
-\pg{lemma! or start making all these facts?}
-\pg{introduce contextual equivalence in valid environment changes.}
 
-We can also do the reasoning in earlier
-example \cref{ex:syn-changes-map}.\pg{check}
-\pg{Made this up, check and show this.}
-\pg{continue}
-
-\pg{Define change structures on terms?}
 % \paragraph{Discussion}
 % We defined earlier a change structure on the domain of the
 % \emph{denotations} of terms, that is |eval Gamma -> eval tau|.
@@ -469,8 +563,6 @@ example \cref{ex:syn-changes-map}.\pg{check}
 
 \section{Change equivalence}
 \label{sec:change-equivalence}
-\pg{We can use based changes. Better not.}
-
 To optimize programs manipulate changes, we often want to replace a
 change-producing term by another one, while preserving the overall program
 meaning. Hence, we define an equivalence on valid changes that is preserved by
@@ -520,6 +612,7 @@ reflexive on changes valid for source |v|. Using the set-theoretic concept of
 subset we can then state the following lemma (whose proof we omit as it is
 brief):
 \begin{lemma}[|`doe`| is an equivalence on valid changes]
+  \label{doe:equiv-valid}
   For each set |V| and source |v `elem` V|, change equivalence
   relative to source |v| is an equivalence relation over the set
   of changes $\{|dv `elem` Dt^V `such` dv| \text{ is valid with source } |v|\}$.
@@ -608,52 +701,90 @@ for all |fromto Gamma rho1 (drhoa `doe` drhob) rho2| we have
   both changes |drhoa| and |drhob|.
 \end{proof}
 
-To show more formally in what sense change equivalence is a congruence, we first
-lift it to terms:
-\begin{definition}[Term change equivalence]
-Two change terms |Dt^Gamma /- dta : Dt^tau|, |Dt^Gamma /- dtb :
+To show more formally in what sense change equivalence is a
+congruence, we first lift it to terms, similarly to syntactic
+change validity in \cref{sec:denot-syntactic-validity}.
+
+\begin{definition}[Syntactic change equivalence]
+Two change terms |Dt^Gamma /- dta : Dt^tau| and |Dt^Gamma /- dtb :
 Dt^tau| are change equivalent, relative to source |Gamma /- t :
-tau|, if for all |fromto Gamma rho1 drho rho2| we have that |eval
-dta drho (doeIdx(eval t rho1)) (eval dtb drho)|. We write then |dta
-(doeIdx t) dtb| or simply |dta `doe` dtb|.
+tau|, if for all valid environment changes
+|fromto Gamma rho1 drho rho2| we have that
+\[|from tau (eval t rho1) (eval dta drho `doe` eval dtb drho)|.\]
+We write then
+|fromsyn Gamma tau t (dta `doe` dtb)|
+or |dta (doeIdx t) dtb|, or simply |dta `doe` dtb|.
 %|fromto tau v1 (dv1 `doe` dv2) v2|,
 \end{definition}
-Saying that |dta| and |dtb| are equivalent relative to |t| does not specify the destination of |dta| and |dtb|, only their source.
-% Unlike in other similar definition, when changes |dta| and |dtb| are equivalent
-% relative to |t| and given equivalent contexts |fromto Gamma rho1 drho rho2|,
-% they need
-% The equivalence of |dta| and |dtb| relative to |t| does not
-% require that the destination is again |t|.
-\pg{Use \cref{def:syntactic-validity} to also state the destination.}
-\pg{Introduce this earlier}
+Saying that |dta| and |dtb| are equivalent relative to |t| does
+not specify the destination of |dta| and |dtb|, only their
+source. The only reason is to simplify the statement and proof of
+\cref{thm:derive-preserve-doe}.
+
+\begin{notation}[One-sided validity]
+  We write |from V v1 dv| to mean there exists |v2| such that
+  |fromto V v1 dv v2|. We will reuse existing conventions and
+  write |from tau v1 dv| instead of |from (eval tau) v1 dv|
+  and |from Gamma rho1 drho| instead of |from (eval Gamma) rho1 drho|.
+\end{notation}
+% If there exists a destination and we want to specify it,
+% we can use the following stronger definition:
+% \begin{definition}[Syntactic change equivalence, two sided]
+% Two change terms |Dt^Gamma /- dta : Dt^tau| and |Dt^Gamma /- dtb :
+% Dt^tau| are change equivalent, from source |Gamma /- t1 :
+% tau| to destination |Gamma /- t2 : tau|, if for all |fromto Gamma rho1 drho rho2| we have that
+% \[|fromto V (eval t1 rho1) (eval dta drho `doe` eval dtb drho)
+%   (eval t2 rho2)|\]
+% %\[|eval dta drho|\, |(doeIdx(eval t rho1))| |eval dtb drho|.\]
+% We write then \[|fromtosyn Gamma tau t1 (dta `doe` dtb) t2|.\]
+% %|fromto tau v1 (dv1 `doe` dv2) v2|,
+% \end{definition}
+% \begin{fact}
+%   Two-sided change equivalence implies source-only change
+%   equivalence: if
+% \[|fromtosyn Gamma tau t1 (dta `doe` dtb) t2|\] then
+% |dta (doeIdx t1) dtb|.
+% \end{fact}
+
+% % Unlike in other similar definition, when changes |dta| and |dtb| are equivalent
+% % relative to |t| and given equivalent contexts |fromto Gamma rho1 drho rho2|,
+% % they need
+% % The equivalence of |dta| and |dtb| relative to |t| does not
+% % require that the destination is again |t|.
+% \pg{Use \cref{def:syntactic-validity} to also state the destination.}
+% \pg{Introduce this earlier}
 
 If two change terms are change equivalent with respect to the
-right source, we can replace one for the other to optimize a
-program, as long as the evaluation context is validity-preserving and accepts
-the change.
+right source, we can replace one for the other in an expression
+context to optimize a program, as long as the expression context
+is validity-preserving and accepts the change.
 
-In particular, we can substitute equivalent changes in the terms resulting from
-differentiation and produce equivalent changes.
-\pg{broken theorem}
-\pg{also maybe arises from earlier theorems?}
-\begin{theorem}
+In particular, substituting into |derive t| preserves syntactic
+change equivalence, according to the following theorem (for which
+we have only a pen-and-paper formal proof).
+\begin{theorem}[|derive| preserves syntactic change equivalence]
   \label{thm:derive-preserve-doe}
-% If |Gamma, x : sigma /- t : tau| and |dsa `doeIdx(s)` dsb|, then |fromtosyn
-% Gamma tau t ((derive t)[x := s, dx := dsa] `doe` (derive t)[x := s, dx := dsa])
-% t|.
-If |Gamma, x : sigma /- t : tau| and
-\[|fromtosyn Gamma sigma s1 (dsa `doe` dsb) s2|\]
-then
-\[|fromtosyn Gamma tau (t [x := ]) ((derive t)[x := s, dx := dsa] `doe` (derive t)[x :=
-s, dx := dsb]) t|.\]
+  For any equivalent changes |fromsyn Gamma
+  sigma (dsa `doe` dsb) s|, and for any term |t| typed as
+  |Gamma , x : sigma /- t : tau|,
+  we can produce equivalent results by substituting into |derive
+  t| either |s| and |dsa| or |s| and |dsb|:
+\[|fromsyn Gamma tau (t [x := s]) ((derive t)[x := s, dx := dsa] `doe` (derive t)[x := s, dx := dsb])|.\]
 \end{theorem}
-We have not mechanized this lemma.
 \begin{proof}
+  Assume |fromto Gamma rho1 drho rho2|.
+
+  The thesis holds because |derive| preserves change equivalence
+  \cref{lem:eval-derive-preserve-doe}.
+  A formal proof follows through routine (and entirely tedious)
+  manipulations of bindings. In essence, we can extend |drho| to
+  equivalent environment changes for context |Gamma , x : sigma|
+  with the values of |dsa| and |dsb|. The tedious calculations
+  follow.
+
   % A corollary of \cref{lem:eval-derive-preserve-doe} and of a substitution lemma
   % relating substitution and denotational semantics: |eval (t) (x = eval s rho,
   % rho) = eval(t [x := s]) rho|.
-
-  Assume |fromto Gamma rho1 (drhoa `doe` drhob) rho2|.
 
   Because |dsa| and |dsb| are change-equivalent we have
   % By definition of |dsa (doeIdx(s)) dsb| we have that
@@ -661,71 +792,71 @@ We have not mechanized this lemma.
   %
   % Because |`oplus`| respects validity also syntactically \pg{?}
   % we can show that |dsa, dsb| have destination |s `oplus` dsa|, that is
-  \[|fromto sigma (eval s rho1) (eval dsa drho `doe` eval dsb drho) (eval (s
-  `oplus` ds) rho1)|.\]
+  \[|from sigma (eval s rho1) (eval dsa drho `doe` eval dsb drho)|.\]
+  Moreover, |eval s rho1 = eval s drho| because |drho| extends
+  |rho1|. We'll use this equality without explicit mention.
+  % \[|fromto sigma (eval s rho1) (eval dsa drho `doe` eval dsb drho) (eval (s `oplus` ds) rho1)|.\]
+  % \[| (eval dsa drho) (doeIdx(eval s rho1)) (eval dsb drho) |.\]
 
   Hence, we can construct change-equivalent environments for
   evaluating |derive t|, by combining |drho| and the values of
   respectively |dsa| and |dsb|:
   \begin{multline}
-  |fromto (Gamma, x : sigma)
+  |from ((Gamma, x : sigma))
   ((rho1, x = eval s rho1))
-  ((drho, x = eval s rho1, dx = eval dsa drho)
-   `doe`
-   (drho, x = eval s rho1, dx = eval dsb drho) ^^^)
-   ((rho2, x = eval (s `oplus` dsa) rho1))|.
+  ((drho, x = eval s drho, dx = eval dsa drho)
+   `doe` ^^^
+   (drho, x = eval s drho, dx = eval dsb drho) ^^^) |.
   \end{multline}
-  This environment change equivalence is respected by |derive|, hence:
+  This environment change equivalence is respected by |derive t|, hence:
   \begin{multline}
     \label{eq:derive-preserve-doe-1}
-  |fromto (Gamma -> tau)
+  |from (Gamma -> tau)
     (eval t (rho1, x = eval s rho1))
-    (eval (derive t) (drho, x = eval s rho1, dx = eval dsa drho)
-     `doe`
-     eval (derive t) (drho, x = eval s rho1, dx = eval dsb drho)^^^)
-    (eval t (rho2, x = eval (s `oplus` dsa) rho1))|.
+    (eval (derive t) (drho, x = eval s drho, dx = eval dsa drho)
+     `doe` ^^^
+     eval (derive t) (drho, x = eval s drho, dx = eval dsb drho)^^^) |.
   \end{multline}
   We want to deduce the thesis by applying to this statement the substitution
   lemma for denotational semantics:
   |eval t (rho, x = eval s rho) = eval(t [x := s]) rho|.
 
-  To be able to apply the substitution lemma for the substitution
-  of |x| in next step, we must adjust \cref{eq:derive-preserve-doe-1}: using
-  soundness of weakening and the fact that |drho| extends |rho1|,
-  we replace some occurrences of |rho1| with bigger environments
-  containing |drho|.
-  We get:
+  To apply the substitution lemma to the substitution of |dx|, we
+  must adjust \cref{eq:derive-preserve-doe-1} using soundness of
+  weakening. We get:
   \begin{multline}
     \label{eq:derive-preserve-doe-2}
-  |fromto (Gamma -> tau)
+  |from (Gamma -> tau)
     (eval t (rho1, x = eval s rho1))
     (eval (derive t) (drho, x = eval s drho, dx = eval dsa (drho, x = eval s drho))
      `doe` ^^^
-     eval (derive t) (drho, x = eval s drho, dx = eval dsb (drho, x = eval s drho))^^^)
-    (eval t (rho2, x = eval (s `oplus` dsa) rho1))|.
+     eval (derive t) (drho, x = eval s drho, dx = eval dsb (drho, x = eval s drho))^^^) |.
   \end{multline}
 
   This equation can now be rewritten (by applying the
-  substitution lemma twice) to the following one:
+  substitution lemma to the substitutions of |dx| and |x|) to the following one:
 
   \begin{multline}
     \label{eq:derive-preserve-doe-3}
-  |fromto (Gamma -> tau)
+  |from (Gamma -> tau)
     (eval (t [x := s]) rho1)
     (eval ((derive t)[dx := dsa][x := s]) drho
      `doe` ^^^
-     eval ((derive t)[dx := dsb][x := s]) drho^^^)
-    (eval t (rho2, x = eval (s `oplus` dsa) rho1))|.
+     eval ((derive t)[dx := dsb][x := s]) drho^^^) |.
   \end{multline}
-  \pg{Nice, the environments don't match in the end :-)!}
 
-\[|fromtosyn Gamma tau t ((derive t)[x := s, dx := dsa] `doe` (derive t)[x :=
-s, dx := dsb]) t|.\]
+  Since |x| is not in scope in |s, dsa, dsb|, we can permute
+  substitutions to conclude that:
+\[|fromsyn Gamma tau (t[x:=s])
+  ((derive t)[x := s, dx := dsa] `doe`
+   (derive t)[x := s, dx := dsb])|\]
+as required.
 \end{proof}
 In this theorem, if |x| appears once in |t|, then |dx| appears once in |derive
 t| (this follows by induction on |t|), hence |(derive t)[x := s, dx := param]|
 produces a one-hole expression context.
 
+\paragraph{Further validity-preserving contexts}
 There are further operations that preserve validity. To represent terms with
 ``holes'' where other terms can be inserted, we can define \emph{one-level
 contexts} |F|, and contexts |E|, as is commonly done:
@@ -742,7 +873,6 @@ unable to state a more general theorem because it's not clear how to formalize
 the notion of a context accepting a change in general: the syntax of a context
 does not always hint at the validity proofs embedded.
 
-
 \pg{explain this type system elsewhere}
 \citet{CaiEtAl2014ILC} solve this problem for metalevel contexts by typing them
 with dependent types. However, it is not clear such a typesystem can be
@@ -753,12 +883,66 @@ correct (for instance in Agda): the typechecker will complain that |dv1| has
 destination |v1 `oplus` dv1| while |dv2| has source |v2|. When working in Agda,
 to solve this problem we can explicitly coerce terms through propositional
 equalities, and can use Agda to prove such equalities in the first place.
-Formalizing an object language including such facilities is highly nontrivial.
+Formalizing an object language including such facilities is not trivial.
+
+\subsection{Sketching an alternative syntax}
+If we exclude composition, we can sketch an alternative syntax
+which helps construct a congruence on changes.
+The idea is to manipulate, instead of changes alone, pairs of
+sources |v `elem` V| and valid changes $\{| dv `such` from V v dv |\}$.
+\pg{Move notation for one-sided validity.}
+%{
+%format src = "\mathbf{src}"
+%format dst = "\mathbf{dst}"
+\begin{code}
+  t ::= src dt | dst dt | x | t t | \x -> t
+  dt ::= dt dt | src dt | \dx -> dt | dx
+\end{code}
+%}
+Adapting differentiation to this syntax is easy:
+\begin{code}
+  derive x = dx
+  derive (s t) = derive s (derive t)
+  derive(\x -> t) = derive(\dx -> dt)
+\end{code}
+Derivatives of
+primitives only need to use |dst dt| instead of |t `oplus` dt|
+and |src dt| instead of |t| whenever |dt| is a change for |t|.
+
+With this syntax, we can define change expression contexts, which
+can be filled in by change expressions:
+
+\begin{code}
+  E ::= src dE | dst dE | E t | t E | \x -> E
+  dE ::= dt dE | dE dt | \dx -> dE | []
+\end{code}
+
+We conjecture change equivalence is a congruence with respect to
+contexts |dE|, and that contexts |E| map change-equivalent
+changes to results that are denotationally equivalent for valid
+changes. We leave a proof to future work, but we expect it to be
+straightforward. It also appears straightforward to provide an
+isomorphism between this syntax and the standard one.
+
+However, extending such contexts with composition does not appear
+trivial: contexts such as |dt `ocompose` dE| or |dE `ocompose`
+dt| only respect validity when the changes sources and
+destinations align correctly.
+
+We make no further use of this alternative syntax in this work.
 
 \subsection{Change equivalence is a PER}
 \label{sec:doe-per}
 Readers with relevant experience will recognize that change
-equivalence is a partial equivalence relation (PER):
+equivalence is a partial equivalence relation (PER)~\citep[Ch.
+5]{Mitchell1996foundations}. It is standard to use PERs to
+identify valid elements in a
+model~\citep{Harper1992constructing}. In this section, we state
+the connection, showing that change equivalence is not an ad-hoc
+construction, so that mathematical constructions using PERs can
+be adapted to use change equivalence.
+
+We recall the definition of a PER:
 \begin{definition}[Partial equivalence relation (PER)]
   A relation $R \subseteq S \times S$ is a partial equivalence
   relation if it is symmetric (if $a R b$ then $b R a$) and
@@ -766,38 +950,56 @@ equivalence is a partial equivalence relation (PER):
 \end{definition}
 Elements related to another are also related to themselves: If
 $aRb$ then $aRa$ (by transitivity: $aRb$, $bRa$, hence $aRa$). So
+a PER on |S| identifies a subset of valid elements of |S|. Since
+PERs are equivalence relations on that subset, they also induce a
+(partial) partition of elements of |S| into equivalence classes
+of change-equivalent elements.
 
 \begin{lemma}[|`doe`| is a PER]
-  Change equivalence on set |Dt^A| relative to a source |a : A|
-  is a PER.
+  Change equivalence relative to a source |a : A| is a PER on set |Dt^A|.
 \end{lemma}
-
-It is standard to use PERs to identify valid elements in a
-model~\citep{Harper1992constructing}.
-\pg{Any needed lemmas.}
+\begin{proof}
+A restatement of \cref{doe:equiv-valid}.
+\end{proof}
 
 Typically, one studies \emph{logical PERs}, which are logical
 relations and PERs at the same time~\citep[Ch. 8]{Mitchell1996foundations}.
 In particular, with a logical PER two functions are related if they map related
 inputs to related outputs. This helps showing that a PERs is a congruence.
-Luckily, our PER is equivalent to such a standard definition.
+Luckily, our PER is equivalent to such a definition.
 
 \begin{lemma}[Alternative definition for |`doe`|]
 Change equivalence is equivalent to the following logical relation:
 \begin{code}
   fromto iota v1 (dva `doe` dvb) v2            `eqdef`
-    fromto iota v1 dva v2 `and` fromto iota v1 dva v2
+    fromto iota v1 dva v2 `wand` fromto iota v1 dva v2
   fromto (sigma -> tau) f1 (dfa `doe` dfb) f2  `eqdef`
     forall (fromto sigma v1 (dva `doe` dvb) v2).
     fromto tau (f1 v1) (dfa v1 dva `doe` dfb v2 dvb) (f2 v2)
 \end{code}
 \end{lemma}
+\begin{proof}
+  By induction on types.
+\end{proof}
 
+% A limitation of our PERs is that, compared to more typical
+% examples, our PERs are constructed over an existing type system
+% in the meta-theory (a semantics for simply-typed
+% $\lambda$-calculus, together with separate domains for each
+% type), rather than a partial combinatory algebra containing codes
+% for all values.
+% Since ILC can be proved correct also for untyped languages
+% (\cref{sec:silr-untyped-proof}), it's unce
 
-\section{Discussion}
-In this section we discuss our proof and compare it with alternative proof
-approaches.
+\section{Chapter conclusion}
+\label{sec:term-reasoning-concl}
+In this chapter, we have put on a more solid foundation
+forms of reasoning about changes on terms, and defined an
+appropriate equivalence on changes.
 
+\chapter{Stuff}
+In this chapter, we relate our formalization of changes with the one by
+\citet{CaiEtAl2014ILC} in \cref{sec:alt-change-validity}.
 \pg{We have proved equivalence with the one-sided definition of validity.}
 \subsection{Alternative definitions of change validity}
 \label{sec:alt-change-validity}
@@ -1346,4 +1548,149 @@ s - c$ which isn't constant, so there can be no such |h|.
 
 \section{General recursion}
 \label{sec:general-recursion}
-\pg{write, and put somewhere}
+\pg{write, and put somewhere. Use the example with |map| on lists.}
+
+This section discusses informally how to differentiate terms
+using general recursion and what is the behavior of the resulting terms.
+
+\subsection{Differentiating general recursion}
+%format letrec = "\mathbf{letrec}"
+%format fix = "\mathbf{fix}"
+
+Earlier we gave a rule for deriving (non-recursive) |lett|:
+\begin{code}
+derive(lett x = t1 in t2) =
+  lett  x = t1
+        dx = derive(t1)
+  in    derive(t2)
+\end{code}
+It turns out that we can use the same rule also for recursive
+|lett|-bindings, which we write here |letrec| for clarity:
+\begin{code}
+derive(letrec x = t1 in t2) =
+  lett  x = t1
+        dx = derive(t1)
+  in    derive(t2)
+\end{code}
+
+\pg{Reorganize. This order makes no sense.}
+\begin{example}
+  In \cref{ex:syn-changes-map} we presented a derivative for
+  |map|.
+  We now rewrite |map| using fixpoint combinators and derive the
+  |dmap| applying the rule for deriving |fix|.
+% \begin{code}
+% map f = fix go
+%   where
+%     go self Nil = Nil
+%     go self (Cons x xs) = Cons (f x) (self xs)
+% \end{code}
+
+% Applying the derivation rules, we get that
+% |dmap f df = fix ((derive go) (fix go))|,
+% and since |fix go = map f| we can write:
+% \begin{code}
+% dmap f df = fix (dgo (map f))
+%   where
+%     dgo self dself Nil Nil = Nil
+%     dgo self dself (Cons x xs) (Cons dx dxs) =
+%       Cons (df x dx) (dself xs dxs)
+% \end{code}
+We can finally show that
+\begin{code}
+dmap f df Nil Nil = Nil
+dmap f df (Cons x xs) (Cons dx dxs) =
+  Cons (df x dx) (dmap f df xs dxs)
+\end{code}
+\end{example}
+
+\subsection{Justification}
+However, we justify this rule using fixpoint operators.
+
+Let's consider STLC extended with a family of standard fixpoint
+combinators $\Varid{fix}_{|tau|}|: (tau -> tau) -> tau|$, with
+|fix|-reduction defined by equation |fix f -> f (fix f)|; we
+search for a definition of |derive (fix f)|.
+
+Using informal equational reasoning, if a correct definition of
+|derive (fix f)| exists, it must be
+\begin{code}
+  derive (fix f) = fix ((derive f (fix f)))
+\end{code}
+\pg{use |`cong`|?}
+
+We can proceed as follows:
+% We recall that the derivative of a closed term is its nil change.
+\begin{equational}
+\begin{code}
+   derive (fix f)
+=  {- imposing that |derive| respects |fix|-reduction here -}
+   derive (f (fix f))
+=  {- using rules for |derive| on application -}
+   (derive f) (fix f) (derive (fix f))
+\end{code}
+\end{equational}
+
+This is a recursive equation in |derive (fix f)|, so we can try
+to solve it using |fix| itself:
+\begin{code}
+  derive (fix f) = fix (\dfixf -> (derive f (fix f) dfixf))
+\end{code}
+
+Indeed, this rule gives a correct derivative.
+Formalizing our reasoning using denotational semantics would
+presumably require the use of domain theory. We leave
+such a formalization for future work.
+However, we do prove correct a variant of |fix| in
+\cref{ch:bsos}, but using operational semantics.
+
+% In particular
+% \begin{code}
+%    derive (fix (\ff -> t))
+% =
+%    fix (\dff -> (derive (\ff -> t) (fix (\ff -> t)) dff))
+% =
+%    fix (\dff -> derive t [ff := fix (\ff -> t)])
+% \end{code}
+
+% % |let ffact = fix (\ffact n -> n * ffact (n - 1)) in t2 =
+% % letrec ffact = \n -> n * ffact (n - 1) in t2|
+% % |
+% % This rule is equivalent
+
+% We can also derive the rule for |letrec|, based on this rewrite rule:
+% |let ff = fix (\ff -> t) in t2 = letrec ff = t in t2|.
+% We proceed as follows:
+% \begin{equational}
+% \begin{code}
+%    derive(letrec ff = t in t2)
+% =  {- -}
+%    derive(lett ff = fix (\ff -> t) in t2)
+% =  {- deriving |let| -}
+%    let
+%      ff   = fix (\ff -> t)
+%      dff  = derive (fix (\ff -> t))
+%    in derive t2
+% =  {- deriving |fix| -}
+%    let
+%      ff   = fix (\ff -> t)
+%      dff  = fix (\dff -> derive t [ff := (fix (\ff -> t))])
+%    in derive t2
+% =  {- deinline binding of |ff| -}
+%    let
+%      ff   = fix (\ff -> t)
+%      dff  = fix (\dff -> derive t)
+%    in derive t2
+% =  {- |let| to |letrec| -}
+%    letrec
+%      ff   = t
+%    in let
+%      dff  = fix (\dff -> derive t)
+%    in derive t2
+% =  {- |let| to |letrec| -}
+%    letrec
+%      ff   = t
+%      dff  = derive t
+%    in derive t2
+% \end{code}
+% \end{equational}
