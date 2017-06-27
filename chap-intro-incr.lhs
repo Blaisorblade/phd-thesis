@@ -295,6 +295,9 @@ preserves types: That is, if an old value |v1| has type |tau|,
 then also its corresponding new value |v2| must have type |tau|.
 To each type |tau| we associate a type of changes or \emph{change type}
 |Dt^tau|: a change between |v1| and |v2| must be a value of type |Dt^tau|.
+Similarly, environments can change: to typing context |Gamma| we associate
+change typing contexts |Dt^Gamma|, such that we can have an environment change
+|drho : eval(Dt^Gamma)| from |rho1 : eval(Gamma)| to |rho2 : eval(Gamma)|.
 
 Not all descriptions of changes are meaningful,
 so we also talk about \emph{valid} changes.
@@ -449,19 +452,18 @@ differentiating term |t|. We apply |derive| on terms of our non-incremental
 programs or \emph{base terms}, such as |grand_total|. To define differentiation,
 we assume that we already have derivatives for primitive functions they use; we
 discuss later how to write such derivatives by hand.
-%
-\pg{Move this below, after we explain the case for functions.}
-Differentiation only produces derivatives on closed terms of function type, in short
-``functions'', but it is defined as a structurally recursive program
-transformation, hence it is also defined on open terms.
 
 A derivative of a function can be applied to initial inputs and changes from initial
 inputs to updated inputs, and returns a change from an initial output to an
-updated output. For instance, for derivative |dgrand_total|, initial inputs
+updated output. For instance, take derivative |dgrand_total|, initial inputs
 |xs1| and |ys1|, and changes |dxs| and |dys| from initial inputs to updated
-inputs, change |dgrand_total xs1 dxs ys1 dys| (that is |ds|) goes from initial
-output |grand_total xs1 ys1| (that is |s1|) to updated output |grand_total xs2
-ys2| (that is |s2|).
+inputs. Then, change |dgrand_total xs1 dxs ys1 dys|, that is |ds|, goes from initial
+output |grand_total xs1 ys1|, that is |s1|, to updated output |grand_total xs2
+ys2|, that is |s2|. And because |ds| goes from |s1| to |s2|, it follows as a
+corollary that |s2 = s1 `oplus` ds|. Hence, we can compute |s2| incrementally
+through |s1 `oplus` ds|, as we have shown, rather than by evaluating
+|grand_total xs2 ys2|.
+
 We often just say that a derivative
 of function |f| maps changes to the inputs of |f| to changes to the outputs of
 |f|, leaving the initial inputs implicit. In short:
@@ -473,8 +475,7 @@ of function |f| maps changes to the inputs of |f| to changes to the outputs of
   applied on old inputs to |t| applied on new inputs.
 \end{restatable}
 
-Since |ds| is a valid change from |s1| to |s2|, it follows as a corollary that
-|s2 = s1 `oplus` ds|, and this equation justifies incrementalization. For a
+For a
 generic unary function |f|, this corollary can be stated as:
 \begin{equation}
   % \label{eq:derivative-requirement}
@@ -491,8 +492,10 @@ where we use |`cong`| to mean denotational equality (that is, |t1
 `cong` t2| if and only if |eval(t1) = eval(t2)|), and where |da| is a valid
 change from |a1| to |a2| (and |f, a1, a2| have compatible types).
 But |(derive f) a1 da| is also a valid change, a fact not captured by these equations.
-We will prove these equations as a consequence of \cref{thm:derive-correct}.\pg{where?}\pg{resume}
+We will justify these equations in \cref{sec:term-reasoning}
+as a consequence of \cref{thm:derive-correct}.\pg{resume}
 
+%In general, if the environment contains valid
 % Informally, |derive t| maps changes to the inputs of |t| to changes to the
 % outputs of |t|. Take |t = grand_total|: as discussed,
 % |dgrand_total xs1 dxs ys1 dxs| computes the change in |grand_total|'s output |s|
@@ -606,10 +609,47 @@ differentiation in \cref{sec:informal-derive}.
 %format y2
 %format tf = "t_f"
 %format dtf = "\Varid{dt}_f"
+
+\section{Differentiation on open terms and functions}
+We have shown that applying |derive| on closed functions produces their
+derivatives. However, |derive| is defined for all terms, hence also for open
+terms and for non-function types.
+
+% Add type annotations.
+Open terms |Gamma /- t : tau| are evaluated with respect to an environment for
+|Gamma|, and when this environment changes, the result of |t| changes as well.
+Assume this environment undergoes a change |drho : eval(Dt^Gamma)| from initial
+environment |rho1 : eval Gamma| to updated environment |rho2 : eval Gamma|. Such
+a change contains changes for each variable in |Gamma|. The two environments
+|rho1| and |rho2| need not be actually different---environment change |drho| can
+be a \emph{nil change} from |rho| to |rho|. For instance, |Gamma| can be empty:
+then |rho1| and |rho2| are also empty (since they match |Gamma|) and equal, so
+|drho| is a nil change. Alternatively, some or all its entries can be nil
+changes. In all these cases, change term |dt = derive t| evaluates against
+|drho| to a change |dv| from |v1 = eval t rho1| (that is, |t| evaluated against
+|rho1|) to |v2 = eval t rho2| (that is, |t| evaluated against |rho2|).
+
+Changes to functions in turn map input changes to output changes, following our
+\cref{slogan:derive}. If a change |df| from |f1| to |f2| is applied (via |df a1
+da|) to an input change |da| from |a1| to |a2|, then |df| will produce a change
+|dv = df a1 da| from |v1 = f1 a1| to |v2 = f2 a2|. The definition of function
+changes is recursive on types: that is, |dv| can in turn be a function change
+mapping input changes to output changes.
+
+Derivatives are a special case of function changes: a derivative |df| is simply
+a change from |f| to |f| itself, which maps input changes |da| from |a1| to |a2|
+to output changes |dv = df a1 da| from |f a1| to |f a2|. This definition
+coincides with the earlier definition of derivatives\pg{does it?}, and it also
+coincides with the definition of function changes for the special case where |f1
+= f2 = f|.
+
 \section{Function changes}
 \label{sec:higher-order-intro}
 We now look at |derive|'s behavior more in general.
-functions themselves can change.
+
+Differentiation only produces derivatives on closed terms of function type, in short
+``functions'', but it is defined as a structurally recursive program
+transformation, hence it is also defined on open terms.
 
 % \subsection{Open terms}
 The value of an open term |Gamma /- t : tau| depends on the environment |rho :
