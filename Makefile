@@ -19,6 +19,7 @@ PDF_NAME=$(PAPER_NAME).pdf
 lhsFmt=$(wildcard *.fmt)
 lhsSources=$(patsubst %,%.lhs, \
 	chap-intro-incr chap-diff-correct-formal chap-chs \
+	chap-eq-reason chap-th-extensions \
 	new-stuff change-theory-reconstruct backmatter \
 	fig-syntactic-ilc chap-operationally \
 	$(patsubst %,pldi14/%,sec-preliminaries sec-intro sec-change-theory \
