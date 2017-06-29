@@ -7,7 +7,17 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{xparse}
-\usepackage{microtype}
+% Kerning thinspace around ---.
+% https://tex.stackexchange.com/a/109188/1340
+\usepackage[kerning=true]{microtype}
+\SetExtraKerning
+    {encoding =  {OT1,T1,T2A,LY1,OT4,QX,T5,TS1,EU1,EU2}} % all text
+    {
+        \textemdash  = {167,167} % thinspace = 1/6 em
+    }
+
+%Useful for highlighting boxes, but unused yet.
+%\usepackage{mdframed}
 
 \usepackage{mathtools}
 % Combine mathtools and MnSymbol.
