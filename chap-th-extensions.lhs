@@ -268,7 +268,7 @@ that erase to each other share source and destination, these induced
 equivalences coincide again with change equivalence. That both relations are
 PERs also means that erasure is a so-called \emph{quasi-PER}~\citep{Krishnaswami2013internalizing}.
 Quasi-PERs are a natural (though not obvious) generalization of PERs for
-relations among different sets $R \subset S_1 \times S_2$: such relations cannot
+relations among different sets $R \subseteq S_1 \times S_2$: such relations cannot
 be either symmetric or transitive. However, we make no use of additional
 properties of quasi-PERs, hence we don't discuss them in further detail.
 
