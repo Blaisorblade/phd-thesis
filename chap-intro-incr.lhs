@@ -405,8 +405,8 @@ because we take advantage of the computation already done to compute |s1|.
 
 To compute the output change |ds| from |s1| to |s2|, we propose to transform our
 \emph{base program} |grand_total| to a new program |dgrand_total|, that we call
-the \emph{derivative} of |grand_total|, and call |dgrand_total| on initial inputs
-and their respective changes.
+the \emph{derivative} of |grand_total|: to compute |ds| we call |dgrand_total|
+on initial inputs and their respective changes.
 Unlike other approaches to incrementalization, |dgrand_total| is a regular
 program in the same language as |grand_total|, hence can be further optimized
 with existing technology.
@@ -492,8 +492,9 @@ where we use |`cong`| to mean denotational equality (that is, |t1
 `cong` t2| if and only if |eval(t1) = eval(t2)|), and where |da| is a valid
 change from |a1| to |a2| (and |f, a1, a2| have compatible types).
 But |(derive f) a1 da| is also a valid change, a fact not captured by these equations.
-We will justify these equations in \cref{sec:term-reasoning}
-as a consequence of \cref{thm:derive-correct}.\pg{resume}
+These equations follow from \cref{thm:derive-correct} and
+\cref{thm:derive-correct-oplus}; we iron out the few remaining details to obtain
+these equations in \cref{sec:term-reasoning}.
 
 %In general, if the environment contains valid
 % Informally, |derive t| maps changes to the inputs of |t| to changes to the
@@ -546,8 +547,8 @@ $\beta$-reduction to produce |dgrand_total|, as we show in \cref{sec:derive-exam
 %\pg{drop?}
 Correctness of |derive(param)| guarantees
 that |sum (merge dxs dys)| evaluates to a change from
-|sum (merge xs ys)| evaluated on old inputs |xs1, ys1| to
-|sum (merge xs ys)| evaluated on new inputs |xs2, ys2|.
+|sum (merge xs ys)| evaluated on old inputs |xs1| and |ys1| to
+|sum (merge xs ys)| evaluated on new inputs |xs2| and |ys2|.
 
 % \pg{rerevise and drop}
 % Here, a derivative of |grand_total| is a function in the same language as
@@ -611,24 +612,39 @@ differentiation in \cref{sec:informal-derive}.
 %format dtf = "\Varid{dt}_f"
 
 \section{Differentiation on open terms and functions}
+\label{sec:higher-order-intro}
 We have shown that applying |derive| on closed functions produces their
 derivatives. However, |derive| is defined for all terms, hence also for open
 terms and for non-function types.
 
 % Add type annotations.
 Open terms |Gamma /- t : tau| are evaluated with respect to an environment for
-|Gamma|, and when this environment changes, the result of |t| changes as well.
-Assume this environment undergoes a change |drho : eval(Dt^Gamma)| from initial
-environment |rho1 : eval Gamma| to updated environment |rho2 : eval Gamma|. Such
-a change contains changes for each variable in |Gamma|. The two environments
-|rho1| and |rho2| need not be actually different---environment change |drho| can
+|Gamma|, and when this environment changes, the result of |t| changes as well;
+|derive t| computes the change to |t|'s output.
+If |Gamma /- t : tau|, evaluating term |derive t| requires as input a
+\emph{change environment} |drho : eval(Dt^Gamma)| containing changes from the \emph{initial
+environment} |rho1 : eval Gamma| to the \emph{updated environment} |rho2 : eval Gamma|.
+The (environment) input change |drho| is mapped by |derive t| to output change
+|dv = eval (derive t) drho|, a change from \emph{initial output} |eval t
+rho1| to \emph{updated output} |eval t rho2|. If |t| is a function,
+|dv| maps in turn changes to the function arguments to changes to the function
+result. All this behavior, again, follows our slogan.
+
+Environment changes contains changes for each variable in |Gamma|. More precisely, if
+variable |x| appears with type |tau| in |Gamma| and hence in |rho1, rho2|, then
+|dx| appears with type |Dt^tau| in |Dt^Gamma| and hence in |drho|. Moreover,
+|drho| extends |rho1| to provide |derive t| with initial inputs and not just
+with their changes.
+
+The two environments
+|rho1| and |rho2| can share entries---in particular, environment change |drho| can
 be a \emph{nil change} from |rho| to |rho|. For instance, |Gamma| can be empty:
 then |rho1| and |rho2| are also empty (since they match |Gamma|) and equal, so
-|drho| is a nil change. Alternatively, some or all its entries can be nil
-changes. In all these cases, change term |dt = derive t| evaluates against
-|drho| to a change |dv| from |v1 = eval t rho1| (that is, |t| evaluated against
-|rho1|) to |v2 = eval t rho2| (that is, |t| evaluated against |rho2|).
+|drho| is a nil change. Alternatively, some or all the change entries in |drho|
+can be nil changes. Whenever |drho| is a nil change, |eval (derive t) drho| is
+also a nil change.
 
+If |t| is a function, |derive t| will be a \emph{function change}.
 Changes to functions in turn map input changes to output changes, following our
 \cref{slogan:derive}. If a change |df| from |f1| to |f2| is applied (via |df a1
 da|) to an input change |da| from |a1| to |a2|, then |df| will produce a change
@@ -639,30 +655,32 @@ mapping input changes to output changes.
 Derivatives are a special case of function changes: a derivative |df| is simply
 a change from |f| to |f| itself, which maps input changes |da| from |a1| to |a2|
 to output changes |dv = df a1 da| from |f a1| to |f a2|. This definition
-coincides with the earlier definition of derivatives\pg{does it?}, and it also
+coincides with the earlier definition of derivatives, and it also
 coincides with the definition of function changes for the special case where |f1
-= f2 = f|.
+= f2 = f|. That is why |derive t| produces derivatives if |t| is a closed
+function term: we can only evaluate |derive t| against an nil environment
+change, producing a nil function change.
 
-\section{Function changes}
-\label{sec:higher-order-intro}
-We now look at |derive|'s behavior more in general.
+% \section{Function changes}
+% \label{sec:higher-order-intro}
+% We now look at |derive|'s behavior more in general.
 
-Differentiation only produces derivatives on closed terms of function type, in short
-``functions'', but it is defined as a structurally recursive program
-transformation, hence it is also defined on open terms.
+% Differentiation only produces derivatives on closed terms of function type, in short
+% ``functions'', but it is defined as a structurally recursive program
+% transformation, hence it is also defined on open terms.
 
-% \subsection{Open terms}
-The value of an open term |Gamma /- t : tau| depends on the environment |rho :
-eval(Gamma)|. If we evaluate |t| against two suitable different environments
-|rho1, rho2 : eval(Gamma)|, we will typically compute different results
-|v1 = eval t rho1| and |v2 = eval t rho2|.
-We can compute an output change (going from |v1| to |v2|) using |derive|.
-As promised informally by our slogan, evaluating our derivative via |eval
-(derive t)| maps an ``input change'' |drho| (in this case, an environment
-change, describing changes to each element of the environment) to an output
-change |dv| from |v1| to |v2|.
-%
-If |tau| is a function type, |dv| will be a \emph{function change}.
+% % \subsection{Open terms}
+% The value of an open term |Gamma /- t : tau| depends on the environment |rho :
+% eval(Gamma)|. If we evaluate |t| against two suitable different environments
+% |rho1, rho2 : eval(Gamma)|, we will typically compute different results
+% |v1 = eval t rho1| and |v2 = eval t rho2|.
+% We can compute an output change (going from |v1| to |v2|) using |derive|.
+% As promised informally by our slogan, evaluating our derivative via |eval
+% (derive t)| maps an ``input change'' |drho| (in this case, an environment
+% change, describing changes to each element of the environment) to an output
+% change |dv| from |v1| to |v2|.
+% %
+% If |tau| is a function type, |dv| will be a \emph{function change}.
 
 Since the concept of function changes can be surprising, we examine it more
 closely next.
@@ -737,33 +755,34 @@ map valid changes to their inputs to valid output changes (as we'll see in
 validity by recursion on types, that is, as a \emph{logical relation} (see
 \cref{sec:validity-logical}).
 
-\subsection{Differentiation and function changes}
-According to our slogan, if term |t| is a closed unary functions, |derive t| map
-input changes to output changes.
-But our slogan extends beyond closed unary functions---|derive t| maps input
-changes to output changes for arbitrary terms |t|. But in general we must
-consider different sorts of inputs to |t|:
-(a) Evaluating an open term takes an environment as input.
-(b) Evaluating a closed function term gives a function that takes arguments as
-inputs.
-(c) Evaluating an open function term |t| takes both sorts of inputs: evaluating |t|
-takes an environment, and the result takes in turn arguments.
-(d) Evaluating a closed term that is not a function gives a value directly,
-without taking any inputs.
-In all those cases, |derive t| maps input changes to output changes. In general,
-if |Gamma /- t : tau|, evaluating term |derive t| requires as input a
-\emph{change environment} |drho| containing changes from the \emph{initial
-environment} |rho1| to the \emph{updated environment} |rho2|.
-The (environment) input change |drho| is mapped by |derive t| to output change
-|dv = eval (derive t) drho|, a change from \emph{initial output} |eval t
-rho1| to \emph{updated output} |eval t rho2|. If |t| is a function,
-|dv| maps in turn changes to the function arguments to changes to the function result.
+% \subsection{Differentiation and function changes}
+% According to our slogan, if term |t| is a closed unary functions, |derive t| map
+% input changes to output changes.
+% But our slogan extends beyond closed unary functions---|derive t| maps input
+% changes to output changes for arbitrary terms |t|. But in general we must
+% consider different sorts of inputs to |t|:
+% (a) Evaluating an open term takes an environment as input.
+% (b) Evaluating a closed function term gives a function that takes arguments as
+% inputs.
+% (c) Evaluating an open function term |t| takes both sorts of inputs: evaluating |t|
+% takes an environment, and the result takes in turn arguments.
+% (d) Evaluating a closed term that is not a function gives a value directly,
+% without taking any inputs.
+% In all those cases, |derive t| maps input changes to output changes.
+% In general,
+% if |Gamma /- t : tau|, evaluating term |derive t| requires as input a
+% \emph{change environment} |drho| containing changes from the \emph{initial
+% environment} |rho1| to the \emph{updated environment} |rho2|.
+% The (environment) input change |drho| is mapped by |derive t| to output change
+% |dv = eval (derive t) drho|, a change from \emph{initial output} |eval t
+% rho1| to \emph{updated output} |eval t rho2|. If |t| is a function,
+% |dv| maps in turn changes to the function arguments to changes to the function result.
 
-While the behavior of |derive t| might seem confusing, it parallels the behavior
-of |t|, because |t| maps inputs to outputs just like |derive(t)| maps valid
-input changes to valid output changes.
+% While the behavior of |derive t| might seem confusing, it parallels the behavior
+% of |t|, because |t| maps inputs to outputs just like |derive(t)| maps valid
+% input changes to valid output changes.
 
-We formalize this guarantee as \cref{thm:derive-correct} in next chapter.
+% We formalize this guarantee as \cref{thm:derive-correct} in next chapter.
 
 
 
@@ -821,9 +840,10 @@ from |f1 a1| to |f2 a2|. However, passing |a2| explicitly adds no
 information: the value |a2| can be computed from |a1| and |da| as
 |a1 `oplus` da|. Indeed, in various cases a function change can
 compute its required output without actually computing |a1
-`oplus` da|. Finally, since we expect the size of |a1| and |a2|
+`oplus` da|. Since we expect the size of |a1| and |a2|
 is asymptotically larger than |da|, actually computing |a2| could
-be expensive.
+be expensive.\footnote{We show later efficient change structures where |`oplus`|
+reuses part of |a1| to output |a2| in logarithmic time.}
 Hence, we stick to our asymmetric form of function
 changes.
 % We will discuss other alternatives later in \cref{?}.
@@ -982,10 +1002,14 @@ Differentiation is a structurally recursive program transformation,
 so we first compute |derive(merge xs ys)|. To compute its change
 we simply call the derivative of |merge|, that is |dmerge|, and
 apply it to the base inputs and their changes: hence we write
-\[|derive(merge xs ys) = dmerge xs dxs ys dys|.\]
+\begin{code}
+derive(merge xs ys) = dmerge xs dxs ys dys
+\end{code}
 As we'll
 better see later, we can define function |dmerge| as
-\[|dmerge = \xs dxs ys dys -> merge dxs dys|,\]
+\begin{code}
+dmerge = \xs dxs ys dys -> merge dxs dys
+\end{code}
 %
 so |derive(merge xs ys)| can be simplified by $\beta$-reduction
 to |merge dxs dys|:
@@ -1021,7 +1045,13 @@ derivation |derive(t)| is defined in context |Gamma, Dt ^ Gamma|,
 where |Dt ^ Gamma| is a context that binds a change |dx| for each
 base input |x| bound in the context |Gamma|.
 
-Next we must transform |derive(\ xs ys -> sum (merge xs ys))|. Since |derive(sum (merge xs ys))| is defined (ignoring later optimizations) in a context binding |xs, dxs, ys, dys|, deriving |\ xs ys -> sum (merge xs ys)| must bind all those variables.
+Next we consider |\xs ys -> sum (merge xs ys)|.
+Since |xs, dxs, ys, dys| are free in |derive(sum (merge xs ys))| (ignoring later
+optimizations), term
+\begin{code}
+derive(\xs ys -> sum (merge xs ys))
+\end{code}
+must bind all those variables.
 
 \begin{code}
             derive(\ xs ys -> sum (merge xs ys))
