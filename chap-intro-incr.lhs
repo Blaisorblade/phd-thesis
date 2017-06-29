@@ -225,8 +225,6 @@ the surrounding theory. ILC generalizes operators |+| and |-| as operators
 ``ominus'' or ``difference''). We show how ILC subsumes groups in
 \cref{sec:change-structure-groups}.
 
-%format s1
-%format s2
 \section{A motivating example}
 \label{sec:motiv-example}
 In this section, we illustrate informally incrementalization on a
@@ -606,8 +604,6 @@ differentiation in \cref{sec:informal-derive}.
 % We'll come back to this definition and refine it,
 % describing the laws it satisfies, in \cref{sec:change-struct-tc}.
 
-%format y1
-%format y2
 %format tf = "t_f"
 %format dtf = "\Varid{dt}_f"
 
