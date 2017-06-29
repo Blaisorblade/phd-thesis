@@ -350,6 +350,70 @@ F and extensions, and calls for research on the relation between ILC and
 parametricity. As follow-up work, \citet{CaiPhD} studies models of ILC based on
 directed and reflexive graphs.
 
+\section{Pointwise function changes}
+\label{ssec:pointwise-changes}
+% We can also describe the difference from function |f| to function
+% |f `oplus` df| as |nabla^f = \x -> f2 x `ominus` f1 x|.
+\pg{Our definition of function change might seem to defy intuitions. In
+  particular, pointwise changes might appear more intuitive. We discuss them
+  later, too.}
+
+We can also decompose function changes into orthogonal (and
+possibly easier to understand) concepts.
+
+Consider two functions |f1, f2 : A -> B| and two inputs |a1, a2: A|.
+The difference between |f2 a2| and |f1 a1| is due to changes to
+both the function and its argument. We can compute the whole
+change at once via a function change |df| as |df a1 da|. Or we
+can compute separately the effects of the function change and of
+the argument change. We can account for changes from |f1 a1| to |f2 a2|
+using |f1'|, a derivative of |f1|: |f1' a1 da = f1 a2 `ominus` f1 a2 = f1 (a1
+`oplus` da) `ominus` f a1|.%
+%
+\footnote{For simplicity, we use equality on changes, even though equality is
+  too restrictive. Later (in \cref{sec:change-equivalence}) we'll define an
+  equivalence relation on changes, called change equivalence and written
+  |`doe`|, and use it systematically to relate changes in place of equality. For
+  instance, we'll write that |f1' a1 da `doe` f1 (a1 `oplus` da) `ominus` f1 a1|.
+  But for the present discussion, equality will do.}
+
+We can account for changes from |f1| to |f2| using the
+\emph{pointwise difference} of two functions, |nabla ^ f1 = \(a : A) ->
+f2 a `ominus` f1 a|; in particular, |f2 (a1 `oplus` da) `ominus`
+f1 (a1 `oplus` da) = nabla ^ f (a1 `oplus` da)|. Hence, a
+function change simply \emph{combines} a derivative with a
+pointwise change using change composition:
+%
+%To account for changes to $a$, we can use
+%$f'$, the derivative of $f$. To account for changes to $f$, we
+%can use the \emph{pointwise difference} of two functions, $\nabla
+%f = \Lam{a}{\App{\New{f}}{a} \DIFF \App{\Old{f}}{a}}$.
+%
+% Now,
+%assuming for the moment the incrementalization theorem, we can
+%show the meaning of a function change $df$ in terms of
+%derivatives and pointwise changes:
+%
+\begin{equation}
+\begin{aligned}
+\label{eq:pointwise-rewrite}
+|df a1 da| & = |f2 a2 `ominus` f1 a1|\\
+           & = |ocompose ((f1 a2 `ominus` f1 a1)) ((f2 a2 `ominus` f1 a2))|\\
+           & = |ocompose (f1' a1 da) (nabla ^ f (a1 `oplus` da))|
+\end{aligned}
+\end{equation}
+One can also compute a pointwise change from a function change:
+\begin{code}
+  nabla f a = df a (nil a)
+\end{code}
+
+While some might find pointwise changes a more natural concept,
+we find it easier to use our definitions of function changes,
+which combines both pointwise changes and derivatives into a
+single concept.
+Some related works explore the use of pointwise changes; we discuss them in
+\cref{sec:rw-partial-differentials}.
+
 \section{Towards differentiation for System F}
 \label{sec:diff-parametricity-system-f}
 Various authors noticed that differentiation appears related to (binary)
