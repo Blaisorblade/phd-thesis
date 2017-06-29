@@ -238,6 +238,17 @@
 
 %format exists(x) = exists_ x "\hsforall "
 %format exists_ = "\exists "
+%format Pi = "\Pi"
+%format PPi(x) = PPi_ x "\hsforall "
+%format PPi_ = "\Pi "
+
+%format Lambda = "\Lambda"
+%format PLambda(x) = PLambda_ x "\hsforall "
+%format PLambda_ = "\Lambda "
+
+%format lambda = "\lambda"
+%format plambda(x) = plambda_ x "\hsforall "
+%format plambda_ = "\lambda "
 
 %format from (tau) (v1) (dv) = "\validfrom{" tau "}{" v1 "}{" dv "}"
 %format fromto (tau) (v1) (dv) (v2) = "\validfromto{" tau "}{" v1 "}{" dv "}{" v2 "}"
