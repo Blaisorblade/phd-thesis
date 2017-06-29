@@ -24,7 +24,7 @@
 
 % For adapting to compiling the whole thesis, or only parts.
 \newtoggle{full}
-\toggletrue{full}
+\togglefalse{full}
 
 \iftoggle{full}{
 \includecomment{fullCompile}
@@ -58,10 +58,16 @@
 %\includeonly{chap-intro-incr}
 %\includeonly{pldi14/sec-preliminaries,chap-diff-correct-formal}
 %\includeonly{pldi14/sec-intro}
-\includeonly{chap-operationally}
-%\includeonly{pldi14/sec-intro,new-stuff}
+
+\includeonly{chap-intro-incr,chap-th-extensions,new-stuff}
+
+%\includeonly{pldi14/sec-preliminaries,chap-diff-correct-formal,chap-chs,chap-operationally}
+%\includeonly{chap-operationally}
+
+%\includeonly{pldi14/sec-preliminaries,chap-intro-incr,pldi14/sec-intro,new-stuff}
+
 %\includeonly{chap-intro-incr,new-stuff,pldi14/sec-rw}
-%\includeonly{pldi14/sec-intro}
+%\includeonly{chap-operationally,pldi14/sec-intro}
 %\includeonly{new-stuff}
 %\includeonly{chap-diff-correct-formal,pldi14/sec-intro}
 %\includeonly{pldi14/sec-intro,new-stuff}
