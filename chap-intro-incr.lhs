@@ -493,95 +493,14 @@ But |(derive f) a1 da| is also a valid change, a fact not captured by these equa
 These equations follow from \cref{thm:derive-correct} and
 \cref{thm:derive-correct-oplus}; we iron out the few remaining details to obtain
 these equations in \cref{sec:term-reasoning}.
-
-%In general, if the environment contains valid
-% Informally, |derive t| maps changes to the inputs of |t| to changes to the
-% outputs of |t|. Take |t = grand_total|: as discussed,
-% |dgrand_total xs1 dxs ys1 dxs| computes the change in |grand_total|'s output |s|
-% based on the changes to inputs |xs| and |ys|. In short, we say that
-% |dgrand_total|, that is |derive grand_total|, maps input changes to output
-% changes.
-
-\pg{Moved from here.}
-
-% In next chapter we define this
-% invariant formally; we
-% prove that |derive| satisfies this invariant in 
-% For now, we just anticipate what this means in a few classes of examples.
-% Recall that we can evaluate |t| to its value |eval t rho|
-% if we have an environment |rho|; for closed terms this environment will be
-% empty. Then, if |t| has function type, |eval t rho| will accept other inputs.
-% Analogously,
-% for any term |t|, |eval (derive t) drho| produces a
-% change from |eval t rho1| to |eval t rho2| when |drho| is a change from |rho1|
-% to |rho2|.
-% If |t| is a unary function, then |eval (derive t) drho a1 da| is a change from
-% |eval t rho1 a1| to |eval t rho2 a2| if |drho| is a change from |rho1| to |rho2|
-% and |da| is a change from |a1| to |a2|.
-% If |t| is a binary function, like |grand_total|, then |eval (derive t) drho a1
-% da b1 db| is a change from |eval t rho1 a1 b1| to |eval t rho2 a2 b2| if |drho|
-% is a change from |rho1| to |rho2|, |da| is a change from |a1| to |a2| and |db|
-% is a change from |b1| to |b2|. And so on for ternary, ...,  |n|-ary functions.
-
-% We sum up the previous paragraph with the following slogan:
-
-% \begin{restatable}{slogan}{sloganDerive}
-%   \label{slogan:derive}
-%   Term |derive(t)| maps input changes to output changes.
-%   That is, |derive(t)| applied to old base inputs and valid \emph{input changes}
-%   (from old inputs to new inputs) gives a valid \emph{output change} from |t|
-%   applied on old inputs to |t| applied on new inputs.
-% \end{restatable}
-
-
-% What's more, we define |derive(param)| \emph{compositionally}:
-% |derive(t)| is defined in terms of |derive(param)| applied to
-% subterms of |t|.
-
 \pg{So we still need to say ``a derivative'', not ``the derivative''.}
 In our example, we have applied |derive(param)| to
 |grand_total|, and simplify the result via
 $\beta$-reduction to produce |dgrand_total|, as we show in \cref{sec:derive-example-merge}.
-%\pg{drop?}
 Correctness of |derive(param)| guarantees
 that |sum (merge dxs dys)| evaluates to a change from
 |sum (merge xs ys)| evaluated on old inputs |xs1| and |ys1| to
 |sum (merge xs ys)| evaluated on new inputs |xs2| and |ys2|.
-
-% \pg{rerevise and drop}
-% Here, a derivative of |grand_total| is a function in the same language as
-% |grand_total|, that accepts changes from initial inputs |xs1| and |ys1| to
-% updated inputs |xs2| and |ys2| and evaluates to the change from the base result
-% |grand_total xs1 ys1| to the updated result |grand_total xs2 ys2|.
-
-% \pg{rerevise and drop}
-% More in general, for a unary function |f|, a derivative |df|
-% takes an input |a| and a change |da| for |a| and produces a
-% change from base output |f a| to updated output |f (a `oplus`
-% da)|. Symbolically we write
-% %   \label{eq:correctness}
-% % \begin{equation}
-% %   \label{eq:derivative-requirement}
-% %   |f (a `oplus` da) `cong` f a `oplus` df a da|
-% % \end{equation}
-% where we use |`cong`| to mean denotational equality (that is, |t1
-% `cong` t2| if and only if |eval(t1) = eval(t2)|).
-
-% \pg{rerevise and drop}
-% We claim that differentiation produces derivatives. Hence, we can
-% take \cref{eq:derivative-requirement}, replace |df| by
-% |derive(f)|, and obtain as a corollary the following equation:
-% \begin{equation}
-%   \label{eq:correctness}
-%   |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
-% \end{equation}
-% We will prove this equation as a consequence of \cref{thm:derive-correct}.\pg{resume} 
-
-% \pg{rerevise and drop}
-% For functions |f| of multiple arguments, a derivative |df| takes
-% all base inputs of |f| together with changes to each of them, and
-% produces a change from the base output to the updated output. We
-% will make this more formal in next section.
 
 In this section, we have sketched the meaning of differentiation
 informally. We discuss incrementalization on higher-order
@@ -657,27 +576,6 @@ coincides with the definition of function changes for the special case where |f1
 function term: we can only evaluate |derive t| against an nil environment
 change, producing a nil function change.
 
-% \section{Function changes}
-% \label{sec:higher-order-intro}
-% We now look at |derive|'s behavior more in general.
-
-% Differentiation only produces derivatives on closed terms of function type, in short
-% ``functions'', but it is defined as a structurally recursive program
-% transformation, hence it is also defined on open terms.
-
-% % \subsection{Open terms}
-% The value of an open term |Gamma /- t : tau| depends on the environment |rho :
-% eval(Gamma)|. If we evaluate |t| against two suitable different environments
-% |rho1, rho2 : eval(Gamma)|, we will typically compute different results
-% |v1 = eval t rho1| and |v2 = eval t rho2|.
-% We can compute an output change (going from |v1| to |v2|) using |derive|.
-% As promised informally by our slogan, evaluating our derivative via |eval
-% (derive t)| maps an ``input change'' |drho| (in this case, an environment
-% change, describing changes to each element of the environment) to an output
-% change |dv| from |v1| to |v2|.
-% %
-% If |tau| is a function type, |dv| will be a \emph{function change}.
-
 Since the concept of function changes can be surprising, we examine it more
 closely next.
 
@@ -751,73 +649,6 @@ map valid changes to their inputs to valid output changes (as we'll see in
 validity by recursion on types, that is, as a \emph{logical relation} (see
 \cref{sec:validity-logical}).
 
-% \subsection{Differentiation and function changes}
-% According to our slogan, if term |t| is a closed unary functions, |derive t| map
-% input changes to output changes.
-% But our slogan extends beyond closed unary functions---|derive t| maps input
-% changes to output changes for arbitrary terms |t|. But in general we must
-% consider different sorts of inputs to |t|:
-% (a) Evaluating an open term takes an environment as input.
-% (b) Evaluating a closed function term gives a function that takes arguments as
-% inputs.
-% (c) Evaluating an open function term |t| takes both sorts of inputs: evaluating |t|
-% takes an environment, and the result takes in turn arguments.
-% (d) Evaluating a closed term that is not a function gives a value directly,
-% without taking any inputs.
-% In all those cases, |derive t| maps input changes to output changes.
-% In general,
-% if |Gamma /- t : tau|, evaluating term |derive t| requires as input a
-% \emph{change environment} |drho| containing changes from the \emph{initial
-% environment} |rho1| to the \emph{updated environment} |rho2|.
-% The (environment) input change |drho| is mapped by |derive t| to output change
-% |dv = eval (derive t) drho|, a change from \emph{initial output} |eval t
-% rho1| to \emph{updated output} |eval t rho2|. If |t| is a function,
-% |dv| maps in turn changes to the function arguments to changes to the function result.
-
-% While the behavior of |derive t| might seem confusing, it parallels the behavior
-% of |t|, because |t| maps inputs to outputs just like |derive(t)| maps valid
-% input changes to valid output changes.
-
-% We formalize this guarantee as \cref{thm:derive-correct} in next chapter.
-
-
-
-% x -> u
-% y -> v
-% z -> w
-
-% Continuing our example, consider for instance term |t = tf z|,
-% where |tf = \x -> x + y| like above. As discussed, |y| undergoes
-% change |dv| from |v1| to |v2|, so |tf|'s value undergoes change
-% |df| from |f1| to |f2|. Moreover, assume variable |z| undergoes
-% change |dw| from |w1| to |w2|. Again, variables |y| and |z| are
-% inputs to |t|, so by our slogan |derive(t)| needs to map their
-% changes to a change from old |t|'s output |f1 w1| to new |t|'s
-% output |f2 w2|.
-
-% We require that a valid function change from |f1| to |f2| (where
-% |f1, f2 : eval(sigma -> tau)|) is in turn a function |df| that
-% takes an input |a1| and a change |da|, valid from |a1| to |a2|,
-% to a valid change from |f1 a1| to |f2 a2|.
-
-% Thanks to this invariant, we can define |derive(param)| so that
-% |derive(t) = derive(tf) v dv|.
-
-% Then, |eval(derive(t)) (y = y1, dy
-% = dy, v = v1, dv = dv) = eval(derive(tf)) v1 dv|
-
-%% We do so using a change
-%% from |v1| to |v2| and a function change from |f1| to |f2| by
-%% defining function changes suitably.
-%
-%%
-%% We want to define |derive(param)| \emph{compositionally}. To this end,
-%% we define function changes so that they enable computing the
-%% change to their output from the change to their input.
-%
-%% To see why that's needed, consider term |t = f v|, where again |f
-%% = \x -> x + y|.
-
 \subsection{Pointwise function changes}
 \label{ssec:pointwise-changes-intro}
 It might seem more natural to describe a function change |df'| between |f1| and
@@ -842,62 +673,7 @@ be expensive.\footnote{We show later efficient change structures where |`oplus`|
 reuses part of |a1| to output |a2| in logarithmic time.}
 Hence, we stick to our asymmetric form of function
 changes.
-% We will discuss other alternatives later in \cref{?}.
-\pg{Discuss alternatives?}
 
-% To answer these
-% questions precisely, we next recall definitions of our object
-% language, simply-typed $\lambda$-calculus.
-
-% To make things concrete we show
-% \begin{code}
-  % xs1          = {{1}}
-  % dxs          = {{1}}
-  % xs2          = {{1, 1}}
-
-  % ys1          = {{2, 3, 4}}
-  % dys          = {{5}}
-  % ys2          = {{2, 3, 4, 5}}
-
-  % output1      = grand_total xs1 ys1
-  %              = sum {{1, 2, 3, 4}} = 10
-  % output2      = grand_total xs2 ys2
-  %              = sum {{1, 1, 2, 3, 4, 5}} = 16
-  % dgrand_total = \ xs dxs ys dys -> sum (merge dxs dys)
-  % doutput      = dgrand_total xs1 dxs ys1 dys =
-  %              = sum {{1, 5}} = 6
-  % output2      = outpu1 + doutput
-% \end{code}
-
-% To clarify notation:
-% \begin{itemize}
-% \item |{{...}}| denotes a multiset or \emph{bag} containing the
-%   elements among braces. A bag is an unordered collection (like a
-%   set) where elements are allowed to appear more than once
-%   (unlike a set).
-% \item Function |grand_total| is given in Haskell-like notation;
-%   it merges the two input bags, and sums all elements to compute
-%   its result.
-% \item Change |dxs| is a value describing the change from base input |xs1| to updated input |xs2|. For now changes to bags simply list elements to insert, so that |dxs = {{1}}| means ``insert element |1| from base input |xs1| to obtain updated input |xs2|''.
-%   Similarly, |dys = {{5}}| means ``insert |5| into base input |ys1| to obtain updated input |ys2|''.
-% \end{itemize}
-
-% In this case, |dgrand_total| would compute the output change
-% |doutput = dgrand_total xs1 dxs ys1 dys = 6|, which can then
-% be used to update the original output |10| to yield the updated
-% result |16|.
-
-% In this example incremental computation doesn't seem to save much
-% time, but that's only because base inputs are small. Usually
-% inputs are instead much bigger than changes. The time complexity
-% of recomputation, |grand_total xs2 ys2|, is linear in the sizes
-% of |xs2| and |ys2|, while the time complexity of |dgrand_total
-% xs1 dxs ys1 dys| only depends on the sizes of |dxs| and |dys|.
-
-% A derivative is a function in the
-% same language as |grand_total|, that accepts changes to all inputs  and producing changes, which
-% are simple first-class values of this language.
-%
 \section{Differentiation, informally}
 \label{sec:informal-derive}
 Next, we define differentiation and explain informally why it
