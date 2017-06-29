@@ -192,8 +192,8 @@
 
 \NewDocumentCommand{\EvalConst}{sm}{\Parens#1{\mean{#2}[\CONST]}}
 \NewDocumentCommand{\DERIVE}{}{\mathcal{D}}
-\NewDocumentCommand{\Derive}{sm}{\Parens#1{\DERIVE(#2)}}
-\NewDocumentCommand{\DeriveConst}{sm}{\Parens#1{\DERIVE^{\CONST}(#2)}}
+\NewDocumentCommand{\Derive}{sm}{\Parens#1{\DERIVE\mean{#2}}}
+\NewDocumentCommand{\DeriveConst}{sm}{\Parens#1{\DERIVE^{\CONST}\mean{#2}}}
 \NewDocumentCommand{\Dom}{m}{\DOM_{#1}}
 
 \NewDocumentCommand{\Append}{smm}{\Parens#1{#2 , #3}}
