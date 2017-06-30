@@ -734,7 +734,8 @@ instance NilTestable (Fun1 sigma tau) where
 \end{code}
 
 We can then wrap a derivative to return a nil change immediately if at runtime
-all input changes turn out to be nil. This was not possible in PLDI'14, because
+all input changes turn out to be nil. This was not possible in the setting
+described by \citet{CaiEtAl2014ILC}, because
 nil function changes could not be detected at runtime, only at compile time.
 
 \pg{Can we in this context?}

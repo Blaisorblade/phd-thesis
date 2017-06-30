@@ -79,7 +79,7 @@ by lists of individual or \emph{atomic} changes. Change composition is then just
 concatenation. We can then extend functions on atomic changes to functions on
 changes. Next, we show how.
 
-Imagine, in the setting of PLDI'14 extended with change composition, applying
+Imagine, in the setting of \citet{CaiEtAl2014ILC} extended with change composition, applying
 one function change |df| to a composed argument change |da1 `ocompose` da2|,
 where |f1 `oplus` df = f2|, |a1 `oplus` da1 = a2| and |a2 `oplus` da2 = a3|. We
 want to compute incrementally the difference |db| between |f2 a3| and |f1 a1|.
