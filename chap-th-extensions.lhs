@@ -703,7 +703,7 @@ At this point, we are also ready to extend the transformation to System F.
     PPi ((alpha1 : *)) (alpha2 : *) (rAlpha : alpha1 -> alpha2 -> star). elemDt2 T (f1 [alpha1]) (f2 [alpha2])
   derive(PLambda alpha . t) =
     \(alpha1 alpha2: star) (rAlpha : alpha1 -> alpha2 -> star) -> derive(t)
-  derive(t (tau)) = derive t (idx1 tau) (idx2 tau) (elemDt2 tau)
+  derive(t [tau]) = derive t (idx1 tau) (idx2 tau) (elemDt2 tau)
 \end{code}
 
   % elemDt2 (forall X . T) f1 f2 = PPi ((X1 : *)) (X2 : *) (DX : *). elemDt2 T (f1 [X1]) (f2 [X2])
