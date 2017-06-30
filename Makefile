@@ -22,7 +22,7 @@ lhsSources=$(patsubst %,%.lhs, \
 	chap-eq-reason chap-th-extensions \
 	new-stuff backmatter \
 	fig-syntactic-ilc chap-operationally \
-	$(patsubst %,pldi14/%,sec-preliminaries sec-intro \
+	$(patsubst %,pldi14/%,sec-preliminaries \
 	fig-differentiation sec-rw))
 lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 # Sources to watch for changes but that don't need to be compiled on their own,

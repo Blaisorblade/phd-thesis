@@ -109,3 +109,22 @@ list manipulation, together with other primitives. However,
 \pg{Average}
 
 \pg{Nested loops}
+\section{A higher-order example}
+\label{sec:differentiation-fold-example}
+\pg{write}
+% Referenced later in sec-performance.tex by saying:
+% % We have seen in \cref{ssec:differentiation} that $\Derivative$
+% % needlessly recomputes $\Merge\Xs\Ys$. However, the result is a
+% % base input to $\FOLD'$.
+
+\section{Aggregation}
+\pg{To move}
+To study aggregation we consider |foldNat|.
+% \begin{code}
+%   foldNat z s 0 = z
+%   foldNat z s (n + 1) = s (foldNat z s n)
+%   -- Assuming that dz and ds are nil.
+%   dfoldNat z dz s ds n 0 = foldNat z s n
+%   dfoldNat z dz s ds n dn = if dn > 0 then foldNat (foldNat z s n) s dn
+% \end{code}
+% Missing sections from chap-intro-incr.lhs.
