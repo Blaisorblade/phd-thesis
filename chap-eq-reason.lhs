@@ -68,55 +68,12 @@ But first, we exemplify informally these notions.
 Or: just change motivation.}
 \begin{example}[Deriving |map| on lists]
   \label{ex:syn-changes-map}
-We consider a basic change structure on lists and the
-derivative of |map|. We will describe this example
-informally, using Haskell notation and let polymorphism as
-appropriate (see \cref{sec:intro-stlc}); to see how such a change
-structure might be formalized, compare with the change structure
-for environments described earlier in \cref{def:chs-envs}. We'll
-describe a more realistic change structure for sequences later.
-
-Consider a basic change structure on cons-lists of type
-|List a|, where a list change is just a list of element changes
-|List (Dt^a)|, and |List a| itself is defined as
-follows (in Haskell notation):\footnote{
-  We use |:| for typing throughout, hence we avoid Haskell's
-  builtin list syntax, which uses |:| for cons cells.}
-\begin{code}
-  data List a = Nil | Cons a (List a)
-\end{code}
-
-A list change |dxs| is valid for source |xs| if
+Let's consider again the example from
+\cref{sec:simple-changes-list-map}, in particular |dmap|.
+Recall that a list change |dxs| is valid for source |xs| if
 they have the same length and each element change is valid for
 its corresponding element.
-On this basic change structure, we can define |`oplus`| and
-|`ocompose`| but not |`ominus`|: such list changes can't express the
-difference between two lists of different lengths. We discuss
-product and sum types more in general in \cref{ch:prod-sums}.
-Nevertheless, this basic change structure is sufficient to define
-derivatives that act correctly on the changes that can be expressed.
-We can describe this change structure in Haskell using a
-typeclass instance for class |BasicChangeStruct| (included):
-\pg{Not the name we use elsewhere. And not the proper location.}
-\begin{code}
-class BasicChangeStruct a where
-  type Dt^a
-  oplus :: a -> Dt^a -> a
-instance BasicChangeStruct (List a) where
-  type Dt^(List a) = List (Dt^a)
-  Nil `oplus` Nil = Nil
-  (Cons x xs) `oplus` (Cons dx dxs) = Cons (x `oplus` xs) (dx `oplus` dxs)
-  _ `oplus` _ = Nil
-\end{code}
 
-The following |dmap| function is a derivative for the
-standard |map| function (included for comparison) and the given
-change structure. We discuss derivatives for recursive functions
-in \cref{sec:general-recursion}.
-% We can write a standard |map| function on this list, and also its derivative |dmap| as follows:
-% If we define |map : List a -> List a| as a primitive, and not as
-% a derived function defined in terms of some other primitive, we
-% can write derivative |dmap| as follows (in Haskell notation):
 \begin{code}
 map : (a -> b) -> List a -> List b
 map f Nil = Nil
