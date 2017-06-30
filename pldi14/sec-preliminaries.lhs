@@ -300,15 +300,15 @@ depend on an environment.
 We define a program equivalence across terms of the same type |t1
 `cong` t2| to mean |eval t1 = eval t2|.
 
-\begin{restatable}[Denotational equality]{definition}{denotEqual}
-  \label{def:denot-equality}
+\begin{restatable}[Denotational equivalence]{definition}{denotEqual}
+  \label{def:denot-equivalence}
   We say that two terms |Gamma /- t1 : tau| and |Gamma /- t2:
   tau| are denotationally equal, and write |Gamma //= t1 `cong` t2
   : tau| (or sometimes |t1 `cong` t2|), if for all environments
   |rho : eval Gamma| we have that |eval t1 rho = eval t2 rho|.
 \end{restatable}
 \begin{remark}
-  Beware that denotational equality cannot always be strengthened
+  Beware that denotational equivalence cannot always be strengthened
   by dropping unused variables:
   that is, |Gamma, x : sigma //= t1 `cong` t2 : tau| does not
   imply |Gamma //= t1 `cong` t2 : tau|, even if |x| does not

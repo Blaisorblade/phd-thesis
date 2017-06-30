@@ -494,16 +494,16 @@ or as
   |f (a1 `oplus` da) `cong` f a1 `oplus` (derive f) a1 da|
 \end{equation}
 where |da| is a metavariable standing for a valid change from |a1| to |a2| (with |a1, a2: A|) and
-where |`cong`| denotes denotational equality (\cref{def:denot-equality}).
+where |`cong`| denotes denotational equivalence (\cref{def:denot-equivalence}).
 Moreover, |(derive f) a1 da| is also a valid change and can be hence used as an
 argument for operations that require valid changes.
 These equations follow from \cref{thm:derive-correct} and
 \cref{thm:derive-correct-oplus}; we iron out the few remaining details to obtain
 these equations in \cref{sec:denot-syntactic-reasoning}.\footnote{Nitpick: if
-  |da| is read as an object variable, denotational equality will detect that
+  |da| is read as an object variable, denotational equivalence will detect that
   these terms are not equivalent if |da| maps to an invalid change. Hence we
-  said that |da| is a metavariable. Later we define denotational equality for valid changes
-  (\cref{def:denot-equality-valid-changes}), which gives a less cumbersome way
+  said that |da| is a metavariable. Later we define denotational equivalence for valid changes
+  (\cref{def:denot-equivalence-valid-changes}), which gives a less cumbersome way
   to state such equations.}%
 \pg{So we still need to say ``a derivative'', not ``the derivative''.}
 

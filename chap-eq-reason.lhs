@@ -24,7 +24,7 @@ definitions, and go from using an updated environment to using
 substitution in this fashion.
 
 To compare for equivalence terms that use changes, we can't use
-denotational equality, but must restrict to consider valid
+denotational equivalence, but must restrict to consider valid
 changes.
 
 Comparing changes is trickier: most often we are not interested
@@ -132,17 +132,17 @@ undefined concepts. On a metalevel function, we could already
 make this proof formal, but not so on terms yet. In this section,
 we define the required concepts.
 
-\subsection{Denotational equality for valid changes}
-\label{sec:denot-equality-valid}
-This example uses the notion of denotational equality for valid
+\subsection{Denotational equivalence for valid changes}
+\label{sec:denot-equivalence-valid}
+This example uses the notion of denotational equivalence for valid
 changes. We now proceed to formalize it.
-For reference, we recall denotational equality of terms, and then
+For reference, we recall denotational equivalence of terms, and then
 introduce its restriction:
 \iftoggle{full}{
 \denotEqual*
 }{
-\begin{restatable*}[Denotational equality]{definition}{denotEqual}
-  \label{def:denot-equality}
+\begin{restatable*}[Denotational equivalence]{definition}{denotEqual}
+  \label{def:denot-equivalence}
   We say that two terms |Gamma /- t1 : tau| and |Gamma /- t2:
   tau| are denotationally equal, and write |Gamma //= t1 `cong` t2
   : tau| (or sometimes |t1 `cong` t2|), if for all environments
@@ -151,13 +151,13 @@ introduce its restriction:
 }
 
 For open terms |t1, t2| that depend on changes,
-denotational equality is too restrictive, since it
+denotational equivalence is too restrictive, since it
 requires |t1| and |t2| to also be equal when the changes they
 depend on are not valid.
-By restricting denotational equality to valid environment
+By restricting denotational equivalence to valid environment
 changes, and terms to depend on contexts, we obtain the following definition.
-\begin{definition}[Denotational equality for valid changes]
-  \label{def:denot-equality-valid-changes}
+\begin{definition}[Denotational equivalence for valid changes]
+  \label{def:denot-equivalence-valid-changes}
   For any context |Gamma| and type |tau|,
   we say that two terms |Dt^Gamma /- t1 : tau| and |Dt^Gamma /-
   t2 : tau| are \emph{denotationally equal for valid changes} and
@@ -217,7 +217,7 @@ be justified in terms of syntactic validity.
 
 Just like (semantic) |`oplus`| agrees with validity, term-level
 (or syntactic) |`oplus`| agrees with syntactic validity, up to
-denotational equality for valid changes.
+denotational equivalence for valid changes.
 \begin{lemma}[Term-level |`oplus`| agrees with syntactic validity]
 If |dt| is a change from |t1| to |t2| (|fromtosyn Gamma tau t1 dt
 t2|) then |t1 `oplus` dt| and |t2| are denotationally equal for
