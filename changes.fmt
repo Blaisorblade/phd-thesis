@@ -21,6 +21,10 @@
 %format lett = "\mathbf{let}"
 
 %format alpha = "\alpha"
+%format alpha1
+%format alpha2
+%format alphai = alpha "_i"
+
 %format Nat = "\mathbb{N}"
 %format Int = "\mathbb{Z}"
 
@@ -165,6 +169,7 @@
 %format x1
 %format x2
 %format x3
+%format xi = "x_i"
 %format xn = "x_n"
 
 %format y0

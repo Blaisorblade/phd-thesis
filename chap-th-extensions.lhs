@@ -440,6 +440,7 @@ transformation for parametricity (which they write |eval t|).
 %format ptsRel = "\mathcal{R}"
 %format (idx1 (t)) = "\mathcal{S}_1 \llbracket" t "\rrbracket"
 %format (idx2 (t)) = "\mathcal{S}_2 \llbracket" t "\rrbracket"
+%format (idxi (t)) = "\mathcal{S}_i \llbracket" t "\rrbracket"
 %format star = "\star"
 %format cstar = "\lceil \star \rceil"
 
@@ -454,8 +455,6 @@ transformation for parametricity (which they write |eval t|).
 %format stlc2 = "\lambda^2_{\to}"
 
 %format rAlpha = "\mathcal{R}_" alpha
-%format alpha1
-%format alpha2
 \paragraph{The parametricity transformation}
 First, we show a variant of their parametricity transformation, adapted to STLC
 (ignoring base types). Their transformation is based on the presentation of STLC
@@ -519,19 +518,13 @@ terms in this logic by recursion on terms.
 
 In the above, |idx1 s| and |idx2 s| simply subscript all (term and type) variables in
 their arguments with ${}_1$ and ${}_2$, to make them refer to the first or
-second computation. To wit, the straightforward definitions are:
+second computation. To wit, the straightforward definition is:
 \begin{code}
-  idx1(x) = x1
-  idx1(\(x : sigma) -> t) = \(x1 : sigma) -> idx1 t
-  idx1(s t) = (idx1 s) (idx1 t)
-  idx1(sigma -> tau) = idx1(sigma) -> idx1(tau)
-  idx1(alpha) = alpha1
-
-  idx2(x) = x2
-  idx2(\(x : sigma) -> t) = \(x2 : sigma) -> idx2 t
-  idx2(s t) = (idx2 s) (idx2 t)
-  idx2(sigma -> tau) = idx2(sigma) -> idx2(tau)
-  idx2(alpha) = alpha2
+  idxi(x) = xi
+  idxi(\(x : sigma) -> t) = \(xi : sigma) -> idxi t
+  idxi(s t) = (idxi s) (idxi t)
+  idxi(sigma -> tau) = idxi(sigma) -> idxi(tau)
+  idxi(alpha) = alphai
 \end{code}
 
 It might be unclear how the proof |ppp t| references the original term |t|.
