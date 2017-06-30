@@ -78,6 +78,9 @@ differentiation: IDSL designers are to choose primitives that encapsulate
 efficiently incrementalizable computation schemes, while IDSL users are to
 express their computation using the primitives provided by the IDSL.
 
+% Helping IDSL designers to incrementalize primitives automatically is a most
+% desirable goal, though one that we leave open. We are working
+
 \pg{rewrite}
 In the IDSLs we consider, similarly to database languages, we use primitives for
 high-level operations, of complexity similar to SQL operators.
@@ -452,6 +455,9 @@ programs or \emph{base terms}, such as |grand_total|. To define differentiation,
 we assume that we already have derivatives for primitive functions they use; we
 discuss later how to write such derivatives by hand.
 
+We define differentiation in \cref{def:derive}; some readers might prefer to
+peek ahead, but we prefer to first explain what differentiation is supposed to do.
+
 A derivative of a function can be applied to initial inputs and changes from initial
 inputs to updated inputs, and returns a change from an initial output to an
 updated output. For instance, take derivative |dgrand_total|, initial inputs
@@ -487,14 +493,20 @@ or as
   \label{eq:correctness-alt}
   |f (a1 `oplus` da) `cong` f a1 `oplus` (derive f) a1 da|
 \end{equation}
-where we use |`cong`| to mean denotational equality (that is, |t1
-`cong` t2| if and only if |eval(t1) = eval(t2)|), and where |da| is a valid
-change from |a1| to |a2| (and |f, a1, a2| have compatible types).
-But |(derive f) a1 da| is also a valid change, a fact not captured by these equations.
+where |da| is a metavariable standing for a valid change from |a1| to |a2| (with |a1, a2: A|) and
+where |`cong`| denotes denotational equality (\cref{def:denot-equality}).
+Moreover, |(derive f) a1 da| is also a valid change and can be hence used as an
+argument for operations that require valid changes.
 These equations follow from \cref{thm:derive-correct} and
 \cref{thm:derive-correct-oplus}; we iron out the few remaining details to obtain
-these equations in \cref{sec:denot-syntactic-reasoning}.
+these equations in \cref{sec:denot-syntactic-reasoning}.\footnote{Nitpick: if
+  |da| is read as an object variable, denotational equality will detect that
+  these terms are not equivalent if |da| maps to an invalid change. Hence we
+  said that |da| is a metavariable. Later we define denotational equality for valid changes
+  (\cref{def:denot-equality-valid-changes}), which gives a less cumbersome way
+  to state such equations.}%
 \pg{So we still need to say ``a derivative'', not ``the derivative''.}
+
 In our example, we have applied |derive(param)| to
 |grand_total|, and simplify the result via
 $\beta$-reduction to produce |dgrand_total|, as we show in \cref{sec:derive-example-merge}.
@@ -845,4 +857,7 @@ taking time linear in the base inputs.%
 \pg{Point out this is self-maintainable!}
 
 \section{Chapter conclusion}
-\pg{TODO: add}
+In this chapter, we have seen how a correct differentiation transform
+allows us to incrementalize programs.
+\pg{What's next?}
+
