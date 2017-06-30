@@ -159,7 +159,7 @@ familiarity with it.
 
 \input{pldi14/fig-lambda-calc}
 
-\paragraph{An extensible grammar of types}
+\paragraph{An extensible syntax of types}
 In fact, the definition of base types can be mutually recursive
 with the definition of types. So a language plugin might add as
 base types, for instance, collections of elements of type |tau|,
@@ -203,7 +203,8 @@ inference, and we will use a Haskell-like concrete syntax. In
 particular, when giving type signatures or type annotations in
 Haskell snippets, we will use |::| to separate terms or variables
 from their types, rather than |:| as in
-$\lambda$-calculus.
+$\lambda$-calculus. To avoid confusion, we never use |:| to
+denote the constructor for Haskell lists.
 
 At times, our concrete examples will use Hindley-Milner (prenex)
 polymorphism, but this is also not such a significant extension.

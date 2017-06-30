@@ -140,7 +140,7 @@ interchangeable in all valid contexts, that is, contexts that
 bind |df| and |dxs| to valid changes, respectively, for |f| and
 |xs|.
 
- We sketch an informal proof directly on terms.
+We sketch an informal proof directly on terms.
 \begin{proof}[Proof sketch]
 We must show that |dy = dmap f df xs dxs| is a change change from
 initial output |y1 = map f xs| to updated output |y2 = map (f
@@ -200,6 +200,7 @@ depend on are not valid.
 By restricting denotational equality to valid environment
 changes, and terms to depend on contexts, we obtain the following definition.
 \begin{definition}[Denotational equality for valid changes]
+  \label{def:denot-equality-valid-changes}
   For any context |Gamma| and type |tau|,
   we say that two terms |Dt^Gamma /- t1 : tau| and |Dt^Gamma /-
   t2 : tau| are \emph{denotationally equal for valid changes} and

@@ -298,7 +298,8 @@ change typing contexts |Dt^Gamma|, such that we can have an environment change
 |drho : eval(Dt^Gamma)| from |rho1 : eval(Gamma)| to |rho2 : eval(Gamma)|.
 
 Not all descriptions of changes are meaningful,
-so we also talk about \emph{valid} changes.
+so we also talk about \emph{valid} changes. Valid changes satisfy additional
+invariants that are useful during incrementalization.
 %
 A change value |dv| can be a valid change from |v1| to |v2|. We
 can also consider a valid change as an edge from |v1| to |v2| in
@@ -307,7 +308,7 @@ type |tau|), and we call |v1| the source of |dv| and |v2| the
 destination of |dv|. We only talk of source and destination for valid changes:
 so a change from |v1| to |v2| is (implicitly) valid.
 We'll discuss examples of valid and invalid
-changes in \cref{ex:valid-bag-int,ex:invalid-nat}. \pg{What about
+changes in \cref{ex:valid-bag-int,ex:invalid-nat}.\pg{What about
   changes with multiple valid sources?}
 
 We also introduce an operator |`oplus`| on values and changes: if
@@ -474,7 +475,7 @@ of function |f| maps changes to the inputs of |f| to changes to the outputs of
 \end{restatable}
 
 For a
-generic unary function |f|, this corollary can be stated as:
+generic unary function |f : A -> B|, the behavior of |derive(f)| can be described as:
 \begin{equation}
   % \label{eq:derivative-requirement}
   \label{eq:correctness}
@@ -492,7 +493,7 @@ change from |a1| to |a2| (and |f, a1, a2| have compatible types).
 But |(derive f) a1 da| is also a valid change, a fact not captured by these equations.
 These equations follow from \cref{thm:derive-correct} and
 \cref{thm:derive-correct-oplus}; we iron out the few remaining details to obtain
-these equations in \cref{sec:term-reasoning}.
+these equations in \cref{sec:denot-syntactic-reasoning}.
 \pg{So we still need to say ``a derivative'', not ``the derivative''.}
 In our example, we have applied |derive(param)| to
 |grand_total|, and simplify the result via
@@ -506,22 +507,6 @@ In this section, we have sketched the meaning of differentiation
 informally. We discuss incrementalization on higher-order
 terms in \cref{sec:higher-order-intro}, and actually define
 differentiation in \cref{sec:informal-derive}.
-
-% \pg{Why show a change structure in Haskell terms?}
-% We already sketch, preliminarly, how a change structure
-% can be represented in Haskell terms: a change structure is
-% encoded as a \emph{type class} named |ChangeStruct t|, where change type
-% |Dt^tau| is defined as an associated type |Dt^t|, and operations
-% |`oplus`|, |`ominus`| and |`ocompose`| are defined as methods.
-% \begin{code}
-% class ChangeStruct t where
-%   type Dt t
-%   oplus :: t -> Dt t -> t
-%   ominus :: t -> t -> Dt t
-%   (`ocompose`) :: Dt t -> Dt t -> Dt t
-% \end{code}
-% We'll come back to this definition and refine it,
-% describing the laws it satisfies, in \cref{sec:change-struct-tc}.
 
 %format tf = "t_f"
 %format dtf = "\Varid{dt}_f"
