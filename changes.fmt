@@ -24,6 +24,7 @@
 %format alpha1
 %format alpha2
 %format alphai = alpha "_i"
+%format DtAlpha = Dt "_" alpha
 
 %format Nat = "\mathbb{N}"
 %format Int = "\mathbb{Z}"

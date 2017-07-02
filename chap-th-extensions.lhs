@@ -340,6 +340,8 @@ whether function changes can be applied to invalid inputs or not.
 We believe it could be possible to formalize the \ilcA{} model using two-sided
 validity, by defining a dependent type of valid changes:
 |Dt2 (A -> B) f1 f2 = (a1 a2 : A) -> Dt2 A a1 a2 -> Dt2 B (f1 a1) (f2 a2)|.
+We provide more details on such a transformation in
+\cref{sec:diff-parametricity-system-f}.
 
 Models restricted to valid changes (like \ilcA{}) are related to models based on
 directed graphs and reflexive graphs, where values are graphs vertexes, changes
@@ -419,6 +421,12 @@ Some related works explore the use of pointwise changes; we discuss them in
 
 \section{Towards differentiation for System F}
 \label{sec:diff-parametricity-system-f}
+In this section, we show how differentiation and the core of its correctness proof
+generalizes naturally to System F. We stop short of giving a full formal proof,
+but we conjecture our results follow as variations of existing proofs. To gain
+initial evidence, we have implemented the transformations described here on top
+of an existing PTS implementation. We leave further investigation as future work.
+
 Various authors noticed that differentiation appears related to (binary)
 parametricity (including \citet{Atkey2015ILC}).
 In particular, it resembles a transformation presented by
@@ -443,6 +451,7 @@ transformation for parametricity (which they write |eval t|).
 %format (idxi (t)) = "\mathcal{S}_i \llbracket" t "\rrbracket"
 %format star = "\star"
 %format cstar = "\lceil \star \rceil"
+%format box = "\Box"
 
 %format (ppp(t)) = "\mathcal{P}\llbracket" t "\rrbracket"
 %format pElemDt1 (tau) (t1) (t2) = "(" t1, t2 ")\in \mathcal{P}\llbracket" tau "\rrbracket"
@@ -452,13 +461,23 @@ transformation for parametricity (which they write |eval t|).
 %format (deriveP(t)) = "\mathcal{DP}\llbracket" t "\rrbracket"
 
 %format stlc = "\lambda_{\to}"
-%format stlc2 = "\lambda^2_{\to}"
-
-%format rAlpha = "\mathcal{R}_" alpha
-\paragraph{The parametricity transformation}
-First, we show a variant of their parametricity transformation, adapted to STLC
-(ignoring base types). Their transformation is based on the presentation of STLC
-as calculus |stlc|, a \emph{Pure Type System} (PTS)~\citep{Barendregt1992lambda}.
+%format stlc2 = stlc "^2"
+%  "\lambda^2_{\to}"
+%format lamp = "\lambda_P"
+%format lamp2 = lamp "^2"
+%format lap2 = "\lambda_{P2}"
+%format lap22 = lap2 "^2"
+%format sysf = "\lambda_{2}"
+%format sysf2 = sysf "^2"
+%format rAlpha = "\mathcal{R}^" alpha
+\subsection{The parametricity transformation}
+First, we show a variant of their parametricity transformation, adapted to a
+variant of STLC without base types but with type variables. Presenting |stlc|
+using type variables will help when we come back to System F, and allows
+discussing parametricity on STLC.
+Their transformation
+is based on the presentation of STLC as calculus |stlc|, a \emph{Pure Type
+System} (PTS)~\citep[Sec 5.2]{Barendregt1992lambda}.
 
 In PTSs, terms and types form a single syntactic category, but are distinguished
 through an extended typing judgement (written |Gamma /- t : t|) using additional
@@ -472,34 +491,62 @@ Typing restricts whether terms of some sort |s1| can abstract over terms of sort
 (specified by \emph{relations} |ptsRel|), but
 lots of metatheory for PTSs is parameterized over the choice of combinations.
 In STLC presented as a PTS, there is an additional
-sort |star|; those terms |tau| such that |/- tau : star| are types. We do not
-intend to give a full introduction to PTSs, only to introduce what's strictly
-needed for our presentation.
+sort |star|; those terms |tau| such that |/- tau : star| are
+types.\footnote{Calculus |stlc| has also a sort |box| such that |/- star : box|,
+but |box| itself has no type. Such a sort appears only in PTS typing
+derivations, not in well-typed terms themselves, so we do not discuss it
+further.} We do not intend to give a full introduction to PTSs, only to
+introduce what's strictly needed for our presentation, and refer the readers to
+existing presentations~\citep{Barendregt1992lambda}.
 
-\citeauthor{Bernardy2011realizability}'s transformation produces terms in a PTS |stlc2|
-that extends STLC with a separate sort |cstar| of propositions, together with
-enough abstraction power to abstract propositions over values.
-Instead of base types, |stlc| and |stlc2| use uninterpreted type variables |alpha|, but
+Instead of base types, |stlc| use uninterpreted type variables |alpha|, but
 do not allow terms to bind them. Nevertheless, we can write open terms, free in
 type variables for, say, naturals, and term variables for operations on
-naturals. STLC restricts |Pi|-types to the usual arrow types through |ptsRel|.
-Presenting |stlc| using type variables will help when we come back to System F.
+naturals. STLC restricts |Pi|-types |PPi (x : A). B| to the usual arrow types |A
+-> B| through |ptsRel|: one can show that in |PPi (x : A) . B|, variable |x|
+cannot occur free in |B|.
 
-Here, |pElemDt1 tau t1 t2| is an proposition (hence, living in |cstar|),
-witnessing that |t1| and |t2| are related;
-we write |dxx| for a proof that |x1| and |x2| are related. For type variables |alpha|,
+\citeauthor{Bernardy2011realizability} show how to transform a typed term |Gamma
+/- t : tau| in a strongly normalizing PTS $P$ into a proof that |t| satisfies the
+parametricity statement for |tau|. The proof is in a logic represented by PTS
+$P^2$, constructed uniformly from $P$, and strongly normalizing whenever $P$
+is.
+\citeauthor{Bernardy2011realizability}'s transformation on |stlc| produces terms
+in a PTS |stlc2|, produced by transforming |stlc|.
+PTS |stlc2| extends |stlc| with a separate sort |cstar| of propositions, together with
+enough abstraction power to abstract propositions over values.
+Like |stlc|, |stlc2| uses uninterpreted type variables |alpha| and does not
+allow abstracting over them.
+
+In parametricity statements about |stlc|, we write |pElemDt1 tau t1 t2| for a
+proposition (hence, living in |cstar|) that states that |t1| and |t2| are
+related. This proposition is defined, as usual, via a logical relation.
+We write |dxx| for a proof that |x1| and |x2| are related. For type variables |alpha|,
 transformed terms abstract over an arbitrary relation |rAlpha| between |alpha1| and
 |alpha2|. When |alpha| is instantiated by |tau|, |rAlpha| \emph{can} (but does
-not have to) be instantiated with relation |pElemDt1 tau|; this is the essence
-of Girard's idea of reducibility candidates~\citep{girard1989proofs}.
+not have to) be instantiated with relation |pElemDt1 tau|. Allowing alternative
+instantiations makes parametricity statements more powerful, and it is also
+necessary to define parametricity for impredicative type systems (like System F)
+in a predicative ambient logic. This is the essence
+of Girard's idea of reducibility candidates~\citep{girard1989proofs}.%
+\footnote{Specifically, if we require |rAlpha| to be instantiated with the
+logical relation itself for |tau| when |alpha| is instantiated with |tau|, the
+definition becomes circular. Consider the definition of |pElemDt1 (forall alpha.
+tau) t1 t2|: type variable |alpha| can be instantiated with the same type
+|forall alpha. tau|, so the definition of |pElemDt1 (forall alpha. tau) t1 t2|
+becomes impredicative.}
 
 A transformed term |ppp(t)| relates two executions of terms |t| in different
 environments: it can be read as a proof that term |t| maps related inputs to
-related outputs. The proof strategy they
-use is the standard one for proving fundamental properties of logical relations;
+related outputs. The proof strategy that |ppp(t)|
+uses is the standard one for proving fundamental properties of logical relations;
 but instead of doing a proof in the metalevel logic (by induction on terms and
-typing derivations), here we define an object-level logic and generate proof
-terms in this logic by recursion on terms.
+typing derivations), |stlc2| serves as an object-level logic, and |ppp|
+generates proof terms in this logic by recursion on terms. At the metalevel,
+\citeauthor[Th. 3]{Bernardy2011realizability} prove that for any well-typed term
+|Gamma /- t : tau|, proof |ppp t| shows that |t| satisfies the parametricity statement
+for type |tau| given the hypotheses |ppp Gamma| (or more formally,
+|ppp(Gamma) /- ppp(t): pElemDt1 tau (idx1 t) (idx2 t)|).
 \begin{code}
   pElemDt1 (sigma -> tau) f1 f2 = PPi ((x1 : idx1 sigma)) (x2 : idx2 sigma) (dxx : pElemDt1 sigma x1 x2).
     pElemDt1 tau (f1 x1) (f2 x2)
@@ -529,9 +576,12 @@ second computation. To wit, the straightforward definition is:
 
 It might be unclear how the proof |ppp t| references the original term |t|.
 Indeed, it does not do so explicitly. But since in PTS $\beta$-equivalent types
-have the same members, we can construct typing judgement that mention |t|. This
-is best shown on a small example.
+have the same members, we can construct typing judgement that mention |t|. As
+mentioned, from |Gamma /- t : tau| it follows that
+|ppp(Gamma) /- ppp(t): pElemDt1 tau (idx1 t) (idx2 t)|~\citep[Th.
+3]{Bernardy2011realizability}. This is best shown on a small example.
 
+\begin{example}
 Take for instance an identity function |id = \(x: alpha) -> x|, which is typed
 in an open context (that is, |alpha : star /- \(x : alpha) -> x|).
 The transformation gives us
@@ -544,79 +594,152 @@ which simply returns the proofs that inputs are related:
   x1 x2|.
 \end{multline*}
 
-This typing judgement does not mention |id|. But since |x1 `betaeq` id x1| and
-|x2 `betaeq` id x2|, we can also show that
+This typing judgement does not mention |id|. But since |x1 `betaeq`
+idx1 id x1| and
+|x2 = idx2 id x2|, we can also show that |id|'s outputs are related whenever the
+inputs are:
 \begin{multline*}
 |alpha1 : star, alpha2 : star, rAlpha : alpha1 -> alpha2 -> cstar /-| \\
   |pid : PPi ((x1 : alpha1)) (x2 : alpha2). pElemDt1 alpha x1 x2 -> pElemDt1 alpha
-  (id x1) (id x2)|,
+  (idx1 id x1) (idx2 id x2)|.
 \end{multline*}
-or more concisely that
+More concisely, we can show that:
 \[
 |alpha1 : star, alpha2 : star, rAlpha : alpha1 -> alpha2 -> cstar /-
-pid : pElemDt1 (alpha -> alpha) id id|.
+pid : pElemDt1 (alpha -> alpha) (idx1 id) (idx2 id)|.
 \]
+\end{example}
 
-\citeauthor{Bernardy2011realizability} prove that this works in general: if
-|Gamma /- s : t| then |ppp(Gamma) /- ppp(s): pElemDt1 t (idx1 s) (idx2 s)| (as a
-special case of their Theorem 3).
-
-\paragraph{Differentiation and parametricity}
-We reobtain a close variant of differentiation by altering the parametricity transform.
+\subsection{Differentiation and parametricity}
+\label{sec:differentiation-dep-types-stlc}
+We obtain a close variant of differentiation by altering the transformation for
+binary parametricity.
 Instead of only having proofs that values are related, we can modify |pElemDt1 (tau)
 t1 t2| to be a type of values---more precisely, a dependent type |elemDt2 tau t1
 t2| of valid changes, indexed by source |t1 : idx1(tau)| and destination |t2 :
-idx2(tau)|. Similarly, |rAlpha| is a type of changes, not propositions.
-For type variables |alpha|, we specialize the transformation further, ensuring
-that |alpha1 = alpha2| (and adapting |idx1, idx2| accordingly). Without this
-specialization, we get to deal with changes across different types, which we
-don't do just yet.
+idx2(tau)|. Similarly, |rAlpha| is replaced by a dependent type of changes, not
+propositions, that we write |DtAlpha|.
+Formally, this is encoded by replacing sort |cstar| with |star|, and by moving
+target programs in a PTS that allows for both simple and dependent types, like
+the Edinburgh Logical Framework; such a PTS is known as
+|lamp|~\citep{Barendregt1992lambda}.
 
+For type variables |alpha|, we specialize the transformation further, ensuring
+that |alpha1 = alpha2 = alpha| (and adapting |idx1, idx2| accordingly to \emph{not} add
+subscripts to type variable). Without this
+specialization, we get to deal with changes across different types, which we
+don't do just yet but defer to \cref{sec:param-derive-changes-across-types}.
+
+We first show how the transformation affects typing contexts:
+\begin{code}
+  derive(emptyCtx) = emptyCtx
+  derive(Gamma, x : sigma) = derive(Gamma), x1 : sigma, x2 : sigma, dx : elemDt2 sigma x1 x2
+  derive(Gamma, alpha : star) = derive(Gamma), alpha : star, DtAlpha : alpha -> alpha -> star
+\end{code}
+Unlike standard differentiation, transformed programs bind, for each input
+variable |x: sigma|,
+a source |x1: sigma|, a destination |x2 : sigma|, and a valid change |dx| from
+|x1| to |x2|. More in detail, for each variable in input programs |x : sigma|, programs produced by standard
+differentiation bind both |x : sigma| and |dx : sigma|; valid use of these
+programs requires |dx| to be a valid change with source |x|, but this is not
+enforced through types.
+Instead, programs produced by \emph{this variant} of differentiation bind,
+for each variable in input programs |x : sigma|, both source |x1 :
+sigma|, destination |x2 : sigma|, and a valid change |dx| from |x1| to |x2|,
+where validity is enforced through dependent types.
+
+For input type variables |alpha|, output programs also bind a dependent type of
+valid changes |DtAlpha|.
+
+Next, we define the type of changes. Since change types are indexed by source
+and destination, the type of function changes forces them to be valid, and the
+definition of function changes resembles our earlier logical relation for
+validity.
+More precisely, if |df| is a change from |f1| to |f2| (|df : elemDt2 (sigma -> tau) f1 f2|), then
+|df| must map any change |dx| from initial input |x1| to updated input |x2| to a
+change from initial output |f1 x1| to updated output |f2 x2|.
 \begin{code}
   elemDt2 (sigma -> tau) f1 f2 = PPi ((x1 x2 : sigma)) (dx : elemDt2 sigma x1 x2) .
     elemDt2 tau (f1 x1) (f2 x2)
-  elemDt2 alpha x1 x2 = rAlpha x1 x2
-
+  elemDt2 alpha x1 x2 = DtAlpha x1 x2
+\end{code}
+At this point, the transformation on terms acts on abstraction and application
+to match the transformation on typing contexts. The definition of |derive(\(x :
+sigma) -> t| follows the definition of |derive(Gamma, x : sigma)|---both
+transformation results bind the same variables |x1, x2, dx| with the same types.
+Application provides corresponding arguments.
+\begin{code}
   derive(x) = dx
   derive(\(x : sigma) -> t) = \(x1 x2 : sigma) (dx : elemDt2 sigma x1 x2) -> derive(t)
   derive(s t) = derive(s) (idx1 s) (idx2 s) (derive t)
-
-  derive(emptyCtx) = emptyCtx
-  derive(Gamma, x : tau) = derive(Gamma), x1 : tau, x2 : tau, dx : elemDt2 tau x1 x2
-  derive(Gamma, alpha : star) = derive(Gamma), alpha : star, rAlpha : alpha -> alpha -> cstar
 \end{code}
-Unlike standard differentiation, we pass around both source and
-destination of changes. In fact, in general it might also be useful to put in
-context, next to type variables |alpha|, also change structures for |alpha|, to
+% Unlike standard differentiation, we pass around both source and
+% destination of changes, and the type of changes is indexed by both source and
+% destination.
+% Making different choices would still give us a correct
+% transformation; but
+% The transformation
+% Here, we could just as well pass only the source, but
+% next section we are going to alter this transformation to produce proofs of
+% correctness
+% are next going to pass around
+
+If we extend the language to support primitives and their manually-written
+derivatives, it is useful to have contexts also bind,
+next to type variables |alpha|, also change structures for |alpha|, to
 allow terms to use change operations. Since the differentiation output does not
-use change operations here (unlike derivatives) we omit change structures for now.
+use change operations here, we omit change structures for now.
 
 This transformation is not incremental,
 as it recomputes both source and destination for each application,
 but we could fix this by replacing |idx2 s| with |idx1 s `oplus` derive s| (and
-passing change structures to make |`oplus`| available to terms). We ignore such complications.
+passing change structures to make |`oplus`| available to terms), or by not
+passing destinations. We ignore such complications here.
 
-Along similar lines, we believe we can also generate from |t| a proof in |stlc2|
-that |derive t| is correct, that is, that |pElemDt2 tau (idx1 t) (idx2
-t) (derive t)|, and that this can be done through the following transformation:
+\subsection{Proving differentiation correct externally}
+Instead of producing dependently-typed programs that show their correctness, we
+might want to produce simply-typed programs (which are easier to compile
+efficiently) and use an external correctness proof, as in
+\cref{ch:derive-formally}. We show how to generate such external proofs here.
+For simplicity, here we produce external correctness proofs for the
+transformation we just defined on dependently-typed outputs, rather than
+defining a separate simply-typed transformation.
+
+Specifically, we show how to generate
+%Along similar lines, we believe we can also generate
+from well-typed terms |t| a proof that |derive t| is correct, that is, that
+|pElemDt2 tau (idx1 t) (idx2 t) (derive t)|.
+% \pg{This variant is pointless because |derive t| is intrinsically correct, but
+%   we could show this for transformations that are not.}
+%While we show this proof for intrinsically-typed
+
+Proofs are generated through the following transformation, defined in terms of
+the transformation from \cref{sec:differentiation-dep-types-stlc}. Again, we
+show first typing contexts and the logical relation:
 \begin{code}
+  deriveP(emptyCtx) = emptyCtx
+  deriveP(Gamma, x : tau) = deriveP(Gamma), x1 : tau, x2 : tau,
+    dx : elemDt2 tau x1 x2, dxx : pElemDt2 tau x1 x2 dx
+  deriveP(Gamma, alpha : star) = deriveP(Gamma), alpha : star,
+    DtAlpha : alpha -> alpha -> star,
+    rAlpha : PPi ((x1 : alpha)) (x2 : alpha) (dx : elemDt2 alpha x1 x2) -> cstar
+
   pElemDt2 (sigma -> tau) f1 f2 df =
     PPi ((x1 x2 : sigma)) (dx : elemDt2 sigma x1 x2) (dxx : pElemDt2 sigma x1 x2 dx).
       pElemDt2 tau (f1 x1) (f2 x2) (df x1 x2 dx)
   pElemDt2 alpha x1 x2 dx = rAlpha x1 x2 dx
+\end{code}
+The transformation from terms to proofs then matches the definition of typing contexts:
+\begin{code}
   deriveP(x) = dxx
   deriveP(\(x : sigma) -> t) =
-    \(x1 x2 : sigma) (dx : elemDt2 sigma x1 x2) (dxx : pElemDt2 sigma x1 dx x2) ->
+    \(x1 x2 : sigma) (dx : elemDt2 sigma x1 x2) (dxx : pElemDt2 sigma x1 x2 dx) ->
       deriveP(t)
   deriveP(s t) = deriveP(s) (idx1 s) (idx2 s) (derive t) (deriveP t)
-
-  deriveP(emptyCtx) = emptyCtx
-  deriveP(Gamma, x : tau) = deriveP(Gamma), x1 : tau, x2 : tau,
-    dx : elemDt2 tau x1 x2, dxx : pElemDt2 tau x1 dx x2
-  deriveP(Gamma, alpha : star) = deriveP(Gamma), alpha : star,
-    rAlpha : PPi ((x1 : alpha)) (x2 : alpha) -> PPi ((dx : elemDt2 tau x1 x2)) -> cstar
 \end{code}
-This term produces a proof object in |stlc2|, whose informal proof content follows
+This term produces a proof object in PTS |lamp2|, which is produced by
+augmenting |lamp| following \citet{Bernardy2011realizability}.
+The informal proof content of generated proofs follows
 the proof of |derive|'s correctness (\cref{thm:derive-correct}):
 For a variable |x|, we just use the assumption |dxx| that
 |pElemDt2 tau x1 dx x2|, that we have in context.
@@ -632,7 +755,7 @@ being applied to valid inputs, using the proof that |derive t| is correct
 (obtained recursively via |deriveP t|).
 
 \subsection{Changes across types}
-
+\label{sec:param-derive-changes-across-types}
 %format ChangeStruct2
 %format NilChangeStruct2
 %format `bplus` = "\boxplus"
@@ -671,8 +794,8 @@ But replacement changes are not the only option. For product types, or for any
 form of nested data, we can apply changes to
 the different components, changing the type of some components:
   \begin{code}
-  instance (ChangeStruct sigma1 sigma2, ChangeStruct tau1 tau2) =>
-      ChangeStruct (sigma1, tau1) (sigma2 , tau2) where
+  instance (  ChangeStruct sigma1 sigma2, ChangeStruct tau1 tau2) =>
+              ChangeStruct (sigma1, tau1) (sigma2 , tau2) where
     type Dt2 (sigma1, tau1) (sigma2 , tau2) = (Dt2 sigma1 sigma2, Dt2 tau1 tau2)
     (a1 , b1) `bplus` (da, db) = (a1 `bplus` da, b1 `bplus` db)
 \end{code}
@@ -681,11 +804,12 @@ in the Haskell community as \emph{polymorphic record update}, a feature that has
 proven desirable in the context of lens
 libraries~\citep{OConnor2012polymorphic,Kmett2012mirrored}.
 
-We can also generalize the transformation:
+We can also generalize differentiation for |stlc| so that it allows for changes
+across types:
 \begin{code}
   elemDt2 (sigma -> tau) f1 f2 = PPi ((x1 : idx1 sigma)) (x2 : idx2 sigma) (dx : elemDt2 sigma x1 x2) .
     elemDt2 tau (f1 x1) (f2 x2)
-  elemDt2 alpha x1 x2 = rAlpha x1 x2
+  elemDt2 alpha x1 x2 = DtAlpha x1 x2
 
   derive(x) = dx
   derive(\(x : sigma) -> t) = \(x1 : idx1 sigma) (x2 : idx2 sigma) (dx : elemDt2 sigma x1 x2) -> derive(t)
@@ -693,18 +817,77 @@ We can also generalize the transformation:
 
   derive(emptyCtx) = emptyCtx
   derive(Gamma, x : tau) = derive(Gamma), x1 : idx1(tau), x2 : idx2(tau), dx : elemDt2 tau x1 x2
-  derive(Gamma, alpha : star) = derive(Gamma), alpha1 : star, alpha2 : star, rAlpha : alpha1 -> alpha2 -> cstar
+  derive(Gamma, alpha : star) = derive(Gamma), alpha1 : star, alpha2 : star, DtAlpha : alpha1 -> alpha2 -> star
 \end{code}
-
-%format dalpha = "d" alpha
-At this point, we are also ready to extend the transformation to System F.
+By adding a few additional rules, we can extend differentiation to System F (the
+PTS |sysf|). We choose to present the additional rules using System F syntax
+rather than PTS syntax.
 \begin{code}
   elemDt2 (forall alpha . T) f1 f2 =
-    PPi ((alpha1 : *)) (alpha2 : *) (rAlpha : alpha1 -> alpha2 -> star). elemDt2 T (f1 [alpha1]) (f2 [alpha2])
+    PPi ((alpha1 : *)) (alpha2 : *) (DtAlpha : alpha1 -> alpha2 -> star). elemDt2 T (f1 [alpha1]) (f2 [alpha2])
   derive(PLambda alpha . t) =
-    \(alpha1 alpha2: star) (rAlpha : alpha1 -> alpha2 -> star) -> derive(t)
+    \(alpha1 alpha2: star) (DtAlpha : alpha1 -> alpha2 -> star) -> derive(t)
   derive(t [tau]) = derive t (idx1 tau) (idx2 tau) (elemDt2 tau)
 \end{code}
+Produced terms use a combination of System F and dependent types, which is known
+as |lap2|~\citep{Barendregt1992lambda} and is strongly normalizing. This PTS
+corresponds to second-order (intuitionistic) predicate logic and is part of
+Barendregt's \emph{lambda cube}; |lap2| does not admit types depending on types
+(that is, type-level functions), but admits all other forms of abstraction in
+the lambda cube (terms on terms like |stlc|, terms on types like System F, and
+types on terms like LF/|lamp|).
+
+Finally, we sketch a transformation producing proofs that differentiation is
+correct for System F.
+\begin{code}
+  deriveP(emptyCtx) = emptyCtx
+  deriveP(Gamma, x : tau) = deriveP(Gamma), x1 : idx1(tau), x2 : idx2(tau),
+    dx : elemDt2 tau x1 x2, dxx : pElemDt2 tau x1 x2 dx
+  deriveP(Gamma, alpha : star) = deriveP(Gamma),
+    alpha1 : star, alpha2 : star, DtAlpha : alpha1 -> alpha2 -> star
+    rAlpha : PPi ((x1 : alpha1)) (x2 : alpha2) (dx : elemDt2 alpha x1 x2) -> cstar
+
+  pElemDt2 (forall alpha. T) f1 f2 df =
+    PPi ((alpha1 : *)) (alpha2 : *) (DtAlpha : alpha1 -> alpha2 -> star)
+    (rAlpha : PPi ((x1 : alpha1)) (x2 : alpha2) (dx : elemDt2 alpha x1 x2) -> cstar).
+      pElemDt2 T (f1 [alpha1]) (f2 [alpha2]) (df [alpha1] [alpha2] [DtAlpha])
+  pElemDt2 (sigma -> tau) f1 f2 df =
+    PPi ((x1 : idx1 sigma)) (x2 : idx2 sigma) (dx : elemDt2 sigma x1 x2) (dxx : pElemDt2 sigma x1 x2 dx).
+      pElemDt2 tau (f1 x1) (f2 x2) (df x1 x2 dx)
+  pElemDt2 alpha x1 x2 dx = rAlpha x1 x2 dx
+
+  deriveP(x) = dxx
+  deriveP(\(x : sigma) -> t) =
+    \  (x1 : idx1 sigma) (x2 : idx2 sigma) (dx : elemDt2 sigma x1 x2)
+       (dxx : pElemDt2 sigma x1 x2 dx) ->
+       deriveP(t)
+  deriveP(s t) = deriveP(s) (idx1 s) (idx2 s) (derive t) (deriveP t)
+  deriveP(PLambda alpha . t) =
+    \  (alpha1 alpha2: star) (DtAlpha : alpha1 -> alpha2 -> star)
+       (rAlpha : PPi ((x1 : alpha1)) (x2 : alpha2) (dx : elemDt2 alpha x1 x2) -> cstar) ->
+       deriveP(t)
+  deriveP(t [tau]) = deriveP t (idx1 tau) (idx2 tau) (elemDt2 tau) (pElemDt2 tau)
+\end{code}
+Produced terms live in |lap22|, the logic produced by extending |lap2| following
+\citeauthor{Bernardy2011realizability}. A variant producing proofs for a
+non-dependently-typed differentiation (as suggested earlier) would produce
+proofs in |sysf2|, the logic produced by extending |sysf| following
+\citeauthor{Bernardy2011realizability}.
+
+\subsection{Prototype implementation}
+\label{sec:param-derive-implementation}
+We have written a prototype implementation of the above rules for a PTS
+presentation of System F, and verified it on a few representative examples of
+System F terms. We have built our implementation on top of an existing
+typechecker for PTSs.\footnote{\url{https://github.com/Toxaris/pts/}, by Tillmann
+  Rendel, based on \citet{vanBenthemJutting1994checking}'s algorithm for
+  PTS typechecking.}
+
+Since our implementation is defined in terms of a generic PTS, some of the rules
+presented above are unified and generalized in our implementation, suggesting
+the transformation might generalize to arbitrary PTSs. In the absence of
+further evidence on the correctness of this generalization, we leave a detailed
+investigation as future work.
 
   % elemDt2 (forall X . T) f1 f2 = PPi ((X1 : *)) (X2 : *) (DX : *). elemDt2 T (f1 [X1]) (f2 [X2])
   % derive(Lambda X . t) = Lambda X1 X2 DX. derive(t)
