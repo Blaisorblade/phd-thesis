@@ -1454,7 +1454,8 @@ collaboration between me and Yann Régis-Gianas, who came up with the
 general strategy and the first partial proofs for untyped $\lambda$-calculi.
 After we both struggled for a while to set up step-indexing correctly enough for a
 full proof, I first managed to give the definitions in this chapter and
-complete the proofs here described.
+complete the proofs here described. Régis-Gianas then mechanized a variant of
+this proof in Coq~\citet{Giarrusso2017Static}.
 
 \section{Conclusion}
 In this chapter we have shown how to construct novel models for
@@ -1470,7 +1471,7 @@ By formally defining intensional validity for closures, we
 provide a solid foundation for the use of defunctionalized
 function changes (\cref{ch:defunc-fun-changes}).
 
-This proof was made much simpler by \citet{Ahmed2006stepindexed}'s
+This proof builds on \citet{Ahmed2006stepindexed}'s
 work on step-indexed logical relations, which enable handling of
 powerful semantics feature using rather elementary techniques.
 The only downside is that it can be tricky to set up the correct
