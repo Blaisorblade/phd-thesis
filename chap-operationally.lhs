@@ -30,7 +30,7 @@ validity; we detail later which corollaries we prove in which
 case.
 The proof for untyped $\lambda$-calculus is the most
 interesting, but the others can serve as stepping stones. We are
-currently working (together with Yann-Régis Gianas) on
+currently working (together with Yann Régis-Gianas) on
 mechanizing the proof for untyped $\lambda$-calculus in
 Coq.\footnote{Mechanizing the proof for untyped
   $\lambda$-calculus is harder for purely technical reasons:
