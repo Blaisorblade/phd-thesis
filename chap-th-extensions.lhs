@@ -775,8 +775,14 @@ section we lift this restriction and define \emph{polymorphic change
   structures}. To do so, we sketch how to extend core change-structure
 operations to this scenario.
 We describe change operations for generalized change structures via a Haskell
-typeclass.
-\pg{Add such a typeclass earlier.}
+typeclass and relative instances, as we did in \cref{ch:diff-examples}.%
+\footnote{GHC rejects most combinations of these instances with overlap errors
+  for type family definitions, some of which appear overly conservative
+(\url{https://ghc.haskell.org/trac/ghc/ticket/4259}), but
+we ignore this overlap problem. We only want to describe ways to produce new change
+structures from existing ones, and not necessarily how to select automatically
+the appropriate change structure for a given type. Arguably, we are describing
+only ML functors, not typeclass instances.}
 \begin{code}
   class ChangeStruct2 tau1 tau2 where
     type Dt2 tau1 tau2
@@ -812,8 +818,10 @@ in the Haskell community as \emph{polymorphic record update}, a feature that has
 proven desirable in the context of lens
 libraries~\citep{OConnor2012polymorphic,Kmett2012mirrored}.
 
-We can also generalize differentiation for |stlc| so that it allows for changes
-across types:
+\subsection{Differentiation for System F}
+\label{sec:param-derive-changes-across-types-transform}
+After introducing changes across different types, we can also generalize
+differentiation for |stlc| so that it allows for the now generalized changes:
 \begin{code}
   elemDt2 (sigma -> tau) f1 f2 = PPi ((x1 : idx1 sigma)) (x2 : idx2 sigma) (dx : elemDt2 sigma x1 x2) .
     elemDt2 tau (f1 x1) (f2 x2)
