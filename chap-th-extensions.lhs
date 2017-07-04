@@ -784,12 +784,12 @@ structures from existing ones, and not necessarily how to select automatically
 the appropriate change structure for a given type. Arguably, we are describing
 only ML functors, not typeclass instances.}
 \begin{code}
-  class ChangeStruct2 tau1 tau2 where
-    type Dt2 tau1 tau2
-    bplus :: tau1 -> Dt2 tau1 tau2 -> tau2
-  class ChangeStruct2 tau tau => NilChangeStruct2 tau where
-    bnilc :: tau -> Dt2 tau tau
-  \end{code}
+class ChangeStruct2 tau1 tau2 where
+  type Dt2 tau1 tau2
+  bplus :: tau1 -> Dt2 tau1 tau2 -> tau2
+class ChangeStruct2 tau tau => NilChangeStruct2 tau where
+  bnilc :: tau -> Dt2 tau tau
+\end{code}
 We can still adapt all existing change structures |ChangeStruct tau| into
 |ChangeStruct2 tau tau|.
 \begin{code}
@@ -800,18 +800,18 @@ instance ChangeStruct tau => ChangeStruct2 tau tau where
 We can also have change structures across different types.
 Replacement changes are possible:
 \begin{code}
-  instance ChangeStruct2 tau1 tau2 where
-    type Dt2 tau1 tau2 = tau2
-    x1 `bplus` x2 = x2
-  \end{code}
+instance ChangeStruct2 tau1 tau2 where
+  type Dt2 tau1 tau2 = tau2
+  x1 `bplus` x2 = x2
+\end{code}
 But replacement changes are not the only option. For product types, or for any
 form of nested data, we can apply changes to
 the different components, changing the type of some components:
-  \begin{code}
-  instance (  ChangeStruct sigma1 sigma2, ChangeStruct tau1 tau2) =>
-              ChangeStruct (sigma1, tau1) (sigma2 , tau2) where
-    type Dt2 (sigma1, tau1) (sigma2 , tau2) = (Dt2 sigma1 sigma2, Dt2 tau1 tau2)
-    (a1 , b1) `bplus` (da, db) = (a1 `bplus` da, b1 `bplus` db)
+\begin{code}
+instance (  ChangeStruct2 sigma1 sigma2, ChangeStruct tau1 tau2) =>
+            ChangeStruct2 (sigma1, tau1) (sigma2 , tau2) where
+  type Dt2 (sigma1, tau1) (sigma2 , tau2) = (Dt2 sigma1 sigma2, Dt2 tau1 tau2)
+  (a1 , b1) `bplus` (da, db) = (a1 `bplus` da, b1 `bplus` db)
 \end{code}
 The ability to modify a field to one of a different type is also known as
 in the Haskell community as \emph{polymorphic record update}, a feature that has
