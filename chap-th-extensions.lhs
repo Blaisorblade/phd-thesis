@@ -524,11 +524,12 @@ related. This proposition is defined, as usual, via a logical relation.
 We write |dxx| for a proof that |x1| and |x2| are related. For type variables |alpha|,
 transformed terms abstract over an arbitrary relation |rAlpha| between |alpha1| and
 |alpha2|. When |alpha| is instantiated by |tau|, |rAlpha| \emph{can} (but does
-not have to) be instantiated with relation |pElemDt1 tau|. Allowing alternative
+not have to) be instantiated with relation |pElemDt1 tau|, but |rAlpha| abstracts
+over arbitrary \emph{candidate} relations (similar to the notion of reducibility
+candidates~\citep[Ch. 14.1.1]{girard1989proofs}). Allowing alternative
 instantiations makes parametricity statements more powerful, and it is also
 necessary to define parametricity for impredicative type systems (like System F)
-in a predicative ambient logic. This is the essence
-of Girard's idea of reducibility candidates~\citep{girard1989proofs}.%
+in a predicative ambient logic.%
 \footnote{Specifically, if we require |rAlpha| to be instantiated with the
 logical relation itself for |tau| when |alpha| is instantiated with |tau|, the
 definition becomes circular. Consider the definition of |pElemDt1 (forall alpha.
@@ -695,6 +696,13 @@ as it recomputes both source and destination for each application,
 but we could fix this by replacing |idx2 s| with |idx1 s `oplus` derive s| (and
 passing change structures to make |`oplus`| available to terms), or by not
 passing destinations. We ignore such complications here.
+\pg{Don't. A formal proof becomes a variant of Bernardy2011realizability.}
+% A proof that this variant of |derive| is correct proceeds similarly to our
+% earlier proof of \cref{thm:derive-correct}, but it requires additional
+% lemmas about |idx1| and |idx2|.
+% \begin{theorem}
+% If |Gamma /- t : tau| then |derive (Gamma) /- derive t : elemDt2 tau (idx1 t) (idx2 t)|.
+% \end{theorem}
 
 \subsection{Proving differentiation correct externally}
 Instead of producing dependently-typed programs that show their correctness, we
