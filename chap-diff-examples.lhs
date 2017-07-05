@@ -3,11 +3,14 @@
 %include changes.fmt
 
 \chapter{A tour of differentiation examples}
+\label{ch:diff-examples}
 Before dealing with ILC formally, we show a bigger set of example change structures and primitives.
 To describe these examples informally, we use Haskell notation and let
 polymorphism as appropriate (see \cref{sec:intro-stlc}).
 % We already sketch, how a change structure
 % can be represented in Haskell terms:
+
+\paragraph{Change structures in Haskell}
 We encode change structure
 as a \emph{type class} named |ChangeStruct|. An instance |ChangeStruct t|
 defines a change type |Dt^t| as an associated type and operations |`oplus`|,
@@ -18,6 +21,7 @@ class ChangeStruct t where
   oplus :: t -> Dt t -> t
   ominus :: t -> t -> Dt t
   (`ocompose`) :: Dt t -> Dt t -> Dt t
+  nilc :: t -> Dt t
 \end{code}
 In this chapter we will
 often show change structures where only some methods are defined; in actual
@@ -29,7 +33,8 @@ available, but we collapse this hierarchy here to simplify presentation.
 \section{Simple changes on lists}
 \label{sec:simple-changes-list-map}
 In this section, we consider a basic change structure on lists and the
-derivative of |map|, and we sketch informally its correctness.
+derivative of |map|, and we sketch informally its correctness. We prove it
+formally in \cref{ex:syn-changes-map}.
 
 To avoid notation conflicts, we represent lists via
 datatype |List a|, defined as follows:
