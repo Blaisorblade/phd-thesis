@@ -818,6 +818,34 @@ in the Haskell community as \emph{polymorphic record update}, a feature that has
 proven desirable in the context of lens
 libraries~\citep{OConnor2012polymorphic,Kmett2012mirrored}.
 
+We can also describe updates going from type |tau| to type |(sigma, tau)|,
+effectively prepending a value of type |sigma| to our data. Similarly, we can
+also remove values. It seems possible to extend such change structures
+constructions to compose change structures that, for instance, allow inserting
+or removing elements from a recursive datatype such as lists. However, we must
+leave investigation of such avenues to future work.
+% What's more, we can also define change structures that allow inserting or
+% removing elements into nested tuples.
+% We believe combining such change structures might produce
+% more interesting ones.
+\begin{code}
+instance ChangeStruct2 tau tau => ChangeStruct2 tau (sigma, tau) where
+  type Dt2 tau (sigma, tau) = (sigma, Dt2 tau tau)
+  b1 `bplus` (a2, db) = (a2, b1 `bplus` db)
+
+% instance ChangeStruct2 tau tau => ChangeStruct2 tau (tau, sigma) where
+%   type Dt2 tau (tau, sigma) = (Dt2 tau tau, sigma)
+%   a1 `bplus` (da, b2) = (a1 `bplus` da, b2)
+
+instance ChangeStruct2 tau tau => ChangeStruct2 (sigma, tau) tau where
+  type Dt2 (sigma, tau) tau = Dt2 tau tau
+  (_, b1) `bplus` db = b1 `bplus` db
+
+% instance ChangeStruct2 tau tau => ChangeStruct2 (tau, sigma) tau where
+%   type Dt2 (tau, sigma) tau = Dt2 tau tau
+%   (a1, _) `bplus` da = a1 `bplus` da
+\end{code}
+
 \subsection{Differentiation for System F}
 \label{sec:param-derive-changes-across-types-transform}
 After introducing changes across different types, we can also generalize
