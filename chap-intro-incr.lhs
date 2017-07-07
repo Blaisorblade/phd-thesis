@@ -78,8 +78,16 @@ differentiation: IDSL designers are to choose primitives that encapsulate
 efficiently incrementalizable computation schemes, while IDSL users are to
 express their computation using the primitives provided by the IDSL.
 
-% Helping IDSL designers to incrementalize primitives automatically is a most
-% desirable goal, though one that we leave open. We are working
+Helping IDSL designers to incrementalize primitives automatically is a
+desirable goal, though one that we leave open. In our setting, incrementalizing
+primitives becomes a problem of \emph{program synthesis}, and we agree with
+\citet{Shah2017synthesis} that it should be treated as such. Among others,
+\citet{Liu00} develops a systematic approach to this synthesis problem for
+first-order programs based on equational reasoning, but it is unclear how
+scalable this approach is. We provide foundations for using equational
+reasoning, and sketch an IDSL for handling different sorts of collections. We
+also discuss avenues at providing language plugins for more fundamental
+primitives, such as algebraic datatypes with structural recursion.
 
 \pg{rewrite}
 In the IDSLs we consider, similarly to database languages, we use primitives for
