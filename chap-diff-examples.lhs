@@ -152,6 +152,25 @@ of the provided ones.
 We extend their framework to handle function changes and generate derivatives
 for all functions that can be expressed in terms of the primitives.
 
+\pg{Consider resuming here}
+%\pg{Code size for snippets?}
+Conceptually, a change for type |Sequence a| is a sequence of atomic changes.
+Each atomic change inserts one element at a given position, or removes one
+element, or changes an element at one
+position.\footnote{\citet{Firsov2016purely} and our implementation allow.}
+% data AtomicChange a
+%   =  Insert Int a
+%   |  Delete Int
+%   |  ShiftAt
+%   |  ChangeAt Int (Dt^a)
+\begin{code}
+data SeqSingleChange a
+  =  Insert    { idx :: Int, x :: a }
+  |  Remove    { idx :: Int }
+  |  ChangeAt  { idx :: Int, dx :: Dt ^ a }
+data SeqChange a = Sequence (SeqSingleChange a)
+type Dt (Sequence a) = SeqChange a
+\end{code}
 \pg{Nil change detection}
 \pg{Move here example on list later}
 
