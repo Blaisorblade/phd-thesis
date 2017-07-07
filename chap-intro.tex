@@ -45,7 +45,7 @@ transparently.
 \section{This thesis}
 To reduce the need for manual optimizations, in this thesis we propose
 techniques for optimizing collection queries and executing them
-incrementally.\pg{Refine}
+incrementally.
 
 We consider the problem for functional programming languages such as Haskell or
 Scala, and we consider collection queries written using the APIs of their
@@ -57,37 +57,54 @@ also handle.
 
 Therefore, our optimizations and incrementalizations must handle programs in
 higher-order EDSLs that can contain arbitrary code in the host language. Hence,
-many of our optimizations will focus\pg{what's the ``focus'' of an optimization??}
-on properties of our collection EDSL, but
-will need to handle host language code. \pg{What's the focus/flow here?}We restrict the problem to purely
-functional programs (without mutation or other side effects, including
+many of our optimizations will exploit on properties of our collection EDSL, but
+will need to handle host language code. We restrict the problem to purely
+functional programs (without mutation or other side effects, mostly including
 non-termination), because such programs can be more ``declarative'' and because
 avoiding side effects can enable more powerful optimization and simplify the
 work of the optimizer at the same time.
 
-In particular, this thesis is divided into three parts:
+This thesis is divided into three parts:
 \begin{itemize}
-\item in \cref{part:ch-aosd13}, we describe work on optimizing collection queries by static program transformation~\citep{GiarrussoAOSD13}.
-\item in \cref{part:incr}, we describe work on incrementalizing programs
+\item In \cref{part:ch-aosd13}, we describe work on optimizing collection queries by static program transformation~\citep{GiarrussoAOSD13}.
+\item In \cref{part:incr}, we describe work on incrementalizing programs
   by static program transformation. This thesis presents the first approach that
   handles higher-order programs by using program transformation; hence, while
   our main examples use collection queries, we phrase the work in terms of
-  $\lambda$-calculi with unspecified primitives~\citep{CaiEtAl2014ILC}.
-\item in \cref{part:static}, we extend ILC with a further program transformation
+  $\lambda$-calculi with unspecified primitives~\citep*{CaiEtAl2014ILC}.
+\item In \cref{part:caching}, we extend ILC with a further program transformation
   step, so that base programs can store intermediate results and derivatives can
   reuse them, but without resorting to dynamic memoization and necessarily
-  needing to look results up at runtime. To this end, we extend techniques
-  mentioned by \citet{Liu00} to a higher-order, typed setting.
+  needing to look results up at runtime. To this end, we build on work by
+\citet{Liu00} and extend it to a higher-order, typed setting.
 \end{itemize}
 
-\pg{rewrite this once we have a second part.}
-\cref{part:incr}
-The second part makes the following contributions:
+\Cref{part:incr} and \cref{part:caching} are more theoretical than
+\cref{part:ch-aosd13}. That was necessary, because optimizations in
+\cref{part:ch-aosd13} are much better understood than our approach to
+incrementalization.
+
+To incrementalize programs, we are the first to extend to higher-order programs
+techniques based on finite differencing for queries on
+collections~\citep{Paige82FDC} and
+databases~\citep{Blakeley:1986:EUM,Gupta99MMV}.
+Incrementalizing by finite differencing is a well-understood technique for
+database queries. How to generalize it for higher-order programs or beyond
+databases was less clear, so we spend significant energy on providing sound
+mathematical foundations for this transformation.
+
+In fact, it took us a while to be sure that our transformation was correct, and
+to understand why; our first correctness proof~\citep*{CaiEtAl2014ILC}, while a
+significant step, was still more complex than needed. In \cref{part:incr},
+especially \cref{ch:derive-formally}, we offer a mathematically much simpler
+proof.
+
+\Cref{part:incr} makes the following contributions:
 \begin{itemize}
-\item We present a novel mathematical theory of changes and derivatives, which is more
-  general than other work in the field because changes are
-  first-class entities, they are distinct from base values and
-  they are defined also for functions.\pg{readd some reference.}
+\item We present a novel mathematical theory of changes and derivatives, which
+  is more general than other work in the field because changes are first-class
+  entities, they are distinct from base values and they are defined also for
+  functions.
   %(\cref{sec:1st-order-changes}).
   %KO: I think the next sentence cannot be understood at this point.
   %We introduce changes for complex types, defined compositionally.
@@ -129,34 +146,35 @@ incrementalize a variant of the MapReduce programming model~\citep{Lammel07}.
   orders of magnitude on realistic inputs (\cref{sec:applying}).
 \end{itemize}
 
-\pg{Describe \cref{part:static}}
+\pg{Describe \cref{part:caching}}
 \subsection{Included papers}
 This thesis includes material from joint work with colleagues.
 
 \Cref{part:ch-aosd13} is based on work by \citet*{GiarrussoAOSD13}. While the
 work was in collaboration, a few clearer responsibilities arose.
-I did most of the implementation work: among other things I devised the
-embedding for collection operations, implemented optimizations and indexing,
-implemented interpretation when compilation did not work well, and performed the
-performance evaluation.
-% Michael Eichberg and Ralf Mitschke contributed to the
-% evaluation on FindBugs code.
-% Christian K{\"{a}}stner contributed, among other things,
-% to the experiment design for the performance evaluation.
-% Klaus Ostermann proposed the original idea and supervised the project.
+I did most of the implementation work, and collaborated to the writing: among
+other things I devised the embedding for collection operations, implemented
+optimizations and indexing, implemented compilation when interpretation did not
+achieve sufficient performance, and performed the performance evaluation.
+Michael Eichberg and Ralf Mitschke contributed to the evaluation by adapting
+FindBugs queries.
+Christian K{\"{a}}stner contributed, among other things, to the experiment
+design for the performance evaluation. Klaus Ostermann proposed the original
+idea (together with an initial prototype) and supervised the project.
 
 \Cref{part:incr} is originally based on work by \citet*{CaiEtAl2014ILC}, though
 significantly revised. This work was even more of a team effort. I designed the
 overall project and came up with the original notion of change structures; Cai
 Yufei contributed differentiation itself and its first correctness proof.
-\Cref{part:incr} contains a novel correctness proof; its history and
+\Cref{part:incr} contains novel correctness proof; its history and
 contributions are discussed in \cref{sec:ilc-dev-history}.
 
-Furthermore, \cref{part:static} comes from a new, unpublished manuscript. I
-designed the overall approach, the transformation and the first case study on
-sequences, defining the change structure, designing the primitives and the first
-case study. Yann Régis-Gianas designed the proofs. Philipp Schuster contributed
-to the evaluation.
+Furthermore, \cref{part:caching} comes from a new, unpublished manuscript. I
+designed the overall approach, the transformation and the case study on
+sequences and nested loops. Proofs were done in collaboration with Yann
+Régis-Gianas: most of the work is his, though I contributed significantly to the
+correctness proof for ILC. Philipp Schuster contributed to the evaluation,
+devising language plugins for bags and maps.
 
 \pg{Readd section on excluded papers.}
 % \subsection{Excluded papers}
