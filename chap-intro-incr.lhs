@@ -31,7 +31,7 @@ options.
   available. For instance, build scripts (our |f|) are written in
   domain-specific languages that support (coarse-grained)
   incremental builds. Database query languages also have often
-  support for incrementalization. \pg{Mention here limits?}
+  support for incrementalization.\pg{Mention here limits?}
 \item Programmers can attempt using general-purpose techniques for
   incrementalizing programs, such as \emph{self-adjusting
     computation} and variants such as \emph{Adapton}. Self-adjusting
@@ -40,7 +40,7 @@ options.
   guarantees efficient incrementalization when applied to base
   programs that are \emph{designed} for efficient
   incrementalization.\pg{Citations}
-  Nevertheless, self-adjusting computation allowed incrementalizing programs
+  Nevertheless, self-adjusting computation enabled incrementalizing programs
   that had never been incrementalized by hand before.
 \end{itemize}
 
