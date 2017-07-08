@@ -218,7 +218,6 @@
 %format dx2
 %format dx3
 
-%format : = ":\,"
 %format Dt = "\Delta"
 %format DtIdx(t) = "\Delta_{" t "}"
 %format Dt2 = "\Delta_2"
