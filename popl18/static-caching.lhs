@@ -261,7 +261,7 @@ come with support for incrementalization.
 
 The ILC framework describes changes as first-class values, and types them using
 dependent types. To each type |A| we associate a type |Dt ^ A| of changes for
-|A|, and an \emph{update operator} |`oplus` : A -> Dt^A -> A|, that updates an
+|A|, and an \emph{update operator} |`oplus` :: A -> Dt^A -> A|, that updates an
 initial value with a change to compute an updated value.
 We also consider changes for evaluation environments, which contain changes for
 each environment entry.
@@ -602,7 +602,7 @@ must apply it to each element of |xs `oplus` dxs|.\pg{show reuse of previous res
 Suppose next that change |dxs| adds one element to |xs| and |dys| is a nil change
 for |ys|. Then |dmapPair1 ys dys| is a nil function change. And we must detect
 this dynamically.\pg{Why do we care about detection?}
-If a function change |df : Dt ^ (A -> B)| is represented as a
+If a function change |df :: Dt ^ (A -> B)| is represented as a
 function, and |A| is infinite, one cannot detect dynamically that it is a nil change.
 To enable runtime nil change detection, we apply closure
 conversion on function changes: a function change |df|, represented as a closure is
