@@ -1,0 +1,35 @@
+\begin{figure}
+  \footnotesize
+  \begin{mathpar}
+    \infer[\rulename{SVar}]{
+    }{
+      \seval\sectx\tx{1}{\sectxlookup\sectx\tx}
+    }
+
+    \infer[\rulename{STuple}]{
+      \seval{\sectxcons{\sectx}{\ty = \stuple{\sectxlookup\sectx{\many\tx}}}}{\sterm}{n}{\sclosedvalue}
+    }{
+      \seval\sectx{\slet{\ty = \stuple{\many\tx}}{\sterm}}{n + 1}{\sclosedvalue}
+    }
+
+    \infer[\rulename{SPrimitiveCall}]{
+      \sectxlookup\sectx\tf = \sprim
+      \\
+      \seval{\sectxcons{\sectx}{\ty = \tdelta\sprim{\sectxlookup\sectx\tx}}}{\sterm}{n}{\sclosedvalue}
+    }{
+      \seval\sectx{\slet{\ty = \sapp\tf\tx}{\sterm}}{n + 1}{\sclosedvalue}
+    }
+
+    \infer[\rulename{SClosureCall}]{
+      \sectxlookup\sectx\tf = \sclosure{\sectx_\tf}{\slam{\tx}{\sterm_\tf}}
+      \\
+      \seval{\sectxcons{\sectx_\tf}{\tx = \sectxlookup\sectx\tx}}{\sterm_\tf}{n}{\sclosedvalue_\ty}
+      \\
+      \seval{\sectxcons{\sectx}{\ty = \sclosedvalue_\ty}}{\sterm}{m}{\sclosedvalue}
+    }{
+      \seval\sectx{\slet{\ty = \sapp\tf\tx}{\sterm}}{n + m + 1}{\sclosedvalue}
+    }
+  \end{mathpar}
+  \caption{Step-indexed big-step semantics for base terms of source language $\source$.}
+  \label{fig:source-definition-base-terms-semantics}
+\end{figure}

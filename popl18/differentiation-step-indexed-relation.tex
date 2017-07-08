@@ -1,0 +1,57 @@
+\begin{figure}[b]
+  \footnotesize
+  \[
+  \begin{array}{l}
+    \bullet\;
+    \vvcrel{\delta_{\oplus} (\sconst, \idconst)}{n}{\sconst}{\idconst}
+    \\[1em]
+
+    \bullet\;
+    \vvcrel
+    {\sclosedvalue_2}
+    {n}
+    {\sclosedvalue_1}
+    {\replace{\sclosedvalue_2}}
+    \\[1em]
+
+    \bullet\;
+    \vvcrel
+    {\sclosedvalue}
+    {n}
+    {\sclosedvalue}
+    {\inil}
+    \\[1em]
+
+    \bullet\;
+    \vvcrel
+    {\stuple{\sclosedvalue_1, \ldots, \sclosedvalue_m}}
+    {n}
+    {\stuple{\icloseddvalue_1, \ldots, \icloseddvalue_m}}
+    {\stuple{\sclosedvalue'_1, \ldots, \sclosedvalue'_m}} \\
+    \quad\textrm{if and only if } \forall k < n,
+    \forall i \in [1 \ldots m ],
+    \vvcrel{\sclosedvalue_i}{n}{\icloseddvalue_i}{\sclosedvalue'_i}
+    \\[1em]
+
+    \bullet\;
+    \vvcrel
+    {\sclosure{\sectx_2}{\slam{\tx}{\sterm}}}
+    {n}
+    {\sclosure{\sectx_1}{\slam{\tx}{\sterm}}}
+    {\iclosure\iectx{\ilam{\tx\,\tdx}{\idterm}}} \\
+    \quad\textrm{if and only if $\sectx_2 = \sectx_1 \oplus \iectx$ and }
+    \forall k < n, \sclosedvalue_1, \icloseddvalue, \sclosedvalue_2, \\
+    \qquad\textrm{if }
+    \vvcrel{\sclosedvalue_2}{k}{\sclosedvalue_1}{\icloseddvalue} \\
+    \qquad\textrm{then }
+    \vvcrelterm
+    {\sectxcons{\sectx_1}{\tx = \sclosedvalue_1}}
+    {\sectxcons{\iectx}{\icloseddvalue}}
+    {\sectxcons{\sectx_2}{\tx = \sclosedvalue_2}}
+    {k}{\sterm}{\idterm}{\sterm}
+  \end{array}
+\]
+
+  \caption{Step-indexed relation between values and changes.}
+  \label{fig:step-index-relation-between-values-and-changes}
+\end{figure}

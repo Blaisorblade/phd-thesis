@@ -1,0 +1,387 @@
+\begin{figure}
+  \begin{multicols}{2}
+    \footnotesize
+%  \figsubtitle{Syntax}
+  \[
+  \begin{array}{rclr}
+    \multicolumn{4}{r}{\syntaxclass{Base terms}} \\
+    \tterm
+    & ::= &
+    \tlet{\ty, \tcacheid{\ty}{\tf}{\tx} = \tapp{\tf}{\tx}}{\tterm}
+    & \rem{Call} \\
+    & \mid &
+    \tlet{\ty = \stuple{\many\tx}}
+    & \rem{Tuple} \\
+    & \mid & (\tx, \tcache)
+    & \rem{Result} \\
+    \nextline
+    \multicolumn{4}{r}{\syntaxclass{Cache terms}} \\
+    \tcache
+    & ::= & \temptycache
+    & \rem{Empty} \\
+    & \mid & \tcachecons\tcache{\tcacheid{\ty}{\tf}{\tx}}
+    & \rem{Sub-cache} \\
+    & \mid & \tcachecons\tcache\tx
+    & \rem{Cached value} \\
+    \nextline
+    \multicolumn{4}{r}{\syntaxclass{Change terms}} \\
+    \tdterm
+    & ::= &
+    \multicolumn{2}{l}{
+    \tlet{\tdy, \tcacheid{\ty}{\tf}{\tx} = \tdapp{\tdf}{\tdx}{\tcacheid{\ty}{\tf}{\tx}}}{\tdterm}
+    \qquad \rem{Call}} \\
+    & \mid &
+    \tlet{\tdy = \stuple{\many\tdx}}{\tdterm}
+    & \rem{Tuple} \\
+    & \mid & (\tdx, \tupdcache)
+    & \rem{Result} \\
+    \nextline
+    \multicolumn{4}{r}{\syntaxclass{Cache updates}} \\
+    \tupdcache
+    & ::= & \temptycache
+    & \rem{Empty} \\
+    & \mid & \tcachecons\tupdcache\tcacheid{\ty}{\tf}{\tx}
+    & \rem{Sub-cache} \\
+    & \mid & \tcachecons\tupdcache{(\tchange\tx\tdx)}
+    & \rem{Updated value} \\
+    \nextline
+    \multicolumn{4}{r}{\syntaxclass{Closed values}} \\
+    \tclosedvalue
+    & ::= & \tclosure\tectx{\tlam{\tx}{\tterm}}
+    & \rem{Closure} \\
+    & \mid & \stuple{\many\tclosedvalue}
+    & \rem{Tuple} \\
+    & \mid & \tconst
+    & \rem{Literal} \\
+    & \mid & \tprim
+    & \rem{Primitive} \\
+    \nextline
+  \end{array}
+\]
+
+  \[
+  \begin{array}{rclr}
+\multicolumn{4}{r}{\syntaxclass{Cache values}} \\
+    \tcachedclosedvalues
+    & ::= & \temptycache
+    & \rem{Empty} \\
+    & \mid & \tcachecons\tcachedclosedvalues\tcachedclosedvalues
+    & \rem{Sub-cache} \\
+    & \mid & \tcachecons\tcachedclosedvalues\tclosedvalue
+    & \rem{Cached value} \\
+    \nextline
+    \multicolumn{4}{r}{\syntaxclass{Change values}} \\
+    \tcloseddvalue
+    & ::= & \tclosure\tdectx{\tlam{\tx,\tcache}{\tdterm}}
+    & \rem{Closure} \\
+    & \mid & \stuple{\many\tcloseddvalue}
+    & \rem{Tuple} \\
+    & \mid & \tdconst
+    & \rem{Literal} \\
+    & \mid & \tdnil
+    & \rem{Nil} \\
+    & \mid & \replace\tclosedvalue
+    & \rem{Replacement} \\
+    \nextline
+    \multicolumn{4}{r}{\syntaxclass{Base definitions}} \\
+    \tvdef
+    & ::= & \tx = \tclosedvalue
+    & \rem{Value definition} \\
+    & \mid & \tcacheid{\ty}{\tf}{\tx} = \tcachedclosedvalues
+    & \rem{Cache definition} \\
+    \nextline
+    \multicolumn{4}{r}{\syntaxclass{Change definitions}} \\
+    \tdvdef
+    & ::= & \tvdef
+    & \rem{Base} \\
+    & \mid & \tdx = \tcloseddvalue
+    & \rem{Change} \\
+    \nextline
+    \multicolumn{4}{r}{\syntaxclass{Evaluation environments}} \\
+    \tectx
+    & ::= & \tectxcons{\tectx}{\tvdef}
+    & \rem{Binding} \\
+    & \mid & \tectxempty
+    & \rem{Empty} \\
+    \nextline
+    \multicolumn{4}{r}{\syntaxclass{Change environments}} \\
+    \tdectx
+    & ::= & \tectxcons{\tdectx}{\tdvdef}
+    & \rem{Binding} \\
+    & \mid & \tectxempty
+    & \rem{Empty} \\
+  \end{array}
+  \]
+\end{multicols}
+\caption{The target language $\target$ (syntax).}
+  \label{fig:target-definition-syntax}
+\end{figure}
+
+\begin{figure}
+    \footnotesize
+  \begin{mathpar}
+    \footnotesize
+    \\
+    \figsubtitle{Evaluation of base terms}{
+      $\sneval{\tectx}{\tterm}{(\tclosedvalue, \tcachedclosedvalues)}$
+    }
+    \\
+
+    \infer[\rulename{TResult}]{
+      \tectxlookup\tectx\tx = \tclosedvalue \\
+      \sneval{\tectx}{\tcache}{\tcachedclosedvalues}
+    }{
+      \sneval{\tectx}{(\tx, \tcache)}{(\tclosedvalue, \tcachedclosedvalues)}
+    }
+
+    \infer[\rulename{TTuple}]{
+      \sneval
+      {\tectxcons{\tectx}{\ty = \tectxlookup\tectx{\many\tx}}}
+      {\tterm}
+      {(\tclosedvalue, \tcachedclosedvalues)}
+    }{
+      \sneval
+      {\tectx}
+      {\tlet{\ty = \stuple{\many\tx}}{\tterm}}
+      {(\tclosedvalue, \tcachedclosedvalues)}
+    }
+
+    \infer[\rulename{TClosureCall}]{
+      \tectxlookup\tectx\tf = \tclosure{\tectx'}{\tlam{\tx'}{\tterm'}} \\\\
+      \sneval
+      {\tectxcons{\tectx'}{\tx' = \tectxlookup\tectx\tx}}{\tterm'}{(\tclosedvalue', \tcachedclosedvalues')} \\\\
+      \sneval
+      {\tectxcons\tectx{\ty = \tclosedvalue'; \tcacheid\ty\tf\tx = \tcachedclosedvalues'}}
+      {\tterm}
+      {(\tclosedvalue, \tcachedclosedvalues)}
+    }{
+      \sneval
+      {\tectx}
+      {\tlet{\ty, \tcacheid\ty\tf\tx = \tf\;\tx}{\tterm}}
+      {(\tclosedvalue, \tcachedclosedvalues)}
+    }
+
+    \infer[\rulename{TPrimitiveCall}]{
+      \tectxlookup\tectx\tf = \sconst
+      \\
+      \tdelta\sconst{\sectxlookup\tectx\tx} = (\tclosedvalue', \tcachedclosedvalues')
+      \\
+      \sneval
+        {\sectxcons{\tectx}{\ty = \tclosedvalue'; \tcacheid\ty\tf\tx = \tcachedclosedvalues'}}
+        {\sterm}
+        {\sclosedvalue}
+    }{
+      \sneval\tectx
+      {\slet{\ty, \tcacheid\ty\tf\tx = \sapp\tf\tx}{\tterm}}
+      {(\tclosedvalue, \tcachedclosedvalues)}
+    }
+
+    \\
+    \figsubtitle{Evaluation of caches}{
+      $\sneval{\tectx}{\tcache}{\tcachedclosedvalues}$
+    }
+    \\
+
+    \infer[\rulename{TEmptyCache}]{
+    }{
+      \sneval{\tectx}{\temptycache}{\temptycache}
+    }
+
+    \infer[\rulename{TCacheVar}]{
+      \tectxlookup\tectx\tx = \tclosedvalue \\
+      \sneval{\tectx}{\tcache}{\tcachedclosedvalues}
+    }{
+      \sneval{\tectx}{\tcachecons\tcache\tx}{\tcachecons\tcachedclosedvalues\tclosedvalue}
+    }
+
+    \infer[\rulename{TCacheSubCache}]{
+      \tectxlookup\tectx{\tcacheid\ty\tf\tx} = \tcachedclosedvalues' \\
+      \sneval{\tectx}{\tcache}{\tcachedclosedvalues}
+    }{
+      \sneval
+      {\tectx}
+      {\tcachecons\tcache{\tcacheid\ty\tf\tx}}
+      {\tcachecons\tcachedclosedvalues{\tcachedclosedvalues'}}
+    }
+  \end{mathpar}
+  \caption{The target language $\target$ (semantics of base terms and caches).}
+  \label{fig:target-definition-base-semantics}
+\end{figure}
+
+\begin{figure}
+    \footnotesize
+  \begin{mathpar}
+    \\
+    \figsubtitle{Evaluation of change terms}{
+      $\sneval{\tdectx}{\tdterm}{(\tcloseddvalue, \tcachedclosedvalues)}$
+    }
+    \\
+
+    \infer[\rulename{TDResult}]{
+      \tectxlookup\tdectx\tdx = \tcloseddvalue \\
+      \sneval{\tdectx}{\tupdcache}{\tcachedclosedvalues}
+    }{
+      \sneval
+      {\tdectx}
+      {(\tdx, \tupdcache)}
+      {(\tcloseddvalue, \tcachedclosedvalues)}
+    }
+
+    \infer[\rulename{TDTuple}]{
+      \sneval
+      {\tectxcons{\tdectx}{\tdy=\tectxlookup\tdectx{\many\tdx}}}
+      {\tdterm}
+      {(\tcloseddvalue, \tcachedclosedvalues)}
+    }{
+      \sneval
+      {\tdectx}
+      {\tlet
+        {\tdy = \stuple{\many\tx}}
+        {\tdterm}
+        {(\tcloseddvalue, \tcachedclosedvalues)}}
+    }
+
+    \infer[\rulename{TDReplaceCall}]{
+      \tectxlookup\tdectx\tdf = \replace{\tclosedvalue_\tf} \\\\
+      \sneval{\newenv{\tdectx}}{\scall\tf\tx}{(\tclosedvalue', \tcachedclosedvalues')} \\\\
+      \sneval
+      {\tectxcons\tdectx{\tdy = \replace{\tclosedvalue'}; \tcacheid\ty\tf\tx = \tcachedclosedvalues'}}
+      {\tdterm}
+      {(\tcloseddvalue, \tcachedclosedvalues)}
+    }{
+      \sneval
+      {\tdectx}
+      {\tlet{\tdy, \tcacheid\ty\tf\tx = \tdf\;\tdx\;\tcacheid\ty\tf\tx}{\tdterm}}
+      {(\tcloseddvalue, \tcachedclosedvalues)}
+    }
+
+    \infer[\rulename{TDClosureNil}]{
+      \tectxlookup\tdectx{\tf,\tdf} = \tclosure{\tdectx_\tf}{\slam{\tx}{\tterm_f}}, \inil \\\\
+      \seval
+      {\sectxcons{\tdectx_f}{\tx = \sectxlookup{\newenv\tdectx}\tx}}{\tterm_f}{}
+      {(\tclosedvalue'_\ty, \tcachedclosedvalues')}
+      \\\\
+      \seval
+      {\tectxcons\tdectx
+        {\tdy = \replace{{\tclosedvalue_\ty}'} ; \tcacheid\ty\tf\tx = \tcachedclosedvalues'}}
+      {\tdterm}
+      {}
+      {(\tcloseddvalue, \tcachedclosedvalues)}
+    }{
+      \sneval
+      {\tdectx}
+      {\tlet{\tdy, \tcacheid\ty\tf\tx = \tdf\;\tdx\;\tcacheid\ty\tf\tx}{\tdterm}}
+      {(\tcloseddvalue, \tcachedclosedvalues)}
+    }
+
+    \infer[\rulename{TDPrimitiveNil}]{
+      \sectxlookup\tdectx{\tf,\tdf} = \tprim, \inil \\
+      \sectxlookup\tdectx{\tx, \tdx} = \tclosedvalue_\tx, \tcloseddvalue_\tx \\
+      \seval
+      {\iectxcons
+        \iectx
+        {\tdy, \tcacheid\ty\tf\tx =
+          \tddelta
+          \tprim
+          {\tclosedvalue_\tx,\tcloseddvalue_\tx, \sectxlookup\tdectx{\tcacheid\ty\tf\tx}}}}
+      {\tdterm}
+      {}
+      {(\tcloseddvalue, \tcachedclosedvalues)}
+    }{
+      \sneval
+      {\tdectx}
+      {\tlet{\tdy, \tcacheid\ty\tf\tx = \tdf\;\tdx\;\tcacheid\ty\tf\tx}{\tdterm}}
+      {(\tcloseddvalue, \tcachedclosedvalues)}
+    }
+
+    \infer[\rulename{TDClosureChange}]{
+      \sectxlookup\tdectx{\tdf} = \tclosure{\tdectx_\tf}{\tlam{\tx\,\tdx\,\tcache}{\tdterm_\tf}} \\
+      \matchcache
+      {\sectxlookup\tdectx{\tcacheid\ty\tf\tx}}
+      {\tcache}
+      {\tdectx'}
+      \\
+      \seval{\iectxcons{\tdectx_\tf}{
+          \tx,\tdx = \sectxlookup\tdectx{\tx,\tdx};
+          \tdectx'
+      }}
+      {\tdterm_\tf}{}{(\tcloseddvalue_\ty, \tcachedclosedvalues')} \\
+      \seval
+      {\iectxcons\tdectx{\tdy = \tcloseddvalue_\ty, \tcacheid\ty\tf\tx = \tcachedclosedvalues'}}
+      {\tdterm}{}
+      {(\tcloseddvalue, \tcachedclosedvalues)}
+    }{
+      \sneval
+      {\tdectx}
+      {\tlet{\tdy, \tcacheid\ty\tf\tx = \tdf\;\tdx\;\tcacheid\ty\tf\tx}{\tdterm}}
+      {(\tcloseddvalue, \tcachedclosedvalues)}
+    }
+
+    % \\
+    % \figsubtitle{Evaluation of cache updates}{
+    %   $\sneval{\tectx}{\tupdcache}{\tcachedclosedvalues}$
+    % }
+    % \\
+
+    % \infer[\rulename{TUpdateEmpty}]{
+    % }{
+    %   \sneval{\tdectx}{\temptycache}{\temptycache}
+    % }
+
+    % \infer[\rulename{TUpdateCachedValue}]{
+    %   \tectxlookup\tdectx{\tx, \tdx} = \tclosedvalue, \tcloseddvalue \\
+    %   \sneval{\tdectx}{\tupdcache}{\tcachedclosedvalues}
+    % }{
+    %   \sneval{\tdectx}
+    %   {\tcachecons\tupdcache{(\tx\oplus\tdx)}}
+    %   {\tcachecons\tcachedclosedvalues(\tclosedvalue\oplus\tcloseddvalue)}
+    % }
+
+    % \infer[\rulename{TUpdateSubCache}]{
+    %   \tectxlookup\tdectx{\tcacheid\ty\tf\tx} = \tcachedclosedvalues' \\
+    %   \sneval{\tdectx}{\tupdcache}{\tcachedclosedvalues}
+    % }{
+    %   \sneval
+    %   {\tdectx}
+    %   {\tcachecons\tupdcache{\tcacheid\ty\tf\tx}}
+    %   {\tcachecons\tcachedclosedvalues{\tcachedclosedvalues'}}
+    % }
+
+    \\
+    \figsubtitle{Binding of caches}{
+      $\matchcache\tcachedclosedvalues\tcache\tdectx$
+    }
+    \\
+
+    \infer[\rulename{TMatchEmptyCache}]{
+    }{
+      \matchcache\temptycache\temptycache\temptycache
+    }
+
+    \infer[\rulename{TMatchCachedValue}]{
+      \matchcache
+      {\tcachedclosedvalues}
+      {\tcache}
+      {\tdectx}
+    }{
+      \matchcache
+      {\tcachecons\tcachedclosedvalues{\tclosedvalue}}
+      {\tcachecons\tcache{\tx}}
+      {\tectxcons\tdectx{(\tx = \tclosedvalue)}}
+    }
+
+    \infer[\rulename{TMatchSubCache}]{
+      \matchcache
+      {\tcachedclosedvalues}
+      {\tcache}
+      {\tdectx}
+    }{
+      \matchcache
+      {\tcachecons\tcachedclosedvalues{\tcachedclosedvalues'}}
+      {\tcachecons\tcache{\tcacheid\ty\tf\tx}}
+      {\tectxcons\tdectx{(\tcacheid\ty\tf\tx = \tcachedclosedvalues')}}
+    }
+  \end{mathpar}
+  \caption{The target language $\target$ (semantics of change terms and cache updates).}
+  \label{fig:target-definition-change-semantics}
+\end{figure}

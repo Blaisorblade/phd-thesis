@@ -1,0 +1,92 @@
+\begin{figure}
+  \footnotesize
+  \begin{mathpar}
+\infer[\rulename{SDVar}]{
+    }{
+      \seval\iectx\tdx{}{\sectxlookup\iectx\tdx}
+    }
+
+    \infer[\rulename{SDTuple}]{
+      \iectxlookup\iectx{\many\tx, \many\tdx} = \many\sclosedvalue_\tx, \many\icloseddvalue_\tx \\\\
+      \seval{\sectxcons\iectx
+        {
+          \ty = \stuple{\many\sclosedvalue_\tx};
+          \tdy = \stuple{\many\icloseddvalue_\tx}
+        }
+      }{\idterm}{}{\icloseddvalue}
+    }{
+      \seval\iectx{\slet{\ty = \stuple{\many\tx}, \tdy = \stuple{\many\tdx}}{\idterm}}{}{\icloseddvalue}
+    }
+
+    \infer[\rulename{SDReplaceCall}]{
+      \sectxlookup\iectx\tdf = \replace{\sclosedvalue_\tf} \\\\ 
+      \seval{\oldenv\iectx}{\scall{\tf}{\tx}}{n}{\sclosedvalue_\ty} \\\\
+      \seval{\newenv\iectx}{\scall{\tf}{\tx}}{m}{{\sclosedvalue_\ty}'} \\\\
+      \seval{\iectxcons\iectx{\ty = \sclosedvalue_\ty ; \tdy = \replace{{\sclosedvalue_\ty}'}}}
+      {\idterm}
+      {}
+      {\icloseddvalue}
+    }{
+      \seval
+      \iectx
+      {\slet{\ty = \sapp\tf\tx, \tdy = \idapp\tdf{\tx\,\tdx}}{\idterm}}
+      {}
+      {\icloseddvalue}
+    }
+
+    \infer[\rulename{SDClosureNil}]{
+      \sectxlookup\iectx{\tf, \tdf} = \sclosure{\sectx_f}{\slam\tx{\sterm_f}}, \inil \\\\
+      \seval{\sectxcons{\sectx_f}{\tx = \sectxlookup\iectx\tx}}{\sterm_f}{n}{\sclosedvalue_\ty} \\\\
+      \seval{\sectxcons{\sectx_f}{\tx = \sectxlookup{\newenv\iectx}\tx}}{\sterm_f}{m}{{\sclosedvalue_\ty}'} \\\\
+      \seval{\iectxcons\iectx{\ty = \sclosedvalue_\ty ; \tdy = \replace{{\sclosedvalue_\ty}'}}}
+      {\idterm}
+      {}
+      {\icloseddvalue}
+    }{
+      \seval
+      \iectx
+      {\slet{\ty = \sapp\tf\tx, \tdy = \idapp\tdf{\tx\,\tdx}}{\idterm}}
+      {}
+      {\icloseddvalue}
+    }
+
+    \infer[\rulename{SDPrimitiveNil}]{
+      \sectxlookup\iectx{\tf,\tdf} = \sprim, \inil \\\\
+      \sectxlookup\iectx{\tx, \tdx} = \sclosedvalue_\tx, \icloseddvalue_\tx \\\\
+      \seval
+      {\iectxcons
+        \iectx
+        {\ty = \tdelta\sprim{\sclosedvalue_\tx} ;
+          \tdy = \tddelta\sprim{\sclosedvalue_\tx,\icloseddvalue_\tx}}}
+      {\idterm}
+      {}
+      {\icloseddvalue}
+    }{
+      \seval
+      \iectx
+      {\slet{\ty = \sapp\tf\tx, \tdy = \idapp\tdf{\tx\,\tdx}}{\idterm}}
+      {}
+      {\icloseddvalue}
+    }
+
+    \infer[\rulename{SDClosureChange}]{
+      \sectxlookup\iectx{\tf,\tdf} = \sclosure{\sectx_\tf}{\slam\tx{\sterm_\tf}}, \iclosure{\iectx_\tf}{\ilam{\tx\,\tdx}{\idterm_\tf}} \\\\
+      \sectxlookup\iectx{\tx,\tdx} = \sclosedvalue_\tx, \icloseddvalue_\tx \\\\
+      \seval{\sectxcons{\sectx_f}{\tx = \sclosedvalue_\tx}}{\sterm_f}{n}{\sclosedvalue_\ty} \\\\
+      \seval{\iectxcons{\iectx_\tf}{
+          \tx = \sclosedvalue_\tx; 
+          \tdx = \icloseddvalue_\tx}}
+      {\idterm_\tf}{}{\icloseddvalue_\ty} \\\\
+      \seval{\iectxcons\iectx{\ty = \sclosedvalue_\ty ; \tdy = \icloseddvalue_\ty}}{\idterm}
+      {}{\icloseddvalue}
+    }{
+      \seval
+      \iectx
+      {\slet{\ty = \sapp\tf\tx, \tdy = \idapp\tdf{\tx\,\tdx}}{\idterm}}
+      {}
+      {\icloseddvalue}
+    }
+  \end{mathpar}
+  \caption{Step-indexed big-step semantics for the change terms of the source language $\source$.}
+  \label{fig:source-definition-change-terms-semantics}
+\end{figure}

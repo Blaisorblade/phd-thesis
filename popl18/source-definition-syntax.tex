@@ -1,0 +1,74 @@
+\begin{figure}
+  \footnotesize
+\begin{multicols}{2}
+  \[
+    \begin{array}{rclr}
+    \multicolumn{4}{r}{\syntaxclass{Base terms}} \\
+    \sterm
+    & ::= & \slet{\ty = \sapp{\tf}{\tx}}{\sterm}
+    & \rem{Call} \\
+    & \mid & \slet{\ty = \stuple{\many\tx}}\sterm
+    & \rem{Tuple} \\
+    & \mid & \tx
+    & \rem{Result} \\
+      \nextline
+    \multicolumn{4}{r}{\syntaxclass{Change terms}} \\
+    \idterm
+    & ::= 
+    & \multicolumn{2}{l}{\ilet{\ty = \iapp{\tf}{\tx}, \tdy = \idapp{\tdf}{\tx\,\tdx}}{\idterm}
+     \qquad \rem{Call}} \\
+    & \mid & \slet{\ty = \stuple{\many\tx}, \tdy = \stuple{\many\tdx}}\idterm
+    & \rem{Tuple} \\
+    & \mid & \tdx
+    & \rem{Result} \\
+    \nextline
+    \multicolumn{4}{r}{\syntaxclass{Closed values}} \\
+    \sclosedvalue
+    &::=& \sclosure\sectx{\slam{\tx}{\sterm}}
+    & \rem{Closure} \\
+    & \mid & \stuple{\many\sclosedvalue}
+    & \rem{Tuple} \\
+    & \mid & \sconst
+    & \rem{Literal} \\
+    & \mid & \sprim
+    & \rem{Primitive} \\
+    \end{array}
+\]
+
+\[
+    \begin{array}{rclr}
+    \multicolumn{4}{r}{\syntaxclass{Value environments}} \\
+    \sectx
+    & ::= & \sectxcons\sectx{\tx = \sclosedvalue}
+    & \rem{Value binding} \\
+    & \mid & \sectxempty
+    & \rem{Empty} \\
+    & \nextline
+    \multicolumn{4}{r}{\syntaxclass{Change values}} \\
+    \icloseddvalue
+    & ::= & \iclosure\iectx{\ilam{\tx\,\tdx}{\idterm}}
+    & \rem{Closure} \\
+    & \mid & \stuple{\many\icloseddvalue}
+    & \rem{Tuple} \\
+    & \mid & \idconst
+    & \rem{Literal} \\
+    & \mid & \replace\sclosedvalue
+    & \rem{Replace} \\
+    & \mid & \inil
+    & \rem{Nil} \\
+    \nextline
+    \multicolumn{4}{r}{\syntaxclass{Change environments}} \\
+    \iectx
+    & ::= 
+    & \multicolumn{2}{l}{\iectxcons{\iectx}{\tx = \sclosedvalue, \tdx = \icloseddvalue}
+      \qquad \rem{Binding}} \\
+    & \mid & \iectxempty
+    & \rem{Empty} \\
+    \nextline
+    n, k & \in & \mathbb{N} & \syntaxclass{Step indexes} \\
+    \end{array}
+  \]
+\end{multicols}
+\caption{Syntax for the source language $\source$.}
+  \label{fig:source-definition}
+\end{figure}

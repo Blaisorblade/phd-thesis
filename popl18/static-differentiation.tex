@@ -1,0 +1,56 @@
+\subsection{Static differentiation in \source}
+Previous work~\citep{CaiEtAl2014ILC} defines differentiation for simply-typed
+$\lambda$-calculus terms.
+Figure~\ref{fig:differentiation} shows differentiation for $\source$'s syntax.
+
+\input{differentiation}
+Differentiating a base term~$\sterm$ produces a change
+term~$\iderive{\sterm}$, its \emph{derivative}.
+%
+Differentiating final result variable~$\tx$ produces its change variable~$\tdx$.
+Differentiation copies each binding of an intermediate result $\ty$ to the
+output and adds a new bindings for its change $\tdy$.
+%
+If $\ty$ is bound to tuple~$\stuple{\many\tx}$, then $\tdy$ will
+be bound to the change tuple $\stuple{\many\tdx}$.
+If $\ty$ is bound to function application $\sapp\tf{\tx}$, then $\tdy$ will be
+bound to the application of function change $\tdf$ to input $\tx$ and its change
+$\tdx$.
+
+Evaluating $\iderive{\sterm}$ recomputes all intermediate results
+computed by $\sterm$. This recomputation will be avoided through cache-transfer
+style in section \cref{sec:transformation}.
+
+The original transformation for static differential of
+$\lambda$-terms~\citep{CaiEtAl2014ILC} has three cases which
+we recall here:
+\[
+  \begin{array}{rcl}
+    \oderive\tx & = & \tdx \\
+    \oderive{t \, u} & = & \oderive{t}\,u\,\oderive{u} \\
+    \oderive{\lambda \tx. t} & = & \lambda \tx\,\tdx. \oderive{t}
+  \end{array}
+\]
+
+Even though the first two cases of the original transformation are
+easily mapped into the two cases of our variant, one may ask where the
+third case is realized now. Actually, this third case occurs while we
+transform the initial environment. Indeed, we will assume that the
+closures of the environment of the source program have been adjoined a
+derivative. More formally, we suppose that the derivative of $\sterm$
+is evaluated under an environment~$\iderive\sectx$ obtained as
+follows:
+\[
+  \begin{array}{rcl}
+    \iderive{\bullet} & = & \bullet \\
+    \iderive{\sectxcons\sectx{\tf = \sclosure{\sectx_f}{\lambda \tx. \sterm}}}
+    &=&
+    \sectxcons{\iderive\sectx}{\tf = \sclosure{\sectx_f}{\lambda \tx. \sterm},
+    \tdf = \sclosure{\iderive{\sectx_f}}{\lambda \tx\,\tdx. \iderive{\sterm}}}
+    \\
+    \iderive{\sectxcons\sectx{\tx = \sclosedvalue}}
+    &=&
+    \sectxcons{\iderive\sectx}{\tx = \sclosedvalue, \tdx = \inil}
+    \qquad \textrm{(If $\sclosedvalue$ is not a closure.)}
+  \end{array}
+\]

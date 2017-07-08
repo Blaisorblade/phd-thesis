@@ -1,0 +1,55 @@
+\section{Formalization}
+\label{sec:formalization}
+In this section, we formalize differentiation with static caching and formally
+prove its soundness with respect to differentiation alone. We furthermore
+present a novel proof of correctness for differentiation itself.
+
+To simplify the proof, we encode many invariants of input and output programs by
+defining input and output languages with a suitably restricted abstract syntax:
+Restricting the input language simplifies the transformations, while restricting
+the output languages simplifies the semantics. Since base programs and
+derivatives have different shapes, we define different syntactic categories of
+\emph{base terms} and \emph{change terms}.
+% following the example of...
+
+We define and prove sound three transformations, across two languages: first, we
+present a variant of differentiation without caching (as defined by
+\citet{CaiEtAl2014ILC}), going from base terms of language $\source$ to change
+terms of $\source$, and we prove it sound with respect to non-incremental
+evaluation.
+%
+Second, we define differentiation with static caching as a pair of
+transformations going from base terms of $\source$: the first transformation
+produces CTS versions of base functions as base terms in $\target$,
+and the second transformation produces CTS derivatives as change terms
+in $\target$.
+
+As source language for differentiation with static caching,
+we use a core language named~$\source$.  This
+language is a common target of a compiler front-end for a functional
+programming language: in this language, terms are written in
+$\lambda$-lifted and in a variant of A-normal form~\cite{sabry1993reasoning}, hence every
+intermediate result is named. Hence intermediate results can be reused
+and stored in a cache.
+
+The target language for differentiation with static caching is
+named~$\target$. Programs in this target language are also
+$\lambda$-lifted and in a variant of A-normal form. But additionally, in these
+programs every toplevel function $\tf$ produces a cache which is to be
+conveyed to the derivatives of $\tf$.
+
+The syntax and semantics of the source and target languages are
+presented in Sections~\ref{sec:sourcelanguage}
+and~\ref{sec:targetlanguage}. The transformation is described in
+Section~\ref{sec:transformation} and its proof of soundness
+is given in Section~\ref{sec:transformation-soundness}. Most of
+the formalization have been mechanized in Coq (the proofs of some
+straightforward lemmas are left for future work).
+
+
+\input{source-language}
+\input{static-differentiation}
+\input{static-differentiation-soundness}
+\input{target-language}
+\input{transformation}
+\input{soundness}

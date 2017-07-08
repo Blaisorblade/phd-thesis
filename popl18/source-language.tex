@@ -1,0 +1,254 @@
+\subsection{The source language \source}
+\label{sec:sourcelanguage}
+
+\input{source-definition-syntax}
+
+\paragraph{Syntax}
+The syntax of~$\source$ is given in
+Figure~\ref{fig:source-definition}. Our source language allows
+representing both \emph{base} terms~$\sterm$ and \emph{change}
+terms~$\idterm$.
+
+Our syntax for base terms~$\sterm$ represents $\lambda$-lifted
+programs in A'-normal form (\cref{sec:motivating-example}).
+So a term can be either a bound variable~$\tx$, or a {\bf let}
+binding~$\ty$ in subterm~$\sterm$ to either a new
+tuple~$\stuple{\many\tx}$ ($\slet{\ty = \stuple{\many\tx}}\sterm$), or
+the result of calling function~$\tf$ on argument~$\tx$
+($\slet{\ty = \sapp{\tf}{\tx}}{\sterm}$).  Both~$\tf$ and~$\tx$ are
+variables to be looked up in the environment.  Terms cannot contain
+$\lambda$-abstractions as they have been $\lambda$-lifted to top-level
+definitions, which we encode as closures in the initial environments.
+%
+Unlike standard ANF we add no special syntax for function
+calls in tail position (see \cref{sec:tail-calls} for a discussion
+about this limitation).
+%
+We often need to inspect the result of
+a function call~$\tf\tx$, which is not a valid term in our syntax.
+To alleviate this, we write~``$\scall\tf\tx$''
+for ``$\slet{\ty = \tf\;\tx}\ty$'' where $\ty$ is
+chosen fresh.
+
+Our syntax for change terms~$\idterm$ mimicks the syntax for base
+terms except that (i) each function call is immediately followed by
+the evaluation of its derivative and (ii) the final value returned by
+a change term is a change variable~$\tdx$. As we will see, this
+\emph{adhoc} syntax of change terms is tailored to capture the
+programs produced by differentiation.  We only allows
+$\alpha$-renamings that maintain the invariant that the definition
+of~$\tx$ is immediately followed by the definition of~$\tdx$: if~$\tx$
+is renamed to~$\ty$ then $\tdx$ must be renamed to~$\tdy$.
+
+\paragraph{Semantics}
+
+The closed values for the base terms are composed of closures, tuples
+of values, constants and primitives. A closure is a pair of an
+evaluation environment~$\sectx$ and a $\lambda$-abstraction closed
+with respect to~$\sectx$. The set of available constants is left
+abstract. It may contain usual first-order constants like integers. We
+also leave abstract the primitives $\sprim$ like
+\textbf{\texttt{if-then-else}} or projections of tuple components. As
+usual, environments~$\sectx$ map variables to closed values. With no
+loss of generality, we assume that all bound variables are distinct.
+
+\input{source-definition-base-semantics}
+
+In Figure~\ref{fig:source-definition-base-terms-semantics}, the base
+terms are evaluated using a step-indexed big-step semantics whose
+judgment~$\seval\sectx\sterm{n}\sclosedvalue$ is read ``Under the
+environment~$\sectx$, the base term~$\sterm$ evaluates into the closed
+value~$\sclosedvalue$ in~$n$~steps.''
+%
+\rulename{SVar} looks up into~$\sectx$ to return the closed value of a
+variable~$\tx$.
+%
+\rulename{STuple} looks up for~$\many\tx$ into~$\sectx$ to evaluate
+the tuple~$\stuple{\many\tx}$, binds it to~$\ty$ and continues with
+the next term.
+%
+\rulename{SPrimitiveCall} assumes that~$\tf$ is mapped to a
+primitive~$\sprim$ in~$\sectx$ and that $\sprim$ has an associated
+interpretation realized as a function~$\tdelta\sprim\param$ from
+closed values to closed values. The evaluation of this interpretation
+function applied to the value of~$\tx$ is bound to~$\ty$ in~$\sectx$
+in order to evaluate the remaining term~$\sterm$ in~$n$ steps. In that
+case, the evaluation of the $\textbf{let}$-binding takes~$n + 1$~steps.
+%
+\rulename{SClosureCall} assumes that~$\tf$ is mapped
+to a closure in~$\sectx$ and evaluates the body of this closure in $n$
+steps in the closure environment~$\sectx_\tf$ extended with the value
+of its argument~$\tx$ found in~$\sectx$. The resulting value is bound
+to~$\ty$ in $\sectx$ to evaluate the remaining term $\sterm$ in~$m$
+steps. Hence, the whole term evaluates in~$n + m + 1$~steps.
+
+A closed change value is either a closure change, a tuple change,
+a literal change, a replacement change or a nil change.
+%
+A closure change is a pair made of an evaluation environment~$\iectx$
+and a~$\lambda$-abstraction expecting a value and a change value as
+arguments to evaluate a change term into an output change value. An
+evaluation environment~$\iectx$ follows the same structure as
+$\textbf{let}$-bindings of the change terms: it binds variables to
+closed values and each variable~$\tx$ is immediately followed by a
+binding for its associated change variable~$\tdx$. As with
+$\textbf{let}$-bindings of change terms, $\alpha$-renamings in an
+environment~$\iectx$ must rename~$\tdx$ into~$\tdy$ if~$\tx$ is
+renamed into~$\ty$. With no loss of generality, we assume that all
+bound term variables are distinct in these environments.  We define
+the \textit{original environment}~$\oldenv\iectx$ of a change
+environment~$\iectx$ by induction over~$\iectx$:
+\[
+\begin{array}{rcl}
+\oldenv\sectxempty & = & \sectxempty \\
+\oldenv{\iectxcons\iectx{\tx = \sclosedvalue; \tdx = \icloseddvalue}}
+& = & \iectxcons{\oldenv{\iectx}}{\tx = \sclosedvalue}
+\end{array}
+\]
+
+The \textit{new environment}~$\newenv\iectx$ of a change
+environment~$\iectx$ is defined by induction over~$\iectx$:
+\[
+\begin{array}{rcl}
+\newenv\sectxempty & = & \sectxempty \\
+\newenv{\iectxcons\iectx{\tx = \sclosedvalue; \tdx = \icloseddvalue}}
+& = & \iectxcons{\newenv{\iectx}}{\tx = \sclosedvalue \oplus \icloseddvalue}
+\end{array}
+\]
+
+This last rule makes use of an operation $\oplus$ to update a value
+with a change, which may fail at runtime. Indeed, the application of a
+change is a partial function written
+``$\sclosedvalue \oplus \icloseddvalue$'' which is defined as follows:
+\[
+  \begin{array}{rclcl}
+    \sconst & \oplus & \idconst & = & \delta_{\oplus} (\sconst, \idconst)
+    \\
+    \sclosedvalue_1 & \oplus & \replace{\sclosedvalue_2} & = & \sclosedvalue_2
+    \\
+    \sclosedvalue & \oplus & \inil & = & \sclosedvalue
+    \\
+    \sclosure{\sectx}{\slam\tx\sterm} & \oplus &
+    \iclosure\iectx{\ilam{\tx\,\tdx}{\idterm}} & = &
+    \sclosure{(\sectx \oplus \iectx)}{\slam\tx\sterm}
+    \\
+    \stuple{\sclosedvalue_1, \ldots, \sclosedvalue_n}
+    & \oplus
+    & \stuple{\icloseddvalue_1, \ldots, \icloseddvalue_n}
+    & =
+    & \stuple{\sclosedvalue_1 \oplus \icloseddvalue_1, \ldots, \sclosedvalue_n \oplus \icloseddvalue_n}
+  \end{array}
+\]
+\noindent where
+\[
+    (\tectxcons\sectx{\tx = \sclosedvalue}) \oplus
+    (\tectxcons\iectx{\tx = \sclosedvalue; \tdx = \icloseddvalue})
+    =
+    (\tectxcons{(\sectx \oplus \iectx)}{\tx = (\sclosedvalue \oplus \icloseddvalue)})
+\]
+
+Nil and replacement changes can be used to update both
+constants, tuples, primitives and closures, while tuple change can
+only update tuples, literal change can only update literals and
+closure changes can only update closures. Indeed, $\oplus$ on literals
+is defined \textit{via} some interpretation function~$\delta_{\oplus}$. A
+replacement change overrides the current value~$\sclosedvalue$ with a
+new one~$\sclosedvalue'$.
+Change application for a closure
+ignores~$\idterm$ instead of combining it with $\sterm$ somehow. This may seem
+surprising, but we only need $\oplus$ to behave well for valid changes (as shown
+by \cref{lemma:crel-oplus}): for valid closure changes,
+$\idterm$ must behave similarly to $\iderive\sterm$ anyway,\pg{Not formal, not
+  visible in the definition, but true for a suitable meaning of ``similarly'';
+  but I'm clearly not claiming a theorem, just giving a hint for clarity.}
+so only environment updates matter. This definition also avoids having to modify
+terms at runtime, which would have been difficult to implement safely.
+\pg{$\oplus$ is not used by derivatives, so commenting this part out
+A change application for a closure
+ignores~$\idterm$, which may seems strange at first but is needed to
+but is needed to
+get guarantees about the evaluation of derivatives.}
+% With this restriction, we avoid the case of a new
+% closure code that would refer to a variable undefined in the closure
+% environment.
+% \pg{I can imagine fixes to that problem, so I'd propose to stick to the
+% stronger arguments.}
+
+\input{source-definition-change-semantics}
+
+In Figure~\ref{fig:source-definition-change-terms-semantics}, change
+terms are evaluated using a big-step semantics whose
+judgment~$\seval\iectx\idterm{}\icloseddvalue$ is read ``Under the
+environment $\iectx$, the change term $\idterm$ evaluates into the
+closed change value $\icloseddvalue$.''
+%
+$\rulename{SDVar}$ looks up into $\iectx$ to return a value for $\tdx$.
+%
+$\rulename{SDTuple}$ builds a tuple out of the values of~$\many\tx$
+and a change tuple out of the change values of~$\many\tdx$ as found
+in the environment~$\iectx$.
+%
+There are four rules to evaluate $\textbf{let}$-binding depending on
+the nature of~$\iectxlookup\iectx\tdf$. These four rules
+systematically recomputes the value~$\sclosedvalue_\ty$ of~$\ty$ in
+the original environment. They differ in the way they compute the
+change~$\tdy$ to~$\ty$.
+
+If $\iectxlookup\iectx\tdf$ is a replacement,
+$\rulename{SDReplaceCall}$ applies. Replacing the value of~$\tf$
+in the environment forces the recomputation of~$\tf\,\tx$ from
+scratch in the new environment. The resulting value~$\sclosedvalue'_\ty$
+is the new value which must replace~$\sclosedvalue_\ty$: therefore
+$\tdy$ equals~$\replace{\sclosedvalue'_\ty}$ in that case.
+
+If $\iectxlookup\iectx\tdf$ is a nil change. We have two rules
+depending on the nature of $\iectxlookup\iectx\tf$. If
+$\iectxlookup\iectx\tf$ is a closure, $\rulename{SDClosureNil}$
+applies and in that case the nil change of~$\iectxlookup\iectx\tf$ is
+the exact same closure. Hence, to compute $\tdy$, we must reevaluate
+this closure applied to the updated
+argument~$\iectxlookup{\newenv\iectx}\tx$ to a
+value~$\sclosedvalue'_\ty$ and bind~$\tdy$ to
+$\replace{\sclosedvalue'_\ty}$. In other words, this rule is
+equivalent to $\rulename{SDReplaceCall}$ in the case where a closure
+is replaced by itself.
+%
+If $\iectxlookup\iectx\tf$ is a primitive, $\rulename{SDPrimitiveNil}$
+applies. The nil change of a primitive~$\sprim$ is its derivative
+which interpretation is realized by a
+function~$\Delta_\sprim(\param)$.  The evaluation of this function on
+the input value and the input change leads to the
+change~$\icloseddvalue_\ty$ bound to $\tdy$.
+
+If $\iectxlookup\iectx\tf$ is a closure change
+$\iclosure{\iectx_\tf}{\ilam{\tx\,\tdx}{\idterm_\tf}}$,
+$\rulename{SDClosureChange}$ applies. The
+change~$\icloseddvalue_\ty$ results from the evaluation
+of~$\idterm_\tf$ in the closure change environment~$\iectx_\tf$
+augmented with an input value for~$\tx$ and a change value
+for~$\tdx$. Again, let us recall that we will maintain the
+invariant that the term~$\idterm_\tf$ behaves as the derivative
+of~$\tf$ so this rule can be seen as the invokation of~$\tf$'s
+derivative.
+
+\paragraph{Expressiveness}
+
+A closure in the initial environment can be used to represent a
+top-level definition. Since environment entries can point to
+primitives, we need no syntax to directly represent calls of
+primitives in the syntax of base terms. To encode in our syntax a
+program with top-level definitions and a term to be evaluated
+representing the entry point, one can produce a term~$\sterm$
+representing the entry point together with an environment~$\sectx$
+containing as values any top-level definitions, primitives and
+constants used in the program.
+
+Our formalization does not model directly $n$-ary functions, but they can be
+encoded through unary functions and tuples. This encoding does not support
+currying efficiently, but we discuss possible solutions in
+\cref{sec:nary-abstraction}.
+
+Control operators, like recursion combinators or branching, can be
+introduced as primitive operations as well. If the branching condition changes,
+expressing the output change in general requires replacement changes. Similarly
+to branching we can add tagged unions.

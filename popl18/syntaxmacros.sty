@@ -1,0 +1,216 @@
+% General macros
+\newcommand\proofcase[1]{\medskip\noindent$\bullet$\; Case ``#1''. \\[0.3em]\locallabelreset}
+\newcommand\proofsubcase[1]{\medskip\noindent$\triangleright$\; Subcase ``#1''. \\[0.3em]}
+\newcommand\fresh[2]{#1 \# #2}
+\newcommand\rem[1]{\textit{#1}}
+\newcommand\syntaxclass[1]{\textbf{\textit{#1}}}
+\newcommand\figsubtitle[2]{
+  \vspace{-0.9em}
+  \begin{minipage}{\textwidth}
+    \hfill\textrm{\bf #1} \; \fbox{#2}
+  \end{minipage}
+}
+\newcommand\figsubcaption[1]{
+  \begin{minipage}{\textwidth}
+    \hfill\fbox{#1}
+  \end{minipage}
+}
+\newcommand\rulename[1]{\textsc{\small\textcolor{gray}{[#1]}}}
+\newcommand\ruletitle[1]{\multicolumn{3}{l}{\rulename{#1}}\vspace{0.1cm}}
+\newcommand\side[1]{\\[-0.9em]&\multicolumn{2}{l}{#1}}
+\newcommand\nextline{\\[-0.9em]}
+\newcommand\beforeside{\\[-0.5em]}
+\newcommand\tquote[1]{\llbracket #1 \rrbracket}
+
+\newcommand\many[1]{\overline{#1}}
+\newcommand\tx{\mathit{x}}
+\newcommand\tdx{\mathit{dx}}
+\newcommand\ty{\mathit{y}}
+\newcommand\tdy{\mathit{dy}}
+\newcommand\tf{\mathit{f}}
+\newcommand\tdf{\mathit{df}}
+\newcommand\subst[2]{[#1 \mapsto #2]}
+
+\newcommand\equivvalues[2]{#1 \equiv #2}
+
+% Allow using λ in section headers and having it show in PDF bookmarks.
+% http://tex.stackexchange.com/a/142906/1340
+\RequirePackage{newunicodechar}
+\newunicodechar{λ}{\texorpdfstring{\ensuremath{\lambda}}{λ}}
+
+% Source language
+%%%%%%%%%%%%%%%%%
+\newcommand\source{\texorpdfstring{\ensuremath{λ_{AL}}}{λAL}}
+
+% Metavariables
+\newcommand\sprogram{p}
+\newcommand\sfdef{d_f}
+\newcommand\sterm{t}
+\newcommand\sdef{d}
+\newcommand\sclosedvalue{v}
+\newcommand\sclosure[2]{#1[#2]}
+\newcommand\pushdef[1]{\uparrow #1}
+\newcommand\svdef{d_v}
+\newcommand\sectx{E}
+\newcommand\sectxempty{\bullet}
+\newcommand\sectxcons[2]{#1; #2}
+\newcommand\sdectx{dE}
+\newcommand\sconst{\ell}
+\newcommand\sprim{\textbf{p}}
+\newcommand\scall[2]{@(#1, #2)}
+
+% Constructions
+\newcommand\appsym{{\scriptstyle @}}
+\newcommand\dappsym{{\scriptstyle @}}
+\newcommand\slam[2]{\lambda #1. #2}
+\newcommand\sapp[2]{#1\, #2}
+\newcommand\slet[2]{\textbf{let}\,#1\,\textbf{in}\,#2}
+\newcommand\stuple[1]{(#1)}
+\newcommand\sectxhole{[]}
+\newcommand\sectxapp[2]{#1[#2]}
+
+% Relations
+\newcommand\seval[4]{#1 \vdash #2 \Downarrow_{#3} #4}
+\newcommand\sneval[3]{#1 \vdash #2 \Downarrow #3}
+\newcommand\matchcache[3]{#1 \sim #2 \rightarrow #3}
+
+% Metafunction
+\newcommand\sectxlookup[2]{#1(#2)}
+\newcommand\newenv[1]{\lceil #1 \rceil}
+\newcommand\oldenv[1]{\lfloor #1 \rfloor}
+
+% Target language
+%%%%%%%%%%%%%%%%%
+\newcommand\target{\texorpdfstring{\ensuremath{iλ_{AL}}}{iλAL}}
+
+% Metavariables
+\newcommand\tprogram{P}
+\newcommand\tfdef{D_f}
+\newcommand\tterm{M}
+\newcommand\tdterm{dM}
+\newcommand\tdef{D}
+\newcommand\tddef{dD}
+\newcommand\tclosedvalue{V}
+\newcommand\tcloseddvalue{\mathit{dV}}
+\newcommand\tvdef{D_v}
+\newcommand\tdvdef{\mathit{dD}_v}
+\newcommand\tectx{F}
+\newcommand\tdectx{\mathit{dF}}
+\newcommand\tcache{C}
+\newcommand\tupdcache{\mathit{dC}}
+\newcommand\tchange[2]{#1 \oplus #2}
+\newcommand\tcachedclosedvalues{V_c}
+\newcommand\tconst{\ell}
+\newcommand\tdconst{d\ell}
+\newcommand\tdnil{\textbf{nil}}
+\newcommand\tprim{\textbf{p}}
+\newcommand\tdprim{d\textbf{p}}
+\newcommand\tclosure[2]{#1[#2]}
+
+% Constructions
+\newcommand\tlam[2]{\lambda #1. #2}
+\newcommand\tapp[2]{#1\,#2}
+\newcommand\tdapp[3]{#1\, #2\, #3}
+\newcommand\tlet[2]{\textbf{let}\,#1\;\textbf{in}\,#2}
+\newcommand\tectxhole{[]}
+\newcommand\tectxapp[2]{#1[#2]}
+\newcommand\tectxcons[2]{#1; #2}
+\newcommand\tectxempty{\bullet}
+
+\newcommand\tcachex{c}
+\newcommand\tcachey{c'}
+\newcommand\tcacheid[3]{c^{#1}_{#2#3}} % actually, using ``f xs'' as subscript is confusing.
+\newcommand\tcachecons[2]{#1\,#2}
+\newcommand\temptycache{\bullet}
+
+% Relations
+\newcommand\treduces{\rightarrow}
+
+% Metafunction
+\newcommand\tmakecache[2]{\textrm{evalCache} (#1, #2)}
+\newcommand\tupdatecache[2]{\textrm{updateCache} (#1, #2)}
+\newcommand\tenterapp[4]{\textrm{call}_t(#1, #2, #3, #4)}
+\newcommand\tenterdapp[5]{\textrm{call}_d(#1, #2, #3, #4, #5)}
+\newcommand\tectxlookup[2]{#1(#2)}
+\newcommand\tdelta[2]{\delta_{#1} (#2)}
+\newcommand\tddelta[2]{\Delta_{#1} (#2)}
+\newcommand\tpushcache[2]{#1 \downarrow #2}
+
+% Transformation
+%%%%%%%%%%%%%%%%
+
+\newcommand\readback[1]{\mathcal{R}\tquote{#1}}
+\newcommand\compile[1]{\mathcal{C}\tquote{#1}}
+\newcommand\icompile[1]{\imark{\mathcal{C}}\tquote{#1}}
+\newcommand\compileterm[2]{\mathcal{C}_{#1}\tquote{#2}}
+\newcommand\derive[2]{\mathcal{D}_{#1}\tquote{#2}}
+\newcommand\iderive[1]{\imark{\mathcal{D}}\tquote{#1}}
+\newcommand\oderive[1]{\mathrm{Derive}(#1)}
+
+% Intermediate language
+%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand\intermediate{d\lambda_{AL}}
+
+% Metavariables
+\newcommand\imark[1]{{\ensuremath #1^\iota}}
+\newcommand\iprogram{\imark{P}}
+\newcommand\ifuncdef{\imark{D_f}}
+\newcommand\iterm{t}
+\newcommand\idterm{\mathit{dt}}
+\newcommand\idef{\imark{D}}
+\newcommand\iddef{\imark{dD}}
+\newcommand\iclosedvalue{\imark{v}}
+\newcommand\icloseddvalue{\mathit{dv}}
+\newcommand\ivdef{\imark{D_v}}
+\newcommand\iectx{dE}
+\newcommand\iectxcons[2]{#1; #2}
+\newcommand\iectxempty{\bullet}
+\newcommand\iconst{\imark{\textbf{c}}}
+\newcommand\idconst{d\ell}
+\newcommand\inil{\textbf{nil}}
+% Constructions
+\newcommand\iclosure[2]{#1[#2]}
+\newcommand\ichange[2]{#1 \oplus #2}
+\newcommand\ilam[2]{\lambda #1. #2}
+\newcommand\iapp[2]{#1\, #2}
+\newcommand\idapp[2]{#1\, #2}
+\newcommand\ilet[2]{\textbf{let}\,#1\,\textbf{in}\,#2}
+\newcommand\iectxhole{[]}
+\newcommand\iectxapp[2]{#1[#2]}
+\newcommand\replace[1]{!#1}
+
+% Relations
+\newcommand\ireduces{\rightarrow}
+\newcommand\idappeval[4]{#1 \vdash #2 \downarrow_{#3} #4}
+
+% Metafunction
+\newcommand\ienterapp[4]{\textrm{call}_t(#1, #2, #3, #4)}
+\newcommand\ienterdapp[5]{\textrm{call}_d(#1, #2, #3, #4, #5)}
+\newcommand\iectxlookup[2]{#1(#2)}
+\newcommand\idelta[2]{\delta_{#1} (#2)}
+
+\newcommand\compileectx[2]{\mathcal{C}_\oplus \tquote{#1}\,\tquote{#2}}
+\newcommand\simulatechange[1]{\mathcal{H}{\tquote{#1}}}
+
+\newcommand\icompileectx[2]{\imark{\mathcal{C}}_\oplus \tquote{#1}\,\tquote{#2}}
+\newcommand\isimulatechange[1]{\imark{\mathcal{H}}{\tquote{#1}}}
+
+
+
+% Step-indexed relations
+\RequirePackage{wasysym}
+\newcommand\param{\text{\textendash}}
+\newcommand\vvcreltau[4]{#4 \rhd #3 \hookrightarrow #1 \mathrel{::} #2}
+\newcommand\vvcrel[4]{#4 \rhd_{#2} #3 \hookrightarrow #1}
+\newcommand\crel{\vvcrel{}{\param}{}{}}
+
+% Can be inlined if desired. \vvcreltrm is just \vvcrel with a different symbol.
+\newcommand\vvcreltrm[4]{#4 \RHD_{#2} #3 \hookrightarrow #1}
+\newcommand\vvcrelterm[7]{\vvcreltrm{(#3 \vdash #7)}{#4}{(#1 \vdash #5)}{(#2 \vdash #6)}}
+
+\newcommand\envwithcache[3]{#1 \uparrow #2 \leadsto #3}
+\newcommand\newenvwithcache[3]{#1 \Uparrow #2 \leadsto #3}
+
+\newcommand\partialectxmove[2]{#1 \,\oplus\, #2}
+
+\newcommand\lifttectx[1]{\uparrow #1}

@@ -1,0 +1,25 @@
+\begin{figure}[h]
+  \[
+    \begin{array}{rcl}
+      \iderive{\tx}
+      & = &
+            \tdx
+      \nextline \\
+
+      \iderive{\slet{\ty = \stuple{\many\tx}}{\sterm}}
+      & = &
+      \ilet{\ty = \stuple{\many\tx}, \tdy = \stuple{\many\tdx}}
+           {\iderive\sterm}
+      \nextline \\
+
+      \iderive{\slet{\ty = \sapp{\tf}{\tx}}{\sterm}}
+      & = &
+            \ilet{\ty = \sapp\tf{\tx}, \tdy = \iapp\tdf{\tx\,\tdx}}{
+            \iderive\sterm
+            }
+      \nextline
+  \end{array}
+  \]
+  \caption{Static differentiation in $\source$.}
+  \label{fig:differentiation}
+\end{figure}

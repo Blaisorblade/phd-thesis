@@ -1,0 +1,182 @@
+\subsection{The target language \target}
+\label{sec:targetlanguage}
+
+In this section, we present the target language of a transformation
+that extends static differentiation with a static caching mechanism.
+As said earlier, the functions of $\target$ not only compute their
+output but they also returns a cache containing the intermediate
+values that have contributed to that output. This cache is transmitted
+to derivatives to build changes on top of intermediate values with no
+recomputation and derivatives update the caches according to their
+input changes. 
+
+\paragraph{Syntax}
+The syntax of $\target$ is defined in
+Figure~\ref{fig:target-definition-syntax}. The base terms of $\target$
+follow the same shape as the $A$-normal $\lambda$-lifted terms of
+$\source$ except that a $\bf let$-binding for a function
+application~$\tf\,\tx$ now introduces an extra \textit{cache
+  identifier}~$\tcacheid\ty\tf\tx$ in replacement for the
+output~$\ty$. The syntax of cache identifiers is non standard: it can
+be seen as a triple that refers to the value identifiers $\tf$, $\tx$
+and $\ty$. Hence, an $\alpha$-renaming of one of these three
+identifiers must refresh the cache identifier accordingly. The syntax
+$(\tx, \tcache)$ for the result term makes explicit that a cache
+$\tcache$ is systematically returned.
+% A similar alpha-renaming issue must be made about the formal
+% cache argument of caching-derivatives. In the Coq development,
+% the positional approach to binders makes the problem disappear.
+
+\input{target-definition}
+
+The syntax for caches has three cases: a cache can be empty, a cache
+can contain a value or another cache. In other words, a cache is a
+tree-like data structure which is isomorphic to an execution trace
+containing both immediate values and the execution traces of the
+function calls issued during the evaluation.
+
+The syntax for change terms of~$\target$ witnesses the CTS
+discipline followed by the derivatives: to determine~$\tdy$, the
+derivative of~$\tf$ evaluated at point $\tx$ with change $\tdx$ is
+expecting the cache related to the evaluation of~$\ty$ in the base
+term. The derivative returns the updated cache which contains the
+intermediate results that would be gathered by the evaluation
+of~$\tf\,(\tx \oplus \tdx)$. The result term of every change term
+returns a cache update $\tupdcache$ in addition to the computed
+change.
+
+The syntax for cache updates is almost the same as the one for caches
+except each value identifier~$\tx$ of the input cache is adjusted with
+its related change~$\tdx$.
+
+\paragraph{Semantics}
+An evaluation environment $\tectx$ of $\target$ contains not only
+values but also cache values. The syntax for values $\tclosedvalue$
+includes closures, tuples, primitives and constants. The syntax for
+cache values $\tcachedclosedvalues$ mimicks the one for cache terms.
+The evaluation of change terms expects the evaluation
+environments~$\tdectx$ to also include bindings for change values.
+
+There are five kinds of change values: closure changes, tuple changes,
+literal changes, nil changes and replacements.  Closure changes embed
+an environment $\tdectx$ as well as a code pointer for a function
+waiting for both a base value $\tx$ and a cache $\tcache$. Notice that
+we abusively reuse the same syntax~$\tcache$ to deconstruct and to
+construct caches. There other changes are similar to the ones found
+in~$\source$.
+
+The base terms of the language are evaluated using a big-step
+semantics defined in Figure~\ref{fig:target-definition-base-semantics}.
+The judgment~``$\sneval{\tectx}{\tterm}{(\tclosedvalue,
+  \tcachedclosedvalues)}$'' is read~``Under the evaluation environment
+$\tectx$, the base term $\tterm$ evaluates into a value
+$\tclosedvalue$ and a cache $\tcachedclosedvalues$''. The auxiliary
+judgment ``$\sneval{\tectx}{\tcache}{\tcachedclosedvalues}$''
+specifies the construction of caches.
+%
+The rule~\rulename{TResult} not only looks into the environment
+for the return value~$\tclosedvalue$ but it also evaluates
+the returned cache~$\tcache$.
+%
+The rule~\rulename{TTuple} is similar to the rule of the source
+language since no cache is produced by the allocation of a tuple.
+%
+The rule~\rulename{TClosureCall} works exactly
+as~\rulename{SClosureCall} except that the cache value returned by the
+closure is bound to the cache identifier $\tcacheid\ty\tf\tx$. The
+same remark applies to~\rulename{TPrimitiveCall} with respect
+to~\rulename{SPrimitiveCall}.
+%
+The rule~\rulename{TEmptyCache} evaluates an empty cache term into an
+empty cache value. The rule~\rulename{TCacheVar} computes the value of
+the cache term~$\tcachecons\tcache\tx$ by appending the value of the
+variable~$\tx$ to the cache value~$\tcachedclosedvalues$ computed for
+the cache term~$\tcache$. Similarly, the
+rule~\rulename{TCacheSubCache} appends the cache value of a cache
+named~$\tcacheid\ty\tf\tx$ to the cache value~$\tcachedclosedvalues$
+computed for~$\tcache$.
+
+The change terms of the target language are also evaluated using a
+big-step semantics defined in
+Figure~\ref{fig:target-definition-change-semantics}. The
+judgment~``$\sneval{\tdectx}{\tdterm}{(\tcloseddvalue,
+  \tcachedclosedvalues)}$'' is read~``Under the evaluation
+environment~$\tectx$, the change term $\tdterm$ evaluates into a
+change value $\tcloseddvalue$ and an updated cache
+$\tcachedclosedvalues$.''. The first auxiliary
+judgment~``$\sneval{\tdectx}{\tupdcache}{\tcachedclosedvalues}$''
+defines the evaluation of cache update terms. We omit the
+rules for this judgment since it is similar to the one for cache terms,
+except that cached values are computed by~$\tx \oplus \tdx$, not simply~$\tx$.
+%
+The final auxiliary
+judgment~``$\matchcache\tcachedclosedvalues\tcache\tdectx$'' describes
+how a cache pattern $\tcache$ binds a cache
+value~$\tcachedclosedvalues$ to produce a change
+environment~$\tdectx$.
+
+The rule~\rulename{TDResult} returns the final change value of a
+computation as well as a updated cache resulting from the evaluation
+of the cache update term~$\tupdcache$.
+%
+The rule~\rulename{TDTuple} is similar to its counterpart in the
+source language, except that no tuple is built for~$\ty$ as it has
+already been pushed in the environment by the cache.
+
+As for~$\source$, there are four rules to deal with {\bf
+  let}-bindings depending on the shape of~the change bound to~$\tdf$
+in the environment.
+%
+If $\tdf$ is bound to a replacement, the rule~\rulename{TDReplaceCall} applies.
+In that case, we reevaluate the function call in the updated
+environment~$\newenv{\tdectx}$~(defined similarly as in the source
+language). This evaluation leads to a new value~$\tclosedvalue'$
+which replaces the original one as well as an updated cache
+for~$\tcacheid\ty\tf\tx$.
+
+If $\tdf$ is bound to a nil change and $\tf$ is bound to a closure, the
+rule~\rulename{TDClosureNil} applies. This rule mimicks again its
+counterpart in the source language passing with the difference that
+only the resulting change and the updated cache are bound in the
+environment.
+
+If $\tdf$ is bound to a nil change and $\tf$ is bound to a primitive, the
+rule~\rulename{TDPrimitiveNil} applies. The derivative of the
+primitive is invoked with the value of $\tx$, its change value and the
+cache of the original call to this primitive. The semantics of this
+derivative is given by a builtin function~$\tddelta\sprim\param$, as
+in the source language.
+
+If $\tdf$ is bound to a closure change and $\tf$ is bound to a
+closure, the rule~\rulename{TDClosureNil} applies. The body of the
+closure change is evaluated under the closure change environment
+extended with the value of the formal argument~$\tdx$ and with the
+environment resulting from the binding of the original cache value
+to the variables occuring in the cache~$\tcache$. This evaluation
+leads to a change and an updated cache bound in the environment
+to continue with the evaluation of the rest of the term.
+
+% The rule~\rulename{TUpdateEmpty} is the base case for cache
+% update.
+% %
+% The rule~\rulename{TUpdateCachedValue} updates the cached
+% value~$\tclosedvalue$ of~$\tx$ with the value of $\tdx$, a
+% change~$\tcloseddvalue$, by applying the change application
+% primitive~$\oplus$.
+% %
+% The rule~\rulename{TUpdateSubCache} extracts the value
+% of~$\tcacheid\ty\tf\tx$ from the environment~$\tdectx$ to append it to
+% the updated cache~$\tcachedclosedvalues$ coming from the evaluation of
+% the cache update~$\tupdcache$.
+
+% The rule~\rulename{TMatchEmptyCache} matches an empty cache pattern
+% against an empty cache value, which binds nothing.
+% %
+% The rule~\rulename{TMatchCachedValue} matches a cache which ends with
+% value identifier~$\tx$ against a cache value which ends with a
+% value~$\tclosedvalue$. The resulting environment binds~$\tx$
+% to~$\tclosedvalue$. The rule~\rulename{TMatchSubCache} is similar
+% except that it binds a cache identifier instead of value identifier.
+% %
+
+

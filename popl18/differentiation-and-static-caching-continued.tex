@@ -1,0 +1,69 @@
+\begin{figure}
+  \vspace{-3em}
+  \footnotesize%
+  \newcommand\categorytitle[1]{\\[-0.6em]\multicolumn{3}{r}{\textit{#1}} \\[0.5em]}%
+  \begin{multicols}{2}
+    \[
+    \begin{array}{rcl}
+      %
+      \categorytitle{CTS translation of values $\compile\sclosedvalue$}
+      %
+    \compile{\sclosure\sectx{\slam{\tx}{\sterm}}}
+      & = &
+            \tclosure{\compile\sectx}{\slam{\tx}{\tterm}} \\
+      \side{\textrm{where } (\tcache, \tterm) = \compileterm{\tcachecons\temptycache\tx}\sterm}\\
+      \\
+      \compile{\sconst}
+      & = &
+            \sconst \\
+      \nextline
+      %
+      \categorytitle{CTS translation of change values $\compile\icloseddvalue$}
+      %
+      \compile{\sclosure\sdectx{\slam{\tx\,\tdx}{\iderive\sterm}}}
+      & = &
+            \tclosure{\compile\sdectx}{\slam{\tdx, \tcache}{\derive{(\tchange{\tx}{\tdx})}\sterm}} \\
+      \side{\textrm{where } (\tcache, \tterm) = \compileterm{\tcachecons\temptycache\tx}\sterm}\\
+      \\
+      \compile{\replace\sclosedvalue}
+      & = &
+            \replace{\compile\sclosedvalue}
+      \\
+      \nextline
+      \compile{\tdconst}
+      & = &
+          \tdconst
+    \end{array}
+  \]
+
+  \[
+    \begin{array}{rcl}
+      \nextline
+      \categorytitle{CTS translation of value environments $\compile\sectx$}
+      %
+      \compile{\sectxempty}
+      & = &
+            \tectxempty
+      \\
+      \nextline
+      \compile{\sectxcons{\sectx}{\tx = \sclosedvalue}}
+      & = &
+            \sectxcons{\compile\sectx}{\tx = \compile\sclosedvalue}
+      \\
+      \nextline
+      \categorytitle{CTS translation of change environments $\compile\iectx$}
+      %
+      \compile{\sectxempty}
+      & = &
+            \tectxempty
+      \\
+      \nextline
+      \compile{\sectxcons{\iectx}{\tx = \sclosedvalue, \tdx = \icloseddvalue}}
+      & = &
+            \sectxcons{\compile\iectx}{\tx = \compile\sclosedvalue, \tdx = \compile\icloseddvalue}
+    \end{array}
+  \]
+\end{multicols}
+\caption{Extending CTS translation to values, change values, environments and change environments.}
+\label{fig:differentiation-and-static-caching-continued}
+\end{figure}

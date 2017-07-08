@@ -1,0 +1,176 @@
+\subsection{A new proof of soundness for static differentiation}
+\label{sec:sound-derive}
+
+As in \citet{CaiEtAl2014ILC}'s development, static differentiation is
+only sound on input changes that are \emph{valid}. However, our
+definition of validity needs to be significantly different.
+%
+\citeauthor{CaiEtAl2014ILC} prove soundness for a strongly normalizing
+simply-typed $\lambda$-calculus using denotational semantics. We generalize this
+result to an untyped and Turing-complete language using purely syntactic
+arguments. In both scenarios, a function change is only valid if it turns valid
+input changes into valid output changes, so validity is a logical relation.
+Since standard logical relations only apply to typed languages, we turn to
+\emph{step-indexed} logical relations.
+
+\subsubsection{Validity as a step-indexed logical relation}
+To state and prove soundness of differentiation, we define validity by
+introducing a ternary step-indexed relation over base values, changes and
+updated values, following previous work on step-indexed
+logical relations~\citep{Ahmed2006stepindexed,Acar08}. Experts might notice
+small differences in our step-indexing, but they do not affect the substance of
+the proof. (We discuss these differences in Section~\ref{sec:rw}.)
+% \pg{We are not using biorthogonality: that notion embeds contextual equivalence
+%   inside the definition of equivalence.}
+%biorthogonality~\citep{pitts2010step}.
+%
+We write
+\[\vvcrel {\sclosedvalue_2} k {\sclosedvalue_1} \icloseddvalue\]
+\noindent and say that ``$\icloseddvalue$ is a valid change from
+$\sclosedvalue_1$ to $\sclosedvalue_2$, up to $k$ steps'' to mean that
+$\icloseddvalue$ is a change from $\sclosedvalue_1$ to
+$\sclosedvalue_2$ and that $\icloseddvalue$ is a \emph{valid}
+description of the differences between~$\sclosedvalue_1$ 
+and~$\sclosedvalue_2$, with validity tested with up to~$k$~steps.
+%
+To justify this intuition of validity, we later state and prove two
+lemmas: a valid change from~$\sclosedvalue_1$ to~$\sclosedvalue_2$
+goes indeed from~$\sclosedvalue_1$ to~$\sclosedvalue_2$
+(Lemma~\ref{lemma:crel-oplus}), and if a change is valid up to~$k$~steps it
+is also valid up to fewer steps (Lemma~\ref{lemma:vvcrel-antimono}).
+
+\begin{lemma}[$\oplus$ agrees with validity]
+  \label{lemma:crel-oplus}
+  \-\\
+  If
+  $\vvcrel {\sclosedvalue_2} k {\sclosedvalue_1} \icloseddvalue$ then
+  $\sclosedvalue_1 \oplus \icloseddvalue = \sclosedvalue_2$.
+\end{lemma}
+\begin{lemma}[Downward-closure]
+  \label{lemma:vvcrel-antimono}
+  \-\\
+  If $N \ge n$, then $\vvcrel{\sclosedvalue_2} {N} {\sclosedvalue_1} \icloseddvalue$ implies
+  $\vvcrel{\sclosedvalue_2} {n} {\sclosedvalue_1} \icloseddvalue$.
+\end{lemma}
+
+\input{differentiation-step-indexed-relation}
+
+As usual with step-indexed logical relations, validity is defined by
+well-founded induction over naturals ordered by $<$. To show this, it helps to
+observe that evaluation always takes at least one step.
+
+Validity is formally defined by cases in
+Figure~\ref{fig:step-index-relation-between-values-and-changes}; we
+describe in turn each case. First, a constant change $\idconst$ is a
+valid change from $\sconst$ to
+$\sconst \oplus \idconst = \delta_{\oplus} (\sconst, \idconst)$.
+Since the function $\delta_\oplus$ is partial, the relation only holds
+for the constant changes $\idconst$ which are valid changes for
+$\sconst$.
+%
+Second, a replacement change ${\replace{\sclosedvalue_2}}$ is always a valid
+change from any value~$\sclosedvalue_1$ to $\sclosedvalue_2$.
+%
+Third, a nil change is a valid change between any value and itself.
+%
+Fourth, a tuple change is valid up to step~$n$, if each of its components
+is valid up to any step strictly less than~$k$.
+%
+Fifth, we define validity for closure changes. Roughly
+speaking, this statement means that a closure change is valid if (i)
+its environment change~$\iectx$ is valid for the original closure
+environment~$\sectx_1$ and for the new closure environment~$\sectx_2$;
+(ii) when applied to related values, the closure \textit{bodies}~$\sterm_1$
+and~$\sterm_2$ are related by~$\idterm$. The validity relation between
+terms is defined as follows:
+\[
+\begin{array}{l}
+  \vvcrelterm{\sectx_1}{\iectx}{\sectx_2}{n}{\sterm_1}{\idterm}{\sterm_2} \\
+  \textrm{if and only if }
+  \forall k < n, \sclosedvalue_1, \sclosedvalue_2, \\
+  \quad\seval{\sectx_1}{\sterm_1}{k}{\sclosedvalue_1} \textrm{ and }
+  \seval{\sectx_2}{\sterm_2}{}{\sclosedvalue_2} \\
+  \quad\textrm{implies that } \exists \icloseddvalue,
+  \seval{\iectx}{\idterm}{}{\icloseddvalue} \wedge
+  \vvcrel{\sclosedvalue_1}{n - k}{\icloseddvalue}{\sclosedvalue_2}
+\end{array}
+\]
+
+\noindent
+We extend this relation from values to environments by defining a
+judgment $\vvcrel {\sectx_2} k {\sectx_1} \iectx$ defined as follows:
+\begin{mathpar}
+  \infer{}{
+    \vvcrel \bullet k \bullet \bullet
+  }
+
+  \infer{
+    \vvcrel {\sectx_2} k {\sectx_1} \iectx
+    \\
+    \vvcrel {\sclosedvalue_2} k {\sclosedvalue_1} \icloseddvalue
+  }{
+    \vvcrel
+    {\tectxcons{\sectx_2}{\tx = \sclosedvalue_2}}
+    k
+    {(\tectxcons{\sectx_1}{\tx = \sclosedvalue_1})}
+    {(\tectxcons\iectx{\tx = \sclosedvalue_1; \tdx = \icloseddvalue})}
+  }
+\end{mathpar}
+
+The above lemmas about validity for values extend to environments.
+\begin{lemma}[$\oplus$ agrees with validity, for environments]
+  \label{lemma:crel-oplus-env}
+  \-\\
+  If
+  $\vvcrel {\sectx_2} k {\sectx_1} \iectx$ then
+  $\sectx_1 \oplus \iectx = \sectx_2$.
+\end{lemma}
+\begin{lemma}[Downward-closure, for environments]
+  \label{lemma:vvcrel-antimono-env}
+  \-\\
+  If $N \ge n$, then $\vvcrel{\sectx_2} {N} {\sectx_1} \iectx$ implies
+  $\vvcrel{\sectx_2} {n} {\sectx_1} \iectx$.
+\end{lemma}
+
+Finally, for both values, terms and environments, omitting the step
+count~$k$ from validity means validity holds for all~$k$s. That is,
+for instance,
+$\vvcrel {\sclosedvalue_2} {} {\sclosedvalue_1} \icloseddvalue$ means
+$\vvcrel {\sclosedvalue_2} {k} {\sclosedvalue_1} \icloseddvalue$ for
+all $k$.
+
+\subsubsection{Soundness of differentiation}
+
+\yrg{This section will be expanded a bit to give a bit more insight about the proof.}
+
+We can state a soundness theorem for differentiation without
+mentioning step-indexes. Instead of proving it directly, we must first
+prove a more technical statement
+(Lemma~\ref{lemma:fundamental-property}) that mentions step-indexes
+explicitly.
+%
+\begin{theorem}[Soundness of differentiation in $\source$]
+  \label{thm:sound-derive}
+  \-\\
+  If $\iectx$ is a valid change environment from base environment $\sectx_1$ to
+  updated environment $\sectx_2$, that is $\vvcrel {\sectx_2} {} {\sectx_1}\iectx$,
+  %
+  and if $\sterm$ converges both in the base and updated environment, that is
+  $\sneval{\sectx_1}\sterm{\sclosedvalue_1}$ and
+  $\sneval{\sectx_2}\sterm{\sclosedvalue_2}$,
+  %
+  then $\iderive\sterm$ evaluates under the change environment~$\iectx$ to a valid
+  change $\icloseddvalue$ between base result ${\sclosedvalue_1}$ and updated result
+  ${\sclosedvalue_2}$, that is
+  $\sneval\iectx{\iderive\sterm}{\icloseddvalue}$ and
+  $\vvcrel{\sclosedvalue_2} {} {\sclosedvalue_1}
+  \icloseddvalue$.
+\end{theorem}
+
+\begin{lemma}[Fundamental Property]
+  \label{lemma:fundamental-property}
+  \-\\
+For each $n$,
+if $\vvcrel{\sectx_2}{n}{\sectx_1}{\iectx}$ then
+$\vvcrelterm{\sectx_1}{\iectx}{\sectx_2}{n}{\sterm}{\iderive{\sterm}}{\sterm}$.
+\end{lemma}

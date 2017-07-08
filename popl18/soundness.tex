@@ -1,0 +1,128 @@
+\subsection{Soundness of CTS conversion}
+\label{sec:transformation-soundness}
+
+In this section, we outline definitions and main lemmas needed to prove CTS
+conversion sound.
+The proof is based on a
+mostly straightforward simulation in lock-step, but two subtle points emerge.
+First, we must relate $\source$ environments that do not contain caches, with
+$\target$ environments that do.
+Second, while evaluating CTS derivatives, the evaluation environment mixes
+caches from the base computation and updated caches computed by the derivatives.
+
+\paragraph{Evaluation commutes with compilation of base terms}
+
+\input{differentiation-and-static-caching-continued}
+
+Figure~\ref{fig:differentiation-and-static-caching-continued}
+extends CTS translation to values, change values, environments and
+change environments. CTS translation commutes with our semantics, as shown by
+next lemma:
+
+\begin{lemma}[Evaluation commutes with CTS translation of base terms]
+  \-\\
+  For all $\sectx, \sterm$ and $\sclosedvalue$, such that
+  $\seval\sectx\sterm{}\sclosedvalue$, and
+  for all $\tcache$, there exists $\tcachedclosedvalues$,
+  $\seval
+  {\compile{\sectx}}{\compileterm\tcache\sterm}
+  {}
+  {(\compile{\sclosedvalue}, \tcachedclosedvalues)}$.
+\end{lemma}
+
+Stating a corresponding lemma for CTS translation of derived terms is trickier.
+If the derivative of $\sterm$ evaluates correctly in some environment
+(that is $\seval{\iectx}{\iderive\sterm}{}{\icloseddvalue}$), CTS derivative
+$\derive\tupdcache\sterm$ cannot be evaluated in environment $\compile\iectx$.
+A CTS derivative can only evaluate against environments containing cache values
+from the base computation, but no cache values appear in $\compile\iectx$!
+
+As a fix we enrich~$\compile\iectx$ with the values of a cache~$\tcache$, using
+the judgment defined in Figure~\ref{fig:envwithcache}.
+Judgment~$\envwithcache\tectx\tcache{\tectx'}$ is read ``The target
+change environment~$\tectx'$ extends~$\tectx$ with the values of
+cache~$\tcache$.'' We introduce a similar
+judgment~$\newenvwithcache\tectx\tcache{\tectx'}$ to extend a change
+environment~$\tectx$ with the updated values of the cache~$\tcache$.
+The rules of this judgment are omitted for lack of space but they
+can be obtained by replacing $\oldenv\tectx$ with $\newenv\tectx$
+in the rule for cache computation in Figure~\ref{fig:envwithcache}.
+
+\begin{lemma}[Evaluation commutes with compilation of derivatives]
+  \-\\
+  Let $\tcache$ be such that
+  $(\tcache, \_) = \compileterm{\bullet}{\sterm}$.
+  For all $\iectx, \sterm$ and $\icloseddvalue$,
+  if
+  $\seval{\iectx}{\iderive\sterm}{}{\icloseddvalue}$,
+  and $\envwithcache{\compile\iectx}{\tcache}{\tdectx}$,
+  then
+  $\seval{\tdectx}{\derive{\tupdcache}{\sterm}}{}{(\compile\icloseddvalue, \tcachedclosedvalues)}$.
+\end{lemma}
+
+Notice that the proof of this lemma is not immediate since during the
+evaluation of~$\derive{\tupdcache}{\sterm}$ the new caches replace the
+old caches. In the Coq development, we enforce a physical separation
+between the part of the environment containing the old caches and the
+one containing the new caches, and we maintain the invariant that the
+second part of the environment corresponds to the remaining part of the
+term.
+
+\begin{figure}
+  \footnotesize
+
+  \begin{mathpar}
+    \infer{}{
+      \envwithcache{\tectx}{\temptycache}{\tectx}
+    }
+
+    \infer{
+      \envwithcache{\tectx}{\tcache}{\tectx'}
+    }{
+      \envwithcache{\tectx}{\tcachecons\tcache\tx}{\tectx'}
+    }
+
+    \infer{
+      \envwithcache{\tectx}{\tcache}{\tectx'}
+      \\
+      \sneval{\oldenv\tectx}{\tlet{\ty, \tcacheid\ty\tf\tx = \tf\tx}{(\ty, \tcacheid\ty\tf\tx)}}{(\_, \tcachedclosedvalues)}
+    }{
+      \envwithcache{\tectx}
+      {\tcachecons\tcache{\tcacheid\ty\tf\tx}}
+      {\tectxcons{\tectx'}{\tcacheid\ty\tf\tx = \tcachedclosedvalues}}
+    }
+\end{mathpar}
+
+\caption{Extension of an environment with cache values $\envwithcache{\tectx}{\tcache}{\tectx'}$}
+\label{fig:envwithcache}
+\end{figure}
+
+\paragraph{Soundness of the transformation}
+Finally, we can state soundness of CTS differentiation relative to differentiation.
+The theorem says that (a) the CTS derivative $\derive\tcache\sterm$ computes the
+CTS translation $\compile{\icloseddvalue}$ of the
+change computed by the standard derivative $\iderive\sterm$; (b) the updated
+cache $\tcachedclosedvalues'$ produced by
+the CTS derivative coincides with the cache produced by the CTS-translated base
+term $\tterm$ in the updated environment $\newenv{\tectx'}$.
+Since we require a correct cache via condition (b), we can use this cache
+to invoke the CTS derivative on further changes, as described
+in~\cref{sec:motivating-example}.
+
+\begin{theorem}[Soundness of differentiation with static caching wrt differentiation]
+  \-\\
+  \label{thm:soundness-compiled-changesfinal}
+  Let $\tcache$ and $\tterm$ be such that 
+  $(\tcache, \tterm) = \compileterm{\bullet}{\sterm}$.
+  For all $\iectx, \sterm$ and $\icloseddvalue$,
+  $\seval{\iectx}{\iderive\sterm}{}{\icloseddvalue}$,
+  for $\tectx$ and $\tectx'$ such that
+  $\envwithcache{\compile\iectx}{\tcache}{\tectx}$
+  and $\newenvwithcache{\compile\iectx}{\tcache}{\tectx'}$,
+  $\seval{\oldenv\tectx}{\tterm}{}{(\tclosedvalue, \tcachedclosedvalues)}$ and
+  $\seval{\newenv{\tectx'}}{\tterm}{}{(\tclosedvalue', \tcachedclosedvalues')}$,
+  then
+  $
+  \seval{\tectx}{\derive\tcache\sterm}{}{(\compile{\icloseddvalue}, \tcachedclosedvalues')}
+  $.
+\end{theorem}

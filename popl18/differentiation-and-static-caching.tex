@@ -1,0 +1,71 @@
+\begin{figure}
+  \footnotesize
+  \setlength{\columnseprule}{0.4pt}
+  \newcommand\categorytitle[1]{\\[-0.2em]\multicolumn{3}{r}{\textit{#1}} \\[0.5em]}
+  \begin{multicols}{2}
+%  \figsubcaption{Derivation with Static Caching}
+  \[
+    \begin{array}{rcl}
+      %
+      \categorytitle{CTS translation of toplevel definitions}
+      %
+      \compile{\tf = \slam{\tx}{\sterm}}
+      & = &
+            \tf = \slam{\tx}{\tterm}, \\
+      &  &\tdf = \slam{\tdx, \tcache}{\derive{(\tchange{\tx}{\tdx})}\sterm} \\
+      \side{\textrm{where } (\tcache, \tterm) = \compileterm{\tcachecons\temptycache\tx}\sterm}\\
+      \nextline
+      %
+      \categorytitle{CTS differentiation of terms}
+      %
+      \derive{\tupdcache}{\slet{\ty = \sapp{\tf}{\tx}}{\sterm}}
+      & = &
+            \tquote{\tlet{\tdy, \tcacheid{\ty}{\tf}{\tx} = \tdapp{\tdf}{\tdx}{\tcacheid{\ty}{\tf}{\tx}}}{\tterm}}
+      \\
+      \side{\textrm{where }\tterm = \derive{(\tupdcache\;(\tchange\ty\tdy)\;\tcacheid{\ty}{\tf}{\tx})}{\sterm}} \\
+      \nextline
+
+      \derive{\tupdcache}{\slet{\ty = \stuple{\many\tx}}{\sterm}}
+      & = &
+            \tquote{\tlet{\tdy = \stuple{\many\tdx}}{\tterm}}
+      \\
+      \side{\textrm{where }\tterm = \derive{(\tupdcache\;(\tchange\ty\tdy))}{\sterm}} \\
+      \nextline
+
+      \derive{\tupdcache}{\tx}
+      & = &
+            \tquote{(\tdx, \tupdcache)}
+      \\[1em]
+    \end{array}
+    \]
+  \figsubcaption{Translation to Cache-Transfer Style (CTS)}
+  \[
+    \begin{array}{rcl}
+      %
+      \categorytitle{CTS translation of terms $\compileterm\tcache\sterm$}
+      %
+      \compileterm{\tcache}{\slet{\ty = \tapp{\tf}{\tx}}{\sterm}}
+      & = &
+      (\tcache', \tquote{\tlet{\ty, \tcacheid{\ty}{\tf}{\tx} = \sapp{\tf}{\tx}}{\tterm}}) \\
+      \side{\textrm{where }(\tcache', \tterm)
+      = \compileterm{(\tcache\;\ty\;\tcacheid{\ty}{\tf}{\tx})}{\sterm}} \\
+      \nextline
+      %
+      \compileterm{\tcache}{\slet{\ty = \stuple{\many\tx}}{\sterm}}
+      & = &
+      (\tcache', \tquote{\tlet{\ty = \stuple{\many\tx}}{\tterm}}) \\
+      \side{\textrm{where }(\tcache', \tterm)
+      = \compileterm{(\tcache\;\ty)}{\sterm}} \\
+      \nextline
+      \compileterm{\tcache}{\tx}
+      & = &
+            (\tcache, \tquote{(\tx, \tcache)})
+      \\
+      \nextline
+      %
+    \end{array}
+  \]
+\end{multicols}
+\caption{CTS conversion from $\source$ to $\target$.}
+\label{fig:differentiation-and-static-caching}
+\end{figure}
