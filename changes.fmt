@@ -257,8 +257,8 @@
 
 % Hook into forall.fmt:
 
-%forall mu = "\mu"
-%forall mmu x = mu x "\hsforall "
+%format mu = "\mu"
+%format mmu x = mu x "\hsforall "
 
 %format exists(x) = exists_ x "\hsforall "
 %format exists_ = "\exists "
