@@ -353,7 +353,7 @@ program, we encode multi-arguments functions using tuples instead of currying.%
   function definitions as multi-argument functions. At this point, this
   discussion is merely a technicality that does not affect our goals, but it
   becomes relevant if we formalize the resulting first-order
-  language~\citep{Giarrusso2017Static}.}
+  language~\citep{Giarrusso2018Static}.}
 %
 Using tuples our example becomes:
 %{

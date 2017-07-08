@@ -1455,7 +1455,7 @@ general strategy and the first partial proofs for untyped $\lambda$-calculi.
 After we both struggled for a while to set up step-indexing correctly enough for a
 full proof, I first managed to give the definitions in this chapter and
 complete the proofs here described. Régis-Gianas then mechanized a variant of
-this proof in Coq~\citet{Giarrusso2017Static}.
+this proof in Coq~\citet{Giarrusso2018Static}.
 
 \section{Conclusion}
 In this chapter we have shown how to construct novel models for
