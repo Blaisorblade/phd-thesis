@@ -8,6 +8,12 @@
 
 %else
 
+% Complexity notation:
+
+%format complTheta(n) = "\Theta(" n ")"
+%format complSmallO(n) = "o(" n ")"
+%format complBigO(n) = "O(" n ")"
+
 %format (pair (a) (b)) = "\langle" a , b "\rangle"
 
 %format param = "\text{\textendash}"
@@ -170,8 +176,8 @@
 %format x1
 %format x2
 %format x3
-%format xi = "x_i"
-%format xn = "x_n"
+%format xi = x "_i"
+%format xn = x "_n"
 
 %format y0
 %format y1
@@ -185,10 +191,19 @@
 %format as2
 %format xs1
 %format xs2
+%format xs3
 %format ys1
 %format ys2
 %format output1
 %format output2
+
+%format dxs1
+%format dxs2
+
+%format res1
+%format res2
+%format dres1
+%format dres2
 
 %format u1
 %format u2
@@ -301,12 +316,32 @@
 
 %format cache1
 %format cache2
+%format cache3
 %format caches1
 %format caches2
 %format mapCache1
 %format mapCache2
 %format cx1
 %format cx2
+
+%format C1
+%format C2
+%format DivC1
+%format DivC2
+
+%format cs1
+%format cs2
+%format cn1
+%format cn2
+%format cr1
+%format cr2
+
+%format c_y
+%format c_z
+
+% XXX
+%format E1
+%format E2
 
 %format size(s) = "\left|{" s "}\right|"
 

@@ -21,6 +21,13 @@
 %
 \input{macros}
 
+%format fromtotau (tau) (v1) (dv) (v2) = "\vvcreltau{" v2 "}{" tau "}{" v1 "}{" dv "}"
+%format fromto (k) (v1) (dv) (v2) = "\vvcrel{" v2 "}{" k "}{" v1 "}{" dv "}"
+\NewDocumentCommand{\NILC}{}{\mathbf{0}}
+\NewDocumentCommand{\NilC}{om}{\NILC_{#2}}
+
+%format derive (t) = "\iderive{" t "}"
+
 % Local packages
 
 \usepackage{locallabel,reversion}
