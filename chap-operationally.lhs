@@ -456,7 +456,7 @@ Evaluation preserves types in the expected way.
 To ensure that our semantics for \ilcTau{} is complete for the typed language,
 instead of proving a small-step progress lemma or extending the semantics with
 errors, we just prove that all typed terms normalize in the standard way.
-As usual, this fails if we add fixpoints or for untyped terms. IF we wanted to
+As usual, this fails if we add fixpoints or for untyped terms. If we wanted to
 ensure type safety in such a case, we could switch to functional big-step
 semantics or definitional interpreters~\citep{Amin2017,Owens2016functional}.
 
