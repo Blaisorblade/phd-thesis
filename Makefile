@@ -53,6 +53,9 @@ mylhs2tex.sty: mylhs2tex.lhs
 	lhs2TeX -o $@ $<
 %.pdf: %.tex $(INTERM_PRODUCTS) FORCE
 	latexmk $* $(REDIR)
+quick:
+	pdflatex $(PAPER_NAME)
+	$(OPEN) $(PDF_NAME)
 
 .PRECIOUS: %.tex
 
@@ -77,6 +80,10 @@ demon:
 	$(fswatch) $(sources) Makefile | $(xargs) make & \
 	wait
 
+quickdemon:
+	-make quick
+	$(fswatch) $(sources) Makefile | $(xargs) make quick & \
+	wait
 
 %.hs: %.lhs $(lhsFmt)
 	lhs2TeX --newcode -P .: -o $*.hs $*.lhs
