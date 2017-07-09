@@ -18,7 +18,7 @@ PDF_NAME=$(PAPER_NAME).pdf
 
 lhsFormat = changes.fmt
 
-lhsSources = static-caching-content.lhs \
+lhsSources = \
 	cts-intro.lhs cts-motivation.lhs \
 	cts-case-studies.lhs cts-relwork.lhs cts-conclusion.lhs
 lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
