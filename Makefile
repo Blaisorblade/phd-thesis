@@ -27,7 +27,7 @@ lhsSources=$(patsubst %,%.lhs, \
 lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 # Sources to watch for changes but that don't need to be compiled on their own,
 # because they're included elsewhere.
-sourcesIncluded=$(shell find . -name '*.tex') $(wildcard Bibs/*.bib) $(lhsFmt) defunc.lhs
+sourcesIncluded=$(shell find . -name '*.tex' -o -name '*.sty') $(wildcard Bibs/*.bib) $(lhsFmt) defunc.lhs
 # Sources that will be watched for changes.
 sources=$(lhsSources) $(sourcesIncluded)
 
@@ -55,7 +55,7 @@ mylhs2tex.sty: mylhs2tex.lhs
 	lhs2TeX -o $@ $<
 %.pdf: %.tex $(INTERM_PRODUCTS) FORCE
 	latexmk $* $(REDIR)
-quick:
+quick: $(PAPER_NAME).tex $(INTERM_PRODUCTS) FORCE
 	pdflatex $(PAPER_NAME)
 	$(OPEN) $(PDF_NAME)
 
