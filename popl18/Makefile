@@ -22,13 +22,13 @@ lhsSources = static-caching-content.lhs
 lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 # Sources to watch for changes but that don't need to be compiled on their own,
 # because they're included elsewhere.
-sourcesIncluded=$(PAPER_NAME).lhs $(wildcard *.tex) $(wildcard ../Bibs/*.bib) syntaxmacros.sty $(lhsFormat)
+sourcesIncluded=$(wildcard *.tex) $(wildcard ../Bibs/*.bib) syntaxmacros.sty $(lhsFormat)
 # Sources that will be watched for changes.
 sources=$(lhsSources) $(sourcesIncluded)
 
 INTERM_PRODUCTS=$(lhsCompiled)
 
-all: check open
+all: open
 OPEN = ./open.sh
 
 open: $(PDF_NAME)
@@ -54,7 +54,7 @@ quick: $(PAPER_NAME).tex $(INTERM_PRODUCTS) $(sources)
 # Remove lhs2TeX and LaTeX build products.
 clean:
 	rm -f \
-	$(PAPER_NAME).aux $(PAPER_NAME).bbl $(PAPER_NAME).blg $(PAPER_NAME).log $(PAPER_NAME).tex \
+	$(PAPER_NAME).aux $(PAPER_NAME).bbl $(PAPER_NAME).blg $(PAPER_NAME).log \
 	$(PAPER_NAME).pdf $(PAPER_NAME).ptb $(PAPER_NAME).toc $(INTERM_PRODUCTS)
 
 fresh:
