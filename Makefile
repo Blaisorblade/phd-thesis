@@ -28,11 +28,13 @@ lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 # Sources to watch for changes but that don't need to be compiled on their own,
 # because they're included elsewhere.
 sourcesIncluded=$(shell find . -name '*.tex') $(wildcard Bibs/*.bib) $(lhsFmt) defunc.lhs
+# Sources that will be watched for changes.
 sources=$(lhsSources) $(sourcesIncluded)
+
 INTERM_PRODUCTS=mylhs2tex.sty $(lhsCompiled)
 
 
-all:	check open
+all: check open
 OPEN = ./open.sh
 
 open: $(PDF_NAME)

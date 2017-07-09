@@ -13,7 +13,7 @@
 # If you suspect stale build products, then `make fresh`.
 
 # Name of the main build product.
-PAPERNAME = static-caching
+PAPER_NAME = static-caching
 
 lhsFormat = changes.fmt
 
@@ -50,8 +50,8 @@ endif
 # Remove lhs2TeX and LaTeX build products.
 clean:
 	rm -f \
-	$(PAPERNAME).aux $(PAPERNAME).bbl $(PAPERNAME).blg $(PAPERNAME).log $(PAPERNAME).tex \
-	$(PAPERNAME).pdf $(PAPERNAME).ptb $(PAPERNAME).toc
+	$(PAPER_NAME).aux $(PAPER_NAME).bbl $(PAPER_NAME).blg $(PAPER_NAME).log $(PAPER_NAME).tex \
+	$(PAPER_NAME).pdf $(PAPER_NAME).ptb $(PAPER_NAME).toc $(INTERM_PRODUCTS)
 
 fresh:
 	make clean
