@@ -220,9 +220,6 @@ update :: Int -> a -> Seq a -> Seq a
 %
 \pg{We conjecture that we can type using free type variables:
   \begin{itemize}
-
-  \item second-class uses of higher-order functions (such as in map, flatMap, and so on)
-  \item but not first-class uses
   \item we can probably thread type variables where possible and use the packing trick elsewhere.
 \end{itemize}
 }
