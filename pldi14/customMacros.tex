@@ -121,11 +121,8 @@
 \NewDocumentCommand{\New}{m}{#1_{\textrm{new}}}
 
 \NewDocumentCommand{\APPFun}{}{\Keyword{app}}
-\NewDocumentCommand{\IF}{}{\mathop{\Keyword{if}}}
 \NewDocumentCommand{\THEN}{}{\mathbin{\Keyword{then}}}
 \NewDocumentCommand{\ELSE}{}{\mathbin{\Keyword{else}}}
-\NewDocumentCommand{\TRUE}{}{\Keyword{true}}
-\NewDocumentCommand{\FALSE}{}{\Keyword{false}}
 \NewDocumentCommand{\BAG}{}{\mathop{\Keyword{Bag}}}
 \NewDocumentCommand{\MERGE}{}{\Term{merge}}
 \NewDocumentCommand{\NAT}{}{\Keyword{Nat}}
@@ -156,9 +153,6 @@
 \NewDocumentCommand{\Add}{smm}{\Parens#1{#2 + #3}}
 \NewDocumentCommand{\Minus}{sm}{\Parens#1{- #2}}
 \NewDocumentCommand{\Bool}{s}{\Parens#1{\BOOL}}
-\NewDocumentCommand{\TrueT}{s}{\Parens#1{\TRUE}}
-\NewDocumentCommand{\FalseT}{s}{\Parens#1{\FALSE}}
-\NewDocumentCommand{\If}{smmm}{\Parens#1{\IF #2 \THEN #3 \ELSE #4}}
 \NewDocumentCommand{\Empty}{s}{\Parens#1{\emptyset}}
 \NewDocumentCommand{\BagLit}{m}{\left\lbrace#1\right\rbrace}
 \NewDocumentCommand{\SINGLETON}{}{\Term{singleton}}
