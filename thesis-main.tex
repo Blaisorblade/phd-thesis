@@ -34,6 +34,15 @@
 \includecomment{partCompile}
 }
 
+% FROM POPL18
+\usepackage{syntaxmacros,multicol}
+% HEAVYWEIGHT, enable as late as possible.
+\iftoggle{full}{
+\usepackage{tikz}
+\usepackage{pgfplots}
+}{}
+
+
 % Number floats and figures together. Documented at
 % http://stackoverflow.com/a/43266057/53974.
 \makeatletter
