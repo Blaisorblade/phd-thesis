@@ -18,7 +18,9 @@ PDF_NAME=$(PAPER_NAME).pdf
 
 lhsFormat = changes.fmt
 
-lhsSources = static-caching-content.lhs
+lhsSources = static-caching-content.lhs \
+	cts-intro.lhs cts-motivation.lhs \
+	cts-case-studies.lhs cts-relwork.lhs cts-conclusion.lhs
 lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 # Sources to watch for changes but that don't need to be compiled on their own,
 # because they're included elsewhere.
