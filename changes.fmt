@@ -218,6 +218,7 @@
 %format dx2
 %format dx3
 
+%format : = "\typcolon"
 %format Dt = "\Delta"
 %format DtIdx(t) = "\Delta_{" t "}"
 %format Dt2 = "\Delta_2"
@@ -347,7 +348,7 @@
 %format succ = "\mathbf{succ}"
 %format add = "\mathbf{add}"
 
-%format `stoup` = "\filleddiamond"
+%format `stoup` = "\mathrel{\filleddiamond}"
 %  format `stoup` = "\blackdiamond"
 
 %format m1

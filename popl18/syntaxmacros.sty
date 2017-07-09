@@ -198,14 +198,13 @@
 
 
 % Step-indexed relations
-\RequirePackage{wasysym}
 \newcommand\param{\text{\textendash}}
-\newcommand\vvcreltau[4]{#4 \rhd #3 \hookrightarrow #1 \mathrel{::} #2}
-\newcommand\vvcrel[4]{#4 \rhd_{#2} #3 \hookrightarrow #1}
+\newcommand\vvcreltau[4]{#4 \mathrel{\vartriangleright} #3 \hookrightarrow #1 \mathrel{::} #2}
+\newcommand\vvcrel[4]{#4 \mathrel{\vartriangleright}_{#2} #3 \hookrightarrow #1}
 \newcommand\crel{\vvcrel{}{\param}{}{}}
 
 % Can be inlined if desired. \vvcreltrm is just \vvcrel with a different symbol.
-\newcommand\vvcreltrm[4]{#4 \RHD_{#2} #3 \hookrightarrow #1}
+\newcommand\vvcreltrm[4]{#4 \mathrel{\blacktriangleright}_{#2} #3 \hookrightarrow #1}
 \newcommand\vvcrelterm[7]{\vvcreltrm{(#3 \vdash #7)}{#4}{(#1 \vdash #5)}{(#2 \vdash #6)}}
 
 \newcommand\envwithcache[3]{#1 \uparrow #2 \leadsto #3}
