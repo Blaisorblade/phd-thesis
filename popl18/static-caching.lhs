@@ -30,7 +30,6 @@
 
 % Local packages
 
-\usepackage{locallabel,reversion}
 \usepackage{syntaxmacros,multicol}
 \usepackage{tikz}
 \usepackage{pgfplots}
