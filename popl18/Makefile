@@ -14,25 +14,19 @@
 
 # Name of the main build product.
 PAPER_NAME = static-caching
+PDF_NAME=$(PAPER_NAME).pdf
 
 lhsFormat = changes.fmt
 
 # Sources that will be watched for changes.
 sources=$(PAPERNAME).lhs $(wildcard *.tex) $(wildcard ../Bibs/*.bib) syntaxmacros.sty $(lhsFormat)
 
-all:	open
 
-UNAMES := $(shell uname -s)
-OPEN   := /bin/false
+all: check open
+OPEN = ./open.sh
 
-ifeq ($(UNAMES),Linux)
-OPEN := xdg-open
-else ifeq ($(UNAMES),Darwin)
-OPEN := open
-endif
-
-open: $(PAPERNAME).pdf
-	$(OPEN) $<
+open: $(PDF_NAME)
+	$(OPEN) $(PDF_NAME)
 
 ifeq ($V, 1)
   REDIR=
@@ -64,6 +58,6 @@ fswatch = fswatch -0o
 xargs = xargs -0 -n 1 -I '{}' -t
 
 demon:
-	make
+	-make
 	$(fswatch) $(sources) Makefile | $(xargs) make & \
 	wait
