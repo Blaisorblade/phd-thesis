@@ -148,13 +148,13 @@ previous one.
         y filter/.code={\pgfmathparse{#1*1000}\pgfmathresult},
         legend pos=north west
       ]
-      \addplot table[x=size, y=from_scratch, col sep=comma]{benchmark-results/average.csv};
+      \addplot table[x=size, y=from_scratch, col sep=comma]{\poplPath{benchmark-results/average.csv}};
       \addlegendentry{original}
-      \addplot table[x=size, y=caching, col sep=comma]{benchmark-results/average.csv};
+      \addplot table[x=size, y=caching, col sep=comma]{\poplPath{benchmark-results/average.csv}};
       \addlegendentry{caching}
-      \addplot table[x=size, y=change_only, col sep=comma]{benchmark-results/average.csv};
+      \addplot table[x=size, y=change_only, col sep=comma]{\poplPath{benchmark-results/average.csv}};
       \addlegendentry{change only}
-      \addplot table[x=size, y=incremental, col sep=comma]{benchmark-results/average.csv};
+      \addplot table[x=size, y=incremental, col sep=comma]{\poplPath{benchmark-results/average.csv}};
       \addlegendentry{incremental}
     \end{axis}
   \end{tikzpicture}
@@ -172,13 +172,13 @@ previous one.
         y filter/.code={\pgfmathparse{#1*1000}\pgfmathresult},
         legend pos=north west
       ]
-      \addplot table[x=size, y=from_scratch, col sep=comma]{benchmark-results/indexedJoin.csv};
+      \addplot table[x=size, y=from_scratch, col sep=comma]{\poplPath{benchmark-results/indexedJoin.csv}};
       \addlegendentry{original}
-      \addplot table[x=size, y=caching, col sep=comma]{benchmark-results/indexedJoin.csv};
+      \addplot table[x=size, y=caching, col sep=comma]{\poplPath{benchmark-results/indexedJoin.csv}};
       \addlegendentry{caching}
-      \addplot table[x=size, y=change_only, col sep=comma]{benchmark-results/indexedJoin.csv};
+      \addplot table[x=size, y=change_only, col sep=comma]{\poplPath{benchmark-results/indexedJoin.csv}};
       \addlegendentry{change only}
-      \addplot table[x=size, y=incremental, col sep=comma]{benchmark-results/indexedJoin.csv};
+      \addplot table[x=size, y=incremental, col sep=comma]{\poplPath{benchmark-results/indexedJoin.csv}};
       \addlegendentry{incremental}
     \end{axis}
   \end{tikzpicture}
@@ -277,13 +277,13 @@ of changes for |ys| and all changes to |xs| will be nil changes.
         ylabel=time in seconds,
         legend pos=north west
       ]
-      \addplot table[x=size, y=from_scratch, col sep=comma]{benchmark-results/nestedLoopInner.csv};
+      \addplot table[x=size, y=from_scratch, col sep=comma]{\poplPath{benchmark-results/nestedLoopInner.csv}};
       \addlegendentry{original}
-      \addplot table[x=size, y=caching, col sep=comma]{benchmark-results/nestedLoopInner.csv};
+      \addplot table[x=size, y=caching, col sep=comma]{\poplPath{benchmark-results/nestedLoopInner.csv}};
       \addlegendentry{caching}
-      \addplot table[x=size, y=change_only, col sep=comma]{benchmark-results/nestedLoopInner.csv};
+      \addplot table[x=size, y=change_only, col sep=comma]{\poplPath{benchmark-results/nestedLoopInner.csv}};
       \addlegendentry{change only}
-      \addplot table[x=size, y=incremental, col sep=comma]{benchmark-results/nestedLoopInner.csv};
+      \addplot table[x=size, y=incremental, col sep=comma]{\poplPath{benchmark-results/nestedLoopInner.csv}};
       \addlegendentry{incremental}
     \end{axis}
   \end{tikzpicture}
@@ -300,13 +300,13 @@ of changes for |ys| and all changes to |xs| will be nil changes.
         ylabel=time in seconds,
         legend pos=north west
       ]
-      \addplot table[x=size, y=from_scratch, col sep=comma]{benchmark-results/nestedLoopOuter.csv};
+      \addplot table[x=size, y=from_scratch, col sep=comma]{\poplPath{benchmark-results/nestedLoopOuter.csv}};
       \addlegendentry{original}
-      \addplot table[x=size, y=caching, col sep=comma]{benchmark-results/nestedLoopOuter.csv};
+      \addplot table[x=size, y=caching, col sep=comma]{\poplPath{benchmark-results/nestedLoopOuter.csv}};
       \addlegendentry{caching}
-      \addplot table[x=size, y=change_only, col sep=comma]{benchmark-results/nestedLoopOuter.csv};
+      \addplot table[x=size, y=change_only, col sep=comma]{\poplPath{benchmark-results/nestedLoopOuter.csv}};
       \addlegendentry{change only}
-      \addplot table[x=size, y=incremental, col sep=comma]{benchmark-results/nestedLoopOuter.csv};
+      \addplot table[x=size, y=incremental, col sep=comma]{\poplPath{benchmark-results/nestedLoopOuter.csv}};
       \addlegendentry{incremental}
     \end{axis}
   \end{tikzpicture}
