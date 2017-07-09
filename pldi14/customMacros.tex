@@ -1,5 +1,29 @@
 % Macros specific to this paper project
 
+% Importing \filleddiamond from MnSymbol. Hints from:
+% https://tex.stackexchange.com/a/36088/1340
+\DeclareFontFamily{U}  {MnSymbolC}{}
+\DeclareSymbolFont{MnSyC}         {U}  {MnSymbolC}{m}{n}
+\DeclareFontShape{U}{MnSymbolC}{m}{n}{
+    <-6>  MnSymbolC5
+   <6-7>  MnSymbolC6
+   <7-8>  MnSymbolC7
+   <8-9>  MnSymbolC8
+   <9-10> MnSymbolC9
+  <10-12> MnSymbolC10
+  <12->   MnSymbolC12}{}
+\DeclareFontShape{U}{MnSymbolC}{b}{n}{
+    <-6>  MnSymbolC-Bold5
+   <6-7>  MnSymbolC-Bold6
+   <7-8>  MnSymbolC-Bold7
+   <8-9>  MnSymbolC-Bold8
+   <9-10> MnSymbolC-Bold9
+  <10-12> MnSymbolC-Bold10
+  <12->   MnSymbolC-Bold12}{}
+
+% Don't ask how I got the code.
+\DeclareMathSymbol{\filleddiamond}{\mathrel}{MnSyC}{109}
+
 % Macros for terms, types and values
 %
 % Naming Convention:
@@ -21,12 +45,8 @@
 
 \newcommand{\myquote}{\ensuremath{'}}
 
-% Without MnSymbol:
-%\newcommand{\VALIDEMPTY}{\mathrel{\vartriangleright}}
-%\newcommand{\VALIDFULL}{\mathrel{\blacktriangleright}}
-% With MnSymbol:
-\newcommand{\VALIDEMPTY}{\mathrel{\medtriangleright}}
-\newcommand{\VALIDFULL}{\mathrel{\filledmedtriangleright}}
+\newcommand{\VALIDEMPTY}{\mathrel{\vartriangleright}}
+\newcommand{\VALIDFULL}{\mathrel{\blacktriangleright}}
 
 \newcommand\validfrom[3]{#3 \VALIDEMPTY #2 \typcolon #1}
 \newcommand\validfromto[4]{#3 \VALIDEMPTY #2 \hookrightarrow #4 \typcolon #1}
