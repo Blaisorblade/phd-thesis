@@ -43,6 +43,14 @@ available, but we collapse this hierarchy here to simplify presentation.
 % We'll come back to this definition and refine it,
 % describing the laws it satisfies, in \cref{sec:change-struct-tc}.
 
+\pg{Too short for a section. Add sums and products maybe?}
+\section{How to design a language plugin}
+\pg{Put somewhere:}
+In general, to differentiate a primitive |f : A -> B| once we have defined a
+change structure for |A|, we can start by defining |df a1 da = f a2
+`ominus` f a1|, assume |da| is a valid change from |a1| to |a2|, and try to
+simplify and rewrite the expression in terms of |a1| and |da| to avoid using
+|`ominus`| as far as possible.
 \section{Simple changes on lists}
 \label{sec:simple-changes-list-map}
 In this section, we consider a basic change structure on lists and the
@@ -260,8 +268,8 @@ instance (ChangeStruct a, ChangeStruct b) => ChangeStruct (Either a b) where
 instance (NilChangeStruct a, NilChangeStruct b) => NilChangeStruct (Either a b) where
   nil (Left a) = Ch $ LeftC (nil a)
   nil (Right a) = Ch $ RightC (nil a)
-either
 \end{code}
+\pg{Add |either| and |deither|!}
 
 \paragraph{Extensions}
 Unfortunately, with this change structure a change from |Left a1| to |Right b2|
