@@ -9,9 +9,9 @@
 %% For final camera-ready submission
 %\documentclass[acmlarge]{acmart}\settopmatter{}
 
-% Directives for lhs2TeX formatting
+% For lhs2TeX formatting
 
-%include polycode.fmt
+\usepackage{../mylhs2tex}
 
 % Shrink a bit lhs2TeX code  this hook is there for this reason:
 \renewcommand{\hscodestyle}{\small}
