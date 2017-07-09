@@ -73,7 +73,7 @@ fswatch = fswatch -0o
 xargs = xargs -0 -n 1 -I '{}' -t
 
 demon:
-	make
+	-make
 	$(fswatch) $(sources) Makefile | $(xargs) make & \
 	wait
 
