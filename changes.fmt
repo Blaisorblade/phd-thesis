@@ -365,12 +365,8 @@
 %format drho' = drho "\myquote"
 
 
-% Cancel the effect of \;
-%format undoapp = "{\mskip-\thickmuskip}"
-
-% To understand that, compare with the standard definitions of opposite commands \, and \!:
-% \def\,{\mskip\thinmuskip} \def\!{\mskip-\thinmuskip}
-% \def\;{\mskip\thickmuskip}
+% Cancel the effect of \; (that is \thickspace)
+%format undoapp = "\negthickspace"
 
 %format envpair (rho) t = rho /- t
 %format denvpair (rho) (drho) t = rho `stoup` drho /-- t
