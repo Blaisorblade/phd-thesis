@@ -1,11 +1,6 @@
 % Emacs, this is -*- latex -*-!
 %include polycode.fmt
-%include changes.fmt
-
-%format fromtotau (tau) (v1) (dv) (v2) = "\vvcreltau{" v2 "}{" tau "}{" v1 "}{" dv "}"
-%format fromto (k) (v1) (dv) (v2) = "\vvcrel{" v2 "}{" k "}{" v1 "}{" dv "}"
-
-%format derive (t) = "\iderive{" t "}"
+%include changes-popl.fmt
 
 \section{Introduction}
 
