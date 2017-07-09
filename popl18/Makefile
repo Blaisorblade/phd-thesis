@@ -18,9 +18,15 @@ PDF_NAME=$(PAPER_NAME).pdf
 
 lhsFormat = changes.fmt
 
+lhsSources = static-caching-content.lhs
+lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
+# Sources to watch for changes but that don't need to be compiled on their own,
+# because they're included elsewhere.
+sourcesIncluded=$(PAPER_NAME).lhs $(wildcard *.tex) $(wildcard ../Bibs/*.bib) syntaxmacros.sty $(lhsFormat)
 # Sources that will be watched for changes.
-sources=$(PAPERNAME).lhs $(wildcard *.tex) $(wildcard ../Bibs/*.bib) syntaxmacros.sty $(lhsFormat)
+sources=$(lhsSources) $(sourcesIncluded)
 
+INTERM_PRODUCTS=$(lhsCompiled)
 
 all: check open
 OPEN = ./open.sh
@@ -34,10 +40,14 @@ else
   REDIR=> /dev/null
 endif
 
+.PHONY: FORCE
 %.tex: %.lhs $(lhsFormat)
-	lhs2TeX -o $*.tex $*.lhs
-%.pdf: %.tex $(sources)
+	lhs2TeX -P .: -o $*.tex $*.lhs
+%.pdf: %.tex $(INTERM_PRODUCTS) $(sources) FORCE
 	latexmk -pdf $* $(REDIR)
+quick: $(PAPER_NAME).tex $(INTERM_PRODUCTS) $(sources)
+	pdflatex $(PAPER_NAME)
+	$(OPEN) $(PDF_NAME)
 
 .PRECIOUS: %.tex
 
@@ -60,4 +70,9 @@ xargs = xargs -0 -n 1 -I '{}' -t
 demon:
 	-make
 	$(fswatch) $(sources) Makefile | $(xargs) make & \
+	wait
+
+quickdemon:
+	-make quick
+	$(fswatch) $(sources) Makefile | $(xargs) make quick & \
 	wait
