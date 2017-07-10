@@ -18,23 +18,24 @@ present a variant of differentiation (as defined by
 terms of $\source$, and we prove it sound with respect to non-incremental
 evaluation.
 %
-Second, we define CTS differentiation as a pair of
-transformations going from base terms of $\source$: the first transformation
+Second, we define CTS conversion as a pair of
+transformations going from base terms of $\source$: CTS translation
 produces CTS versions of base functions as base terms in $\target$,
-and the second transformation produces CTS derivatives as change terms
+and CTS differentiation produces CTS derivatives as change terms
 in $\target$.
 
 As source language for CTS differentiation,
 we use a core language named~$\source$.  This
 language is a common target of a compiler front-end for a functional
 programming language: in this language, terms are written in
-$\lambda$-lifted and in a variant of A-normal form~\cite{sabry1993reasoning}, hence every
-intermediate result is named. Hence intermediate results can be reused
-and stored in a cache.
+$\lambda$-lifted and in A'-normal form (A'NF), so that every
+intermediate result is named and can be reused
+and stored in a cache by CTS conversion (as described in
+\cref{sec:cts-motivation}).
 
 The target language for CTS differentiation is
 named~$\target$. Programs in this target language are also
-$\lambda$-lifted and in a variant of A-normal form. But additionally, in these
+$\lambda$-lifted and in A'NF. But additionally, in these
 programs every toplevel function $\tf$ produces a cache which is to be
 conveyed to the derivatives of $\tf$.
 
