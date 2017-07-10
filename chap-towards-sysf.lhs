@@ -3,8 +3,8 @@
 %include changes.fmt
 
 \chapter{Towards differentiation for System F}
-\label{sec:diff-parametricity-system-f}
-In this section, we show how differentiation and the core of its correctness proof
+\label{ch:diff-parametricity-system-f}
+In this chapter, we show how differentiation and the core of its correctness proof
 generalizes naturally to System F. We stop short of giving a full formal proof,
 but we conjecture our results follow as variations of existing proofs. To gain
 initial evidence, we have implemented the transformations described here on top
@@ -53,7 +53,7 @@ transformation for parametricity (which they write |eval t|).
 %format sysf = "\lambda_{2}"
 %format sysf2 = sysf "^2"
 %format rAlpha = "\mathcal{R}^" alpha
-\subsection{The parametricity transformation}
+\section{The parametricity transformation}
 First, we show a variant of their parametricity transformation, adapted to a
 variant of STLC without base types but with type variables. Presenting |stlc|
 using type variables will help when we come back to System F, and allows
@@ -194,7 +194,7 @@ pid : pElemDt1 (alpha -> alpha) (idx1 id) (idx2 id)|.
 \]
 \end{example}
 
-\subsection{Differentiation and parametricity}
+\section{Differentiation and parametricity}
 \label{sec:differentiation-dep-types-stlc}
 We obtain a close variant of differentiation by altering the transformation for
 binary parametricity.
@@ -287,7 +287,7 @@ passing destinations. We ignore such complications here.
 % If |Gamma /- t : tau| then |derive (Gamma) /- derive t : elemDt2 tau (idx1 t) (idx2 t)|.
 % \end{theorem}
 
-\subsection{Proving differentiation correct externally}
+\section{Proving differentiation correct externally}
 Instead of producing dependently-typed programs that show their correctness, we
 might want to produce simply-typed programs (which are easier to compile
 efficiently) and use an external correctness proof, as in
@@ -345,7 +345,7 @@ recursively via |deriveP s|). To show that |(derive s) (derive t)|, that is
 being applied to valid inputs, using the proof that |derive t| is correct
 (obtained recursively via |deriveP t|).
 
-\subsection{Changes across types}
+\section{Changes across types}
 \label{sec:param-derive-changes-across-types}
 %format ChangeStruct2
 %format NilChangeStruct2
@@ -429,7 +429,7 @@ instance ChangeStruct2 tau tau => ChangeStruct2 (sigma, tau) tau where
 %   (a1, _) `bplus` da = a1 `bplus` da
 \end{code}
 
-\subsection{Differentiation for System F}
+\section{Differentiation for System F}
 \label{sec:param-derive-changes-across-types-transform}
 After introducing changes across different types, we can also generalize
 differentiation for |stlc| so that it allows for the now generalized changes:
@@ -501,7 +501,7 @@ non-dependently-typed differentiation (as suggested earlier) would produce
 proofs in |sysf2|, the logic produced by extending |sysf| following
 \citeauthor{Bernardy2011realizability}.
 
-\subsection{Prototype implementation}
+\section{Prototype implementation}
 \label{sec:param-derive-implementation}
 We have written a prototype implementation of the above rules for a PTS
 presentation of System F, and verified it on a few representative examples of

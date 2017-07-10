@@ -341,7 +341,7 @@ We believe it could be possible to formalize the \ilcA{} model using two-sided
 validity, by defining a dependent type of valid changes:
 |Dt2 (A -> B) f1 f2 = (a1 a2 : A) -> Dt2 A a1 a2 -> Dt2 B (f1 a1) (f2 a2)|.
 We provide more details on such a transformation in
-\cref{sec:diff-parametricity-system-f}.
+\cref{ch:diff-parametricity-system-f}.
 
 Models restricted to valid changes (like \ilcA{}) are related to models based on
 directed graphs and reflexive graphs, where values are graphs vertexes, changes
