@@ -19,7 +19,7 @@ PDF_NAME=$(PAPER_NAME).pdf
 lhsFmt=$(wildcard *.fmt)
 lhsSources=$(patsubst %,%.lhs, \
 	chap-intro-incr chap-diff-examples chap-diff-correct-formal chap-chs \
-	chap-eq-reason chap-th-extensions \
+	chap-eq-reason chap-th-extensions chap-towards-sysf \
 	defunc new-stuff backmatter \
 	fig-syntactic-ilc chap-operationally \
 	$(patsubst %,pldi14/%,\
