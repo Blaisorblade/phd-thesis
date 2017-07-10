@@ -1,8 +1,9 @@
 \begin{figure}
-  \vspace{-3em}
-  \footnotesize%
+  %\vspace{-3em}
+  \small%
+  %\vspace{0.6em} %compensate -0.6em at the beginning.
   \newcommand\categorytitle[1]{\\[-0.6em]\multicolumn{3}{r}{\textit{#1}} \\[0.5em]}%
-  \begin{multicols}{2}
+  % \begin{multicols}{2}
     \[
     \begin{array}{rcl}
       %
@@ -63,7 +64,7 @@
             \sectxcons{\compile\iectx}{\tx = \compile\sclosedvalue, \tdx = \compile\icloseddvalue}
     \end{array}
   \]
-\end{multicols}
+% \end{multicols}
 \caption{Extending CTS translation to values, change values, environments and change environments.}
 \label{fig:differentiation-and-static-caching-continued}
 \end{figure}
