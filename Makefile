@@ -22,8 +22,11 @@ lhsSources=$(patsubst %,%.lhs, \
 	chap-eq-reason chap-th-extensions \
 	new-stuff backmatter \
 	fig-syntactic-ilc chap-operationally \
-	$(patsubst %,pldi14/%,sec-preliminaries \
-	fig-differentiation sec-rw))
+	$(patsubst %,pldi14/%,\
+		sec-preliminaries fig-differentiation sec-rw) \
+	$(patsubst %,popl18/%, \
+		cts-intro cts-motivation \
+		cts-case-studies cts-relwork cts-conclusion))
 lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 # Sources to watch for changes but that don't need to be compiled on their own,
 # because they're included elsewhere.
@@ -50,7 +53,7 @@ new-stuff.tex: defunc.lhs
 
 .PHONY: FORCE
 %.tex: %.lhs $(lhsFmt)
-	lhs2TeX -P .: -o $*.tex $*.lhs
+	lhs2TeX -P .:popl18: -o $*.tex $*.lhs
 mylhs2tex.sty: mylhs2tex.lhs
 	lhs2TeX -o $@ $<
 %.pdf: %.tex $(INTERM_PRODUCTS) FORCE
