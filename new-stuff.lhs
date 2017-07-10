@@ -37,34 +37,34 @@
 % \citet{CaiEtAl2014ILC}, dropping the requirement that |a = da|. Thanks to change negation, a
 % derivative |dgroupFold| could react to the removal of collection elements.
 
-\chapter{Incrementalization beyond ILC}
-\label{ch:inc-more-programs}
-\pg{Only a very rough sketch for now}
+% \chapter{Incrementalization beyond ILC}
+% \label{ch:inc-more-programs}
+% \pg{Only a very rough sketch for now}
 
-In previous chapters we have shown how to apply finite differencing to
-programs with first-class functions. With finite differencing we can
-incrementalize a few programs, but for others we run into problems:
+% In previous chapters we have shown how to apply finite differencing to
+% programs with first-class functions. With finite differencing we can
+% incrementalize a few programs, but for others we run into problems:
 
-\begin{enumerate}
-\item The incremental computation does not have accesss to intermediate results
-  from the original computation.
-\item Since function changes are represented as functions, they cannot be
-  inspected at runtime, preventing a few optimizations. For instance, applying a
-  derivative to a nil change always produces a nil change, but we never take
-  advantage of this to optimize derivatives, except sometimes at compile time.
-\item Applying a derivative to a nil change always produce a nil change, but we
-  never take advantage of this to optimize derivatives, except sometimes at
-  compile time.
-\end{enumerate}
+% \begin{enumerate}
+% \item The incremental computation does not have accesss to intermediate results
+%   from the original computation.
+% \item Since function changes are represented as functions, they cannot be
+%   inspected at runtime, preventing a few optimizations. For instance, applying a
+%   derivative to a nil change always produces a nil change, but we never take
+%   advantage of this to optimize derivatives, except sometimes at compile time.
+% \item Applying a derivative to a nil change always produce a nil change, but we
+%   never take advantage of this to optimize derivatives, except sometimes at
+%   compile time.
+% \end{enumerate}
 
-To show these limitations
-% \item No support for change composition: there is no direct way to compose a
-%   sequence of changes |dx1, dx2, dx3, ...| across |x0, x1, x2, x3, ...| and
-%   produce a single change, except by applying all those changes and computing a
-%   difference with |x0 `oplus` dx1 `oplus` dx2 `oplus` dx3|.
+% To show these limitations
+% % \item No support for change composition: there is no direct way to compose a
+% %   sequence of changes |dx1, dx2, dx3, ...| across |x0, x1, x2, x3, ...| and
+% %   produce a single change, except by applying all those changes and computing a
+% %   difference with |x0 `oplus` dx1 `oplus` dx2 `oplus` dx3|.
 
-% \item Change structures must provide a difference operation, even though most
-%   often we are not supposed to use it.
+% % \item Change structures must provide a difference operation, even though most
+% %   often we are not supposed to use it.
 
 %include defunc.lhs
 \chapter{Misc to integrate}
@@ -208,28 +208,28 @@ index :: Seq a -> Int -> a
 update :: Int -> a -> Seq a -> Seq a
 \end{code}
 
-\chapter{Static caching}
-\label{sec:static-caching}
-\pg{Write it!}
+% \chapter{Static caching}
+% \label{sec:static-caching}
+% \pg{Write it!}
 
-\section{Motivating Cache-passing Style}
+% \section{Motivating Cache-passing Style}
 
-\pg{It'd be nice to type the smart approach to cache type variables. We can't
-  generally. It would be good to characterize when it can be used, but we don't
-  do that either. Instead, we just show examples of what would be possible.}
-%
-\pg{We conjecture that we can type using free type variables:
-  \begin{itemize}
-  \item we can probably thread type variables where possible and use the packing trick elsewhere.
-\end{itemize}
-}
+% \pg{It'd be nice to type the smart approach to cache type variables. We can't
+%   generally. It would be good to characterize when it can be used, but we don't
+%   do that either. Instead, we just show examples of what would be possible.}
+% %
+% \pg{We conjecture that we can type using free type variables:
+%   \begin{itemize}
+%   \item we can probably thread type variables where possible and use the packing trick elsewhere.
+% \end{itemize}
+% }
 
-\pg{In fact, assume a combinator |mapInt : (Int -> Int) -> List Int -> List
-  Int|. We can't prove that |mapInt f| uses its argument as we expect, maybe it
-  does nothing on the list elements, or maybe it maps |inc| on (some of) them.
-  Many such behaviors are allowed by its type; but our translation turns these
-  |mapInt| variants with the same type into functions with different cache
-  types. Mapping different functions over different elements produces.}
+% \pg{In fact, assume a combinator |mapInt : (Int -> Int) -> List Int -> List
+%   Int|. We can't prove that |mapInt f| uses its argument as we expect, maybe it
+%   does nothing on the list elements, or maybe it maps |inc| on (some of) them.
+%   Many such behaviors are allowed by its type; but our translation turns these
+%   |mapInt| variants with the same type into functions with different cache
+%   types. Mapping different functions over different elements produces.}
 
 
 \chapter{Conclusion and future work}
