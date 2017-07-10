@@ -297,12 +297,11 @@ someCaller xs1 dxss = do
 More in general, we produce both an augmented base function and a derivative,
 where the augmented base function communicates with the derivative by returning
 a cache. The content of this cache are determined statically, and can be
-accessed by tuple projections without any dynamic lookups; hence, we term the
-approach \emph{static caching}.
+accessed by tuple projections without any dynamic lookups.
 % mention initial runs and incremental updates.
 
 In the rest of the paper, we use the above idea to develop a correct
-transformation that allows incrementalizing programs using static caching.
+transformation that allows incrementalizing programs using cache-transfer style.
 
 We'll return to this example in~\cref{sec:incr-an-aver}.
 % XXX mention other contributions: prove correctness, show how to use it, evaluate it...
@@ -310,7 +309,7 @@ We'll return to this example in~\cref{sec:incr-an-aver}.
 \subsection{A higher-order motivating example: nested loops}
 \label{sec:higher-order-example}
 
-Next, we consider differentiation with static caching on a minimal higher-order
+Next, we consider CTS differentiation on a minimal higher-order
 example. To incrementalize this example, we enable detecting nil function
 changes at runtime by representing function changes as closures that can be
 inspected by incremental programs. We'll return to this example

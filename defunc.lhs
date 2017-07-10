@@ -503,7 +503,7 @@ To apply |DFun sigma tau| we introduce an interpreter |dapplyFun1 :: Fun sigma
 tau -> Dt^(Fun sigma tau) -> Dt^(sigma -> tau)|, or equivalently |dapplyFun1 ::
 Fun sigma tau -> DFun sigma tau -> sigma -> Dt^sigma -> Dt^tau|, which also
 serves as derivative of |applyFun1|.
-\pg{Or maybe we first do untyped static caching and then defunctionalization?}
+\pg{Or maybe we first do CTS and then defunctionalization?}
 
 Like we did for |Fun sigma tau|, we define |DFun sigma tau| using function
 codes. That is, |DFun sigma tau| pairs a function code |Code env sigma tau|
