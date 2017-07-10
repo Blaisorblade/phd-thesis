@@ -609,7 +609,7 @@ function invocation for each argument~\citep{Marlow2006making}. Naively
 transforming such a curried functions to CTS would produce a function |divc| of
 type |Int -> (Int -> (Int, DivC2)), DivC1)| with |DivC1 = ()|, which adds
 excessive overhead.%
-\footnote{In \cref{sec:motivation} and our evaluation we use curried functions
+\footnote{In \cref{sec:cts-motivation} and our evaluation we use curried functions
 and never need to use this naive encoding, but only because we always invoke
 functions of known arity.}
 Based on preliminary experiments, we believe we can straightforwardly combine our

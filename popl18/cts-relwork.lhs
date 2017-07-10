@@ -3,7 +3,7 @@
 %include changes-popl.fmt
 
 \section{Related work}
-\label{sec:rw}
+\label{sec:cts-rw}
 Among all research on incremental computation in both programming languages and
 databases~\citep{Gupta99MMV,Ramalingam93} we discuss the most closely related works.
 

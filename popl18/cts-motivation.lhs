@@ -3,7 +3,7 @@
 %include changes-popl.fmt
 
 \section{Introducing Cache-Transfer Style}
-\label{sec:motivation}
+\label{sec:cts-motivation}
 In this section we motivate cache-transfer style (CTS).
 \Cref{sec:ilc-background} summarizes a reformulation of ILC, so we recommend it
 also to readers familiar with \citet{CaiEtAl2014ILC}.
@@ -69,7 +69,7 @@ is also a derivative according to \citet{CaiEtAl2014ILC}.
 To support incrementalization, one must define change types and validity for
 each base type, and a correct derivative for each primitive. Functions written
 in terms of primitives can be differentiated automatically.
-As in all approaches to incrementalization (see \cref{sec:rw}), one cannot
+As in all approaches to incrementalization (see \cref{sec:cts-rw}), one cannot
 incrementalize efficiently an arbitrary program: ILC limits the effort to base
 types and primitives.
 

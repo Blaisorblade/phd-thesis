@@ -94,7 +94,7 @@ In sum, we present the following contributions:
 \pg{revise more, add sections; this is getting redundant with the text.}
 \begin{itemize}
 \item via examples, we motivate extending ILC to remember intermediate
-  results (\cref{sec:motivation});
+  results (\cref{sec:cts-motivation});
 \item we give a novel proof of correctness for ILC for untyped
   $\lambda$-calculus, based on step-indexed logical relations
   (\cref{sec:sound-derive});
@@ -110,8 +110,8 @@ In sum, we present the following contributions:
 \end{itemize}
 
 \pg{Try merging with contributions if we can.}
-The rest of the paper is organized as follows. \Cref{sec:motivation} summarizes
+The rest of the paper is organized as follows. \Cref{sec:cts-motivation} summarizes
 ILC and motivates the extension to cache-transfer style.
 \Cref{sec:formalization} presents our formalization and proofs.
-\Cref{sec:case-studies} presents our case studies and benchmarks. \Cref{sec:rw}
+\Cref{sec:case-studies} presents our case studies and benchmarks. \Cref{sec:cts-rw}
 discusses related work and \cref{sec:conclusions} concludes.
