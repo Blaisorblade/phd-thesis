@@ -9,26 +9,26 @@ In this chapter we collect discussion of a few additional topics related to ILC.
 % Sections of this chapter investigate various questions arising
 % within the theory of ILC.
 
-\section{A change structure for sums}
-\label{sec:chs-sums}
-We can define change structures on disjoint sums |A + B|, given
-change structures on |A| and |B|.
-\pg{resume.}
-
-\section{Language plugins for products and sums}
-\label{ch:prod-sums}
-
-In this section, we show language plugins for sum and product
-types.
-
-\pg{Extend by showing the base semantics of these plugins.}
-We give ways to give change structures for products and sums.
-As primitives, we use the introduction and elimination forms for
-these types. Then, we show how to obtain derivatives for these
-primitives.
-
-\pg{Consider recursive types, and recursion?}
-
+% \section{A change structure for sums}
+% \label{sec:chs-sums}
+% We can define change structures on disjoint sums |A + B|, given
+% change structures on |A| and |B|.
+% \pg{resume.}
+%
+% \section{Language plugins for products and sums}
+% \label{ch:prod-sums}
+%
+% In this section, we show language plugins for sum and product
+% types.
+%
+% \pg{Extend by showing the base semantics of these plugins.}
+% We give ways to give change structures for products and sums.
+% As primitives, we use the introduction and elimination forms for
+% these types. Then, we show how to obtain derivatives for these
+% primitives.
+%
+% \pg{Consider recursive types, and recursion?}
+%
 
 
 \section{General recursion}

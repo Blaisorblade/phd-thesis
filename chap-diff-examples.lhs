@@ -208,10 +208,11 @@ To study aggregation we consider |foldNat|.
 % Missing sections from chap-intro-incr.lhs.
 
 \pg{Ask question: can we define such change structures in terms of simpler ones?}
-\section{Products and sums}
+\section{Products}
+\pg{``Sums'' }
 It is also possible to define change structures for arbitrary sum and product
 types, and to provide derivatives for introduction and elimination forms for
-such datatypes.
+such datatypes. In this section we discuss products, in next one sums.
 
 We define a simple change structure for product type |A `times` B| from change
 structures for |A| and |B|, similar to change structures for environments:
@@ -248,6 +249,7 @@ One can also define $n$-ary products in a similar way. However, a product change
 contains as many entries as a product.\pg{Sketch alternatives.}
 
 \section{Sums}
+\label{sec:chs-sums}
 Changes structures for sums are more challenging. We can define them, but in
 many cases we can do better with specialized structures.
 \begin{code}
