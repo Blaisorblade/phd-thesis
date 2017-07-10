@@ -405,7 +405,7 @@ We can also describe updates going from type |tau| to type |(sigma, tau)|,
 effectively prepending a value of type |sigma| to our data. Similarly, we can
 also remove values. It seems possible to extend such change structures
 constructions to compose change structures that, for instance, allow inserting
-or removing elements from a recursive datatype such as lists. However, we must
+or removing elements from a recursive datatype such as lists. However, we
 leave investigation of such avenues to future work.
 % What's more, we can also define change structures that allow inserting or
 % removing elements into nested tuples.
