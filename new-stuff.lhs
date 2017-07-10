@@ -66,7 +66,6 @@
 % % \item Change structures must provide a difference operation, even though most
 % %   often we are not supposed to use it.
 
-%include defunc.lhs
 \chapter{Misc to integrate}
 \subsection{Applying function changes to composed changes}
 \pg{Move somewhere else. About lists?}
