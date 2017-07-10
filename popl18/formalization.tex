@@ -38,12 +38,16 @@ $\lambda$-lifted and in a variant of A-normal form. But additionally, in these
 programs every toplevel function $\tf$ produces a cache which is to be
 conveyed to the derivatives of $\tf$.
 
-The syntax and semantics of the source and target languages are
-presented in Sections~\ref{sec:sourcelanguage}
-and~\ref{sec:targetlanguage}. The transformation is described in
-Section~\ref{sec:transformation} and its proof of soundness
-is given in Section~\ref{sec:transformation-soundness}. Most of
-the formalization have been mechanized in Coq (the proofs of some
+The rest of this section is organized as follows.
+\Cref{sec:sourcelanguage} presents
+syntax and semantics of source language~$\source$.
+\Cref{sec:stat-diff-source} defines differentiation, and \cref{sec:sound-derive}
+proves it correct.
+\Cref{sec:targetlanguage} presents
+syntax and semantics of target language~$\source$.
+\Cref{sec:transformation} define CTS conversion, and
+\cref{sec:transformation-soundness} proves it correct.
+Most of the formalization has been mechanized in Coq (the proofs of some
 straightforward lemmas are left for future work).
 
 
