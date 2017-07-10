@@ -41,14 +41,12 @@ is also valid up to fewer steps (Lemma~\ref{lemma:vvcrel-antimono}).
 
 \begin{lemma}[$\oplus$ agrees with validity]
   \label{lemma:crel-oplus}
-  \-\\
   If
   $\vvcrel {\sclosedvalue_2} k {\sclosedvalue_1} \icloseddvalue$ then
   $\sclosedvalue_1 \oplus \icloseddvalue = \sclosedvalue_2$.
 \end{lemma}
 \begin{lemma}[Downward-closure]
   \label{lemma:vvcrel-antimono}
-  \-\\
   If $N \ge n$, then $\vvcrel{\sclosedvalue_2} {N} {\sclosedvalue_1} \icloseddvalue$ implies
   $\vvcrel{\sclosedvalue_2} {n} {\sclosedvalue_1} \icloseddvalue$.
 \end{lemma}
@@ -120,14 +118,12 @@ judgment $\vvcrel {\sectx_2} k {\sectx_1} \iectx$ defined as follows:
 The above lemmas about validity for values extend to environments.
 \begin{lemma}[$\oplus$ agrees with validity, for environments]
   \label{lemma:crel-oplus-env}
-  \-\\
   If
   $\vvcrel {\sectx_2} k {\sectx_1} \iectx$ then
   $\sectx_1 \oplus \iectx = \sectx_2$.
 \end{lemma}
 \begin{lemma}[Downward-closure, for environments]
   \label{lemma:vvcrel-antimono-env}
-  \-\\
   If $N \ge n$, then $\vvcrel{\sectx_2} {N} {\sectx_1} \iectx$ implies
   $\vvcrel{\sectx_2} {n} {\sectx_1} \iectx$.
 \end{lemma}
@@ -151,7 +147,6 @@ explicitly.
 %
 \begin{theorem}[Soundness of differentiation in $\source$]
   \label{thm:sound-derive}
-  \-\\
   If $\iectx$ is a valid change environment from base environment $\sectx_1$ to
   updated environment $\sectx_2$, that is $\vvcrel {\sectx_2} {} {\sectx_1}\iectx$,
   %
@@ -169,7 +164,6 @@ explicitly.
 
 \begin{lemma}[Fundamental Property]
   \label{lemma:fundamental-property}
-  \-\\
 For each $n$,
 if $\vvcrel{\sectx_2}{n}{\sectx_1}{\iectx}$ then
 $\vvcrelterm{\sectx_1}{\iectx}{\sectx_2}{n}{\sterm}{\iderive{\sterm}}{\sterm}$.

@@ -20,7 +20,6 @@ change environments. CTS translation commutes with our semantics, as shown by
 next lemma:
 
 \begin{lemma}[Evaluation commutes with CTS translation of base terms]
-  \-\\
   For all $\sectx, \sterm$ and $\sclosedvalue$, such that
   $\seval\sectx\sterm{}\sclosedvalue$, and
   for all $\tcache$, there exists $\tcachedclosedvalues$,
@@ -49,7 +48,6 @@ can be obtained by replacing $\oldenv\tectx$ with $\newenv\tectx$
 in the rule for cache computation in Figure~\ref{fig:envwithcache}.
 
 \begin{lemma}[Evaluation commutes with compilation of derivatives]
-  \-\\
   Let $\tcache$ be such that
   $(\tcache, \_) = \compileterm{\bullet}{\sterm}$.
   For all $\iectx, \sterm$ and $\icloseddvalue$,
@@ -110,7 +108,6 @@ to invoke the CTS derivative on further changes, as described
 in~\cref{sec:motivating-example}.
 
 \begin{theorem}[Soundness of differentiation with static caching wrt differentiation]
-  \-\\
   \label{thm:soundness-compiled-changesfinal}
   Let $\tcache$ and $\tterm$ be such that 
   $(\tcache, \tterm) = \compileterm{\bullet}{\sterm}$.
