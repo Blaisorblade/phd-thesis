@@ -416,18 +416,18 @@ instance ChangeStruct2 tau tau => ChangeStruct2 tau (sigma, tau) where
   type Dt2 tau (sigma, tau) = (sigma, Dt2 tau tau)
   b1 `bplus` (a2, db) = (a2, b1 `bplus` db)
 
+instance ChangeStruct2 tau tau => ChangeStruct2 (sigma, tau) tau where
+  type Dt2 (sigma, tau) tau = Dt2 tau tau
+  (_, b1) `bplus` db = b1 `bplus` db
+\end{code}
+
 % instance ChangeStruct2 tau tau => ChangeStruct2 tau (tau, sigma) where
 %   type Dt2 tau (tau, sigma) = (Dt2 tau tau, sigma)
 %   a1 `bplus` (da, b2) = (a1 `bplus` da, b2)
 
-instance ChangeStruct2 tau tau => ChangeStruct2 (sigma, tau) tau where
-  type Dt2 (sigma, tau) tau = Dt2 tau tau
-  (_, b1) `bplus` db = b1 `bplus` db
-
 % instance ChangeStruct2 tau tau => ChangeStruct2 (tau, sigma) tau where
 %   type Dt2 (tau, sigma) tau = Dt2 tau tau
 %   (a1, _) `bplus` da = a1 `bplus` da
-\end{code}
 
 \section{Differentiation for System F}
 \label{sec:param-derive-changes-across-types-transform}
