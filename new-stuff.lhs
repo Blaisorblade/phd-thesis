@@ -103,25 +103,25 @@ environment. \pg{continue and clarify}
 % derPostDFun1 :: (ChangeStruct a, NilChangeStruct env) => Code env a b -> env -> Dt^env -> a -> Dt^a -> Dt^b
 % \end{code}
 
-\subsection{Replacing functions without necessarily recomputing}
-If a function change replaces a base function with a different one, in general
-we must simply call the new function and produce a replacement change. However,
-this can be wasteful if we replace a function by a similar one.
-
-Luckily we can add special cases to |derApplyDFun1|. To get started, suppose for
-instance we replace |(+1)| by |(+2)|. Instead of replacing all the results, we
-can add a specialized pattern match producing an equivalent change that however
-is not a replacement one:
-
-\begin{code}
-derApplyDFun1 :: (ChangeStruct a, NilChangeStruct env) =>
-  Code env a b -> env -> DCode env a b -> Dt^env -> a -> Dt^a -> Dt^b
-derApplyDFun1 (P Add1 _()) (DP (Replace Add2) ()) = +1 -- As a change
-...
-derApplyDFun1 (P _f _env) (DP (Replace newF) newEnv) = oreplace (newF newEnv)
-\end{code}
-
-This is enabled by defunctionalizing both base functions and changes.
+% \subsection{Replacing functions without necessarily recomputing}
+% If a function change replaces a base function with a different one, in general
+% we must simply call the new function and produce a replacement change. However,
+% this can be wasteful if we replace a function by a similar one.
+%
+% Luckily we can add special cases to |derApplyDFun1|. To get started, suppose for
+% instance we replace |(+1)| by |(+2)|. Instead of replacing all the results, we
+% can add a specialized pattern match producing an equivalent change that however
+% is not a replacement one:
+%
+% \begin{code}
+% derApplyDFun1 :: (ChangeStruct a, NilChangeStruct env) =>
+  % Code env a b -> env -> DCode env a b -> Dt^env -> a -> Dt^a -> Dt^b
+% derApplyDFun1 (P Add1 _()) (DP (Replace Add2) ()) = +1 -- As a change
+% ...
+% derApplyDFun1 (P _f _env) (DP (Replace newF) newEnv) = oreplace (newF newEnv)
+% \end{code}
+%
+% This is enabled by defunctionalizing both base functions and changes.
 
 \section{Mapping changeable functions over sequences}
 \label{sec:map-seq}
