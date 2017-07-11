@@ -22,7 +22,8 @@
 \newcommand\beforeside{\\[-0.5em]}
 \newcommand\tquote[1]{\llbracket #1 \rrbracket}
 
-\newcommand\many[1]{\overline{#1}}
+% https://tex.stackexchange.com/a/102699/1340
+\newcommand\many[1]{\overline{\vphantom{d} #1}}
 \newcommand\tx{\mathit{x}}
 \newcommand\tdx{\mathit{dx}}
 \newcommand\ty{\mathit{y}}
