@@ -474,7 +474,7 @@ The change structure on |A -> B| enables defining change structures for function
 types.
 Similarly, the change structure on |A `times` B| enables defining a change
 structure for product types in a language plugin, as described in
-\cref{ch:prod-sums}. In \cref{ch:prod-sums} we also discuss change structures
+\cref{sec:chs-products-intro}. In \cref{sec:chs-sums} we also discuss change structures
 for disjoint sums.
 % In \cref{sec:chs-product,sec:chs-sums} we will also define change
 % structures for |A `times` B| and |A + B|, for use in language
