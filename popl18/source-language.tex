@@ -129,9 +129,9 @@ environment~$\iectx$ is defined by induction over~$\iectx$:
 \]
 
 This last rule makes use of an operation $\oplus$ to update a value
-with a change, which may fail at runtime. Indeed, the application of a
-change is a partial function written
-``$\sclosedvalue \oplus \icloseddvalue$'' which is defined as follows:
+with a change, which may fail at runtime. Indeed, change update
+is a partial function written
+``$\sclosedvalue \oplus \icloseddvalue$'', defined as follows:
 \[
   \begin{array}{rclcl}
     \sconst & \oplus & \idconst & = & \delta_{\oplus} (\sconst, \idconst)
@@ -158,15 +158,15 @@ change is a partial function written
     =
     (\tectxcons{(\sectx \oplus \iectx)}{\tx = (\sclosedvalue \oplus \icloseddvalue)})
 \]
-
-Nil and replacement changes can be used to update
-constants, tuples, primitives and closures, while tuple changes can
+Nil and replacement changes can be used to update all values
+(constants, tuples, primitives and closures), while tuple changes can
 only update tuples, literal changes can only update literals and
-closure changes can only update closures. Indeed, $\oplus$ on literals
-is defined via some interpretation function~$\delta_{\oplus}$. A
-replacement change overrides the current value~$\sclosedvalue$ with a
+closure changes can only update closures.
+A replacement change overrides the current value~$\sclosedvalue$ with a
 new one~$\sclosedvalue'$.
-Change application for a closure
+On literals, $\oplus$ is defined via some interpretation
+function~$\delta_{\oplus}$.
+Change update for a closure
 ignores~$\idterm$ instead of combining it with $\sterm$ somehow. This may seem
 surprising, but we only need $\oplus$ to behave well for valid changes (as shown
 by \cref{lemma:crel-oplus}): for valid closure changes,
