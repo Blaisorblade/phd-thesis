@@ -161,7 +161,7 @@ is a partial function written
 Nil and replacement changes can be used to update all values
 (constants, tuples, primitives and closures), while tuple changes can
 only update tuples, literal changes can only update literals and
-closure changes can only update closures.
+closure changes can only update closures. A nil change leaves a value unchanged.
 A replacement change overrides the current value~$\sclosedvalue$ with a
 new one~$\sclosedvalue'$.
 On literals, $\oplus$ is defined via some interpretation
