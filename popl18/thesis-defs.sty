@@ -9,3 +9,12 @@
 % For validity relations.
 \newcommand{\VALIDEMPTY}{\mathrel{\vartriangleright}}
 \newcommand{\VALIDFULL}{\mathrel{\blacktriangleright}}
+
+% Conditional compilation across thesis and POPL18. Additional commands.
+\iftoggle{poplForThesis}{
+\includecomment{poplForThesis}
+\excludecomment{poplForPopl}
+}{
+\excludecomment{poplForThesis}
+\includecomment{poplForPopl}
+}
