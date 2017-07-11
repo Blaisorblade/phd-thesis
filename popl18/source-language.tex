@@ -11,7 +11,7 @@ terms~$\idterm$.
 
 Our syntax for base terms~$\sterm$ represents $\lambda$-lifted
 programs in A'-normal form (\cref{sec:motivating-example}).
-So a term can be either a bound variable~$\tx$, or a {\bf let}
+A term can be either a bound variable~$\tx$, or a {\bf let}
 binding of $\ty$ in subterm~$\sterm$ to either a new
 tuple~$\stuple{\many\tx}$ ($\slet{\ty = \stuple{\many\tx}}\sterm$), or
 the result of calling function~$\tf$ on argument~$\tx$
@@ -34,7 +34,7 @@ Our syntax for change terms~$\idterm$ mimicks the syntax for base
 terms except that (i) each function call is immediately followed by
 the evaluation of its derivative and (ii) the final value returned by
 a change term is a change variable~$\tdx$. As we will see, this
-\emph{adhoc} syntax of change terms is tailored to capture the
+\emph{ad-hoc} syntax of change terms is tailored to capture the
 programs produced by differentiation.  We only allows
 $\alpha$-renamings that maintain the invariant that the definition
 of~$\tx$ is immediately followed by the definition of~$\tdx$: if~$\tx$
@@ -42,8 +42,8 @@ is renamed to~$\ty$ then $\tdx$ must be renamed to~$\tdy$.
 
 \paragraph{Semantics}
 
-The closed values for the base terms are composed of closures, tuples
-of values, constants and primitives. A closure is a pair of an
+A closed value for base terms is either a closure, a tuple
+of values, a constants or a primitive. A closure is a pair of an
 evaluation environment~$\sectx$ and a $\lambda$-abstraction closed
 with respect to~$\sectx$. The set of available constants is left
 abstract. It may contain usual first-order constants like integers. We
