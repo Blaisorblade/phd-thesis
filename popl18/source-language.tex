@@ -134,11 +134,11 @@ is a partial function written
 ``$\sclosedvalue \oplus \icloseddvalue$'', defined as follows:
 \[
   \begin{array}{rclcl}
-    \sconst & \oplus & \idconst & = & \delta_{\oplus} (\sconst, \idconst)
+    \sclosedvalue & \oplus & \inil & = & \sclosedvalue
     \\
     \sclosedvalue_1 & \oplus & \replace{\sclosedvalue_2} & = & \sclosedvalue_2
     \\
-    \sclosedvalue & \oplus & \inil & = & \sclosedvalue
+    \sconst & \oplus & \idconst & = & \delta_{\oplus} (\sconst, \idconst)
     \\
     \sclosure{\sectx}{\slam\tx\sterm} & \oplus &
     \iclosure\iectx{\ilam{\tx\,\tdx}{\idterm}} & = &
