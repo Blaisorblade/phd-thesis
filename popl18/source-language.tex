@@ -232,8 +232,12 @@ equivalent to $\rulename{SDReplaceCall}$ in the case where a closure
 is replaced by itself.%
 \begin{poplForThesis}
 \footnote{Based on \cref{ch:bsos}, we are confident we
-could in fact use the derivative of $\sterm_f$;}
+could in fact use the derivative of $\sterm_f$ instead of replacement changes,
+but transforming terms in a semantics seems aesthetically wrong. We can also
+restrict $\inil$ to primitives, as we essentially did in \cref{ch:bsos}.}
 \end{poplForThesis}
+\pg{TODO: uniform notation for $\inil$ over whole thesis, and use it in
+  \cref{ch:bsos} in change terms.}
 %
 If $\iectxlookup\iectx\tf$ is a primitive, $\rulename{SDPrimitiveNil}$
 applies. The nil change of a primitive~$\sprim$ is its derivative
