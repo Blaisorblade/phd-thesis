@@ -1,8 +1,11 @@
 \subsection{Static differentiation in \source}
 \label{sec:stat-diff-source}
+\iftoggle{poplForThesis}{%
+\Cref{def:derive} defines differentiation for simply-typed
+$\lambda$-calculus terms.}{%
 Previous work~\citep{CaiEtAl2014ILC} defines differentiation for simply-typed
-$\lambda$-calculus terms.
-Figure~\ref{fig:popl-differentiation} shows differentiation for $\source$'s syntax.
+$\lambda$-calculus terms.}
+\Cref{fig:popl-differentiation} shows differentiation for $\source$ syntax.
 
 \input{\poplPath{differentiation}}
 Differentiating a base term~$\sterm$ produces a change

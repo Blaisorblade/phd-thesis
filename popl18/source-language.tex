@@ -63,11 +63,11 @@ environment~$\sectx$, base term~$\sterm$ evaluates to closed
 value~$\sclosedvalue$ in~$n$~steps.'' Our step-indexes count the number of
 ``nodes'' of a big-step derivation.\footnote{Instead,
   \citet{Ahmed2006stepindexed} and \citet{Acar08} count the
-number of steps that small-step evaluation would take
-% only for thesis:
-(as we did in \cref{ch:bsos}),
-%
-but this simplifies some proof steps and makes a minor difference in others.}
+number of steps that small-step evaluation would take%
+\iftoggle{poplForThesis}{
+(as we did in \cref{ch:bsos})%
+}{}%
+, but this simplifies some proof steps and makes a minor difference in others.}
 We explain each rule in turn.
 %
 Rule \rulename{SVar} looks variable $\tx$ up in environment $\sectx$.
@@ -228,7 +228,11 @@ argument~$\iectxlookup{\newenv\iectx}\tx$ to a
 value~$\sclosedvalue'_\ty$ and bind~$\tdy$ to
 $\replace{\sclosedvalue'_\ty}$. In other words, this rule is
 equivalent to $\rulename{SDReplaceCall}$ in the case where a closure
-is replaced by itself.
+is replaced by itself.%
+\begin{poplForThesis}
+\footnote{Based on \cref{ch:bsos}, we are confident we
+could in fact use the derivative of $\sterm_f$;}
+\end{poplForThesis}
 %
 If $\iectxlookup\iectx\tf$ is a primitive, $\rulename{SDPrimitiveNil}$
 applies. The nil change of a primitive~$\sprim$ is its derivative
