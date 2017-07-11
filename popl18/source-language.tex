@@ -213,10 +213,11 @@ change~$\tdy$ to~$\ty$.
 
 If $\iectxlookup\iectx\tdf$ is a replacement,
 $\rulename{SDReplaceCall}$ applies. Replacing the value of~$\tf$
-in the environment forces the recomputation of~$\tf\,\tx$ from
+in the environment forces recomputing~$\tf\,\tx$ from
 scratch in the new environment. The resulting value~$\sclosedvalue'_\ty$
-is the new value which must replace~$\sclosedvalue_\ty$: therefore
-$\tdy$ equals~$\replace{\sclosedvalue'_\ty}$ in that case.
+is the new value which must replace~$\sclosedvalue_\ty$, so
+$\tdy$ binds to~$\replace{\sclosedvalue'_\ty}$ when evaluating the
+$\textbf{let}$ body.
 
 If $\iectxlookup\iectx\tdf$ is a nil change, we have two rules
 depending on the nature of $\iectxlookup\iectx\tf$. If
