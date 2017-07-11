@@ -56,34 +56,44 @@ loss of generality, we assume that all bound variables are distinct.
 
 \input{\poplPath{source-definition-base-semantics}}
 
-In Figure~\ref{fig:source-definition-base-terms-semantics}, the base
-terms are evaluated using a step-indexed big-step semantics whose
-judgment~$\seval\sectx\sterm{n}\sclosedvalue$ is read ``Under the
-environment~$\sectx$, the base term~$\sterm$ evaluates into the closed
-value~$\sclosedvalue$ in~$n$~steps.''
+\Cref{fig:source-definition-base-terms-semantics} shows a
+step-indexed big-step semantics for base terms, defined through
+judgment~$\seval\sectx\sterm{n}\sclosedvalue$, which is read ``Under
+environment~$\sectx$, base term~$\sterm$ evaluates to closed
+value~$\sclosedvalue$ in~$n$~steps.'' Our step-indexes count the number of
+``nodes'' of a big-step derivation.\footnote{Instead,
+  \citet{Ahmed2006stepindexed} and \citet{Acar08} count the
+number of steps that small-step evaluation would take
+% only for thesis:
+(as we did in \cref{ch:bsos}),
 %
-\rulename{SVar} looks up in~$\sectx$ to return the closed value of a
-variable~$\tx$.
+but this simplifies some proof steps and makes a minor difference in others.}
+We explain each rule in turn.
 %
-\rulename{STuple} looks~$\many\tx$ up in~$\sectx$ to evaluate
-tuple~$\stuple{\many\tx}$, binds it to~$\ty$ and continues with
-the next term.
+Rule \rulename{SVar} looks variable $\tx$ up in environment $\sectx$.
+Other rules evaluate $\mathbf{let}$-binding $\slet{\ty = \ldots}{\sterm}$ in
+environment $\sectx$: Each rule computes $\ty$'s new value $\sclosedvalue_\ty$ (taking~$m$ steps,
+where $m$ can be zero) and evaluates in~$n$ steps body~$\sterm$ to
+$\sclosedvalue$, using environment~$\sectx$ extended by binding~$\ty$
+to~$\sclosedvalue_\ty$. The overall $\mathbf{let}$-binding evaluates to
+$\sclosedvalue$ in $m + n + 1$ steps. But different rules compute $\ty$'s value differently.
 %
-\rulename{SPrimitiveCall} assumes that~$\tf$ is mapped to a
-primitive~$\sprim$ in~$\sectx$ and that $\sprim$ has an associated
-interpretation realized as a function~$\tdelta\sprim\param$ from
-closed values to closed values. The evaluation of this interpretation
-function applied to the value of~$\tx$ is bound to~$\ty$ in~$\sectx$
-in order to evaluate the remaining term~$\sterm$ in~$n$ steps. In that
-case, the evaluation of the $\textbf{let}$-binding takes~$n + 1$~steps.
+\rulename{STuple} looks each variable in~$\many\tx$ up in~$\sectx$ to evaluate
+tuple~$\stuple{\many\tx}$ (in $m=0$ steps).
 %
-\rulename{SClosureCall} assumes that~$\tf$ is mapped
-to a closure in~$\sectx$ and evaluates the body of this closure in $n$
-steps in the closure environment~$\sectx_\tf$ extended with the value
-of its argument~$\tx$ found in~$\sectx$. The resulting value is bound
-to~$\ty$ in $\sectx$ to evaluate the remaining term $\sterm$ in~$m$
-steps. Hence, the whole term evaluates in~$n + m + 1$~steps.
+\rulename{SPrimitiveCall} evaluates function calls where
+variable~$\tf$ is bound in~$\sectx$ to a primitive~$\sprim$.
+How primitives are evaluated is specified by function $\tdelta\sprim\param$ from
+closed values to closed values. To evaluate such a primitive call, this rule
+applies~$\tdelta\sprim\param$ to~$\tx$'s value (in $m=0$ steps).
+%
+\rulename{SClosureCall} evaluates functions calls where variable~$\tf$ is bound
+in~$\sectx$ to closure~$\sclosure{\sectx_\tf}{\slam{\tx}{\sterm_\tf}}$: this
+rule evaluates closure body $\sterm_\tf$ in $m$
+steps, using closure environment~$\sectx_\tf$ extended with the value
+of argument~$\tx$ in~$\sectx$.
 
+\paragraph{Change semantics}
 A closed change value is either a closure change, a tuple change,
 a literal change, a replacement change or a nil change.
 %

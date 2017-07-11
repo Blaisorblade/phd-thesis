@@ -23,11 +23,11 @@
     \infer[\rulename{SClosureCall}]{
       \sectxlookup\sectx\tf = \sclosure{\sectx_\tf}{\slam{\tx}{\sterm_\tf}}
       \\
-      \seval{\sectxcons{\sectx_\tf}{\tx = \sectxlookup\sectx\tx}}{\sterm_\tf}{n}{\sclosedvalue_\ty}
+      \seval{\sectxcons{\sectx_\tf}{\tx = \sectxlookup\sectx\tx}}{\sterm_\tf}{m}{\sclosedvalue_\ty}
       \\
-      \seval{\sectxcons{\sectx}{\ty = \sclosedvalue_\ty}}{\sterm}{m}{\sclosedvalue}
+      \seval{\sectxcons{\sectx}{\ty = \sclosedvalue_\ty}}{\sterm}{n}{\sclosedvalue}
     }{
-      \seval\sectx{\slet{\ty = \sapp\tf\tx}{\sterm}}{n + m + 1}{\sclosedvalue}
+      \seval\sectx{\slet{\ty = \sapp\tf\tx}{\sterm}}{m + n + 1}{\sclosedvalue}
     }
   \end{mathpar}
   \caption{Step-indexed big-step semantics for base terms of source language $\source$.}
