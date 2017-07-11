@@ -157,9 +157,10 @@ explicitly.
   then $\iderive\sterm$ evaluates under the change environment~$\iectx$ to a valid
   change $\icloseddvalue$ between base result ${\sclosedvalue_1}$ and updated result
   ${\sclosedvalue_2}$, that is
-  $\sneval\iectx{\iderive\sterm}{\icloseddvalue}$ and
+  $\sneval\iectx{\iderive\sterm}{\icloseddvalue}$,
   $\vvcrel{\sclosedvalue_2} {} {\sclosedvalue_1}
-  \icloseddvalue$.
+  \icloseddvalue$ and
+  $\sclosedvalue_1 \oplus \icloseddvalue = \sclosedvalue_2$.
 \end{theorem}
 
 \begin{lemma}[Fundamental Property]
