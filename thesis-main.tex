@@ -34,6 +34,17 @@
 \includecomment{partCompile}
 }
 
+% Conditional compilation across thesis and POPL18. With multiple commands.
+\newtoggle{poplForThesis}
+\toggletrue{poplForThesis}
+\iftoggle{poplForThesis}{
+\includecomment{poplForThesis}
+\excludecomment{poplForPopl}
+}{
+\excludecomment{poplForThesis}
+\includecomment{poplForPopl}
+}
+
 % FROM POPL18
 \usepackage{popl18/thesis-defs}
 \usepackage{syntaxmacros,multicol}
