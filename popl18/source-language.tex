@@ -58,7 +58,7 @@ loss of generality, we assume that all bound variables are distinct.
 
 \Cref{fig:source-definition-base-terms-semantics} shows a
 step-indexed big-step semantics for base terms, defined through
-judgment~$\seval\sectx\sterm{n}\sclosedvalue$, which is read ``Under
+judgment~$\seval\sectx\sterm{n}\sclosedvalue$, pronounced ``Under
 environment~$\sectx$, base term~$\sterm$ evaluates to closed
 value~$\sclosedvalue$ in~$n$~steps.'' Our step-indexes count the number of
 ``nodes'' of a big-step derivation.\footnote{Instead,
@@ -75,7 +75,7 @@ Other rules evaluate $\mathbf{let}$-binding $\slet{\ty = \ldots}{\sterm}$ in
 environment $\sectx$: Each rule computes $\ty$'s new value $\sclosedvalue_\ty$ (taking~$m$ steps,
 where $m$ can be zero) and evaluates in~$n$ steps body~$\sterm$ to
 $\sclosedvalue$, using environment~$\sectx$ extended by binding~$\ty$
-to~$\sclosedvalue_\ty$. The overall $\mathbf{let}$-binding evaluates to
+to~$\sclosedvalue_\ty$. The overall $\textbf{let}$-binding evaluates to
 $\sclosedvalue$ in $m + n + 1$ steps. But different rules compute $\ty$'s value differently.
 %
 \rulename{STuple} looks each variable in~$\many\tx$ up in~$\sectx$ to evaluate
@@ -93,7 +93,9 @@ rule evaluates closure body $\sterm_\tf$ in $m$
 steps, using closure environment~$\sectx_\tf$ extended with the value
 of argument~$\tx$ in~$\sectx$.
 
-\paragraph{Change semantics}
+\paragraph{Change semantics} We move on to define how change terms evaluate to
+change values. We start by required auxiliary definitions.
+
 A closed change value is either a closure change, a tuple change,
 a literal change, a replacement change or a nil change.
 %
@@ -107,7 +109,9 @@ binding for its associated change variable~$\tdx$. As with
 $\textbf{let}$-bindings of change terms, $\alpha$-renamings in an
 environment~$\iectx$ must rename~$\tdx$ into~$\tdy$ if~$\tx$ is
 renamed into~$\ty$. With no loss of generality, we assume that all
-bound term variables are distinct in these environments.  We define
+bound term variables are distinct in these environments.
+
+We define
 the \textit{original environment}~$\oldenv\iectx$ of a change
 environment~$\iectx$ by induction over~$\iectx$:
 \[
@@ -188,9 +192,10 @@ get guarantees about the evaluation of derivatives.}
 
 \input{\poplPath{source-definition-change-semantics}}
 
-In Figure~\ref{fig:source-definition-change-terms-semantics}, change
-terms are evaluated using a big-step semantics whose
-judgment~$\seval\iectx\idterm{}\icloseddvalue$ is read ``Under the
+Having given these definitions, we show in
+\cref{fig:source-definition-change-terms-semantics} a big-step semantics for
+change terms (without step-indexing), defined through
+judgment~$\seval\iectx\idterm{}\icloseddvalue$, pronounced ``Under the
 environment $\iectx$, the change term $\idterm$ evaluates into the
 closed change value $\icloseddvalue$.''
 %
