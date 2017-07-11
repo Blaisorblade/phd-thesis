@@ -12,7 +12,7 @@ terms~$\idterm$.
 Our syntax for base terms~$\sterm$ represents $\lambda$-lifted
 programs in A'-normal form (\cref{sec:motivating-example}).
 So a term can be either a bound variable~$\tx$, or a {\bf let}
-binding~$\ty$ in subterm~$\sterm$ to either a new
+binding of $\ty$ in subterm~$\sterm$ to either a new
 tuple~$\stuple{\many\tx}$ ($\slet{\ty = \stuple{\many\tx}}\sterm$), or
 the result of calling function~$\tf$ on argument~$\tx$
 ($\slet{\ty = \sapp{\tf}{\tx}}{\sterm}$).  Both~$\tf$ and~$\tx$ are
@@ -25,7 +25,7 @@ calls in tail position (see \cref{sec:tail-calls} for a discussion
 about this limitation).
 %
 We often need to inspect the result of
-a function call~$\tf\tx$, which is not a valid term in our syntax.
+a function call~$\tf\,\tx$, which is not a valid term in our syntax.
 To alleviate this, we write~``$\scall\tf\tx$''
 for ``$\slet{\ty = \tf\;\tx}\ty$'' where $\ty$ is
 chosen fresh.
