@@ -66,7 +66,7 @@
     \nextline
     \multicolumn{4}{r}{\syntaxclass{Change values}} \\
     \tcloseddvalue
-    & ::= & \tclosure\tdectx{\tlam{\tx,\tcache}{\tdterm}}
+    & ::= & \tclosure\tdectx{\tlam{\tdx\,\tcache}{\tdterm}}
     & \rem{Closure} \\
     & \mid & \stuple{\many\tcloseddvalue}
     & \rem{Tuple} \\
@@ -289,7 +289,7 @@
     }
 
     \infer[\rulename{TDClosureChange}]{
-      \sectxlookup\tdectx{\tdf} = \tclosure{\tdectx_\tf}{\tlam{\tx\,\tdx\,\tcache}{\tdterm_\tf}} \\
+      \sectxlookup\tdectx{\tdf} = \tclosure{\tdectx_\tf}{\tlam{\tdx\,\tcache}{\tdterm_\tf}} \\
       \matchcache
       {\sectxlookup\tdectx{\tcacheid\ty\tf\tx}}
       {\tcache}
