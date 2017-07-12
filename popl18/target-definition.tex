@@ -1,6 +1,6 @@
-\begin{figure}
-  \begin{multicols}{2}
-    \footnotesize
+\begin{figure}[tb]
+  %\begin{multicols}{2}
+  \footnotesize
 %  \figsubtitle{Syntax}
   \[
   \begin{array}{rclr}
@@ -27,9 +27,8 @@
     \multicolumn{4}{r}{\syntaxclass{Change terms}} \\
     \tdterm
     & ::= &
-    \multicolumn{2}{l}{
     \tlet{\tdy, \tcacheid{\ty}{\tf}{\tx} = \tdapp{\tdf}{\tdx}{\tcacheid{\ty}{\tf}{\tx}}}{\tdterm}
-    \qquad \rem{Call}} \\
+    & \rem{Call} \\
     & \mid &
     \tlet{\tdy = \stuple{\many\tdx}}{\tdterm}
     & \rem{Tuple} \\
@@ -56,12 +55,7 @@
     & \mid & \tprim
     & \rem{Primitive} \\
     \nextline
-  \end{array}
-\]
-
-  \[
-  \begin{array}{rclr}
-\multicolumn{4}{r}{\syntaxclass{Cache values}} \\
+    \multicolumn{4}{r}{\syntaxclass{Cache values}} \\
     \tcachedclosedvalues
     & ::= & \temptycache
     & \rem{Empty} \\
@@ -112,15 +106,15 @@
     & \rem{Empty} \\
   \end{array}
   \]
-\end{multicols}
+%\end{multicols}
 \caption{The target language $\target$ (syntax).}
   \label{fig:target-definition-syntax}
 \end{figure}
 
-\begin{figure}
-    \footnotesize
+\begin{figure}[htb]
+    \small
   \begin{mathpar}
-    \footnotesize
+    \small
     \\
     \figsubtitle{Evaluation of base terms}{
       $\sneval{\tectx}{\tterm}{(\tclosedvalue, \tcachedclosedvalues)}$
@@ -209,7 +203,7 @@
 \end{figure}
 
 \begin{figure}
-    \footnotesize
+    \small
   \begin{mathpar}
     \\
     \figsubtitle{Evaluation of change terms}{
