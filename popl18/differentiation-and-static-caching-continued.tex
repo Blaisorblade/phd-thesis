@@ -23,7 +23,7 @@
       %
       \compile{\sclosure\sdectx{\slam{\tx\,\tdx}{\iderive\sterm}}}
       & = &
-            \tclosure{\compile\sdectx}{\slam{\tdx, \tcache}{\derive{(\tchange{\tx}{\tdx})}\sterm}} \\
+            \tclosure{\compile\sdectx}{\slam{\tdx\, \tcache}{\derive{(\tchange{\tx}{\tdx})}\sterm}} \\
       \side{\textrm{where } (\tcache, \tterm) = \compileterm{\tcachecons\temptycache\tx}\sterm}\\
       \\
       \compile{\replace\sclosedvalue}
