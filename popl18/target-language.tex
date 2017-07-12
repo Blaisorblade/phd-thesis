@@ -8,7 +8,7 @@ output but they also returns a cache containing the intermediate
 values that have contributed to that output. This cache is transmitted
 to derivatives to build changes on top of intermediate values with no
 recomputation and derivatives update the caches according to their
-input changes. 
+input changes.
 
 \paragraph{Syntax}
 The syntax of $\target$ is defined in
@@ -59,63 +59,64 @@ environments~$\tdectx$ to also include bindings for change values.
 
 There are five kinds of change values: closure changes, tuple changes,
 literal changes, nil changes and replacements.  Closure changes embed
-an environment $\tdectx$ as well as a code pointer for a function
-waiting for both a base value $\tx$ and a cache $\tcache$. Notice that
-we abusively reuse the same syntax~$\tcache$ to deconstruct and to
-construct caches. There other changes are similar to the ones found
+an environment $\tdectx$ and a code pointer for a function,
+waiting for both a base value $\tx$ and a cache $\tcache$. By abuse of notation,
+we reuse the same syntax~$\tcache$ to both deconstruct and
+construct caches. Other changes are similar to the ones found
 in~$\source$.
 
-The base terms of the language are evaluated using a big-step
+Base terms of the language are evaluated using a big-step
 semantics defined in Figure~\ref{fig:target-definition-base-semantics}.
-The judgment~``$\sneval{\tectx}{\tterm}{(\tclosedvalue,
-  \tcachedclosedvalues)}$'' is read~``Under the evaluation environment
-$\tectx$, the base term $\tterm$ evaluates into a value
-$\tclosedvalue$ and a cache $\tcachedclosedvalues$''. The auxiliary
+Judgment~``$\sneval{\tectx}{\tterm}{(\tclosedvalue,
+  \tcachedclosedvalues)}$'' is read~``Under evaluation environment
+$\tectx$, base term $\tterm$ evaluates to value
+$\tclosedvalue$ and cache $\tcachedclosedvalues$''. Auxiliary
 judgment ``$\sneval{\tectx}{\tcache}{\tcachedclosedvalues}$''
-specifies the construction of caches.
+evaluates cache terms into cache values.
 %
-The rule~\rulename{TResult} not only looks into the environment
+Rule~\rulename{TResult} not only looks into the environment
 for the return value~$\tclosedvalue$ but it also evaluates
 the returned cache~$\tcache$.
 %
-The rule~\rulename{TTuple} is similar to the rule of the source
+Rule~\rulename{TTuple} is similar to the rule of the source
 language since no cache is produced by the allocation of a tuple.
 %
-The rule~\rulename{TClosureCall} works exactly
+Rule~\rulename{TClosureCall} works exactly
 as~\rulename{SClosureCall} except that the cache value returned by the
-closure is bound to the cache identifier $\tcacheid\ty\tf\tx$. The
-same remark applies to~\rulename{TPrimitiveCall} with respect
-to~\rulename{SPrimitiveCall}.
+closure is bound to cache identifier $\tcacheid\ty\tf\tx$.
+In the same way, \rulename{TPrimitiveCall} resembles \rulename{SPrimitiveCall}
+but also binds $\tcacheid\ty\tf\tx$.
 %
-The rule~\rulename{TEmptyCache} evaluates an empty cache term into an
-empty cache value. The rule~\rulename{TCacheVar} computes the value of
-the cache term~$\tcachecons\tcache\tx$ by appending the value of the
-variable~$\tx$ to the cache value~$\tcachedclosedvalues$ computed for
-the cache term~$\tcache$. Similarly, the
+Rule~\rulename{TEmptyCache} evaluates an empty cache term into an
+empty cache value. Rule~\rulename{TCacheVar} computes the value of
+cache term~$\tcachecons\tcache\tx$ by appending the value of
+variable~$\tx$ to cache value~$\tcachedclosedvalues$ computed for
+cache term~$\tcache$. Similarly,
 rule~\rulename{TCacheSubCache} appends the cache value of a cache
 named~$\tcacheid\ty\tf\tx$ to the cache value~$\tcachedclosedvalues$
 computed for~$\tcache$.
 
-The change terms of the target language are also evaluated using a
-big-step semantics defined in
-Figure~\ref{fig:target-definition-change-semantics}. The
-judgment~``$\sneval{\tdectx}{\tdterm}{(\tcloseddvalue,
-  \tcachedclosedvalues)}$'' is read~``Under the evaluation
-environment~$\tectx$, the change term $\tdterm$ evaluates into a
-change value $\tcloseddvalue$ and an updated cache
-$\tcachedclosedvalues$.''. The first auxiliary
+Change terms of the target language are also evaluated using a
+big-step semantics, defined in
+\cref{fig:target-definition-change-semantics}.
+Judgment~``$\sneval{\tdectx}{\tdterm}{(\tcloseddvalue,
+  \tcachedclosedvalues)}$'' is read~``Under evaluation
+environment~$\tectx$, change term $\tdterm$ evaluates to
+change value $\tcloseddvalue$ and updated cache
+$\tcachedclosedvalues$''. The first auxiliary
 judgment~``$\sneval{\tdectx}{\tupdcache}{\tcachedclosedvalues}$''
-defines the evaluation of cache update terms. We omit the
+defines evaluation of cache update terms. We omit the
 rules for this judgment since it is similar to the one for cache terms,
 except that cached values are computed by~$\tx \oplus \tdx$, not simply~$\tx$.
 %
 The final auxiliary
-judgment~``$\matchcache\tcachedclosedvalues\tcache\tdectx$'' describes
-how a cache pattern $\tcache$ binds a cache
+judgment~``$\matchcache\tcachedclosedvalues\tcache\tdectx$'' describes a limited
+form of pattern matching used by CTS derivatives: namely,
+how a cache pattern $\tcache$ matches a cache
 value~$\tcachedclosedvalues$ to produce a change
 environment~$\tdectx$.
 
-The rule~\rulename{TDResult} returns the final change value of a
+Rule~\rulename{TDResult} returns the final change value of a
 computation as well as a updated cache resulting from the evaluation
 of the cache update term~$\tupdcache$.
 %
