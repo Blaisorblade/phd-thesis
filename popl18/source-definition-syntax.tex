@@ -15,8 +15,8 @@
     \multicolumn{4}{r}{\syntaxclass{Change terms}} \\
     \idterm
     & ::= 
-    & \multicolumn{2}{l}{\ilet{\ty = \iapp{\tf}{\tx}, \tdy = \idapp{\tdf}{\tx\,\tdx}}{\idterm}
-     \qquad \rem{Call}} \\
+    & \ilet{\ty = \iapp{\tf}{\tx}, \tdy = \idapp{\tdf}{\tx\,\tdx}}{\idterm}
+    & \rem{Call} \\
     & \mid & \slet{\ty = \stuple{\many\tx}, \tdy = \stuple{\many\tdx}}\idterm
     & \rem{Tuple} \\
     & \mid & \tdx
@@ -32,11 +32,7 @@
     & \rem{Literal} \\
     & \mid & \sprim
     & \rem{Primitive} \\
-    \end{array}
-\]
-
-\[
-    \begin{array}{rclr}
+    \nextline
     \multicolumn{4}{r}{\syntaxclass{Value environments}} \\
     \sectx
     & ::= & \sectxcons\sectx{\tx = \sclosedvalue}
@@ -60,8 +56,8 @@
     \multicolumn{4}{r}{\syntaxclass{Change environments}} \\
     \iectx
     & ::= 
-    & \multicolumn{2}{l}{\iectxcons{\iectx}{\tx = \sclosedvalue, \tdx = \icloseddvalue}
-      \qquad \rem{Binding}} \\
+    & \iectxcons{\iectx}{\tx = \sclosedvalue, \tdx = \icloseddvalue}
+    & \rem{Binding} \\
     & \mid & \iectxempty
     & \rem{Empty} \\
     \nextline
