@@ -650,7 +650,7 @@ must prove their extensions correct.
   \label{req:const-differentiation}
   For all $\ConstTyping{c}{\tau}$, the plugin defines
   |deriveConst(c)| satisfying |/- deriveConst(c) :
-  Dt^tau| .
+  Dt^tau|.
 \end{restatable}
 
 \begin{restatable}[Correctness of |deriveConst(param)|]{requirement}{deriveConstCorrect}
