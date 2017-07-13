@@ -4,11 +4,32 @@
 
 \chapter{Towards differentiation for System F}
 \label{ch:diff-parametricity-system-f}
-In this chapter, we show how differentiation and the core of its correctness proof
-generalizes naturally to System F. We stop short of giving a full formal proof,
-but we conjecture our results follow as variations of existing proofs. To gain
-initial evidence, we have implemented the transformations described here on top
-of an existing PTS implementation. We leave further investigation as future work.
+Differentiation is closely related to both logical relations and parametricity,
+as noticed by various authors in discussions of differentiation. \Cref{ch:bsos}
+presents novel proofs of ILC correctness by adapting some logical relation techniques.
+As a demonstration, we
+define in this chapter differentiation for System F, by adapting results about parametricity.
+%
+We stop short of a full proof that this generalization is correct, but we have
+implemented and tested it on a mature implementation of a System F typechecker;
+we believe the proof will be a straightforward adaptation of existing ones about
+parametricity, but we leave verification for future work.
+
+% define a form of differentiation to System F that arises as
+% an immediate generalization.
+% conjecture
+
+% In this chapter, we show how differentiation and the core of its correctness proof
+% appear to generalize naturally to System F. We define a transformation
+% We stop short of giving a full formal proof,
+% but we conjecture our results follow as variations of existing proofs.
+
+% To gain
+% initial evidence, we have implemented the transformations described here on top
+% of an existing PTS implementation.
+
+% We show a variant of differentiation (that we still write |derive t|) that is
+% closer to their transformation for parametricity (which they write |eval t|).
 
 Various authors noticed that differentiation appears related to (binary)
 parametricity (including \citet{Atkey2015ILC}).
@@ -17,11 +38,10 @@ In particular, it resembles a transformation presented by
 \footnote{\citeauthor{Bernardy2011realizability} were not the first to introduce
   such a transformation. But most earlier work
 focuses on System F, and our presentation follows theirs and uses their added
-generality. We refer for details to existing discussions of related work~\citep{Wadler2007girardreynolds,Bernardy2011realizability}.}
-We show a variant of
-differentiation (that we still write |derive t|) that is closer to their
-transformation for parametricity (which they write |eval t|).
-
+generality. We refer for details to existing discussions of related
+work~\citep{Wadler2007girardreynolds,Bernardy2011realizability}.}
+By analogy with unary parametricity, Yufei Cai sketched an extension of
+differentiation for arbitrary PTSs.
 % The syntax we use
 % for change types suggests that
 
@@ -196,8 +216,9 @@ pid : pElemDt1 (alpha -> alpha) (idx1 id) (idx2 id)|.
 
 \section{Differentiation and parametricity}
 \label{sec:differentiation-dep-types-stlc}
+\pg{Figure out if we're just redoing \citep{Bernardy10}.}
 We obtain a close variant of differentiation by altering the transformation for
-binary parametricity.
+binary parametricity. We obtain a variant very closer to the one investigated by \citet*{Bernardy10}.
 Instead of only having proofs that values are related, we can modify |pElemDt1 (tau)
 t1 t2| to be a type of values---more precisely, a dependent type |elemDt2 tau t1
 t2| of valid changes, indexed by source |t1 : idx1(tau)| and destination |t2 :
@@ -921,3 +942,13 @@ investigation as future work.
 % % parametricity. However, usual statements of binary parametricity mention no
 % % analog of changes or |derive(param)|. One defines a relational interpretation of
 % % terms, mapping input relations to output relations, and shows this maps
+
+\section{Conclusion}
+In this chapter, we have sketched how to define and prove correct
+differentiation following \citet{Bernardy2011realizability}'s work on
+parametricity by code transformation; while we give no formal correctness proof,
+we have implemented and tested differentiation in an existing mature PTS implementation,
+and verified it is type-correct on a few typical terms.
+
+ We leave further investigation as future work.
+\pg{finish.}
