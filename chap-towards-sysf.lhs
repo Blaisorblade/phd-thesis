@@ -31,6 +31,7 @@ parametricity, but we leave verification for future work.
 % We show a variant of differentiation (that we still write |derive t|) that is
 % closer to their transformation for parametricity (which they write |eval t|).
 
+\paragraph{History and motivation}
 Various authors noticed that differentiation appears related to (binary)
 parametricity (including \citet{Atkey2015ILC}).
 In particular, it resembles a transformation presented by
@@ -41,7 +42,13 @@ focuses on System F, and our presentation follows theirs and uses their added
 generality. We refer for details to existing discussions of related
 work~\citep{Wadler2007girardreynolds,Bernardy2011realizability}.}
 By analogy with unary parametricity, Yufei Cai sketched an extension of
-differentiation for arbitrary PTSs.
+differentiation for arbitrary PTSs, but many questions remained open, and at the
+time our correctness proof for ILC was significantly more involved and trickier
+to extend to System F, since it was defined in terms of denotational equivalence.
+Later, we reduced the proof core to defining a logical relation, proving its
+fundamental property and a few corollaries, as shown in~\cref{ch:derive-formally},
+Extending this logical relation to System F proved comparably more straightforward.
+
 % The syntax we use
 % for change types suggests that
 
@@ -521,6 +528,22 @@ Produced terms live in |lap22|, the logic produced by extending |lap2| following
 non-dependently-typed differentiation (as suggested earlier) would produce
 proofs in |sysf2|, the logic produced by extending |sysf| following
 \citeauthor{Bernardy2011realizability}.
+
+\section{Related work}
+Dependently-typed differentiation for System F, as given, coincides with the
+parametricity transformation for System F given by \citet*[Sec.~3.1]{Bernardy10}. But our
+application is fundamentally different: for known types, \citeauthor{Bernardy10}
+only consider identity relations, while we can consider non-identity relations
+as long as we assume that |`ominus`| is available for all types.\pg{say this
+  earlier!}
+What is more, \citeauthor{Bernardy10} do not consider changes, the update
+operator |`oplus`|, or change structures across different types: changes are
+replaced by proofs of relatedness with no computational significance.
+Finally, non-dependently-typed differentiation (and its corectness proof) is
+novel here, as it makes limited sense in the context of parametricity, even
+though it is a small variant of \citeauthor{Bernardy10}'s parametricity transform.
+%(if we assume |`ominus`| is available)
+\pg{Demonstrate the actual contributions, they aren't here!}
 
 \section{Prototype implementation}
 \label{sec:param-derive-implementation}
