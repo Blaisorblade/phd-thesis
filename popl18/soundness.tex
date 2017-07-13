@@ -10,16 +10,16 @@ $\target$ environments that do.
 Second, while evaluating CTS derivatives, the evaluation environment mixes
 caches from the base computation and updated caches computed by the derivatives.
 
-\paragraph{Evaluation commutes with compilation of base terms}
+\paragraph{Evaluation commutes with CTS conversion}
 
 \input{\poplPath{differentiation-and-static-caching-continued}}
 
 Figure~\ref{fig:differentiation-and-static-caching-continued}
 extends CTS translation to values, change values, environments and
-change environments. CTS translation commutes with our semantics, as shown by
+change environments. CTS translation of base terms commutes with our semantics, as shown by
 next lemma:
 
-\begin{lemma}[Evaluation commutes with CTS translation of base terms]
+\begin{lemma}[Evaluation commutes with CTS translation]
   For all $\sectx, \sterm$ and $\sclosedvalue$, such that
   $\seval\sectx\sterm{}\sclosedvalue$, and
   for all $\tcache$, there exists $\tcachedclosedvalues$,
@@ -47,7 +47,7 @@ The rules of this judgment are omitted for lack of space but they
 can be obtained by replacing $\oldenv\tectx$ with $\newenv\tectx$
 in the rule for cache computation in Figure~\ref{fig:envwithcache}.
 
-\begin{lemma}[Evaluation commutes with compilation of derivatives]
+\begin{lemma}[Evaluation commutes with CTS differentiation]
   Let $\tcache$ be such that
   $(\tcache, \_) = \compileterm{\bullet}{\sterm}$.
   For all $\iectx, \sterm$ and $\icloseddvalue$,
@@ -95,7 +95,7 @@ term.
 \label{fig:envwithcache}
 \end{figure}
 
-\paragraph{Soundness of the transformation}
+\paragraph{Soundness of CTS conversion}
 Finally, we can state soundness of CTS differentiation relative to differentiation.
 The theorem says that (a) the CTS derivative $\derive\tcache\sterm$ computes the
 CTS translation $\compile{\icloseddvalue}$ of the
