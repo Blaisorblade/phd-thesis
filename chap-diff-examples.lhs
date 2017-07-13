@@ -190,15 +190,9 @@ type Dt (Sequence a) = SeqChange a
 \pg{Average}
 
 \pg{Nested loops}
-\section{A higher-order example}
-\label{sec:differentiation-fold-example}
-\pg{write}
-% Referenced later in sec-performance.tex by saying:
-% % We have seen in \cref{ssec:differentiation} that $\Derivative$
-% % needlessly recomputes $\Merge\Xs\Ys$. However, the result is a
-% % base input to $\FOLD'$.
 
 \section{Aggregation}
+%Aggregation
 \pg{To move}
 To study aggregation we consider |foldNat|.
 % \begin{code}
@@ -211,6 +205,14 @@ To study aggregation we consider |foldNat|.
 % Missing sections from chap-intro-incr.lhs.
 
 \pg{Ask question: can we define such change structures in terms of simpler ones?}
+
+\section{A higher-order example}
+\label{sec:differentiation-fold-example}
+\pg{write}
+% Referenced later in sec-performance.tex by saying:
+% % We have seen in \cref{ssec:differentiation} that $\Derivative$
+% % needlessly recomputes $\Merge\Xs\Ys$. However, the result is a
+% % base input to $\FOLD'$.
 \section{Products}
 \label{sec:chs-products-intro}
 It is also possible to define change structures for arbitrary sum and product
