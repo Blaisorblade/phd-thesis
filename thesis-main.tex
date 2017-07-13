@@ -162,7 +162,9 @@
 \phantomsection
 \addcontentsline{toc}{chapter}{Bibliography}
 
-\bibliography{Bibs/DB,Bibs/ProgLang,Bibs/SoftEng,Bibs/own}
+% Use include on the \bibliography line avoids always typesetting the bibliography.
+\include{biblio}
+
 \include{backmatter}
 \end{document}
 %%% Local Variables:
