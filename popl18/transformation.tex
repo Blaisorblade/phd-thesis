@@ -24,7 +24,7 @@ term~$\tcache$ is used as a cache pattern to define the second
 argument of the derivative of $\tf$. That way, we make sure that the
 shape of the cache expected by $\tdf$ is consistent with the shape of
 the cache produced by $\tf$. Derivative body~$\tdf$ is
-computed by derivation call~$\derive{(\tx \oplus \tdx)}{\sterm}$.
+computed by derivation call~$\derive{\tcachecons\temptycache{(\tchange{\tx}{\tdx})}}{\sterm}$.
 
 CTS translation on terms, $\compileterm{\tcache}{\sterm}$, accepts a term
 $\sterm$ and a cache term
