@@ -8,7 +8,7 @@
   \[
     \begin{array}{rcl}
       %
-      \categorytitle{CTS translation of toplevel definitions}
+      \categorytitle{CTS translation of toplevel definitions $\compile{\tf = \slam{\tx}{\sterm}}$}
       %
       \compile{\tf = \slam{\tx}{\sterm}}
       & = &
@@ -17,7 +17,7 @@
       \side{\textrm{where } (\tcache, \tterm) = \compileterm{\tcachecons\temptycache\tx}\sterm}\\
       \nextline
       %
-      \categorytitle{CTS differentiation of terms}
+      \categorytitle{CTS differentiation of terms $\derive{\tupdcache}{\sterm}$}
       %
       \derive{\tupdcache}{\slet{\ty = \sapp{\tf}{\tx}}{\sterm}}
       & = &
