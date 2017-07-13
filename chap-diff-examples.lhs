@@ -23,7 +23,7 @@ function changes to manipulate the embedded environments, as we discuss in
 \cref{ch:defunc-fun-changes}. We will also need ways to remember intermediate
 results.\pg{discussed where?}
 
-\section{Change structures in Haskell}
+\section{Change structures as typeclass instances}
 We encode change structure
 as a \emph{type class} named |ChangeStruct|. An instance |ChangeStruct t|
 defines a change type |Dt^t| as an associated type and operations |`oplus`|,
@@ -50,7 +50,10 @@ In general, to differentiate a primitive |f : A -> B| once we have defined a
 change structure for |A|, we can start by defining |df a1 da = f a2
 `ominus` f a1|, assume |da| is a valid change from |a1| to |a2|, and try to
 simplify and rewrite the expression in terms of |a1| and |da| to avoid using
-|`ominus`| as far as possible.
+|`ominus`| as far as possible. In fact, instead of defining |`ominus`| and
+simplifying |f a2 `ominus` f a1| to not use it, it is sufficient to produce a
+change from |f a1| to |f a2|.
+
 \section{Simple changes on lists}
 \label{sec:simple-changes-list-map}
 In this section, we consider a basic change structure on lists and the
