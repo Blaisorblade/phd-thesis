@@ -83,7 +83,7 @@ term.
     \infer{
       \envwithcache{\tectx}{\tcache}{\tectx'}
       \\
-      \sneval{\oldenv\tectx}{\tlet{\ty, \tcacheid\ty\tf\tx = \tf\tx}{(\ty, \tcacheid\ty\tf\tx)}}{(\_, \tcachedclosedvalues)}
+      \sneval{\oldenv\tectx}{\tlet{\ty, \tcacheid\ty\tf\tx = \tapp\tf\tx}{(\ty, \tcacheid\ty\tf\tx)}}{(\_, \tcachedclosedvalues)}
     }{
       \envwithcache{\tectx}
       {\tcachecons\tcache{\tcacheid\ty\tf\tx}}
