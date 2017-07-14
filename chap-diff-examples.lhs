@@ -8,9 +8,7 @@ Before formalizing ILC, we show more example of change structures and
 primitives, to show (a) designs for reusable primitives and their
 derivatives, (b) to what extent we can incrementalize basic building
 blocks such as recursive functions and algebraic data types, and (c) to sketch how
-we can incrementalize collections efficiently. When possible, we will try to
-define change structures for a datatype, together with introduction and
-elimination forms for that datatype.
+we can incrementalize collections efficiently.
 
 To describe these examples informally, we use Haskell notation and let
 polymorphism as appropriate (see \cref{sec:intro-stlc}).
@@ -21,7 +19,7 @@ We also motivate a few extensions to differentiation that we describe later. As
 we'll see in this chapter, we'll need to enable some forms of introspection on
 function changes to manipulate the embedded environments, as we discuss in
 \cref{ch:defunc-fun-changes}. We will also need ways to remember intermediate
-results.\pg{discussed where?}
+results, which we will discuss in \cref{part:caching}.
 
 \section{Change structures as typeclass instances}
 We encode change structure
@@ -45,6 +43,15 @@ available, but we collapse this hierarchy here to simplify presentation.
 
 \pg{Too short for a section. Add sums and products maybe?}
 \section{How to design a language plugin}
+\label{sec:plugin-design}
+
+When adding support for a datatype |T|, we will strive to
+define both a change structure and derivatives of introduction and
+elimination forms for |T|, since such forms constitute a complete API
+for using that datatype. However, we will sometimes have to restrict
+elimination forms to scenarios that can be incrementalized efficiently. We will
+also use overly simplified change structures to illustrate a few points.
+
 \pg{Put somewhere:}
 In general, to differentiate a primitive |f : A -> B| once we have defined a
 change structure for |A|, we can start by defining |df a1 da = f a2
@@ -52,19 +59,180 @@ change structure for |A|, we can start by defining |df a1 da = f a2
 simplify and rewrite the expression in terms of |a1| and |da| to avoid using
 |`ominus`| as far as possible. In fact, instead of defining |`ominus`| and
 simplifying |f a2 `ominus` f a1| to not use it, it is sufficient to produce a
-change from |f a1| to |f a2|.
+change from |f a1| to |f a2|, even a different one. We write |da1 `doe` da2| to
+mean that changes |da1| and |da2| are equivalent, that is they have the same
+source and destination. We define this concept properly in~\cref{sec:change-equivalence}.
+
+We try to avoid running |`ominus`| on arguments of non-constant size, since it
+might easily take time linear or superlinear in the argument sizes; if
+|`ominus`| produces replacement values, it completes in constant time but
+derivatives invoked on the produced changes are not efficient.
+%implement it on lists to produce a minimal-size difference,\citep{Cormen2001}.
+% Running |`ominus`| can take time linear on input sizes, or worse: If we wanted
+% to find a minimal description of a change between lists,
+
+\section{Incrementalizing a collection API}
+In this section, we describe a collection API that we incrementalize in this chapter.
+
+To avoid notation conflicts, we represent lists via
+datatype |List a|, defined as follows:
+\begin{code}
+data List a = Nil | Cons a (List a)
+\end{code}
+
+We also consider as primitive operation a standard mapping function |map|.
+We also support two restricted forms of aggregation:
+(a) folding over a group via
+|fold|, similar to how one usually folds over a monoid;\footnote{\url{https://hackage.haskell.org/package/base-4.9.1.0/docs/Data-Foldable.html}.}
+(b) list concatenation via |concat|. We will not discuss how to differentiate
+|concat|, as we reuse existing solutions by \citet{Firsov2016purely}.
+\begin{code}
+singleton :: a -> List a
+singleton x = Cons x Nil
+
+map :: (a -> b) -> List a -> List b
+map f Nil = Nil
+map f (Cons x xs) = Cons (f x) (map f xs)
+
+fold :: GroupChangeStruct b => List b -> b
+fold Nil = mempty
+fold (Cons x xs) = x `mappend` fold xs -- Where |`mappend`| is infix for |mappend|.
+
+concat :: List (List a) -> List a
+concat = ...
+\end{code}
+While usually |fold| requires only an instance |Monoid b| of type class |Monoid| to aggregate
+collection elements, our variant of |fold| requires an instance of type class |GroupChangeStruct|, a
+subclass of |Monoid|. This typeclass is not used by |fold| itself, but only by
+its derivative, as we explain in \cref{sec:incr-fold}; nevertheless,
+we add this stronger constraint to |fold| itself because we forbid derivatives
+with stronger typeclass constraints. With this approach, all clients of |fold|
+can be incrementalized using differentiation.
+
+Using those primitives, one can define further higher-order functions on
+collections such as |concatMap|, |filter|, |foldMap|. In turn, these functions
+form the kernel of a collection API, as studied for instance by work on the
+\emph{monoid comprehension calculus}~\citep{Grust96Monoid,Fegaras95,Fegaras99},
+even if they are not complete by themselves.
+\begin{code}
+concatMap :: (a -> List b) -> List a -> List b
+concatMap f = concat . map f
+
+filter :: (a -> Bool) -> List a -> List a
+filter p = concatMap (\x -> if p x then singleton x else Nil)
+
+foldMap :: GroupChangeStruct b => (a -> b) -> List a -> b
+foldMap f = fold . map f
+\end{code}
+In first-order DSLs such as SQL, such functionality must typically be added through separate
+primitives (consider for instance |filter|), while here we can simply
+\emph{define}, for instance, |filter| on top of |concatMap|, and incrementalize
+the resulting definitions using differentiation.
+
+Function |filter| uses conditionals, which we haven't discussed yet; we show how
+to incrementalize |filter| successfully in \cref{sec:chs-sums}.\pg{Do it!}
+
+\section{Incrementalizing aggregation}
+\label{sec:incr-fold}
+\pg{We are using abelian groups!}
+Let's now discuss how to incrementalize |fold|.
+We consider an oversimplified change structure that
+allows only two sorts of changes: prepending an element to a list or removing
+the list head of a non-empty list, and study how to incrementalize |fold| for
+such changes:
+
+\begin{code}
+data ListChange a = Prepend a | Remove
+instance ChangeStruct (List a) where
+  type Dt^(List a) = ListChange a
+  xs `oplus` Prepend x = Cons x xs
+  (Cons x xs) `oplus` Remove = xs
+  Nil `oplus` Remove = error "Invalid change"
+
+dfold xs (Prepend x) = ...
+\end{code}
+Removing an element from an empty list is an invalid change, hence it is safe to
+give an error in that scenario as mentioned when introducing |`oplus`|
+(\cref{sec:change-intro}).
+
+Equational reasoning shows that |dfold xs (Prepend x)| should be a change that,
+in a sense, ``adds'' |x| to the result using group operations:
+\begin{equational}
+\begin{code}
+      dfold xs (Prepend x)
+`doe`
+      fold (xs `oplus` Prepend x) `ominus` fold xs
+=
+      fold (Cons x xs) `ominus` fold xs
+=
+      (x `mappend` fold xs) `ominus` fold xs
+\end{code}
+\end{equational}
+Similarly, |dfold (Cons x xs) Remove| should instead ``subtract'' |x| from the result:
+
+\begin{equational}
+\begin{code}
+      dfold (Cons x xs) Remove
+`doe`
+      fold (Cons x xs `oplus` Remove) `ominus` fold (Cons x xs)
+=
+      fold xs `ominus` fold (Cons x xs)
+=
+      fold xs `ominus` (x `mappend` fold xs)
+\end{code}
+\end{equational}
+To avoid using |`ominus`| we must rewrite its invocation to an equivalent expression.
+In this scenario we can use group changes, and restrict |fold| to
+situations where such changes are available.
+
+\begin{code}
+dfold :: GroupChangeStruct b => List b -> Dt (List b) -> Dt b
+dfold xs (Prepend x) = inject x
+dfold (Cons x xs) Remove = inject (invert x)
+dfold Nil Remove = error "Invalid change"
+\end{code}
+
+To support group changes we define the following type classes to model groups
+and group change structures. |GroupChangeStruct| only requires that group
+elements of type |g| can be converted into changes (type |Dt^g|), allowing
+change type |Dt^g| to contain other sorts of changes.
+\begin{code}
+class Monoid g => Group g where
+  invert :: g -> g
+class (Group a, ChangeStruct a) => GroupChangeStruct a where
+  -- Inject group elements into changes. Laws:
+  -- |a `oplus` inject b = a `mappend` b|
+  inject :: a -> Dt a
+\end{code}
+
+\Cref{sec:applying} discusses how
+we can use so without assuming a single group is defined on elements, but here we
+simply select the canonical group as chosen by typeclass resolution. To use a
+different group, as usual, one defines a different but isomorphic type via the
+Haskell |newtype| construct. As a downside, derivatives |newtype| constructors
+must convert changes across different representations.
+
+\pg{Add removals!}
+
+% % Aggregation
+% \pg{To move}
+% To study aggregation we consider |foldNat|.
+% % \begin{code}
+% %   foldNat z s 0 = z
+% %   foldNat z s (n + 1) = s (foldNat z s n)
+% %   -- Assuming that dz and ds are nil.
+% %   dfoldNat z dz s ds n 0 = foldNat z s n
+% %   dfoldNat z dz s ds n dn = if dn > 0 then foldNat (foldNat z s n) s dn
+% % \end{code}
+% % Missing sections from chap-intro-incr.lhs.
+
+% \pg{Ask question: can we define such change structures in terms of simpler ones?}
 
 \section{Simple changes on lists}
 \label{sec:simple-changes-list-map}
 In this section, we consider a basic change structure on lists and the
 derivative of |map|, and we sketch informally its correctness. We prove it
 formally in \cref{ex:syn-changes-map}.
-
-To avoid notation conflicts, we represent lists via
-datatype |List a|, defined as follows:
-\begin{code}
-  data List a = Nil | Cons a (List a)
-\end{code}
 
 We can then represent changes to a list (|List a|) as a list of changes (|List
 (Dt^a)|), one for each element.
@@ -191,21 +359,6 @@ type Dt (Sequence a) = SeqChange a
 
 \pg{Nested loops}
 
-\section{Aggregation}
-%Aggregation
-\pg{To move}
-To study aggregation we consider |foldNat|.
-% \begin{code}
-%   foldNat z s 0 = z
-%   foldNat z s (n + 1) = s (foldNat z s n)
-%   -- Assuming that dz and ds are nil.
-%   dfoldNat z dz s ds n 0 = foldNat z s n
-%   dfoldNat z dz s ds n dn = if dn > 0 then foldNat (foldNat z s n) s dn
-% \end{code}
-% Missing sections from chap-intro-incr.lhs.
-
-\pg{Ask question: can we define such change structures in terms of simpler ones?}
-
 \section{A higher-order example}
 \label{sec:differentiation-fold-example}
 \pg{write}
@@ -298,3 +451,8 @@ values of type |b|,
 \pg{Idea: |ChangeStruct2 t1 t2, Iso t2 t3) => ChangeStruct2 t1 t3|}
 % Lists can be described as the fixpoint of a sum of
 % product: |List a = mu X. 1 + A `times` X|
+
+\section{Chapter conclusion}
+In this chapter we have toured what can and cannot be incrementalized using
+differentiation, and how using higher-order functions allows defining generic
+primitives to incrementalize.

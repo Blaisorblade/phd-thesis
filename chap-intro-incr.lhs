@@ -325,8 +325,11 @@ changes in \cref{ex:valid-bag-int,ex:invalid-nat}.\pg{What about
 We also introduce an operator |`oplus`| on values and changes: if
 |dv| is a valid change from |v1| to |v2|, then |v1 `oplus` dv|
 (read as ``|v1| updated by |dv|'') is guaranteed to return |v2|.
-However, we later show that often |v1 `oplus` dv| can be defined
-even if |dv| is not a valid change from |v1| to |v1 `oplus` dv|.
+If |dv| is \emph{not} a valid change from |v1|, then |v1 `oplus` dv| can be
+defined to some arbitrary value or not, without any effect on correctness. In
+practice, if |`oplus`| detects an invalid input change it can trigger an error or
+return a dummy value; in our formalization we assume for simplicity that
+|`oplus`| is total.
 Again, if |dv| is not valid from |v1| to |v1 `oplus` dv|, then we do not talk of
 the source and destination of |dv|.
 
