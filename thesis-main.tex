@@ -1,4 +1,4 @@
-\documentclass{book}
+\documentclass[a4paper]{book}
 \bibliographystyle{plainnat}
 
 % lhs2TeX setup
@@ -25,6 +25,7 @@
 % For adapting to compiling the whole thesis, or only parts.
 \newtoggle{full}
 \togglefalse{full}
+%\toggletrue{full}
 
 \iftoggle{full}{
 \includecomment{fullCompile}
@@ -76,12 +77,14 @@
 %\includeonly{pldi14/sec-intro}
 
 %\includeonly{chap-towards-sysf}
-\includeonly{chap-diff-examples}
+\includeonly{}
+%\includeonly{chap-intro}
+%\includeonly{chap-diff-examples}
 %\includeonly{chap-intro,chap-intro-incr,chap-diff-examples}
 %\includeonly{chap-diff-examples,new-stuff}
 
 %\includeonly{pldi14/sec-preliminaries,chap-diff-correct-formal,chap-chs,chap-operationally}
-%\includeonly{chap-operationally}
+%\includeonly{chap-operationally,popl18/formalization}
 
 %\includeonly{pldi14/sec-preliminaries,chap-intro-incr,pldi14/sec-intro,new-stuff}
 
@@ -98,20 +101,27 @@
 \input{pldi14/agda}
 \begin{document}
 
+\frontmatter
+%\pagestyle{empty}
+\input{TitlePage}
+%\clearpage
+\end{titlepage}
 
+% \pagestyle{myheadings}
 \iftoggle{full}{
-\maketitle
+
+\cleardoublepage
 \section*{Abstract}
 % Programs manipulating data collections require
 
 % \begin{abstract}
 % \end{abstract}
 \tableofcontents
-
 \listoffigures
 \listoftables
 }{}
 
+\mainmatter
 \include{chap-intro}
 
 \part{Optimizing collection queries by reification}
@@ -163,9 +173,10 @@
 \addcontentsline{toc}{chapter}{Bibliography}
 
 % Use include on the \bibliography line avoids always typesetting the bibliography.
-\include{biblio}
 
 \include{backmatter}
+\backmatter
+\include{biblio}
 \end{document}
 %%% Local Variables:
 %%% mode: latex
