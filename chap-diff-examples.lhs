@@ -54,14 +54,15 @@ also use overly simplified change structures to illustrate a few points.
 
 \pg{Put somewhere:}
 In general, to differentiate a primitive |f : A -> B| once we have defined a
-change structure for |A|, we can start by defining |df a1 da = f a2
+change structure for |A|, we can start by defining |df a1 da = f (a1 `oplus` da)
 `ominus` f a1|, assume |da| is a valid change from |a1| to |a2|, and try to
-simplify and rewrite the expression in terms of |a1| and |da| to avoid using
-|`ominus`| as far as possible. In fact, instead of defining |`ominus`| and
-simplifying |f a2 `ominus` f a1| to not use it, it is sufficient to produce a
-change from |f a1| to |f a2|, even a different one. We write |da1 `doe` da2| to
-mean that changes |da1| and |da2| are equivalent, that is they have the same
-source and destination. We define this concept properly in~\cref{sec:change-equivalence}.
+simplify and rewrite the expression using \emph{equational reasoning}, so that it does
+not refer to |`ominus`| any more, as far as possible.
+In fact, instead of defining |`ominus`| and simplifying |f a2 `ominus` f a1| to
+not use it, it is sufficient to produce a change from |f a1| to |f a2|, even a
+different one. We write |da1 `doe` da2| to mean that changes |da1| and |da2| are
+equivalent, that is they have the same source and destination. We define this
+concept properly in~\cref{sec:change-equivalence}.
 
 We try to avoid running |`ominus`| on arguments of non-constant size, since it
 might easily take time linear or superlinear in the argument sizes; if
@@ -155,32 +156,22 @@ Removing an element from an empty list is an invalid change, hence it is safe to
 give an error in that scenario as mentioned when introducing |`oplus`|
 (\cref{sec:change-intro}).
 
-Equational reasoning shows that |dfold xs (Prepend x)| should be a change that,
+By using equational reasoning as suggested in \cref{sec:plugin-design},
+one can show formally that |dfold xs (Prepend x)| should be a change that,
 in a sense, ``adds'' |x| to the result using group operations:
-\begin{equational}
 \begin{code}
-      dfold xs (Prepend x)
-`doe`
-      fold (xs `oplus` Prepend x) `ominus` fold xs
-=
-      fold (Cons x xs) `ominus` fold xs
-=
-      (x `mappend` fold xs) `ominus` fold xs
+       dfold xs (Prepend x)
+`doe`  fold (xs `oplus` Prepend x) `ominus` fold xs
+=      fold (Cons x xs) `ominus` fold xs
+=      (x `mappend` fold xs) `ominus` fold xs
 \end{code}
-\end{equational}
 Similarly, |dfold (Cons x xs) Remove| should instead ``subtract'' |x| from the result:
-
-\begin{equational}
 \begin{code}
-      dfold (Cons x xs) Remove
-`doe`
-      fold (Cons x xs `oplus` Remove) `ominus` fold (Cons x xs)
-=
-      fold xs `ominus` fold (Cons x xs)
-=
-      fold xs `ominus` (x `mappend` fold xs)
+       dfold (Cons x xs) Remove
+`doe`  fold (Cons x xs `oplus` Remove) `ominus` fold (Cons x xs)
+=      fold xs `ominus` fold (Cons x xs)
+=      fold xs `ominus` (x `mappend` fold xs)
 \end{code}
-\end{equational}
 To avoid using |`ominus`| we must rewrite its invocation to an equivalent expression.
 In this scenario we can use group changes, and restrict |fold| to
 situations where such changes are available.
@@ -408,8 +399,8 @@ contains as many entries as a product.\pg{Sketch alternatives.}
 
 \section{Sums}
 \label{sec:chs-sums}
-Changes structures for sums are more challenging. We can define them, but in
-many cases we can do better with specialized structures.
+Changes structures for sums are more challenging than ones for products. We can
+define them, but in many cases we can do better with specialized structures.
 \begin{code}
 data EitherChange a b = LeftC (Dt a) | RightC (Dt b) | EitherReplace (Either a b)
 oplusEither
