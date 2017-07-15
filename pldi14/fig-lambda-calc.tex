@@ -65,9 +65,9 @@ s, t     & c             & \mid \Lam{(x : \Gs)}{t}
     \begin{subfigure}[b]{0.6\textwidth}
     \Align{
       \Eval{\EmptyContext}
-        & = \left\{ \EmptyEnv \right\} \\
+        & = \left\{\, \EmptyEnv \,\right\} \\
       \Eval{\Extend{x}{\Gt}}
-        & = \left\{ \ExtendEnv*{x}{v} \mid \Gr \in \Eval{\GG} \land v \in \Eval{\Gt}\right\}
+        & = \left\{\, \ExtendEnv*{x}{v} \mid \Gr \in \Eval{\GG} \land v \in \Eval{\Gt}\,\right\}
     }
     \caption{Environments.}
     \label{fig:lambda-calc:environments}

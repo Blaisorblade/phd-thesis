@@ -651,31 +651,31 @@ Gamma|: environments are related if their corresponding entries
 are related values.
 \begin{figure}[h!]
 \begin{align*}
-  |valset Nat| ={}& \{|(n1, dn, n2) `such` n1, dn, n2 `elem` Nat `wand` n1 + dn = n2|\}\\
-  |valset (taua `times` taub)| ={} & \{|(pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
+  |valset Nat| ={}& \{ \, |(n1, dn, n2) `such` n1, dn, n2 `elem` Nat `wand` n1 + dn = n2|\, \}\\
+  |valset (taua `times` taub)| ={} & \{ \, |(pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
                                    ^&^ (va1, dva, va2) `elem` valset taua
                                       ^^ `wand` ^^
-                                      (vb1, dvb, vb2) `elem` valset taub |\}\\
+                                      (vb1, dvb, vb2) `elem` valset taub | \, \}\\
   |valset (sigma -> tau)| ={}
-                  |^&^ |\{|(vf1, dvf, vf2) `such` ^^^
+                  |^&^ |\{ \, |(vf1, dvf, vf2) `such` ^^^
                       ^&^ //= vf1 : sigma -> tau `wand`
                          //== dvf : sigma -> tau `wand`
                          //= vf2 : sigma -> tau ^^^
                       ^&^ `wandnosp` ^^^
                       ^&^ forall ((v1, dv, v2) `elem` (valset sigma)). ^^^
-                      ^&^ qua ((vapply vf1 v1, dvapply dvf v1 dv, vapply vf2 v2) `elem` (compset tau)) |\}\\
+                      ^&^ qua ((vapply vf1 v1, dvapply dvf v1 dv, vapply vf2 v2) `elem` (compset tau)) | \, \}\\
   |compset tau| ={}&
-                  \{|(envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `such` ^^^
+                  \{ \, |(envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `such` ^^^
                     ^&^ (exists Gamma1 Gamma Gamma2 . ^^ Gamma1 /- t1 : tau `wand` ^^ Gamma /-- dt : tau `wand` Gamma2 /- t2 : tau) ^^^
                     ^&^ `wandnosp` ^^^
                     ^&^ forall v1 v2 . ^^^
                     ^&^ qua ((bseval t1 rho1 v1 `wand` bseval t2 rho2 v2)) => ^^^
-                    ^&^ qua (exists dv . ^^ dbseval dt rho drho dv `wand` (v1, dv, v2) `elem` valset tau) |\}\\
+                    ^&^ qua (exists dv . ^^ dbseval dt rho drho dv `wand` (v1, dv, v2) `elem` valset tau) | \, \}\\
                   \\
-  |envset emptyCtx| ={} & \{|(emptyRho, emptyRho, emptyRho)|\} \\
+  |envset emptyCtx| ={} & \{ \, |(emptyRho, emptyRho, emptyRho)| \, \} \\
   |envset (Gamma, x : tau)| ={} &
-                                  \{|((rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
-                                  ^&^ (rho1, drho, rho2) `elem` envset Gamma `wand` (v1, dv, v2) `elem` valset tau|\} \\
+                                  \{ \, |((rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
+                                  ^&^ (rho1, drho, rho2) `elem` envset Gamma `wand` (v1, dv, v2) `elem` valset tau| \, \} \\
   |fromtosyn Gamma tau t1 dt t2| ={}&
                                       |forall ((rho1, drho, rho2) `elem` envset Gamma) . ^^^
                                       ^&^ (envpair rho1 t1, denvpair rho1 drho dt, envpair rho2 t2) `elem` compset tau|
@@ -859,31 +859,31 @@ well-founded recursion on step-indexes.
 
 \begin{figure}[h!]
 \begin{align*}
-  |valset Nat| ={}& \{|(k, n1, dn, n2) `such` n1, dn, n2 `elem` Nat `wand` n1 + dn = n2|\}\\
-  |valset (taua `times` taub)| ={} & \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
+  |valset Nat| ={}& \{ \, |(k, n1, dn, n2) `such` n1, dn, n2 `elem` Nat `wand` n1 + dn = n2| \, \}\\
+  |valset (taua `times` taub)| ={} & \{ \, |(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
                                    ^&^ (k, va1, dva, va2) `elem` valset taua
                                       ^^ `wand` ^^
-                                      (k, vb1, dvb, vb2) `elem` valset taub |\}\\
+                                      (k, vb1, dvb, vb2) `elem` valset taub | \, \}\\
   |valset (sigma -> tau)| ={}
-                  |^&^ |\{|(k, vf1, dvf, vf2) `such` ^^^
+                  |^&^ |\{ \, |(k, vf1, dvf, vf2) `such` ^^^
                       ^&^ //= vf1 : sigma -> tau `wand`
                          //== dvf : sigma -> tau `wand`
                          //= vf2 : sigma -> tau ^^^
                       ^&^ `wandnosp` ^^^
                       ^&^ forall ((j, v1, dv, v2) `elem` (valset sigma)). ^^ j < k => ^^^
-                      ^&^ qua ((j, vapply vf1 v1, dvapply dvf v1 dv, vapply vf2 v2) `elem` (compset tau)) |\}\\
+                      ^&^ qua ((j, vapply vf1 v1, dvapply dvf v1 dv, vapply vf2 v2) `elem` (compset tau)) | \, \}\\
   |compset tau| ={}&
-                  \{|(k, envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `such` ^^^
+                  \{ \, |(k, envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `such` ^^^
                     ^&^ (exists Gamma1 Gamma Gamma2 . ^^ Gamma1 /- t1 : tau `wand` ^^ Gamma /-- dt : tau `wand` Gamma2 /- t2 : tau) ^^^
                     ^&^ `wandnosp` ^^^
                     ^&^ forall j v1 v2 . ^^^
                     ^&^ qua ((j < k `wand` bseval t1 rho1 v1 `wand` bseval t2 rho2 v2)) => ^^^
-                    ^&^ qua (exists dv . ^^ dbseval dt rho drho dv `wand` (k - j, v1, dv, v2) `elem` valset tau) |\}\\
+                    ^&^ qua (exists dv . ^^ dbseval dt rho drho dv `wand` (k - j, v1, dv, v2) `elem` valset tau) | \, \}\\
                   \\
-  |envset emptyCtx| ={} & \{|(k, emptyRho, emptyRho, emptyRho)|\} \\
+  |envset emptyCtx| ={} & \{ \, |(k, emptyRho, emptyRho, emptyRho)| \, \} \\
   |envset (Gamma, x : tau)| ={} &
-                                  \{|(k, (rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
-                                  ^&^ (k, rho1, drho, rho2) `elem` envset Gamma `wand` (k, v1, dv, v2) `elem` valset tau|\} \\
+                                  \{ \, |(k, (rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
+                                  ^&^ (k, rho1, drho, rho2) `elem` envset Gamma `wand` (k, v1, dv, v2) `elem` valset tau| \, \} \\
   |fromtosyn Gamma tau t1 dt t2| ={}&
                                       |forall ((k, rho1, drho, rho2) `elem` envset Gamma) . ^^^
                                       ^&^ (k, envpair rho1 t1, denvpair rho1 drho dt, envpair rho2 t2) `elem` compset tau|
@@ -1066,7 +1066,7 @@ by requiring the following equation holds (hence, modifying all
 equations for |valset|; we omit details):
 \begin{align}
   \label{eq:val-replacement}
-  |valset tau| \supseteq {}& \{| (k, v1, !v2, v2) `such` ^^ //= v1 : tau ^^ `wand` ^^ //= v2 : tau |\}
+  |valset tau| \supseteq {}& \{ \, | (k, v1, !v2, v2) `such` ^^ //= v1 : tau ^^ `wand` ^^ //= v2 : tau | \, \}
 \end{align}
 where we write |//= v : tau| to state that value |v| has type
 |tau|; we omit the unsurprising rules for this judgement.
@@ -1094,7 +1094,7 @@ As an example for \cref{eq:val-replacement}, we also include explicitly
 replacement closures in the definition of |valset (sigma -> tau)|.
 \begin{align*}
   |valset (sigma -> tau)| ={}
-                  |^&^ |\{|(k, vf1, dvf, vf2) `such` ^^^
+                  |^&^ |\{ \, |(k, vf1, dvf, vf2) `such` ^^^
                       ^&^ //= vf1 : sigma -> tau `wand`
                          //== dvf : sigma -> tau `wand`
                          //= vf2 : sigma -> tau ^^^
@@ -1102,8 +1102,8 @@ replacement closures in the definition of |valset (sigma -> tau)|.
                       ^&^ matchImpl vf1 dvf vf2 ^^^
                       ^&^ `wandnosp` ^^^
                       ^&^ forall ((j, v1, dv, v2) `elem` (valset sigma)). ^^ j < k => ^^^
-                      ^&^ qua ((j, vapply vf1 v1, dvapply dvf v1 dv, vapply vf2 v2) `elem` (compset tau))|\}| ^^ `union` ^^^
-                  ^&^| \{| (k, f1, !f2, f2) `such` ^^ //= f1 : sigma -> tau ^^ `wand` ^^ //= f2 : sigma -> tau |\}
+                      ^&^ qua ((j, vapply vf1 v1, dvapply dvf v1 dv, vapply vf2 v2) `elem` (compset tau))| \, \}| ^^ `union` ^^^
+                  ^&^| \{ \, | (k, f1, !f2, f2) `such` ^^ //= f1 : sigma -> tau ^^ `wand` ^^ //= f2 : sigma -> tau | \, \}
 \end{align*}
 
 Using these updated definitions, we can again prove the
@@ -1201,25 +1201,25 @@ details~\citep{Ahmed2006stepindexed}.
 
 \begin{figure}[h!]
 \begin{align*}
-  |valsetunt| ={}& \{|(k, n1, dn, n2) `such` n1, dn, n2 `elem` Nat
-                   `wand` n1 + dn = n2|\} | ^^ `union` ^^^
-                  ^&^ |\{|(k, vf1, dvf, vf2) `such` ^^^
+  |valsetunt| ={}& \{ \, |(k, n1, dn, n2) `such` n1, dn, n2 `elem` Nat
+                   `wand` n1 + dn = n2| \, \} | ^^ `union` ^^^
+                  ^&^ |\{ \, |(k, vf1, dvf, vf2) `such` ^^^
                       ^&^ forall ((j, v1, dv, v2) `elem` valsetunt). ^^ j < k => ^^^
-                      ^&^ qua ((j, vapply vf1 v1, dvapply dvf v1 dv, vapply vf2 v2) `elem` compsetunt) |\}| ^^ `union` ^^^
-                  ^&^ | \{|(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
+                      ^&^ qua ((j, vapply vf1 v1, dvapply dvf v1 dv, vapply vf2 v2) `elem` compsetunt) | \, \}| ^^ `union` ^^^
+                  ^&^ | \{ \, |(k, pair va1 vb1, pair dva dvb, pair va2 vb2) `such` ^^^
                    ^&^ (k, va1, dva, va2) `elem` valsetunt
                       ^^ `wand` ^^
-                      (k, vb1, dvb, vb2) `elem` valsetunt |\}\\
+                      (k, vb1, dvb, vb2) `elem` valsetunt | \, \}\\
   |compsetunt| ={}&
-                  \{|(k, envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `such` ^^^
+                  \{ \, |(k, envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `such` ^^^
                     ^&^ forall j v1 v2 . ^^^
                     ^&^ qua ((j < k `wand` bseval t1 rho1 v1 `wand` bseval t2 rho2 v2)) => ^^^
-                    ^&^ qua (exists dv . ^^ dbseval dt rho drho dv `wand` (k - j, v1, dv, v2) `elem` valsetunt) |\}\\
+                    ^&^ qua (exists dv . ^^ dbseval dt rho drho dv `wand` (k - j, v1, dv, v2) `elem` valsetunt) | \, \}\\
   \\
-  |envset emptyCtx| ={} & \{|(k, emptyRho, emptyRho, emptyRho)|\} \\
+  |envset emptyCtx| ={} & \{ \, |(k, emptyRho, emptyRho, emptyRho)| \, \} \\
   |envset (Gamma, x)| ={} &
-                                  \{|(k, (rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
-                                  ^&^ (k, rho1, drho, rho2) `elem` envset Gamma `wand` (k, v1, dv, v2) `elem` valsetunt|\} \\
+                                  \{ \, |(k, (rho1 , x := v1), (drho, dx := dv) , (rho2, x := v2)) `such` ^^^
+                                  ^&^ (k, rho1, drho, rho2) `elem` envset Gamma `wand` (k, v1, dv, v2) `elem` valsetunt| \, \} \\
   |fromtosynuntyped Gamma t1 dt t2| ={}&
                                       |forall ((k, rho1, drho, rho2) `elem` envset Gamma) . ^^^
                                       ^&^ (k, envpair rho1 t1, denvpair rho1 drho dt, envpair rho2 t2) `elem` compsetunt|
