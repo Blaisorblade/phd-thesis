@@ -332,12 +332,13 @@ formalization and mechanization details.
 % function changes are again closures, but we require they bind
 % two variables at the out
 %
-In change terms, we reuse primitives to stand for their
-derivatives. The semantics evaluates the derivatives of
-primitives correctly.
-While strictly speaking differentiation \emph{must} map
+In change terms, we write |nil p| as syntax for the derivative of |p|, evaluated
+as such by the semantics.
+Strictly speaking, differentiation \emph{must} map
 primitives to standard terms, so that the resulting programs can
-be executed by a standard semantics, doing so in a new
+be executed by a standard semantics; hence, we should replace |nil p| by a
+concrete implementation of the derivative of |p|.
+However, doing so in a new
 formalization yields little additional insight, and requires
 writing concrete derivatives of primitives as de Bruijn terms.
 
@@ -421,7 +422,6 @@ complete equations for the typed case; for the untyped case, we
 must turn |evalPrim| and |devalPrim| into relations (or add explicit error
 results), but we omit the standard details (see also
 \cref{sec:silr-untyped-proof}).
-
 For simplicity, we assume evaluation of primitives takes one step.
 We conjecture higher-order primitives might need to be assigned
 different costs, but leave details for future work.

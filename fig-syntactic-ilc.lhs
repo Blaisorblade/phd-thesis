@@ -25,7 +25,7 @@
 \begin{code}
   dc      ::=  0
   dw      ::=  dx | \x dx -> dt | pair dw dw | dc
-  ds, dt  ::=  dw | dw w dw | p w dw |
+  ds, dt  ::=  dw | dw w dw | nil p w dw |
                lett x = t; dx = dt in dt
   dv      ::=  rho `stoup` drho[\x dx -> dt] | pair dv dv | dc
   drho    ::=  dx1 := dv1 , ..., dxn := dvn
@@ -44,7 +44,7 @@
   |derive c| &= |deriveConst c|\\
   \\
   |derive(wf wa)| &= |(derive wf) wa (derive wa)| \\
-  |derive(p w)| &= |p w (derive w)| \\
+  |derive(p w)| &= |nil p w (derive w)| \\
   |derive(lett x = s in t)| &= |lett x = s; dx = derive s in derive t|
 \end{align*}
 \caption{Differentiation.}
@@ -158,7 +158,7 @@
   {|`vdashPrim` p : sigma -> tau|\\
     |Gamma /- w : sigma|\\
     |Gamma /-- dw : sigma|}
- {|Gamma /-- p w dw : tau|}
+ {|Gamma /-- nil p w dw : tau|}
 \end{typing}
 \caption{\dilcTau{} change typing. Judgement |Gamma /-- dt : tau| means that variables from
   both |Gamma| and |Dt^Gamma| are in scope in |dt|, and the final type is in fact
@@ -217,7 +217,7 @@
 
 \raisebox{0.5\baselineskip}{\fbox{|dbseval dt rho drho dv|}}
 
-  \Axiom[E-DPrim]{|dbseval (p w dw) rho drho
+  \Axiom[E-DPrim]{|dbseval (nil p w dw) rho drho
     (devalPrim p (evalVal w rho) (devalVal dw rho drho))|}
 
   \Rule[E-DApp]{%
