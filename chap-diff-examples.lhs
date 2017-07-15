@@ -8,10 +8,12 @@ Before formalizing ILC, we show more example of change structures and
 primitives, to show (a) designs for reusable primitives and their
 derivatives, (b) to what extent we can incrementalize basic building
 blocks such as recursive functions and algebraic data types, and (c) to sketch how
-we can incrementalize collections efficiently.
+we can incrementalize collections efficiently. We make no attempt at
+incrementalizing a complete collection API here; we discuss briefly more
+complete implementations in \cref{sec:applying} and \cref{sec:case-studies}.
 
-To describe these examples informally, we use Haskell notation and let
-polymorphism as appropriate (see \cref{sec:intro-stlc}).
+To describe these examples informally, we use Haskell notation and
+|lett| polymorphism as appropriate (see \cref{sec:intro-stlc}).
 % We already sketch, how a change structure
 % can be represented in Haskell terms:
 
@@ -95,7 +97,7 @@ map :: (a -> b) -> List a -> List b
 map f Nil = Nil
 map f (Cons x xs) = Cons (f x) (map f xs)
 
-fold :: GroupChangeStruct b => List b -> b
+fold :: AbGroupChangeStruct b => List b -> b
 fold Nil = mempty
 fold (Cons x xs) = x `mappend` fold xs -- Where |`mappend`| is infix for |mappend|.
 
@@ -122,7 +124,7 @@ concatMap f = concat . map f
 filter :: (a -> Bool) -> List a -> List a
 filter p = concatMap (\x -> if p x then singleton x else Nil)
 
-foldMap :: GroupChangeStruct b => (a -> b) -> List a -> b
+foldMap :: AbGroupChangeStruct b => (a -> b) -> List a -> b
 foldMap f = fold . map f
 \end{code}
 In first-order DSLs such as SQL, such functionality must typically be added through separate
@@ -133,9 +135,8 @@ the resulting definitions using differentiation.
 Function |filter| uses conditionals, which we haven't discussed yet; we show how
 to incrementalize |filter| successfully in \cref{sec:chs-sums}.\pg{Do it!}
 
-\section{Incrementalizing aggregation}
+\subsection{Incrementalizing aggregation}
 \label{sec:incr-fold}
-\pg{We are using abelian groups!}
 Let's now discuss how to incrementalize |fold|.
 We consider an oversimplified change structure that
 allows only two sorts of changes: prepending an element to a list or removing
@@ -172,25 +173,28 @@ Similarly, |dfold (Cons x xs) Remove| should instead ``subtract'' |x| from the r
 =      fold xs `ominus` fold (Cons x xs)
 =      fold xs `ominus` (x `mappend` fold xs)
 \end{code}
+As discussed, using |`ominus`| is fast enough on, say, integers or other
+primitive types, but not in general.
 To avoid using |`ominus`| we must rewrite its invocation to an equivalent expression.
-In this scenario we can use group changes, and restrict |fold| to
+In this scenario we can use group changes for abelian groups, and restrict |fold| to
 situations where such changes are available.
 
 \begin{code}
-dfold :: GroupChangeStruct b => List b -> Dt (List b) -> Dt b
+dfold :: AbGroupChangeStruct b => List b -> Dt (List b) -> Dt b
 dfold xs (Prepend x) = inject x
 dfold (Cons x xs) Remove = inject (invert x)
 dfold Nil Remove = error "Invalid change"
 \end{code}
 
-To support group changes we define the following type classes to model groups
-and group change structures. |GroupChangeStruct| only requires that group
+To support group changes we define the following type classes to model abelian groups
+and group change structures, omitting APIs for more general groups.
+|AbGroupChangeStruct| only requires that group
 elements of type |g| can be converted into changes (type |Dt^g|), allowing
 change type |Dt^g| to contain other sorts of changes.
 \begin{code}
-class Monoid g => Group g where
+class Monoid g => AbGroup g where
   invert :: g -> g
-class (Group a, ChangeStruct a) => GroupChangeStruct a where
+class (AbGroup a, ChangeStruct a) => AbGroupChangeStruct a where
   -- Inject group elements into changes. Laws:
   -- |a `oplus` inject b = a `mappend` b|
   inject :: a -> Dt a
@@ -203,8 +207,19 @@ different group, as usual, one defines a different but isomorphic type via the
 Haskell |newtype| construct. As a downside, derivatives |newtype| constructors
 must convert changes across different representations.
 
-\pg{Add removals!}
+For folds producing integers or other types of small bounded size, one can
+support more general folds. More in general, one can design tree-shaped folds
+for associative operations \citep[Sec. 9.1]{Acar05}, where intermediate results form a balanced tree. For
+instance, summing integers from 1 to 8 in this way means evaluating
+|((1 + 2) + (3 + 4)) + ((5 + 6) + (7 + 8))| and remembering intermediate
+results, as discussed in \cref{part:caching}.
 
+Rewriting |`ominus`| away can also be possible for other specialized folds,
+though sometimes they can be incrementalized directly; for
+instance |map| can be written as a fold. Incrementalizing |map| for the
+insertion of |x| into |xs| requires simplifying |map f (Cons x xs) `ominus` map
+f xs|. To avoid |`ominus`| we can rewrite this change statically to |Insert (f
+x)|; indeed, we can incrementalize |map| also for more realistic change structures.
 % % Aggregation
 % \pg{To move}
 % To study aggregation we consider |foldNat|.
@@ -219,11 +234,13 @@ must convert changes across different representations.
 
 % \pg{Ask question: can we define such change structures in terms of simpler ones?}
 
-\section{Simple changes on lists}
+\subsection{Modifying list elements}
 \label{sec:simple-changes-list-map}
-In this section, we consider a basic change structure on lists and the
-derivative of |map|, and we sketch informally its correctness. We prove it
-formally in \cref{ex:syn-changes-map}.
+In this section, we consider another change structure on lists that allows
+expressing changes to individual elements.
+Then, we present |dmap|, derivative of |map| for this change structure. Finally,
+we sketch informally the correctness of |dmap|, which we prove formally in
+\cref{ex:syn-changes-map}.
 
 We can then represent changes to a list (|List a|) as a list of changes (|List
 (Dt^a)|), one for each element.
