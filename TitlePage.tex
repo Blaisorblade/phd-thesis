@@ -1,26 +1,24 @@
-%\pagestyle{empty}
 \begin{titlepage}
-{
-
-\makeatletter
+% Declarations, in scope until \end{titlepage}.
+\makeatletter % for \@title and \@author
+\setlength{\parskip}{0pt}
 \centering
+\large
+%
 % https://tex.stackexchange.com/a/241121/1340
 \linespread{1.5}\selectfont
-\parskip 0pt
 %\sffamily
 
 \vspace*{-2cm}
 
 {\huge \bfseries
-  \@title\par}
+  \@title%
+  \par% Must be in scope of the \huge declaration to get correct spacing.
+}
 
 \vspace{4cm}
-\large
 
 {\bfseries Dissertation}\\
-%
-%\vspace{0.5cm}
-%
 der Mathematisch- und Naturwissenschaftlichen Fakult\"at\\
 der Eberhard Karls Universit\"at T\"ubingen\\
 zur Erlangung des Grades eines\\
@@ -39,9 +37,6 @@ T\"ubingen\\
 2017
 
 \vfill
-\makeatother
-}
 \end{titlepage}
 % TODO: insert here page 2 with the needed thesis boilerplate.
 %\clearpage
-% \pagestyle{myheadings}
