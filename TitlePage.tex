@@ -1,8 +1,11 @@
+%\pagestyle{empty}
+\begin{titlepage}
 {
 
 \makeatletter
 \centering
-\renewcommand{\baselinestretch}{1.5}\selectfont
+% https://tex.stackexchange.com/a/241121/1340
+\linespread{1.5}\selectfont
 \parskip 0pt
 %\sffamily
 
@@ -12,29 +15,33 @@
   \@title\par}
 
 \vspace{4cm}
+\large
 
-{\large \bfseries Dissertation}\\
+{\bfseries Dissertation}\\
 %
 %\vspace{0.5cm}
 %
-{\large der Mathematisch- und Naturwissenschaftlichen Fakult\"at\\
+der Mathematisch- und Naturwissenschaftlichen Fakult\"at\\
 der Eberhard Karls Universit\"at T\"ubingen\\
 zur Erlangung des Grades eines\\
 Doktors der Naturwissenschaften\\
-(Dr. rer. nat.)%
-\par}
+(Dr. rer. nat.)
 
 \vspace{4 cm}
 
-{\large vorgelegt von \\
+vorgelegt von \\
 \@author \\
-aus Catania (Italien)\par}
+aus Catania (Italien)
 
 \vspace{2 cm}
 
-{\large T\"ubingen\\
-  2017\par}
+T\"ubingen\\
+2017
 
 \vfill
 \makeatother
 }
+\end{titlepage}
+% TODO: insert here page 2 with the needed thesis boilerplate.
+%\clearpage
+% \pagestyle{myheadings}
