@@ -833,15 +833,22 @@ does not always hint at the validity proofs embedded.
 
 \pg{explain this type system elsewhere}
 \citet{CaiEtAl2014ILC} solve this problem for metalevel contexts by typing them
-with dependent types. However, it is not clear such a typesystem can be
-expressive enough. Consider a change |dv1| from |v1| to |v1 `oplus` dv1|, a
+with dependent types, but as discussed the overall proof is more awkward.
+Alternatively, it appears that the use of dependent types in
+\cref{ch:diff-parametricity-system-f} also ensures that change equivalence is a
+congruence (though at present this is still a conjecture), without overly
+complicating correctness proofs.
+However, it is not clear whether such a type system can be
+expressive enough without requiring additional coercions.
+Consider a change |dv1| from |v1| to |v1 `oplus` dv1|, a
 value |v2| which is known to be (propositionally) equal to |v1 `oplus` dv1|, and
 a change |dv2| from |v2| to |v3|. Then, term |dv1 `ocompose` dv2| is not type
 correct (for instance in Agda): the typechecker will complain that |dv1| has
 destination |v1 `oplus` dv1| while |dv2| has source |v2|. When working in Agda,
 to solve this problem we can explicitly coerce terms through propositional
 equalities, and can use Agda to prove such equalities in the first place.
-Formalizing an object language including such facilities is not trivial.
+We leave the design of a sufficiently expressive object language where change
+equivalence is a congruence for future work.
 
 \subsection{Sketching an alternative syntax}
 If we exclude composition, we can sketch an alternative syntax
