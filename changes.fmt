@@ -12,6 +12,7 @@
 %format `mappend` = " \diamond "
 % Complexity notation:
 
+%format @ = "\mathrel{@}"
 %format complTheta(n) = "\Theta(" n ")"
 %format complSmallO(n) = "o(" n ")"
 %format complBigO(n) = "O(" n ")"

@@ -29,10 +29,10 @@ others on paper. In all cases we prove the fundamental property for
 validity; we detail later which corollaries we prove in which
 case.
 The proof for untyped $\lambda$-calculus is the most
-interesting, but the others can serve as stepping stones. We are
-currently working (together with Yann Régis-Gianas) on
-mechanizing the proof for untyped $\lambda$-calculus in
-Coq.\footnote{Mechanizing the proof for untyped
+interesting, but the others can serve as stepping stones.
+Yann Régis-Gianas, in collaboration with me, recently mechanized a similar proof
+for untyped $\lambda$-calculus in Coq, which appears in
+\cref{sec:formalization}.\footnote{Mechanizing the proof for untyped
   $\lambda$-calculus is harder for purely technical reasons:
   mechanizing well-founded induction in Agda is harder than
   mechanizing structural induction.}
@@ -1024,12 +1024,12 @@ replacement change:
 
 Evaluation rule \textsc{E-BangApp} requires defining |`oplus`| on
 syntactic values. We define it \emph{intensionally}:
+%{
+%format matchGamma = "\mathsf{match\Gamma}"
 \begin{definition}[Update operator |`oplus`|]
-  %{
-  %format matchGamma = "\mathsf{match\Gamma}"
   Operator |`oplus`| is defined on values by the following
-  equations:
-
+  equations, where |matchGamma rho drho| (whose definition we omit) tests if
+  |rho| and |drho| are environments for the same typing context |Gamma|.
   \begin{code}
     v1 `oplus` ! v2 = v2
     rho[\x -> t] `oplus` drho[\x dx -> dt] =
@@ -1047,16 +1047,14 @@ syntactic values. We define it \emph{intensionally}:
     -- changes, so we can just return |v1|:
     v1 `oplus` dv = v1
   \end{code}
-  We omit the definition of |matchGamma rho drho|.
-
-  We also define |`oplus`| on environments for matching contexts
+  We define |`oplus`| on environments for matching contexts
   to combine values and changes pointwise:
   \begin{code}
     (x1 := v1, ..., xn := vn) `oplus` (dx1 := dv1, ..., dxn := dvn) =
         (x1 := v1 `oplus` dv1, ..., xn := vn `oplus` dvn)
-  \end{code}
-  %}
+  \end{code}%
 \end{definition}
+%}
 The definition of update for closures can only update them in few cases, but
 this is not a problem: as we show in a moment, we restrict validity to the
 closure changes for which it is correct.
@@ -1071,27 +1069,27 @@ equations for |valset|; we omit details):
 where we write |//= v : tau| to state that value |v| has type
 |tau|; we omit the unsurprising rules for this judgement.
 
-Finally, to restrict closure changes themselves, we modify the
-definition for |valset (sigma -> tau)| by requiring that related elements
-satisfy predicate |matchImpl vf1 dvf vf2|, defined by pattern matching syntax
-(informally) via the following equations:
-
+To restrict valid closure changes,
+|valset (sigma -> tau)| now requires that related elements
+satisfy predicate |matchImpl vf1 dvf vf2|, defined
+by the following equations:
 %format matchImpl = "\mathsf{matchImpl}"
 \begin{code}
   matchImpl
     (rho1[\x -> t])
     (rho1 `stoup` drho[\x dx -> derive t])
-    ((rho1 `oplus` drho)[\x -> t]) =
+    ((rho1 `oplus` drho)[\x -> t]) = True
   matchImpl _ _ _ = False
 \end{code}
-Via |matchImpl| we require that the base
-closure environment |rho1| and the base environment of the
-closure change coincide, that |rho2 = rho1 `oplus` drho|,
+In other words, validity |(k, vf1, dvf, vf2) `elem` valset (sigma -> tau)| now requires
+via |matchImpl| that the base closure environment |rho1| and the base environment of the
+closure change |dvf| coincide, that |rho2 = rho1 `oplus` drho|,
 and that |vf1| and |vf2| have |\x -> t| as body while |dvf| has body |\x dx ->
 derive t|.
 
-As an example for \cref{eq:val-replacement}, we also include explicitly
-replacement closures in the definition of |valset (sigma -> tau)|.
+To define intensional validity for function changes, |valset (sigma -> tau)|
+must use |matchImpl| and explicitly support replacement closures to satisfy
+\cref{eq:val-replacement}. Its definition is as follows:
 \begin{align*}
   |valset (sigma -> tau)| ={}
                   |^&^ |\{ \, |(k, vf1, dvf, vf2) `such` ^^^
@@ -1103,15 +1101,15 @@ replacement closures in the definition of |valset (sigma -> tau)|.
                       ^&^ `wandnosp` ^^^
                       ^&^ forall ((j, v1, dv, v2) `elem` (valset sigma)). ^^ j < k => ^^^
                       ^&^ qua ((j, vapply vf1 v1, dvapply dvf v1 dv, vapply vf2 v2) `elem` (compset tau))| \, \}| ^^ `union` ^^^
-                  ^&^| \{ \, | (k, f1, !f2, f2) `such` ^^ //= f1 : sigma -> tau ^^ `wand` ^^ //= f2 : sigma -> tau | \, \}
+                  ^&^| \{ \, | (k, vf1, !vf2, vf2) `such` ^^ //= vf1 : sigma -> tau ^^ `wand` ^^ //= vf2 : sigma -> tau | \, \}
 \end{align*}
+Definitions of |valset| for other types can be similarly updated to support
+replacement changes and satisfy \cref{eq:val-replacement}.
 
 Using these updated definitions, we can again prove the
 fundamental property, with the same statement as
-\cref{thm:fund-lemma-derive-correct-types-si}, and we can also
-prove that |`oplus`| agrees
-with validity.
-
+\cref{thm:fund-lemma-derive-correct-types-si}. Furthermore, we now
+prove that |`oplus`| agrees with validity.
 \begin{theorem}[Fundamental property: correctness of |derive|]
   \label{thm:fund-lemma-derive-correct-types-si-intensional}
   For every well-typed term |Gamma /- t : tau| we have that
@@ -1122,9 +1120,9 @@ with validity.
 If |(k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
 \end{theorem}
 \begin{proof}
-  By induction on types. For type |Nat| validity coincides with the
-  thesis. For type |pair taua taub|, we must simply apply the
-  induction hypothesis on pair components.
+  By induction on types. For type |Nat|, validity coincides with the
+  thesis. For type |pair taua taub|, we must apply the
+  induction hypothesis on both pair components.
 
   For closures, validity requires that |v1 = rho1[\x -> t], dv =
   drho[\x dx -> derive t], v2 = rho2[\x -> t]| with |rho1 `oplus`
@@ -1141,11 +1139,13 @@ If |(k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
   \end{multline*}
 \end{proof}
 
-We can also define |nilc| intensionally on values and
-environments, and prove it correct. We omit the standard
-definition of |nil| on environments.
-For closures, we recurse on the environment.
+We can also define |nilc| intensionally,as a metafunction on values and
+environments, and prove it correct.
+For closures, we differentiate the body and recurse on the environment. The
+definition extends from values to environments variable-wise, so we omit the
+standard formal definition.
 \begin{definition}[Nil changes |nilc|]
+  \label{def:nil-change-operational}
   Nil changes on values are defined as follows:
 \begin{code}
   nil (rho[\x -> t]) = rho `stoup` (nil rho)[\x dx -> derive t]
@@ -1163,6 +1163,9 @@ For closures, we recurse on the environment.
   (\cref{thm:fund-lemma-derive-correct-types-si-intensional}) to
   |derive t|.
 \end{proof}
+Because |nilc| transforms closure bodies, we cannot define it internally to the
+language. This problem can be avoided by defunctionalizing functions and
+function changes, as we do in \cref{ch:defunc-fun-changes}.
 
 We conclude with the overall correctness theorem, analogous to
 \cref{thm:derive-correct-oplus}.
@@ -1233,9 +1236,7 @@ Otherwise, the proof proceeds just as earlier in
 downward-closed, just like in \cref{lem:validity-typed-downward-closed}
 (we omit the new statement), and we prove the new fundamental
 lemma by induction on the structure of terms (not of typing derivations).
-
 %format `subset` = "\subseteq"
-
 \begin{theorem}[Fundamental property: correctness of |derive|]
   \label{thm:fund-lemma-derive-correct-untyped-si}
   If |FV(t) `subset` Gamma| then we have that |fromtosynuntyped
@@ -1290,26 +1291,28 @@ We replace closures with recursive closures in the definition of values:
 \end{code}
 We also modify the semantics for abstraction and application. Rules
 \textsc{E-Val} and \textsc{E-App} are unchanged: it is sufficient to adapt the
-definitions of |evalVal| and |vapply|.
+definitions of |evalVal| and |vapply|, so that evaluation of a function value
+|vf| has access to |vf| in the environment.
 \begin{code}
 evalVal (rec f x -> t) rho     = rho[rec f x -> t]
 
-vapply vf va =
-  case vf of rho'[rec f x -> t] ->
-    envpair ((rho', f := vf, x := va)) t
+vapply (vf @ (rho'[rec f x -> t])) va =
+  envpair ((rho', f := vf, x := va)) t
 \end{code}
+Like in Haskell, we write |x @ p| in equations to bind an argument as
+metavariable |x| and match it against pattern |p|.
 
-We also modify the language of changes and some of its evaluation rules.
+Similarly, we modify the language of changes, the definition of differentiation,
+and evaluation metafunctions |devalVal| and |dvapply|.
 Since the derivative of a recursive function |f = rec f x -> t| can call the base
 function, we remember the original function body |t| in the
 derivative, together with its derivative |derive t|. This should not be
 surprising: in \cref{sec:general-recursion}, where recursive functions are
 defined using |letrec|, a recursive function |f| is in scope in the body of its
-derivative |df| Here we use a different syntax, but still ensure that |f| is in
+derivative |df|. Here we use a different syntax, but still ensure that |f| is in
 scope in the body of derivative |df|.
 The definitions are otherwise unsurprising, if long.
 
-{
 \begin{code}
 dw ::= drec f df x dx -> t `stoup` dt | ...
 dv ::= rho `stoup` drho[drec f df x dx -> t `stoup` dt] | ...
@@ -1319,14 +1322,10 @@ derive (rec f x -> t) = drec f df x dx -> t `stoup` derive t
 devalVal (drec f df x dx -> dt) rho drho =
   rho `stoup` drho[drec f df x dx -> t `stoup` dt]
 
-dvapply dvf va dva =
-  case dvf of
-    rho' `stoup` drho' [rec f df x dx -> dt] ->
-      let vf = rho'[rec f x -> t]
-      in
-        denvpair ((rho', f := vf , x := va)) ((drho' , df := dvf , dx := dva)) dt
+dvapply (dvf @ (rho' `stoup` drho' [rec f df x dx -> dt])) va dva =
+  let  vf = rho'[rec f x -> t]
+  in   denvpair ((rho', f := vf , x := va)) ((drho' , df := dvf , dx := dva)) dt
 \end{code}
-
 \begin{typing}
   \Rule[T-DRec]{
     |Gamma , f : sigma -> tau, x : sigma /- t : tau|\\
@@ -1334,25 +1333,19 @@ dvapply dvf va dva =
   }
   {|Gamma /-- drec f df x dx -> t `stoup` dt : sigma -> tau|}
 \end{typing}
-}
 
-We must also update the logical relations to use the new
-definition of application between values. We omit details.
-
+We can adapt the proof of the fundamental property to the use of recursive functions.
 \begin{theorem}[Fundamental property: correctness of |derive|]
   \label{thm:fund-lemma-derive-correct-types-si-intensional-rec}
   For every well-typed term |Gamma /- t : tau| we have that
   |fromtosyn Gamma tau t (derive t) t|.
 \end{theorem}
 \begin{proof}[Proof sketch]
-  Essentially as before.
-
-  Going through the proof will reveal one interesting difference:
+  Mostly as before, modulo one interesting difference:
   To prove the fundamental property for recursive
   functions at step-count |k|, this time we must use the
   fundamental property inductively on the same term, but at
   step-count |j < k|.
-
   This happens because to evaluate |dw = derive(rec f x -> t)| we
   evaluate |derive t| with the value |dv| for |dw| in the
   environment: to show this invocation is valid, we must show |dw|
@@ -1423,10 +1416,8 @@ Gamma e1 (de1 `ocompose` de2) e3| means the absurd
 
 \paragraph{A possible fix}
 Does transitivity hold if |e2| terminates?
-we cannot conclude anything from
-|(k, e1, de1, e2) `elem` compset tau `wand` (k, e2, de2, e3)
-`elem` compset tau|.
-
+If |(k, e1, de1, e2) `elem` compset tau `wand` (k, e2, de2, e3)
+`elem` compset tau|, we still cannot conclude anything.
 But like in \citet{Ahmed2006stepindexed}, if |e2| amd |e3| are
 related at all step counts, that is, if |(k, e1, de1, e2) `elem`
 compset tau `wand` (forall n. (n, e2, de2, e3) `elem` compset
@@ -1455,7 +1446,25 @@ general strategy and the first partial proofs for untyped $\lambda$-calculi.
 After we both struggled for a while to set up step-indexing correctly enough for a
 full proof, I first managed to give the definitions in this chapter and
 complete the proofs here described. Régis-Gianas then mechanized a variant of
-this proof in Coq~\citet{Giarrusso2018Static}.
+our proof for untyped $\lambda$-calculus in Coq~\citep{Giarrusso2018Static}.
+That proof takes a few different choices, and unfortunately strictly speaking neither proof
+subsumes the other. (1) We also give a non-step-indexed syntactic proof for
+simply-typed $\lambda$-calculus, together with proofs defining validity extensionally.
+(2) To support remembering intermediate
+results by conversion to cache-transfer-style (CTS),
+Régis-Gianas' proof uses a lambda-lifted A'NF syntax instead of plain ANF.
+(3) Régis-Gianas' formalization adds to change values a single token |nilc|,
+which is a valid nil change for all valid values. Hence, if we know a change is
+nil, we can erase it. As a downside, evaluating |df a da| when |df| is |nilc|
+requires looking up |f|.
+In our presentation, instead, if |f| and |g| are different function values, they
+have different nil changes. Such nil changes carry information, so they can be
+evaluated directly, but they cannot be erased. Techniques in
+\cref{ch:defunc-fun-changes} enable erasing and reconstructing a nil change |df|
+for function value |f| as long as the value of |f| is available.
+% To
+% By making lambda syntax
+% because of different choices in formalizing the language or
 
 \section{Conclusion}
 In this chapter we have shown how to construct novel models for
