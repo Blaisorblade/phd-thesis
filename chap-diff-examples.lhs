@@ -85,7 +85,7 @@ data List a = Nil | Cons a (List a)
 
 We also consider as primitive operation a standard mapping function |map|.
 We also support two restricted forms of aggregation:
-(a) folding over a group via
+(a) folding over an abelian group via
 |fold|, similar to how one usually folds over a monoid;\footnote{\url{https://hackage.haskell.org/package/base-4.9.1.0/docs/Data-Foldable.html}.}
 (b) list concatenation via |concat|. We will not discuss how to differentiate
 |concat|, as we reuse existing solutions by \citet{Firsov2016purely}.
@@ -97,7 +97,7 @@ map :: (a -> b) -> List a -> List b
 map f Nil = Nil
 map f (Cons x xs) = Cons (f x) (map f xs)
 
-fold :: AbGroupChangeStruct b => List b -> b
+fold :: AbelianGroupChangeStruct b => List b -> b
 fold Nil = mempty
 fold (Cons x xs) = x `mappend` fold xs -- Where |`mappend`| is infix for |mappend|.
 
@@ -124,7 +124,7 @@ concatMap f = concat . map f
 filter :: (a -> Bool) -> List a -> List a
 filter p = concatMap (\x -> if p x then singleton x else Nil)
 
-foldMap :: AbGroupChangeStruct b => (a -> b) -> List a -> b
+foldMap :: AbelianGroupChangeStruct b => (a -> b) -> List a -> b
 foldMap f = fold . map f
 \end{code}
 In first-order DSLs such as SQL, such functionality must typically be added through separate
@@ -180,7 +180,7 @@ In this scenario we can use group changes for abelian groups, and restrict |fold
 situations where such changes are available.
 
 \begin{code}
-dfold :: AbGroupChangeStruct b => List b -> Dt (List b) -> Dt b
+dfold :: AbelianGroupChangeStruct b => List b -> Dt (List b) -> Dt b
 dfold xs (Prepend x) = inject x
 dfold (Cons x xs) Remove = inject (invert x)
 dfold Nil Remove = error "Invalid change"
@@ -188,20 +188,21 @@ dfold Nil Remove = error "Invalid change"
 
 To support group changes we define the following type classes to model abelian groups
 and group change structures, omitting APIs for more general groups.
-|AbGroupChangeStruct| only requires that group
+|AbelianGroupChangeStruct| only requires that group
 elements of type |g| can be converted into changes (type |Dt^g|), allowing
 change type |Dt^g| to contain other sorts of changes.
 \begin{code}
-class Monoid g => AbGroup g where
+class Monoid g => AbelianGroup g where
   invert :: g -> g
-class (AbGroup a, ChangeStruct a) => AbGroupChangeStruct a where
-  -- Inject group elements into changes. Laws:
-  -- |a `oplus` inject b = a `mappend` b|
+class (  AbelianGroup a, ChangeStruct a) =>
+         AbelianGroupChangeStruct a where
+-- Inject group elements into changes. Law:
+-- |a `oplus` inject b = a `mappend` b|
   inject :: a -> Dt a
 \end{code}
 
 \Cref{sec:applying} discusses how
-we can use so without assuming a single group is defined on elements, but here we
+we can use group changes without assuming a single group is defined on elements, but here we
 simply select the canonical group as chosen by typeclass resolution. To use a
 different group, as usual, one defines a different but isomorphic type via the
 Haskell |newtype| construct. As a downside, derivatives |newtype| constructors
@@ -344,7 +345,8 @@ for all functions that can be expressed in terms of the primitives.
 Conceptually, a change for type |Sequence a| is a sequence of atomic changes.
 Each atomic change inserts one element at a given position, or removes one
 element, or changes an element at one
-position.\footnote{\citet{Firsov2016purely} and our implementation allow.}
+position.\footnote{\citet{Firsov2016purely} and our implementation allow changes
+  to multiple elements.}
 % data AtomicChange a
 %   =  Insert Int a
 %   |  Delete Int
