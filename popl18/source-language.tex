@@ -112,21 +112,14 @@ renamed into~$\ty$. With no loss of generality, we assume that all
 bound term variables are distinct in these environments.
 
 We define
-the \textit{original environment}~$\oldenv\iectx$ of a change
-environment~$\iectx$ by induction over~$\iectx$:
+the \textit{original environment}~$\oldenv\iectx$
+and the \textit{new environment}~$\newenv\iectx$
+of a change environment~$\iectx$ by induction over~$\iectx$:
 \[
 \begin{array}{rcl}
-\oldenv\sectxempty & = & \sectxempty \\
+\env\sectxempty & = & \sectxempty \qquad $i = 1, 2$\\
 \oldenv{\iectxcons\iectx{\tx = \sclosedvalue; \tdx = \icloseddvalue}}
-& = & \iectxcons{\oldenv{\iectx}}{\tx = \sclosedvalue}
-\end{array}
-\]
-
-The \textit{new environment}~$\newenv\iectx$ of a change
-environment~$\iectx$ is defined by induction over~$\iectx$:
-\[
-\begin{array}{rcl}
-\newenv\sectxempty & = & \sectxempty \\
+& = & \iectxcons{\oldenv{\iectx}}{\tx = \sclosedvalue} \\
 \newenv{\iectxcons\iectx{\tx = \sclosedvalue; \tdx = \icloseddvalue}}
 & = & \iectxcons{\newenv{\iectx}}{\tx = \sclosedvalue \oplus \icloseddvalue}
 \end{array}

@@ -36,16 +36,17 @@ $\derive\tupdcache\sterm$ cannot be evaluated in environment $\compile\iectx$.
 A CTS derivative can only evaluate against environments containing cache values
 from the base computation, but no cache values appear in $\compile\iectx$!
 
-As a fix we enrich~$\compile\iectx$ with the values of a cache~$\tcache$, using
-the judgment defined in Figure~\ref{fig:envwithcache}.
+%\pg{This consumes and produces change environments!}
+As a fix, we enrich~$\compile\iectx$ with the values of a cache~$\tcache$, using
+the pair of judgments $\envwithcache\tectx\tcache{\tectx'}$ (for $i = 1, 2$) defined in \cref{fig:envwithcache}.
 Judgment~$\oldenvwithcache\tectx\tcache{\tectx'}$ is read ``The target
-change environment~$\tectx'$ extends~$\tectx$ with the values of
-cache~$\tcache$.'' We introduce a similar
-judgment~$\newenvwithcache\tectx\tcache{\tectx'}$ to extend a change
-environment~$\tectx$ with the updated values of the cache~$\tcache$.
-The rules of this judgment are omitted for lack of space but they
-can be obtained by replacing $\oldenv\tectx$ with $\newenv\tectx$
-in the rule for cache computation in Figure~\ref{fig:envwithcache}.
+change environment~$\tectx'$ extends~$\tectx$ with the original values of
+cache~$\tcache$.''
+Analogously, judgment~$\newenvwithcache\tectx\tcache{\tectx'}$ is read ``The
+target change environment~$\tectx'$ extends~$\tectx$ with the updated values of
+cache~$\tcache$.''
+Since $\tcache$ is essentially a list of variables containing no values, cache
+values in $\tectx'$ must be computed from $\env\tectx$.
 
 \begin{lemma}[Evaluation commutes with CTS differentiation]
   Let $\tcache$ be such that
@@ -71,27 +72,28 @@ term.
 
   \begin{mathpar}
     \infer{}{
-      \oldenvwithcache{\tectx}{\temptycache}{\tectx}
+      \envwithcache{\tectx}{\temptycache}{\tectx}
     }
 
     \infer{
-      \oldenvwithcache{\tectx}{\tcache}{\tectx'}
+      \envwithcache{\tectx}{\tcache}{\tectx'}
     }{
-      \oldenvwithcache{\tectx}{\tcachecons\tcache\tx}{\tectx'}
+      \envwithcache{\tectx}{\tcachecons\tcache\tx}{\tectx'}
     }
 
     \infer{
-      \oldenvwithcache{\tectx}{\tcache}{\tectx'}
+      \envwithcache{\tectx}{\tcache}{\tectx'}
       \\
-      \sneval{\oldenv\tectx}{\tlet{\ty, \tcacheid\ty\tf\tx = \tapp\tf\tx}{(\ty, \tcacheid\ty\tf\tx)}}{(\_, \tcachedclosedvalues)}
+      \sneval{\env\tectx}{\tlet{\ty, \tcacheid\ty\tf\tx = \tapp\tf\tx}{(\ty, \tcacheid\ty\tf\tx)}}{(\_, \tcachedclosedvalues)}
     }{
-      \oldenvwithcache{\tectx}
+      \envwithcache{\tectx}
       {\tcachecons\tcache{\tcacheid\ty\tf\tx}}
       {\tectxcons{\tectx'}{\tcacheid\ty\tf\tx = \tcachedclosedvalues}}
     }
 \end{mathpar}
 
-\caption{Extension of an environment with cache values $\oldenvwithcache{\tectx}{\tcache}{\tectx'}$}
+\caption{Extension of an environment with cache values
+  $\envwithcache{\tectx}{\tcache}{\tectx'}$ (for $i = 1, 2$).}
 \label{fig:envwithcache}
 \end{figure}
 

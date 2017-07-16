@@ -79,6 +79,7 @@
 \newcommand\sectxlookup[2]{#1(#2)}
 \newcommand\newenv[1]{\lfloor {#1} \rfloor_2}
 \newcommand\oldenv[1]{\lfloor {#1} \rfloor_1}
+\newcommand\env[1]{\lfloor {#1} \rfloor_{i}}
 
 % Target language
 %%%%%%%%%%%%%%%%%
@@ -212,6 +213,7 @@
 \newcommand\vvcreltrm[4]{#4 \VALIDFULL_{#2} #3 \hookrightarrow #1}
 \newcommand\vvcrelterm[7]{\vvcreltrm{(#3 \vdash #7)}{#4}{(#1 \vdash #5)}{(#2 \vdash #6)}}
 
+\newcommand\envwithcache[3]{#1 \Uparrow_{i} #2 \leadsto #3}
 \newcommand\oldenvwithcache[3]{#1 \Uparrow_1 #2 \leadsto #3}
 \newcommand\newenvwithcache[3]{#1 \Uparrow_2 #2 \leadsto #3}
 
