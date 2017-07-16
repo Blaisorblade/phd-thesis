@@ -213,9 +213,10 @@
 \newcommand\vvcreltrm[4]{#4 \VALIDFULL_{#2} #3 \hookrightarrow #1}
 \newcommand\vvcrelterm[7]{\vvcreltrm{(#3 \vdash #7)}{#4}{(#1 \vdash #5)}{(#2 \vdash #6)}}
 
-\newcommand\envwithcache[3]{#1 \Uparrow_{i} #2 \leadsto #3}
-\newcommand\oldenvwithcache[3]{#1 \Uparrow_1 #2 \leadsto #3}
-\newcommand\newenvwithcache[3]{#1 \Uparrow_2 #2 \leadsto #3}
+\newcommand\rawenvwithcache[4]{#1 \Uparrow_{#4} #2 \leadsto #3}
+\newcommand\envwithcache[3]{\rawenvwithcache{#1}{#2}{#3}{i}}
+\newcommand\oldenvwithcache[3]{\rawenvwithcache{#1}{#2}{#3}{1}}
+\newcommand\newenvwithcache[3]{\rawenvwithcache{#1}{#2}{#3}{2}}
 
 \newcommand\partialectxmove[2]{#1 \,\oplus\, #2}
 
