@@ -27,9 +27,13 @@
 \togglefalse{full}
 %\toggletrue{full}
 
+\newtoggle{poplAsChapter}
+\togglefalse{poplAsChapter} % For dev.
+
 \iftoggle{full}{
 \includecomment{fullCompile}
 \excludecomment{partCompile}
+\toggletrue{poplAsChapter}
 }{% else
 \excludecomment{fullCompile}
 \includecomment{partCompile}
@@ -120,14 +124,14 @@
 \mainmatter
 \include{chap-intro}
 
-\part{Optimizing collection queries by reification}
+\part{Optimizing Collection Queries by Reification}
 \label{part:ch-aosd13}
 
 \include{aosd13/graphs/evalResLos}
 \include{aosd13/paperBody}
 
 
-\part{Incrementalization by static differentiation}
+\part{Incremental λ-Calculus}
 \label{part:incr}
 \include{pldi14/sec-preliminaries}
 \include{chap-intro-incr}
@@ -145,16 +149,21 @@
 \include{pldi14/sec-rw}
 \include{pldi14/sec-concl}
 
-\part{Static differentiation and CTS conversion}
+\part{Incremental λ-Calculus in Cache-Transfer Style}
 \label{part:caching}
-\chapter{POPL}
+
+\iftoggle{poplAsChapter}{
+\include{popl18-sections}
+}{
 \newcommand{\poplPath}[1]{popl18/#1}
+\chapter{Static memoization by CTS conversion}
 \include{popl18/cts-intro}
 \include{popl18/cts-motivation}
 \include{popl18/formalization}
 \include{popl18/cts-case-studies}
 \include{popl18/cts-relwork}
 \include{popl18/cts-conclusion}
+}
 
 \include{defunc}
 \include{new-stuff}
