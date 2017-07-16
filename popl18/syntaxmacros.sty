@@ -77,8 +77,8 @@
 
 % Metafunction
 \newcommand\sectxlookup[2]{#1(#2)}
-\newcommand\newenv[1]{\lceil #1 \rceil}
-\newcommand\oldenv[1]{\lfloor #1 \rfloor}
+\newcommand\newenv[1]{\lfloor {#1} \rfloor_2}
+\newcommand\oldenv[1]{\lfloor {#1} \rfloor_1}
 
 % Target language
 %%%%%%%%%%%%%%%%%
@@ -96,11 +96,15 @@
 \newcommand\tvdef{D_v}
 \newcommand\tdvdef{\mathit{dD}_v}
 \newcommand\tectx{F}
+\newcommand\old[1]{{#1}_1}
+\newcommand\new[1]{{#1}_2}
 \newcommand\tdectx{\mathit{dF}}
 \newcommand\tcache{C}
 \newcommand\tupdcache{\mathit{dC}}
 \newcommand\tchange[2]{#1 \oplus #2}
 \newcommand\tcachedclosedvalues{V_c}
+\newcommand\oldtcachedclosedvalues{V_{c1}}
+\newcommand\newtcachedclosedvalues{V_{c2}}
 \newcommand\tconst{\ell}
 \newcommand\tdconst{d\ell}
 \newcommand\tdnil{\textbf{nil}}
@@ -208,8 +212,8 @@
 \newcommand\vvcreltrm[4]{#4 \VALIDFULL_{#2} #3 \hookrightarrow #1}
 \newcommand\vvcrelterm[7]{\vvcreltrm{(#3 \vdash #7)}{#4}{(#1 \vdash #5)}{(#2 \vdash #6)}}
 
-\newcommand\envwithcache[3]{#1 \uparrow #2 \leadsto #3}
-\newcommand\newenvwithcache[3]{#1 \Uparrow #2 \leadsto #3}
+\newcommand\oldenvwithcache[3]{#1 \Uparrow_1 #2 \leadsto #3}
+\newcommand\newenvwithcache[3]{#1 \Uparrow_2 #2 \leadsto #3}
 
 \newcommand\partialectxmove[2]{#1 \,\oplus\, #2}
 

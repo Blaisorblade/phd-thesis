@@ -38,7 +38,7 @@ from the base computation, but no cache values appear in $\compile\iectx$!
 
 As a fix we enrich~$\compile\iectx$ with the values of a cache~$\tcache$, using
 the judgment defined in Figure~\ref{fig:envwithcache}.
-Judgment~$\envwithcache\tectx\tcache{\tectx'}$ is read ``The target
+Judgment~$\oldenvwithcache\tectx\tcache{\tectx'}$ is read ``The target
 change environment~$\tectx'$ extends~$\tectx$ with the values of
 cache~$\tcache$.'' We introduce a similar
 judgment~$\newenvwithcache\tectx\tcache{\tectx'}$ to extend a change
@@ -53,7 +53,7 @@ in the rule for cache computation in Figure~\ref{fig:envwithcache}.
   For all $\iectx, \sterm$ and $\icloseddvalue$,
   if
   $\seval{\iectx}{\iderive\sterm}{}{\icloseddvalue}$,
-  and $\envwithcache{\compile\iectx}{\tcache}{\tdectx}$,
+  and $\oldenvwithcache{\compile\iectx}{\tcache}{\tdectx}$,
   then
   $\seval{\tdectx}{\derive{\tupdcache}{\sterm}}{}{(\compile\icloseddvalue, \tcachedclosedvalues)}$.
 \end{lemma}
@@ -71,27 +71,27 @@ term.
 
   \begin{mathpar}
     \infer{}{
-      \envwithcache{\tectx}{\temptycache}{\tectx}
+      \oldenvwithcache{\tectx}{\temptycache}{\tectx}
     }
 
     \infer{
-      \envwithcache{\tectx}{\tcache}{\tectx'}
+      \oldenvwithcache{\tectx}{\tcache}{\tectx'}
     }{
-      \envwithcache{\tectx}{\tcachecons\tcache\tx}{\tectx'}
+      \oldenvwithcache{\tectx}{\tcachecons\tcache\tx}{\tectx'}
     }
 
     \infer{
-      \envwithcache{\tectx}{\tcache}{\tectx'}
+      \oldenvwithcache{\tectx}{\tcache}{\tectx'}
       \\
       \sneval{\oldenv\tectx}{\tlet{\ty, \tcacheid\ty\tf\tx = \tapp\tf\tx}{(\ty, \tcacheid\ty\tf\tx)}}{(\_, \tcachedclosedvalues)}
     }{
-      \envwithcache{\tectx}
+      \oldenvwithcache{\tectx}
       {\tcachecons\tcache{\tcacheid\ty\tf\tx}}
       {\tectxcons{\tectx'}{\tcacheid\ty\tf\tx = \tcachedclosedvalues}}
     }
 \end{mathpar}
 
-\caption{Extension of an environment with cache values $\envwithcache{\tectx}{\tcache}{\tectx'}$}
+\caption{Extension of an environment with cache values $\oldenvwithcache{\tectx}{\tcache}{\tectx'}$}
 \label{fig:envwithcache}
 \end{figure}
 
@@ -100,9 +100,9 @@ Finally, we can state soundness of CTS differentiation relative to differentiati
 The theorem says that (a) the CTS derivative $\derive\tcache\sterm$ computes the
 CTS translation $\compile{\icloseddvalue}$ of the
 change computed by the standard derivative $\iderive\sterm$; (b) the updated
-cache $\tcachedclosedvalues'$ produced by
+cache $\newtcachedclosedvalues$ produced by
 the CTS derivative coincides with the cache produced by the CTS-translated base
-term $\tterm$ in the updated environment $\newenv{\tectx'}$.
+term $\tterm$ in the updated environment $\newenv{\new\tectx}$.
 Since we require a correct cache via condition (b), we can use this cache
 to invoke the CTS derivative on further changes, as described
 in~\cref{sec:motivating-example}.
@@ -113,13 +113,13 @@ in~\cref{sec:motivating-example}.
   $(\tcache, \tterm) = \compileterm{\bullet}{\sterm}$.
   For all $\iectx, \sterm$ and $\icloseddvalue$,
   $\seval{\iectx}{\iderive\sterm}{}{\icloseddvalue}$,
-  for $\tectx$ and $\tectx'$ such that
-  $\envwithcache{\compile\iectx}{\tcache}{\tectx}$
-  and $\newenvwithcache{\compile\iectx}{\tcache}{\tectx'}$,
-  $\seval{\oldenv\tectx}{\tterm}{}{(\tclosedvalue, \tcachedclosedvalues)}$ and
-  $\seval{\newenv{\tectx'}}{\tterm}{}{(\tclosedvalue', \tcachedclosedvalues')}$,
+  for $\old\tectx$ and $\new\tectx$ such that
+  $\oldenvwithcache{\compile\iectx}{\tcache}{\old\tectx}$
+  and $\newenvwithcache{\compile\iectx}{\tcache}{\new\tectx}$,
+  $\seval{\oldenv{\old\tectx}}{\tterm}{}{(\old\tclosedvalue, \oldtcachedclosedvalues)}$ and
+  $\seval{\newenv{\new\tectx}}{\tterm}{}{(\new\tclosedvalue, \newtcachedclosedvalues)}$,
   then
   $
-  \seval{\tectx}{\derive\tcache\sterm}{}{(\compile{\icloseddvalue}, \tcachedclosedvalues')}
+  \seval{\old\tectx}{\derive\tcache\sterm}{}{(\compile{\icloseddvalue}, \newtcachedclosedvalues)}
   $.
 \end{theorem}
