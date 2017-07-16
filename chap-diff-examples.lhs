@@ -21,9 +21,10 @@ We also motivate a few extensions to differentiation that we describe later. As
 we'll see in this chapter, we'll need to enable some forms of introspection on
 function changes to manipulate the embedded environments, as we discuss in
 \cref{ch:defunc-fun-changes}. We will also need ways to remember intermediate
-results, which we will discuss in \cref{part:caching}.
+results, which we will discuss in \cref{part:caching} (in particular
+\cref{sec:cts-motivation}).
 
-\section{Change structures as typeclass instances}
+\section{Change structures as type-class instances}
 We encode change structure
 as a \emph{type class} named |ChangeStruct|. An instance |ChangeStruct t|
 defines a change type |Dt^t| as an associated type and operations |`oplus`|,
@@ -106,10 +107,10 @@ concat = ...
 \end{code}
 While usually |fold| requires only an instance |Monoid b| of type class |Monoid| to aggregate
 collection elements, our variant of |fold| requires an instance of type class |GroupChangeStruct|, a
-subclass of |Monoid|. This typeclass is not used by |fold| itself, but only by
+subclass of |Monoid|. This type class is not used by |fold| itself, but only by
 its derivative, as we explain in \cref{sec:incr-fold}; nevertheless,
 we add this stronger constraint to |fold| itself because we forbid derivatives
-with stronger typeclass constraints. With this approach, all clients of |fold|
+with stronger type-class constraints. With this approach, all clients of |fold|
 can be incrementalized using differentiation.
 
 Using those primitives, one can define further higher-order functions on
@@ -203,7 +204,7 @@ class (  AbelianGroup a, ChangeStruct a) =>
 
 \Cref{sec:applying} discusses how
 we can use group changes without assuming a single group is defined on elements, but here we
-simply select the canonical group as chosen by typeclass resolution. To use a
+simply select the canonical group as chosen by type-class resolution. To use a
 different group, as usual, one defines a different but isomorphic type via the
 Haskell |newtype| construct. As a downside, derivatives |newtype| constructors
 must convert changes across different representations.
@@ -215,85 +216,90 @@ insertion of |x| into |xs| requires simplifying |map f (Cons x xs) `ominus` map
 f xs|. To avoid |`ominus`| we can rewrite this change statically to |Insert (f
 x)|; indeed, we can incrementalize |map| also for more realistic change structures.
 
-% \paragraph{Associative tree folds}
-% Other usages of fold over sequences produce result type of small bounded size
-% (such as integers). In this scenario, one can incrementalize the given fold
-% efficiently using |`ominus`| instead of relying on group operations.
-% For such scenarios, one can design a primitive |foldMonoid| for
-% \emph{associative tree folds}, that is, a function that folds
-% over the input sequence using a \emph{monoid} (that is, an associative operation
-% with a unit). For efficient incrementalization, |foldMonoid|'s intermediate
-% results should form a \emph{balanced} tree and
-% updating this tree should take \emph{logarithmic} time: one approach to ensure
-% this is to represent the input sequence itself using a balanced tree, such as a
-% finger tree~\citep{hinze2006finger}.
-%
-% Various algorithms store intermediate results of folding
-% inside an input balanced tree, as described by \citet[Ch.~14]{Cormen2001} or by
-% \citet{hinze2006finger}. But intermediate results can also be stored outside the
-% input tree, as is commonly done using self-adjusting
-% computation~\citep[Sec.~9.1]{Acar05}, or as can be done in our setting.
-% While we do not use such folds, we describe the existing algorithms briefly and
-% sketch how to integrate them in our setting.
-%
-% Function |foldMonoid| must record the intermediate results, and the derivative
-% |dfoldMonoid| must propagate input changes to affected intermediate
-% results.%
-% \footnote{We discuss in \cref{part:caching} how base functions communicate results to derivatives.}
-% % Moreover, folding must store the tree of intermediate results for reuse by the
-% % derivative;
-% To study time complexity  of input change propagation, it is useful to consider
-% the \emph{dependency graph} of intermediate results: in this graph, an
-% intermediate result |v1| has an arc to intermediate result |v2| if and only if computing |v1|
-% depends on |v2|.
-% To ensure |dfoldMonoid| is efficient, the dependency graph of intermediate
-% results from |foldMonoid| must form a balanced tree of logarithmic height, so
-% that changes to a leaf only affect a logarithmic number of intermediate
-% results.
-%
-% In contrast, implementing |foldMonoid| using |foldr| on a list produces an
-% unbalanced graph of intermediate results.
-% For instance, take input list |xs = [1..8]|, containing numbers from 1 to 8, and
-% assume a given monoid.
-% Summing them with |foldr (`mappend`) mempty xs| means evaluating
-% \[|1 `mappend` (2 `mappend` (3 `mappend` (4 `mappend` (5 `mappend` (6 `mappend`
-% (7 `mappend` (8 `mappend` mempty)))))))|.\]
-% Then, a change to the last element of input |xs| affects all intermediate
-% results, hence incrementalization takes at least $O(n)$.
-% In contrast, using |foldAssoc| on |xs| should evaluate a balanced tree similar to
-% \[|((1 `mappend` 2) `mappend` (3 `mappend` 4)) `mappend` ((5 `mappend` 6)
-% `mappend` (7 `mappend` 8))|,\]
-% so that any individual change to a leave, insertion or
-% deletion only affects $O(\log n)$ intermediate results (where $n$ is the
-% sequence size).
-% % To ensure each |dfoldMonoid| takes logarithmic time,
-% % as it it were a balanced tree, using
-% % any associative operations
-% % , where intermediate results
-% % form a balanced tree,
-% Upon modifications to the tree, one must ensure that the balancing is
-% stable~\citep[Sec. 9.1]{Acar05}.
-% In other words, altering the tree (by inserting or removing an element) must only alter
-% $O(\log n)$ nodes.
-%
-% % We have implemented associative tree folds on very simple but unbalanced tree
-% % structures; we believe they could be implemented and incrementalized over
-% % balanced trees representing sequences, such as finger trees, but doing so
-% % requires ... \pg{Not true, what about `ominus` and changes to the monoid?
-%
-% % % Aggregation
-% % \pg{To move}
-% % To study aggregation we consider |foldNat|.
-% % % \begin{code}
-% % %   foldNat z s 0 = z
-% % %   foldNat z s (n + 1) = s (foldNat z s n)
-% % %   -- Assuming that dz and ds are nil.
-% % %   dfoldNat z dz s ds n 0 = foldNat z s n
-% % %   dfoldNat z dz s ds n dn = if dn > 0 then foldNat (foldNat z s n) s dn
-% % % \end{code}
-% % % Missing sections from chap-intro-incr.lhs.
-%
-% % \pg{Ask question: can we define such change structures in terms of simpler ones?}
+\paragraph{Associative tree folds}
+Other usages of fold over sequences produce result type of small bounded size
+(such as integers). In this scenario, one can incrementalize the given fold
+efficiently using |`ominus`| instead of relying on group operations.
+For such scenarios, one can design a primitive
+\[|foldMonoid :: Monoid a => List a => a|\]
+for \emph{associative tree folds}, that is, a function that folds
+over the input sequence using a \emph{monoid} (that is, an associative operation
+with a unit). For efficient incrementalization, |foldMonoid|'s intermediate
+results should form a \emph{balanced} tree and
+updating this tree should take \emph{logarithmic} time: one approach to ensure
+this is to represent the input sequence itself using a balanced tree, such as a
+finger tree~\citep{hinze2006finger}.
+
+Various algorithms store intermediate results of folding
+inside an input balanced tree, as described by \citet[Ch.~14]{Cormen2001} or by
+\citet{hinze2006finger}. But intermediate results can also be stored outside the
+input tree, as is commonly done using self-adjusting
+computation~\citep[Sec.~9.1]{Acar05}, or as can be done in our setting.
+While we do not use such folds, we describe the existing algorithms briefly and
+sketch how to integrate them in our setting.
+
+Function |foldMonoid| must record the intermediate results, and the derivative
+|dfoldMonoid| must propagate input changes to affected intermediate
+results.%
+
+\footnote{We discuss in \cref{sec:cts-motivation} how base functions communicate results to derivatives.}
+% Moreover, folding must store the tree of intermediate results for reuse by the
+% derivative;
+To study time complexity  of input change propagation, it is useful to consider
+the \emph{dependency graph} of intermediate results: in this graph, an
+intermediate result |v1| has an arc to intermediate result |v2| if and only if computing |v1|
+depends on |v2|.
+To ensure |dfoldMonoid| is efficient, the dependency graph of intermediate
+results from |foldMonoid| must form a balanced tree of logarithmic height, so
+that changes to a leaf only affect a logarithmic number of intermediate
+results.
+
+In contrast, implementing |foldMonoid| using |foldr| on a list produces an
+unbalanced graph of intermediate results.
+For instance, take input list |xs = [1..8]|, containing numbers from 1 to 8, and
+assume a given monoid.
+Summing them with |foldr (`mappend`) mempty xs| means evaluating
+\[|1 `mappend` (2 `mappend` (3 `mappend` (4 `mappend` (5 `mappend` (6 `mappend`
+(7 `mappend` (8 `mappend` mempty)))))))|.\]
+Then, a change to the last element of input |xs| affects all intermediate
+results, hence incrementalization takes at least $O(n)$.
+In contrast, using |foldAssoc| on |xs| should evaluate a balanced tree similar to
+\[|((1 `mappend` 2) `mappend` (3 `mappend` 4)) `mappend` ((5 `mappend` 6)
+`mappend` (7 `mappend` 8))|,\]
+so that any individual change to a leave, insertion or
+deletion only affects $O(\log n)$ intermediate results (where $n$ is the
+sequence size).
+% To ensure each |dfoldMonoid| takes logarithmic time,
+% as it it were a balanced tree, using
+% any associative operations
+% , where intermediate results
+% form a balanced tree,
+Upon modifications to the tree, one must ensure that the balancing is
+stable~\citep[Sec. 9.1]{Acar05}.
+In other words, altering the tree (by inserting or removing an element) must only alter
+$O(\log n)$ nodes.
+
+We have implemented associative tree folds on very simple but unbalanced tree
+structures; we believe they could be implemented and incrementalized over
+balanced trees representing sequences, such as finger trees or random access
+zippers~\citep{Headley2016random}, but doing so requires transforming their
+implementation of their data structure to cache-transfer style (CTS)
+(\cref{sec:cts-motivation}). We leave this for future work, together with an
+automated implementation of CTS transformation.
+
+% % Aggregation
+% \pg{To move}
+% To study aggregation we consider |foldNat|.
+% % \begin{code}
+% %   foldNat z s 0 = z
+% %   foldNat z s (n + 1) = s (foldNat z s n)
+% %   -- Assuming that dz and ds are nil.
+% %   dfoldNat z dz s ds n 0 = foldNat z s n
+% %   dfoldNat z dz s ds n dn = if dn > 0 then foldNat (foldNat z s n) s dn
+% % \end{code}
+% % Missing sections from chap-intro-incr.lhs.
+
+% \pg{Ask question: can we define such change structures in terms of simpler ones?}
 
 \subsection{Modifying list elements}
 \label{sec:simple-changes-list-map}
@@ -316,7 +322,7 @@ difference between two lists of different lengths.
 Nevertheless, this change structure is sufficient to define
 derivatives that act correctly on the changes that can be expressed.
 We can describe this change structure in Haskell using a
-typeclass instance for class |ChangeStruct|:
+type-class instance for class |ChangeStruct|:
 \begin{code}
 instance ChangeStruct (List a) where
   type Dt^(List a) = List (Dt^a)
@@ -427,7 +433,9 @@ type Dt (Sequence a) = SeqChange a
 
 \pg{Average}
 
+\subsection{Incremental higher-order primitives and nested loops}
 \pg{Nested loops}
+\pg{we need to discuss how map propagates changes to functions.}
 
 \section{A higher-order example}
 \label{sec:differentiation-fold-example}
