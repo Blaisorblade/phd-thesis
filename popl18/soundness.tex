@@ -38,15 +38,13 @@ from the base computation, but no cache values appear in $\compile\iectx$!
 
 %\pg{This consumes and produces change environments!}
 As a fix, we enrich~$\compile\iectx$ with the values of a cache~$\tcache$, using
-the pair of judgments $\envwithcache\tectx\tcache{\tectx'}$ (for $i = 1, 2$) defined in \cref{fig:envwithcache}.
-Judgment~$\oldenvwithcache\tectx\tcache{\tectx'}$ is read ``The target
-change environment~$\tectx'$ extends~$\tectx$ with the original values of
-cache~$\tcache$.''
-Analogously, judgment~$\newenvwithcache\tectx\tcache{\tectx'}$ is read ``The
-target change environment~$\tectx'$ extends~$\tectx$ with the updated values of
+the pair of judgments $\envwithcache\tdectx\tcache{\tdectx'}$ (for $i = 1, 2$) defined in \cref{fig:envwithcache}.
+Judgment~$\envwithcache\tdectx\tcache{\tdectx'}$ (for $i = 1, 2$) is read ``Target
+change environment~$\tdectx'$ extends~$\tdectx$ with the original (for $i = 1$)
+(or updated, for $i = 2$) values of
 cache~$\tcache$.''
 Since $\tcache$ is essentially a list of variables containing no values, cache
-values in $\tectx'$ must be computed from $\env\tectx$.
+values in $\tdectx'$ must be computed from $\env\tdectx$.
 
 \begin{lemma}[Evaluation commutes with CTS differentiation]
   Let $\tcache$ be such that
@@ -61,9 +59,9 @@ values in $\tectx'$ must be computed from $\env\tectx$.
 
 The proof of this lemma is not immediate, since during the
 evaluation of~$\derive{\tupdcache}{\sterm}$ the new caches replace the
-old caches. In the Coq development, we enforce a physical separation
-between the part of the environment containing the old caches and the
-one containing the new caches, and we maintain the invariant that the
+old caches. In our Coq development, we enforce a physical separation
+between the part of the environment containing old caches and the
+one containing new caches, and we maintain the invariant that the
 second part of the environment corresponds to the remaining part of the
 term.
 
@@ -72,28 +70,28 @@ term.
 
   \begin{mathpar}
     \infer{}{
-      \envwithcache{\tectx}{\temptycache}{\tectx}
+      \envwithcache{\tdectx}{\temptycache}{\tdectx}
     }
 
     \infer{
-      \envwithcache{\tectx}{\tcache}{\tectx'}
+      \envwithcache{\tdectx}{\tcache}{\tdectx'}
     }{
-      \envwithcache{\tectx}{\tcachecons\tcache\tx}{\tectx'}
+      \envwithcache{\tdectx}{\tcachecons\tcache\tx}{\tdectx'}
     }
 
     \infer{
-      \envwithcache{\tectx}{\tcache}{\tectx'}
+      \envwithcache{\tdectx}{\tcache}{\tdectx'}
       \\
-      \sneval{\env\tectx}{\tlet{\ty, \tcacheid\ty\tf\tx = \tapp\tf\tx}{(\ty, \tcacheid\ty\tf\tx)}}{(\_, \tcachedclosedvalues)}
+      \sneval{\env\tdectx}{\tlet{\ty, \tcacheid\ty\tf\tx = \tapp\tf\tx}{(\ty, \tcacheid\ty\tf\tx)}}{(\_, \tcachedclosedvalues)}
     }{
-      \envwithcache{\tectx}
+      \envwithcache{\tdectx}
       {\tcachecons\tcache{\tcacheid\ty\tf\tx}}
-      {\tectxcons{\tectx'}{\tcacheid\ty\tf\tx = \tcachedclosedvalues}}
+      {\tectxcons{\tdectx'}{\tcacheid\ty\tf\tx = \tcachedclosedvalues}}
     }
 \end{mathpar}
 
 \caption{Extension of an environment with cache values
-  $\envwithcache{\tectx}{\tcache}{\tectx'}$ (for $i = 1, 2$).}
+  $\envwithcache{\tdectx}{\tcache}{\tdectx'}$ (for $i = 1, 2$).}
 \label{fig:envwithcache}
 \end{figure}
 
@@ -104,7 +102,10 @@ CTS translation $\compile{\icloseddvalue}$ of the
 change computed by the standard derivative $\iderive\sterm$; (b) the updated
 cache $\newtcachedclosedvalues$ produced by
 the CTS derivative coincides with the cache produced by the CTS-translated base
-term $\tterm$ in the updated environment $\newenv{\new\tectx}$.
+term $\tterm$ in the updated environment $\newenv{\new\tdectx}$.
+We must use $\newenv{\new\tdectx}$ instead of $\new\tdectx$ to evaluate
+CTS-translated base term~$\tterm$ since $\new\tdectx$, produced by environment extension,
+contains updated caches, changes and original values.
 Since we require a correct cache via condition (b), we can use this cache
 to invoke the CTS derivative on further changes, as described
 in~\cref{sec:motivating-example}.
@@ -115,13 +116,13 @@ in~\cref{sec:motivating-example}.
   $(\tcache, \tterm) = \compileterm{\bullet}{\sterm}$.
   For all $\iectx, \sterm$ and $\icloseddvalue$,
   $\seval{\iectx}{\iderive\sterm}{}{\icloseddvalue}$,
-  for $\old\tectx$ and $\new\tectx$ such that
-  $\oldenvwithcache{\compile\iectx}{\tcache}{\old\tectx}$
-  and $\newenvwithcache{\compile\iectx}{\tcache}{\new\tectx}$,
-  $\seval{\oldenv{\old\tectx}}{\tterm}{}{(\old\tclosedvalue, \oldtcachedclosedvalues)}$ and
-  $\seval{\newenv{\new\tectx}}{\tterm}{}{(\new\tclosedvalue, \newtcachedclosedvalues)}$,
+  for $\old\tdectx$ and $\new\tdectx$ such that
+  $\oldenvwithcache{\compile\iectx}{\tcache}{\old\tdectx}$
+  and $\newenvwithcache{\compile\iectx}{\tcache}{\new\tdectx}$,
+  $\seval{\oldenv{\old\tdectx}}{\tterm}{}{(\old\tclosedvalue, \oldtcachedclosedvalues)}$ and
+  $\seval{\newenv{\new\tdectx}}{\tterm}{}{(\new\tclosedvalue, \newtcachedclosedvalues)}$,
   then
   $
-  \seval{\old\tectx}{\derive\tcache\sterm}{}{(\compile{\icloseddvalue}, \newtcachedclosedvalues)}
+  \seval{\old\tdectx}{\derive\tcache\sterm}{}{(\compile{\icloseddvalue}, \newtcachedclosedvalues)}
   $.
 \end{theorem}
