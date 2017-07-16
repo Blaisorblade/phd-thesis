@@ -1,7 +1,7 @@
+\input{\poplPath{source-definition-syntax}}
+
 \subsection{The source language \source}
 \label{sec:sourcelanguage}
-
-\input{\poplPath{source-definition-syntax}}
 
 \paragraph{Syntax}
 The syntax of~$\source$ is given in
@@ -131,7 +131,6 @@ environment~$\iectx$ is defined by induction over~$\iectx$:
 & = & \iectxcons{\newenv{\iectx}}{\tx = \sclosedvalue \oplus \icloseddvalue}
 \end{array}
 \]
-
 This last rule makes use of an operation $\oplus$ to update a value
 with a change, which may fail at runtime. Indeed, change update
 is a partial function written

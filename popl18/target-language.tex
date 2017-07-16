@@ -29,16 +29,17 @@ $\tcache$ is systematically returned.
 
 \input{\poplPath{target-definition}}
 
-The syntax for caches has three cases: a cache can be empty, a cache
-can contain a value or another cache. In other words, a cache is a
+The syntax for caches has three cases: a cache can be empty, or it can
+prepend a value or a cache variable to a cache.
+In other words, a cache is a
 tree-like data structure which is isomorphic to an execution trace
 containing both immediate values and the execution traces of the
 function calls issued during the evaluation.
 
 The syntax for change terms of~$\target$ witnesses the CTS
 discipline followed by the derivatives: to determine~$\tdy$, the
-derivative of~$\tf$ evaluated at point $\tx$ with change $\tdx$ is
-expecting the cache related to the evaluation of~$\ty$ in the base
+derivative of~$\tf$ evaluated at point $\tx$ with change $\tdx$
+expects the cache produced by evaluating ~$\ty$ in the base
 term. The derivative returns the updated cache which contains the
 intermediate results that would be gathered by the evaluation
 of~$\tf\,(\tx \oplus \tdx)$. The result term of every change term
@@ -47,13 +48,13 @@ change.
 
 The syntax for cache updates is almost the same as the one for caches
 except each value identifier~$\tx$ of the input cache is adjusted with
-its related change~$\tdx$.
+its corresponding change~$\tdx$.
 
 \paragraph{Semantics}
 An evaluation environment $\tectx$ of $\target$ contains not only
 values but also cache values. The syntax for values $\tclosedvalue$
 includes closures, tuples, primitives and constants. The syntax for
-cache values $\tcachedclosedvalues$ mimicks the one for cache terms.
+cache values $\tcachedclosedvalues$ mimics the one for cache terms.
 The evaluation of change terms expects the evaluation
 environments~$\tdectx$ to also include bindings for change values.
 

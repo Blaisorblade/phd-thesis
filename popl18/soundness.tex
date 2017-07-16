@@ -58,7 +58,7 @@ in the rule for cache computation in Figure~\ref{fig:envwithcache}.
   $\seval{\tdectx}{\derive{\tupdcache}{\sterm}}{}{(\compile\icloseddvalue, \tcachedclosedvalues)}$.
 \end{lemma}
 
-Notice that the proof of this lemma is not immediate since during the
+The proof of this lemma is not immediate, since during the
 evaluation of~$\derive{\tupdcache}{\sterm}$ the new caches replace the
 old caches. In the Coq development, we enforce a physical separation
 between the part of the environment containing the old caches and the
