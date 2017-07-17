@@ -32,10 +32,10 @@ defines a change type |Dt^t| as an associated type and operations |`oplus`|,
 \begin{code}
 class ChangeStruct t where
   type Dt^t
-  oplus :: t -> Dt t -> t
-  ominus :: t -> t -> Dt t
-  (`ocompose`) :: Dt t -> Dt t -> Dt t
-  nilc :: t -> Dt t
+  oplus :: t -> Dt^t -> t
+  ominus :: t -> t -> Dt^t
+  (`ocompose`) :: Dt^t -> Dt^t -> Dt^t
+  nilc :: t -> Dt^t
 \end{code}
 In this chapter we will
 often show change structures where only some methods are defined; in actual
@@ -186,7 +186,7 @@ In this scenario we can use group changes for abelian groups, and restrict |fold
 situations where such changes are available.
 
 \begin{code}
-dfold :: AbelianGroupChangeStruct b => List b -> Dt (List b) -> Dt b
+dfold :: AbelianGroupChangeStruct b => List b -> Dt^(List b) -> Dt^b
 dfold xs (Prepend x) = inject x
 dfold (Cons x xs) Remove = inject (invert x)
 dfold Nil Remove = error "Invalid change"
@@ -204,7 +204,7 @@ class (  AbelianGroup a, ChangeStruct a) =>
          AbelianGroupChangeStruct a where
 -- Inject group elements into changes. Law:
 -- |a `oplus` inject b = a `mappend` b|
-  inject :: a -> Dt a
+  inject :: a -> Dt^a
 \end{code}
 
 \Cref{sec:applying} discusses how
@@ -427,9 +427,9 @@ position.\footnote{\citet{Firsov2016purely} and our implementation allow changes
 data SeqSingleChange a
   =  Insert    { idx :: Int, x :: a }
   |  Remove    { idx :: Int }
-  |  ChangeAt  { idx :: Int, dx :: Dt ^ a }
+  |  ChangeAt  { idx :: Int, dx :: Dt^a }
 data SeqChange a = Sequence (SeqSingleChange a)
-type Dt (Sequence a) = SeqChange a
+type Dt^(Sequence a) = SeqChange a
 \end{code}
 \pg{Nil change detection}
 \pg{Move here example on list later}
@@ -475,14 +475,14 @@ dpair a da b db = (da, db)
 
 fst (a, b) = a
 snd (a, b) = b
-dfst :: Dt (a, b) -> Dt a
+dfst :: Dt^(a, b) -> Dt^a
 dfst (da, db) = da
-dsnd :: Dt (a, b) -> Dt b
+dsnd :: Dt^(a, b) -> Dt^b
 dsnd (da, db) = db
 
 uncurry :: (a -> b -> c) -> (a, b) -> c
 uncurry f (a, b) = f a b
-duncurry :: (a -> b -> c) -> Dt (a -> b -> c) -> (a, b) -> Dt (a, b) -> Dt c
+duncurry :: (a -> b -> c) -> Dt^(a -> b -> c) -> (a, b) -> Dt^(a, b) -> Dt^c
 duncurry _f df (x, y) (dx, dy) = df x dx y dy
 \end{code}
 
