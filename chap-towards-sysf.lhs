@@ -14,6 +14,7 @@ We stop short of a full proof that this generalization is correct, but we have
 implemented and tested it on a mature implementation of a System F typechecker;
 we believe the proof will mostly be a straightforward adaptation of existing ones about
 parametricity, but we leave verification for future work.
+A key open issue is discussed in \cref{rem:validity-oplus-system-f-not-really}.
 
 % define a form of differentiation to System F that arises as
 % an immediate generalization.
@@ -98,6 +99,7 @@ As in earlier chapters, if terms |e1| and |e2| are equivalent, any valid change
 % then extend differentiation to System F.
 
 \section{The parametricity transformation}
+\label{sec:parametricity-transform}
 First, we show a variant of their parametricity transformation, adapted to a
 variant of STLC without base types but with type variables. Presenting |stlc|
 using type variables will help when we come back to System F, and allows
@@ -322,6 +324,34 @@ derivatives, it is useful to have contexts also bind,
 next to type variables |alpha|, also change structures for |alpha|, to
 allow terms to use change operations. Since the differentiation output does not
 use change operations here, we omit change structures for now.
+
+\begin{remark}[Validity and |`oplus`|]
+  \label{rem:validity-oplus-system-f-not-really}
+Because we omit change structures (here and through most of the chapter),
+the type of differentiation only suggests that |derive t| is a valid change, but
+not that validity agrees with |`oplus`|.
+
+In other words, dependent types as used
+here do not prove all theorems expected of an incremental transformation.
+While we can prove the fundamental property
+of our logical relation, we cannot prove that |`oplus`| agrees with
+differentiation for abstract types. As we did in \cref{sec:chs-types-contexts} (in
+particular \cref{req:base-change-structures}), we must require that validity
+relations provided for type variables agree with implementations of |`oplus`| as
+provided for type variables: formally, we must state (internally) that
+|forall ((x1 x2 : alpha)) (dx: DtAlpha x1 x2). pElemDt1 alpha (x1 `oplus` dx) x2|.
+We can state this requirement by internalizing
+logical equivalence (such as shown in \cref{sec:parametricity-transform}, or
+using \citet{Bernardy10}'s variant in |lamp|). But since this statement
+quantifies over members of |alpha|, it is not clear if it can be proven
+internally when instantiating |alpha| with a type argument. We leave this
+question (admittedly crucial) for future work.
+%or if such a proof resembles .
+%
+% we expect it cannot be proved internally without
+% extending the language, similarly to how parametricity cannot be proven
+% internally to System F.
+\end{remark}
 
 This transformation is not incremental,
 as it recomputes both source and destination for each application,
@@ -989,10 +1019,12 @@ investigation as future work.
 
 \section{Conclusion}
 In this chapter, we have sketched how to define and prove correct
-differentiation following \citet{Bernardy2011realizability}'s work on
-parametricity by code transformation; while we give no formal correctness proof,
-we have implemented and tested differentiation in an existing mature PTS implementation,
-and verified it is type-correct on a few typical terms.
+differentiation following \citet{Bernardy2011realizability}'s and
+\citet{Bernardy10}'s work on
+parametricity by code transformation. We give no formal correctness proof, but
+proofs appear mostly an extension of their methods. An important open point is
+\cref{rem:validity-oplus-system-f-not-really}.
+We have implemented and tested differentiation in an existing mature PTS
+implementation, and verified it is type-correct on a few typical terms.
 
- We leave further investigation as future work.
-\pg{finish.}
+We leave further investigation as future work.
