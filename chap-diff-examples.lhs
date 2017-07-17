@@ -22,7 +22,7 @@ we'll see in this chapter, we'll need to enable some forms of introspection on
 function changes to manipulate the embedded environments, as we discuss in
 \cref{ch:defunc-fun-changes}. We will also need ways to remember intermediate
 results, which we will discuss in \cref{part:caching} (in particular
-\cref{sec:cts-motivation}).
+\cref{ch:cts}).
 
 \section{Change structures as type-class instances}
 We encode change structure
@@ -83,6 +83,7 @@ derivatives invoked on the produced changes are not efficient.
 % to find a minimal description of a change between lists,
 
 \section{Incrementalizing a collection API}
+\label{sec:incr-coll-api-intro}
 In this section, we describe a collection API that we incrementalize in this chapter.
 
 To avoid notation conflicts, we represent lists via
@@ -250,7 +251,7 @@ Function |foldMonoid| must record the intermediate results, and the derivative
 |dfoldMonoid| must propagate input changes to affected intermediate
 results.%
 
-\footnote{We discuss in \cref{sec:cts-motivation} how base functions communicate results to derivatives.}
+\footnote{We discuss in \cref{ch:cts} how base functions communicate results to derivatives.}
 % Moreover, folding must store the tree of intermediate results for reuse by the
 % derivative;
 To study time complexity  of input change propagation, it is useful to consider
@@ -292,7 +293,7 @@ structures; we believe they could be implemented and incrementalized over
 balanced trees representing sequences, such as finger trees or random access
 zippers~\citep{Headley2016random}, but doing so requires transforming their
 implementation of their data structure to cache-transfer style (CTS)
-(\cref{sec:cts-motivation}). We leave this for future work, together with an
+(\cref{ch:cts}). We leave this for future work, together with an
 automated implementation of CTS transformation.
 
 % % Aggregation
