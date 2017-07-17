@@ -465,9 +465,9 @@ semantics or definitional interpreters~\citep{Amin2017,Owens2016functional}.
 For any well-typed and closed term |/- t : tau|, there exist a step count |n| and value |v| such that |/- t (downto n) v|.
 \end{theorem}
 \begin{proof}
-A variant of standard proofs of normalization for STLC~\citep[Ch.
-12]{Pierce02TAPL}, adapted for big-step semantics rather than small-step
-semantics (similarly to \cref{sec:typed-proof}).
+A variant of standard proofs of normalization for
+STLC~\citep[Ch.~12]{Pierce02TAPL}, adapted for big-step semantics rather than
+small-step semantics (similarly to \cref{sec:typed-proof}).
 We omit needed definitions and refer interested readers to our Agda
 mechanization.
 \end{proof}

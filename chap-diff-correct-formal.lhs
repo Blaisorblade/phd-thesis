@@ -699,10 +699,10 @@ the result of differentiation evaluates to valid change |eval(derive(t)) drho|.
 Readers familiar with logical relations proofs should be able to reproduce this
 proof on their own, as it is rather standard, once one uses the given
 definitions. In particular, this proof resembles closely the proof of the
-abstraction theorem or relational parametricity (as given by \citet[Sec.
-6]{Wadler1989theorems} or by \citet[Sec. 3.3, Theorem
-3]{Bernardy2011realizability}) and the proof of the fundamental theorem of
-logical relations by \citet{Statman1985logical}.
+abstraction theorem or relational parametricity (as given by
+\citet[Sec.~6]{Wadler1989theorems} or by \citet[Sec.~3.3,
+Theorem~3]{Bernardy2011realizability}) and the proof of the fundamental theorem
+of logical relations by \citet{Statman1985logical}.
 
 Nevertheless, we spell this proof out, and use it to motivate how
 |derive(param)| is defined, more formally than we did in

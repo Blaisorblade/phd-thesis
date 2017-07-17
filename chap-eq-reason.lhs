@@ -902,8 +902,8 @@ We make no further use of this alternative syntax in this work.
 \subsection{Change equivalence is a PER}
 \label{sec:doe-per}
 Readers with relevant experience will recognize that change
-equivalence is a partial equivalence relation (PER)~\citep[Ch.
-5]{Mitchell1996foundations}. It is standard to use PERs to
+equivalence is a partial equivalence relation
+(PER)~\citep[Ch.~5]{Mitchell1996foundations}. It is standard to use PERs to
 identify valid elements in a
 model~\citep{Harper1992constructing}. In this section, we state
 the connection, showing that change equivalence is not an ad-hoc
@@ -931,7 +931,7 @@ A restatement of \cref{doe:equiv-valid}.
 \end{proof}
 
 Typically, one studies \emph{logical PERs}, which are logical
-relations and PERs at the same time~\citep[Ch. 8]{Mitchell1996foundations}.
+relations and PERs at the same time~\citep[Ch.~8]{Mitchell1996foundations}.
 In particular, with a logical PER two functions are related if they map related
 inputs to related outputs. This helps showing that a PERs is a congruence.
 Luckily, our PER is equivalent to such a definition.

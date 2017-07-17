@@ -87,7 +87,7 @@ using type variables will help when we come back to System F, and allows
 discussing parametricity on STLC.
 Their transformation
 is based on the presentation of STLC as calculus |stlc|, a \emph{Pure Type
-System} (PTS)~\citep[Sec 5.2]{Barendregt1992lambda}.
+System} (PTS)~\citep[Sec.~5.2]{Barendregt1992lambda}.
 
 In PTSs, terms and types form a single syntactic category, but are distinguished
 through an extended typing judgement (written |Gamma /- t : t|) using additional
@@ -136,7 +136,7 @@ transformed terms abstract over an arbitrary relation |rAlpha| between |alpha1| 
 |alpha2|. When |alpha| is instantiated by |tau|, |rAlpha| \emph{can} (but does
 not have to) be instantiated with relation |pElemDt1 tau|, but |rAlpha| abstracts
 over arbitrary \emph{candidate} relations (similar to the notion of reducibility
-candidates~\citep[Ch. 14.1.1]{girard1989proofs}). Allowing alternative
+candidates~\citep[Ch.~14.1.1]{girard1989proofs}). Allowing alternative
 instantiations makes parametricity statements more powerful, and it is also
 necessary to define parametricity for impredicative type systems (like System F)
 in a predicative ambient logic.%

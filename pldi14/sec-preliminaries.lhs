@@ -16,7 +16,7 @@ Agda's underlying type theory as our foundation. We discuss
 what this means in \cref{sec:metalanguage}.
 
 Our object language is a standard simply-typed $\lambda$-calculus
-(STLC)~\citep[Ch. 9]{Pierce02TAPL}, parameterized over base types
+(STLC)~\citep[Ch.~9]{Pierce02TAPL}, parameterized over base types
 and constants. We term the set of base types and constants a
 \emph{language plugin} (see \cref{sec:lang-plugins}). In our
 examples we assume that the language plugins supports needed base
@@ -154,7 +154,7 @@ context |Gamma| has type |tau|.%
   in~\cref{sec:sem-style-and-rw}.}
 %
 For a proper introduction to STLC we refer the reader to
-\citet[Ch. 9]{Pierce02TAPL}. We will assume significant
+\citet[Ch.~9]{Pierce02TAPL}. We will assume significant
 familiarity with it.
 
 \input{pldi14/fig-lambda-calc}
@@ -221,7 +221,7 @@ Scala~\citep{CaiEtAl2014ILC}.
 To prove that incrementalization preserves the semantics of our
 object-language programs, we define a semantics for STLC. We use
 a naive set-theoretic denotational semantics: Since STLC is
-strongly normalizing~\citep[Ch. 12]{Pierce02TAPL}, its semantics
+strongly normalizing~\citep[Ch.~12]{Pierce02TAPL}, its semantics
 need not handle partiality. Hence, we can use denotational
 semantics but eschew using domain theory, and simply use sets
 from the metalanguage (see \cref{sec:metalanguage}). Likewise, we

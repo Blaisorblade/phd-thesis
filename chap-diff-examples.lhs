@@ -302,7 +302,7 @@ sequence size).
 % , where intermediate results
 % form a balanced tree,
 Upon modifications to the tree, one must ensure that the balancing is
-stable~\citep[Sec. 9.1]{Acar05}.
+stable~\citep[Sec.~9.1]{Acar05}.
 In other words, altering the tree (by inserting or removing an element) must only alter
 $O(\log n)$ nodes.
 
