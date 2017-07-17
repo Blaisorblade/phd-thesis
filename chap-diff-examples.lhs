@@ -64,7 +64,10 @@ change structure for |A|, we can start by defining
 \end{equation}
 where |da| is a valid change from |a1| to |a2|. We then try to
 simplify and rewrite the expression using \emph{equational reasoning}, so that it does
-not refer to |`ominus`| any more, as far as possible.
+not refer to |`ominus`| any more, as far as possible. We can assume that all
+argument changes are valid, especially if that allows producing faster
+derivatives; we formalize equational reasoning for valid changes in
+\cref{sec:denot-equivalence-valid}.
 In fact, instead of defining |`ominus`| and simplifying |f a2 `ominus` f a1| to
 not use it, it is sufficient to produce a change from |f a1| to |f a2|, even a
 different one. We write |da1 `doe` da2| to mean that changes |da1| and |da2| are
@@ -541,7 +544,7 @@ Finally, replacement change |EitherReplace e2| is valid from |e1| to |e2| for
 any |e1|.
 
 Using \cref{eq:diff-primitive-eq-reasoning}, we can then obtain definitions for
-derivatives of primitives |Left|, |Right| and |either|.
+derivatives of primitives |Left|, |Right| and |either|. The resulting code is as follows:
 \begin{code}
 dLeft :: a -> Dt^a -> Dt^(Either a b)
 dLeft a da = LeftC da
@@ -559,6 +562,21 @@ deither f df g dg e1 (EitherReplace e2) =
   either (f `oplus` df) (g `oplus` dg) e2 `ominus` either f g e1
 deither _ _ _ _ _ _ = error "Invalid sum change"
 \end{code}
+
+We show only one case of the derivation of |deither| as an example:
+\begin{equational}
+\begin{code}
+      deither f df g dg (Left a) (LeftC da)
+`doe` {- using variants of \cref{eq:diff-primitive-eq-reasoning} for multiple arguments -}
+      either (f `oplus` df) (g `oplus` dg) (Left a `oplus` LeftC da) `ominus` either f g (Left a)
+=     {- simplify |`oplus`| -}
+      either (f `oplus` df) (g `oplus` dg) (Left (a `oplus` da)) `ominus` either f g (Left a)
+=     {- simplify |either| -}
+      (f `oplus` df) (a `oplus` da) `ominus` f a
+`doe` {- because |df| is a valid change for |f|, and |da| for |a| -}
+      df a da
+\end{code}
+\end{equational}
 
 Unfortunately, with this change structure a change from |Left a1| to |Right b2|
 is simply a replacement change, so derivatives processing it must recompute
