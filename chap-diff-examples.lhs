@@ -25,15 +25,20 @@ results, which we will discuss in \cref{part:caching} (in particular
 \cref{ch:cts}).
 
 \section{Change structures as type-class instances}
-We encode change structure
-as a \emph{type class} named |ChangeStruct|. An instance |ChangeStruct t|
+We encode change structures, as sketched earlier in \cref{sec:change-intro},
+through a \emph{type class} named |ChangeStruct|. An instance |ChangeStruct t|
 defines a change type |Dt^t| as an associated type and operations |`oplus`|,
-|`ominus`| and |`ocompose`| are defined as methods.
+|`ominus`| and |`ocompose`| are defined as methods. We also define method
+|oreplace|, such that |oreplace v2| produces a \emph{replacement change} from
+any source to |v2|; by default, |v2 `ominus` v1| is simply an alias for
+|oreplace v2|.
 \begin{code}
 class ChangeStruct t where
   type Dt^t
   oplus :: t -> Dt^t -> t
+  oreplace :: t -> Dt^t
   ominus :: t -> t -> Dt^t
+  v2 `ominus` v1 = oreplace v2
   (`ocompose`) :: Dt^t -> Dt^t -> Dt^t
   nilc :: t -> Dt^t
 \end{code}
@@ -469,7 +474,9 @@ operations act pointwise on the two components.
 \begin{code}
 instance (ChangeStruct a, ChangeStruct b) => ChangeStruct (a, b) where
   type Dt^(a, b) = (Dt^a, Dt^b)
-  oplus (a, b) (da, db) = (oplus a da, oplus b db)
+  (a, b) `oplus` (da, db) = (a `oplus` da, b `oplus` db)
+  (a2, b2) `ominus` (a1, b1) = (a2 `ominus` a1, b2 `ominus` b1)
+  oreplace (a2, b2) = (oreplace a2, oreplace b2)
   nil (a, b) = (nil a, nil b)
   (da1, db1) `ocompose` (da2, db2) = (da1 `ocompose` da2, db1 `ocompose` db2)
 \end{code}
@@ -540,8 +547,6 @@ instance (  ChangeStruct a, ChangeStruct b) =>
 
   oreplace = EitherReplace
 
-instance (  NilChangeStruct a, NilChangeStruct b) =>
-            NilChangeStruct (Either a b) where
   nil (Left a) = LeftC (nil a)
   nil (Right a) = RightC (nil a)
 \end{code}
