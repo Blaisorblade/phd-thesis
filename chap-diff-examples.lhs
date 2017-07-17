@@ -144,6 +144,18 @@ the resulting definitions using differentiation.
 Function |filter| uses conditionals, which we haven't discussed yet; we show how
 to incrementalize |filter| successfully in \cref{sec:chs-sums}.\pg{Do it!}
 
+\subsection{Changes to type-class instances?}
+In this whole chapter, we assume that type-class instances, such as |fold|'s
+|AbelianGroupChangeStruct| argument, do not undergo changes. Since
+type-class instances are closed top-level definitions of operations and are
+canonical for a datatype, it is hard to imagine a change to a type-class
+instance. On the other hand, type-class instances can be encoded as first-class
+values. We can for instance imagine a fold taking a unit value and an
+associative operation as argument.
+In such scenarios, one needs additional effort to propagate changes to operation
+arguments, similarly to changes to the function argument to |map|.
+\pg{this is OKish, but where is |map| now discussed?}
+
 \subsection{Incrementalizing aggregation}
 \label{sec:incr-fold}
 Let's now discuss how to incrementalize |fold|.
