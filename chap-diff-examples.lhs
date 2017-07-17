@@ -519,9 +519,13 @@ either f g (Right b) = g b
 
 We can define the following change structure.
 \begin{code}
-data EitherChange a b = LeftC (Dt^a) | RightC (Dt^b) | EitherReplace (Either a b)
+data EitherChange a b
+  = LeftC (Dt^a)
+  | RightC (Dt^b)
+  | EitherReplace (Either a b)
 
-instance (ChangeStruct a, ChangeStruct b) => ChangeStruct (Either a b) where
+instance (  ChangeStruct a, ChangeStruct b) =>
+            ChangeStruct (Either a b) where
   type Dt^(Either a b) = EitherChange a b
   Left a   `oplus` LeftC da          = Left (a `oplus` da)
   Right b  `oplus` RightC db         = Right (b `oplus` db)
@@ -531,7 +535,8 @@ instance (ChangeStruct a, ChangeStruct b) => ChangeStruct (Either a b) where
 
   oreplace = EitherReplace
 
-instance (NilChangeStruct a, NilChangeStruct b) => NilChangeStruct (Either a b) where
+instance (  NilChangeStruct a, NilChangeStruct b) =>
+            NilChangeStruct (Either a b) where
   nil (Left a) = LeftC (nil a)
   nil (Right a) = RightC (nil a)
 \end{code}
