@@ -114,14 +114,14 @@ in~\cref{sec:motivating-example}.
   \label{thm:soundness-compiled-changesfinal}
   Let $\tcache$ and $\tterm$ be such that 
   $(\tcache, \tterm) = \compileterm{\bullet}{\sterm}$.
-  For all $\iectx, \sterm$ and $\icloseddvalue$,
+  For all $\iectx, \sterm$ and $\icloseddvalue$ such that
   $\seval{\iectx}{\iderive\sterm}{}{\icloseddvalue}$,
-  for $\old\tdectx$ and $\new\tdectx$ such that
-  $\oldenvwithcache{\compile\iectx}{\tcache}{\old\tdectx}$
-  and $\newenvwithcache{\compile\iectx}{\tcache}{\new\tdectx}$,
+  for all $\old\tdectx$ and $\new\tdectx$ such that
+  $\oldenvwithcache{\compile\iectx}{\tcache}{\old\tdectx}$,
+  $\newenvwithcache{\compile\iectx}{\tcache}{\new\tdectx}$,
   $\seval{\oldenv{\old\tdectx}}{\tterm}{}{(\old\tclosedvalue, \oldtcachedclosedvalues)}$ and
   $\seval{\newenv{\new\tdectx}}{\tterm}{}{(\new\tclosedvalue, \newtcachedclosedvalues)}$,
-  then
+  we have
   $
   \seval{\old\tdectx}{\derive\tcache\sterm}{}{(\compile{\icloseddvalue}, \newtcachedclosedvalues)}
   $.
