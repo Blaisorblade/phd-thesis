@@ -924,8 +924,8 @@ imply relations at step-count $k < n$.
 thesis. If |tau = Nat| they coincide. For |valset (sigma ->
 tau)|, parts of the hypothesis and thesis match.
 For some relation |P|,
-the rest of the hypothesis has shape |forall j < n. ^^ P(j, v1, dv, v2)|
-and the rest of the thesis has shape |forall j < k. ^^ P(j, v1, dv,
+the rest of the hypothesis has shape |forall j < n. P(j, v1, dv, v2)|
+and the rest of the thesis has shape |forall j < k. P(j, v1, dv,
 v2)|. Assume $j < k$. We must prove |P(j, v1, dv, v2)|, but since
 $j < k \le n$ we can just apply the hypothesis.
 
@@ -1217,7 +1217,7 @@ details~\citep{Ahmed2006stepindexed}.
                   \{ \, |(k, envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `such` ^^^
                     ^&^ forall j v1 v2 . ^^^
                     ^&^ qua ((j < k `wand` bseval t1 rho1 v1 `wand` bseval t2 rho2 v2)) => ^^^
-                    ^&^ qua (exists dv . ^^ dbseval dt rho drho dv `wand` (k - j, v1, dv, v2) `elem` valsetunt) | \, \}\\
+                    ^&^ qua (exists dv . dbseval dt rho drho dv `wand` (k - j, v1, dv, v2) `elem` valsetunt) | \, \}\\
   \\
   |envset emptyCtx| ={} & \{ \, |(k, emptyRho, emptyRho, emptyRho)| \, \} \\
   |envset (Gamma, x)| ={} &

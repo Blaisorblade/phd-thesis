@@ -259,6 +259,8 @@
 %format dx_i = dx"_i"
 
 % Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+%format period_ = "\mathpunct{.}"
 
 %format mu = "\mu"
 %format mmu x = mu x "\hsforall "
