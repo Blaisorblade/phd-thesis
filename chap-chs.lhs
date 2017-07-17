@@ -635,6 +635,7 @@ As promised, given change structures for base types we can
 provide change structures for all types:
 
 \begin{restatable}[Change structures for base types]{requirement}{baseChs}
+  \label{req:base-change-structures}
   For each base type |iota| we must have a change structure
   |chs(iota)| defined on base set |eval(iota)|, based on the
   basic change structures defined earlier.
