@@ -20,7 +20,14 @@
 \newcommand\side[1]{\\[-0.9em]&\multicolumn{2}{l}{#1}}
 \newcommand\nextline{\\[-0.9em]}
 \newcommand\beforeside{\\[-0.5em]}
-\newcommand\tquote[1]{\llbracket #1 \rrbracket}
+
+\iftoggle{poplForThesis}{
+  % My thesis uses more space.
+  % Braces to avoid misunderstanding surrounding [].
+  \newcommand\tquote[1]{{\mean{#1}}}
+}{
+  \newcommand\tquote[1]{\llbracket #1 \rrbracket}
+}
 
 % https://tex.stackexchange.com/a/102699/1340
 \newcommand\many[1]{\overline{\vphantom{d} #1}}

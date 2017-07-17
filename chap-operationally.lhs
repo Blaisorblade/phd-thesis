@@ -714,8 +714,8 @@ t, /- t) `elem` compset tau|. From the definition of |compset tau| and
 dv| and |(v, dv, v) `elem` valset tau|.
 \end{proof}
 %{
-%format (valset' (tau)) = "\mathcal{RV'}\left\llbracket" tau "\right\rrbracket"
-%format (compset' (tau)) = "\mathcal{RC'}\left\llbracket" tau "\right\rrbracket"
+%format (valset' (tau)) = "\mathcal{RV'}\mean{" tau "}"
+%format (compset' (tau)) = "\mathcal{RC'}\mean{" tau "}"
 \begin{remark}
   Compared to prior work,
   these relations are unusual for two reasons. First, instead of

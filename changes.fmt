@@ -402,15 +402,15 @@
 %format (star rho (t)) = rho "^*(" t ")"
 %format starv v = v "^*"
 
-%format evalVal (w) rho = "\mathcal{V}\left\llbracket" w "\right\rrbracket" rho
-%format evalPrim p v = "\mathcal{P}\left\llbracket" p "\right\rrbracket" v
+%format evalVal (w) rho = "\mathcal{V}\mean{" w "}" rho
+%format evalPrim p v = "\mathcal{P}\mean{" p "}" v
 
-%format devalVal (w) rho = "\mathcal{V}_{\Delta}\left\llbracket" w "\right\rrbracket" rho
-%format devalPrim p v = "\mathcal{P}_{\Delta}\left\llbracket" p "\right\rrbracket" v
+%format devalVal (w) rho = "\mathcal{V}_{\Delta}\mean{" w "}" rho
+%format devalPrim p v = "\mathcal{P}_{\Delta}\mean{" p "}" v
 
-%format (valset (tau)) = "\mathcal{RV}\left\llbracket" tau "\right\rrbracket"
-%format (compset (tau)) = "\mathcal{RC}\left\llbracket" tau "\right\rrbracket"
-%format (envset (gamma)) = "\mathcal{RG}\left\llbracket" gamma "\right\rrbracket"
+%format (valset (tau)) = "\mathcal{RV}\mean{" tau "}"
+%format (compset (tau)) = "\mathcal{RC}\mean{" tau "}"
+%format (envset (gamma)) = "\mathcal{RG}\mean{" gamma "}"
 
 %format valsetunt = "\mathcal{RV}"
 %format compsetunt = "\mathcal{RC}"
