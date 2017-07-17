@@ -12,7 +12,7 @@ define in this chapter differentiation for System F, by adapting results about p
 %
 We stop short of a full proof that this generalization is correct, but we have
 implemented and tested it on a mature implementation of a System F typechecker;
-we believe the proof will be a straightforward adaptation of existing ones about
+we believe the proof will mostly be a straightforward adaptation of existing ones about
 parametricity, but we leave verification for future work.
 
 % define a form of differentiation to System F that arises as
