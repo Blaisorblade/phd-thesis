@@ -425,6 +425,7 @@ on sequences defined by finger trees~\citep{hinze2006finger},
 following \citet{Firsov2016purely}.
 
 \section{Efficient sequence changes}
+\pg{move/merge this to chapter on CTS and add pointer}
 \citet{Firsov2016purely} define an efficient representation of list changes in a
 framework similar to ILC, and incrementalize selected operations over this change
 structure. They also provide combinators to assemble further operations on top
@@ -462,6 +463,7 @@ type Dt^(Sequence a) = SeqChange a
 \subsection{Incremental higher-order primitives and nested loops}
 \pg{Nested loops}
 \pg{we need to discuss how map propagates changes to functions.}
+
 \section{Products}
 \label{sec:chs-products-intro}
 It is also possible to define change structures for arbitrary sum and product
