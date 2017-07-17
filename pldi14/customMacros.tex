@@ -99,11 +99,7 @@
 \NewDocumentCommand{\ChangeStruct}{m}{\widehat{#1}}
 \NewDocumentCommand{\chs}{m}{\ChangeStruct{#1}}
 
-%http://tex.stackexchange.com/a/163831/1340
-\usepackage{stackengine}
-\NewDocumentCommand{\Doe}{}{\mathrel{\stackon[1pt]{$=$}{$\scriptscriptstyle\Delta$}}}
-%{\ensuremath{\overset{\scriptscriptstyle\GD}{=}}}
-%{\triangleq}
+\NewDocumentCommand{\Doe}{}{\mathrel{=_{\scriptscriptstyle\Delta}}}
 
 \NewDocumentCommand{\MAP}{}{\Term{map}}
 
