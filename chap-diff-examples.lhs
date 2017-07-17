@@ -23,6 +23,7 @@ function changes to manipulate the embedded environments, as we discuss in
 \cref{ch:defunc-fun-changes}. We will also need ways to remember intermediate
 results, which we will discuss in \cref{part:caching} (in particular
 \cref{ch:cts}).
+We will also use overly simplified change structures to illustrate a few points.
 
 \section{Change structures as type-class instances}
 We encode change structures, as sketched earlier in \cref{sec:change-intro},
@@ -57,8 +58,7 @@ When adding support for a datatype |T|, we will strive to
 define both a change structure and derivatives of introduction and
 elimination forms for |T|, since such forms constitute a complete API
 for using that datatype. However, we will sometimes have to restrict
-elimination forms to scenarios that can be incrementalized efficiently. We will
-also use overly simplified change structures to illustrate a few points.
+elimination forms to scenarios that can be incrementalized efficiently.
 
 \pg{Put somewhere:}
 In general, to differentiate a primitive |f : A -> B| once we have defined a
@@ -89,7 +89,8 @@ derivatives invoked on the produced changes are not efficient.
 
 \section{Incrementalizing a collection API}
 \label{sec:incr-coll-api-intro}
-In this section, we describe a collection API that we incrementalize in this chapter.
+In this section, we describe a collection API that we incrementalize (partially)
+in this chapter.
 
 To avoid notation conflicts, we represent lists via
 datatype |List a|, defined as follows:
