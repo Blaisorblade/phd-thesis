@@ -184,8 +184,11 @@ any types |sigma, tau|).
 \end{example}
 
 Arguably, the need for a special equivalence is a defect in our
-semantics of change programs; see \cref{sec:alt-change-validity}
-for relevant discussion.
+semantics of change programs; it might be more preferable to make the type of
+changes abstract throughout the program (except for derivatives of primitives,
+which must inspect derivatives), but this is not immediate, especially in a
+module system like Haskell.
+Other possible alternatives are discussed in \cref{sec:alt-change-validity}.
 
 \subsection{Syntactic validity}
 \label{sec:denot-syntactic-validity}
