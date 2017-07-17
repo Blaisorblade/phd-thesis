@@ -60,7 +60,7 @@ mylhs2tex.sty: mylhs2tex.lhs
 	latexmk $* $(REDIR)
 quick: $(PAPER_NAME).tex $(INTERM_PRODUCTS) FORCE
 	# Pass pdflatex the same options as latexmk would.
-	pdflatex -synctex=1 -file-line-error -recorder $(PAPER_NAME)
+	pdflatex -interaction=nonstopmode -synctex=1 -file-line-error -recorder $(PAPER_NAME)
 	$(OPEN) $(PDF_NAME)
 
 .PRECIOUS: %.tex
