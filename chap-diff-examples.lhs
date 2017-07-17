@@ -57,8 +57,12 @@ also use overly simplified change structures to illustrate a few points.
 
 \pg{Put somewhere:}
 In general, to differentiate a primitive |f : A -> B| once we have defined a
-change structure for |A|, we can start by defining |df a1 da = f (a1 `oplus` da)
-`ominus` f a1|, assume |da| is a valid change from |a1| to |a2|, and try to
+change structure for |A|, we can start by defining
+\begin{equation}
+  \label{eq:diff-primitive-eq-reasoning}
+  |df a1 da = f (a1 `oplus` da) `ominus` f a1|,
+\end{equation}
+where |da| is a valid change from |a1| to |a2|. We then try to
 simplify and rewrite the expression using \emph{equational reasoning}, so that it does
 not refer to |`ominus`| any more, as far as possible.
 In fact, instead of defining |`ominus`| and simplifying |f a2 `ominus` f a1| to
@@ -158,7 +162,8 @@ Removing an element from an empty list is an invalid change, hence it is safe to
 give an error in that scenario as mentioned when introducing |`oplus`|
 (\cref{sec:change-intro}).
 
-By using equational reasoning as suggested in \cref{sec:plugin-design},
+By using equational reasoning as suggested in \cref{sec:plugin-design}, starting
+from \cref{eq:diff-primitive-eq-reasoning},
 one can show formally that |dfold xs (Prepend x)| should be a change that,
 in a sense, ``adds'' |x| to the result using group operations:
 \begin{code}
@@ -484,51 +489,102 @@ duncurry _f df (x, y) (dx, dy) = df x dx y dy
 One can also define $n$-ary products in a similar way. However, a product change
 contains as many entries as a product.\pg{Sketch alternatives.}
 
-\section{Sums}
+\section{Sums, pattern matching and conditionals}
 \label{sec:chs-sums}
+In this section we define change structures for sum types, together with the
+derivative of their introduction and elimination forms.
+We also obtain support for booleans (which can be encoded as sum type |1 + 1|)
+and conditionals (which can be encoded in terms of elimination for sums).
+We have mechanically proved correctness of this change structure and
+derivatives, but we do not present the tedious details in this thesis and refer
+to our Agda formalization.
+
 Changes structures for sums are more challenging than ones for products. We can
 define them, but in many cases we can do better with specialized structures.
+Nevertheless, such changes are useful in some scenarios.
+
+In Haskell, sum types |a + b| are conventionally defined via datatype |Either a
+b|, with introduction forms |Left| and |Right| and elimination form |either|
+which will be our primitives:
 \begin{code}
-data EitherChange a b = LeftC (Dt a) | RightC (Dt b) | EitherReplace (Either a b)
-oplusEither
-  :: (ChangeStruct a, ChangeStruct b) =>
-     Either a b -> EitherChangeBase a b -> Either a b
-(Left a) `oplusEitherBase` (LeftC da) = Left (a `oplus` da)
-(Right b) `oplusEitherBase` (RightC db) = Right (b `oplus` db)
-(Left _) `oplusEitherBase` (RightC _) = error "Invalid change!"
-(Right _) `oplusEitherBase` (LeftC _) = error "Invalid change!"
+data Either a b = Left a | Right b
+
+either :: (a -> c) -> (b -> c) -> Either a b -> c
+either f g (Left a) = f a
+either f g (Right b) = g b
+\end{code}
+
+We can define the following change structure.
+\begin{code}
+data EitherChange a b = LeftC (Dt^a) | RightC (Dt^b) | EitherReplace (Either a b)
 
 instance (ChangeStruct a, ChangeStruct b) => ChangeStruct (Either a b) where
-  type Dt (Either a b) = Replace (Either a b) (EitherChangeBase a b)
-  oplus = oplusEither
+  type Dt^(Either a b) = EitherChange a b
+  Left a   `oplus` LeftC da          = Left (a `oplus` da)
+  Right b  `oplus` RightC db         = Right (b `oplus` db)
+  Left _   `oplus` RightC _          = error "Invalid change!"
+  Right _  `oplus` LeftC _           = error "Invalid change!"
+  _        `oplus` EitherReplace e2  = e2
+
   oreplace = EitherReplace
 
 instance (NilChangeStruct a, NilChangeStruct b) => NilChangeStruct (Either a b) where
-  nil (Left a) = Ch $ LeftC (nil a)
-  nil (Right a) = Ch $ RightC (nil a)
+  nil (Left a) = LeftC (nil a)
+  nil (Right a) = RightC (nil a)
 \end{code}
-\pg{Add |either| and |deither|!}
+Changes to a sum value can either keep the same ``branch'' (left or right) and
+modify the contained value, or replace the sum value with another one altogether.
+Specifically, change |LeftC da| is valid from |Left a1| to |Left a2| if |da| is valid from
+|a1| to |a2|. Similarly, change |RightC db| is valid from |Right b1| to |Right
+b2| if |db| is valid from |b1| to |b2|.
+Finally, replacement change |EitherReplace e2| is valid from |e1| to |e2| for
+any |e1|.
 
-\paragraph{Extensions}
+Using \cref{eq:diff-primitive-eq-reasoning}, we can then obtain definitions for
+derivatives of primitives |Left|, |Right| and |either|.
+\begin{code}
+dLeft :: a -> Dt^a -> Dt^(Either a b)
+dLeft a da = LeftC da
+
+dRight :: b -> Dt^b -> Dt^(Either a b)
+dRight b db = RightC db
+
+deither ::
+  (NilChangeStruct a, NilChangeStruct b, DiffChangeStruct c) =>
+  (a -> c) -> Dt^(a -> c) -> (b -> c) -> Dt^(b -> c) ->
+  Either a b -> Dt^(Either a b) -> Dt^c
+deither f df g dg (Left a) (LeftC da) = df a da
+deither f df g dg (Right b) (RightC db) = dg b db
+deither f df g dg e1 (EitherReplace e2) =
+  either (f `oplus` df) (g `oplus` dg) e2 `ominus` either f g e1
+deither _ _ _ _ _ _ = error "Invalid sum change"
+\end{code}
+
 Unfortunately, with this change structure a change from |Left a1| to |Right b2|
 is simply a replacement change, so derivatives processing it must recompute
-results from scratch. Could we do better?
-In general no, since there need be no shared data between two
-branches of a datatype.
+results from scratch.
+In general, we cannot do better, since there need be no shared data between two
+branches of a datatype. We need to find specialized scenarios where better
+implementations are possible.
+
+\paragraph{Extensions and future work}
 But in some cases types |a| and |b| are related. Take again lists: a change from
 list |as| to list |Cons a2 as| should simply say that we prepend |a2| to the
-list. In a sense, we are just using a change structure from type |List a| to |a
-`times` List a|.
+list. In a sense, we are just using a change structure from type |List a| to
+|(a, List a)|.
 More in general, if change |das| from |as1| to |as2| is small, a change from
 list |as1| to list |Cons a2 as2| should simply ``say'' that we prepend |a2| and
 that we modify |as1| into |as2|.
-With a better way to describe a change from values of type |a| to
-values of type |b|,
-\pg{Later we sketch change structures across types.}
 
-\pg{Idea: |ChangeStruct2 t1 t2, Iso t2 t3) => ChangeStruct2 t1 t3|}
-% Lists can be described as the fixpoint of a sum of
-% product: |List a = mu X. 1 + A `times` X|
+Such a facility might allow building change structures such as the one we
+considered for lists in \cref{sec:incr-fold}.
+
+In \cref{sec:param-derive-changes-across-types} we sketch a few ways to
+construct such change structures, based on the concept of \emph{polymorphic
+  change structure}, where changes have source and destination of different
+types. Based on initial experiments, we believe one could develop these
+constructions into a powerful combinator language for change structures, but
+many questions remain open, so we leave this effort for future work.
 
 \section{Chapter conclusion}
 In this chapter we have toured what can and cannot be incrementalized using

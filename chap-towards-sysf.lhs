@@ -392,8 +392,9 @@ typeclass and relative instances, as we did in \cref{ch:diff-examples}.%
 (\url{https://ghc.haskell.org/trac/ghc/ticket/4259}), but
 we ignore this overlap problem. We only want to describe ways to produce new change
 structures from existing ones, and not necessarily how to select automatically
-the appropriate change structure for a given type. Arguably, we are describing
-only ML functors, not typeclass instances.}
+the appropriate change structure for a given type. Arguably, instead of using
+typeclass instances, we should encode change structures as first-class records
+and define a language of combinators for assembling them.}
 \begin{code}
 class ChangeStruct2 tau1 tau2 where
   type Dt2 tau1 tau2
@@ -456,6 +457,14 @@ instance ChangeStruct2 tau tau => ChangeStruct2 (sigma, tau) tau where
 % instance ChangeStruct2 tau tau => ChangeStruct2 (tau, sigma) tau where
 %   type Dt2 (tau, sigma) tau = Dt2 tau tau
 %   (a1, _) `bplus` da = a1 `bplus` da
+
+% With a better way to describe a change from values of type |a| to
+% values of type |b|,
+%\pg{Later we sketch change structures across types.}
+
+%\pg{Idea: |ChangeStruct2 t1 t2, Iso t2 t3) => ChangeStruct2 t1 t3|}
+% Lists can be described as the fixpoint of a sum of
+% product: |List a = mu X. 1 + A `times` X|
 
 \section{Differentiation for System F}
 \label{sec:param-derive-changes-across-types-transform}
