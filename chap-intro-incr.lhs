@@ -107,7 +107,7 @@ more efficient to detect that some output can be reused thanks to a description
 of the input changes, rather than through runtime detection.
 \pg{Consider list insertion and map. This point might need to be moved to later.}
 %There is a tension between the efficiency
-We return to this point in \cref{sec:fw-primitives}.
+%We return to this point in \cref{sec:fw-primitives}.
 \pg{Nevertheless, we do not compete with SAC and Adapton?}
 
 We propose that IDSLs be higher-order, so that primitives can be parameterized

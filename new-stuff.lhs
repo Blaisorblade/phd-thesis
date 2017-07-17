@@ -232,5 +232,6 @@ update :: Int -> a -> Seq a -> Seq a
 
 
 \chapter{Conclusion and future work}
-\section{Primitives}
-\label{sec:fw-primitives}
+
+% \section{Primitives}
+% \label{sec:fw-primitives}
