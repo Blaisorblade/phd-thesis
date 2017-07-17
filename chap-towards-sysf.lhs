@@ -102,10 +102,11 @@ First, we show a variant of their parametricity transformation, adapted to a
 variant of STLC without base types but with type variables. Presenting |stlc|
 using type variables will help when we come back to System F, and allows
 discussing parametricity on STLC.
-Their transformation
+This transformation
 is based on the presentation of STLC as calculus |stlc|, a \emph{Pure Type
 System} (PTS)~\citep[Sec.~5.2]{Barendregt1992lambda}.
 
+\paragraph{Background}
 In PTSs, terms and types form a single syntactic category, but are distinguished
 through an extended typing judgement (written |Gamma /- t : t|) using additional
 terms called \emph{sorts}. Function types |sigma -> tau| are generalized by
@@ -133,12 +134,14 @@ naturals. STLC restricts |Pi|-types |PPi (x : A). B| to the usual arrow types |A
 -> B| through |ptsRel|: one can show that in |PPi (x : A) . B|, variable |x|
 cannot occur free in |B|.
 
+\paragraph{Parametricity}
 \citeauthor{Bernardy2011realizability} show how to transform a typed term |Gamma
-/- t : tau| in a strongly normalizing PTS $P$ into a proof that |t| satisfies the
+/- t : tau| in a strongly normalizing PTS $P$ into a proof that |t| satisfies a
 parametricity statement for |tau|. The proof is in a logic represented by PTS
-$P^2$, constructed uniformly from $P$, and strongly normalizing whenever $P$
-is.
-\citeauthor{Bernardy2011realizability}'s transformation on |stlc| produces terms
+$P^2$. PTS $P^2$ is constructed uniformly from $P$, and is strongly normalizing
+whenever $P$ is.
+When the base PTS $P$ is |stlc|,
+\citeauthor{Bernardy2011realizability}'s transformation produces terms
 in a PTS |stlc2|, produced by transforming |stlc|.
 PTS |stlc2| extends |stlc| with a separate sort |cstar| of propositions, together with
 enough abstraction power to abstract propositions over values.
@@ -147,7 +150,7 @@ allow abstracting over them.
 
 In parametricity statements about |stlc|, we write |pElemDt1 tau t1 t2| for a
 proposition (hence, living in |cstar|) that states that |t1| and |t2| are
-related. This proposition is defined, as usual, via a logical relation.
+related. This proposition is defined, as usual, via a \emph{logical relation}.
 We write |dxx| for a proof that |x1| and |x2| are related. For type variables |alpha|,
 transformed terms abstract over an arbitrary relation |rAlpha| between |alpha1| and
 |alpha2|. When |alpha| is instantiated by |tau|, |rAlpha| \emph{can} (but does
@@ -242,13 +245,14 @@ pid : pElemDt1 (alpha -> alpha) (idx1 id) (idx2 id)|.
 \label{sec:differentiation-dep-types-stlc}
 \pg{Figure out if we're just redoing \citep{Bernardy10}.}
 We obtain a close variant of differentiation by altering the transformation for
-binary parametricity. We obtain a variant very closer to the one investigated by \citet*{Bernardy10}.
+binary parametricity. We obtain a variant very close to the one investigated by \citet*{Bernardy10}.
 Instead of only having proofs that values are related, we can modify |pElemDt1 (tau)
 t1 t2| to be a type of values---more precisely, a dependent type |elemDt2 tau t1
 t2| of valid changes, indexed by source |t1 : idx1(tau)| and destination |t2 :
 idx2(tau)|. Similarly, |rAlpha| is replaced by a dependent type of changes, not
 propositions, that we write |DtAlpha|.
-Formally, this is encoded by replacing sort |cstar| with |star|, and by moving
+Formally, this is encoded by replacing sort |cstar| with |star| in
+\citet{Bernardy2011realizability}'s transform, and by moving
 target programs in a PTS that allows for both simple and dependent types, like
 the Edinburgh Logical Framework; such a PTS is known as
 |lamp|~\citep{Barendregt1992lambda}.
