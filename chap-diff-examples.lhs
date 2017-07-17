@@ -590,6 +590,42 @@ In general, we cannot do better, since there need be no shared data between two
 branches of a datatype. We need to find specialized scenarios where better
 implementations are possible.
 
+\subsection{Optimizing |filter|}
+In \cref{sec:incr-coll-api-intro} we have defined |filter| using a conditional,
+and now we have just explained that in general conditionals are inefficient!
+This seems pretty unfortunate. But luckily, we can optimize |filter| using
+equational reasoning.
+
+Consider again the earlier definition of |filter|:
+\begin{code}
+filter :: (a -> Bool) -> List a -> List a
+filter p = concatMap (\x -> if p x then singleton x else Nil)
+\end{code}
+As explained, we can encode conditionals using |either| and differentiate the
+resulting program. However, if |p x| changes from |True| to |False|, or
+viceversa (that is, for all elements |x| for which |dp x dx| is a non-nil
+change), we must compute |`ominus`| at runtime. However, |`ominus`| will compare
+empty list |Nil| with a singleton list produced by |singleton x| (in one
+direction or the other). We can have |`ominus`| detect this situation at
+runtime. But since the implementation of |filter| is known statically, we can
+optimize this code at runtime, rewriting |singleton x `ominus` Nil| to |Insert
+x|, and |Nil `ominus` singleton x| to |Remove|. To enable this optimization in
+|dfilter|, we need to inline the function that |filter| passes as argument to
+|concatMap| and all the functions it calls except |p|. Moreover, we need to
+case-split on possible return values for |p x| and |dp x dx|. We omit the steps
+because they are both tedious and standard.
+
+It appears in principle possible to automate such transformations by adding
+domain-specific knowledge to a sufficiently smart compiler, though we have made
+no attempt at an actual implementation. It would be first necessary to
+investigate further classes of examples where optimizations are
+applicable.\pg{claim we have more}
+Sufficiently smart compilers are rare, but since our approach produces purely
+functional programs we have access to GHC and HERMIT~\citep{Farmer2012hermit}.
+An interesting alternative (which does have some support for side effects) is
+LMS~\citep{rompf2010lightweight} and Delite~\citep{Brown11}.
+We leave further investigation for future work.
+
 \paragraph{Extensions and future work}
 But in some cases types |a| and |b| are related. Take again lists: a change from
 list |as| to list |Cons a2 as| should simply say that we prepend |a2| to the
