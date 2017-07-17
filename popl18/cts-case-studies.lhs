@@ -2,7 +2,7 @@
 %include polycode.fmt
 %include changes-popl.fmt
 
-\section{Case studies}
+\section{Incrementalization case studies}
 \label{sec:case-studies}
 
 In this section, we investigate whether our transformations incrementalize
@@ -26,7 +26,7 @@ recomputation and incremental evaluation.
 Our benchmarks were compiled by GHC 8.0.2. They were run on a 2.60GHz dual core
 Intel i7-6600U CPU with 12GB of RAM running Ubuntu 16.04.
 
-\subsection{Incrementalizing average computation over integers bags}
+\subsection{Averaging integers bags}
 \label{sec:incr-an-aver}
 
 Section \cref{sec:motivating-example} motivates our transformation with a
@@ -202,7 +202,7 @@ and evaluating an integer is fast. We will see an example where there is a
 bigger difference between the two.
 
 
-\subsection{Incrementalizing a nested loop over two sequences}
+\subsection{Nested loops over two sequences}
 \label{sec:incr-nest-loop}
 
 We implemented incremental sequences and related primitives following \citet{Firsov2016purely}: our
@@ -332,7 +332,7 @@ report the time it takes to produce and fully force only the output changes whic
 is of a lower time complexity.
 
 
-\subsection{Incrementalizing an indexed join of two bags}
+\subsection{Indexed joins of two bags}
 \label{sec:incr-an-index}
 
 As expected, we found that we can compose functions into larger and more complex programs and
