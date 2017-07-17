@@ -534,9 +534,9 @@ either f g (Right b) = g b
 We can define the following change structure.
 \begin{code}
 data EitherChange a b
-  = LeftC (Dt^a)
-  | RightC (Dt^b)
-  | EitherReplace (Either a b)
+  =  LeftC (Dt^a)
+  |  RightC (Dt^b)
+  |  EitherReplace (Either a b)
 
 instance (  ChangeStruct a, ChangeStruct b) =>
             ChangeStruct (Either a b) where
