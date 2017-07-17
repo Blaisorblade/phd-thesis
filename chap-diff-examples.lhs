@@ -480,9 +480,11 @@ instance (ChangeStruct a, ChangeStruct b) => ChangeStruct (a, b) where
   nil (a, b) = (nil a, nil b)
   (da1, db1) `ocompose` (da2, db2) = (da1 `ocompose` da2, db1 `ocompose` db2)
 \end{code}
-We can also define derivatives for the basic primitives on product types, both
+
+Through equational reasoning as in \cref{sec:plugin-design}, we can also
+compute derivatives for basic primitives on product types, both
 the introduction form (that we alias as |pair|) and the elimination forms |fst|
-and |snd|.
+and |snd|. We just present the resulting definitions:
 % ∆⨟
 \begin{code}
 pair a b = (a, b)
