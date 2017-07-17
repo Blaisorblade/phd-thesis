@@ -31,8 +31,8 @@ we recall here:
 \[
   \begin{array}{rcl}
     \oderive\tx & = & \tdx \\
-    \oderive{t \, u} & = & \oderive{t}\,u\,\oderive{u} \\
-    \oderive{\lambda \tx. t} & = & \lambda \tx\,\tdx. \oderive{t}
+    \oderive{\sapp t u} & = & \idapp{\oderive{t}}{u\,\oderive{u}} \\
+    \oderive{\slam\tx\sterm} & = & \ilam{\tx\,\tdx}{\oderive{t}}
   \end{array}
 \]
 
@@ -47,10 +47,10 @@ follows:
 \[
   \begin{array}{rcl}
     \iderive{\bullet} & = & \bullet \\
-    \iderive{\sectxcons\sectx{\tf = \sclosure{\sectx_f}{\lambda \tx. \sterm}}}
+    \iderive{\sectxcons\sectx{\tf = \sclosure{\sectx_f}{\slam \tx \sterm}}}
     &=&
-    \sectxcons{\iderive\sectx}{\tf = \sclosure{\sectx_f}{\lambda \tx. \sterm},
-    \tdf = \sclosure{\iderive{\sectx_f}}{\lambda \tx\,\tdx. \iderive{\sterm}}}
+    \sectxcons{\iderive\sectx}{\tf = \sclosure{\sectx_f}{\slam \tx \sterm},
+    \tdf = \sclosure{\iderive{\sectx_f}}{\ilam{\tx\,\tdx}{\iderive{\sterm}}}}
     \\
     \iderive{\sectxcons\sectx{\tx = \sclosedvalue}}
     &=&
