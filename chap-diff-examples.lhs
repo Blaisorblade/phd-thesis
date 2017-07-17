@@ -445,14 +445,6 @@ type Dt^(Sequence a) = SeqChange a
 \subsection{Incremental higher-order primitives and nested loops}
 \pg{Nested loops}
 \pg{we need to discuss how map propagates changes to functions.}
-
-\section{A higher-order example}
-\label{sec:differentiation-fold-example}
-\pg{write}
-% Referenced later in sec-performance.tex by saying:
-% % We have seen in \cref{ssec:differentiation} that $\Derivative$
-% % needlessly recomputes $\Merge\Xs\Ys$. However, the result is a
-% % base input to $\FOLD'$.
 \section{Products}
 \label{sec:chs-products-intro}
 It is also possible to define change structures for arbitrary sum and product

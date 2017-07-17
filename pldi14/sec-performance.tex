@@ -42,9 +42,8 @@ is self-maintainable in this case (as discussed in next section).
 We take advantage of this by implementing a specialized
 derivative for $\FOLDBAG$.
 
-\pg{broken reference}
-We have seen in \cref{sec:differentiation-fold-example} that $\Derivative$
-needlessly recomputes $\Merge\Xs\Ys$. However, the result is a
+Similarly to what we have seen in \cref{sec:derive-example-merge} that $\Derivative$
+needlessly recomputes $\Merge\Xs\Ys$ without optimizations. However, the result is a
 base input to $\FOLD'$.
 %
 In next section, we'll replace $\FOLD'$ by a self-maintainable

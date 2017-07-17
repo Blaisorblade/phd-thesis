@@ -864,8 +864,17 @@ program. In the above example, if we don't inline derivatives and
 use $\beta$-reduction to simplify programs, |derive(sum (merge xs
 ys))| is just |dsum (merge xs ys) (derive(merge xs ys))|. A
 direct execution of this program will compute |merge xs ys|,
-taking time linear in the base inputs.%
-\pg{Point out this is self-maintainable!}
+which would waste time linear in the base inputs.%
+% \pg{Point out this is self-maintainable!}
+
+% Without such optimizations, incremental program
+% |dsum (merge xs ys) (derive(merge xs ys))| would recompute |merge
+% xs ys|, which would be wasteful.
+We'll show how to avoid such recomputations in general in
+\cref{sec:cts-motivation}; but here we can avoid computing |merge xs ys| simply
+because |dsum| does not use its base argument, that is, it is
+\emph{self-maintainable}. Without the approach described in
+\cref{ch:cts}, we are restricted to self-maintainable derivatives.
 
 \section{Chapter conclusion}
 In this chapter, we have seen how a correct differentiation transform
