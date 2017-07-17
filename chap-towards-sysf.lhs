@@ -377,7 +377,7 @@ being applied to valid inputs, using the proof that |derive t| is correct
 \label{sec:param-derive-changes-across-types}
 %format ChangeStruct2
 %format NilChangeStruct2
-%format `bplus` = "\boxplus"
+%format `bplus` = "\myboxplus"
 %format bplus = "(" `bplus` ")"
 %instance bnilc = "\mathbf{0}_2"
 Earlier, we restricted our transformation so that there can be a change

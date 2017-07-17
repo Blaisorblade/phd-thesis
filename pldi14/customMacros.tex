@@ -55,6 +55,12 @@
 \newcommand{\Keyword}[1]{\textbf{#1}}
 \newcommand{\Term}[1]{\Varid{#1}}
 
+% Used in {sec:param-derive-changes-across-types}, looks wrong on
+% screen without adjustment.
+%\newcommand{\myboxplus}{\boxplus} % Looks too high.
+% -0.5pt came after trying -1pt
+\newcommand{\myboxplus}{\mathbin{\raisebox{-0.5pt}{$\boxplus$}}}
+
 \newenvironment{equational}{
   % https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
 \let\onelinecomment=\onelinecommentchars
