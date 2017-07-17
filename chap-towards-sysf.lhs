@@ -49,10 +49,16 @@ Later, we reduced the proof core to defining a logical relation, proving its
 fundamental property and a few corollaries, as shown in~\cref{ch:derive-formally},
 Extending this logical relation to System F proved comparably more straightforward.
 
-% The syntax we use
-% for change types suggests that
-
-% then extend differentiation to System F.
+\paragraph{Parametricity versus ILC}
+Both parametricity and ILC define logical relations across program executions on
+different inputs. When studying parametricity, differences are only allowed in
+the implementations of abstractions (through abstract types or other
+mechanisms). To be related, different implementations of the same abstraction
+must give results that are equivalent according to the calling program.
+Indeed, parametricity defines not just a logical relation but a \emph{logical
+equivalence}, that can be shown to be equivalent to contextual
+equivalence~(as explained for instance by \citet[Ch.~48]{Harper2016PFPL} or by
+\citet{Ahmed2006stepindexed}).
 
 %{
 %format ptsRel = "\mathcal{R}"
@@ -80,6 +86,17 @@ Extending this logical relation to System F proved comparably more straightforwa
 %format sysf = "\lambda_{2}"
 %format sysf2 = sysf "^2"
 %format rAlpha = "\mathcal{R}^" alpha
+
+When studying ILC, logical equivalence between terms |t1| and |t2|
+(written |pElemDt1 tau t1 t2|), appears to be generalized by the existence
+of a valid change |de| between |t1| and |t2| (that is, |fromto tau t1 dt t2|).
+As in earlier chapters, if terms |e1| and |e2| are equivalent, any valid change
+|dt| between them is a nil change, but validity allows describing other changes.
+% The syntax we use
+% for change types suggests that
+
+% then extend differentiation to System F.
+
 \section{The parametricity transformation}
 First, we show a variant of their parametricity transformation, adapted to a
 variant of STLC without base types but with type variables. Presenting |stlc|
@@ -802,15 +819,6 @@ investigation as future work.
 % parametricity.
 % As a follow-up work \citet{CaiPhD} studies models of ILC based on directed and
 % reflexive graphs.
-
-% Both parametricity and ILC define logical relations across program executions on
-% different inputs. When studying parametricity, differences are only allowed in
-% the implementations of abstractions (through abstract types or other
-% mechanisms). To be related, different implementations of the same abstraction
-% must give results that are equivalent according to the calling program.
-% Indeed, parametricity defines not just a logical relation but a \emph{logical
-% equivalence}, that can be shown to be equivalent to contextual
-% equivalence~\citet{Ahmed2006stepindexed}.
 
 % In ILC, instead, |fromto V v1 dv v2| holds even if |v1| and |v2| are different
 % and this difference is observable in the program, but require that |dv| is a
