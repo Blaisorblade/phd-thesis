@@ -69,7 +69,8 @@ quick: $(PAPER_NAME).tex $(INTERM_PRODUCTS) FORCE
 clean:
 	rm -f \
 	$(PAPER_NAME).aux $(PAPER_NAME).bbl $(PAPER_NAME).blg $(PAPER_NAME).log \
-	$(PAPER_NAME).pdf $(PAPER_NAME).ptb $(PAPER_NAME).toc $(INTERM_PRODUCTS)
+	$(PAPER_NAME).pdf $(PAPER_NAME).ptb $(PAPER_NAME).toc $(PAPER_NAME).thm \
+	$(INTERM_PRODUCTS)
 
 fresh:
 	make clean
