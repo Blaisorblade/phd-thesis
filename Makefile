@@ -51,6 +51,11 @@ endif
 
 new-stuff.tex: defunc.lhs
 
+# Name of base processor and TeX base format.
+baseProcessor = pdflatex
+# Name of TeX base format. Often coincides with baseProcessor.
+baseFormat = $(baseProcessor)
+
 .PHONY: FORCE
 %.tex: %.lhs $(lhsFmt)
 	lhs2TeX -P .:popl18: -o $*.tex $*.lhs
@@ -58,9 +63,9 @@ mylhs2tex.sty: mylhs2tex.lhs
 	lhs2TeX -o $@ $<
 %.pdf: %.tex $(INTERM_PRODUCTS) FORCE
 	latexmk $* $(REDIR)
+# Pass pdflatex the same options as latexmk would.
 quick: $(PAPER_NAME).tex $(INTERM_PRODUCTS) FORCE
-	# Pass pdflatex the same options as latexmk would.
-	pdflatex -interaction=nonstopmode -synctex=1 -file-line-error -recorder $(PAPER_NAME)
+	$(baseProcessor) -interaction=nonstopmode -synctex=1 -file-line-error -recorder $(PAPER_NAME)
 	$(OPEN) $(PDF_NAME)
 
 .PRECIOUS: %.tex

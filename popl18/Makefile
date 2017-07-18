@@ -42,14 +42,19 @@ else
   REDIR=> /dev/null
 endif
 
+# Name of base processor and TeX base format.
+baseProcessor = pdflatex
+# Name of TeX base format. Often coincides with baseProcessor.
+baseFormat = $(baseProcessor)
+
 .PHONY: FORCE
 %.tex: %.lhs $(lhsFormat)
 	lhs2TeX -P .: -o $*.tex $*.lhs
 %.pdf: %.tex $(INTERM_PRODUCTS) $(sources) FORCE
 	latexmk -pdf $* $(REDIR)
+# Pass pdflatex the same options as latexmk would.
 quick: $(PAPER_NAME).tex $(INTERM_PRODUCTS) $(sources)
-	# Pass pdflatex the same options as latexmk would.
-	pdflatex -synctex=1 -file-line-error -recorder $(PAPER_NAME)
+	$(baseProcessor) -synctex=1 -file-line-error -recorder $(PAPER_NAME)
 	$(OPEN) $(PDF_NAME)
 
 .PRECIOUS: %.tex
