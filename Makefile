@@ -16,7 +16,8 @@
 PAPER_NAME = thesis-main
 PDF_NAME=$(PAPER_NAME).pdf
 # Sources that will be watched for changes.
-lhsFmt=$(wildcard *.fmt)
+# $(PAPER_NAME).fmt is a TeX format not a lhs2TeX format.
+lhsFmt=$(filter-out $(PAPER_NAME).fmt, $(wildcard *.fmt))
 lhsSources=$(patsubst %,%.lhs, \
 	chap-intro-incr chap-diff-examples chap-diff-correct-formal chap-chs \
 	chap-eq-reason chap-th-extensions chap-towards-sysf \
@@ -61,10 +62,15 @@ baseFormat = $(baseProcessor)
 	lhs2TeX -P .:popl18: -o $*.tex $*.lhs
 mylhs2tex.sty: mylhs2tex.lhs
 	lhs2TeX -o $@ $<
-%.pdf: %.tex $(INTERM_PRODUCTS) FORCE
+# After the first build, this file will be recompiled by latexmk accounting for
+# all other dependencies thanks to code in .latexmkrc.
+# This line is hence only for the first build. Keep it in sync with .latexmkrc!
+%.fmt: %.ltx
+	$(baseProcessor) -ini -jobname="$*" "&${baseFormat} $*.ltx \dump"
+%.pdf: %.tex %.fmt $(INTERM_PRODUCTS) FORCE
 	latexmk $* $(REDIR)
 # Pass pdflatex the same options as latexmk would.
-quick: $(PAPER_NAME).tex $(INTERM_PRODUCTS) FORCE
+quick: $(PAPER_NAME).tex $(PAPER_NAME).fmt $(INTERM_PRODUCTS) FORCE
 	$(baseProcessor) -interaction=nonstopmode -synctex=1 -file-line-error -recorder $(PAPER_NAME)
 	$(OPEN) $(PDF_NAME)
 
@@ -75,6 +81,7 @@ clean:
 	rm -f \
 	$(PAPER_NAME).aux $(PAPER_NAME).bbl $(PAPER_NAME).blg $(PAPER_NAME).log \
 	$(PAPER_NAME).pdf $(PAPER_NAME).ptb $(PAPER_NAME).toc $(PAPER_NAME).thm \
+	$(PAPER_NAME).fmt \
 	$(INTERM_PRODUCTS) \
 	$(find . -name '*.aux')
 
