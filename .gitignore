@@ -12,6 +12,9 @@
 comment.cut
 *.pdf
 
+# Precompiled format file.
+thesis-main.fmt
+
 ## lhs2TeX output
 chap-intro-incr.tex
 chap-diff-examples.tex
