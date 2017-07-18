@@ -4,3 +4,42 @@
 
 % lhs2TeX setup
 \usepackage{mylhs2tex}
+\input{packages}
+\input{macros}
+
+\usepackage{listings}
+\input{lstsetup}
+
+\input{aosd13/customMacros}
+\input{pldi14/customMacros}
+
+\input{pldi14/macros_part2}
+% from pldi14
+\newcommand{\ILC}{ILC}
+% from aosd13
+\excludecomment{extraEval}
+\includecomment{techrep}
+\excludecomment{nontechrep}
+\includecomment{forNonBeamer}
+
+% Conditional compilation across thesis and POPL18. With multiple commands.
+\newtoggle{poplForThesis}
+\toggletrue{poplForThesis}
+
+% FROM POPL18
+\usepackage{popl18/thesis-defs}
+\usepackage{syntaxmacros,multicol}
+
+% HEAVYWEIGHT (from 2s to 2.5s compile time), enable as late as possible.
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{xcolor}
+
+% Number floats and figures together. Documented at
+% http://stackoverflow.com/a/43266057/53974.
+\makeatletter
+\let\c@table\c@figure
+\let\ftype@table\ftype@figure
+\makeatother
+
+\input{pldi14/agda}

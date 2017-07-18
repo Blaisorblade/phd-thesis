@@ -1,22 +1,5 @@
 %&thesis-main
-\input{packages}
-\input{macros}
-
-\usepackage{listings}
-\input{lstsetup}
-
-\input{aosd13/customMacros}
-\input{pldi14/customMacros}
-
-\input{pldi14/macros_part2}
-% from pldi14
-\newcommand{\ILC}{ILC}
-% from aosd13
-\usepackage{comment}
-\excludecomment{extraEval}
-\includecomment{techrep}
-\excludecomment{nontechrep}
-\includecomment{forNonBeamer}
+% The above line loads a precompiled format coming from precompiling thesis-main.ltx.
 
 % For adapting to compiling the whole thesis, or only parts.
 \newtoggle{full}
@@ -35,28 +18,6 @@
 \includecomment{partCompile}
 }
 
-% Conditional compilation across thesis and POPL18. With multiple commands.
-\newtoggle{poplForThesis}
-\toggletrue{poplForThesis}
-
-% FROM POPL18
-\usepackage{popl18/thesis-defs}
-\usepackage{syntaxmacros,multicol}
-% HEAVYWEIGHT (from 2s to 2.5s compile time), enable as late as possible.
-\iftoggle{full}{
-\usepackage{tikz}
-\usepackage{pgfplots}
-}{
-\usepackage{xcolor}
-}
-
-
-% Number floats and figures together. Documented at
-% http://stackoverflow.com/a/43266057/53974.
-\makeatletter
-\let\c@table\c@figure
-\let\ftype@table\ftype@figure
-\makeatother
 \title{Optimizing and Incrementalizing Collection Queries by AST Transformations}
 \author{Paolo G. Giarrusso}
 
@@ -100,7 +61,6 @@
 %\includeonly{pldi14/sec-intro,new-stuff}
 %\includeonly{aosd13/graphs/evalResLos,aosd13/paperBody,pldi14/sec-intro,backmatter}
 }
-\input{pldi14/agda}
 \begin{document}
 
 \frontmatter
