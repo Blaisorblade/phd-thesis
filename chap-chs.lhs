@@ -473,9 +473,14 @@ two change structures |chs(A)| and |chs(B)|.
 The change structure on |A -> B| enables defining change structures for function
 types.
 Similarly, the change structure on |A `times` B| enables defining a change
-structure for product types in a language plugin, as described in
-\cref{sec:chs-products-intro}. In \cref{sec:chs-sums} we also discuss change structures
-for disjoint sums.
+structure for product types in a language plugin, as described informally in
+\cref{sec:chs-products-intro}.
+\pg{Revise maybe?}
+In \cref{sec:chs-sums} we also discuss informally
+change structures for disjoint sums: Formally, we can derive a change structure
+for disjoint union of sets |A + B| (from change structures for |A| and |B|), and
+this enables defining change structures for sum types; we have mechanized the
+required proofs, but omit the tedious details here.
 % In \cref{sec:chs-product,sec:chs-sums} we will also define change
 % structures for |A `times` B| and |A + B|, for use in language
 % plugins for types |sigma `times` tau| and |sigma + tau|.
