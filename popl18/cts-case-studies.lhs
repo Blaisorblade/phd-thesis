@@ -138,7 +138,7 @@ previous one.
 
 \begin{figure}
   \footnotesize
-  \begin{subfigure}[l]{0.45\linewidth}
+  \begin{subfigure}[l]{0.495\linewidth}
   \begin{tikzpicture}
     \begin{axis}[
         width=\linewidth,
@@ -162,7 +162,7 @@ previous one.
   \label{fig:average-results}
 \end{subfigure}
 \hfill
-\begin{subfigure}[r]{0.45\linewidth}
+\begin{subfigure}[r]{0.495\linewidth}
   \begin{tikzpicture}
     \begin{axis}[
         width=\linewidth,
@@ -268,7 +268,7 @@ of changes for |ys| and all changes to |xs| will be nil changes.
 
 \begin{figure}
   \footnotesize
-  \begin{subfigure}[l]{0.45\linewidth}
+  \begin{subfigure}[l]{0.495\linewidth}
   \begin{tikzpicture}
     \begin{axis}[
         width=\linewidth,
@@ -291,7 +291,7 @@ of changes for |ys| and all changes to |xs| will be nil changes.
   \label{fig:nestedLoopInner-results}
 \end{subfigure}
 \hfill
-\begin{subfigure}[r]{0.45\linewidth}
+\begin{subfigure}[r]{0.495\linewidth}
   \begin{tikzpicture}
     \begin{axis}[
         width=\linewidth,
