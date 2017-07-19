@@ -1,0 +1,35 @@
+\PassOptionsToPackage{kerning=true}{microtype}
+\PassOptionsToPackage{unicode}{hyperref}
+%% For double-blind review submission
+\documentclass[acmsmall,review,anonymous]{acmart}\settopmatter{printfolios=true}
+%% For single-blind review submission
+%\documentclass[acmsmall,review]{acmart}\settopmatter{printfolios=true}
+%\documentclass[sigplan,10pt,review]{acmart}\settopmatter{printfolios=true}
+
+%% For final camera-ready submission
+%\documentclass[acmlarge]{acmart}\settopmatter{}
+
+% For lhs2TeX formatting
+
+\usepackage{../mylhs2tex}
+
+% Shrink a bit lhs2TeX code  this hook is there for this reason:
+\renewcommand{\hscodestyle}{\small}
+% If we're desperate, but it looks bad:
+%\renewcommand{\hscodestyle}{\footnotesize}
+%
+\input{macros}
+% Conditional compilation across thesis and POPL18. With multiple commands.
+\newtoggle{poplForThesis}
+\togglefalse{poplForThesis}
+\usepackage{thesis-defs}
+
+% Local packages
+
+\usepackage{syntaxmacros,multicol}
+\usepackage{tikz}
+\usepackage{pgfplots}
+% Enable backward-incompatible tikz bugfixes. Here, it saves wasted space for graphs.
+\pgfplotsset{compat=1.13}
+
+\usepackage{subcaption}
