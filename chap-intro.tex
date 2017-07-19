@@ -118,13 +118,15 @@ proof.
   requires no run-time support. The transformation produces an incremental
   program in the same language; all optimization techniques for the original
   program are applicable to the incremental program as well.
+
+  % \pg{ Maybe comment in? Not sure, which might be telling.}
+  % Since our incremental programs use no impure features, they are
+  % especially amenable to further optimizations, making this approach
+  % very suitable for further research.
+
 %KO: commented this out. I think the purity is not important enough
 %to deserve another sentence here, since we only vaguely hint
 %at "further research".
-%Since our incremental programs use no impure features, they are
-%especially amenable to further optimizations, making this approach
-%very suitable for further research.
-%
 % KO: Let's have one bullet point per section. Also, a conjecture
 % sounds like a rather weak contribution
 %\item We argue that incrementalization is efficient on
@@ -151,6 +153,21 @@ incrementalize a variant of the MapReduce programming model~\citep{Lammel07}.
 \end{itemize}
 
 \pg{Describe \cref{part:caching}}
+\pg{Paste contributions from paper}
+\pg{Maybe defunc chapter?}
+
+\pg{WIP}
+Other chapters propose further contributions.
+\Cref{ch:bsos} proposes the first correctness proofs for ILC via operational
+methods and (step-indexed) logical relations, for simply-typed $\lambda$-calculus
+(without and with general recursion) and for untyped $\lambda$-calculus.
+
+\Cref{ch:diff-parametricity-system-f} outlines how to extend differentiation to
+System F and suggests a proof avenue. Differentiation for System F requires a
+generalization of change structures to changes across different types
+(\cref{sec:param-derive-changes-across-types}) that appears of independent
+interest, though further research remains to be done.
+
 \subsection{Included papers}
 This thesis includes material from joint work with colleagues.
 
@@ -167,7 +184,8 @@ design for the performance evaluation. Klaus Ostermann proposed the original
 idea (together with an initial prototype) and supervised the project.
 
 \Cref{part:incr} is originally based on work by \citet*{CaiEtAl2014ILC}, though
-significantly revised. This work was even more of a team effort. I designed the
+significantly revised; only \cref{sec:applying} survives mostly unchanged.
+This work was even more of a team effort. I designed the
 overall project and came up with the original notion of change structures; Cai
 Yufei contributed differentiation itself and its first correctness proof.
 \Cref{part:incr} contains novel correctness proof; its history and
@@ -197,6 +215,57 @@ devising language plugins for bags and maps in collaboration with me.
 % \paragraph{DSL work}
 % While working on modular embedded DSLs I collaborated to \citet{ErdwegGR12},
 % \pg{TODO GADT paper}, \pg{TODO maybe manuscript on cake pattern?}.
+
+\subsection{Navigating this thesis}
+\pg{WIP!!}
+Many chapters are independent from each other, with a few exceptions.
+\Cref{part:ch-aosd13} can be read independently from the rest.
+
+% Write this even though maybe I restructure the parts.
+\Cref{part:incr} and \Cref{part:caching} describe incrementalization.
+
+\paragraph{Differentiation}
+\Cref{sec:intro} and \cref{ch:diff-examples} introduce the overall approach to
+incrementalization informally.
+
+The core mathematical theory underlying incrementalization correctness using ILC
+is developed formally in \cref{ch:derive-formally} and~\cref{ch:change-theory}
+using a denotational framework. Equational reasoning on terms is then developed
+in~\cref{sec:term-reasoning}. These chapters contain full formal proofs: readers
+are welcome to skip or skim those proofs where appropriate. We strive not to
+hide important definitions inside theorems, and to give stand-alone definitions
+and theorem statements.
+
+Later chapters are again independent from each other.
+
+\paragraph{Performance of differentiated programs}
+\Cref{sec:applying} studies how to apply differentiation (as introduced in
+previous chapters) to incrementalize a case study and empirically evaluates
+performance speedups.
+
+\paragraph{Differentiation with static caching}
+\pg{Explain label}
+\Cref{ch:cts} is mostly self-contained, even though it builds on the rest of the
+material; it summarizes the basics of ILC in \cref{sec:ilc-background}.
+Terminology in that chapter is sometimes subtly different from the rest of the thesis.
+
+\pg{At least in more formal chapters, all definitions, notations, and so on are
+  clearly highlighted and presented as standalone definitions for ease of reference.}
+
+\pg{Missing chapters}
+
+\paragraph{Numbering}
+We number tables and figures per-chapter with a shared counter. For instance,
+\cref{fig:measurements-overview} is the first figure in \cref{sec:evaluation},
+followed by \cref{table:performance}.
+
+Similarly, we number definitions, remarks, examples and all sorts of theorems
+per-chapter with counters including section numbers. For
+instance, \cref{def:inc-semantics} is the first definition in
+\cref{ch:derive-formally}, followed by \cref{thm:derive-correct}, and they both
+appear in \cref{sec:correct-derive}.
+
+All such references are hyperlinked in electronic versions of this thesis.
 
 % Modern libraries offer high-level APIs for manipulating (in-memory) collections;
 % equivalently, such an API is an embedded domain-specific language (EDSL).
