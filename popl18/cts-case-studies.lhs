@@ -158,7 +158,7 @@ previous one.
       \addlegendentry{incremental}
     \end{axis}
   \end{tikzpicture}
-  \caption{Benchmark results for average}
+  \caption{Benchmark results for |avg|}
   \label{fig:average-results}
 \end{subfigure}
 \hfill
@@ -182,7 +182,7 @@ previous one.
       \addlegendentry{incremental}
     \end{axis}
   \end{tikzpicture}
-  \caption{Benchmark results for totalPrice}
+  \caption{Benchmark results for |totalPrice|}
   \label{fig:indexedJoin-results}
 \end{subfigure}
 \end{figure}
