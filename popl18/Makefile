@@ -50,10 +50,15 @@ baseFormat = $(baseProcessor)
 .PHONY: FORCE
 %.tex: %.lhs $(lhsFormat)
 	lhs2TeX -P .: -o $*.tex $*.lhs
-%.pdf: %.tex $(INTERM_PRODUCTS) $(sources) FORCE
+# After the first build, this file will be recompiled by latexmk accounting for
+# all other dependencies thanks to code in .latexmkrc.
+# This line is hence only for the first build. Keep it in sync with .latexmkrc!
+%.fmt: %.ltx
+	$(baseProcessor) -ini -jobname="$*" "&${baseFormat} $*.ltx \dump"
+%.pdf: %.tex %.fmt $(INTERM_PRODUCTS) $(sources) FORCE
 	latexmk -pdf $* $(REDIR)
 # Pass pdflatex the same options as latexmk would.
-quick: $(PAPER_NAME).tex $(INTERM_PRODUCTS) $(sources)
+quick: $(PAPER_NAME).tex $(PAPER_NAME).fmt $(INTERM_PRODUCTS) $(sources)
 	$(baseProcessor) -synctex=1 -file-line-error -recorder $(PAPER_NAME)
 	$(OPEN) $(PDF_NAME)
 
