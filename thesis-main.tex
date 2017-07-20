@@ -1,13 +1,10 @@
 %&thesis-main
 % The above line loads a precompiled format coming from precompiling thesis-main.ltx.
 
-% For adapting to compiling the whole thesis, or only parts.
-\newtoggle{full}
-\togglefalse{full}
-%\toggletrue{full}
+% Toggles full and poplAsChapter are initialized to false.
 
-\newtoggle{poplAsChapter}
-\togglefalse{poplAsChapter} % For dev.
+% For adapting to compiling the whole thesis, or only parts.
+%\toggletrue{full}
 
 \iftoggle{full}{
 \includecomment{fullCompile}
@@ -17,9 +14,6 @@
 \excludecomment{fullCompile}
 \includecomment{partCompile}
 }
-
-\title{Optimizing and Incrementalizing Collection Queries by AST Transformations}
-\author{Paolo G. Giarrusso}
 
 \iftoggle{full}{
 }{%else
