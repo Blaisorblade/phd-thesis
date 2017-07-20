@@ -81,13 +81,15 @@ when applied to updated inputs using the QuickCheck library.
 
 Following ideas inspired by~\citet{Rossberg2010fing}, all higher-order functions
 (and typically, also their caches) are parametric over cache types of their
-function arguments. Here, functions |mapC| and |dmapC| and cache type |MapCache|
+function arguments. Here, functions |mapC| and |dmapC| and cache type |MapC|
 are parametric over the cache type |c| of |fC| and |dfC|.
 \begin{code}
 map :: (a -> b) -> Bag a -> Bag b
-type MapCache a b c = (a -> (b, c), Bag a, Map a (b, c))
-mapC :: (a -> (b, c)) -> Bag a -> (Bag b, MapCache a b c)
-dmapC :: (Dt^a -> c -> (Dt^b, c)) -> Dt^(Bag a) -> MapCache a b c -> (Dt^(Bag b), MapCache a b c)
+
+type MapC a b c = (a -> (b, c), Bag a, Map a (b, c))
+mapC :: (a -> (b, c)) -> Bag a -> (Bag b, MapC a b c)
+dmapC :: (Dt^a -> c -> (Dt^b, c)) -> Dt^(Bag a) ->
+  MapC a b c -> (Dt^(Bag b), MapC a b c)
 \end{code}
 
 We wrote the |length| and |sum| function used in our benchmarks in terms of
