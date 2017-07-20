@@ -446,7 +446,14 @@
 % \end{code}
 %endif
 
-%format pair1
-%format dpair1
-%format mapPair1
-%format dmapPair1
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+%format pair1 = "\Varid{pair}"
+%format dpair1 = "\Varid{dpair}"
+%format pair1X = "\Varid{pairX}"
+%format dpair1X = "\Varid{dpairX}"
+
+%format mapPair1 = "\Varid{mapPair}"
+%format dmapPair1 = "\Varid{dmapPair}"
+%format mapPair1Ys = "\Varid{mapPairYs}"
+%format dmapPair1Ys = "\Varid{dmapPairYs}"
