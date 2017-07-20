@@ -134,6 +134,9 @@ transformation~\citep{Koch2016incremental,Huesca2015incrementality},
 as we discuss further next.
 
 \newcommand{\ldiff}{\TitleLambda--diff}
+%format d_y = "d_y"
+% Unused, but just to be safe.
+%format d_x = "d_x"
 \subsection{\TitleLambda{}--diff and partial differentials}
 \label{sec:rw-partial-differentials}
 In work concurrent with \citet{CaiEtAl2014ILC}, \citet{Huesca2015incrementality}
