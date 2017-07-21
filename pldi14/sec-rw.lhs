@@ -151,7 +151,7 @@ Instead of differentiating a term |t| relative to all inputs (free
 variables and function arguments) via |derive t|, like ILC,
 \ldiff{} differentiates terms
 relative to one input variable, and writes
-$\frac{\partial t}{\partial x, d_x}$
+$\sfrac{\partial t}{\partial x, d_x}$
 for the result of differentiating $t$
 relative to $x$, a term that computes the change in $t$ when the
 value for $x$ is updated by change $d_x$. The formalism also uses
@@ -165,7 +165,7 @@ term transformations, which are usually considered problematic
 when implementing functional languages.
 In particular, it appears necessary to introduce a new term
 constructor |D t|, which evaluates |t| to a function value |\y ->
-u|, and then evaluates to $\lambda (y, d_y) \to \frac{\partial
+u|, and then evaluates to $\lambda (y, d_y) \to \sfrac{\partial
 t}{\partial y, d_y}$, which differentiates |t| at runtime
 relative to its head variable |y|. As an indirect consequence, if the
 program under incrementalization contains function term |Gamma /-
@@ -186,22 +186,22 @@ suffer similar problems, but a few details appear simpler since
 they restrict focus to functions over groups.
 
 To see why \ldiff{} need introduce |D t|, consider
-differentiating $\frac{\partial s\;t}{\partial x, d_x}$, that is,
+differentiating $\sfrac{\partial s\;t}{\partial x, d_x}$, that is,
 the change $d$ of $s\;t$ when $x$x is updated by change $d_x$.
 Change $d$ depends (a) on the change of $t$ when $x$ is updated
 by $d_x$, that is
-$\frac{\partial t}{\partial x, d_x}$;
+$\sfrac{\partial t}{\partial x, d_x}$;
 (b) on how $s$ changes when its input $t$ is updated by
-$\frac{\partial t}{\partial x, d_x}$; to express this change, \ldiff{}
-expresses this via $|(D s) t|\; \frac{\partial t}{\partial x, d_x}$;
+$\sfrac{\partial t}{\partial x, d_x}$; to express this change, \ldiff{}
+expresses this via $|(D s) t|\; \sfrac{\partial t}{\partial x, d_x}$;
 (c) on the change of $s$ (applied to the updated $t$) when $x$ is
-updated by $d_x$, that is $\frac{\partial t}{\partial x, d_x}$.
+updated by $d_x$, that is $\sfrac{\partial t}{\partial x, d_x}$.
 To compute component (b), \ldiff{} writes |D s| to
 differentiate |s| not relative to |x|, but relative to the still unknown head
 variable of |s|.
 If |s| evaluates to |\y -> u|, then |y| is the head variable of |s|, and |D s|
 differentiates |u| relative to |y| and evaluates to $\lambda (y, d_y) \to
-\frac{\partial u}{\partial y, d_y}$.
+\sfrac{\partial u}{\partial y, d_y}$.
 % Hence, \citeauthor{Huesca2015incrementality} adds term |D t| to
 % the syntax of $\lambda$-calculus; evaluating
 
