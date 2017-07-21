@@ -44,8 +44,22 @@ transparently.
 
 \section{This thesis}
 To reduce the need for manual optimizations, in this thesis we propose
-techniques for optimizing collection queries and executing them
+techniques for optimizing higher-order collection queries and executing them
 incrementally.
+\pg{WIP: What's my thesis? ``We provide approaches'' is better but not yet enough.}
+By generalizing database-inspired approaches, we provide approaches to query optimization and
+incrementalization by code transformation to apply to higher-order collection
+queries including user-defined functions.
+%While
+\pg{Status: others have done much more on optimization.}
+Instead of building on existing approaches to incrementalization, such as
+self-adjusting computation~\citep{Acar09}, we introduce a novel
+incrementalization approach which enables further transformations on the
+incrementalization results.
+%
+Further research is needed, but a number of case studies suggest at least some
+limited applicability, which improves in some ways on the applicability of similar
+techniques~\citep{Koch2016incremental}.
 
 We consider the problem for functional programming languages such as Haskell or
 Scala, and we consider collection queries written using the APIs of their
