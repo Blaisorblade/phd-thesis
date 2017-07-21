@@ -148,17 +148,3 @@ Few alternatives remain:
 Sadly, giving up on modularity altogether appears the more conventional choice.
 Either way, as we claimed at the outset, these modularity concerns only limit
 the modularity of the mechanized proofs, not their cogency.
-
-\chapter*{Acknowledgments}
-% From AOSD13
-I thank Sebastian Erdweg for helpful discussions on
-this project, Katharina Haselhorst for help
-implementing the code generator, and the anonymous reviewers, Jacques Carette and Karl Klose
-for their helpful comments on this chapter.
-This work is supported in part by the European Research Council, grant \#203099 ``ScalPL''.
-
-% From PLDI14 (?)
-% From ILC17
-We thank Cai Yufei, Tillmann Rendel, Lourdes Del Carmen Gonz\`alez Huesca, Yann
-R\`egis-Gianas, Philipp Schuster, Sebastian Erdweg, Marc Lasson, Robert Atkey,
-... for helpful discussions on this project.
