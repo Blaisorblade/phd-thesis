@@ -231,7 +231,3 @@
 % %   types. Mapping different functions over different elements produces.}
 
 
-\chapter{Conclusion and future work}
-
-% \section{Primitives}
-% \label{sec:fw-primitives}

@@ -1,0 +1,78 @@
+% Emacs, this is -*- latex -*-!
+
+% \pg{Plan for things that complete the original paper's story: add them by
+%   revising that text and in that chapter.}
+\chapter{Conclusion and future work}
+\label{ch:incl-conclusion}
+In databases, standard finite differencing technology allows incrementalizing
+programs in a specific domain-specific first-order language of collection
+operations.
+Unlike other approaches, finite differencing transforms programs to programs,
+which can in turn be transformed further.
+
+Differentiation (\cref{sec:intro}) transforms higher-order programs to incremental ones called \emph{derivatives}, as long as
+one can provide incremental support for primitive types and operations.
+
+Case studies in this thesis consider support for several such primitives. We first
+study a setting restricted to \emph{self-maintainable} derivatives
+(\cref{sec:applying}). Then we study a more general setting where it is possible
+to remember inputs and intermediate results from one execution to the next,
+thanks to a transformation to \emph{cache-transfer style} (\cref{ch:cts}). In all cases, we are
+able to deliver order-of-magnitude speedups on non-trivial examples; moreover,
+incrementalization produces programs in standard languages that are subject to
+further optimization and code transformation.
+
+Correctness of incrementalization appeared initially surprising, so we devoted
+significant effort to formal correctness proofs, either on paper or in
+mechanized proof assistants.
+The original correctness proof of differentiation, using a set-theoretic
+denotational semantics~\citep{CaiEtAl2014ILC}, was a significant milestone, but
+since then we have
+simplified the proof to a logical relations proof that defines when a change is
+valid from a source to a destination, and proves that differentiation produces
+valid changes (\cref{ch:derive-formally}). Valid changes witness the difference between
+sources and destinations; since changes can be \emph{nil}, change validity
+arises as a generalization of the concept of \emph{logical equivalence} and
+parametricity for a language (at least in terminating languages)
+(\cref{ch:diff-parametricity-system-f}). Crucially,
+changes are not just witnesses: operation $\oplus$ takes a change and its
+source to the change destination. One can consider further operations, that give
+rise to an algebraic structure that we call \emph{change structure} (\cref{ch:change-theory}).
+
+Based on this simplified proof, in this thesis we generalize correctness to
+further languages
+using big-step operational semantics and (step-indexed) logical relations (\cref{ch:bsos}).
+Using operational semantics we reprove correctness for simply-typed
+$\lambda$-calculus, then add support for recursive functions (which would
+require domain-theoretic methods when using denotational semantics), and finally
+extend the proof to untyped $\lambda$-calculus. Building on a variant of this
+proof (\cref{sec:sound-derive}), we show that conversion to cache-transfer-style
+also preserves correctness.
+
+Based on a different formalism for logical equivalence and
+parametricity~\citep{Bernardy2011realizability}, we sketch variants of the
+transformation and correctness proofs for simply-typed $\lambda$-calculus with
+type variables and then for full System F (\cref{ch:diff-parametricity-system-f}).
+
+\paragraph{Future work}
+To extend differentiation to System F, we must consider changes where source and
+destination have different types. This generalization of changes makes change
+operations much more flexible: it becomes possible to define a combinator
+language for change structures, and it appears possible to define nontrivial
+change structures for algebraic datatypes using this combinator language.
+
+We conjecture such a combinator language will allow programmers to define
+correct change structures out of simple, reusable components.
+
+Incrementalizing primitives correctly remains at present a significant
+challenge. We provide tools to support this task by formalizing equational
+reasoning, but it appears necessary to provide more tools to programmers, as
+done by \citet{Liu00}. Conceivably, it might be possible to build such a
+rewriting tool on top of the rewriting and automation support of theorem provers
+such as Coq.
+
+% Incrementalization b
+% In this part, we have discussed incrementalization by static
+
+% \section{Primitives}
+% \label{sec:fw-primitives}
