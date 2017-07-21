@@ -2,7 +2,6 @@
 %include polycode.fmt
 %include changes.fmt
 
-\appendix
 \chapter{More on our formalization}
 \section{Mechanizing plugins modularly and limitations}
 \label{sec:modularity-limits}
