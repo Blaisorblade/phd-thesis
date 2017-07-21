@@ -58,7 +58,8 @@ baseProcessor = pdflatex
 baseFormat = $(baseProcessor)
 
 TeXOpts := -synctex=1 -file-line-error -recorder
-TeXOpts += -interaction=nonstopmode
+TeXOpts += -interaction=nonstopmode -halt-on-error
+#TeXOpts += -interaction=errorstopmode
 
 .PHONY: FORCE
 %.tex: %.lhs $(lhsFmt)
