@@ -269,17 +269,30 @@ Terminology in that chapter is sometimes subtly different from the rest of the t
 \pg{Missing chapters}
 
 \paragraph{Numbering}
-We number tables and figures per-chapter with a shared counter. For instance,
-\cref{fig:measurements-overview} is the first figure in \cref{sec:evaluation},
+We use numbering and hyperlinks to help navigation; we explain our conventions
+to enable exploiting them.
+
+To simplify navigation, we number all sorts of ``theorems'' (including here
+definitions, remarks, even examples or notations)
+per-chapter with counters including section numbers. For
+instance, \cref{def:inc-semantics} is the first such item in
+\cref{ch:derive-formally}, followed by \cref{thm:derive-correct}, and they both
+appear in \cref{sec:correct-derive}. And we can be sure that \cref{lem:derive-typing}
+comes after both ``theorems'' because of its number, even if they are of different sorts.
+
+Similarly, we number tables and figures per-chapter with a shared counter. For instance,
+\cref{fig:measurements-overview} is the first figure or table in \cref{sec:evaluation},
 followed by \cref{table:performance}.
 
-Similarly, we number definitions, remarks, examples and all sorts of theorems
-per-chapter with counters including section numbers. For
-instance, \cref{def:inc-semantics} is the first definition in
-\cref{ch:derive-formally}, followed by \cref{thm:derive-correct}, and they both
-appear in \cref{sec:correct-derive}.
+To help reading, at times we will repeat or anticipate statements of
+``theorems'' to refer to them, without forcing readers to jump back and forth.
+We will then reuse the original number.
+For instance \cref{sec:correct-derive} contains a copy of \cref{slogan:derive}
+with its original number.
 
-All such references are hyperlinked in electronic versions of this thesis.
+For ease of navigation, all such references are hyperlinked in electronic
+versions of this thesis, and the table of contents is exposed to PDF readers via
+PDF bookmarks.
 
 % Modern libraries offer high-level APIs for manipulating (in-memory) collections;
 % equivalently, such an API is an embedded domain-specific language (EDSL).
