@@ -127,8 +127,8 @@ transformed to first-order ones, incrementalizing resulting programs is still
 beyond reach for previous approaches to differentiation (see
 \cref{sec:finite-diff} for earlier work and \cref{sec:rw-partial-differentials}
 for later approaches).
-In \cref{part:caching} we transform higher-order programs to first-order ones by
-defunctionalization, but we incrementalize defunctionalized programs using
+In \cref{ch:cts,ch:defunc-fun-changes} we transform higher-order programs to first-order ones by
+closure conversion or defunctionalization, but we incrementalize defunctionalized programs using
 similar ideas, including changes to (defunctionalized) functions.
 
 % Instead of extending differentiation to higher-order programs, it might be

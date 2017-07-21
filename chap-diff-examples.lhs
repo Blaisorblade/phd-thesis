@@ -21,8 +21,7 @@ We also motivate a few extensions to differentiation that we describe later. As
 we'll see in this chapter, we'll need to enable some forms of introspection on
 function changes to manipulate the embedded environments, as we discuss in
 \cref{ch:defunc-fun-changes}. We will also need ways to remember intermediate
-results, which we will discuss in \cref{part:caching} (in particular
-\cref{ch:cts}).
+results, which we will discuss in \cref{ch:cts}.
 We will also use overly simplified change structures to illustrate a few points.
 
 \section{Change structures as type-class instances}

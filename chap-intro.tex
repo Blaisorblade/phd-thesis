@@ -87,14 +87,14 @@ This thesis is divided into three parts:
   handles higher-order programs by using program transformation; hence, while
   our main examples use collection queries, we phrase the work in terms of
   $\lambda$-calculi with unspecified primitives~\citep*{CaiEtAl2014ILC}.
-\item In \cref{part:caching}, we extend ILC with a further program transformation
+  In \cref{ch:cts}, we extend ILC with a further program transformation
   step, so that base programs can store intermediate results and derivatives can
   reuse them, but without resorting to dynamic memoization and necessarily
   needing to look results up at runtime. To this end, we build on work by
 \citet{Liu00} and extend it to a higher-order, typed setting.
 \end{itemize}
 
-\Cref{part:incr} and \cref{part:caching} are more theoretical than
+\Cref{part:incr} is more theoretical than
 \cref{part:ch-aosd13}. That was necessary, because optimizations in
 \cref{part:ch-aosd13} are much better understood than our approach to
 incrementalization.
@@ -166,7 +166,7 @@ incrementalize a variant of the MapReduce programming model~\citep{Lammel07}.
   orders of magnitude on realistic inputs (\cref{sec:applying}).
 \end{itemize}
 
-\pg{Describe \cref{part:caching}}
+\pg{Describe \cref{ch:cts}}
 \pg{Paste contributions from paper}
 \pg{Maybe defunc chapter?}
 
@@ -236,7 +236,7 @@ Many chapters are independent from each other, with a few exceptions.
 \Cref{part:ch-aosd13} can be read independently from the rest.
 
 % Write this even though maybe I restructure the parts.
-\Cref{part:incr} and \Cref{part:caching} describe incrementalization.
+\Cref{part:incr} describes incrementalization.
 
 \paragraph{Differentiation}
 \Cref{sec:intro} and \cref{ch:diff-examples} introduce the overall approach to
