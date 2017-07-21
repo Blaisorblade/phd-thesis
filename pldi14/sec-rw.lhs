@@ -224,7 +224,7 @@ updated input |xs|. Therefore, in our practical implementations
 |derive(map f xs)| tests whether |df| is nil and uses a more
 efficient implementation. In \cref{sec:applying}, we detect at
 compile time whether |df| is guaranteed to be nil. In
-\cref{sec:map-seq}, we instead detect at runtime whether |df| is
+\cref{sec:incr-nest-loop}, we instead detect at runtime whether |df| is
 nil. In both cases, authors of derivatives must implement this
 optimization by hand. Instead, \ldiff{} hints at a more general
 solution.
