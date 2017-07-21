@@ -207,9 +207,9 @@ differentiates |u| relative to |y| and evaluates to $\lambda (y, d_y) \to
 
 Overall, the rule for differentiating application in $\lambda$-diff is
 \[
-  \frac{\partial s\;t}{\partial x, d_x} = (D s)(t, \frac{\partial t}{\partial x,
-d_x}) \circledcirc \frac{\partial s}{\partial x, d_x}(t \oplus \frac{\partial
-t}{\partial x, d_x}).
+  \frac{\partial s\;t}{\partial x, d_x} = (D s)\left(t, \frac{\partial t}{\partial x,
+d_x}\right) \circledcirc \frac{\partial s}{\partial x, d_x}\left(t \oplus \frac{\partial
+t}{\partial x, d_x}\right).
   \]
 
 This rule appears closely related to \cref{eq:pointwise-rewrite},
