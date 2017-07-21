@@ -239,9 +239,6 @@ as variants of the same type. Correspondingly we represent changes to a closed
 function and changes to a closure as variants of the same type of function changes.
 We inspect this representation at runtime to find out if a function change
 is a nil change.
-We have evaluated another representation of function changes with different
-tradeoffs where we use defunctionalization instead of closure conversion.
-
 \begin{code}
   data Fun a b c where
     Closed :: (a -> (b, c)) -> Fun a b c
@@ -251,6 +248,9 @@ tradeoffs where we use defunctionalization instead of closure conversion.
     DClosed :: (Dt^a -> c -> (Dt^b, c)) -> Dt^(Fun a b c)
     DClosure :: (Dt^e -> Dt^a -> c -> (Dt^b, c)) -> Dt^e -> Dt^(Fun a b c)
 \end{code}
+
+We have also evaluated another representation of function changes with different
+tradeoffs where we use defunctionalization instead of closure conversion.
 
 We use the same benchmark setup as in the benchmark for the average computation on bags.
 The input for size |n| is a pair of sequences |(xs, ys)|. Each sequence
