@@ -78,7 +78,8 @@ non-termination), because such programs can be more ``declarative'' and because
 avoiding side effects can enable more powerful optimization and simplify the
 work of the optimizer at the same time.
 
-This thesis is divided into three parts:
+\pg{Rewrite}
+This thesis is divided into two parts:
 \begin{itemize}
 \item In \cref{part:ch-aosd13}, we describe work on optimizing collection
   queries by static program transformation, based on a set of rewrite rules~\citep{GiarrussoAOSD13}.
@@ -234,18 +235,23 @@ devising language plugins for bags and maps in collaboration with me.
 \pg{WIP!!}
 Many chapters are independent from each other, with a few exceptions.
 \Cref{part:ch-aosd13} can be read independently from the rest.
-
 % Write this even though maybe I restructure the parts.
 \Cref{part:incr} describes incrementalization.
 
 \paragraph{Differentiation}
+\Crefrange{sec:intro}{sec:term-reasoning} form the core of incrementalization
+theory, with other chapters building on top of them.
+
 \Cref{sec:intro} and \cref{ch:diff-examples} introduce the overall approach to
 incrementalization informally.
 
-The core mathematical theory underlying incrementalization correctness using ILC
-is developed formally in \cref{ch:derive-formally} and~\cref{ch:change-theory}
-using a denotational framework. Equational reasoning on terms is then developed
-in~\cref{sec:term-reasoning}. These chapters contain full formal proofs: readers
+\Cref{ch:derive-formally,ch:change-theory} show that incrementalization using
+ILC is correct. Building on a set-theoretic semantics, these
+\lcnamecrefs{ch:derive-formally} also develop the theory
+underlying this correctness proofs and further results.
+
+Equational reasoning on terms is then developed
+in \cref{sec:term-reasoning}. These chapters contain full formal proofs: readers
 are welcome to skip or skim those proofs where appropriate. We strive not to
 hide important definitions inside theorems, and to give stand-alone definitions
 and theorem statements.
