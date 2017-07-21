@@ -165,7 +165,7 @@ term transformations, which are usually considered problematic
 when implementing functional languages.
 In particular, it appears necessary to introduce a new term
 constructor |D t|, which evaluates |t| to a function value |\y ->
-u|, and then evaluates to $|\(y, d_y) -> |\frac{\partial
+u|, and then evaluates to $\lambda (y, d_y) \to \frac{\partial
 t}{\partial y, d_y}$, which differentiates |t| at runtime
 relative to its head variable |y|. As an indirect consequence, if the
 program under incrementalization contains function term |Gamma /-
