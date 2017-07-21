@@ -59,7 +59,7 @@ baseFormat = $(baseProcessor)
 	latexmk -pdf $* $(REDIR)
 # Pass pdflatex the same options as latexmk would.
 quick: $(PAPER_NAME).tex $(PAPER_NAME).fmt $(INTERM_PRODUCTS) $(sources)
-	$(baseProcessor) -synctex=1 -file-line-error -recorder $(PAPER_NAME)
+	$(baseProcessor) -shell-escape -synctex=1 -file-line-error -recorder $(PAPER_NAME)
 	$(OPEN) $(PDF_NAME)
 
 .PRECIOUS: %.tex

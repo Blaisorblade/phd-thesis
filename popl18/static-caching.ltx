@@ -32,6 +32,11 @@
 % Enable backward-incompatible tikz bugfixes. Here, it saves wasted space for graphs.
 \pgfplotsset{compat=1.13}
 
+% Build tikz pictures into separate files. Enabled by
+%\tikzexternalize in main document.
+\usetikzlibrary{external}
+\tikzset{external/system call={pdflatex -fmt=static-caching.fmt \tikzexternalcheckshellescape -halt-on-error -interaction=batchmode -jobname "\image" "\texsource"}}
+
 \usepackage{subcaption}
 
 \special{papersize=8.5in,11in}

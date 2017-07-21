@@ -1,8 +1,11 @@
 %&static-caching
-% The above line loads a precompiled format coming from precompiling static-caching.ltx.
+% The above line loads a precompiled format coming from precompiling the "static
+% preamble" static-caching.ltx.
 
 % Prelude code which changes more often should appear below.
 
+% Build tikz pictures into separate files. Relies on setup in static preamble.
+\tikzexternalize
 \begin{document}
 \maketitle
 

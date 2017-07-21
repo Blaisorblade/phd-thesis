@@ -12,6 +12,8 @@
 # occurrences of pdflatex below (especially the second) with your TeX
 # processor (etex, latex, lualatex, etc.)
 
+# Add -shell-escape to my defaults.
+$pdflatex="pdflatex -synctex=1 -file-line-error -shell-escape %O %S";
 # Enable correct dependency tracking.
 $recorder = 1;
 # Declare that pdflatex also reads .fmt files.
