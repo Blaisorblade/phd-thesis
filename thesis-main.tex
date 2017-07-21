@@ -5,7 +5,7 @@
 % Toggles full and poplAsChapter are initialized to false.
 
 % For adapting to compiling the whole thesis, or only parts.
-%\toggletrue{full}
+\toggletrue{full}
 
 \iftoggle{full}{
 \includecomment{fullCompile}
@@ -29,7 +29,9 @@
 % Also, include can add extra page breaks, so maybe switch back to input at the end.
 % From http://web.science.mq.edu.au/~rdale/resources/writingnotes/latexstruct.html.
 %
+%\includeonly{TitlePage,Abstract}
 \includeonly{chap-intro}
+%\includeonly{Abstract,biblio,acks}
 %
 %\includeonly{TitlePage}
 %\includeonly{aosd13/graphs/evalResLos,aosd13/paperBody}
@@ -98,22 +100,18 @@
 \include{chap-eq-reason}
 \include{chap-th-extensions}
 
-\include{chap-towards-sysf}
-\include{chap-operationally}
-
 \include{pldi14/sec-practice}
 
-\include{pldi14/sec-rw}
-\include{pldi14/sec-concl}
+% \part{Incremental λ-Calculus in Cache-Transfer Style}
 
-\part{Incremental λ-Calculus in Cache-Transfer Style}
-\label{part:caching}
+\include{defunc}
 
 \iftoggle{poplAsChapter}{
 \include{popl18-sections}
 }{
 \newcommand{\poplPath}[1]{popl18/#1}
-\chapter{Static memoization by cache-transfer-style conversion}
+\chapter{Cache-transfer-style conversion}
+\label{part:caching}
 \label{ch:cts}
 \include{popl18/cts-intro}
 \include{popl18/cts-motivation}
@@ -123,10 +121,16 @@
 \include{popl18/cts-conclusion}
 }
 
-\include{defunc}
-\pg{DROP except conclusions}
-\include{new-stuff}
+\include{chap-towards-sysf}
 
+% Merge relworks?
+\include{pldi14/sec-rw}
+
+%\pg{DROP except conclusions}
+%\include{new-stuff}
+
+% Dropped
+%\include{pldi14/sec-concl}
 \include{chap-incr-concl}
 
 
@@ -134,6 +138,7 @@
 
 \appendix
 \include{backmatter}
+\include{chap-operationally}
 \include{acks}
 
 \backmatter
