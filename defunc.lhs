@@ -15,12 +15,20 @@ import Prelude hiding (map, concatMap)
 \chapter{Defunctionalizing function changes}
 \label{ch:defunc-fun-changes}
 
-Up to now we have represented function changes as functions, which can only be
-applied. However, incremental programs often inspect changes to decide how to
+In~\cref{ch:derive-formally}, and in most of~\cref{part:incr}, we represent
+function changes as functions, which can only be applied.
+However, incremental programs often inspect changes to decide how to
 react to them most efficiently. Also inspecting function changes would help
-performance further. In this chapter, we address these restrictions by
-\emph{defunctionalizing} functions and function changes, so that we can inspect
-both at runtime.
+performance further.
+Representing function changes as closures, as we do in~\cref{ch:cts}
+and~\cref{ch:bsos}, allows implementing some operations more efficient, but is
+not fully satisfactory.
+In this chapter, we address these restrictions by \emph{defunctionalizing}
+functions and function changes, so that we can inspect both at runtime without
+restrictions.
+% In particular, by encoding functions and functions changes as
+% values of algebraic datatypes, it becomes possible to test whether the function
+% change is a nil change for the function.
 
 Once we defunctionalize function changes, we can detect at runtime whether a
 function change is nil. As we have mentioned in \cref{sec:plugins}, nil function
@@ -33,8 +41,9 @@ decreasing time complexity of |dmap f df xs dxs| from |O(size(xs) + size(dxs))|
 to |O(size(dxs))|.
 
 We will also present a change structure on defunctionalized function changes,
-and show its benefits.\pg{Furthermore, other operations on function and
-  function changes become cheaper, such as |`oplus`|, |nilc|, and so on.}
+and show that operations on defunctionalized function changes become cheaper.
+% and show its benefits.\pg{Furthermore, other operations on function and
+%   function changes become cheaper, such as |`oplus`|, |nilc|, and so on.}
 %Moreover, as we have discussed
 
 % \chapter{Defunctionalizing function changes}
@@ -845,7 +854,7 @@ data FunW code a b cache where
 data DFunW code a b cache1 cache2 where
   DW :: DFun a b code -> DFunW code a b (Cache code) (Cache code)
 
-instance Codelike code => C.FunOps (FunW code) where
+instance Codelike code => FunOps (FunW code) where
   type Dk (FunW code) = DFunW code
   apply (W f) = applyFun f
   dApply (DW df) = dapplyFun df
@@ -854,5 +863,6 @@ instance Codelike code => C.FunOps (FunW code) where
   isNilFun (DW df) = if isNil df then Just Refl else Nothing
 \end{code}
 
-In this code we have not shown support for replacement values for functions.
+In this code we have not shown support for replacement values for functions; we
+leave details to our implementation.
 \pg{it is a straightforward extension that we omit.}\pg{True? }
