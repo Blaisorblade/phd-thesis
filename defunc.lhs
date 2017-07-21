@@ -93,7 +93,7 @@ class ChangeStruct t where
   oreplace :: t -> Dt^t
 
 class ChangeStruct t => NilChangeStruct t where
-  nil :: t -> Dt^t
+  nilc :: t -> Dt^t
 \end{code}
 %ocompose :: Dt^t -> Dt^t -> Dt^t
 With this code we define type classes |ChangeStruct| and |NilChangeStruct|. We
@@ -738,19 +738,121 @@ all input changes turn out to be nil. This was not possible in the setting
 described by \citet{CaiEtAl2014ILC}, because
 nil function changes could not be detected at runtime, only at compile time.
 
-\pg{Can we in this context?}
-% \begin{code}
-% wrapDF :: DFun sigma tau -> sigma -> Dt^sigma -> Dt^tau
+\pg{Comment this back in!}
+% \begin{spec}
+% wrapDF :: DFun1 sigma tau -> sigma -> Dt^sigma -> Dt^tau
 % wrapDF f df x dx =
 %   if isNil df then
 %     nil (f x)
 %   else
-%
-% \end{code}
+%     df x dx
+% \end{spec}
 %
 % \begin{code}
 % wrapDer1 g df c =
 %   case isNilFun df of
-%     Nil -> (onil Proxy, c)
-%     NotNil -> g df c
+%     Just Refl -> (onil Proxy, c)
+%     Nothing -> g df c
 % \end{code}
+\pg{Can we in this context?}
+
+\section{Defunctionalization and cache-transfer-style}
+\pg{Read!}
+We can combine the above ideas with cache-transfer-style (\cref{ch:cts}).
+
+Combining the above with caching, we can use defunctionalization as described to
+implement the following interface for functions in caches.
+\begin{code}
+class FunOps k where
+  type Dk k = (dk :: * -> * -> * -> * -> *) | dk -> k
+
+  type ApplyCtx k i o :: Constraint
+  type ApplyCtx k i o = ()
+  apply :: ApplyCtx k i o => k i o cache -> i -> (o, cache)
+
+  type DApplyCtx k i o :: Constraint
+  type DApplyCtx k i o = ()
+  dApply :: DApplyCtx k i o => Dk k i o cache1 cache2 -> Dt i -> cache1 -> (Dt o, cache2)
+
+  type DerivCtx k i o :: Constraint
+  type DerivCtx k i o = ()
+  deriv :: DerivCtx k i o => k i o cache -> Dk k i o cache cache
+
+  type FunUpdCtx k i o :: Constraint
+  type FunUpdCtx k i o = ()
+  funUpdate :: FunUpdCtx k i o => k i o cache1 -> Dk k i o cache1 cache2 -> k i o cache2
+
+  isNilFun :: Dk k i o cache1 cache2 -> Maybe (cache1 :~: cache2)
+
+updatedDeriv ::
+  (FunOps k, FunUpdCtx k i o, DerivCtx k i o) =>
+  k i o cache1 -> Dk k i o cache1 cache2 -> Dk k i o cache2 cache2
+updatedDeriv f df = deriv (f `funUpdate` df)
+\end{code}
+Type constructor |k| defines the specific constructor for the function type.
+In this interface, the type of function changes |DK k i o cache1 cache2|
+represents functions (encoded by type constructor |Dk k|) with inputs of type
+|i|, outputs of type |o|, input cache type |cache1| and output cache type
+|cache2|. Types |cache1| and |cache2| coincide for typical function changes, but
+can be different for replacement function changes.
+Correspondingly, |dApply| supports applying such replacement changes.
+
+To implement this interface it is sufficient to define a type of codes that
+admits an instance of type-class |Codelike|. Earlier definitions of
+|codeMatch1|, |applyFun1| and |dapplyFun1|, adapted to cache-transfer style.
+\begin{code}
+class Codelike code where
+  codeMatch :: code env1 a1 r1 cache1 -> code env2 a2 r2 cache2 -> Maybe ((env1, cache1) :~: (env2, cache2))
+  apply :: code env a b cache -> env -> a -> (b, cache)
+  dapply :: code env a b cache -> Dt env -> Dt a -> cache -> (Dt b, cache)
+\end{code}
+Typically, a defunctionalized program uses no first-class functions and has a
+single type of functions. Having a type class of function codes weakens that
+property. We can still use a single type of codes throughout our program; we can
+also use different types of codes for different parts of a program, without
+allowing for communications between those parts.
+
+Defining such instances
+%Observe that |dapply| produces caches
+
+\pg{Gotta copy-paste more code.}
+
+On top of that interface, we can define instances of interface |FunOps| and
+|ChangeStruct|.
+We can also hide the difference between difference cache types by defining a
+uniform type of caches, |Cache code|.
+To hide caches, we can use a pair of a cache (of type |cache|)
+and a code for that cache type. When applying a function (change) to a cache, or
+when composing the function, we can compare the function code with the cache
+code.
+
+In representations using closure conversion (\cref{sec:incr-nest-loop}), it is
+possible to apply functions to correspondingly caches and to update a function
+with a function change, but it is not possible to define the change composition
+of two function changes.\pg{nobody will have a clue if I say this.}
+\begin{code}
+type Env env = (CompChangeStruct env, NilTestable env)
+type RawFun a b code env cache = (code env a b cache, env)
+type RawDFun a b code env cache = (code env a b cache, Dt env)
+
+data Fun a b code = forall env cache . Env env => F !(RawFun a b code env cache)
+data DFun a b code = forall env cache . Env env => DF !(RawDFun a b code env cache)
+-- This cache is not indexed by a and b.
+data Cache code = forall a b env cache . C (code env a b cache) cache
+-- Wrapper.
+data FunW code a b cache where
+  W :: Fun a b code -> FunW code a b (Cache code)
+data DFunW code a b cache1 cache2 where
+  DW :: DFun a b code -> DFunW code a b (Cache code) (Cache code)
+
+instance Codelike code => C.FunOps (FunW code) where
+  type Dk (FunW code) = DFunW code
+  apply (W f) = applyFun f
+  dApply (DW df) = dapplyFun df
+  deriv (W f) = DW (derivFun f)
+  funUpdate (W f) (DW df) = W (f `oplus` df)
+  isNilFun (DW df) = if isNil df then Just Refl else Nothing
+\end{code}
+
+In this code we have not shown support for replacement values for functions.
+\pg{it is a straightforward extension that we omit.}\pg{True? }
