@@ -21,7 +21,8 @@ approaches it supports more expressive languages.
 In the remainder of this section, we analyze the relation to the
 most closely related prior works. \Citet{Ramalingam93}, \citet{Gupta99MMV}
 and \citet{Acar06} discuss further related work.
-
+Other related work, more closely to cache-transfer style, is
+discussed in \cref{sec:cts-rw}.
 
 \section{Dynamic approaches}
 One of the most advanced dynamic approach to incrementalization is
