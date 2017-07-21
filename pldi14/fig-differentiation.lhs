@@ -51,7 +51,7 @@
 \begin{align*}
   |fromto iota v1 dv v2| &= \ldots \\
   |fromto (sigma -> tau) f1 df f2| &=
-  |forall (fromto sigma a1 da a2) ^^ . ^^ fromto tau (f1 a1) (df a1 da) (f2 a2)|
+  |forall (fromto sigma a1 da a2) . ^^ fromto tau (f1 a1) (df a1 da) (f2 a2)|
   \end{align*}
 
   \RightFramedSignature{|fromto Gamma rho1 drho rho2|\text{ with }|rho1, rho2 : eval(Gamma), drho : eval(Dt^Gamma)|}
@@ -78,7 +78,7 @@
 If |Gamma /- t : tau| then
 % \[|fromto (eval(Gamma) -> eval(tau)) (eval t) (evalInc t) (eval t)|\]
 % that is
-\[|forall (fromto Gamma rho1 drho rho2) ^^ . ^^
+\[|forall (fromto Gamma rho1 drho rho2) . ^^
   fromto tau (eval(t) rho1) (eval(derive(t)) drho) (eval(t) rho2)|.\]
 \caption{Correctness of |derive(param)| (from \cref{thm:derive-correct}).}
 \label{fig:correctness:derive-correct}

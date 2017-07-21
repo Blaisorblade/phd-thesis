@@ -118,10 +118,10 @@ using the following notation.%
   Mathematically, this gives the correct results, but we'll typically not use
   such triples as changes in programs for performance reasons.}
 \begin{notation}[Quantification over valid changes]
-  We write \[|forall (fromto V v1 dv v2)^^ . ^^ P|,\] and say ``for all (valid)
+  We write \[|forall (fromto V v1 dv v2).  P|,\] and say ``for all (valid)
   changes |dv| from |v1| to |v2| on set |V| we have |P|'', as a shortcut for
   \[|forall
-    v1, v2 `elem` V, dv `elem` Dt^V,|\text{ if }|fromto V v1 dv v2|\text{ then }|P|.\]
+    v1, v2 `elem`| V, |dv `elem` Dt^V,|\text{ if }|fromto V v1 dv v2|\text{ then }P.\]
 
   Since we focus on valid changes, we'll omit the word ``valid'' when clear from context.
   In particular, a change from |v1| to |v2| is necessarily valid.
@@ -389,7 +389,7 @@ The key equations for function types are:
 \begin{align*}
   |Dt^(sigma -> tau)| &= |sigma -> Dt ^ sigma -> Dt ^ tau|\\
   |fromto (sigma -> tau) f1 df f2| &=
-  |forall (fromto sigma a1 da a2) ^^ . ^^ fromto tau (f1 a1) (df a1 da) (f2 a2)|
+  |forall (fromto sigma a1 da a2) . ^^ fromto tau (f1 a1) (df a1 da) (f2 a2)|
 \end{align*}
 
 \begin{remark}
@@ -766,7 +766,7 @@ and then redo the proof in more detail to make the proof easier to follow.
     \end{gather*}
     Since |eval(s)| is a function, its validity
     means
-    \[|forall (fromto sigma a1 da a2)^^ . fromto (tau) (eval s rho1 a1) (eval(derive s) drho a1 da) (eval s rho2 a2)|.\]
+    \[|forall (fromto sigma a1 da a2). ^^ fromto (tau) (eval s rho1 a1) (eval(derive s) drho a1 da) (eval s rho2 a2)|.\]
 
     Instantiating in this statement the hypothesis |fromto sigma a1 da a2| by
     |fromto sigma (eval t rho1) (eval(derive t) drho) (eval t rho2)| gives the
