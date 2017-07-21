@@ -11,10 +11,14 @@
 \includecomment{fullCompile}
 \excludecomment{partCompile}
 \toggletrue{poplAsChapter}
+\toggletrue{tocs}
 }{% else
 \excludecomment{fullCompile}
 \includecomment{partCompile}
 }
+
+% For developing tocs
+%\toggletrue{tocs}
 
 \iftoggle{full}{
 }{%else
@@ -64,7 +68,7 @@
 \cleardoublepage
 \include{Abstract}
 
-\iftoggle{full}{
+\iftoggle{tocs}{
 
 \cleardoublepage
 \tableofcontents
