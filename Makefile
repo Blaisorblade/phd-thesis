@@ -101,12 +101,12 @@ xargs = xargs -0 -n 1 -I '{}' -t
 
 demon:
 	-make
-	$(fswatch) $(sources) Makefile | $(xargs) make & \
+	$(fswatch) $(sources) Makefile | $(xargs) time make & \
 	wait
 
 quickdemon:
 	-make quick
-	$(fswatch) $(sources) Makefile | $(xargs) make quick & \
+	$(fswatch) $(sources) Makefile | $(xargs) time make quick & \
 	wait
 
 %.hs: %.lhs $(lhsFmt)
