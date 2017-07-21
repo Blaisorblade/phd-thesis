@@ -284,7 +284,7 @@ change.
 For instance, under earlier definitions for
 changes on naturals, if we take |v = 0| and |dv = -5|, we have |v
 `oplus` dv = v| even though |dv| is not valid; examples of
-invalid changes on functions are discussed at \cref{sec:invalid}.
+invalid changes on functions are discussed at \cref{sec:very-invalid}.
 However, we prefer to define ``|dv| is a nil change'' as we do,
 to imply that |dv| is valid, not just a neutral element.
 
