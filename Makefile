@@ -57,6 +57,9 @@ baseProcessor = pdflatex
 # Name of TeX base format. Often coincides with baseProcessor.
 baseFormat = $(baseProcessor)
 
+TeXOpts := -synctex=1 -file-line-error -recorder
+TeXOpts += -interaction=nonstopmode
+
 .PHONY: FORCE
 %.tex: %.lhs $(lhsFmt)
 	lhs2TeX -P .:popl18: -o $*.tex $*.lhs
@@ -71,7 +74,7 @@ mylhs2tex.sty: mylhs2tex.lhs
 	latexmk $* $(REDIR)
 # Pass pdflatex the same options as latexmk would.
 quick: $(PAPER_NAME).tex $(PAPER_NAME).fmt $(INTERM_PRODUCTS) FORCE
-	$(baseProcessor) -interaction=nonstopmode -synctex=1 -file-line-error -recorder $(PAPER_NAME)
+	$(baseProcessor) $(TeXOpts)  $(PAPER_NAME)
 	$(OPEN) $(PDF_NAME)
 
 .PRECIOUS: %.tex
