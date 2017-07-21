@@ -251,6 +251,9 @@ is a nil change.
 
 We have also evaluated another representation of function changes with different
 tradeoffs where we use defunctionalization instead of closure conversion.
+\begin{poplForThesis}
+We discuss the use of defunctionalization in \cref{ch:defunc-fun-changes}.
+\end{poplForThesis}
 
 We use the same benchmark setup as in the benchmark for the average computation on bags.
 The input for size |n| is a pair of sequences |(xs, ys)|. Each sequence
