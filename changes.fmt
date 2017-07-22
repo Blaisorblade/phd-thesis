@@ -372,6 +372,8 @@
 %format rho' = rho "\myquote"
 %format drho' = drho "\myquote"
 
+%format r1
+%format r2
 
 % Cancel the effect of \; (that is \thickspace)
 %format undoapp = "\negthickspace"

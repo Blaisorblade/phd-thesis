@@ -140,11 +140,14 @@ id x = x
 did :: a -> Dt^a -> Dt^a
 did x dx = dx
 
-instance (NilChangeStruct a, ChangeStruct b) => ChangeStruct (a -> b) where
+instance (  NilChangeStruct a, ChangeStruct b) =>
+            ChangeStruct (a -> b) where
   type Dt^(a -> b) = a -> Dt^a -> Dt^b
   f `oplus` df = \x -> f x `oplus` df x (nil x)
   oreplace f = \x dx -> oreplace (f (x `oplus` dx))
-instance (NilChangeStruct a, ChangeStruct b) => NilChangeStruct (a -> b) where
+
+instance (  NilChangeStruct a, ChangeStruct b) =>
+            NilChangeStruct (a -> b) where
   nil f = oreplace f
 
 -- Same for |apply|:
@@ -283,6 +286,8 @@ functions.
 
 For instance, consider the program on sequences in \cref{fig:defunc-example}.
 \begin{figure}[h]
+\texths %drop extra space around figure
+% From https://tex.stackexchange.com/a/186335/1340
 \begin{code}
 successors :: [Int] -> [Int]
 successors xs = map (\x -> x + 1) xs
@@ -310,11 +315,11 @@ Both |pair| and |mapPair| close over some free variables, so their
 corresponding constructors will take an argument
 for each free variable; for |pair| we have
 %
-\[|x :: sigma /- (\y -> (x, y)) :: tau -> (sigma, tau)|,\]
+\[|x :: sigma /- \y -> (x, y) :: tau -> (sigma, tau)|,\]
 %
 while for |mapPair| we have
 %
-\[|ys :: [tau] /- (\x -> map (\y -> (x, y)) ys) :: sigma -> [(sigma, tau)]|.\]
+\[|ys :: [tau] /- \x -> map (\y -> (x, y)) ys :: sigma -> [(sigma, tau)]|.\]
 %
 Hence, the type of defunctionalized functions |Fun sigma tau| and its
 interpreter |applyFun0| become:
@@ -450,7 +455,8 @@ data Code1 env sigma tau where
   Pair1     ::               Code1 sigma  tau    (sigma, tau)
   MapPair1  :: Env sigma =>  Code1 [tau]  sigma  [(sigma, tau)]
 \end{code}
-\pg{Justify the |Env env| there.} We also require an interpretation function
+\pg{Justify the |Env env| there.}%
+We also require an interpretation function
 |applyCode| for function codes. If |c| is the code for a function |f = \x -> t|,
 calling |applyCode c| computes |f|'s output from an environment |env| for |f|
 and an argument for |x|.
@@ -460,9 +466,9 @@ applyCode1     AddOne1                 ()      x      =  x + 1
 applyCode1     Pair1                   x       y      =  (x, y)
 applyCode1     MapPair1                ys      x      =  mapDF1 (F1 (Pair1, x)) ys
 \end{code}
-
-To define defunctionalized function values, we define a type synonym |RawFun1 env sigma tau| for
-the product of |Code env sigma tau| and |env|. Then we encode type |sigma ->
+We represent defunctionalized function values through type |RawFun1 env
+sigma tau|,
+a type synonym of the product of |Code env sigma tau| and |env|. We encode type |sigma ->
 tau| through type |Fun sigma tau|, defined as |RawFun1 env sigma tau| where
 |env| is existentially bound.
 \begin{code}
@@ -476,7 +482,6 @@ version of |applyFun1|, having the same interface as the earlier |applyFun0|.
 applyFun1 :: Fun1 sigma tau -> sigma -> tau
 applyFun1 (F1 (code, env)) arg = applyCode1 code env arg
 \end{code}
-
 The rest of the source program is defunctionalized like before, using the new
 definition of |Fun sigma tau| and of |applyFun1|.
 
@@ -488,7 +493,7 @@ mapDF1 :: Fun1 sigma tau -> [sigma] -> [tau]
 mapDF1 f [] = []
 mapDF1 f (x : xs) = applyFun1 f x : mapDF1 f xs
 
-dmapDF1 :: Fun1 sigma tau -> DFun1 sigma tau -> [sigma] -> Dt [sigma] -> Dt [tau]
+dmapDF1 :: Fun1 sigma tau -> DFun1 sigma tau -> [sigma] -> Dt^[sigma] -> Dt^[tau]
 dmapDF1 = undefined
 \end{code}
 %endif
@@ -552,8 +557,8 @@ We can encode triples as nested pairs |(a, (b, (c, ())))|. Or we can define
 change structures for triples directly:
 
 \begin{code}
-instance (ChangeStruct a, ChangeStruct b,
-  ChangeStruct c) => ChangeStruct (a, b, c) where
+instance (  ChangeStruct a, ChangeStruct b,
+            ChangeStruct c) => ChangeStruct (a, b, c) where
 
   type Dt^(a, b, c) = (Dt^a, Dt^b, Dt^c)
   (a, b, c) `oplus` (da, db, dc) = (a `oplus` da, b `oplus` db, c `oplus` dc)
@@ -731,12 +736,11 @@ cannot add it to |isNil|'s type signature since type variable |env| is not in
 scope there.
 Instead, we must add the constraint where we introduce it by existential
 quantification, just like the constraint |ChangeStruct env|.
-
 \begin{code}
-data DFun1 sigma tau = forall env . (NilTestable env, ChangeStruct env) => DF1 (Code1 env sigma tau, Dt^env)
-\end{code}
+data DFun1 sigma tau =
+  forall env . (NilTestable env, ChangeStruct env) =>
+  DF1 (Code1 env sigma tau, Dt^env)
 
-\begin{code}
 instance NilTestable (Fun1 sigma tau) where
   isNil :: DFun1 sigma tau -> Bool
   isNil (DF1 (code, denv)) = isNil denv
@@ -766,11 +770,13 @@ nil function changes could not be detected at runtime, only at compile time.
 \pg{Can we in this context?}
 
 \section{Defunctionalization and cache-transfer-style}
-\pg{Read!}
+%\pg{Read!}
 We can combine the above ideas with cache-transfer-style (\cref{ch:cts}).
 
 Combining the above with caching, we can use defunctionalization as described to
-implement the following interface for functions in caches.
+implement the following interface for functions in caches. For extra generality,
+we use extension |ConstraintKinds| to allow instances to define the required
+typeclass constraints.
 \begin{code}
 class FunOps k where
   type Dk k = (dk :: * -> * -> * -> * -> *) | dk -> k
@@ -781,15 +787,18 @@ class FunOps k where
 
   type DApplyCtx k i o :: Constraint
   type DApplyCtx k i o = ()
-  dApply :: DApplyCtx k i o => Dk k i o cache1 cache2 -> Dt^i -> cache1 -> (Dt^o, cache2)
+  dApply :: DApplyCtx k i o =>
+    Dk k i o cache1 cache2 -> Dt^i -> cache1 -> (Dt^o, cache2)
 
   type DerivCtx k i o :: Constraint
   type DerivCtx k i o = ()
-  deriv :: DerivCtx k i o => k i o cache -> Dk k i o cache cache
+  deriv :: DerivCtx k i o =>
+    k i o cache -> Dk k i o cache cache
 
   type FunUpdCtx k i o :: Constraint
   type FunUpdCtx k i o = ()
-  funUpdate :: FunUpdCtx k i o => k i o cache1 -> Dk k i o cache1 cache2 -> k i o cache2
+  funUpdate :: FunUpdCtx k i o =>
+    k i o cache1 -> Dk k i o cache1 cache2 -> k i o cache2
 
   isNilFun :: Dk k i o cache1 cache2 -> Maybe (cache1 :~: cache2)
 
@@ -811,9 +820,10 @@ admits an instance of type-class |Codelike|. Earlier definitions of
 |codeMatch1|, |applyFun1| and |dapplyFun1|, adapted to cache-transfer style.
 \begin{code}
 class Codelike code where
-  codeMatch :: code env1 a1 r1 cache1 -> code env2 a2 r2 cache2 -> Maybe ((env1, cache1) :~: (env2, cache2))
+  codeMatch :: code env1 a1 r1 cache1 -> code env2 a2 r2 cache2 ->
+    Maybe ((env1, cache1) :~: (env2, cache2))
   apply :: code env a b cache -> env -> a -> (b, cache)
-  dapply :: code env a b cache -> Dt env -> Dt a -> cache -> (Dt b, cache)
+  dapply :: code env a b cache -> Dt^env -> Dt^a -> cache -> (Dt^b, cache)
 \end{code}
 Typically, a defunctionalized program uses no first-class functions and has a
 single type of functions. Having a type class of function codes weakens that
@@ -842,15 +852,20 @@ of two function changes.\pg{nobody will have a clue if I say this.}
 \begin{code}
 type Env env = (CompChangeStruct env, NilTestable env)
 type RawFun a b code env cache = (code env a b cache, env)
-type RawDFun a b code env cache = (code env a b cache, Dt env)
+type RawDFun a b code env cache = (code env a b cache, Dt^env)
 
-data Fun a b code = forall env cache . Env env => F !(RawFun a b code env cache)
-data DFun a b code = forall env cache . Env env => DF !(RawDFun a b code env cache)
--- This cache is not indexed by a and b.
+data Fun a b code = forall env cache . Env env =>
+  F (RawFun a b code env cache)
+data DFun a b code = forall env cache . Env env =>
+  DF (RawDFun a b code env cache)
+
+-- This cache is not indexed by |a| and |b|
 data Cache code = forall a b env cache . C (code env a b cache) cache
--- Wrapper.
+
+-- Wrapper
 data FunW code a b cache where
   W :: Fun a b code -> FunW code a b (Cache code)
+
 data DFunW code a b cache1 cache2 where
   DW :: DFun a b code -> DFunW code a b (Cache code) (Cache code)
 
@@ -860,7 +875,11 @@ instance Codelike code => FunOps (FunW code) where
   dApply (DW df) = dapplyFun df
   deriv (W f) = DW (derivFun f)
   funUpdate (W f) (DW df) = W (f `oplus` df)
-  isNilFun (DW df) = if isNil df then Just Refl else Nothing
+  isNilFun (DW df) =
+    if isNil df then
+      Just Refl
+    else
+      Nothing
 \end{code}
 
 In this code we have not shown support for replacement values for functions; we
