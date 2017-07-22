@@ -222,8 +222,9 @@
 %format dx3
 
 %format : = "\typcolon"
+%format :: = "\mathrel{:\mkern-1mu:}"
 
-%format :~: = "\mathrel{:\sim:}"
+%format :~: = "\mathrel{:\mkern-1mu\sim\mkern-1mu:}"
 
 %format Dt = "\Delta"
 %format DtIdx(t) = "\Delta_{" t "}"
