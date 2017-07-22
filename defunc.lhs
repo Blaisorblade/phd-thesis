@@ -8,6 +8,9 @@
   InstanceSigs, GADTs, TypeOperators, ConstraintKinds #-}
 import qualified Data.Sequence as S
 import Data.Sequence(Seq)
+import GHC.Exts (Constraint)
+import Data.Proxy (Proxy(Proxy))
+import Control.Arrow ((***))
 import Prelude hiding (map, concatMap)
 \end{code}
 %endif
@@ -15,7 +18,7 @@ import Prelude hiding (map, concatMap)
 \chapter{Defunctionalizing function changes}
 \label{ch:defunc-fun-changes}
 
-In~\cref{ch:derive-formally}, and in most of~\cref{part:incr}, we represent
+In~\cref{ch:derive-formally}, and throughout most of~\cref{part:incr}, we represent
 function changes as functions, which can only be applied.
 However, incremental programs often inspect changes to decide how to
 react to them most efficiently. Also inspecting function changes would help
@@ -26,6 +29,7 @@ not fully satisfactory.
 In this chapter, we address these restrictions by \emph{defunctionalizing}
 functions and function changes, so that we can inspect both at runtime without
 restrictions.
+
 % In particular, by encoding functions and functions changes as
 % values of algebraic datatypes, it becomes possible to test whether the function
 % change is a nil change for the function.
@@ -80,7 +84,7 @@ and show that operations on defunctionalized function changes become cheaper.
 % work.
 
 \section{Setup}
-\label{sec:change-struct-tc} \pg{earlier we have a different typeclass}
+\label{sec:change-struct-tc}
 
 We write incremental programs based on ILC by manually writing Haskell code,
 containing both manually-written plugin code, and code that is transformed
@@ -90,9 +94,34 @@ encodings in Haskell, while also studying language plugins for non-trivial
 primitives, such as different sorts of collections. We make liberal use of GHC
 extensions where needed.
 
-As sketched before, we define change structure inside Haskell. We choose for now
-a different subset of operations.
-We proceed as follows.
+Code in this chapter has been extracted and type-checked, though we elide a few
+details (mostly language extensions and imports from the standard library).
+Code in this \lcnamecref{ch:defunc-fun-changes} is otherwise self-contained.
+We have also tested a copy of this code more extensively.
+
+As sketched before, we define change structure inside Haskell.
+%We choose for now a different subset of operations.
+%if style == newcode
+\begin{code}
+class ChangeStruct t where
+  -- Next line declares |Dt^t| as an injective type function
+  type Dt^t = r | r -> t
+
+  oplus :: t -> Dt^t -> t
+  oreplace :: t -> Dt^t
+
+class ChangeStruct t => NilChangeStruct t where
+  nil :: t -> Dt^t
+
+class ChangeStruct a => CompChangeStruct a where
+  ocompose :: Dt^a -> Dt^a -> Dt^a
+
+-- Omitted from typeset code but used once!
+class ChangeStruct t => OnilChangeStruct t where
+  -- Proxy is used to encode explicit type application.
+  onil :: Proxy t -> Dt^t
+\end{code}
+%else
 \begin{code}
 class ChangeStruct t where
   -- Next line declares |Dt^t| as an injective type function
@@ -103,19 +132,25 @@ class ChangeStruct t where
 
 class ChangeStruct t => NilChangeStruct t where
   nilc :: t -> Dt^t
+
+class ChangeStruct a => CompChangeStruct a where
+  -- Compose change |dx1| with |dx2|, so that
+  -- |x `oplus` (dx1 `ocompose` dx2) == x `oplus` dx1 `oplus` dx2|.
+  (`ocompose`) :: Dt^a -> Dt^a -> Dt^a
 \end{code}
+%endif
 %ocompose :: Dt^t -> Dt^t -> Dt^t
-With this code we define type classes |ChangeStruct| and |NilChangeStruct|. We
-explain each of the declared members in turn.
+With this code we define type classes |ChangeStruct|, |NilChangeStruct| and
+|CompChangeStruct|. We explain each of the declared members in turn.
 
 First, type |Dt^t| represents the change type for type |t|. To improve Haskell
 type inference, we declare that |Dt| is injective, so that |Dt^t1 = Dt^t2|
 implies |t1 = t2|. This forbids some potentially useful change structures, but
 in exchange it makes type inference vastly more usable.
 
-Next, we declare |`oplus`| and |nilc| as available to object programs.\pg{Why a separate type class for |nilc|?}
+Next, we declare |`oplus`|, |nilc| and |`ocompose`| as available to object programs.
 %
-\pg{pointer to bang?} Last, we introduce |oreplace| to construct replacement
+Last, we introduce |oreplace| to construct replacement
 changes, characterized by the \emph{absorption law} |x `oplus` oreplace y = y|
 for all |x|.
 Function |oreplace| encodes |!t|, that is the bang operator. We use a different
@@ -124,18 +159,19 @@ notation because |!| is reserved for other purposes in Haskell.
 These typeclasses omit operation |`ominus`| intentionally: we do \emph{not}
 require that change structures support a proper difference operation.
 Nevertheless, as discussed |b `ominus` a| can be expressed through |oreplace b|.
-\pg{Should we omit |oreplace| at first?}
-
-% or that all changes are
-% representable.
 
 We can then differentiate Haskell functions---even polymorphic ones. We show a
 few trivial examples to highlight how derivatives are encoded in Haskell,
 especially polymorphic ones.
+%if style /= newcode
+%format apply0 = apply
+%format dapply0 = dapply
+%format id0 = id
+%endif
 \begin{code}
 -- The standard |id| function:
-id :: a -> a
-id x = x
+id0 :: a -> a
+id0 x = x
 -- and its derivative:
 did :: a -> Dt^a -> Dt^a
 did x dx = dx
@@ -151,10 +187,10 @@ instance (  NilChangeStruct a, ChangeStruct b) =>
   nil f = oreplace f
 
 -- Same for |apply|:
-apply :: (a -> b) -> a -> b
-apply f x = f x
-dapply :: (a -> b) -> Dt^(a -> b) -> a -> Dt^a -> Dt^b
-dapply f df x dx = df x dx
+apply0 :: (a -> b) -> a -> b
+apply0 f x = f x
+dapply0 :: (a -> b) -> Dt^(a -> b) -> a -> Dt^a -> Dt^b
+dapply0 f df x dx = df x dx
 \end{code}
 \paragraph{Which polymorphism?}
 As visible here, polymorphism does not cause particular problems. However, we
@@ -168,6 +204,8 @@ First, with first-class polymorphism, we can encode
 existential types |exists X. T|, and two values |v1, v2| of the same existential type
 |exists X. T| can hide different types |T1, T2|,
 Hence, a change between |v1| and |v2| requires handling changes between types.
+While we discuss such topics in~\cref{ch:diff-parametricity-system-f}, we avoid
+them here.
 
 Second, prenex polymorphism is a small extension of simply-typed lambda calculus
 metatheoretically. We can treat prenex-polymorphic definitions as families of
@@ -175,38 +213,6 @@ monomorphic (hence simply-typed) definitions; to each definition we can apply
 all the ILC theory we developed to show differentiation is correct.
 % Alternatively, we can regard type variables as additional base types without
 % primitives, so that we can treat our function definitions as one functions.
-
-% \section{Setup}
-% \pg{Clarify how we use Haskell}
-
-% Even though we do not support higher-order programs directly, we still reuse or
-% adapt many of the ideas from ILC. \pg{Check this} And as we will see, we treat
-% defunctionalized functions specially.
-
-% In this chapter we will support polymorphism but avoid tackling first-class
-% polymorphism.
-% \pg{add pointer.}
-
-% Let's rememeber our basic interface to change structures:
-% \begin{code}
-% class ChangeStruct t where
-%   type Dt^t = r | r -> t
-%   oplus :: t -> Dt^t -> t
-%   oreplace :: t -> Dt^t
-
-% class ChangeStruct t => OnilChangeStruct t where
-%   -- Proxy is used to encode explicit type application.
-%   onil :: Proxy t -> Dt^t
-
-% class ChangeStruct t => NilChangeStruct t where
-%   nil :: t -> Dt^t
-% \end{code}
-
-% Let's also recall the \emph{absorption law}, |x `oplus` oreplace y = y|.
-
-% Crucially, changes to type |t| are represented as type |Dt^t|, and this
-% interface does \emph{not} require that change structures support a difference
-% operation, or that all changes are representable.
 
 \section{Defunctionalization}
 Defunctionalization is a whole-program transformation that turns a program
@@ -307,13 +313,13 @@ concatMap f xs = concat (map f xs)
 \end{figure}
 
 In this program, the first-class function values arise from evaluating the three
-terms |\y -> (x, y)|, that we call |pair|, |\x -> map (\y -> (x, y)) ys|,
+terms |\y -> (x, y)|, that we call |pair1|, |\x -> map (\y -> (x, y)) ys|,
 that we call |mapPair|, and |\x -> x + 1|, that we call |addOne|.
 Defunctionalization creates a type |Fun sigma tau| with a constructor for each
 of the three terms, respectively |Pair|, |MapPair| and |AddOne|.
-Both |pair| and |mapPair| close over some free variables, so their
+Both |pair1| and |mapPair| close over some free variables, so their
 corresponding constructors will take an argument
-for each free variable; for |pair| we have
+for each free variable; for |pair1| we have
 %
 \[|x :: sigma /- \y -> (x, y) :: tau -> (sigma, tau)|,\]
 %
@@ -339,6 +345,8 @@ applyFun0     (MapPair0 ys)      x = mapDF0 (Pair0 x) ys
 We need to also transform the rest of the program accordingly.
 
 \begin{figure}[h!]
+\texths %drop extra space around figure
+% From https://tex.stackexchange.com/a/186335/1340
 \begin{code}
 successors0 :: [Int] -> [Int]
 successors0 xs = map (\x -> x + 1) xs
@@ -353,6 +361,7 @@ mapDF0 f (x : xs) = applyFun0 f x : mapDF0 f xs
 concatMapDF0 :: Fun0 sigma [tau] -> [sigma] -> [tau]
 concatMapDF0 f xs = concat (mapDF0 f xs)
 \end{code}
+\caption{Defunctionalized program.}
 \label{prog:defunc-curried}
 \end{figure}
 
@@ -361,13 +370,13 @@ it encodes multi-argument functions through currying. To get a fully first-order
 program, we encode multi-arguments functions using tuples instead of currying.%
 \footnote{Strictly speaking, the resulting program is still not first-order,
   because in Haskell multi-argument data constructors, such as the pair
-  constructor |(,)| that we use, are still first-class curried functions, unlike
+  constructor $(\mathord{,})$ that we use, are still first-class curried functions, unlike
   for instance in OCaml. To make this program truly first-order, we must
   formalize tuple constructors as a term constructor, or formalize these
   function definitions as multi-argument functions. At this point, this
   discussion is merely a technicality that does not affect our goals, but it
   becomes relevant if we formalize the resulting first-order
-  language~\citep{Giarrusso2018Static}.}
+  language as in~\cref{sec:formalization}.}
 %
 Using tuples our example becomes:
 %{
@@ -449,13 +458,17 @@ straightforward to automate the process.\pg{Revise this.}
 Defunctionalizing the program with separate function codes produces the
 following GADT of function codes:
 \begin{code}
-type Env env = (NilChangeStruct env, NilTestable env)
+type Env env = (CompChangeStruct env, NilTestable env)
 data Code1 env sigma tau where
   AddOne1   ::               Code1 ()     Int    Int
   Pair1     ::               Code1 sigma  tau    (sigma, tau)
   MapPair1  :: Env sigma =>  Code1 [tau]  sigma  [(sigma, tau)]
 \end{code}
-\pg{Justify the |Env env| there.}%
+In this definition, type |Env| names a set of typeclass constraints on the type
+of the environment, using the |ConstraintKinds| GHC language
+extension.
+Satisfying these constraints is necessary to implement a few operations on
+functions.
 We also require an interpretation function
 |applyCode| for function codes. If |c| is the code for a function |f = \x -> t|,
 calling |applyCode c| computes |f|'s output from an environment |env| for |f|
@@ -466,15 +479,21 @@ applyCode1     AddOne1                 ()      x      =  x + 1
 applyCode1     Pair1                   x       y      =  (x, y)
 applyCode1     MapPair1                ys      x      =  mapDF1 (F1 (Pair1, x)) ys
 \end{code}
+The implementation of |applyCode1 MapPair1| only works because of the |Env sigma|
+constraint for constructor |MapPair1|: this constraint is required when
+constructing the defunctionalized function value that we pass as argument to |mapDF1|.
+
 We represent defunctionalized function values through type |RawFun1 env
 sigma tau|,
 a type synonym of the product of |Code env sigma tau| and |env|. We encode type |sigma ->
 tau| through type |Fun sigma tau|, defined as |RawFun1 env sigma tau| where
-|env| is existentially bound.
+|env| is existentially bound. We add constraint |Env env| to the definition of
+|Fun sigma tau|, because implementing |`oplus`| on function changes will require
+using |`oplus`| on environments.
 \begin{code}
 type RawFun1 env sigma tau = (Code1 env sigma tau, env)
 data Fun1 sigma tau where
-  F1 :: RawFun1 env sigma tau -> Fun1 sigma tau
+  F1 :: Env env => RawFun1 env sigma tau -> Fun1 sigma tau
 \end{code}
 To interpret defunctionalized function values, we wrap |applyCode1| in a new
 version of |applyFun1|, having the same interface as the earlier |applyFun0|.
@@ -653,6 +672,7 @@ instance ChangeStruct (Fun1 sigma tau) where
       Just Refl -> F1 (c1, env `oplus` denv)
       Nothing -> error "Invalid function change in oplus"
 \end{code}
+
 \subsubsection{Applying function changes}
 After defining environment changes, we define an incremental interpretation
 function |dapplyCode|. If |c| is the code for a function |f = \x -> t|, as
@@ -678,13 +698,8 @@ dapplyCode1     MapPair1                ys      dys        x         dx         
   dmapDF1 (F1 (Pair1, x)) (DF1 (Pair1, dx)) ys dys
 \end{code}
 
-On top of |dapplyCode1| we can define |dapplyFun1|
-% We can start by
-% simply adding a derivative for |applyFun1|:
-% \begin{code}
-% dapplyFun1 :: Fun1 sigma tau -> DFun1 sigma tau -> sigma -> Dt^sigma -> Dt^tau
-% dapplyFun1 (F1 (c1, env)) (DF1 (c2, denv)) = undefined
-% \end{code}
+On top of |dapplyCode1| we can define |dapplyFun1|, which functions as a
+a derivative for |applyFun1| and allows applying function changes:
 \begin{code}
 dapplyFun1 :: Fun1 sigma tau -> DFun1 sigma tau -> sigma -> Dt^sigma -> Dt^tau
 dapplyFun1 (F1 (c1, env)) (DF1 (c2, denv)) x dx =
@@ -693,27 +708,27 @@ dapplyFun1 (F1 (c1, env)) (DF1 (c2, denv)) x dx =
     Nothing -> error "Invalid function change in dapplyFun"
 \end{code}
 
-\pg{resume}
-Next, we add support for derivatives and function changes.
-% We can start by
-% simply adding a derivative for |applyFun1|:
+% \pg{resume}
+% Next, we add support for derivatives and function changes.
+% % We can start by
+% % simply adding a derivative for |applyFun1|:
+% % \begin{code}
+% % dapplyFun1 :: Fun1 sigma tau -> DFun1 sigma tau -> sigma -> Dt^sigma -> Dt^tau
+% % dapplyFun1 (F1 (c1, env)) (DF1 (c2, denv)) = undefined
+% % \end{code}
 % \begin{code}
 % dapplyFun1 :: Fun1 sigma tau -> DFun1 sigma tau -> sigma -> Dt^sigma -> Dt^tau
-% dapplyFun1 (F1 (c1, env)) (DF1 (c2, denv)) = undefined
+% dapplyFun1 (F1 (c1, env)) (DF1 (c2, denv)) x dx =
+%   case codeMatch1 c1 c2 of
+%     Just Refl -> dapplyCode1 c1 env denv x dx
+%     Nothing -> error "Invalid function change in dapplyFun"
 % \end{code}
-\begin{code}
-dapplyFun1 :: Fun1 sigma tau -> DFun1 sigma tau -> sigma -> Dt^sigma -> Dt^tau
-dapplyFun1 (F1 (c1, env)) (DF1 (c2, denv)) x dx =
-  case codeMatch1 c1 c2 of
-    Just Refl -> dapplyCode1 c1 env denv x dx
-    Nothing -> error "Invalid function change in dapplyFun"
-\end{code}
 
 However, we can also implement further accessors that inspect function changes.
 We can now finally detect if a change is nil. To this end, we first define a
 typeclass that allows testing changes to determine if they're nil:
 \begin{code}
-class NilTestable t where
+class NilChangeStruct t => NilTestable t where
   isNil :: Dt^t -> Bool
 \end{code}
 Now, a function change is nil only if the contained environment is nil.
@@ -727,43 +742,41 @@ However, this definition of |isNil| only works given a typeclass instance for
 cannot add it to |isNil|'s type signature since type variable |env| is not in
 scope there.
 Instead, we must add the constraint where we introduce it by existential
-quantification, just like the constraint |ChangeStruct env|.
+quantification, just like the constraint |ChangeStruct env|. In particular, we
+can reuse the constraint |Env env|.
 \begin{code}
 data DFun1 sigma tau =
-  forall env . (NilTestable env, ChangeStruct env) =>
+  forall env . Env env =>
   DF1 (Code1 env sigma tau, Dt^env)
 
+instance NilChangeStruct (Fun1 sigma tau) where
+  nil (F1 (code, env)) = DF1 (code, nil env)
 instance NilTestable (Fun1 sigma tau) where
   isNil :: DFun1 sigma tau -> Bool
   isNil (DF1 (code, denv)) = isNil denv
 \end{code}
 
-We can then wrap a derivative to return a nil change immediately if at runtime
+We can then wrap a derivative via function |wrapDF| to return a nil change immediately if at runtime
 all input changes turn out to be nil. This was not possible in the setting
 described by \citet{CaiEtAl2014ILC}, because
 nil function changes could not be detected at runtime, only at compile time.
-
-\pg{Comment this back in!}
-% \begin{spec}
-% wrapDF :: DFun1 sigma tau -> sigma -> Dt^sigma -> Dt^tau
-% wrapDF f df x dx =
-%   if isNil df then
-%     nil (f x)
-%   else
-%     df x dx
-% \end{spec}
-%
-% \begin{code}
-% wrapDer1 g df c =
-%   case isNilFun df of
-%     Just Refl -> (onil Proxy, c)
-%     Nothing -> g df c
-% \end{code}
-\pg{Can we in this context?}
+To do so, we must produce directly a nil change for |v = applyFun1 f x|. To avoid
+computing |v|, we assume we can compute a nil change for |v| without access to
+|v| via operation |onil| and typeclass |OnilChangeStruct| (omitted here);
+argument |Proxy| is a constant required for purely technical reasons.
+\begin{code}
+wrapDF :: OnilChangeStruct tau => Fun1 sigma tau -> DFun1 sigma tau -> sigma -> Dt^sigma -> Dt^tau
+wrapDF f df x dx =
+  if isNil df then
+    onil Proxy -- Change-equivalent to |nil (applyFun1 f x)|
+  else
+    dapplyFun1 f df x dx
+\end{code}
 
 \section{Defunctionalization and cache-transfer-style}
 %\pg{Read!}
-We can combine the above ideas with cache-transfer-style (\cref{ch:cts}).
+We can combine the above ideas with cache-transfer-style (\cref{ch:cts}). We
+show the details quickly.
 
 Combining the above with caching, we can use defunctionalization as described to
 implement the following interface for functions in caches. For extra generality,
@@ -774,21 +787,17 @@ class FunOps k where
   type Dk k = (dk :: * -> * -> * -> * -> *) | dk -> k
 
   type ApplyCtx k i o :: Constraint
-  type ApplyCtx k i o = ()
   apply :: ApplyCtx k i o => k i o cache -> i -> (o, cache)
 
   type DApplyCtx k i o :: Constraint
-  type DApplyCtx k i o = ()
   dApply :: DApplyCtx k i o =>
     Dk k i o cache1 cache2 -> Dt^i -> cache1 -> (Dt^o, cache2)
 
   type DerivCtx k i o :: Constraint
-  type DerivCtx k i o = ()
   deriv :: DerivCtx k i o =>
     k i o cache -> Dk k i o cache cache
 
   type FunUpdCtx k i o :: Constraint
-  type FunUpdCtx k i o = ()
   funUpdate :: FunUpdCtx k i o =>
     k i o cache1 -> Dk k i o cache1 cache2 -> k i o cache2
 
@@ -804,8 +813,11 @@ In this interface, the type of function changes |DK k i o cache1 cache2|
 represents functions (encoded by type constructor |Dk k|) with inputs of type
 |i|, outputs of type |o|, input cache type |cache1| and output cache type
 |cache2|. Types |cache1| and |cache2| coincide for typical function changes, but
-can be different for replacement function changes.
-Correspondingly, |dApply| supports applying such replacement changes.
+can be different for replacement function changes, or more generally for
+function changes across functions with different implementations and cache types.
+Correspondingly, |dApply| supports applying such changes across closures with
+different implementations: unfortunately, unless the two implementations are
+similar, the cache content cannot be reused.
 
 To implement this interface it is sufficient to define a type of codes that
 admits an instance of type-class |Codelike|. Earlier definitions of
@@ -814,22 +826,49 @@ admits an instance of type-class |Codelike|. Earlier definitions of
 class Codelike code where
   codeMatch :: code env1 a1 r1 cache1 -> code env2 a2 r2 cache2 ->
     Maybe ((env1, cache1) :~: (env2, cache2))
-  apply :: code env a b cache -> env -> a -> (b, cache)
-  dapply :: code env a b cache -> Dt^env -> Dt^a -> cache -> (Dt^b, cache)
+  applyCode :: code env a b cache -> env -> a -> (b, cache)
+  dapplyCode :: code env a b cache -> Dt^env -> Dt^a -> cache -> (Dt^b, cache)
 \end{code}
 Typically, a defunctionalized program uses no first-class functions and has a
 single type of functions. Having a type class of function codes weakens that
 property. We can still use a single type of codes throughout our program; we can
 also use different types of codes for different parts of a program, without
 allowing for communications between those parts.
+% Defining such instances
+% %Observe that |dapply| produces caches
 
-Defining such instances
-%Observe that |dapply| produces caches
+On top of the |Codelike| interface, we can define instances of interface |FunOps| and
+|ChangeStruct|. To demonstrate this, we show a complete implementation in
+\cref{fig:chs-codelike,fig:funops-codelike}.
+Similarly to |`oplus`|, we can implement |`ocompose`| by comparing codes
+contained in function changes; this is not straightforward when using closure
+conversion as in \cref{sec:incr-nest-loop}, unless we store even more type
+representations.
+% In representations using closure conversion , it is
+% possible to apply functions to correspondingly caches and to update a function
+% with a function change, but it is not possible to define the change composition
+% of two function changes.
 
-\pg{Gotta copy-paste more code.}
+We can detect nil changes at runtime even in cache-passing style. We can for
+instance define function |wrapDer1| which does something trickier than |wrapDF|:
+here we assume that |dg| is a derivative taking function change |df| as
+argument. Then, if |df| is nil, |dg df| must also be nil, so we can return a nil
+change directly, together with the input cache.
+The input cache has the required type because in this case, the type |cache2| of
+the desired output cache has matches type |cache1| of the input cache (because
+we have a nil change |df| across them): the return value of |isNilFun| witnesses
+this type equality.
+\begin{code}
+wrapDer1 ::
+  (FunOps k, OnilChangeStruct r') =>
+  (Dk k i o cache1 cache2 -> f cache1 -> (Dt^r', f cache2)) ->
+  (Dk k i o cache1 cache2 -> f cache1 -> (Dt^r', f cache2))
+wrapDer1 dg df c =
+  case isNilFun df of
+    Just Refl -> (onil Proxy, c)
+    Nothing -> dg df c
+\end{code}
 
-On top of that interface, we can define instances of interface |FunOps| and
-|ChangeStruct|.
 We can also hide the difference between difference cache types by defining a
 uniform type of caches, |Cache code|.
 To hide caches, we can use a pair of a cache (of type |cache|)
@@ -837,12 +876,13 @@ and a code for that cache type. When applying a function (change) to a cache, or
 when composing the function, we can compare the function code with the cache
 code.
 
-In representations using closure conversion (\cref{sec:incr-nest-loop}), it is
-possible to apply functions to correspondingly caches and to update a function
-with a function change, but it is not possible to define the change composition
-of two function changes.\pg{nobody will have a clue if I say this.}
+In this code we have not shown support for replacement values for functions; we
+leave details to our implementation.
+
+\begin{figure}[p]
+\texths %drop extra space around figure
+% From https://tex.stackexchange.com/a/186335/1340
 \begin{code}
-type Env env = (CompChangeStruct env, NilTestable env)
 type RawFun a b code env cache = (code env a b cache, env)
 type RawDFun a b code env cache = (code env a b cache, Dt^env)
 
@@ -861,6 +901,62 @@ data FunW code a b cache where
 data DFunW code a b cache1 cache2 where
   DW :: DFun a b code -> DFunW code a b (Cache code) (Cache code)
 
+derivFun :: Fun a b code -> DFun a b code
+derivFun (F (code, env)) = DF (code, nil env)
+
+oplusBase :: Codelike code => Fun a b code -> DFun a b code -> Fun a b code
+oplusBase (F (c1, env)) (DF (c2, denv)) =
+  case codeMatch c1 c2 of
+    Just Refl ->
+      F (c1, env `oplus` denv)
+    _ -> error "INVALID call to oplusBase!"
+
+ocomposeBase :: Codelike code => DFun a b code -> DFun a b code -> DFun a b code
+ocomposeBase (DF (c1, denv1)) (DF (c2, denv2)) =
+  case codeMatch c1 c2 of
+    Just Refl ->
+      DF (c1, denv1 `ocompose` denv2)
+    _ -> error "INVALID call to ocomposeBase!"
+
+instance Codelike code => ChangeStruct (Fun a b code) where
+  type Dt^(Fun a b code) = DFun a b code
+  oplus = oplusBase
+
+instance Codelike code => NilChangeStruct (Fun a b code) where
+  nil (F (c, env)) = DF (c, nil env)
+
+instance Codelike code => CompChangeStruct (Fun a b code) where
+  ocompose df1 df2 = ocomposeBase df1 df2
+
+instance Codelike code => NilTestable (Fun a b code) where
+  isNil (DF (c, env)) = isNil env
+\end{code}
+\caption{Implementing change structures using |Codelike| instances.}
+\label{fig:chs-codelike}
+\end{figure}
+
+\begin{figure}[p]
+\texths %drop extra space around figure
+% From https://tex.stackexchange.com/a/186335/1340
+\begin{code}
+applyRaw :: Codelike code => RawFun a b code env cache -> a -> (b, cache)
+applyRaw (code, env) = applyCode code env
+
+dapplyRaw :: Codelike code => RawDFun a b code env cache -> Dt^a -> cache -> (Dt^b, cache)
+dapplyRaw (code, denv) = dapplyCode code denv
+
+applyFun :: Codelike code => Fun a b code -> a -> (b, Cache code)
+applyFun (F f@(code, env)) arg =
+  (id *** C code) $ applyRaw f arg
+
+dapplyFun :: Codelike code => DFun a b code -> Dt^a -> Cache code -> (Dt^b, Cache code)
+dapplyFun (DF (code1, denv)) darg (C code2 cache1) =
+  case codeMatch code1 code2 of
+    Just Refl ->
+      (id *** C code1) $ dapplyCode code1 denv darg cache1
+    _ -> error "INVALID call to dapplyFun!"
+
+
 instance Codelike code => FunOps (FunW code) where
   type Dk (FunW code) = DFunW code
   apply (W f) = applyFun f
@@ -873,7 +969,6 @@ instance Codelike code => FunOps (FunW code) where
     else
       Nothing
 \end{code}
-
-In this code we have not shown support for replacement values for functions; we
-leave details to our implementation.
-\pg{it is a straightforward extension that we omit.}\pg{True? }
+\caption{Implementing |FunOps| using |Codelike| instances.}
+\label{fig:funops-codelike}
+\end{figure}

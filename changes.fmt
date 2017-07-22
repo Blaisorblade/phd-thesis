@@ -375,6 +375,14 @@
 %format r1
 %format r2
 
+%format code1
+%format code2
+
+%format env1
+%format env2
+%format denv1
+%format denv2
+
 % Cancel the effect of \; (that is \thickspace)
 %format undoapp = "\negthickspace"
 
