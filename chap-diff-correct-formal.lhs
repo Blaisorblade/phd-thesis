@@ -904,16 +904,19 @@ changes to valid output changes. This is why we
 formalize validity as a logical relation.
 
 \subsection{Invalid input changes}
+\label{sec:invalid}
 To see concretely why invalid changes, in general, can cause
 derivatives to produce
 incorrect results, consider again |grandTotal = \ xs ys -> sum
-(merge xs ys)|. Suppose a bag change |dxs| removes an element
+(merge xs ys)| from~\cref{sec:motiv-example}.
+Suppose a bag change |dxs| removes an element
 |20| from input bag |xs|, while |dys| makes no changes to |ys|:
-in this case, the output should decrease, so |dgrandTotal xs dxs
-ys dys| should return |-20|. However, that is only correct if
+in this case, the output should decrease, so |dz = dgrandTotal xs dxs
+ys dys| should be |-20|. However, that is only correct if
 |20| is actually an element of |xs|. Otherwise, |xs `oplus` dxs|
-will make no change to |xs|. Similar issues apply with function
-changes.\pg{elaborate}
+will make no change to |xs|, hence the correct output change |dz| would be |0|
+instead of |-20|. Similar but trickier issues apply with function
+changes; see also \cref{sec:very-invalid}.
 
 \subsection{Alternative environment changes}
 \label{sec:envs-without-base-inputs-intro}
