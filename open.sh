@@ -1,2 +1,2 @@
 skim-revert -g "$1"
-cp "$1" ~/Dropbox/Drafts/
+#cp "$1" ~/Dropbox/Drafts/
