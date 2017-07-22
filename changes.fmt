@@ -222,6 +222,9 @@
 %format dx3
 
 %format : = "\typcolon"
+
+%format :~: = "\mathrel{:\sim:}"
+
 %format Dt = "\Delta"
 %format DtIdx(t) = "\Delta_{" t "}"
 %format Dt2 = "\Delta_2"
