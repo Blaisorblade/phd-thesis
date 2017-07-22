@@ -286,7 +286,7 @@ takes time |Theta(n)|, and we would like to obtain our result asymptotically fas
 
 To compute the updated output |s2| faster, we assume the changes to the
 inputs have a description of size |dn| that is asymptotically smaller than the
-input size |n|, that is |dn = o(n)|. All approaches to incrementalization
+input size |n|, that is |dn = complSmallO(n)|. All approaches to incrementalization
 require small input changes. Incremental computation will then process the input
 changes, rather than just the new inputs.
 
@@ -456,7 +456,7 @@ the base program.
 Here, derivative |dgrand_total| is faster simply because it \emph{ignores} initial
 inputs altogether. Therefore, its time complexity depends only on the total size
 of changes |dn|. In particular, the complexity of |dgrand_total| is |Theta(dn) =
-o(n)|.
+complSmallO(n)|.
 
 We generate derivatives through a program transformation from terms to terms,
 which we call \emph{differentiation} (or, sometimes, simply \emph{derivation}).

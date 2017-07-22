@@ -14,13 +14,9 @@
 
 %format @ = "\mathrel{@}"
 
-% Argh, conflicts!
-%format complTheta(n) = "\Theta(" n ")"
 %format complSmallO(n) = "o(" n ")"
 %format complBigO(n) = "O(" n ")"
 %format Theta(n) = "\Theta(" n ")"
-%format o(n) = "o(" n ")"
-
 
 %format (pair (a) (b)) = "\langle" a , b "\rangle"
 
