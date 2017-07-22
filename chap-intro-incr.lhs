@@ -701,11 +701,20 @@ name with |d|, so that |derive(y) = dy| and so on.%
 \end{restatable}
 If we extend the language with (non-recursive) |lett|-bindings, we can give
 derived rules for it such as:
+% \[
+% \begin{array}{llrl}
+%   |derive(lett x = t1 in t2)| ={} & \mathbf{let} & x ={} & |t1| \\
+%   && \mathit{dx} ={}& |derive t1|\\
+%   & \mathbf{in} && |derive t2|
+% \end{array}
+% \]
+% |lett  x = t1|\\
+%       & |dx = derive(t1)|\\
+% &|in    derive(t2)|
 \begin{code}
-derive(lett x = t1 in t2) =
-  lett  x = t1
-        dx = derive(t1)
-  in    derive(t2)
+derive(lett x = t1 in t2)   =  lett  x   = t1
+                                     dx  = derive(t1)
+                               in    derive(t2)
 \end{code}
 In \cref{sec:general-recursion} we will explain that the same transformation
 rules apply for \emph{recursive} |lett|-bindings.\pg{This is not the proof, so
