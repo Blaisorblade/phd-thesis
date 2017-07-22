@@ -241,15 +241,15 @@ the surrounding theory. ILC generalizes operators |+| and |-| as operators
 In this section, we illustrate informally incrementalization on a
 small example.
 
-In the following program, |grand_total xs ys| sums integer numbers in
+In the following program, |grandTotal xs ys| sums integer numbers in
 input collections |xs| and |ys|.
 
 \begin{code}
-  grand_total        :: Bag Int -> Bag Int -> Int
+  grandTotal         :: Bag Int -> Bag Int -> Int
   s                  :: Int
 
-  grand_total xs ys  = sum (merge xs ys)
-  s                  = grand_total xs ys
+  grandTotal xs ys   = sum (merge xs ys)
+  s                  = grandTotal xs ys
 \end{code}
 
 This program computes output |s| from input collections |xs| and
@@ -266,7 +266,7 @@ and |ys1 = {{4}}| to obtain output |s1|. Here, double braces
 braces.
 
 \begin{code}
-  s1                 = grand_total xs1 ys1
+  s1                 = grandTotal xs1 ys1
                      = sum {{1, 2, 3, 4}} = 10
 \end{code}
 
@@ -278,7 +278,7 @@ to denote the input size. In this case the asymptotic complexity of computing
 Consider computing updated output |s2| from updated inputs |xs2 = {{1, 1, 2, 3}}|
 and |ys2 = {{4, 5}}|. We could recompute |s2| from scratch as
 \begin{code}
-  s2           = grand_total xs2 ys2
+  s2           = grandTotal xs2 ys2
                = sum {{1, 1, 2, 3, 4, 5}} = 16
 \end{code}
 But if the size of the updated inputs is |Theta(n)|, recomputation also
@@ -405,10 +405,10 @@ After introducing changes and related notions, we describe how we incrementalize
 our example program.
 
 We consider again the scenario of \cref{sec:motiv-example}: we need to compute
-the updated output |s2|, the result of calling our program |grand_total| on
+the updated output |s2|, the result of calling our program |grandTotal| on
 updated inputs |xs2| and |ys2|. And we have the initial output |s1| from calling our
 program on initial inputs |xs1| and |ys1|. In this scenario we can compute |s2|
-\emph{non-incrementally} by calling |grand_total| on the updated inputs, but
+\emph{non-incrementally} by calling |grandTotal| on the updated inputs, but
 we would like to obtain the same result faster.
 Hence, we compute |s2| \emph{incrementally}: that is, we first compute the
 \emph{output change} |ds| from |s1| to |s2|; then we update the old output |s1|
@@ -417,14 +417,14 @@ asymptotically faster than non-incremental computation. This speedup is possible
 because we take advantage of the computation already done to compute |s1|.
 
 To compute the output change |ds| from |s1| to |s2|, we propose to transform our
-\emph{base program} |grand_total| to a new program |dgrand_total|, that we call
-the \emph{derivative} of |grand_total|: to compute |ds| we call |dgrand_total|
+\emph{base program} |grandTotal| to a new program |dgrandTotal|, that we call
+the \emph{derivative} of |grandTotal|: to compute |ds| we call |dgrandTotal|
 on initial inputs and their respective changes.
-Unlike other approaches to incrementalization, |dgrand_total| is a regular
-program in the same language as |grand_total|, hence can be further optimized
+Unlike other approaches to incrementalization, |dgrandTotal| is a regular
+program in the same language as |grandTotal|, hence can be further optimized
 with existing technology.
 
-Below, we give the code for |dgrand_total| and show that in this example
+Below, we give the code for |dgrandTotal| and show that in this example
 incremental computation computes |s2| correctly.
 
 For ease of reference, we recall inputs, changes and outputs:
@@ -435,16 +435,16 @@ For ease of reference, we recall inputs, changes and outputs:
   ys1                         = {{4}}
   dys                         = {{5}}
   ys2                         = {{4, 5}}
-  s1                          = grand_total xs1 ys1
+  s1                          = grandTotal xs1 ys1
                               = 10
-  s2                          = grand_total xs2 ys2
+  s2                          = grandTotal xs2 ys2
                               = 16
 \end{code}
 Incremental computation uses the following definitions to compute |s2| correctly
 and with fewer steps, as desired.
 \begin{code}
-  dgrand_total xs dxs ys dys  = sum (merge dxs dys)
-  ds                          = dgrand_total xs1 dxs ys1 dys =
+  dgrandTotal xs dxs ys dys   = sum (merge dxs dys)
+  ds                          = dgrandTotal xs1 dxs ys1 dys =
                               = sum {{1, 5}} = 6
   s2                          = s1 `oplus` ds = s1 + ds
                               = 10 + 6 = 16
@@ -453,16 +453,16 @@ and with fewer steps, as desired.
 Incremental computation should be asymptotically faster than non-incremental
 computation; hence, the derivative we run should be asymptotically faster than
 the base program.
-Here, derivative |dgrand_total| is faster simply because it \emph{ignores} initial
+Here, derivative |dgrandTotal| is faster simply because it \emph{ignores} initial
 inputs altogether. Therefore, its time complexity depends only on the total size
-of changes |dn|. In particular, the complexity of |dgrand_total| is |Theta(dn) =
+of changes |dn|. In particular, the complexity of |dgrandTotal| is |Theta(dn) =
 complSmallO(n)|.
 
 We generate derivatives through a program transformation from terms to terms,
 which we call \emph{differentiation} (or, sometimes, simply \emph{derivation}).
 We write |derive t| for the result of
 differentiating term |t|. We apply |derive| on terms of our non-incremental
-programs or \emph{base terms}, such as |grand_total|. To define differentiation,
+programs or \emph{base terms}, such as |grandTotal|. To define differentiation,
 we assume that we already have derivatives for primitive functions they use; we
 discuss later how to write such derivatives by hand.
 
@@ -471,14 +471,14 @@ peek ahead, but we prefer to first explain what differentiation is supposed to d
 
 A derivative of a function can be applied to initial inputs and changes from initial
 inputs to updated inputs, and returns a change from an initial output to an
-updated output. For instance, take derivative |dgrand_total|, initial inputs
+updated output. For instance, take derivative |dgrandTotal|, initial inputs
 |xs1| and |ys1|, and changes |dxs| and |dys| from initial inputs to updated
-inputs. Then, change |dgrand_total xs1 dxs ys1 dys|, that is |ds|, goes from initial
-output |grand_total xs1 ys1|, that is |s1|, to updated output |grand_total xs2
+inputs. Then, change |dgrandTotal xs1 dxs ys1 dys|, that is |ds|, goes from initial
+output |grandTotal xs1 ys1|, that is |s1|, to updated output |grandTotal xs2
 ys2|, that is |s2|. And because |ds| goes from |s1| to |s2|, it follows as a
 corollary that |s2 = s1 `oplus` ds|. Hence, we can compute |s2| incrementally
 through |s1 `oplus` ds|, as we have shown, rather than by evaluating
-|grand_total xs2 ys2|.
+|grandTotal xs2 ys2|.
 
 We often just say that a derivative
 of function |f| maps changes to the inputs of |f| to changes to the outputs of
@@ -519,8 +519,8 @@ these equations in \cref{sec:denot-syntactic-reasoning}.\footnote{Nitpick: if
 \pg{So we still need to say ``a derivative'', not ``the derivative''.}
 
 In our example, we have applied |derive(param)| to
-|grand_total|, and simplify the result via
-$\beta$-reduction to produce |dgrand_total|, as we show in \cref{sec:derive-example-merge}.
+|grandTotal|, and simplify the result via
+$\beta$-reduction to produce |dgrandTotal|, as we show in \cref{sec:derive-example-merge}.
 Correctness of |derive(param)| guarantees
 that |sum (merge dxs dys)| evaluates to a change from
 |sum (merge xs ys)| evaluated on old inputs |xs1| and |ys1| to
@@ -783,11 +783,11 @@ differentiation to our earlier example.
 
 To exemplify the behavior of differentiation concretely, and help
 fix ideas for later discussion, in this section we show how the derivative of
-|grand_total| looks like.
+|grandTotal| looks like.
 
 \begin{code}
-grand_total  = \ xs ys -> sum (merge xs ys)
-s            = grand_total {{1}} {{2, 3, 4}} = 11
+grandTotal   = \ xs ys -> sum (merge xs ys)
+s            = grandTotal {{1}} {{2, 3, 4}} = 11
 \end{code}
 Differentiation is a structurally recursive program transformation,
 so we first compute |derive(merge xs ys)|. To compute its change
@@ -850,20 +850,20 @@ must bind all those variables.
   `betaeq`  \xs dxs ys dys -> sum (merge dxs dys)
 \end{code}
 
-Next we need to transform the binding of |grand_total2| to its body |b = \ xs ys -> sum (merge xs ys)|. We copy this binding and add a new additional binding from |dgrand_total2| to the derivative of |b|.
+Next we need to transform the binding of |grandTotal2| to its body |b = \ xs ys -> sum (merge xs ys)|. We copy this binding and add a new additional binding from |dgrandTotal2| to the derivative of |b|.
 
 \begin{code}
-grand_total   = \ xs      ys      ->  sum  (merge  xs   ys)
-dgrand_total  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
+grandTotal   = \ xs      ys      ->  sum  (merge  xs   ys)
+dgrandTotal  = \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
 \end{code}
 
 Finally, we need to transform the binding of |output| and its body. By iterating similar steps,
 in the end we get:
 \begin{code}
-grand_total   `eq`      \ xs      ys      ->  sum  (merge  xs   ys)
-dgrand_total  `eq`      \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
-s             `eq`      grand_total   {{1, 2, 3}}       {{4}}
-ds            `eq`      dgrand_total  {{1, 2, 3}} {{1}} {{4}} {{5}}
+grandTotal    `eq`      \ xs      ys      ->  sum  (merge  xs   ys)
+dgrandTotal   `eq`      \ xs dxs  ys dys  ->  sum  (merge  dxs  dys)
+s             `eq`      grandTotal   {{1, 2, 3}}       {{4}}
+ds            `eq`      dgrandTotal  {{1, 2, 3}} {{1}} {{4}} {{5}}
               `betaeq`  sum (merge {{1}} {{5}})
 \end{code}
 

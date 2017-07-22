@@ -528,7 +528,7 @@ mentioned in this chapter.
 
 % In this chapter we will assume a language plugin
 
-% Our |grand_total| example requires a plugin that provides a types for integers
+% Our |grandTotal| example requires a plugin that provides a types for integers
 % and bags and primitives such that we can implement |sum| and
 % |merge|.
 

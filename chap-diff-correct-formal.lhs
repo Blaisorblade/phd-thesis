@@ -906,10 +906,10 @@ formalize validity as a logical relation.
 \subsection{Invalid input changes}
 To see concretely why invalid changes, in general, can cause
 derivatives to produce
-incorrect results, consider again |grand_total = \ xs ys -> sum
+incorrect results, consider again |grandTotal = \ xs ys -> sum
 (merge xs ys)|. Suppose a bag change |dxs| removes an element
 |20| from input bag |xs|, while |dys| makes no changes to |ys|:
-in this case, the output should decrease, so |dgrand_total xs dxs
+in this case, the output should decrease, so |dgrandTotal xs dxs
 ys dys| should return |-20|. However, that is only correct if
 |20| is actually an element of |xs|. Otherwise, |xs `oplus` dxs|
 will make no change to |xs|. Similar issues apply with function

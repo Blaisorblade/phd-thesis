@@ -64,8 +64,8 @@
 %format t1
 %format t2
 
-%format grand_total2
-%format dgrand_total2
+%format grandTotal2
+%format dgrandTotal2
 
 %format `oplus` = "\oplus "
 %format `ominus` = "\ominus "
