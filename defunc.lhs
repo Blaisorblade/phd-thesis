@@ -574,7 +574,6 @@ $n$-uples in general (say, for values of $n$ up to some high threshold).
 % that case we can simply support replacing a function value with a new code and
 % associated environment, that is, simply support a replacement change.
 
-\pg{}
 \subsubsection{Validity and ⊕ on defunctionalized function changes}
 A function change |df| is valid for |f| if |df| has the same function code as
 |f| and if |df|'s environment change is valid for |f|'s environment:
@@ -601,8 +600,6 @@ instance ChangeStruct (Fun1 sigma tau) where
       error "Invalid function change in oplus"
 \end{spec}
 
-%format ~ = "\sim"
-
 In particular, |env `oplus` denv| is reported as ill-typed, because we don't
 know that |env| and |denv| have compatible types. Take |c1 = Pair1, c2 =
 MapPair1, f = F1 (env, Pair1) :: sigma -> tau| and |df = DF1 (denv, MapPair1) ::
@@ -613,15 +610,7 @@ DF1 (denv, MapPair1)|: there, indeed, |env :: sigma| and |denv :: [tau]|, so
 return false and |env `oplus` denv| won't be evaluated. But the typechecker does
 not know that.
 
-% Indeed, if |c1| and |c2| are different, |env|
-% and |denv| have different types as well: |env :: env1| and |denv :: Dt^env2|,
-% where |env1| is an existential type variable brought in scope by matching on |F
-% env c1|, while |env2| is brought in scope by matching on |DF denv c2|. And even
-% if |c1 == c2|, the typechecker does not learn that |c1| and |c2| have the same
-% type and in particular that |env1 ~ env2| (where |~| denotes type equivalence in
-% Haskell).
-
-Hence we need an equality operation that produces a witness of type equality. We
+Hence, we need an equality operation that produces a witness of type equality. We
 define the needed infrastructure with few lines of code. First, we need a GADT
 of witnesses of type equality; we can borrow from GHC's standard library its
 definition, which is just:
@@ -632,16 +621,20 @@ definition, which is just:
 data tau1 :~: tau2 where
   Refl :: tau :~: tau
 \end{code}
-Assume that |x| has type |tau1 :~: tau2|: by standard GADT typing rules, if |x| matches |Refl|
-then |tau1| and |tau2| are equal and we write (with Haskell syntax) |tau1 ~
-tau2|. Even if |tau1 :~: tau2| has only constructor |Refl|, a match is necessary
+If |x| has type |tau1 :~: tau2| and matches pattern |Refl|, then by standard
+GADT typing rules |tau1| and |tau2| are equal.
+Even if |tau1 :~: tau2| has only constructor |Refl|, a match is necessary
 since |x| might be bottom. Readers familiar with type theory, Agda or Coq will
 recognize that |:~:| resembles Agda's propositional equality or Martin-Löf's
 identity types, even though it can only represents equality between types and
 not between values.
 
-Next, we implement a new equality on codes. For equal codes, this
-operation produces a witness that their environment types match.
+Next, we implement function |codeMatch| to compare codes. For equal codes, this
+operation produces a witness that their environment types match.\footnote{%
+If a code is polymorphic in the environment type, it must take as argument a
+representation of its type argument, to be used to implement |codeMatch|.
+We represent type arguments at runtime via instances of |Typeable|, and omit
+standard details here.}
 Using this operation, we can complete the above instance of
 |ChangeStruct (Fun1 sigma tau)|.
 
