@@ -712,7 +712,9 @@ rules apply for \emph{recursive} |lett|-bindings.\pg{This is not the proof, so
   we can be more informal.}
 
 If |t| contains occurrences of both (say) |x| and |dx|, capture issues arise in
-|derive(t)|. We defer these issues to \cref{sec:derive-binding-issues}.
+|derive(t)|. We defer these issues to \cref{sec:derive-binding-issues}, and
+assume throughout that such issues can be avoided by $\alpha$-renaming and the
+Barendregt convention \citep{Barendregt1984lambda}.
 
 This transformation might seem deceptively simple. Indeed, pure
 $\lambda$-calculus only handles binding and higher-order
