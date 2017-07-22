@@ -623,7 +623,7 @@ definition, which is just:
 
 \pg{add link, not ``in GHC 8.0''}
 \begin{code}
--- From Data.Type.Equality
+-- From |Data.Type.Equality|
 data tau1 :~: tau2 where
   Refl :: tau :~: tau
 \end{code}
@@ -781,7 +781,7 @@ class FunOps k where
 
   type DApplyCtx k i o :: Constraint
   type DApplyCtx k i o = ()
-  dApply :: DApplyCtx k i o => Dk k i o cache1 cache2 -> Dt i -> cache1 -> (Dt o, cache2)
+  dApply :: DApplyCtx k i o => Dk k i o cache1 cache2 -> Dt^i -> cache1 -> (Dt^o, cache2)
 
   type DerivCtx k i o :: Constraint
   type DerivCtx k i o = ()
