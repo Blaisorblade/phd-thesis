@@ -972,3 +972,5 @@ instance Codelike code => FunOps (FunW code) where
 \caption{Implementing |FunOps| using |Codelike| instances.}
 \label{fig:funops-codelike}
 \end{figure}
+
+%  LocalWords:  dapplyFun dapply oreplace ChangeStruct Codelike RawFun
