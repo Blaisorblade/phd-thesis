@@ -426,6 +426,9 @@
 %format dilcTau = "\dilcTau"
 %format dilcUntau = "\dilcUntau"
 
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+%format *** = "\mathbin{* \mkern-5mu * \mkern-5mu *}"
+
 %endif
 
 \def\deriveDefCore{%
