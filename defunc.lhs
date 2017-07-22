@@ -632,17 +632,17 @@ definition, which is just:
 data tau1 :~: tau2 where
   Refl :: tau :~: tau
 \end{code}
-Assume |x :: tau1 :~: tau2|: by standard GADT typing rules, if |x| matches |Refl|
+Assume that |x| has type |tau1 :~: tau2|: by standard GADT typing rules, if |x| matches |Refl|
 then |tau1| and |tau2| are equal and we write (with Haskell syntax) |tau1 ~
 tau2|. Even if |tau1 :~: tau2| has only constructor |Refl|, a match is necessary
-since |v| might be bottom. Readers familiar with type theory, Agda or Coq will
-recognize that |(:~:)| resembles Agda's propositional equality or Martin-Löf's
+since |x| might be bottom. Readers familiar with type theory, Agda or Coq will
+recognize that |:~:| resembles Agda's propositional equality or Martin-Löf's
 identity types, even though it can only represents equality between types and
 not between values.
 
-Next, we define a new equality operation on codes. For equal codes, this
-operation produces a witness that their environment types match, otherwise
-nothing. Using this operation, we can complete the above instance of
+Next, we implement a new equality on codes. For equal codes, this
+operation produces a witness that their environment types match.
+Using this operation, we can complete the above instance of
 |ChangeStruct (Fun1 sigma tau)|.
 
 % codeMatch1 :: Code1 env1 sigma1 tau1 -> Code1 env2 sigma2 tau2 -> IsEq (env1, sigma1, tau1) (env2, sigma2, tau2)
@@ -655,12 +655,11 @@ codeMatch1 _ _ = Nothing
 
 instance ChangeStruct (Fun1 sigma tau) where
   type Dt^(Fun1 sigma tau) = DFun1 sigma tau
-  (F1 (c1, env)) `oplus` (DF1 (c2, denv)) =
+  F1 (c1, env) `oplus` DF1 (c2, denv) =
     case codeMatch1 c1 c2 of
       Just Refl -> F1 (c1, env `oplus` denv)
       Nothing -> error "Invalid function change in oplus"
 \end{code}
-
 \subsubsection{Applying function changes}
 After defining environment changes, we define an incremental interpretation
 function |dapplyCode|. If |c| is the code for a function |f = \x -> t|, as
