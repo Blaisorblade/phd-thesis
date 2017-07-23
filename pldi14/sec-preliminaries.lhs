@@ -9,7 +9,7 @@
 To discuss how we incrementalize programs and prove that
 our incrementalization technique gives correct results, we specify
 which foundation we use for our proofs and what object language we
-study.
+study throughout most of \cref{part:incr}.
 
 We mechanize our correctness proof using Agda, hence we use
 Agda's underlying type theory as our foundation. We discuss
