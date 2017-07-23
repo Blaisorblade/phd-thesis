@@ -138,9 +138,6 @@ This example uses the notion of denotational equivalence for valid
 changes. We now proceed to formalize it.
 For reference, we recall denotational equivalence of terms, and then
 introduce its restriction:
-\iftoggle{full}{
-\denotEqual*
-}{
 \begin{restatable*}[Denotational equivalence]{definition}{denotEqual}
   \label{def:denot-equivalence}
   We say that two terms |Gamma /- t1 : tau| and |Gamma /- t2:
@@ -148,7 +145,6 @@ introduce its restriction:
   : tau| (or sometimes |t1 `cong` t2|), if for all environments
   |rho : eval Gamma| we have that |eval t1 rho = eval t2 rho|.
 \end{restatable*}
-}
 
 For open terms |t1, t2| that depend on changes,
 denotational equivalence is too restrictive, since it

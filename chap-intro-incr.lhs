@@ -163,9 +163,9 @@ Flattening? Nested data? Sharding?
 
 We build our incremental DSLs based on
 simply-typed $\lambda$-calculus (STLC), extended with
-\emph{language plugins} to define the domain-specific parts, as
-discussed in \cref{sec:intro-stlc}. We call our approach
-\emph{ILC} for \emph{Incremental Lambda Calculus}.
+\emph{language plugins} to define the domain-specific parts, as discussed in
+\cref{sec:intro-stlc} and summarized in \cref{fig:lambda-calc}. We call our
+approach \emph{ILC} for \emph{Incremental Lambda Calculus}.
 
 The rest of this chapter is organized as follows.
 In \cref{sec:generalize-fin-diff} we explain that 
