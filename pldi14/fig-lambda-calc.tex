@@ -78,7 +78,7 @@ s, t     & c             & \mid \Lam{(x : \Gs)}{t}
       \EvalWith{c}{\rho}
         & =\EvalConst{c}\\
       \EvalWith{\Lam{(x : \Gs)}{t}}{\rho}
-        & = \lambda v : \Eval{\Gs}.\ \EvalWith{t}{\ExtendEnv*{x}{v}}\\
+        & = \lambda (v : \Eval{\Gs}) \to \EvalWith{t}{\ExtendEnv*{x}{v}}\\
       \EvalWith{\App{s}{t}}{\rho}
         & = \App{\EvalWith*{s}{\rho}}{\EvalWith*{t}{\rho}}\\
       \EvalWith{x}{\Gr}
