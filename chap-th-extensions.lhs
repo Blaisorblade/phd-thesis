@@ -44,21 +44,27 @@ using general recursion and what is the behavior of the resulting terms.
 
 Earlier we gave a rule for deriving (non-recursive) |lett|:
 \begin{code}
-derive(lett x = t1 in t2) =
-  lett  x = t1
-        dx = derive(t1)
-  in    derive(t2)
+derive(lett x = t1 in t2)   =  lett  x   = t1
+                                     dx  = derive(t1)
+                               in    derive(t2)
 \end{code}
+% derive(lett x = t1 in t2) =
+%   lett  x = t1
+%         dx = derive(t1)
+%   in    derive(t2)
 It turns out that we can use the same rule also for recursive
-|lett|-bindings, which we write here |letrec| for clarity:
+|lett|-bindings, which we write here (and only here) |letrec| for distinction:
 \begin{code}
-derive(letrec x = t1 in t2) =
-  lett  x = t1
-        dx = derive(t1)
-  in    derive(t2)
+derive(letrec x = t1 in t2)   =  letrec  x   = t1
+                                         dx  = derive(t1)
+                                 in      derive(t2)
 \end{code}
+% derive(letrec x = t1 in t2) =
+%   letrec  x = t1
+%           dx = derive(t1)
+%   in      derive(t2)
 
-\pg{Reorganize. This order makes no sense.}
+\pg{Far from perfect. Better reorganize. This order makes little sense.}
 \begin{example}
   In \cref{ex:syn-changes-map} we presented a derivative for
   |map|.
