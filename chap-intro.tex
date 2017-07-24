@@ -27,7 +27,7 @@ programming languages (PL) support also arbitrarily nested lists and maps of
 data, and allow programmers to define new data types with few restrictions; a
 typical PL will also allow a far richer set of operations than SQL.
 
-However, typical PL do not apply typical database optimizations to collection
+However, typical PLs do not apply typical database optimizations to collection
 queries, and if queries are incrementalized, this is often done by hand, even
 though code implementing incremental query is error-prone and
 hard-to-maintain~\citep{Salvaneschi13reactive}.
@@ -57,8 +57,8 @@ self-adjusting computation~\citep{Acar09}, we introduce a novel
 incrementalization approach which enables further transformations on the
 incrementalization results.
 %
-Further research is needed, but a number of case studies suggest at least some
-limited applicability, which improves in some ways on the applicability of similar
+Further research is needed, but a number of case studies suggest
+applicability, even in some scenarios beyond existing
 techniques~\citep{Koch2016incremental}.
 
 We consider the problem for functional programming languages such as Haskell or
@@ -81,22 +81,23 @@ work of the optimizer at the same time.
 \pg{Rewrite}
 This thesis is divided into two parts:
 \begin{itemize}
-\item In \cref{part:ch-aosd13}, we describe work on optimizing collection
-  queries by static program transformation, based on a set of rewrite rules~\citep{GiarrussoAOSD13}.
-\item In \cref{part:incr}, we describe work on incrementalizing programs
-  by static program transformation. This thesis presents the first approach that
-  handles higher-order programs by using program transformation; hence, while
+\item In \cref{part:ch-aosd13}, we optimize collection
+  queries by static program transformation, based on a set of rewrite
+  rules~\citep{GiarrussoAOSD13}.
+\item In \cref{part:incr}, we incrementalize programs by transforming them to
+  new programs. This thesis presents the first approach that
+  handles higher-order programs through program transformation; hence, while
   our main examples use collection queries, we phrase the work in terms of
   $\lambda$-calculi with unspecified primitives~\citep*{CaiEtAl2014ILC}.
   In \cref{ch:cts}, we extend ILC with a further program transformation
   step, so that base programs can store intermediate results and derivatives can
   reuse them, but without resorting to dynamic memoization and necessarily
   needing to look results up at runtime. To this end, we build on work by
-\citet{Liu00} and extend it to a higher-order, typed setting.
+  \citet{Liu00} and extend it to a higher-order, typed setting.
 \end{itemize}
 
 \Cref{part:incr} is more theoretical than
-\cref{part:ch-aosd13}. That was necessary, because optimizations in
+\cref{part:ch-aosd13}, because optimizations in
 \cref{part:ch-aosd13} are much better understood than our approach to
 incrementalization.
 
@@ -117,6 +118,7 @@ proof.
 
 %\Cref{part:ch-aosd13} makes the following contributions:
 \pg{TODO:contributions of other parts.}
+\pg{Contributions: maybe in first chapters?}
 
 \Cref{part:incr} makes the following contributions:
 \begin{itemize}
