@@ -69,7 +69,7 @@ mylhs2tex.sty: mylhs2tex.lhs
 # After the first build, this file will be recompiled by latexmk accounting for
 # all other dependencies thanks to code in .latexmkrc.
 # This line is hence only for the first build. Keep it in sync with .latexmkrc!
-%.fmt: %.ltx
+%.fmt: %.ltx mylhs2tex.sty
 	$(baseProcessor) -ini -jobname="$*" "&${baseFormat} $*.ltx \dump"
 # Save log file.
 	mv $*.log $*-fmt.log
