@@ -2,6 +2,9 @@
 %include polycode.fmt
 %include changes.fmt
 
+\part{Incremental λ-Calculus}
+\label{part:incr}
+
 \chapter{Introduction to differentiation}
 \label{sec:intro}
 \label{ch:static-diff-intro}

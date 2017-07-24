@@ -2,6 +2,9 @@
 %include polycode.fmt
 %include changes.fmt
 
+\part*{Appendixes}
+\addcontentsline{toc}{part}{Appendixes}
+
 \chapter[Preliminaries]{Preliminaries: syntax and semantics of
   simply-typed λ-calculus}
 \label{sec:preliminaries}
