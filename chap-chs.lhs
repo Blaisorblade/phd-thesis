@@ -669,10 +669,10 @@ provide change structures for all types:
 \validOplus
 \end{fullCompile}
 \begin{partCompile}
-  \begin{restatable*}[|`oplus`| agrees with validity]{lemma}{validOplus}
+  \begin{restatable}[|`oplus`| agrees with validity]{lemma}{validOplus}
     \label{thm:valid-oplus}
     If |fromto tau v1 dv v2| then |v1 `oplus` dv = v2|.
-  \end{restatable*}
+  \end{restatable}
 \end{partCompile}
 \begin{proof}
   Because |chs(tau)| is a change structure and in change structures |`oplus`|
