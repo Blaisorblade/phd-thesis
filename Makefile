@@ -71,6 +71,8 @@ mylhs2tex.sty: mylhs2tex.lhs
 # This line is hence only for the first build. Keep it in sync with .latexmkrc!
 %.fmt: %.ltx
 	$(baseProcessor) -ini -jobname="$*" "&${baseFormat} $*.ltx \dump"
+# Save log file.
+	mv $*.log $*-fmt.log
 %.pdf: %.tex %.fmt $(INTERM_PRODUCTS) FORCE
 	latexmk $* $(REDIR)
 # Pass pdflatex the same options as latexmk would.
