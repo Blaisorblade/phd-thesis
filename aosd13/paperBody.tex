@@ -95,7 +95,7 @@ To evaluate \LoS, we study queries of the FindBugs tool~\citep{DBLP:journals/sig
 We rewrote a set of queries to use the Scala collections API and show that modularization incurs significant performance overhead. Subsequently, we consider versions of the same queries using \LoS{}.
 We demonstrate that the automatic optimization can reconcile modularity and performance in many cases. Adding advanced optimizations such as indexing can even improve the performance of the analyses beyond the original non-modular analyses.
  
-Overall, our main contributions are the following:
+Overall, our main contributions in \cref{part:ch-aosd13} are the following:
 \begin{itemize}
 \item We illustrate the tradeoff between modularity and performance when manipulating collections, caused by the lack of domain-specific optimizations~(Sec.~\ref{sec:motivation}). Conversely, we illustrate how domain-specific optimizations lead to more readable and more modular code (Sec.~\ref{sec:solution}).
 \item We present the design and implementation of \LoS, an embedded DSL for queries on collections in Scala (Sec.~\ref{sec:implementation}).
