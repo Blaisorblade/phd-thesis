@@ -9,16 +9,13 @@ First, we must relate $\source$ environments that do not contain caches, with
 $\target$ environments that do.
 Second, while evaluating CTS derivatives, the evaluation environment mixes
 caches from the base computation and updated caches computed by the derivatives.
-
 \paragraph{Evaluation commutes with CTS conversion}
 
 \input{\poplPath{differentiation-and-static-caching-continued}}
 
 Figure~\ref{fig:differentiation-and-static-caching-continued}
 extends CTS translation to values, change values, environments and
-change environments. CTS translation of base terms commutes with our semantics, as shown by
-next lemma:
-
+change environments. CTS translation of base terms commutes with our semantics:
 \begin{lemma}[Evaluation commutes with CTS translation]
   For all $\sectx, \sterm$ and $\sclosedvalue$, such that
   $\seval\sectx\sterm{}\sclosedvalue$, and
@@ -45,7 +42,6 @@ change environment~$\tdectx'$ extends~$\tdectx$ with the original (for $i = 1$)
 cache~$\tcache$.''
 Since $\tcache$ is essentially a list of variables containing no values, cache
 values in $\tdectx'$ must be computed from $\env\tdectx$.
-
 \begin{lemma}[Evaluation commutes with CTS differentiation]
   Let $\tcache$ be such that
   $(\tcache, \_) = \compileterm{\bullet}{\sterm}$.
@@ -56,7 +52,6 @@ values in $\tdectx'$ must be computed from $\env\tdectx$.
   then
   $\seval{\tdectx}{\derive{\tupdcache}{\sterm}}{}{(\compile\icloseddvalue, \tcachedclosedvalues)}$.
 \end{lemma}
-
 The proof of this lemma is not immediate, since during the
 evaluation of~$\derive{\tupdcache}{\sterm}$ the new caches replace the
 old caches. In our Coq development, we enforce a physical separation

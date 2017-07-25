@@ -3,26 +3,25 @@
 
 In this section, we present the target language of a transformation
 that extends static differentiation with CTS conversion.
-As said earlier, the functions of $\target$ not only compute their
-output but they also returns a cache containing the intermediate
-values that have contributed to that output. This cache is transmitted
-to derivatives to build changes on top of intermediate values with no
-recomputation and derivatives update the caches according to their
-input changes.
+As said earlier, the functions of $\target$ compute both their
+output and a cache, which contains the intermediate
+values that contributed to that output. Derivatives receive this cache and use
+it to compute changes without recomputing intermediate values; derivatives also
+update the caches according to their input changes.
 
 \paragraph{Syntax}
 The syntax of $\target$ is defined in
-Figure~\ref{fig:target-definition-syntax}. The base terms of $\target$
-follow the same shape as the $A$-normal $\lambda$-lifted terms of
-$\source$ except that a $\bf let$-binding for a function
-application~$\tf\,\tx$ now introduces an extra \textit{cache
-  identifier}~$\tcacheid\ty\tf\tx$ in replacement for the
-output~$\ty$. The syntax of cache identifiers is non-standard: it can
+Figure~\ref{fig:target-definition-syntax}. Base terms of $\target$
+follow again $\lambda$-lifted A'NF, like
+$\source$, except that a $\bf let$-binding for a function
+application~$\tf\,\tx$ now binds an extra \textit{cache
+  identifier}~$\tcacheid\ty\tf\tx$ instead of
+output~$\ty$. Cache identifiers have non-standard syntax: it can
 be seen as a triple that refers to the value identifiers $\tf$, $\tx$
 and $\ty$. Hence, an $\alpha$-renaming of one of these three
-identifiers must refresh the cache identifier accordingly. The syntax
-$(\tx, \tcache)$ for the result term makes explicit that a cache
-$\tcache$ is systematically returned.
+identifiers must refresh the cache identifier accordingly.
+Result terms explicitly return cache $\tcache$ through
+syntax $(\tx, \tcache)$.
 % A similar alpha-renaming issue must be made about the formal
 % cache argument of caching-derivatives. In the Coq development,
 % the positional approach to binders makes the problem disappear.
@@ -46,8 +45,8 @@ of~$\tf\,(\tx \oplus \tdx)$. The result term of every change term
 returns a cache update $\tupdcache$ in addition to the computed
 change.
 
-The syntax for cache updates is almost the same as the one for caches
-except each value identifier~$\tx$ of the input cache is adjusted with
+The syntax for cache updates resembles the one for caches,
+but each value identifier~$\tx$ of the input cache is updated with
 its corresponding change~$\tdx$.
 
 \paragraph{Semantics}
@@ -121,9 +120,9 @@ Rule~\rulename{TDResult} returns the final change value of a
 computation as well as a updated cache resulting from the evaluation
 of the cache update term~$\tupdcache$.
 %
-The rule~\rulename{TDTuple} is similar to its counterpart in the
-source language, except that no tuple is built for~$\ty$ as it has
-already been pushed in the environment by the cache.
+Rule~\rulename{TDTuple} resembles its counterpart in the
+source language, but the tuple for~$\ty$ is not built as it has already been
+pushed in the environment by the cache.
 
 As for~$\source$, there are four rules to deal with {\bf
   let}-bindings depending on the shape of~the change bound to~$\tdf$
@@ -142,11 +141,11 @@ counterpart in the source language passing with the difference that
 only the resulting change and the updated cache are bound in the
 environment.
 
-If $\tdf$ is bound to a nil change and $\tf$ is bound to a primitive, the
-rule~\rulename{TDPrimitiveNil} applies. The derivative of the
-primitive is invoked with the value of $\tx$, its change value and the
-cache of the original call to this primitive. The semantics of this
-derivative is given by a builtin function~$\tddelta\sprim\param$, as
+If $\tdf$ is bound to a nil change and $\tf$ is bound to primitive $p$, the
+rule~\rulename{TDPrimitiveNil} applies. The derivative of $\tprim$
+is invoked with the value of $\tx$, its change value and the
+cache of the original call to $\tprim$. The semantics of $\tprim$'s
+derivative is given by builtin function~$\tddelta\sprim\param$, as
 in the source language.
 
 If $\tdf$ is bound to a closure change and $\tf$ is bound to a

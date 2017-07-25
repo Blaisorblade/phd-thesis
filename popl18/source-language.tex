@@ -26,9 +26,9 @@ Unlike standard ANF we add no special syntax for function
 calls in tail position (see \cref{sec:tail-calls} for a discussion
 about this limitation).
 %
-We often need to inspect the result of
+We often inspect the result of
 a function call~$\tf\,\tx$, which is not a valid term in our syntax.
-To alleviate this, we write~``$\scall\tf\tx$''
+To enable this, we write~``$\scall\tf\tx$''
 for ``$\slet{\ty = \tf\;\tx}\ty$'' where $\ty$ is
 chosen fresh.
 
