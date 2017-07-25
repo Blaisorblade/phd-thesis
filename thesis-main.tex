@@ -78,11 +78,14 @@
 \include{TitlePage}
 
 \cleardoublepage
+% Avoid having the word "Abstract" in the header of next page.
+\pagestyle{myheadings}
 \include{Abstract}
 
 \iftoggle{tocs}{
 
 \cleardoublepage
+\pagestyle{headings}
 \tableofcontents
 \cleardoublepage
 \listoffigures
