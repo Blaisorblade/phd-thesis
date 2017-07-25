@@ -155,7 +155,7 @@ Hence, part of the expression is evaluated before being reified. This is harmles
 
 \section{Lifting higher-order expressions}
 \label{sec:lifting-ho}
-We have shown how to lift first-order expressions; however, the interface of collections also uses higher-order methods, that is, methods that accept functions as parameters, and we need to lift them as well to reify the complete collection EDSL. For instance, the \code{map} method applies a function to each element of a collection. In this section, we describe how we reify such expressions of function type.
+We have shown how to lift first-order expressions; however, the interface of collections also uses higher-order methods, that is, methods that accept functions as parameters, and we need to lift them as well to reify the complete collection EDSL\@. For instance, the \code{map} method applies a function to each element of a collection. In this section, we describe how we reify such expressions of function type.
 
 \smartParagraph{Higher-order abstract syntax}
 To represent functions, we have to represent the bound variables in the function bodies. For example, a reification of \code{str => str + "!"} needs to reify the variable \code{str} of type \code{String} in the body of the anonymous function. This reification should retain the information where \code{str} is bound. We achieve this by representing bound variables using \emph{higher-order abstract syntax} (HOAS)~\citep{Pfenning88hoas}, that is, we represent them by variables bound at the meta level. To continue the example, the above function is reified as \code{(str: Exp[String]) => str + "!"}. Note how the type of \code{str} in the body of this version is \code{Exp[String]}, because \code{str} is a reified variable now. Correspondingly, the expression \code{str + "!"} is lifted as described in the previous section. 
@@ -196,7 +196,7 @@ class ListOps(coll: Exp[List[T]]) {
 case class ListMapNode[T, U](coll: Exp[List[T]], mapping: Exp[T => U]) extends Exp[List[U]]
 \end{lstlisting}
 
-Note how \code{map}'s parameter \code{f} has type \code{Exp[T] => Exp[U]} as necessary to enable Scala's syntax for anonymous functions and automatic lifting of the function body. This implementation would work for queries on lists, but does not support other collection types or queries where the collection type changes. We show in \cref{subsec:collections} how {\LoS} integrates with such advanced features of the Scala Collection EDSL.
+Note how \code{map}'s parameter \code{f} has type \code{Exp[T] => Exp[U]} as necessary to enable Scala's syntax for anonymous functions and automatic lifting of the function body. This implementation would work for queries on lists, but does not support other collection types or queries where the collection type changes. We show in \cref{subsec:collections} how {\LoS} integrates with such advanced features of the Scala Collection EDSL\@.
 
 %\pg{Discuss this elsewhere? Better?}
 %Note, moreover, that while the interface of our representation is
@@ -305,7 +305,7 @@ implicit def expToTraversableLikeOps
 The query operations are defined in class \code{TraversableLikeOps[T, Repr]}; a few examples are shown in Fig.~\ref{fig:liftTrav}.%
 \footnote{Similar liftings are introduced for traits similar to \code{TraversableLike}, like \code{SeqLike}, \code{SetLike}, \code{MapLike}, and so on.}
 
-Note how the lifted query operations use \code{CanBuildFrom} to compute the same static return type as the corresponding non-lifted query operation would compute. This reuse of type-level machinery allows {\LoS} to provide the same interface as the Scala Collections EDSL.
+Note how the lifted query operations use \code{CanBuildFrom} to compute the same static return type as the corresponding non-lifted query operation would compute. This reuse of type-level machinery allows {\LoS} to provide the same interface as the Scala Collections EDSL\@.
 
 \smartParagraph{Code reuse, revisited}
 We already saw how we could reify \code{List[T].map} through a specific expression node, \code{ListMapNode}. However, this approach would require generating many variants for different collections with slightly different types; writing an optimizer able to handle all such variations would be unfeasible because of the amount of code duplication required.
@@ -456,7 +456,7 @@ case class StringConcat(str1: Exp[String], str2: Exp[String]) extends Exp[String
 }
 \end{lstlisting}
 
-The subset of Scala we reify roughly corresponds to a typed lambda calculus with subtyping and type constructors. It does not include constructs for looping or recursion, so it should be strongly normalizing as long as application programmers do not add expression nodes with non-terminating interpretations. However, query writers can use the host language to create a reified expression of infinite size. This should not be an issue if {\LoS} is used as a drop-in replacement for the Scala Collection EDSL.
+The subset of Scala we reify roughly corresponds to a typed lambda calculus with subtyping and type constructors. It does not include constructs for looping or recursion, so it should be strongly normalizing as long as application programmers do not add expression nodes with non-terminating interpretations. However, query writers can use the host language to create a reified expression of infinite size. This should not be an issue if {\LoS} is used as a drop-in replacement for the Scala Collection EDSL\@.
 
 During optimization, nodes of the expression tree might get duplicated, and the
 interpreter could, in principle, observe this sharing and treat the expression

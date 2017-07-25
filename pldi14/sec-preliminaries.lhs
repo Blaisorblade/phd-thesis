@@ -25,7 +25,7 @@ and constants. We term the set of base types and constants a
 examples we assume that the language plugins supports needed base
 types and constants. Later (e.g., in \cref{ch:derive-formally})
 we add further requirements to language plugins, to support
-incrementalization of the language features they add to our STLC.
+incrementalization of the language features they add to our STLC\@@.
 %
 Rather than operational semantics we use a denotational
 semantics, which is however set-theoretic rather than
@@ -222,7 +222,7 @@ Scala~\citep{CaiEtAl2014ILC}.
 \subsection{Denotational semantics for STLC}
 \label{sec:denotational-sem}
 To prove that incrementalization preserves the semantics of our
-object-language programs, we define a semantics for STLC. We use
+object-language programs, we define a semantics for STLC\@@. We use
 a naive set-theoretic denotational semantics: Since STLC is
 strongly normalizing~\citep[Ch.~12]{Pierce02TAPL}, its semantics
 need not handle partiality. Hence, we can use denotational

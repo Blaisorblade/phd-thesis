@@ -217,7 +217,7 @@ go over the input sequence; for a nil function change it can avoid that.
 
 \ps{Briefly describe change structure for sequences}
 
-Consider the running example again, this time in A'NF. The partial application of
+Consider the running example again, this time in A'NF\@@. The partial application of
 a lambda lifted function constructs a closure. We made that explicit with a
 |closure| function.
 

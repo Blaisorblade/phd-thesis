@@ -79,7 +79,7 @@ simply changes.
 For primitives, IDSL designers must specify the result of
 differentiation: IDSL designers are to choose primitives that encapsulate
 efficiently incrementalizable computation schemes, while IDSL users are to
-express their computation using the primitives provided by the IDSL.
+express their computation using the primitives provided by the IDSL\@@.
 
 Helping IDSL designers to incrementalize primitives automatically is a
 desirable goal, though one that we leave open. In our setting, incrementalizing

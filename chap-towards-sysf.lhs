@@ -103,7 +103,7 @@ As in earlier chapters, if terms |e1| and |e2| are equivalent, any valid change
 First, we show a variant of their parametricity transformation, adapted to a
 variant of STLC without base types but with type variables. Presenting |stlc|
 using type variables will help when we come back to System F, and allows
-discussing parametricity on STLC.
+discussing parametricity on STLC\@@.
 This transformation
 is based on the presentation of STLC as calculus |stlc|, a \emph{Pure Type
 System} (PTS)~\citep[Sec.~5.2]{Barendregt1992lambda}.
@@ -553,7 +553,7 @@ the lambda cube (terms on terms like |stlc|, terms on types like System F, and
 types on terms like LF/|lamp|).
 
 Finally, we sketch a transformation producing proofs that differentiation is
-correct for System F.
+correct for System F\@@.
 \begin{code}
   deriveP(emptyCtx) = emptyCtx
   deriveP(Gamma, x : tau) = deriveP(Gamma), x1 : idx1(tau), x2 : idx2(tau),

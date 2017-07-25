@@ -1452,7 +1452,7 @@ subsumes the other. (1) We also give a non-step-indexed syntactic proof for
 simply-typed $\lambda$-calculus, together with proofs defining validity extensionally.
 (2) To support remembering intermediate
 results by conversion to cache-transfer-style (CTS),
-Régis-Gianas' proof uses a lambda-lifted A'NF syntax instead of plain ANF.
+Régis-Gianas' proof uses a lambda-lifted A'NF syntax instead of plain ANF\@@.
 (3) Régis-Gianas' formalization adds to change values a single token |nilc|,
 which is a valid nil change for all valid values. Hence, if we know a change is
 nil, we can erase it. As a downside, evaluating |df a da| when |df| is |nilc|

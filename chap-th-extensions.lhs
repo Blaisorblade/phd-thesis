@@ -4,7 +4,7 @@
 
 \chapter{Extensions and theoretical discussion}
 \label{ch:misc-extensions}
-In this chapter we collect discussion of a few additional topics related to ILC.
+In this chapter we collect discussion of a few additional topics related to ILC\@@.
 
 % Sections of this chapter investigate various questions arising
 % within the theory of ILC.
