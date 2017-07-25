@@ -5,11 +5,11 @@
 To optimize a query as described in the previous section, {\LoS} needs to reify, optimize and execute queries. 
 Our implementation assigns responsibility for these steps to three main components: A generic library for reification and execution of general Scala expressions, a more specialized library for reification and execution of query operators, and a dedicated query optimizer.
 Queries need then to be executed through either compilation (already discussed in
-Sec.~\ref{sec:execution}) or interpretation (to discuss in Sec.~\ref{sec:interpretation}).
+\cref{sec:execution}) or interpretation (to discuss in \cref{sec:interpretation}).
 We describe the implementation in more detail in the rest of this section. The full implementation is also available online\footnote{\url{http://www.informatik.uni-marburg.de/~pgiarrusso/SQuOpt}}.
 %\url{https://github.com/Blaisorblade/SQuOpt}.
 
-A core idea of {\LoS} is to reify Scala code as a data structure in memory. A programmer could directly create instances of that data structure, but we also provide a more convenient interface based on advanced Scala features such as implicit conversions and type inference. That interface allows to automatically reify code with a minimum of programmer annotations, as shown in the examples in Sec.~\ref{sec:solution}. Since this is a case study on Scala's support for deep embedding of DSLs, we also describe in this section how Scala supports our task. In particular, we report on techniques we used and issues we faced.
+A core idea of {\LoS} is to reify Scala code as a data structure in memory. A programmer could directly create instances of that data structure, but we also provide a more convenient interface based on advanced Scala features such as implicit conversions and type inference. That interface allows to automatically reify code with a minimum of programmer annotations, as shown in the examples in \cref{sec:solution}. Since this is a case study on Scala's support for deep embedding of DSLs, we also describe in this section how Scala supports our task. In particular, we report on techniques we used and issues we faced.
 
 %\pg{Somewhere: Contrast a bit with LMS - we are more open, provide less compile-time safety, etc.; motivate differences. This section risks being boring, explain why it is not.}
 \section{Representing expression trees}
@@ -114,7 +114,7 @@ application programmer with this tedious task, we provide a code generator which
 discovers the interface of a class through reflection on its compiled version
 and generates the boilerplate code such as the one above for \code{Author}. It
 also generates
-the application-specific expression tree types such as \code{AuthorFirstName} as shown in Sec.~\ref{subsec:repexptrees}.
+the application-specific expression tree types such as \code{AuthorFirstName} as shown in \cref{subsec:repexptrees}.
 In general, query writers need to generate and import the boilerplate lifting code for all application-specific types they want to use in a {\LoS} query.
 
 If desired, we can exclude some methods to \emph{restrict} the language supported in our deeply embedded programs. For instance, \LoS{} requires the user to write side-effect-free queries, hence we do not lift methods which perform side effects.
@@ -196,7 +196,7 @@ class ListOps(coll: Exp[List[T]]) {
 case class ListMapNode[T, U](coll: Exp[List[T]], mapping: Exp[T => U]) extends Exp[List[U]]
 \end{lstlisting}
 
-Note how \code{map}'s parameter \code{f} has type \code{Exp[T] => Exp[U]} as necessary to enable Scala's syntax for anonymous functions and automatic lifting of the function body. This implementation would work for queries on lists, but does not support other collection types or queries where the collection type changes. We show in Sec.~\ref{subsec:collections} how {\LoS} integrates with such advanced features of the Scala Collection EDSL.
+Note how \code{map}'s parameter \code{f} has type \code{Exp[T] => Exp[U]} as necessary to enable Scala's syntax for anonymous functions and automatic lifting of the function body. This implementation would work for queries on lists, but does not support other collection types or queries where the collection type changes. We show in \cref{subsec:collections} how {\LoS} integrates with such advanced features of the Scala Collection EDSL.
 
 %\pg{Discuss this elsewhere? Better?}
 %Note, moreover, that while the interface of our representation is
@@ -446,7 +446,7 @@ class TraversableLikeOps[T, Repr <: Traversable[T] with TraversableLike[T, Repr]
 \section{Interpretation}
 \label{sec:interpretation}
 
-After optimization, {\LoS} needs to interpret the optimized expression trees to perform the query. Therefore, the trait \code{Exp[T]} declares an \code{def interpret(): T} method, and each expression node overrides it appropriately to implement a mostly standard typed, tagless~\citep{carette09finally}, environment-based interpreter. The interpreter computes a value of type \code{T} from an expression tree of type \code{Exp[T]}. This design allows query writers to extend the interpreter to handle application-specific operations. In fact, the lifting generator described in Sec.~\ref{sec:lifting-ho} automatically generates appropriate definitions of \code{interpret} for the lifted operations. 
+After optimization, {\LoS} needs to interpret the optimized expression trees to perform the query. Therefore, the trait \code{Exp[T]} declares an \code{def interpret(): T} method, and each expression node overrides it appropriately to implement a mostly standard typed, tagless~\citep{carette09finally}, environment-based interpreter. The interpreter computes a value of type \code{T} from an expression tree of type \code{Exp[T]}. This design allows query writers to extend the interpreter to handle application-specific operations. In fact, the lifting generator described in \cref{sec:lifting-ho} automatically generates appropriate definitions of \code{interpret} for the lifted operations. 
 
 For example, the interpretation of string concatenation is simply string concatenation, as shown in the following fragment of the interpreter. Note that type-safety of the interpreter is checked automatically by the Scala compiler when it compiles the fragments.
 
@@ -581,7 +581,7 @@ We can now easily implement substitution and beta-reduction and through that, as
 %Since we always generate fresh variable names,
 %variable names are globally unique and their manipulation becomes simpler; in particular, no shadowing occurs in FOAS open terms that we inspect, and there is no need to make substitution capture-avoiding.
 
-%We show in Sec.~\ref{subsec:transf} how we implement the inverse conversion from FOAS to HOAS in terms of substitution. We can thus choose which representation to use for the task at hand; again in Sec.~\ref{subsec:transf} we show that supporting transformation and efficient interpretation requires internally using a FOAS representation.
+%We show in \cref{subsec:transf} how we implement the inverse conversion from FOAS to HOAS in terms of substitution. We can thus choose which representation to use for the task at hand; again in \cref{subsec:transf} we show that supporting transformation and efficient interpretation requires internally using a FOAS representation.
 
 %Values of function type (of type \code{S => T}) can be additionally lifted through \code{pure}: in this case, however, inspecting function bodies is not possible. We will show later why the inability to inspect such expressions does not make optimizations unsafe; it makes optimizations less effective because the optimizer will not be able to rewrite the bodies of such functions.
 

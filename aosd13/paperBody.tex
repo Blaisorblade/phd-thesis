@@ -97,13 +97,13 @@ We demonstrate that the automatic optimization can reconcile modularity and perf
  
 Overall, our main contributions in \cref{part:ch-aosd13} are the following:
 \begin{itemize}
-\item We illustrate the tradeoff between modularity and performance when manipulating collections, caused by the lack of domain-specific optimizations~(Sec.~\ref{sec:motivation}). Conversely, we illustrate how domain-specific optimizations lead to more readable and more modular code (Sec.~\ref{sec:solution}).
-\item We present the design and implementation of \LoS, an embedded DSL for queries on collections in Scala (Sec.~\ref{sec:implementation}).
+\item We illustrate the tradeoff between modularity and performance when manipulating collections, caused by the lack of domain-specific optimizations~(\cref{sec:motivation}). Conversely, we illustrate how domain-specific optimizations lead to more readable and more modular code (\cref{sec:solution}).
+\item We present the design and implementation of \LoS, an embedded DSL for queries on collections in Scala (\cref{sec:implementation}).
 %\LoS\ makes heavy usage of advanced Scala features to preserve the ``look and feel'' of native Scala queries
-% and is hence a significant showcase for these features~(Sec.~\ref{sec:implementation}).
+% and is hence a significant showcase for these features~(\cref{sec:implementation}).
  \item We evaluate \LoS\ to show that it supports writing queries that are at the same time modular and fast. We do so by re-implementing several code analyses of the FindBugs tool.
  The resulting code is more modular and/or more efficient, in some cases by orders of magnitude.
- In these case studies, we measured average speedups of \avgSpeedupT{} with a maximum of \maxSpeedupT{}~(Sec.~\ref{sec:evaluation}).
+ In these case studies, we measured average speedups of \avgSpeedupT{} with a maximum of \maxSpeedupT{}~(\cref{sec:evaluation}).
 \end{itemize}
 
 \section{Motivation}
@@ -195,7 +195,7 @@ Moreover, the same book can appear in \code{records} more than once if the book 
 In general, one can only resolve these inefficiencies by manually optimizing the query; however, we will observe that these manual optimizations produce less modular code.%
 \footnote{%
 The existing Scala collections API supports optimization, for instance through non-strict variants of the query operators (called `views' in Scala), but they can only
-be used for a limited set of optimizations, as we discuss in Sec.~\ref{sec:relwork}.}
+be used for a limited set of optimizations, as we discuss in \cref{sec:relwork}.}
 
 To address the first problem above, that is, to avoid creating intermediate collections, we can manually inline \code{titleFilter} and \code{records}; we obtain two nested for\-/comprehensions.
 Furthermore, we can \emph{unnest} the inner one~\citep{Fegaras00}.
@@ -676,7 +676,7 @@ and combine type-safe queries, similarly to ours (also in the way it is
 implemented).
 However, the language for defining queries maps to SQL, so it does not support nesting collections
 in other collections (a feature which simplified our example in
-Sec.~\ref{sec:motivation}), nor distinguishes statically between different kinds of
+\cref{sec:motivation}), nor distinguishes statically between different kinds of
 collections, such as \code{Set} or \code{Seq}.
 Based on Ferry, ScalaQL~\citep{JOT:issue_2010_07/article3} extends Scala with a compiler-plugin to integrate a query language on top of a relational database. The work by \citet{Spiewak09scalaql:language-integrated} is
  unrelated to~\citep{JOT:issue_2010_07/article3} but also called ScalaQL\@. It is similar to our approach in that it also 
@@ -729,7 +729,7 @@ shallowly nested collection operators and other Scala code in queries, such as
 arguments of \code{filter}, \code{map} and \code{flatMap}.
 %
 Deep embedding of the whole query is necessary for many optimizations, as
-discussed in Sec.~\ref{sec:solution}.
+discussed in \cref{sec:solution}.
 
 \subsection{LMS}
 \label{sec:rwdsl-lms}

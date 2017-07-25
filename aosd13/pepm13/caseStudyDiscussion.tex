@@ -176,7 +176,7 @@ The choice of interpreting expressions turned out to be a significant performanc
 %EDSL programs need to resort to calling \code{asExp} extremely rarely, because operations of the EDSL already provide the needed context; but as soon as we try supporting nesting tuples such as \code{((a, b), c}, we face again type inference bugs, for which this time we found no reasonable workaround which does not affect surface syntax. The conversion above accepts a pair of expression trees; we can write a more general conversion which accepts a pair of values \emph{implicitly convertible} to expression trees, so that \code{asExp((a, b), c)} would have type \code{Exp[((A, B), C)]}, but the compiler cannot make use of this conversion\footnote{We reported \url{https://issues.scala-lang.org/browse/SI-5651}, probably a dup of \url{https://issues.scala-lang.org/browse/SI-3346}.}.
 %The problem generalizes to any two nested generic constructors.
 %
-%We observe that these limitations of type inference make its behavior hard to predict and hinder DSL embedding. We discuss this point further in Sec.~\ref{sec:ScalaLessons}.
+%We observe that these limitations of type inference make its behavior hard to predict and hinder DSL embedding. We discuss this point further in \cref{sec:ScalaLessons}.
 
 
 %\subsubsection{Lessons about Scala}
