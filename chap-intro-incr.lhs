@@ -892,8 +892,115 @@ because |dsum| does not use its base argument, that is, it is
 \emph{self-maintainable}. Without the approach described in
 \cref{ch:cts}, we are restricted to self-maintainable derivatives.
 
-\section{Chapter conclusion}
+% Revise title
+\section{Contributions}
+\label{sec:incr-contributions}
 In this chapter, we have seen how a correct differentiation transform
 allows us to incrementalize programs.
 \pg{What's next?}
 
+%\pg{TODO:contributions of other parts.}
+\Cref{part:incr} makes the following contributions:
+\begin{itemize}
+\item We present a novel mathematical theory of changes and derivatives, which
+  is more general than other work in the field because changes are first-class
+  entities, they are distinct from base values and they are defined also for
+  functions.
+  %(\cref{sec:1st-order-changes}).
+  %KO: I think the next sentence cannot be understood at this point.
+  %We introduce changes for complex types, defined compositionally.
+%
+\item We present the first approach to incremental computation for pure
+  $\lambda$-calculi by a source-to-source transformation, $\DERIVE$, that
+  requires no run-time support. The transformation produces an incremental
+  program in the same language; all optimization techniques for the original
+  program are applicable to the incremental program as well.
+
+  % \pg{ Maybe comment in? Not sure, which might be telling.}
+  % Since our incremental programs use no impure features, they are
+  % especially amenable to further optimizations, making this approach
+  % very suitable for further research.
+
+%KO: commented this out. I think the purity is not important enough
+%to deserve another sentence here, since we only vaguely hint
+%at "further research".
+% KO: Let's have one bullet point per section. Also, a conjecture
+% sounds like a rather weak contribution
+%\item We argue that incrementalization is efficient on
+%  \emph{self-maintainable programs}, and discuss how further research on
+%  static or dynamic memoization can speed up a larger class of programs (\cref{sec:performance-cons}).
+%  \pg{This contribution references text which is now commented
+%    out. I believe the text should be brought back in.}
+%
+\item We prove that our incrementalizing transformation $\DERIVE$
+is correct by a novel machine-checked logical relation
+proof, mechanized in Agda.
+
+\item While we focus mainly on the theory of changes
+and derivatives, we also perform a performance case study.
+We implement the derivation transformation in Scala,
+with a plug-in architecture that can be extended with new base
+types and primitives. We define a plugin with support for
+different collection types and use the plugin to
+incrementalize a variant of the MapReduce programming model~\citep{Lammel07}.
+  Benchmarks show that on this program,
+  incrementalization can reduce asymptotic complexity and can turn $O(n)$
+  performance into $O(1)$, improving running time by over 4
+  orders of magnitude on realistic inputs (\cref{sec:applying}).
+\end{itemize}
+
+\pg{Describe \cref{ch:cts}}
+\pg{Paste contributions from paper}
+\pg{Maybe defunc chapter?}
+
+
+\pg{WIP}
+Other chapters propose further contributions.
+\Cref{ch:bsos} proposes the first correctness proofs for ILC via operational
+methods and (step-indexed) logical relations, for simply-typed $\lambda$-calculus
+(without and with general recursion) and for untyped $\lambda$-calculus.
+
+\Cref{ch:diff-parametricity-system-f} outlines how to extend differentiation to
+System F and suggests a proof avenue. Differentiation for System F requires a
+generalization of change structures to changes across different types
+(\cref{sec:param-derive-changes-across-types}) that appears of independent
+interest, though further research remains to be done.
+
+\subsection{Navigating this thesis part}
+\label{sec:navigating-incr}
+
+\paragraph{Differentiation}
+\Crefrange{sec:intro}{sec:term-reasoning} form the core of incrementalization
+theory, with other chapters building on top of them.
+
+\Cref{sec:intro} and \cref{ch:diff-examples} introduce the overall approach to
+incrementalization informally.
+
+\Cref{ch:derive-formally,ch:change-theory} show that incrementalization using
+ILC is correct. Building on a set-theoretic semantics, these
+\lcnamecrefs{ch:derive-formally} also develop the theory
+underlying this correctness proofs and further results.
+
+Equational reasoning on terms is then developed
+in \cref{sec:term-reasoning}. These chapters contain full formal proofs: readers
+are welcome to skip or skim those proofs where appropriate. We strive not to
+hide important definitions inside theorems, and to give stand-alone definitions
+and theorem statements.
+
+Later chapters are again independent from each other.
+
+\paragraph{Performance of differentiated programs}
+\Cref{sec:applying} studies how to apply differentiation (as introduced in
+previous chapters) to incrementalize a case study and empirically evaluates
+performance speedups.
+
+\paragraph{Differentiation with static caching}
+\pg{Explain label}
+\Cref{ch:cts} is mostly self-contained, even though it builds on the rest of the
+material; it summarizes the basics of ILC in \cref{sec:ilc-background}.
+Terminology in that chapter is sometimes subtly different from the rest of the thesis.
+
+\pg{At least in more formal chapters, all definitions, notations, and so on are
+  clearly highlighted and presented as standalone definitions for ease of reference.}
+
+\pg{Missing chapters}
