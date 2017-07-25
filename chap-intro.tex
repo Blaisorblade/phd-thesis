@@ -33,7 +33,9 @@ though code implementing incremental query is error-prone and
 hard-to-maintain~\citep{Salvaneschi13reactive}.
 
 What's worse, some of these manual optimizations are best done over the whole
-program. For instance, adding an index on some collection can speed up looking
+program. Some optimizations only become possible after inlining, which breaks
+modularity if done by hand.
+Worse, adding an index on some collection can speed up looking
 for some information, but each index must be maintained incrementally when the
 underlying data changes. Depending on the actual queries and updates performed
 on the collection, and on how often they happen, it might turn out that updating
@@ -41,6 +43,9 @@ an index takes more time than the index saves; hence the choice of which indexes
 to enable depends on the whole program. However, adding/removing an index
 requires updating all PL queries to use it, while RDBMS queries can use an index
 transparently.
+
+Overall, manual optimizations are not only effort-intensive and error-prone, but
+they also significantly reduce modularity.
 
 \section{This thesis}
 To reduce the need for manual optimizations, in this thesis we propose
@@ -55,7 +60,9 @@ queries including user-defined functions.
 Instead of building on existing approaches to incrementalization, such as
 self-adjusting computation~\citep{Acar09}, we introduce a novel
 incrementalization approach which enables further transformations on the
-incrementalization results.
+incrementalization results. This approach is in fact not restricted to
+collection queries but applicable to other domains, but it requires adaptation
+for the domain under consideration.
 %
 Further research is needed, but a number of case studies suggest
 applicability, even in some scenarios beyond existing
@@ -63,8 +70,9 @@ techniques~\citep{Koch2016incremental}.
 
 We consider the problem for functional programming languages such as Haskell or
 Scala, and we consider collection queries written using the APIs of their
-collection libraries, which we treat as an embedded domain-specific language (EDSL). Such
-APIs (or DSLs) contain powerful operators on collections such as $\Varid{map}$,\pg{exemplify or take for granted?}
+collection libraries, which we treat as an embedded domain-specific language
+(EDSL). Such APIs (or DSLs) contain powerful operators on collections such as
+$\Varid{map}$,
 which are higher-order, that
 is they take as arguments arbitrary functions in the host language that we must
 also handle.
@@ -155,21 +163,75 @@ correctness proof for ILC. Philipp Schuster contributed to the evaluation,
 devising language plugins for bags and maps in collaboration with me.
 
 \pg{Readd section on excluded papers.}
-% \subsection{Excluded papers}
-% During my PhD work I collaborated on several other papers.
 
-% \paragraph{Software Product Lines}
-% Initial work on Software Product Lines lead to \cite{KPO:VaMoS11} and
-% \cite{KGREOB:OOPSLA11}. On the same line I collaborated to experiments in
-% \cite{SRKGAK:SPLC11} and its updated version\pg{TODO}.
-% % \pg{Cite work on VarPL? Unlikely.}
+\subsection{Excluded papers}
+This thesis improves modularity of collection queries by automating different sorts of
+optimizations on them.
 
-% \paragraph{Modularity}
-% \cite{OGKR:ECOOP11}
+During my PhD work I collaborated on several other papers, mostly on different facets of
+modularity, which do not appear in this thesis.
 
-% \paragraph{DSL work}
-% While working on modular embedded DSLs I collaborated to \citet{ErdwegGR12},
-% \pg{TODO GADT paper}, \pg{TODO maybe manuscript on cake pattern?}.
+\paragraph{Modularity}
+Module boundaries hide information on implementation that is not relevant to
+clients. However, it often turns out that some scenarios, clients or task
+require such hidden information. As discussed, manual optimization requires
+hidden information: hence, researchers strive to automate optimizations. But
+other tasks often violate these boundaries. I collaborated on research on
+understanding why this happens and how to deal with this
+problem~\citep*{OGKR:ECOOP11}.
+
+\paragraph{Software Product Lines}
+In some scenarios, a different form of modular software is realized through
+software product lines (SPLs), where many \emph{variants} of a single software
+artifact (with different sets of features) can be generated. This is often done
+using conditional compilation, for instance through the C preprocessor.
+
+But if a software product line uses conditional compilation, processing
+automatically its source code is difficult---in fact, even lexing or parsing it
+is a challenge. Since the number of variants is exponential in the number of
+features, generating and processing each variant does not scale.
+
+To address these
+challenges, I collaborated with the TypeChef project to develop a
+variability-aware lexer \citep*{KPO:VaMoS11} and parser
+\citep*{KGREOB:OOPSLA11}.
+
+Another challenge is predicting non-functional properties (such as code size or
+performance) of a variant of a software product line before generation and
+direct measurement. Such predictions can be useful to select efficiently a
+variant that satisfies some non-functional requirements.
+I collaborated to research on predicting such non-functional properties: we
+measure the properties on a few variants and extrapolate the results to other
+variants. In particular, I collaborated to the experimental evaluation on a few
+open source projects, where even a simple model reached significant accuracy in a
+few scenarios \citep*{SRKGAK:SPLC11,siegmund2013scalable}.
+
+\paragraph{Domain-specific languages}
+This thesis is concerned with DSLs, both ones for the domain of collection
+queries, but also (in \cref{part:incr}) more general ones.
+
+Different forms of language composition, both among DSLs and across
+general-purpose languages and DSLs are possible, but their relationship is
+nontrivial; I collaborated to work classifying the different forms of language
+compositions~\citep*{ErdwegGR12}.
+
+The implementation of \LoS, as described in \cref{part:ch-aosd13}, requires an
+extensible representation of ASTs, similar to the one used by LMS
+\citep{rompf2010lightweight}. While this representation is pretty flexible, it
+relies on Scala's support of GADTs \citep{Emir06Variance,Emir07Patterns}, which
+is known to be somewhat fragile due to implementation bugs. In fact,
+sound pattern matching on Scala's extensible GADTs is impossible
+without imposing significant restrictions to extensibility, due to language
+extensions not considered during formal study
+\citep{Emir06Variance,Emir07Correct}: the problem arises due to the interaction
+between GADTs, declaration-site variance annotations and variant refinement of
+type arguments at inheritance time.
+To illustrate the problem, I've shown it already applies to an extensible
+definitional interpreter for $\lambda_{<:}$~\citep{Giarrusso2013gadt}.
+While solutions have been investigated in other settings
+\citep{Scherer13GADTSub}, the problem remains open for Scala to this day.
+
+%\pg{TODO maybe manuscript on cake pattern?}.
 
 \subsection{Navigating this thesis}
 The two parts of this thesis, while related by the common topic of collection
