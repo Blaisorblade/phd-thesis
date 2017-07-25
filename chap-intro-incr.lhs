@@ -299,7 +299,9 @@ To talk about how the differences between old values and new
 values, we introduce a few concepts, for now without full definitions.
 In our approach to
 incrementalization, we describe changes to values as values
-themselves: We call such descriptions simply \emph{changes}. Just
+themselves: We call such descriptions simply \emph{changes}.
+Incremental programs examine changes to inputs to understand how to produce
+changes to outputs. Just
 like in STLC we have terms (programs) that evaluates to values,
 we also have \emph{change terms}, which evaluate to \emph{change
   values}. We require that going from old values to new values
