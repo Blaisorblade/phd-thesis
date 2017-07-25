@@ -2,7 +2,46 @@
 % https://tex.stackexchange.com/a/244746/1340
 \chapter{Abstract}
 
- Programs manipulating data collections require
+Queries on big data collections are often more expensive than needed;
+traditional databases optimize and incrementalize such queries but do not
+support richly structured program data, or expressive programming languages
+supporting higher-order functions. Manual optimization and incrementalization
+interferes with program modularity and is often too error-prone to be feasible
+or to enable maintenance of resulting programs.
+In this thesis, we optimize and incrementalize such collection queries to free
+programmers from such burdens.
+Resulting programs are expressed in the same language, so that they can be
+subjected to other standard optimizations.
+
+To enable optimizing collection queries which occur inside programs, we develop a
+staged variant of the Scala collection API that \emph{reifies} queries as ASTs.
+On top of this interface, we adapt domain-specific optimizations from the fields
+of programming languages and databases; among others, we rewrite queries to use
+indexes chosen by programmers. Thanks to the use of indexes we show significant
+speedups in our experimental evaluation, with an average of 12x and a maximum of
+12800x.
+
+To incrementalize higher-order programs by program transformation, we extend
+\emph{finite differencing} \citep{Paige82FDC,Blakeley:1986:EUM,Gupta99MMV} and
+develop the first approach to incrementalization by program transformation for
+higher-order programs. Base programs are transformed to \emph{derivatives},
+program that transform input \emph{changes} to output changes.
+We prove that our incrementalization approach is correct: We develop the theory
+underlying this approach for simply-typed and untyped $\lambda$-calculus, and
+discuss extensions to System F.
+
+Derivatives often need to reuse results produced by base programs: to enable
+such reuse, we extend work by \citet{Liu95} to higher-order programs, and
+develop and prove correct a program transformation, converting higher-order
+programs to \emph{cache-transfer-style}.
+
+For efficient incrementalization, it is necessary to choose and incrementalize
+by hand appropriate primitive operations. We incrementalize a significant subset
+of collection operations and perform case studies, showing order-of-magnitude
+both in practice and in asymptotic complexity.
+% To incrementalize programs efficiently, derivatives
+% To use our approach a certain domain, designers must provide
+% relies on efficient primitives
 
 % \begin{abstract}
 % \end{abstract}
