@@ -33,8 +33,13 @@ though code implementing incremental query is error-prone and
 hard-to-maintain~\citep{Salvaneschi13reactive}.
 
 What's worse, some of these manual optimizations are best done over the whole
-program. Some optimizations only become possible after inlining, which breaks
-modularity if done by hand.
+program. Some optimizations only become possible after inlining, which reduces
+modularity if done by hand.\footnote{%
+In \cref{sec:aosd13-intro} we define modularity as the ability to abstract
+behavior in a separate function (possibly part of a different module) to enable
+reuse and improve understandability.%
+}
+
 Worse, adding an index on some collection can speed up looking
 for some information, but each index must be maintained incrementally when the
 underlying data changes. Depending on the actual queries and updates performed
@@ -147,19 +152,24 @@ idea (together with an initial prototype) and supervised the project.
 The first chapters of \cref{part:incr} are originally based on work by \citet*{CaiEtAl2014ILC}, though
 significantly revised; only \cref{sec:applying,sec:rw} survive mostly unchanged.
 This work was even more of a team effort. I initiated and led the
-overall project and came up with the original notion of change structures; Cai
+overall project and came up with the original notion of change structures. Cai
 Yufei contributed differentiation itself and its first correctness proof.
 Tillmann Rendel contributed significant simplifications and started the overall
-mechanization effort.
-\Cref{part:incr} contains novel correctness proof; its history and
-contributions are discussed in \cref{sec:ilc-dev-history}.
+mechanization effort. Klaus Ostermann provided senior supervision that proved
+essential to the project.
+\Cref{part:incr} contains a novel correctness proof for simply-typed $\lambda$-calculus;
+for its history and contributions \cref{sec:ilc-dev-history}.
 
 Furthermore, \cref{ch:cts} comes from a recently submitted
 manuscript~\citep*{Giarrusso2018Static}. I
 designed the overall approach, the transformation and the case study on
 sequences and nested loops. Proofs were done in collaboration with Yann
-Régis-Gianas: most of the actual mechanization work is his, though I contributed significantly to the
-correctness proof for ILC\@. Philipp Schuster contributed to the evaluation,
+Régis-Gianas: he is the main author of the Coq mechanization and proof, though I
+contributed significantly to the correctness proof for ILC\@, in particular with
+the proofs described in \cref{ch:bsos} and their partial Agda mechanization.
+The history of this correctness proof is described in
+\cref{sec:ilc-bsos-dev-history}.
+Philipp Schuster contributed to the evaluation,
 devising language plugins for bags and maps in collaboration with me.
 
 \pg{Readd section on excluded papers.}
