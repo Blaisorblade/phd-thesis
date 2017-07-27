@@ -186,6 +186,133 @@ However, we do prove correct a variant of |fix| in
 % \end{code}
 % \end{equational}
 
+\section{Completely invalid changes}
+\label{sec:very-invalid}
+\pg{Not sure that the reference to sec;invalid should go here. Ok, probably not.}
+In some change sets, some changes might not be valid relative to
+any source. In particular, we can construct examples in |Dt^(Int
+-> Int)|.
+
+To understand why this is plausible, we recall that as described
+in \cref{ssec:pointwise-changes}, |df| can be decomposed into a
+derivative, and a pointwise function change that is independent
+of |da|. While pointwise changes can be defined arbitrarily, the
+behavior of the derivative of |f| on changes is determined by the
+behavior of |f|.
+
+\begin{example}
+  We search for a function change |df : Dt^(Int -> Int)| such
+that there exist no |f1, f2: Int -> Int| for which
+|fromto (Int -> Int) f1 df f2|. To find |df|, we assume that there are |f1, f2| such that |fromto
+(Int -> Int) f1 df f2|, prove a few consequences, and construct
+|df| that cannot satisfy them. Alternatively, we could pick the
+desired definition for |df| right away, and prove by
+contradiction that there exist no |f1, f2| such that |fromto (Int -> Int) f1 df
+f2|.
+
+Recall that on integers |a1 `oplus` da = a1 + da|, and that
+|fromto Int a1 da a2| means |a2 = a1 `oplus` da = a1 + da|.
+So, for any numbers |a1, da, a2| such that |a1 + da = a2|, validity of |df| implies that
+\[|f2 (a1 + da) = f1 a1 + df a1 da|.\]
+
+For any two numbers |b1, db| such that |b1 + db = a1 + da|,
+we have that
+\[|f1 a1 + df a1 da = f2 (a1 + da) = f2 (b1 + db) = f1 b1 + df b1 db|.\]
+
+Rearranging terms, we have
+\[|df a1 da - df b1 db = f1 b1 - f1 a1|,\]
+that is, |df a1 da - df b1 db| does not depend on |da| and |db|.
+
+For concreteness, let us fix |a1 = 0|, |b1 = 1|, and |a1 + da = b1 + db = s|. We have then that
+\[|df 0 s - df 1 (s - 1) = f1 1 - f1 0|,\]
+Once we set |h = f1 1 - f1 0|, we have |df 0 s - df 1 (s - 1) =
+h|.
+Because |s| is just the sum of two arbitrary numbers, while |h|
+only depends on |f1|, this equation must hold for a fixed |h| and
+for all integers |s|.
+
+To sum up, we assumed for a given |df| there exists |f1, f2| such
+that |fromto (Int -> Int) f1 df f2|, and concluded that there
+exists |h = f1 1 - f1 0| such that for all |s|
+\[|df 0 s - df 1 (s - 1) = h|.\]
+
+At this point, we can try concrete families of functions |df| to
+obtain a contradiction. Substituting a linear polynomial $|df a
+da| = c_1 \cdot a + c_2 \cdot |da|$ fails to obtain a
+contradiction: in fact, we can construct various |f1, f2| such
+that |fromto (Int -> Int) f1 df f2|. So we try quadratic
+polynomials: Substituting $|df a da| = c \cdot |da|^2$ succeeds:
+we have that there is |h| such that for all integers |s|
+\[c \cdot \left(s^2 - (s - 1)^2\right) = h.\]
+
+However, $c \cdot \left(s^2 - (s - 1)^2\right) = 2 \cdot c \cdot
+s - c$ which isn't constant, so there can be no such |h|.
+\end{example}
+
+\section{Pointwise function changes}
+\label{ssec:pointwise-changes}
+% We can also describe the difference from function |f| to function
+% |f `oplus` df| as |nabla^f = \x -> f2 x `ominus` f1 x|.
+\pg{Our definition of function change might seem to defy intuitions. In
+  particular, pointwise changes might appear more intuitive. We discuss them
+  later, too.}
+
+We can also decompose function changes into orthogonal (and
+possibly easier to understand) concepts.
+
+Consider two functions |f1, f2 : A -> B| and two inputs |a1, a2: A|.
+The difference between |f2 a2| and |f1 a1| is due to changes to
+both the function and its argument. We can compute the whole
+change at once via a function change |df| as |df a1 da|. Or we
+can compute separately the effects of the function change and of
+the argument change. We can account for changes from |f1 a1| to |f2 a2|
+using |f1'|, a derivative of |f1|: |f1' a1 da = f1 a2 `ominus` f1 a2 = f1 (a1
+`oplus` da) `ominus` f a1|.%
+%
+\footnote{For simplicity, we use equality on changes, even though equality is
+  too restrictive. Later (in \cref{sec:change-equivalence}) we'll define an
+  equivalence relation on changes, called change equivalence and written
+  |`doe`|, and use it systematically to relate changes in place of equality. For
+  instance, we'll write that |f1' a1 da `doe` f1 (a1 `oplus` da) `ominus` f1 a1|.
+  But for the present discussion, equality will do.}
+
+We can account for changes from |f1| to |f2| using the
+\emph{pointwise difference} of two functions, |nabla ^ f1 = \(a : A) ->
+f2 a `ominus` f1 a|; in particular, |f2 (a1 `oplus` da) `ominus`
+f1 (a1 `oplus` da) = nabla ^ f (a1 `oplus` da)|. Hence, a
+function change simply \emph{combines} a derivative with a
+pointwise change using change composition:
+%
+%To account for changes to $a$, we can use
+%$f'$, the derivative of $f$. To account for changes to $f$, we
+%can use the \emph{pointwise difference} of two functions, $\nabla
+%f = \Lam{a}{\App{\New{f}}{a} \DIFF \App{\Old{f}}{a}}$.
+%
+% Now,
+%assuming for the moment the incrementalization theorem, we can
+%show the meaning of a function change $df$ in terms of
+%derivatives and pointwise changes:
+%
+\begin{equation}
+\begin{aligned}
+\label{eq:pointwise-rewrite}
+|df a1 da| & = |f2 a2 `ominus` f1 a1|\\
+           & = |ocompose ((f1 a2 `ominus` f1 a1)) ((f2 a2 `ominus` f1 a2))|\\
+           & = |ocompose (f1' a1 da) (nabla ^ f (a1 `oplus` da))|
+\end{aligned}
+\end{equation}
+One can also compute a pointwise change from a function change:
+\begin{code}
+  nabla f a = df a (nil a)
+\end{code}
+
+While some might find pointwise changes a more natural concept,
+we find it easier to use our definitions of function changes,
+which combines both pointwise changes and derivatives into a
+single concept.
+Some related works explore the use of pointwise changes; we discuss them in
+\cref{sec:rw-partial-differentials}.
+
 \section{Modeling only valid changes}
 \label{sec:alt-change-validity}
 \newcommand{\ilcA}{ILC'14}
@@ -360,133 +487,6 @@ reflexive graphs, which have been used to construct parametric models for System
 F and extensions, and calls for research on the relation between ILC and
 parametricity. As follow-up work, \citet{CaiPhD} studies models of ILC based on
 directed and reflexive graphs.
-
-\section{Pointwise function changes}
-\label{ssec:pointwise-changes}
-% We can also describe the difference from function |f| to function
-% |f `oplus` df| as |nabla^f = \x -> f2 x `ominus` f1 x|.
-\pg{Our definition of function change might seem to defy intuitions. In
-  particular, pointwise changes might appear more intuitive. We discuss them
-  later, too.}
-
-We can also decompose function changes into orthogonal (and
-possibly easier to understand) concepts.
-
-Consider two functions |f1, f2 : A -> B| and two inputs |a1, a2: A|.
-The difference between |f2 a2| and |f1 a1| is due to changes to
-both the function and its argument. We can compute the whole
-change at once via a function change |df| as |df a1 da|. Or we
-can compute separately the effects of the function change and of
-the argument change. We can account for changes from |f1 a1| to |f2 a2|
-using |f1'|, a derivative of |f1|: |f1' a1 da = f1 a2 `ominus` f1 a2 = f1 (a1
-`oplus` da) `ominus` f a1|.%
-%
-\footnote{For simplicity, we use equality on changes, even though equality is
-  too restrictive. Later (in \cref{sec:change-equivalence}) we'll define an
-  equivalence relation on changes, called change equivalence and written
-  |`doe`|, and use it systematically to relate changes in place of equality. For
-  instance, we'll write that |f1' a1 da `doe` f1 (a1 `oplus` da) `ominus` f1 a1|.
-  But for the present discussion, equality will do.}
-
-We can account for changes from |f1| to |f2| using the
-\emph{pointwise difference} of two functions, |nabla ^ f1 = \(a : A) ->
-f2 a `ominus` f1 a|; in particular, |f2 (a1 `oplus` da) `ominus`
-f1 (a1 `oplus` da) = nabla ^ f (a1 `oplus` da)|. Hence, a
-function change simply \emph{combines} a derivative with a
-pointwise change using change composition:
-%
-%To account for changes to $a$, we can use
-%$f'$, the derivative of $f$. To account for changes to $f$, we
-%can use the \emph{pointwise difference} of two functions, $\nabla
-%f = \Lam{a}{\App{\New{f}}{a} \DIFF \App{\Old{f}}{a}}$.
-%
-% Now,
-%assuming for the moment the incrementalization theorem, we can
-%show the meaning of a function change $df$ in terms of
-%derivatives and pointwise changes:
-%
-\begin{equation}
-\begin{aligned}
-\label{eq:pointwise-rewrite}
-|df a1 da| & = |f2 a2 `ominus` f1 a1|\\
-           & = |ocompose ((f1 a2 `ominus` f1 a1)) ((f2 a2 `ominus` f1 a2))|\\
-           & = |ocompose (f1' a1 da) (nabla ^ f (a1 `oplus` da))|
-\end{aligned}
-\end{equation}
-One can also compute a pointwise change from a function change:
-\begin{code}
-  nabla f a = df a (nil a)
-\end{code}
-
-While some might find pointwise changes a more natural concept,
-we find it easier to use our definitions of function changes,
-which combines both pointwise changes and derivatives into a
-single concept.
-Some related works explore the use of pointwise changes; we discuss them in
-\cref{sec:rw-partial-differentials}.
-
-\section{Completely invalid changes}
-\label{sec:very-invalid}
-\pg{Not sure that the reference to sec;invalid should go here. Ok, probably not.}
-In some change sets, some changes might not be valid relative to
-any source. In particular, we can construct examples in |Dt^(Int
--> Int)|.
-
-To understand why this is plausible, we recall that as described
-in \cref{ssec:pointwise-changes}, |df| can be decomposed into a
-derivative, and a pointwise function change that is independent
-of |da|. While pointwise changes can be defined arbitrarily, the
-behavior of the derivative of |f| on changes is determined by the
-behavior of |f|.
-
-\begin{example}
-  We search for a function change |df : Dt^(Int -> Int)| such
-that there exist no |f1, f2: Int -> Int| for which
-|fromto (Int -> Int) f1 df f2|. To find |df|, we assume that there are |f1, f2| such that |fromto
-(Int -> Int) f1 df f2|, prove a few consequences, and construct
-|df| that cannot satisfy them. Alternatively, we could pick the
-desired definition for |df| right away, and prove by
-contradiction that there exist no |f1, f2| such that |fromto (Int -> Int) f1 df
-f2|.
-
-Recall that on integers |a1 `oplus` da = a1 + da|, and that
-|fromto Int a1 da a2| means |a2 = a1 `oplus` da = a1 + da|.
-So, for any numbers |a1, da, a2| such that |a1 + da = a2|, validity of |df| implies that
-\[|f2 (a1 + da) = f1 a1 + df a1 da|.\]
-
-For any two numbers |b1, db| such that |b1 + db = a1 + da|,
-we have that
-\[|f1 a1 + df a1 da = f2 (a1 + da) = f2 (b1 + db) = f1 b1 + df b1 db|.\]
-
-Rearranging terms, we have
-\[|df a1 da - df b1 db = f1 b1 - f1 a1|,\]
-that is, |df a1 da - df b1 db| does not depend on |da| and |db|.
-
-For concreteness, let us fix |a1 = 0|, |b1 = 1|, and |a1 + da = b1 + db = s|. We have then that
-\[|df 0 s - df 1 (s - 1) = f1 1 - f1 0|,\]
-Once we set |h = f1 1 - f1 0|, we have |df 0 s - df 1 (s - 1) =
-h|.
-Because |s| is just the sum of two arbitrary numbers, while |h|
-only depends on |f1|, this equation must hold for a fixed |h| and
-for all integers |s|.
-
-To sum up, we assumed for a given |df| there exists |f1, f2| such
-that |fromto (Int -> Int) f1 df f2|, and concluded that there
-exists |h = f1 1 - f1 0| such that for all |s|
-\[|df 0 s - df 1 (s - 1) = h|.\]
-
-At this point, we can try concrete families of functions |df| to
-obtain a contradiction. Substituting a linear polynomial $|df a
-da| = c_1 \cdot a + c_2 \cdot |da|$ fails to obtain a
-contradiction: in fact, we can construct various |f1, f2| such
-that |fromto (Int -> Int) f1 df f2|. So we try quadratic
-polynomials: Substituting $|df a da| = c \cdot |da|^2$ succeeds:
-we have that there is |h| such that for all integers |s|
-\[c \cdot \left(s^2 - (s - 1)^2\right) = h.\]
-
-However, $c \cdot \left(s^2 - (s - 1)^2\right) = 2 \cdot c \cdot
-s - c$ which isn't constant, so there can be no such |h|.
-\end{example}
 
 % Because of |fromto (Int -> Int) f1 df f2| and because |`oplus`|
 % respects validity we can show that, for any valid input |fromto
