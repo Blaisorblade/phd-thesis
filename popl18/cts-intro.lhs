@@ -99,11 +99,15 @@ In sum, we present the following contributions:
   $\lambda$-calculus, based on step-indexed logical relations
   (\cref{sec:sound-derive});
 \item building on top of ILC-style differentiation, we show how to transform
-  untyped higher-order programs to \emph{cache-transfer-style (CTS)}
+  untyped higher-order programs to \emph{cache-transfer-style}~(CTS)~%
   (\cref{sec:transformation});
 \item we show that programs and derivatives in cache-transfer style
   \emph{simulate} correctly their non-CTS variants (\cref{sec:transformation-soundness});
-\item we mechanize in Coq most of our proofs (see supplementary material);
+\item we mechanize in Coq most of our proofs, save for a few straightforward lemmas%
+\begin{poplForPopl}
+(see supplementary material)%
+\end{poplForPopl}
+;
 \item we perform performance case studies (in \cref{sec:case-studies}) applying
   (by hand) extension of this technique to Haskell programs, and incrementalize
   efficiently also programs that do not admit self-maintainable derivatives.
