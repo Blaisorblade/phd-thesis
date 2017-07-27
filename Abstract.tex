@@ -2,15 +2,18 @@
 % https://tex.stackexchange.com/a/244746/1340
 \chapter{Abstract}
 
-Queries on big data collections are often more expensive than needed;
-traditional databases optimize and incrementalize such queries but do not
-support richly structured program data, or expressive programming languages
-supporting higher-order functions. Manual optimization and incrementalization
-interferes with program modularity and is often too error-prone to be feasible
-or to enable maintenance of resulting programs.
+In modern programming languages, queries on in-memory collections are often more
+expensive than needed.
+While database queries can be readily optimized, collection queries often don't
+translate trivially to databases, as modern programming languages are far more
+expressive than databases, supporting both nested data and first-class functions.
+
+Collection queries can be optimized and incrementalized by hand, but this
+reduces modularity, and is often too error-prone to be feasible or to enable
+maintenance of resulting programs.
 In this thesis, we optimize and incrementalize such collection queries to free
 programmers from such burdens.
-Resulting programs are expressed in the same language, so that they can be
+Resulting programs are expressed in the same core language, so that they can be
 subjected to other standard optimizations.
 
 To enable optimizing collection queries which occur inside programs, we develop a
