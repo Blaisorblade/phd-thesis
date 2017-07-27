@@ -423,7 +423,8 @@ incrementally updating the result is 180 times faster than from scratch
 recomputation.
 
 
-\subsection{Limitations and future work}
+\section{Limitations and future work}
+\label{sec:cts-limitations}
 % Knowing myself, I'm probably doing this too much.
 In this section we describe limitations to be addressed in future work.
 
@@ -481,7 +482,7 @@ In this section we describe limitations to be addressed in future work.
 % \ps{Just some notes}
 
 
-\subsubsection{Hiding the cache type}
+\subsection{Hiding the cache type}
 \label{sec:hiding-cache-type}
 %\ps{A limitation that the defunctionalization solution did not have}
 
@@ -514,7 +515,7 @@ translation, but leave this question for future work.
 % \ps{Just noting it}
 
 
-\subsubsection{Nested bags}
+\subsection{Nested bags}
 
 Our implementation of bags makes nested bags overly slow: we represent bags as
 tree-based maps from elements to multiplicity, so looking up a bag |b| in a bag
@@ -534,7 +535,7 @@ in $O(1)$.
 % \ps{Handwavy, just noting}
 
 
-\subsubsection{Proper tail calls}
+\subsection{Proper tail calls}
 \label{sec:tail-calls}
 CTS transformation conflicts with proper tail calls, as it turns most tail calls
 into non-tail calls.
@@ -551,7 +552,7 @@ such fixes are available for other uses of tail calls.
 % \pg{Which ones? I can only think of CPS but CTS-transforming a CPS program as
 % a normal one makes no sense.}
 
-\subsubsection{Pervasive replacement values}
+\subsection{Pervasive replacement values}
 \label{sec:annoying-replacement}
 Thanks to replacement changes, we can compute a change from any |v1| to any |v2|
 in constant time. \citet{CaiEtAl2014ILC} use a difference operator |`ominus`| instead, but
@@ -574,7 +575,7 @@ works~\citep{Koch2016incremental}, we believe for similar reasons.
 
 %New in the thesis, include in paper?
 \begin{poplForThesis}
-\subsubsection{Recomputing updated values}
+\subsection{Recomputing updated values}
 \label{sec:cts-limit-reupdate}
 In some cases, the same updated input might be recomputed more than once.
 If a derivative |df| needs some base input |x| (that is, if |df| is not
@@ -602,7 +603,7 @@ context, might cause space leaks, where thunks for |x2 = x1 `oplus` dx1|, |x3 =
 x2 `oplus` dx2| and so on might accumulate and grow without bounds.
 \end{poplForThesis}
 
-\subsubsection{Cache pruning via absence analysis}
+\subsection{Cache pruning via absence analysis}
 \label{sec:cache-pruning}
 To reduce memory usage and runtime overhead, it should be possible to
 automatically remove from transformed programs any caches or cache fragments
@@ -634,7 +635,7 @@ be able to remove unused caches or inputs (assuming unused inputs exist, see
 % so we are satisfied with leaving this for future work.
 
 
-\subsubsection{Unary vs n-ary abstraction}
+\subsection{Unary vs n-ary abstraction}
 \label{sec:nary-abstraction}
 We only show our transformation correct for unary functions and tuples. But many
 languages provide efficient support for applying curried functions such as |div :: Int ->
