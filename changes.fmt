@@ -81,7 +81,7 @@
 %format (ominusIdx(t)) = "\ominus_{" t "}"
 %format (nilIdx(t)) = "\NilC{" t "}"
 %format (ocomposeIdx(t)) = "\circledcirc_{" t "}"
-%format (doeIdx(v)) = undoapp "\Doe_{" v "}" undoapp
+%format (doeIdx(v)) = undoapp "\DoeIdx{" v "}" undoapp
 
 %format `doe` = "\Doe"
 %format chs (v) = "\ChangeStruct{" v "}"
