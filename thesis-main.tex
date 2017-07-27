@@ -1,5 +1,6 @@
 %&thesis-main
 % The above line loads a precompiled format coming from precompiling thesis-main.ltx.
+
 \hyphenation{Ber-nar-dy}
 
 % For some reason this breaks in the static preamble, or at the point it's defined, not sure.
@@ -8,6 +9,10 @@
 \newunicodechar{τ}{\texorpdfstring{\ensuremath{\tau}}{τ}}
 \newunicodechar{λ}{\texorpdfstring{\ensuremath{\lambda}}{λ}}
 \newunicodechar{→}{\texorpdfstring{\ensuremath{\rightarrow}}{→}}
+
+% Height of an empty line in lhs2TeX output
+% The default value is 0.66084ex. XXX don't adjust it now.
+%\setlength{\blanklineskip}{1ex}
 
 
 % Toggles full and poplAsChapter are initialized to false.
