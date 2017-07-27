@@ -893,14 +893,72 @@ because |dsum| does not use its base argument, that is, it is
 \cref{ch:cts}, we are restricted to self-maintainable derivatives.
 
 % Revise title
-\section{Contributions}
+\section{Conclusion and contributions}
 \label{sec:incr-contributions}
 In this chapter, we have seen how a correct differentiation transform
 allows us to incrementalize programs.
-\pg{What's next?}
 
-%\pg{TODO:contributions of other parts.}
-\Cref{part:incr} makes the following contributions:
+\subsection{Navigating this thesis part}
+\label{sec:navigating-incr}
+
+\paragraph{Differentiation}
+This chapter and \crefrange{ch:diff-examples}{ch:term-reasoning} form the core
+of incrementalization theory, with other chapters building on top of them.
+We study incrementalization for STLC; we summarize our formalization of STLC in
+\cref{sec:preliminaries}.
+Together with \cref{sec:intro}, \cref{ch:diff-examples} introduces the overall
+approach to incrementalization informally.
+\Cref{ch:derive-formally,ch:change-theory} show that incrementalization using
+ILC is correct.
+Building on a set-theoretic semantics, these
+\lcnamecrefs{ch:derive-formally} also develop the theory
+underlying this correctness proofs and further results.
+Equational reasoning on terms is then developed
+in \cref{ch:term-reasoning}.
+
+\Crefrange{ch:derive-formally}{ch:term-reasoning} contain full
+formal proofs: readers are welcome to skip or skim those proofs where
+appropriate.
+For ease of reference and to help navigation and skimming, these highlight and
+number all definitions, notations, theorem statements and so on, and we strive
+not to hide important definitions inside theorems.
+
+Later chapters build on this core but are again independent from each other.
+
+\paragraph{Extensions and theoretical discussion}
+\Cref{ch:misc-extensions} discusses a few assorted aspects of the theory that do
+not fit elsewhere and do not suffice for standalone chapters. We
+show how to differentiation general recursion~\cref{sec:general-recursion}, we
+exhibit a function change that is not valid for any function
+(\cref{sec:very-invalid}), we contrast our representation of function changes
+with \emph{pointwise} function changes (\cref{ssec:pointwise-changes}), and we
+compare our formalization with the one presented in \citep{CaiEtAl2014ILC}
+(\cref{sec:alt-change-validity}).
+
+\paragraph{Performance of differentiated programs}
+\Cref{sec:applying} studies how to apply differentiation (as introduced in
+previous chapters) to incrementalize a case study and empirically evaluates
+performance speedups.
+
+\paragraph{Differentiation with cache-transfer-style conversion}
+\Cref{ch:cts} is self-contained, even though it builds on the rest of the
+material; it summarizes the basics of ILC in \cref{sec:ilc-background}.
+Terminology in that chapter is sometimes subtly different from the rest of the
+thesis.
+
+\paragraph{Towards differentiation for System F}
+\Cref{ch:diff-parametricity-system-f} outlines how to extend differentiation to
+System F and suggests a proof avenue. Differentiation for System F requires a
+generalization of change structures to changes across different types
+(\cref{sec:param-derive-changes-across-types}) that appears of independent
+interest, though further research remains to be done.
+
+\paragraph{Related work, conclusions and appendixes}
+Finally, \cref{sec:cts-rw,ch:incr-rw} discuss related work and
+\cref{ch:incr-conclusion} concludes this part of the thesis.
+
+\subsection{Contributions}
+In \crefrange{ch:diff-examples}{ch:term-reasoning} we make the following contributions:
 \begin{itemize}
 \item We present a novel mathematical theory of changes and derivatives, which
   is more general than other work in the field because changes are first-class
@@ -949,58 +1007,41 @@ incrementalize a variant of the MapReduce programming model~\citep{Lammel07}.
   orders of magnitude on realistic inputs (\cref{sec:applying}).
 \end{itemize}
 
-\pg{Describe \cref{ch:cts}}
-\pg{Paste contributions from paper}
-\pg{Maybe defunc chapter?}
+In \cref{ch:cts} we make the following contributions:
+% altered copy of contribution list in that chapter.
+\begin{itemize}
+\item via examples, we motivate extending ILC to remember intermediate
+  results (\cref{sec:cts-motivation});
+\item we give a novel proof of correctness for ILC for untyped
+  $\lambda$-calculus, based on step-indexed logical relations
+  (\cref{sec:sound-derive});
+\item building on top of ILC-style differentiation, we show how to transform
+  untyped higher-order programs to \emph{cache-transfer-style (CTS)}
+  (\cref{sec:transformation});
+\item we show through formal proofs that programs and derivatives in cache-transfer style
+  \emph{simulate} correctly their non-CTS variants (\cref{sec:transformation-soundness});
+\item we perform performance case studies (in \cref{sec:case-studies}) applying
+  (by hand) extension of this technique to Haskell programs, and incrementalize
+  efficiently also programs that do not admit self-maintainable derivatives.
+\end{itemize}
 
+\Cref{ch:diff-parametricity-system-f} describes how to extend differentiation to
+System F. To this end, we extend change structure to allow from changes where
+source and destination have different types and enable defining more powerful
+combinators for change structures to be more powerful.
+While the results in this chapter call for further research, we consider them
+exciting
 
-\pg{WIP}
-Other chapters propose further contributions.
 \Cref{ch:bsos} proposes the first correctness proofs for ILC via operational
 methods and (step-indexed) logical relations, for simply-typed $\lambda$-calculus
 (without and with general recursion) and for untyped $\lambda$-calculus.
+A later variant of this proof, adapted for use of cache-transfer-style, is
+presented in \cref{ch:cts}, but we believe the presentation in \cref{ch:bsos}
+might also be interesting for theorists, as it explains how to extend ILC
+correctness proofs with fewer extraneous complications.
+Nevertheless, given the similarity between proofs in \cref{ch:bsos,ch:cts}, we
+relegate the latter one to an appendix.
 
-\Cref{ch:diff-parametricity-system-f} outlines how to extend differentiation to
-System F and suggests a proof avenue. Differentiation for System F requires a
-generalization of change structures to changes across different types
-(\cref{sec:param-derive-changes-across-types}) that appears of independent
-interest, though further research remains to be done.
-
-\subsection{Navigating this thesis part}
-\label{sec:navigating-incr}
-
-\paragraph{Differentiation}
-\Crefrange{sec:intro}{sec:term-reasoning} form the core of incrementalization
-theory, with other chapters building on top of them.
-
-\Cref{sec:intro} and \cref{ch:diff-examples} introduce the overall approach to
-incrementalization informally.
-
-\Cref{ch:derive-formally,ch:change-theory} show that incrementalization using
-ILC is correct. Building on a set-theoretic semantics, these
-\lcnamecrefs{ch:derive-formally} also develop the theory
-underlying this correctness proofs and further results.
-
-Equational reasoning on terms is then developed
-in \cref{sec:term-reasoning}. These chapters contain full formal proofs: readers
-are welcome to skip or skim those proofs where appropriate. We strive not to
-hide important definitions inside theorems, and to give stand-alone definitions
-and theorem statements.
-
-Later chapters are again independent from each other.
-
-\paragraph{Performance of differentiated programs}
-\Cref{sec:applying} studies how to apply differentiation (as introduced in
-previous chapters) to incrementalize a case study and empirically evaluates
-performance speedups.
-
-\paragraph{Differentiation with static caching}
-\pg{Explain label}
-\Cref{ch:cts} is mostly self-contained, even though it builds on the rest of the
-material; it summarizes the basics of ILC in \cref{sec:ilc-background}.
-Terminology in that chapter is sometimes subtly different from the rest of the thesis.
-
-\pg{At least in more formal chapters, all definitions, notations, and so on are
-  clearly highlighted and presented as standalone definitions for ease of reference.}
-
-\pg{Missing chapters}
+Finally, \cref{ch:defunc-fun-changes} shows how to implement all change operations on
+function changes efficiently, by defunctionalizing functions and
+function changes rather than using mere closure conversion.
