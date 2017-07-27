@@ -4,37 +4,18 @@
 
 \chapter{Extensions and theoretical discussion}
 \label{ch:misc-extensions}
-In this chapter we collect discussion of a few additional topics related to ILC\@@.
-
-% Sections of this chapter investigate various questions arising
-% within the theory of ILC.
-
-% \section{A change structure for sums}
-% \label{sec:chs-sums}
-% We can define change structures on disjoint sums |A + B|, given
-% change structures on |A| and |B|.
-% \pg{resume.}
-%
-% \section{Language plugins for products and sums}
-% \label{ch:prod-sums}
-%
-% In this section, we show language plugins for sum and product
-% types.
-%
-% \pg{Extend by showing the base semantics of these plugins.}
-% We give ways to give change structures for products and sums.
-% As primitives, we use the introduction and elimination forms for
-% these types. Then, we show how to obtain derivatives for these
-% primitives.
-%
-% \pg{Consider recursive types, and recursion?}
-%
-
+In this \lcnamecref{ch:misc-extensions} we collect discussion of a few
+additional topics related to ILC that do not suffice for standalone chapters.
+We
+show how to differentiation general recursion~\cref{sec:general-recursion}, we
+exhibit a function change that is not valid for any function
+(\cref{sec:very-invalid}), we contrast our representation of function changes
+with \emph{pointwise} function changes (\cref{ssec:pointwise-changes}), and we
+compare our formalization with the one presented in \citep{CaiEtAl2014ILC}
+(\cref{sec:alt-change-validity}).
 
 \section{General recursion}
 \label{sec:general-recursion}
-\pg{write, and put somewhere. Use the example with |map| on lists.}
-
 This section discusses informally how to differentiate terms
 using general recursion and what is the behavior of the resulting terms.
 
@@ -66,10 +47,9 @@ derive(letrec x = t1 in t2)   =  letrec  x   = t1
 
 \pg{Far from perfect. Better reorganize. This order makes little sense.}
 \begin{example}
-  In \cref{ex:syn-changes-map} we presented a derivative for
-  |map|.
-  We now rewrite |map| using fixpoint combinators and derive the
-  |dmap| applying the rule for deriving |fix|.
+  In \cref{ex:syn-changes-map} we presented a derivative |dmap| for
+  |map|. By using rules for differentiating recursive functions, we obtain
+  |dmap| as presented from |map|:
 % \begin{code}
 % map f = fix go
 %   where
@@ -87,7 +67,6 @@ derive(letrec x = t1 in t2)   =  letrec  x   = t1
 %     dgo self dself (Cons x xs) (Cons dx dxs) =
 %       Cons (df x dx) (dself xs dxs)
 % \end{code}
-We can finally show that
 \begin{code}
 dmap f df Nil Nil = Nil
 dmap f df (Cons x xs) (Cons dx dxs) =
@@ -96,7 +75,8 @@ dmap f df (Cons x xs) (Cons dx dxs) =
 \end{example}
 
 \subsection{Justification}
-However, we justify this rule using fixpoint operators.
+Here, we justify informally the rule for differentiating recursive functions
+using fixpoint operators.
 
 Let's consider STLC extended with a family of standard fixpoint
 combinators $\Varid{fix}_{|tau|}|: (tau -> tau) -> tau|$, with
@@ -104,11 +84,10 @@ combinators $\Varid{fix}_{|tau|}|: (tau -> tau) -> tau|$, with
 search for a definition of |derive (fix f)|.
 
 Using informal equational reasoning, if a correct definition of
-|derive (fix f)| exists, it must be
+|derive (fix f)| exists, it must satisfy
 \begin{code}
-  derive (fix f) = fix ((derive f (fix f)))
+  derive (fix f) `cong` fix ((derive f (fix f)))
 \end{code}
-\pg{use |`cong`|?}
 
 We can proceed as follows:
 % We recall that the derivative of a closed term is its nil change.
@@ -129,11 +108,10 @@ to solve it using |fix| itself:
 \end{code}
 
 Indeed, this rule gives a correct derivative.
-Formalizing our reasoning using denotational semantics would
-presumably require the use of domain theory. We leave
-such a formalization for future work.
-However, we do prove correct a variant of |fix| in
-\cref{ch:bsos}, but using operational semantics.
+Formalizing our reasoning using denotational semantics would presumably require
+the use of domain theory.
+Instead, we prove correct a variant of |fix| in \cref{ch:bsos}, but using
+operational semantics.
 
 % In particular
 % \begin{code}
