@@ -117,5 +117,7 @@ In sum, we present the following contributions:
 The rest of the paper is organized as follows. \Cref{sec:cts-motivation} summarizes
 ILC and motivates the extension to cache-transfer style.
 \Cref{sec:formalization} presents our formalization and proofs.
-\Cref{sec:case-studies} presents our case studies and benchmarks. \Cref{sec:cts-rw}
+\Cref{sec:case-studies} presents our case studies and benchmarks.
+\Cref{sec:cts-limitations} discusses limitations and future work.
+\Cref{sec:cts-rw}
 discusses related work and \cref{sec:conclusions} concludes.
