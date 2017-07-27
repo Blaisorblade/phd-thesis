@@ -660,10 +660,19 @@ for all |fromto Gamma rho1 (drhoa `doe` drhob) rho2| we have
 \end{proof}
 
 To show more formally in what sense change equivalence is a
-congruence, we first lift it to terms, similarly to syntactic
-change validity in \cref{sec:denot-syntactic-validity}.
+congruence, we first lift change equivalence to terms (\cref{def:syn-doe}),
+similarly to syntactic change validity in \cref{sec:denot-syntactic-validity}.
+To do so, we first need a notation for \emph{one-sided}
+or \emph{source-only} validity:
+\begin{notation}[One-sided validity]
+  We write |from V v1 dv| to mean there exists |v2| such that
+  |fromto V v1 dv v2|. We will reuse existing conventions and
+  write |from tau v1 dv| instead of |from (eval tau) v1 dv|
+  and |from Gamma rho1 drho| instead of |from (eval Gamma) rho1 drho|.
+\end{notation}
 
 \begin{definition}[Syntactic change equivalence]
+  \label{def:syn-doe}
 Two change terms |Dt^Gamma /- dta : Dt^tau| and |Dt^Gamma /- dtb :
 Dt^tau| are change equivalent, relative to source |Gamma /- t :
 tau|, if for all valid environment changes
@@ -677,15 +686,8 @@ or |dta (doeIdx t) dtb|, or simply |dta `doe` dtb|.
 Saying that |dta| and |dtb| are equivalent relative to |t| does
 not specify the destination of |dta| and |dtb|, only their
 source. The only reason is to simplify the statement and proof of
-\cref{thm:derive-preserve-doe}. We also need a notation for \emph{one-sided}
-or \emph{source-only} validity.
+\cref{thm:derive-preserve-doe}.
 
-\begin{notation}[One-sided validity]
-  We write |from V v1 dv| to mean there exists |v2| such that
-  |fromto V v1 dv v2|. We will reuse existing conventions and
-  write |from tau v1 dv| instead of |from (eval tau) v1 dv|
-  and |from Gamma rho1 drho| instead of |from (eval Gamma) rho1 drho|.
-\end{notation}
 % If there exists a destination and we want to specify it,
 % we can use the following stronger definition:
 % \begin{definition}[Syntactic change equivalence, two sided]
