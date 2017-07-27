@@ -4,6 +4,7 @@
 
 \chapter{Equational reasoning on changes}
 \label{sec:term-reasoning}
+\label{ch:term-reasoning}
 
 In this chapter, we formalize equational reasoning
 directly on terms, rather than on semantic values

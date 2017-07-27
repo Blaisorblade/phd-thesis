@@ -4,6 +4,7 @@
 
 \chapter{Related work}
 \label{sec:rw}
+\label{ch:incr-rw}
 
 Existing work on incremental computation can be divided into two
 groups: Static incrementalization and dynamic incrementalization.
