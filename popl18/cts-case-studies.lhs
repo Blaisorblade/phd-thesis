@@ -572,6 +572,36 @@ input is completely different, or because the condition of an |if| expression
 changed. Such changes to conditions are forbidden by other
 works~\citep{Koch2016incremental}, we believe for similar reasons.
 
+%New in the thesis, include in paper?
+\begin{poplForThesis}
+\subsubsection{Recomputing updated values}
+\label{sec:cts-limit-reupdate}
+In some cases, the same updated input might be recomputed more than once.
+If a derivative |df| needs some base input |x| (that is, if |df| is not
+self-maintainable), |df|'s input cache will contain a copy of |x|, and |df|'s
+output cache will contain its updated value |x `oplus` dx|. When all or most
+derivatives are self-maintainable this is convenient, because in most cases
+updated inputs will not need to be computed. But if most derivatives are not self-maintainable, the same updated input might be computed multiple times: specifically,
+if derivative |dh| calls functions |df| and |dg|, and both |df| and |dg| need
+the same base input |x|, caches for both |df| and |dg| will contain the updated
+value of |x `oplus` dx|, computed independently. Worse, because of pervasive
+replacement values (\cref{sec:annoying-replacement}), derivatives in our case
+studies tend to not be self-maintainable.
+%On the other hand, it appears that the slowdown factor is a function of the program text,
+% Not clear: a loop calling |df| will recompute |x `oplus` dx| once per iteration.
+
+In some cases, such repeated updates should be removable by a standard optimizer
+after inlining and common-subexpression elimination, but it is unclear how often this happens.
+To solve this problem, derivatives could take and return both old inputs |x1|
+and updated ones |x2 = x1 `oplus` dx|, and |x2| could be computed at the single
+location where |dx| is bound. In this case, to avoid updates for unused base
+inputs we would have to rely more on absence analysis
+(\cref{sec:cache-pruning}); pruning function inputs appears easier than pruning
+caches. Otherwise, computations of updated inputs that are not used, in a lazy
+context, might cause space leaks, where thunks for |x2 = x1 `oplus` dx1|, |x3 =
+x2 `oplus` dx2| and so on might accumulate and grow without bounds.
+\end{poplForThesis}
+
 \subsubsection{Cache pruning via absence analysis}
 \label{sec:cache-pruning}
 To reduce memory usage and runtime overhead, it should be possible to
