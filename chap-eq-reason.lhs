@@ -190,8 +190,8 @@ Other possible alternatives are discussed in \cref{sec:alt-change-validity}.
 \subsection{Syntactic validity}
 \label{sec:denot-syntactic-validity}
 Next, we define \emph{syntactic validity}, that is,
-when a change term |dt| is a (valid) change
-from source |t1| to destination |t2|. Intuitively, |dt| is valid
+when a change \emph{term} |dt| is a (valid) change
+from source term |t1| to destination |t2|. Intuitively, |dt| is valid
 from |t1| to |t2| if |dt|, |t1| and |t2|, evaluated all
 against the same valid environment change |drho|, produce a
 valid change, its source and destination. Formally:
@@ -200,7 +200,7 @@ valid change, its source and destination. Formally:
   We say that term |Dt^Gamma /- dt : Dt^tau| is a (syntactic)
   change from |Dt^Gamma /- t1 : tau| to |Dt^Gamma /- t2 : tau|, and write
   |fromtosyn Gamma tau t1 dt t2|, if
-  |forall (fromto Gamma rho1 drho rho2). fromto tau (eval t1 drho) (eval dt drho) (eval t2 drho)|.
+  \[|forall (fromto Gamma rho1 drho rho2). fromto tau (eval t1 drho) (eval dt drho) (eval t2 drho)|.\]
 \end{definition}
 \begin{notation}
   We often simply say that |dt| is a change from |t1| to |t2|,
@@ -315,7 +315,7 @@ We present the following straightforward (if tedious) proof (formal but not mech
   |fromto tau (eval t drho) (eval (derive t) drho) (eval t2 drho)|.
 
   Because |drho| extend |rho1| and |t| only needs entries
-  in |rho1|, we can show that |eval t drho = eval t rho1|, hence
+  in |rho1|, we can show that |eval t drho = eval t rho1|, so
   our thesis becomes |fromto tau (eval t rho1) (eval (derive t)
   drho) (eval t2 drho)|.
 
@@ -573,7 +573,7 @@ brief):
   \label{doe:equiv-valid}
   For each set |V| and source |v `elem` V|, change equivalence
   relative to source |v| is an equivalence relation over the set
-  of changes $\{|dv `elem` Dt^V `such` dv| \text{ is valid with source } |v|\}$.
+  of changes \[\{|dv `elem` Dt^V `such` dv| \text{ is valid with source } |v|\}.\]
 \end{lemma}
 We elaborate on this peculiar sort of equivalence in \cref{sec:doe-per}.
 
@@ -677,7 +677,8 @@ or |dta (doeIdx t) dtb|, or simply |dta `doe` dtb|.
 Saying that |dta| and |dtb| are equivalent relative to |t| does
 not specify the destination of |dta| and |dtb|, only their
 source. The only reason is to simplify the statement and proof of
-\cref{thm:derive-preserve-doe}.
+\cref{thm:derive-preserve-doe}. We also need a notation for \emph{one-sided}
+or \emph{source-only} validity.
 
 \begin{notation}[One-sided validity]
   We write |from V v1 dv| to mean there exists |v2| such that
@@ -729,21 +730,23 @@ we have only a pen-and-paper formal proof).
   t| either |s| and |dsa| or |s| and |dsb|:
 \[|fromsyn Gamma tau (t [x := s]) ((derive t)[x := s, dx := dsa] `doe` (derive t)[x := s, dx := dsb])|.\]
 \end{theorem}
-\begin{proof}
-  Assume |fromto Gamma rho1 drho rho2|.
-
+\begin{proof}[Proof sketch]
   The thesis holds because |derive| preserves change equivalence
   \cref{lem:eval-derive-preserve-doe}.
-  A formal proof follows through routine (and entirely tedious)
-  manipulations of bindings. In essence, we can extend |drho| to
+  A formal proof follows through routine (and tedious)
+  manipulations of bindings. In essence, we can extend a change environment
+  |drho| for context |Gamma| to
   equivalent environment changes for context |Gamma , x : sigma|
   with the values of |dsa| and |dsb|. The tedious calculations
   follow.
+\end{proof}
 
+\begin{proof}
   % A corollary of \cref{lem:eval-derive-preserve-doe} and of a substitution lemma
   % relating substitution and denotational semantics: |eval (t) (x = eval s rho,
   % rho) = eval(t [x := s]) rho|.
 
+  Assume |fromto Gamma rho1 drho rho2|.
   Because |dsa| and |dsb| are change-equivalent we have
   % By definition of |dsa (doeIdx(s)) dsb| we have that
   % |eval dsa drho (doeIdx(eval s rho1)) (eval dsb drho)|.
@@ -793,7 +796,6 @@ we have only a pen-and-paper formal proof).
 
   This equation can now be rewritten (by applying the
   substitution lemma to the substitutions of |dx| and |x|) to the following one:
-
   \begin{multline}
     \label{eq:derive-preserve-doe-3}
   |from (Gamma -> tau)
@@ -938,6 +940,7 @@ Change equivalence is equivalent to the following logical relation:
 \begin{code}
   fromto iota v1 (dva `doe` dvb) v2            `eqdef`
     fromto iota v1 dva v2 `wand` fromto iota v1 dva v2
+
   fromto (sigma -> tau) f1 (dfa `doe` dfb) f2  `eqdef`
     forall (fromto sigma v1 (dva `doe` dvb) v2).
     fromto tau (f1 v1) (dfa v1 dva `doe` dfb v2 dvb) (f2 v2)
