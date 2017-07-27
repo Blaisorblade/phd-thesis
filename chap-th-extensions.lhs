@@ -74,6 +74,34 @@ dmap f df (Cons x xs) (Cons dx dxs) =
 \end{code}
 \end{example}
 
+However, derivative |dmap| is not asymptotically faster than |map|. Even when we
+consider less trivial change structures, derivatives of recursive functions
+produced using this rule are often not asymptotically faster.
+Deriving |letrec x = t1 in t2| can still be useful if |derive t1|
+and/or |derive t2| is faster than its base term, but during our work we focus
+mostly on using structural recursion. Alternatively, in \cref{ch:diff-examples}
+and \cref{sec:plugin-design} we have shown how to incrementalize functions
+(including recursive ones) using equational reasoning.
+
+In general, when we invoke |dmap| on a change |dxs| from |xs1| to |xs2|, it is
+important that |xs1| and |xs2| are similar enough that enough computation can be
+reused. Say that |xs1 = Cons 2 (Cons 3 (Cons 4 Nil))| and |xs2 = Cons 1 (Cons 2
+(Cons 3 (Cons 4 Nil)))|: in this case, a change modifying each element of |xs1|,
+and then replacing |Nil| by |Cons 4 Nil|, would be inefficient to process, and
+naive incrementalization would produce this scenario. In this case, it is clear
+that a preferable change should simply insert |1| at the beginning of the list,
+as illustrated in \cref{sec:incr-fold} (though we have omitted the
+straightforward definition of |dmap| for such a change structure).
+In approaches like self-adjusting computation, this is ensured by using
+memoization. In our approach, instead, we rely on changes that are nil or small
+to detect when a derivative can reuse input computation.
+
+The same problem affects naive attempts to incrementalize, for instance, a
+simple factorial function; we omit details. Because of these issues, we focus on
+incrementalization of structurally recursive functions, and on incrementalizing
+generally recursive primitives using equational reasoning.
+We return to this issue in \cref{ch:incr-conclusion-futwork}.
+
 \subsection{Justification}
 Here, we justify informally the rule for differentiating recursive functions
 using fixpoint operators.
