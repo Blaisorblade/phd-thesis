@@ -1446,7 +1446,8 @@ general strategy and the first partial proofs for untyped $\lambda$-calculi.
 After we both struggled for a while to set up step-indexing correctly enough for a
 full proof, I first managed to give the definitions in this chapter and
 complete the proofs here described. Régis-Gianas then mechanized a variant of
-our proof for untyped $\lambda$-calculus in Coq~\citep{Giarrusso2018Static}.
+our proof for untyped $\lambda$-calculus in Coq~\citep{Giarrusso2018Static},
+that appears here in \cref{sec:formalization}.
 That proof takes a few different choices, and unfortunately strictly speaking neither proof
 subsumes the other. (1) We also give a non-step-indexed syntactic proof for
 simply-typed $\lambda$-calculus, together with proofs defining validity extensionally.
