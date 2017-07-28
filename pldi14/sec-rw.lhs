@@ -130,9 +130,9 @@ self-maintainable views, without hinting at a possible solution.
 
 Unlike later approaches to higher-order differentiation, we do
 not restrict our base types to
-groups~\citep{Koch2016incremental}, and transformed programs we
+groups unlike \citet{Koch2016incremental}, and transformed programs we
 produce do not require further runtime
-transformation~\citep{Koch2016incremental,Huesca2015incrementality},
+transformation unlike \citet{Koch2016incremental} and \citet{Huesca2015incrementality},
 as we discuss further next.
 
 \newcommand{\ldiff}{\TitleLambda--diff}
