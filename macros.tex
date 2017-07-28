@@ -13,8 +13,22 @@
 % Load hyperref as last package
 % (http://www.tex.ac.uk/cgi-bin/texfaq2html?label=hyperdupdest), except for
 % bookmark (which would otherwise load hyperref with other options).
-\usepackage[unicode=true]{hyperref}
+\usepackage[unicode=true,breaklinks=true,backref=page]{hyperref}
 \usepackage{bookmark}
+
+%\hypersetup{pdfborder={0 0 0}}
+%\hypersetup{bookmarksopenlevel=2}
+%\hypersetup{colorlinks,citecolor=black,urlcolor=black,linkcolor=black}
+
+% Customize list of backreferences.
+% From https://tex.stackexchange.com/a/183735/1340
+\renewcommand*{\backref}[1]{}
+\renewcommand*{\backrefalt}[4]{%
+    \ifcase #1%
+          \or [Page~#2.]%
+          \else [Pages~#2.]%
+    \fi%
+    }
 
 % Comments
 \iftoggle{todos}{%
