@@ -68,7 +68,7 @@ mylhs2tex.sty: mylhs2tex.lhs
 # all other dependencies thanks to code in .latexmkrc.
 # This line is hence only for the first build. Keep it in sync with .latexmkrc!
 %.fmt: %.ltx mylhs2tex.sty
-	$(baseProcessor) -ini -jobname="$*" "&${baseFormat} $*.ltx \dump"
+	$(baseProcessor) -ini -recorder -jobname="$*" "&${baseFormat} $*.ltx \dump"
 # Save log file.
 	mv $*.log $*-fmt.log
 %.pdf: %.tex %.fmt $(INTERM_PRODUCTS) FORCE

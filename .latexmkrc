@@ -24,7 +24,7 @@ sub compilepreamble {
     my $source = "$_[0].ltx";
     my $fmt_file = "$_[0].fmt";
     # Precompile format file.
-    my $return = system( "pdflatex", "-interaction=batchmode",
+    my $return = system( "pdflatex",
                          "-ini", "-recorder", "-jobname=$_[0]",
                          "&pdflatex $source \\dump" );
     if ($return) {
