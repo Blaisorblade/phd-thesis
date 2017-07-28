@@ -31,7 +31,7 @@ lhsSources=$(patsubst %,%.lhs, \
 lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 # Sources to watch for changes but that don't need to be compiled on their own,
 # because they're included elsewhere.
-sourcesIncluded=$(shell find . -name '*.tex' -o -name '*.sty') $(wildcard Bibs/*.bib) $(lhsFmt) defunc.lhs
+sourcesIncluded=$(shell find . -name '*.tex' -o -name '*.sty') $(wildcard Bibs/*.bib) $(lhsFmt)
 # Sources that will be watched for changes.
 sources=$(lhsSources) $(sourcesIncluded)
 
@@ -49,8 +49,6 @@ ifeq ($V, 1)
 else
   REDIR=> /dev/null
 endif
-
-new-stuff.tex: defunc.lhs
 
 # Name of base processor and TeX base format.
 baseProcessor = pdflatex
