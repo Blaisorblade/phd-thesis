@@ -116,7 +116,7 @@ collections or algebraic data types, but only to relational
 functions or programs resulting from defunctionalization or
 closure conversion. Incremental support is typically designed
 monolithically for a whole language, rather than piecewise.
-Improving on algebraic differencing, \citet{Koch10IQE}
+Improving on algebraic differencing, DBToaster (\citet{Koch10IQE,Koch14})
 \emph{guarantees} asymptotic speedups with a compositional query
 transformation and delivers huge speedup in realistic benchmarks,
 though still for a first-order database language.
@@ -146,7 +146,7 @@ introduces an alternative formalism, called \ldiff, for incremental computation
 by program transformation. While \ldiff{} has some appealing features, it
 currently appears to require program transformations at
 runtime. Other systems appear to share this
-feature~\citep{Koch2014incremental,Koch2016incremental}. Hence, this section
+feature~\citep{Koch2016incremental}. Hence, this section
 discusses the reason in some detail.
 
 Instead of differentiating a term |t| relative to all inputs (free
@@ -183,7 +183,7 @@ realized, or how big |n| grows in typical programs, or if it is
 simply feasible to perform differentiation at runtime, similarly
 to JIT compilation. Overall, an efficient implementation of
 \ldiff{} remains an open problem.
-It appears also \citet{Koch2014incremental,Koch2016incremental}
+It appears also \citet{Koch2016incremental}
 suffer similar problems, but a few details appear simpler since
 they restrict focus to functions over groups.
 
