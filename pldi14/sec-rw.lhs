@@ -128,6 +128,19 @@ but their architecture is still rather restrictive: they lack
 support for function changes and restrict incrementalization to
 self-maintainable views, without hinting at a possible solution.
 
+It seems possible to transform higher-order functional programs
+to database queries, using a variety of approaches
+\citep{Grust:2009:FDP:1559845.1559982,Cheney2013practical}, some
+of which support first-class functions via closure conversion
+\citep{Grust2013first,Grust2013functions}, and incrementalize the
+resulting programs using standard database technology. Such a
+solution would inherit limitations of database incrementalization
+approaches: in particular, it appears that database
+incrementalization approaches such as DBToaster can handle the
+insertion and removal of entire table rows, not of smaller
+changes. Nevertheless, such an alternative approach might be
+worth investigating.
+
 Unlike later approaches to higher-order differentiation, we do
 not restrict our base types to
 groups unlike \citet{Koch2016incremental}, and transformed programs we
