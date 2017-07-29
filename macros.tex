@@ -29,6 +29,28 @@
           \else [Pages~#2.]%
     \fi%
     }
+% Explain list of backreferences.
+% https://tex.stackexchange.com/a/70953/1340
+\newcommand{\myBibPreambleText}{[Citing pages are listed after each reference.]}
+% Alternatives:
+% Pages containing citations to each reference are listed after each reference
+% After each reference, we list pages containing citations.
+% between square brackets, you will find a list of links to page numbers c
+
+% Place \myBibPreambleText below "Bibliography".
+\renewcommand{\bibpreamble}{%
+  \vspace{-2 \bigskipamount}%
+  \myBibPreambleText%
+  \par \vspace{2 \bigskipamount}}
+
+% % More robust but won't work with tocbibind, since it redefines the whole
+% % shebang. Without tocbibind, however, the output is close enough (by luck?).
+% \makeatletter
+% \renewcommand{\bibsection}{
+%   \chapter*{\bibname \\ {\normalsize\mdseries \myBibPreambleText}}
+%   \@mkboth {\MakeUppercase {\bibname }}{\MakeUppercase {\bibname }}
+% }
+% \makeatother
 
 % Comments
 \iftoggle{todos}{%
