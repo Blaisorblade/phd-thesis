@@ -429,7 +429,7 @@ being applied to valid inputs, using the proof that |derive t| is correct
 % End of %if style /= newcode:
 %endif
 
-\section{Changes across types}
+\section{Combinators for polymorphic change structures}
 \label{sec:param-derive-changes-across-types}
 
 %if style /= newcode
@@ -440,6 +440,15 @@ being applied to valid inputs, using the proof that |derive t| is correct
 %format bplus = "(" `bplus` ")"
 %instance bnilc = "\mathbf{0}_2"
 
+%format CS = "\mathbb{CS}"
+
+%format delta = "\delta"
+%format dsigma = delta "_" sigma
+%format dtau = delta "_" tau
+%format dtaua = delta "_{\tau a}"
+%format dtaub = delta "_{\tau b}"
+%format $ = "\mathrel{\$}"
+%format ListMu = List "_{\mu}"
 %else
 
 \begin{code}
@@ -455,86 +464,208 @@ class ChangeStruct t where
 \end{code}
 %endif
 
-%if style /= newcode
-
-Earlier, we restricted our transformation so that there can be a change
+Earlier, we restricted our transformation on |stlc| terms, so that there could be a change
 |dt| from |t1| to |t2| only if |t1| and if |t2| have the same type. In this
-section we lift this restriction and define \emph{polymorphic change
-  structures}. To do so, we sketch how to extend core change-structure
-operations to this scenario.
-We describe change operations for generalized change structures via a Haskell
-typeclass and relative instances, as we did in \cref{ch:diff-examples}.%
-\footnote{GHC rejects most combinations of these instances with overlap errors
-  for type family definitions, some of which appear overly conservative
-(\url{https://ghc.haskell.org/trac/ghc/ticket/4259}), but
-we ignore this overlap problem. We only want to describe ways to produce new change
-structures from existing ones, and not necessarily how to select automatically
-the appropriate change structure for a given type. Arguably, instead of using
-typeclass instances, we should encode change structures as first-class records
-and define a language of combinators for assembling them.}
+section we lift this restriction and define \emph{polymorphic} change
+structures (also called change structures when no ambiguity arises). To do so,
+we sketch how to extend core change-structure operations to polymorphic change structures.
+
+We also show a few \emph{combinators}, combining existing polymorphic change
+structures into new ones. We believe the combinator types are more enlightening
+than their implementations, but we include them here for completeness.
+We already described a few constructions on non-polymorphic change structures;
+however, polymorphic change structures enable new constructions that insert or
+remove data, or apply isomorphisms to the source or destination type.
+
+We conjecture that combinators for polymorphic change structure can be used to
+compose, out of small building blocks, change structures that, for instance,
+allow inserting or removing elements from a recursive datatype such as lists.
+Derivatives for primitives could then be produced using equational reasoning as
+described in \cref{sec:plugin-design}.
+However, we leave investigation of such avenues to future work.
+
+We describe change operations for polymorphic change structures via a Haskell
+record containing change operations, and we define combinators on polymorphic
+change structures. Of all change operations, we only consider |`oplus`|; to
+avoid confusion, we write |`bplus`| for the polymorphic variant of |`oplus`|.
 \begin{code}
-class ChangeStruct2 tau1 tau2 where
-  type Dt2 tau1 tau2
-  bplus :: tau1 -> Dt2 tau1 tau2 -> tau2
-class ChangeStruct2 tau tau => NilChangeStruct2 tau where
-  bnilc :: tau -> Dt2 tau tau
+data CS tau1 dtau tau2 = CS {
+  bplus :: tau1 -> dtau -> tau2
+}
 \end{code}
-We can still adapt all existing change structures |ChangeStruct tau| into
-|ChangeStruct2 tau tau|.
+This code define a record type constructor |CS| with a data constructor also
+written |CS|, and a field accessor written |bplus|; we use |tau1|, |dtau| and
+|tau2| (and later also |sigma1|, |dsigma| and |sigma2|) for
+Haskell type variables. To follow Haskell lexical rules, we use here lowercase
+letters (even though Greek ones).
+
+We have not formalized definitions of validity, or proofs that it agrees with
+|`bplus`|, but for all the change structures and combinators in this section,
+this exercise appears no harder than the ones in \cref{ch:change-theory}.
+
+In \cref{sec:diff-examples-tc,sec:cts-motivation} change structures are embedded in Haskell
+using type class |ChangeStruct tau|. Conversely, here we do not define a type
+class of polymorphic change
+structures, because (apart from the simplest scenarios), Haskell type class
+resolution is unable to choose a \emph{canonical} way to construct a polymorphic
+change structure using our combinators.
+
+All existing change structures (that is, instances of |ChangeStruct tau|) induce
+generalized change structures |CS tau (Dt^tau) tau|.
 \begin{code}
-instance ChangeStruct tau => ChangeStruct2 tau tau where
-  type Dt2 tau tau = Dt tau
-  x1 `bplus` dx = x1 `oplus` dx
+typeCS :: ChangeStruct tau => CS tau (Dt^tau) tau
+typeCS = CS oplus
 \end{code}
+
 We can also have change structures across different types.
 Replacement changes are possible:
 \begin{code}
-instance ChangeStruct2 tau1 tau2 where
-  type Dt2 tau1 tau2 = tau2
-  x1 `bplus` x2 = x2
+replCS :: CS tau1 tau2 tau2
+replCS = CS $ \x1 x2 -> x2
 \end{code}
+% Unbreak Emacs syntax highlighting with $
 But replacement changes are not the only option. For product types, or for any
 form of nested data, we can apply changes to
-the different components, changing the type of some components:
+the different components, changing the type of some components. We can also
+define a change structure for nullary products (the unit type) which can be
+useful as a building block in other change structures:%
 \begin{code}
-instance (  ChangeStruct2 sigma1 sigma2, ChangeStruct tau1 tau2) =>
-            ChangeStruct2 (sigma1, tau1) (sigma2 , tau2) where
-  type Dt2 (sigma1, tau1) (sigma2 , tau2) = (Dt2 sigma1 sigma2, Dt2 tau1 tau2)
-  (a1 , b1) `bplus` (da, db) = (a1 `bplus` da, b1 `bplus` db)
+prodCS :: CS sigma1 dsigma sigma2 -> CS tau1 dtau tau2 -> CS (sigma1, tau1) (dsigma, dtau) (sigma2, tau2)
+prodCS scs tcs = CS $ \ (s1, t1) (ds, dt) -> (bplus scs s1 ds, bplus tcs t1 dt)
+unitCS :: CS () () ()
+unitCS = CS $ \() () -> ()
 \end{code}
+% Unbreak Emacs syntax highlighting with $
 The ability to modify a field to one of a different type is also known as
 in the Haskell community as \emph{polymorphic record update}, a feature that has
 proven desirable in the context of lens
 libraries~\citep{OConnor2012polymorphic,Kmett2012mirrored}.
 
-We can also describe updates going from type |tau| to type |(sigma, tau)|,
-effectively prepending a value of type |sigma| to our data. Similarly, we can
-also remove values. It seems possible to extend such change structures
-constructions to compose change structures that, for instance, allow inserting
-or removing elements from a recursive datatype such as lists. However, we
-leave investigation of such avenues to future work.
+We can also define a combinator |sumCS| for change structures on sum types,
+similarly to our earlier construction described in \cref{sec:chs-sums}.
+This time, we choose to forbid changes across branches since they're
+inefficient, though we could support them as well, if desired.
+\begin{code}
+sumCS :: CS s1 ds s2 -> CS t1 dt t2 ->
+  CS (Either s1 t1) (Either ds dt) (Either s2 t2)
+
+sumCS scs tcs = CS go
+  where
+    go (Left s1) (Left ds) = Left $ bplus scs s1 ds
+    go (Right t1) (Right dt) = Right $ bplus tcs t1 dt
+    go _ _ = error "Invalid changes"
+\end{code}
+
+Given two change structures from |tau1| to |tau2|, with respective change types
+|dtaua| and |dtaub|, we can also define a new change structure with change type
+|Either dtaua dtaub|, that allows using changes from either structure.
+We capture this construction through combinator |mSumCS|, having the following
+signature:
+\begin{code}
+mSumCS :: CS tau1 dtaua tau2 -> CS tau1 dtaub tau2 -> CS tau1 (Either dtaua dtaub) tau2
+
+mSumCS acs bcs = CS go
+  where
+    go t1 (Left dt) = bplus acs t1 dt
+    go t1 (Right dt) = bplus bcs t1 dt
+\end{code}
+This construction is possible for non-polymorphic change structures; we only
+need change structures to be first-class (instead of a type class) to be able to internalize this construction in Haskell.
+
+Using combinator |lInsCS| we can describe updates going from type |tau1| to type |(sigma, tau2)|,
+assuming a change structure from |tau1| to |tau2|:
+that is, we can prepend a value of type |sigma| to our data while we modify it.
+Similarly, combinator |lRemCS| allows removing values:
 % What's more, we can also define change structures that allow inserting or
 % removing elements into nested tuples.
 % We believe combining such change structures might produce
 % more interesting ones.
 \begin{code}
-instance ChangeStruct2 tau tau => ChangeStruct2 tau (sigma, tau) where
-  type Dt2 tau (sigma, tau) = (sigma, Dt2 tau tau)
-  b1 `bplus` (a2, db) = (a2, b1 `bplus` db)
+lInsCS :: CS t1 dt t2 -> CS t1 (s, dt) (s, t2)
+lInsCS tcs = CS $ \t1 (s, dt) -> (s, bplus tcs t1 dt)
 
-instance ChangeStruct2 tau tau => ChangeStruct2 (sigma, tau) tau where
-  type Dt2 (sigma, tau) tau = Dt2 tau tau
-  (_, b1) `bplus` db = b1 `bplus` db
+lRemCS :: CS t1 dt (s, t2) -> CS t1 dt t2
+lRemCS tcs = CS $ \t1 dt -> snd $ bplus tcs t1 dt
+\end{code}
+% Unbreak Emacs syntax highlighting with $
+
+We can also transform change structures given suitable conversion functions.
+\begin{code}
+lIsoCS :: (t1 -> s1) -> CS s1 dt t2 -> CS t1 dt t2
+mIsoCS :: (dt -> ds) -> CS t1 ds t2 -> CS t1 dt t2
+rIsoCS :: (s2 -> t2) -> CS t1 dt s2 -> CS t1 dt t2
+isoCS :: (t1 -> s1) -> (dt -> ds) -> (s2 -> t2) -> CS s1 ds s2 -> CS t1 dt t2
+\end{code}
+To do so, we must only compose |`bplus`| with the given conversion functions
+according to the types. Combinator |isoCS| arises by simply combining the other ones:
+\begin{code}
+lIsoCS f tcs     = CS $ \s1 dt -> bplus tcs (f s1) dt
+mIsoCS g tcs     = CS $ \t1 ds -> bplus tcs t1 (g ds)
+rIsoCS h tcs     = CS $ \t1 dt -> h $ bplus tcs t1 dt
+isoCS f g h scs  = lIsoCS f $ mIsoCS g $ rIsoCS h scs
 \end{code}
 
-% instance ChangeStruct2 tau tau => ChangeStruct2 tau (tau, sigma) where
-%   type Dt2 tau (tau, sigma) = (Dt2 tau tau, sigma)
-%   a1 `bplus` (da, b2) = (a1 `bplus` da, b2)
+With a bit of datatype-generic programming infrastructure, we can reobtain only
+using combinators the change
+structure for lists shown in \cref{sec:simple-changes-list-map}, which allows
+modifying list elements. The core definition is the following one:
+\begin{code}
+listMuChangeCS :: CS a1 da a2 -> CS (ListMu a1) (ListMu da) (ListMu a2)
+listMuChangeCS acs = go where
+    go =  isoCS unRollL unRollL rollL $
+          sumCS unitCS $ prodCS acs go
+\end{code}
+The needed infrastructure appears in \cref{fig:change-structure-list-w-combinators}.
 
-% instance ChangeStruct2 tau tau => ChangeStruct2 (tau, sigma) tau where
-%   type Dt2 (tau, sigma) tau = Dt2 tau tau
-%   (a1, _) `bplus` da = a1 `bplus` da
+% -- This change structure is implemented directly, but should be done using combinators.
+% listChangeCS :: CS a1 da a2 -> CS (List a1) (List da) (List a2)
+% listChangeCS acs = resCS
+%   where
+%     resCS = CS go
+%     go Nil Nil = Nil
+%     go (Cons a1 as1) (Cons da das) = Cons (bplus acs a1 da) (bplus resCS as1 das)
+%     go _ _ = error "Invalid change"
 
+\begin{figure}[h]
+\texths %drop extra space around figure
+\begin{code}
+-- Our list type:
+data List a = Nil | Cons a (List a)
+
+-- Equivalently, we can represent lists as a fixpoint of a sum-of-product pattern functor:
+data Mu f = Roll { unRoll :: f (Mu f) }
+data ListF a x = L { unL :: Either () (a, x) }
+type ListMu a = Mu (ListF a)
+
+rollL :: Either () (a, ListMu a) -> ListMu a
+rollL = Roll . L
+unRollL :: ListMu a -> Either () (a, ListMu a)
+unRollL = unL . unRoll
+
+-- Isomorphism between |List| and |ListMu|:
+lToLMu :: List a -> ListMu a
+lToLMu Nil = rollL $ Left ()
+lToLMu (Cons a as) = rollL $ Right (a, lToLMu as)
+
+lMuToL :: ListMu a -> List a
+lMuToL = go . unRollL where
+  go (Left ()) = Nil
+  go (Right (a, as)) = Cons a (lMuToL as)
+
+-- A change structure for |List|:
+listChangesCS :: CS a1 da a2 -> CS (List a1) (List da) (List a2)
+listChangesCS acs = isoCS lToLMu lToLMu lMuToL $ listMuChangeCS acs
+\end{code}
+% Unbreak Emacs syntax highlighting with $
+
+  \caption{A change structure that allows modifying list elements.}
+  \label{fig:change-structure-list-w-combinators}
+\end{figure}
+
+\paragraph{Section summary}
+We have defined polymorphic change structures and shown they admit a rich
+combinator language. Now, we return to using these change structures for
+differentiating |stlc| and System F.
 % With a better way to describe a change from values of type |a| to
 % values of type |b|,
 %\pg{Later we sketch change structures across types.}
@@ -542,8 +673,6 @@ instance ChangeStruct2 tau tau => ChangeStruct2 (sigma, tau) tau where
 %\pg{Idea: |ChangeStruct2 t1 t2, Iso t2 t3) => ChangeStruct2 t1 t3|}
 % Lists can be described as the fixpoint of a sum of
 % product: |List a = mu X. 1 + A `times` X|
-
-%endif
 
 %if style /= newcode
 \section{Differentiation for System F}
