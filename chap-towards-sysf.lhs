@@ -29,6 +29,8 @@
 %format sysf2 = sysf "^2"
 %format rAlpha = "\mathcal{R}^" alpha
 
+%if style /= newcode
+
 \chapter{Towards differentiation for System F}
 \label{ch:diff-parametricity-system-f}
 Differentiation is closely related to both logical relations and parametricity,
@@ -424,13 +426,37 @@ recursively via |deriveP s|). To show that |(derive s) (derive t)|, that is
 being applied to valid inputs, using the proof that |derive t| is correct
 (obtained recursively via |deriveP t|).
 
+% End of %if style /= newcode:
+%endif
+
 \section{Changes across types}
 \label{sec:param-derive-changes-across-types}
+
+%if style /= newcode
+
 %format ChangeStruct2
 %format NilChangeStruct2
 %format `bplus` = "\myboxplus"
 %format bplus = "(" `bplus` ")"
 %instance bnilc = "\mathbf{0}_2"
+
+%else
+
+\begin{code}
+
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeFamilyDependencies #-}
+module Examples.ChangeStructureFirstClass where
+
+class ChangeStruct t where
+  type Dt t = r | r -> t
+  oplus :: t -> Dt t -> t
+
+\end{code}
+%endif
+
+%if style /= newcode
+
 Earlier, we restricted our transformation so that there can be a change
 |dt| from |t1| to |t2| only if |t1| and if |t2| have the same type. In this
 section we lift this restriction and define \emph{polymorphic change
@@ -517,6 +543,9 @@ instance ChangeStruct2 tau tau => ChangeStruct2 (sigma, tau) tau where
 % Lists can be described as the fixpoint of a sum of
 % product: |List a = mu X. 1 + A `times` X|
 
+%endif
+
+%if style /= newcode
 \section{Differentiation for System F}
 \label{sec:param-derive-changes-across-types-transform}
 After introducing changes across different types, we can also generalize
@@ -588,6 +617,8 @@ Produced terms live in |lap22|, the logic produced by extending |lap2| following
 non-dependently-typed differentiation (as suggested earlier) would produce
 proofs in |sysf2|, the logic produced by extending |sysf| following
 \citeauthor{Bernardy2011realizability}.
+
+%endif
 
 \section{Related work}
 Dependently-typed differentiation for System F, as given, coincides with the
