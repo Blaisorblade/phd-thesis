@@ -2,6 +2,33 @@
 %include polycode.fmt
 %include changes.fmt
 
+%{
+%format ptsRel = "\mathcal{R}"
+%format (idx1 (t)) = "\mathcal{S}_1 \mean{" t "}"
+%format (idx2 (t)) = "\mathcal{S}_2 \mean{" t "}"
+%format (idxi (t)) = "\mathcal{S}_i \mean{" t "}"
+%format star = "\star"
+%format cstar = "\lceil \star \rceil"
+%format box = "\Box"
+
+%format (ppp(t)) = "\mathcal{P}\mean{" t "}"
+%format pElemDt1 (tau) (t1) (t2) = "(" t1, t2 ")\in \mathcal{P}\mean{" tau "}"
+
+%format elemDt2 (tau) (t1) (t2) = "(" t1, t2 ")\in \Delta_2\mean{" tau "}"
+%format pElemDt2 (tau) (t1) (dt) (t2) = "(" t1, dt, t2 ")\in \Delta\mathcal{V}\mean{" tau "}"
+%format (deriveP(t)) = "\mathcal{DP}\mean{" t "}"
+
+%format stlc = "\lambda_{\to}"
+%format stlc2 = stlc "^2"
+%  "\lambda^2_{\to}"
+%format lamp = "\lambda_P"
+%format lamp2 = lamp "^2"
+%format lap2 = "\lambda_{P2}"
+%format lap22 = lap2 "^2"
+%format sysf = "\lambda_{2}"
+%format sysf2 = sysf "^2"
+%format rAlpha = "\mathcal{R}^" alpha
+
 \chapter{Towards differentiation for System F}
 \label{ch:diff-parametricity-system-f}
 Differentiation is closely related to both logical relations and parametricity,
@@ -60,33 +87,6 @@ Indeed, parametricity defines not just a logical relation but a \emph{logical
 equivalence}, that can be shown to be equivalent to contextual
 equivalence~(as explained for instance by \citet[Ch.~48]{Harper2016PFPL} or by
 \citet{Ahmed2006stepindexed}).
-
-%{
-%format ptsRel = "\mathcal{R}"
-%format (idx1 (t)) = "\mathcal{S}_1 \mean{" t "}"
-%format (idx2 (t)) = "\mathcal{S}_2 \mean{" t "}"
-%format (idxi (t)) = "\mathcal{S}_i \mean{" t "}"
-%format star = "\star"
-%format cstar = "\lceil \star \rceil"
-%format box = "\Box"
-
-%format (ppp(t)) = "\mathcal{P}\mean{" t "}"
-%format pElemDt1 (tau) (t1) (t2) = "(" t1, t2 ")\in \mathcal{P}\mean{" tau "}"
-
-%format elemDt2 (tau) (t1) (t2) = "(" t1, t2 ")\in \Delta_2\mean{" tau "}"
-%format pElemDt2 (tau) (t1) (dt) (t2) = "(" t1, dt, t2 ")\in \Delta\mathcal{V}\mean{" tau "}"
-%format (deriveP(t)) = "\mathcal{DP}\mean{" t "}"
-
-%format stlc = "\lambda_{\to}"
-%format stlc2 = stlc "^2"
-%  "\lambda^2_{\to}"
-%format lamp = "\lambda_P"
-%format lamp2 = lamp "^2"
-%format lap2 = "\lambda_{P2}"
-%format lap22 = lap2 "^2"
-%format sysf = "\lambda_{2}"
-%format sysf2 = sysf "^2"
-%format rAlpha = "\mathcal{R}^" alpha
 
 When studying ILC, logical equivalence between terms |t1| and |t2|
 (written |pElemDt1 tau t1 t2|), appears to be generalized by the existence
