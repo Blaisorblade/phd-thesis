@@ -4,6 +4,7 @@
 
 \section{Incrementalization case studies}
 \label{sec:case-studies}
+\label{sec:cts-case-studies}.
 
 In this section, we investigate whether our transformations incrementalize
 efficiently programs in a typed language such as Haskell.

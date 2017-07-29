@@ -25,6 +25,7 @@ results, which we will discuss in \cref{ch:cts}.
 We will also use overly simplified change structures to illustrate a few points.
 
 \section{Change structures as type-class instances}
+\label{sec:diff-examples-tc}
 We encode change structures, as sketched earlier in \cref{sec:change-intro},
 through a \emph{type class} named |ChangeStruct|. An instance |ChangeStruct t|
 defines a change type |Dt^t| as an associated type and operations |`oplus`|,
@@ -49,7 +50,6 @@ available, but we collapse this hierarchy here to simplify presentation.
 % We'll come back to this definition and refine it,
 % describing the laws it satisfies, in \cref{sec:change-struct-tc}.
 
-\pg{Too short for a section. Add sums and products maybe?}
 \section{How to design a language plugin}
 \label{sec:plugin-design}
 
@@ -59,7 +59,6 @@ elimination forms for |T|, since such forms constitute a complete API
 for using that datatype. However, we will sometimes have to restrict
 elimination forms to scenarios that can be incrementalized efficiently.
 
-\pg{Put somewhere:}
 In general, to differentiate a primitive |f : A -> B| once we have defined a
 change structure for |A|, we can start by defining
 \begin{equation}
@@ -438,7 +437,7 @@ for all functions that can be expressed in terms of the primitives.
 Conceptually, a change for type |Sequence a| is a sequence of atomic changes.
 Each atomic change inserts one element at a given position, or removes one
 element, or changes an element at one
-position.\footnote{\citet{Firsov2016purely} and our implementation allow changes
+position.\footnote{\citet{Firsov2016purely} and our actual implementation allow changes
   to multiple elements.}
 % data AtomicChange a
 %   =  Insert Int a
@@ -453,12 +452,13 @@ data SeqSingleChange a
 data SeqChange a = Sequence (SeqSingleChange a)
 type Dt^(Sequence a) = SeqChange a
 \end{code}
-\pg{Nil change detection}
-\pg{Move here example on list later}
+We use \citeauthor{Firsov2016purely}'s variant of this change structure in \cref{sec:cts-case-studies}.
+% \pg{Nil change detection}
+% \pg{Move here example on list later}
 
-\pg{Real list}
+% \pg{Real list}
 
-\pg{Average}
+% \pg{Average}
 
 \subsection{Incremental higher-order primitives and nested loops}
 \pg{Nested loops}

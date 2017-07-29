@@ -799,15 +799,12 @@ Our results show that the incrementalized program runs
 in essentially constant time and hence orders of magnitude faster than
 the alternative of recomputation from scratch.
 
-Two important lessons from the evaluations are:
-\begin{itemize}
-\item As anticipated in \cref{ssec:self-maint}, to achieve good performance our current
-  implementation requires some form of dead code elimination, such as laziness.
-%Either laziness or dead-code elimination is required for
-%good performance ().
-\item Incrementalization increases code size significantly.
-  Analyzing and addressing this increase is left for future work.
-\end{itemize}
+An important lessons from the evaluations is that,
+as anticipated in \cref{ssec:self-maint}, to achieve good
+performance our current implementation requires some form of dead
+code elimination, such as laziness.
+% %Either laziness or dead-code elimination is required for
+% %good performance ().
 
 \begin{figure}
 \includegraphics[keepaspectratio,width=8.5cm]{pldi14/HistogramGenerated-new.pdf}
