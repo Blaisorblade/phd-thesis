@@ -42,6 +42,7 @@ mylhs2tex.sty
 
 ## lhs2TeX extracted code
 defunc.hs
+chap-towards-sysf.hs
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

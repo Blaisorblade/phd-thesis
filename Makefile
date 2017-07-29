@@ -111,4 +111,4 @@ quickdemon:
 
 %.hs: %.lhs $(lhsFmt)
 	lhs2TeX --newcode -P .: -o $*.hs $*.lhs
-check: defunc.hs
+check: defunc.hs chap-towards-sysf.hs
