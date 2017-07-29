@@ -604,6 +604,30 @@ In general, we cannot do better, since there need be no shared data between two
 branches of a datatype. We need to find specialized scenarios where better
 implementations are possible.
 
+\paragraph{Extensions, changes for ADTs and future work}
+In some cases, we consider changes for type |Either a b|, where |a| and |b| both
+contain some other type |c|. Take again lists: a change from
+list |as| to list |Cons a2 as| should simply say that we prepend |a2| to the
+list. In a sense, we are just using a change structure from type |List a| to
+|(a, List a)|.
+More in general, if change |das| from |as1| to |as2| is small, a change from
+list |as1| to list |Cons a2 as2| should simply ``say'' that we prepend |a2| and
+that we modify |as1| into |as2|, and similarly for removals.
+
+In \cref{sec:param-derive-changes-across-types}, we suggest how to
+construct such change structures, based on the concept of \emph{polymorphic
+  change structure}, where changes have source and destination of different
+types. Based on initial experiments, we believe one could develop these
+constructions into a powerful combinator language for change structures. In particular,
+it should be possible to build change structures for lists similar to the ones
+in \cref{sec:incr-fold}. Generalizing beyond lists, similar systematic constructions
+should be able to represent insertions and removals of one-hole
+contexts~\citep{McBride2001derivative} for
+arbitrary algebraic datatypes (ADTs); for ADTs representing balanced data
+structures, such changes could enable efficient incrementalization in many
+scenarios.
+However, many questions remain open, so we leave this effort for future work.
+
 \subsection{Optimizing |filter|}
 In \cref{sec:incr-coll-api-intro} we have defined |filter| using a conditional,
 and now we have just explained that in general conditionals are inefficient!
@@ -639,25 +663,6 @@ functional programs we have access to GHC and HERMIT~\citep{Farmer2012hermit}.
 An interesting alternative (which does have some support for side effects) is
 LMS~\citep{rompf2010lightweight} and Delite~\citep{Brown11}.
 We leave further investigation for future work.
-
-\paragraph{Extensions and future work}
-But in some cases types |a| and |b| are related. Take again lists: a change from
-list |as| to list |Cons a2 as| should simply say that we prepend |a2| to the
-list. In a sense, we are just using a change structure from type |List a| to
-|(a, List a)|.
-More in general, if change |das| from |as1| to |as2| is small, a change from
-list |as1| to list |Cons a2 as2| should simply ``say'' that we prepend |a2| and
-that we modify |as1| into |as2|.
-
-Such a facility might allow building change structures such as the one we
-considered for lists in \cref{sec:incr-fold}.
-
-In \cref{sec:param-derive-changes-across-types} we sketch a few ways to
-construct such change structures, based on the concept of \emph{polymorphic
-  change structure}, where changes have source and destination of different
-types. Based on initial experiments, we believe one could develop these
-constructions into a powerful combinator language for change structures, but
-many questions remain open, so we leave this effort for future work.
 
 \section{Chapter conclusion}
 In this chapter we have toured what can and cannot be incrementalized using
