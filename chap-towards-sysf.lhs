@@ -1017,7 +1017,7 @@ investigation as future work.
 % % analog of changes or |derive(param)|. One defines a relational interpretation of
 % % terms, mapping input relations to output relations, and shows this maps
 
-\section{Conclusion}
+\section{Chapter conclusion}
 In this chapter, we have sketched how to define and prove correct
 differentiation following \citet{Bernardy2011realizability}'s and
 \citet{Bernardy10}'s work on

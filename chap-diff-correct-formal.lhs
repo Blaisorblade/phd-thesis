@@ -1113,7 +1113,7 @@ For reference, we repeat here plugin requirements spread through the chapter.
 \constDifferentiation*
 \deriveConstCorrect*
 
-\section{Chapter summary}
+\section{Chapter conclusion}
 In this chapter, we have formally defined changes for values and environments of
 our language, and when changes are valid. Through these definitions, we have explained
 that |derive(t)| is correct, that is, that it maps changes to the input

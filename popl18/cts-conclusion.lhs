@@ -2,8 +2,13 @@
 %include polycode.fmt
 %include changes-popl.fmt
 
+\iftoggle{poplForThesis}{
+\section{Chapter conclusion}
+}{
 \section{Conclusions}
+}
 \label{sec:conclusions}
+\label{sec:cts-conclusion}
 
 We have presented a program transformation which turns a functional
 program into its derivative and efficiently shares redundant
