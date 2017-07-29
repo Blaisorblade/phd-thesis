@@ -460,9 +460,9 @@ We use \citeauthor{Firsov2016purely}'s variant of this change structure in \cref
 
 % \pg{Average}
 
-\subsection{Incremental higher-order primitives and nested loops}
-\pg{Nested loops}
-\pg{we need to discuss how map propagates changes to functions.}
+% \subsection{Incremental higher-order primitives and nested loops}
+% \pg{Nested loops}
+% \pg{we need to discuss how map propagates changes to functions.}
 
 \section{Products}
 \label{sec:chs-products-intro}
