@@ -5,6 +5,7 @@
 
 \chapter{Introduction}
 \label{sec:aosd13-intro}
+\label{ch:aosd13-intro}
 In-memory collections of data often need efficient processing. For on-disk
 data, efficient processing is already provided by database management systems~(DBMS) thanks to
 their query optimizers, which support many optimizations specific to the domain
@@ -235,6 +236,7 @@ val res = titleFilterHandOpt(books,
 % Does not work well
 \chapter{Automatic optimization with SQuOpt}
 
+\label{ch:aosd13-solution}
 \label{sec:solution}
 The goal of {\LoS} is to let programmers write queries modularly and at a high level of abstraction and deal with optimization by a dedicated domain-specific optimizer. In our concrete example,
 programmers should be able to write queries similar to the one in Fig.~\ref{fig:query}, but get the efficiency of the one in Fig.~\ref{fig:titleFilterho2}.
@@ -365,6 +367,7 @@ of the indexes is modularized in the optimizer.
 %\pg{Exemplify join optimization? Better just cite~\citep{Willis06JQL} about it; they don't report great results IIRC, unlike their next version,~\citep{Willis08}.}
 
 \chapter{Implementing SQuOpt}
+\label{ch:aosd13-implementation}
 \label{sec:implementation}
 
 After describing how to use {\LoS}, we explain how \LoS{} represents queries internally and optimizes them.
@@ -600,6 +603,7 @@ instance by writing \code{idxByPublisher(book)} where \code{book: Book}, will
 make \texttt{scalac} emit a static type error.
 
 \chapter{A deep EDSL for collection queries}
+\label{ch:aosd13-caseStudy}
 \label{sec:caseStudy}
 In this chapter we discuss collections as a \emph{critical} case
 study~\citep{flyvbjerg06five} for deep DSL embedding.
@@ -609,6 +613,7 @@ As discussed in the previous chapter, to support optimizations we require a deep
 \input{aosd13/pepm13/caseStudyGoals}
 
 \section{Implementation: Expressing the interface in Scala}
+\label{ch:aosd13-intfScala}
 \label{sec:intfScala}
 \input{aosd13/pepm13/caseStudyImpl}
 
@@ -616,11 +621,13 @@ As discussed in the previous chapter, to support optimizations we require a deep
 
 
 \chapter{Discussion}
+\label{ch:aosd13-discussion}
 \label{sec:discussion}
 \input{aosd13/pepm13/caseStudyDiscussion}
 \pg{TODO: mention discussion with Jacques Carette. Maybe mention that in the technical report only?}
 
 \chapter{Related work}
+\label{ch:aosd13-relwork}
 \label{sec:relwork}
 This chapter builds on prior work on language-integrated queries, query optimization, techniques for DSL embedding, and other works on code querying.
 
@@ -786,6 +793,7 @@ Since these are special-purpose query languages that are not embedded into a hos
 
 
 \chapter{Conclusions}
+\label{ch:aosd13-concl}
 
 We have illustrated the tradeoff between performance and modularity for queries on in-memory collections. We have shown that it is possible to design a deep embedding of a version of the collections API which reifies queries and can optimize them at runtime.
 Writing queries using this framework is, except minor syntactic details, the same as writing queries using the collection library, hence the adoption barrier to using our optimizer is low. 
