@@ -1,49 +1,64 @@
 \begin{otherlanguage}{ngerman}
 \chapter{Zusammenfassung}
 
-In moderne Programmiersprachen, Abfragen auf Speicher-basierte Kollektion sind oft
-teurer als erforderlich.
-Datenbankenabfragen können einfach optimiert werden, aber Kollectionabfragen
-können oft schwer, in Datenbankenabfragen umgesetzt werden, denn moderne
-Programmiersprachen sind expressiver als Datenbanken, weil sie beide
-verschachtelte Daten und Erste-Klasse-Funktionen unterstützen.
+In modernen, universellen Programmiersprachen sind Abfragen auf
+Speicher-basierten Kollektionen oft rechenintensiver als erforderlich. Während
+Datenbankenabfragen vergleichsweise einfach optimiert werden können, fällt dies bei
+Speicher-basierten Kollektionen oft schwer, denn universelle
+Programmiersprachen sind in aller Regel ausdrucksstärker als
+Datenbanken. Insbesondere unterstützen diese Sprachen meistens
+verschachtelte, rekursive Datentypen und Funktionen höherer Ordnung.
 
-Kollektionabfragen können per Hand optimiert und inkrementalisieren werden,
-aber das verringert Modularität, und ist oft zu fehleranfällig um
-ausführbar zu sein oder um Instandhaltung von entstandene Programm zu ermöglichen.
-In dieser Doktorarbeit optimieren und inkrementalisieren wir
-Kollektionabfragen um Programmierer von solchen Last zu befreien.
-Erzeugte Programme werden in derselbe Kernsprache ausgedruckt, damit sie weiter
-standardmäßig optimiert werden können.
+Kollektionsabfragen können per Hand optimiert und inkrementalisiert
+werden, jedoch verringert dies häufig die Modularität und ist oft zu
+fehleranfällig, um realisierbar zu sein oder um Instandhaltung von
+entstandene Programm zu gewährleisten.
+Die vorliegende Doktorarbeit demonstriert, wie Abfragen auf Kollektionen
+systematisch und automatisch optimiert und inkrementalisiert werden
+können, um Programmierer von dieser Last zu befreien.
+%
+Die so erzeugten Programme werden in derselben Kernsprache ausgedrückt,
+um weitere Standardoptimierungen zu ermöglichen.
 
-Um Optimierung von Kollektionabfragen zu ermöglichen, die im Programme
-vorkommen, entwickeln wir eine gestaged Variante der Scala-Kollektion-API, die
-Abfragen als Abstrakten Syntaxbäume konkretisiert. Auf diese Schnittstelle
-anpassen wir domänenspezifische Optimierungen vom Programmiersprachen und
-Datenbanken; unter anderem umschreiben wir Abfragen um
-von Programmierer ausgewählte Indexe zu benutzen. Dank Indexen können wir zeigen
-bedeutend Beschleunigung in unserer experimentelle Auswertung, mit einem
-Durchschnitt von 12x und einem Maximum von 12800x.
+Kapitel X entwickelt eine Variante der Scala API für
+Kollektionen, die \emph{Staging} verwendet um Abfragen als abstrakte
+Syntaxbäume zu \emph{reifizieren}.
+Auf Basis dieser Schnittstelle werden anschließend domänenspezifische
+Optimierungen von Programmiersprachen und Datenbanken angewandt; unter
+anderem werden Abfragen umgeschrieben, um vom Programmierer ausgewählte
+Indizes zu benutzen. Dank dieser Indizes kann eine erhebliche
+Beschleunigung der Ausführungsgeschwindigkeit gezeigt werden; eine
+experimentelle Auswertung zeigt hierbei Beschleunigungen von
+durchschnittlich 12x bis zu einem Maximum von 12800x.
 
-Um Programme mit Funktionen von höhere Ordnung durch Programmtransformation zu
-inkrementalisieren, erweitern wir \emph{Finite-Differenzen-Methode}
-\citep{Paige82FDC,Blakeley:1986:EUM,Gupta99MMV} und entwickeln wir den ersten
+Um Programme mit Funktionen höherer Ordnung durch
+Programmtransformation zu inkrementalisieren, wird in Kapitel Y eine
+Erweiterung der \emph{Finite-Differenzen-Methode} vorgestellt
+\citep{Paige82FDC,Blakeley:1986:EUM,Gupta99MMV} und ein erster
 Ansatz zur Inkrementalisierung durch Programmtransformation für Programme mit
-Funktionen höherer Ordnung. Eingangsprogramme werden zu \emph{Ableitungen}
-transformiert, d.h. Programme die \emph{Eingangsdifferenzen} in
+Funktionen höherer Ordnung entwickelt.
+%
+% "Eingangsprogramme": Orig. "base program"
+%
+Dabei werden Programme zu \emph{Ableitungen}
+transformiert, d.h. zu Programmen die \emph{Eingangsdifferenzen} in
 \emph{Ausgangdifferenzen} umwandeln.
-Wir beweisen dass unserer Ansatz zur Inkrementalisierung korrekt ist für
-einfach-getypt und ungetypt λ-Kalkül, und besprechen Erweiterungen zu System~F.
+Weiterhin werden in Kapitel Z die Korrektheit des
+Inkrementalisierungsansatzes für einfach-getypten und ungetypten
+λ-Kalkül bewiesen und Erweiterungen zu System~F besprochen.
 
-Ableitungen müssen oft Ergebnisse von Eingangsprogramme wiederverwenden. Um
-solche Wiederverwendung zu ermöglichen, wir erweitern Arbeit von \citet{Liu95}
-zu Programme mit Funktionen höherer Ordnung. Wir entwickeln eine
-Programmtransformation von solche Programme in \emph{Cache-Transfer-Stil}.
+Ableitungen müssen oft Ergebnisse der ursprünglichen Programme wiederverwenden. Um
+eine solche Wiederverwendung zu ermöglichen, erweitern die Kapitel A-B die
+Arbeit von \citet{Liu95} zu Programmen mit Funktionen höherer Ordnung und
+entwickeln eine Programmtransformation solcher Programme im \emph{Cache-Transfer-Stil}.
 
-Für effiziente Inkrementalisierung muss man passende Grundroutinen auswählen und
-manuell inkrementalisieren. Wir inkrementalisieren ein bedeutend Auswahl von
-Grundroutinen für Kollektionen; dann durchführen wir Fallstudien, die starke
-Beschleunigung in Laufzeit und asymptotische Komplexität zeigen.
+Für eine effiziente Inkrementalisierung ist es weiterhin notwendig, passende
+Grundoperationen auszuwählen und manuell zu inkrementalisieren. Diese
+Arbeit deckt einen Großteil der wichtigsten Grundoperationen auf
+Kollektionen ab. Die Durchführung von Fallstudien zeigt deutliche
+Laufzeitverbesserungen sowohl in Praxis als auch in der asymptotischen
+Komplexität.
+
 \end{otherlanguage}
 
 % Local Variables:
