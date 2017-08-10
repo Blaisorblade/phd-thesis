@@ -20,7 +20,7 @@ können, um Programmierer von dieser Last zu befreien.
 Die so erzeugten Programme werden in derselben Kernsprache ausgedrückt,
 um weitere Standardoptimierungen zu ermöglichen.
 
-Kapitel X entwickelt eine Variante der Scala API für
+Teil~\ref{part:ch-aosd13} entwickelt eine Variante der Scala API für
 Kollektionen, die \emph{Staging} verwendet um Abfragen als abstrakte
 Syntaxbäume zu \emph{reifizieren}.
 Auf Basis dieser Schnittstelle werden anschließend domänenspezifische
@@ -32,7 +32,7 @@ experimentelle Auswertung zeigt hierbei Beschleunigungen von
 durchschnittlich 12x bis zu einem Maximum von 12800x.
 
 Um Programme mit Funktionen höherer Ordnung durch
-Programmtransformation zu inkrementalisieren, wird in Kapitel Y eine
+Programmtransformation zu inkrementalisieren, wird in Teil~\ref{part:incr} eine
 Erweiterung der \emph{Finite-Differenzen-Methode} vorgestellt
 \citep{Paige82FDC,Blakeley:1986:EUM,Gupta99MMV} und ein erster
 Ansatz zur Inkrementalisierung durch Programmtransformation für Programme mit
@@ -43,12 +43,12 @@ Funktionen höherer Ordnung entwickelt.
 Dabei werden Programme zu \emph{Ableitungen}
 transformiert, d.h. zu Programmen die \emph{Eingangsdifferenzen} in
 \emph{Ausgangdifferenzen} umwandeln.
-Weiterhin werden in Kapitel Z die Korrektheit des
+Weiterhin werden in den Kapiteln~\ref{ch:derive-formally}--\ref{ch:change-theory} die Korrektheit des
 Inkrementalisierungsansatzes für einfach-getypten und ungetypten
 λ-Kalkül bewiesen und Erweiterungen zu System~F besprochen.
 
 Ableitungen müssen oft Ergebnisse der ursprünglichen Programme wiederverwenden. Um
-eine solche Wiederverwendung zu ermöglichen, erweitern die Kapitel A-B die
+eine solche Wiederverwendung zu ermöglichen, erweitert Kapitel~\ref{ch:cts} die
 Arbeit von \citet{Liu95} zu Programmen mit Funktionen höherer Ordnung und
 entwickeln eine Programmtransformation solcher Programme im \emph{Cache-Transfer-Stil}.
 
