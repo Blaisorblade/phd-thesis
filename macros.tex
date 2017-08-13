@@ -1,20 +1,18 @@
 % Emacs, this is -*- latex -*-!
-\usepackage[scaled=0.88]{beramono} % http://wbillingsley.blogspot.de/2008/06/latex-monospace-bold-computer-modern.html
-\usepackage{array}
-\usepackage{booktabs}
-\usepackage{mathpartir}
 
-\usepackage[amsmath,thmmarks,amsthm]{ntheorem}
-\usepackage{thmtools}
-\usepackage{thm-restate}
-%
-% Allow to hyphenate URLs on hyphens.
-\PassOptionsToPackage{hyphens}{url}
-% Load hyperref as last package
-% (http://www.tex.ac.uk/cgi-bin/texfaq2html?label=hyperdupdest), except for
-% bookmark (which would otherwise load hyperref with other options).
-\usepackage[unicode=true,breaklinks=true,backref=page]{hyperref}
-\usepackage{bookmark}
+\newtoggle{todos}
+% Show empty space at page ends, to ease squeezing space.
+% Should remove before submission.
+%\raggedbottom
+
+% For submission. These settings shouldn't be altered.
+\togglefalse{todos}
+% \toggletrue{todos}
+\allowdisplaybreaks[1]
+% For development, feel free to tune if needed.
+% Allow reasonable looks without huge cost, during development.
+%   \allowdisplaybreaks[1]
+%   %\sloppy
 
 %\hypersetup{pdfborder={0 0 0}}
 %\hypersetup{bookmarksopenlevel=2}
@@ -77,8 +75,8 @@
 
 % Allow using λ in section headers and having it show in PDF bookmarks.
 % http://tex.stackexchange.com/a/142906/1340
-% Part 1:
-\usepackage[verbose]{newunicodechar}
+% Part 1 in packages.tex:
+%\usepackage[verbose]{newunicodechar}
 % Part 2 in thesis.
 % \newunicodechar{⊕}{\texorpdfstring{\ensuremath{\oplus}}{⊕}}
 % \newunicodechar{Δ}{\texorpdfstring{\ensuremath{\Delta}}{Δ}}
