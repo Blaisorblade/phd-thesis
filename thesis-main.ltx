@@ -1,4 +1,20 @@
 % The more static part of the thesis preamble
+
+\RequirePackage{fix-cm}
+\RequirePackage[T1]{fontenc}
+% Ways to unbreak fonts, from https://tex.stackexchange.com/q/227063/1340.
+\RequirePackage{lmodern}
+% I just noticed the problem in the titlepage, so for now I just fix it there.
+% Also headings for \part, \chapter etc. are affected, but they don't look so
+% wrong so ignoring for now.
+% https://tex.stackexchange.com/a/386933/1340
+
+% Replace missing Latin Modern bold small capitals with Computer Modern bold
+% small capitals.
+\rmfamily
+\DeclareFontShape{T1}{lmr}{b}{sc}{<->ssub*cmr/bx/sc}{}
+\DeclareFontShape{T1}{lmr}{bx}{sc}{<->ssub*cmr/bx/sc}{}
+
 \documentclass[a4paper]{book}
 
 \title{Optimizing and Incrementalizing Higher-order Collection Queries by AST Transformation}
