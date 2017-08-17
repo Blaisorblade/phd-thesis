@@ -1,13 +1,16 @@
+{
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\large
+\sffamily
+% https://tex.stackexchange.com/a/241121/1340
+\linespread{1.5}
+\selectfont
 \begin{titlepage}
 % Declarations, in scope until \end{titlepage}.
 \makeatletter % for \@title and \@author
-\setlength{\parskip}{0pt}
 \centering
-\large
 %
-% https://tex.stackexchange.com/a/241121/1340
-\linespread{1.5}
-\sffamily
 % Huge titles are broken by cm-super. Using lmodern fixes it.
 \selectfont
 
@@ -42,6 +45,9 @@ T\"ubingen\\
 \end{titlepage}
 \clearpage
 % TODO: insert here page 2 with the needed thesis boilerplate.
+%
+} % End of group with special font declarations.
+%
 \cleardoublepage
 {%
 \begin{flushright}
