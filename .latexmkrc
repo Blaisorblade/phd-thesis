@@ -18,7 +18,7 @@ $recorder = 1;
 # Declare that pdflatex also reads .fmt files.
 add_input_ext('pdflatex','fmt');
 # fmt files are built from ltx files by calling the compilepreamble function defined below.
-add_cus_dep('ltx', 'fmt', 1, 'compilepreamble');
+add_cus_dep('ltx', 'fmt', 0, 'compilepreamble');
 sub compilepreamble {
     print "Preamble compiling for '$_[0]'...\n";
     my $fls_file = "$_[0].fls";
