@@ -1,8 +1,21 @@
 % The more static part of the thesis preamble
 \documentclass[a4paper]{book}
+
+\title{Optimizing and Incrementalizing Higher-order Collection Queries by AST Transformation}
+\author{Paolo G. Giarrusso}
+
 \bibliographystyle{plainnat}
 
 \input{packages}
+\makeatletter
+\hypersetup{
+  pdftitle={\@title},
+  pdfauthor={\@author},
+  pdfproducer={\@author},
+  %pdfsubject={},
+  %pdfkeywords={optimization, incremental computation, lambda calculus, collection queries}
+}
+\makeatother
 \input{macros}
 
 \input{aosd13/customMacros}
@@ -33,9 +46,6 @@
 \makeatother
 
 \input{pldi14/agda}
-
-\title{Optimizing and Incrementalizing Higher-order Collection Queries by AST Transformation}
-\author{Paolo G. Giarrusso}
 
 \newtoggle{full}
 \togglefalse{full}
