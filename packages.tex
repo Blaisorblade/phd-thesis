@@ -87,6 +87,17 @@
 % (http://www.tex.ac.uk/cgi-bin/texfaq2html?label=hyperdupdest), except for
 % bookmark (which would otherwise load hyperref with other options).
 \usepackage[unicode=true,breaklinks=true,backref=page]{hyperref}
+
+\hypersetup{
+  bookmarksopen=true,
+  bookmarksopenlevel=2,
+  bookmarksnumbered=true,
+  pdfstartview=FitH,
+  pdfpagelayout=TwoPageLeft,
+  pdfpagemode=UseOutlines, % default
+  % pdfpagemode=None,
+  linktoc=all,
+}
 \usepackage{bookmark}
 
 % Allow using λ in section headers and having it show in PDF bookmarks.
