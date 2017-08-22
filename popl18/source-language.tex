@@ -13,12 +13,12 @@ Our syntax for base terms~$\sterm$ represents $\lambda$-lifted
 programs in A'-normal form (\cref{sec:motivating-example}).
 We write $\many\tx$ for a sequence of variables of some unspecified length
 $\tx_1, \tx_2, \ldots, \tx_m$.
-A term can be either a bound variable~$\tx$, or a {\bf let}
-binding of $\ty$ in subterm~$\sterm$ to either a new
+A term can be either a bound variable~$\tx$, or a {\bf let}-binding
+of~$\ty$ in subterm~$\sterm$ to either a new
 tuple~$\stuple{\many\tx}$ ($\slet{\ty = \stuple{\many\tx}}\sterm$), or
 the result of calling function~$\tf$ on argument~$\tx$
-($\slet{\ty = \sapp{\tf}{\tx}}{\sterm}$).  Both~$\tf$ and~$\tx$ are
-variables to be looked up in the environment.  Terms cannot contain
+($\slet{\ty = \sapp{\tf}{\tx}}{\sterm}$). Both~$\tf$ and~$\tx$ are
+variables to be looked up in the environment. Terms cannot contain
 $\lambda$-abstractions as they have been $\lambda$-lifted to top-level
 definitions, which we encode as closures in the initial environments.
 %
