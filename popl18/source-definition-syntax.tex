@@ -1,6 +1,6 @@
 \begin{figure}[htb]
   \footnotesize
-%\begin{multicols}{2}
+  \iftoggle{poplForThesis}{}{\multicolsep = 0pt \begin{multicols}{2}}
   \[
     \begin{array}{rclr}
     \multicolumn{4}{r}{\syntaxclass{Base terms}} \\
@@ -14,9 +14,14 @@
       \nextline
     \multicolumn{4}{r}{\syntaxclass{Change terms}} \\
     \idterm
-    & ::= 
+    & ::=
+\iftoggle{poplForThesis}{
+    & \multicolumn{2}{l}{\ilet{\ty = \iapp{\tf}{\tx}, \tdy = \idapp{\tdf}{\tx\,\tdx}}{\idterm}
+     \qquad \rem{Call}} \\
+}{
     & \ilet{\ty = \iapp{\tf}{\tx}, \tdy = \idapp{\tdf}{\tx\,\tdx}}{\idterm}
-    & \rem{Call} \\
+          & \rem{Call} \\
+}
     & \mid & \slet{\ty = \stuple{\many\tx}, \tdy = \stuple{\many\tdx}}\idterm
     & \rem{Tuple} \\
     & \mid & \tdx
@@ -32,7 +37,15 @@
     & \rem{Literal} \\
     & \mid & \sprim
     & \rem{Primitive} \\
-    \nextline
+\iftoggle{poplForThesis}{
+      \nextline
+}{
+    \end{array}
+\]
+
+\[
+    \begin{array}{rclr}
+}
     \multicolumn{4}{r}{\syntaxclass{Value environments}} \\
     \sectx
     & ::= & \sectxcons\sectx{\tx = \sclosedvalue}
@@ -55,16 +68,21 @@
     \nextline
     \multicolumn{4}{r}{\syntaxclass{Change environments}} \\
     \iectx
-    & ::= 
+    & ::=
+\iftoggle{poplForThesis}{
+    & \multicolumn{2}{l}{\iectxcons{\iectx}{\tx = \sclosedvalue, \tdx = \icloseddvalue}
+      \qquad \rem{Binding}} \\
+}{
     & \iectxcons{\iectx}{\tx = \sclosedvalue, \tdx = \icloseddvalue}
     & \rem{Binding} \\
+}
     & \mid & \iectxempty
     & \rem{Empty} \\
     \nextline
     n, k & \in & \mathbb{N} & \syntaxclass{Step indexes} \\
     \end{array}
   \]
-%\end{multicols}
+  \iftoggle{poplForThesis}{}{\end{multicols}}
 \caption{Source language $\source$ (syntax).}
   \label{fig:source-definition}
 \end{figure}
