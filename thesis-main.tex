@@ -3,6 +3,8 @@
 
 \input{lstsetup}
 
+\usepackage{fancyhdr-setup} % Mine
+
 % Ensure that ligatures in the output can be copy-pasted correctly.
 \pdfgentounicode=1
 % Loading this file in the format has no effect.
@@ -91,14 +93,14 @@
 
 \cleardoublepage
 % Avoid having the word "Abstract" in the header of next page.
-\pagestyle{myheadings}
+\pagestyle{plain}
 \include{Abstract}
 \include{Abstract-de}
 
-\iftoggle{tocs}{
-
 \cleardoublepage
-\pagestyle{headings}
+\pagestyle{custom}
+
+\iftoggle{tocs}{
 \tableofcontents
 \cleardoublepage
 \listoffigures
@@ -107,6 +109,7 @@
 }{}
 
 \mainmatter
+
 \include{chap-intro}
 
 % Test case for issue with →.

@@ -1,0 +1,68 @@
+
+\RequirePackage{fancyhdr}
+
+%\newcommand{\mymainchaptermark}[1]{\markboth{\MakeUppercase{\chaptername} \thechapter.\ #1}{}}
+%\newcommand{\mymainchaptermark}[1]{\markright{\MakeUppercase{\chaptername} \thechapter.\ #1}}
+\newcommand{\mymainchaptermark}[1]{\markright{\textsc{\chaptername} \thechapter.\ #1}}
+
+\pagestyle{fancy}
+
+
+% % These MUST be after fancyhdr and pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\mymainchaptermark{#1}}
+% % \renewcommand{\tocetcmark}[1]{\markboth{#1}{}}
+%\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ #1}{}}
+\renewcommand{\sectionmark}[1]{}
+\renewcommand{\tocetcmark}[1]{\markright{#1}}
+
+\setlength{\headheight}{15pt}
+%%%%%%%%%%%%%%
+\fancypagestyle{custom}{
+% % width of the line for headers and footers
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
+
+\fancyhf{}
+% TODO: replace all lhead/rhead with fancyhead[LO,RE]/fancyhead[RO,LE] respectively.
+%\fancyhead[LO,RE]{\bfseries\rightmark}
+\fancyhead[RO,LE]{\bfseries\rightmark}
+%\rhead{\bfseries\leftmark}
+\fancyfoot[C]{\thepage}
+}
+%%%%%%%%%%%%%%
+\fancypagestyle{plain}{%
+\fancyhf{}
+% %Does not work, no rightmark is given on chapter pages.
+% %\lhead{\bfseries\rightmark}
+% %\lhead{\bfseries\thechapter}
+\fancyfoot[C]{\thepage}
+% %\renewcommand{\headrulewidth}{0.5pt}
+% % The above line must not appear since there is nothing over it and too much
+% % space under it.
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.5pt}
+}
+% %%%%%%%%%%%%%%
+% \fancypagestyle{nopage}{%
+% \renewcommand{\headrulewidth}{0.5pt}
+% \renewcommand{\footrulewidth}{0.5pt}
+% \setlength \headheight{15pt}
+
+% \lhead{\bfseries\rightmark}
+% %Only difference between this and the main {fancy} style.
+% \fancyfoot[C]{}
+% }
+
+%%%%%%%%%%%%%%
+% \fancypagestyle{nopagenoupperbar}{%
+% \fancyhf{}
+% \renewcommand{\headrulewidth}{0pt}
+% \renewcommand{\footrulewidth}{0.5pt}
+% \setlength \headheight{15pt}
+
+% \lhead{\bfseries\rightmark}
+% %Only difference between this and the main {fancy} style.
+% %\fancyfoot[C]{\thepage}
+% }
+
+\pagestyle{custom}
