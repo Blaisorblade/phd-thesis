@@ -35,6 +35,7 @@
 %format alpha2
 %format alphai = alpha "_i"
 %format DtAlpha = Dt "_" alpha
+%format omega = "\omega"
 
 %format Nat = "\mathbb{N}"
 %format Int = "\mathbb{Z}"
