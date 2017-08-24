@@ -1,9 +1,7 @@
 \begin{figure}
-  %\vspace{-3em}
-  \small%
-  %\vspace{0.6em} %compensate -0.6em at the beginning.
+  \iftoggle{poplForThesis}{\small}{\vspace{-3em}\footnotesize}
   \newcommand\categorytitle[1]{\\[-0.6em]\multicolumn{3}{r}{\textit{#1}} \\[0.5em]}%
-  % \begin{multicols}{2}
+  \iftoggle{poplForThesis}{}{\begin{multicols}{2}}
     \[
     \begin{array}{rcl}
       %
@@ -64,7 +62,7 @@
             \sectxcons{\compile\iectx}{\tx = \compile\sclosedvalue, \tdx = \compile\icloseddvalue}
     \end{array}
   \]
-% \end{multicols}
+  \iftoggle{poplForThesis}{}{\end{multicols}}
 \caption{Extending CTS translation to values, change values, environments and change environments.}
 \label{fig:differentiation-and-static-caching-continued}
 \end{figure}
