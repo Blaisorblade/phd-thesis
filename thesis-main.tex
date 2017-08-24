@@ -3,6 +3,8 @@
 
 \input{lstsetup}
 
+\usepackage{fancyhdr-setup} % Mine
+
 % For some reason this breaks in the static preamble, or at the point it's defined, not sure.
 \newunicodechar{⊕}{\texorpdfstring{\ensuremath{\oplus}}{⊕}}
 \newunicodechar{Δ}{\texorpdfstring{\ensuremath{\Delta}}{Δ}}
@@ -84,14 +86,14 @@
 
 \cleardoublepage
 % Avoid having the word "Abstract" in the header of next page.
-\pagestyle{myheadings}
+\pagestyle{plain}
 \include{Abstract}
 \include{Abstract-de}
 
-\iftoggle{tocs}{
-
 \cleardoublepage
-\pagestyle{headings}
+\pagestyle{custom}
+
+\iftoggle{tocs}{
 \tableofcontents
 \cleardoublepage
 \listoffigures
@@ -100,6 +102,7 @@
 }{}
 
 \mainmatter
+
 \include{chap-intro}
 
 % Test case for issue with →.
