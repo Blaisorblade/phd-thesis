@@ -16,7 +16,7 @@
 
 \vspace*{-2cm}
 
-{\huge \bfseries
+{\linespread{1} \bfseries \Huge \selectfont
   \@title%
   \par% Must be in scope of the \huge declaration to get correct spacing.
 }
@@ -68,7 +68,9 @@ Dekan:               & Prof.\ Dr.\ Wolfgang Rosenstiel\\
 } % End of group with special font declarations.
 %
 \cleardoublepage
-{%
+{% Group with normal linespread
+\linespread{1}
+\selectfont
 \begin{flushright}
   \null\vspace{\stretch{1}}
   To the memory of my mother Rosalia (1946--2016)\\
