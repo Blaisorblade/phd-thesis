@@ -1,4 +1,5 @@
 {
+\pagestyle{empty}
 \setlength{\parskip}{0pt}
 \setlength{\parindent}{0pt}
 \large
@@ -14,14 +15,14 @@
 % Huge titles are broken by cm-super. Using lmodern fixes it.
 \selectfont
 
-\vspace*{-2cm}
+\vspace*{\stretch{-2}}
 
-{\linespread{1} \bfseries \Huge \selectfont
+{\linespread{1.3} \bfseries \Huge \selectfont
   \@title%
   \par% Must be in scope of the \huge declaration to get correct spacing.
 }
 
-\vspace{4cm}
+\vspace{\stretch{4}}
 
 {\bfseries Dissertation}\\
 der Mathematisch- und Naturwissenschaftlichen Fakult\"at\\
@@ -30,21 +31,20 @@ zur Erlangung des Grades eines\\
 Doktors der Naturwissenschaften\\
 (Dr.\ rer.\ nat.)
 
-\vspace{4 cm}
+\vspace{\stretch{4}}
 
 vorgelegt von \\
 \@author \\
 aus Catania (Italien)
 
-\vspace{2 cm}
+\vspace{\stretch{2}}
 
 T\"ubingen\\
 2017
 
-\vfill
+\vspace{\stretch{-1}}
 \end{titlepage}
 \clearpage
-\thispagestyle{empty}
 %
 \vspace*{\fill}
 
@@ -65,18 +65,19 @@ Dekan:               & Prof.\ Dr.\ Wolfgang Rosenstiel\\
 %
 \vspace{-1cm} %XXX revise when changing geometry.
 %
-} % End of group with special font declarations.
 %
 \cleardoublepage
 {% Group with normal linespread
 \linespread{1}
 \selectfont
 \begin{flushright}
-  \null\vspace{\stretch{1}}
+  \vspace*{\stretch{1}}
   To the memory of my mother Rosalia\\
   ~\\
   Alla memoria di mia madre Rosalia
 
   \vspace{\stretch{3}}
-  \null
-\end{flushright}}
+\end{flushright}
+} % End group with normal linespread
+\cleardoublepage % End pages in the empty pagestyle.
+} % End of group with special font declarations.
