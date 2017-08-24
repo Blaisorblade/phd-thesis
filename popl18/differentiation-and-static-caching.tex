@@ -1,9 +1,10 @@
 \begin{figure}
-  \small
+  \iftoggle{poplForThesis}{\small}{\footnotesize \setlength{\columnseprule}{0.4pt}}
   \newcommand\categorytitle[1]{\\[-0.2em]\multicolumn{3}{r}{\textit{#1}} \\[0.5em]}
+\begin{poplForThesis}
   \figsubcaption{Translation to Cache-Transfer Style (CTS)}
-  %\setlength{\columnseprule}{0.4pt}
-  %\begin{multicols}{2}
+\end{poplForThesis}
+  \iftoggle{poplForThesis}{}{\begin{multicols}{2}}
 %  \figsubcaption{Derivation with Static Caching}
   \[
     \begin{array}{rcl}
@@ -39,8 +40,10 @@
       \\[1em]
     \end{array}
     \]
-  %\figsubcaption{Translation to Cache-Transfer Style (CTS)}
-  \[
+\begin{poplForPopl}
+  \figsubcaption{Translation to Cache-Transfer Style (CTS)}
+\end{poplForPopl}
+    \[
     \begin{array}{rcl}
       %
       \categorytitle{CTS translation of terms $\compileterm\tcache\sterm$}
@@ -66,7 +69,7 @@
       %
     \end{array}
   \]
-%\end{multicols}
+  \iftoggle{poplForThesis}{}{\end{multicols}}
 \caption{CTS conversion from $\source$ to $\target$.}
 \label{fig:differentiation-and-static-caching}
 \end{figure}
