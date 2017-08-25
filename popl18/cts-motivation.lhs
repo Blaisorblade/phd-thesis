@@ -296,10 +296,9 @@ someCaller xs1 dxss = do
 
 More in general, we produce both an augmented base function and a derivative,
 where the augmented base function communicates with the derivative by returning
-a cache. The content of this cache are determined statically, and can be
-accessed by tuple projections without any dynamic lookups.
+a cache. The contents of this cache are determined statically, and can be
+accessed by tuple projections without dynamic lookups.
 % mention initial runs and incremental updates.
-
 In the rest of the paper, we use the above idea to develop a correct
 transformation that allows incrementalizing programs using cache-transfer style.
 
