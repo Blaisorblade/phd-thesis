@@ -103,9 +103,11 @@ In sum, we present the following contributions:
   (\cref{sec:transformation});
 \item we show that programs and derivatives in cache-transfer style
   \emph{simulate} correctly their non-CTS variants (\cref{sec:transformation-soundness});
-\item we mechanize in Coq most of our proofs, save for a few straightforward lemmas%
+\item we mechanize in Coq most of our proofs%
 \begin{poplForPopl}
-(see supplementary material)%
+% PG: I'm commenting this out, assuming that we fix this soon
+%, save for a few straightforward lemmas
+ (see supplementary material)%
 \end{poplForPopl}
 ;
 \item we perform performance case studies (in \cref{sec:case-studies}) applying
@@ -117,7 +119,12 @@ In sum, we present the following contributions:
 The rest of the paper is organized as follows. \Cref{sec:cts-motivation} summarizes
 ILC and motivates the extension to cache-transfer style.
 \Cref{sec:formalization} presents our formalization and proofs.
+\iftoggle{poplForThesis}{
 \Cref{sec:case-studies} presents our case studies and benchmarks.
 \Cref{sec:cts-limitations} discusses limitations and future work.
+}{
+\Cref{sec:case-studies} discusses our case studies, benchmarks,
+limitations and future work.
+}
 \Cref{sec:cts-rw}
 discusses related work and \cref{sec:conclusions} concludes.
