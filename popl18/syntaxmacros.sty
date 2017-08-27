@@ -150,11 +150,12 @@
 % Transformation
 %%%%%%%%%%%%%%%%
 
+\newcommand\subscript@kern{\mkern1mu}
 \newcommand\readback[1]{\mathcal{R}\tquote{#1}}
-\newcommand\compile[1]{\mathcal{C}\tquote{#1}}
+\newcommand\compile[1]{\mathcal{C} \subscript@kern \tquote{#1}}
 \newcommand\icompile[1]{\imark{\mathcal{C}}\tquote{#1}}
-\newcommand\compileterm[2]{\mathcal{C}_{#1}\tquote{#2}}
-\newcommand\derive[2]{\mathcal{D}_{#1}\tquote{#2}}
+\newcommand\compileterm[2]{\mathcal{C}_{\subscript@kern #1}\tquote{#2}}
+\newcommand\derive[2]{\mathcal{D}_{\subscript@kern #1}\tquote{#2}}
 \newcommand\iderive[1]{\imark{\mathcal{D}}\tquote{#1}}
 \newcommand\oderive[1]{\mathrm{Derive}(#1)}
 
