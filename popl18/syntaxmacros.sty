@@ -7,7 +7,7 @@
 \newcommand\figsubtitle[2]{
   \vspace{-0.9em}
   \begin{minipage}{\textwidth}
-    \hfill\textrm{\bf #1} \; \fbox{#2}
+    \hfill\textbf{#1} \; \fbox{#2}
   \end{minipage}
 }
 \newcommand\figsubcaption[1]{
@@ -68,9 +68,11 @@
 % Constructions
 \newcommand\appsym{{\scriptstyle @}}
 \newcommand\dappsym{{\scriptstyle @}}
+\newcommand\lett{\mathbf{let}}
+\newcommand\let@in{\mathbf{in}}
 \newcommand\slam[2]{\lambda #1\mathpunct{.} #2}
 \newcommand\sapp[2]{#1\, #2}
-\newcommand\slet[2]{\textbf{let}\,#1\,\textbf{in}\,#2}
+\newcommand\slet[2]{\lett\,#1\,\let@in\,#2}
 \newcommand\stuple[1]{(#1)}
 \newcommand\sectxhole{[]}
 \newcommand\sectxapp[2]{#1[#2]}
@@ -122,7 +124,7 @@
 \newcommand\tlam[2]{\lambda #1\mathpunct{.} #2}
 \newcommand\tapp[2]{#1\,#2}
 \newcommand\tdapp[3]{#1\, #2\, #3}
-\newcommand\tlet[2]{\textbf{let}\,#1\;\textbf{in}\,#2}
+\newcommand\tlet[2]{\lett\,#1\;\let@in\,#2}
 \newcommand\tectxhole{[]}
 \newcommand\tectxapp[2]{#1[#2]}
 \newcommand\tectxcons[2]{#1; #2}
@@ -186,7 +188,7 @@
 \newcommand\ilam[2]{\lambda #1\mathpunct{.} #2}
 \newcommand\iapp[2]{#1\, #2}
 \newcommand\idapp[2]{#1\, #2}
-\newcommand\ilet[2]{\textbf{let}\,#1\,\textbf{in}\,#2}
+\newcommand\ilet[2]{\lett\,#1\,\let@in\,#2}
 \newcommand\iectxhole{[]}
 \newcommand\iectxapp[2]{#1[#2]}
 \newcommand\replace[1]{!#1}
