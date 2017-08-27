@@ -23,8 +23,7 @@
 
 \iftoggle{poplForThesis}{
   % My thesis uses more space.
-  % Braces to avoid misunderstanding surrounding [].
-  \newcommand\tquote[1]{{\mean{#1}}}
+  \newcommand\tquote[1]{\llbracket\, #1\, \rrbracket}
 }{
   \newcommand\tquote[1]{\llbracket #1 \rrbracket}
 }
