@@ -27,14 +27,8 @@
     \multicolumn{4}{r}{\syntaxclass{Change terms}} \\
     \tdterm
     & ::= &
-    \iftoggle{poplForThesis}{\multicolumn{2}{l}}{}
-    {
     \tlet{\tdy, \tcacheid{\ty}{\tf}{\tx} = \tdapp{\tdf}{\tdx}{\tcacheid{\ty}{\tf}{\tx}}}{\tdterm}
-    \iftoggle{poplForThesis}{\qquad \rem{Call}}{}
-    }
-\begin{poplForPopl}
     & \rem{Call}
-\end{poplForPopl}
     \\
     & \mid &
     \tlet{\tdy = \stuple{\many\tdx}}{\tdterm}
