@@ -15,13 +15,8 @@
     \multicolumn{4}{r}{\syntaxclass{Change terms}} \\
     \idterm
     & ::=
-\iftoggle{poplForThesis}{
-    & \multicolumn{2}{l}{\ilet{\ty = \iapp{\tf}{\tx}, \tdy = \idapp{\tdf}{\tx\,\tdx}}{\idterm}
-     \qquad \rem{Call}} \\
-}{
     & \ilet{\ty = \iapp{\tf}{\tx}, \tdy = \idapp{\tdf}{\tx\,\tdx}}{\idterm}
           & \rem{Call} \\
-}
     & \mid & \slet{\ty = \stuple{\many\tx}, \tdy = \stuple{\many\tdx}}\idterm
     & \rem{Tuple} \\
     & \mid & \tdx
@@ -69,13 +64,8 @@
     \multicolumn{4}{r}{\syntaxclass{Change environments}} \\
     \iectx
     & ::=
-\iftoggle{poplForThesis}{
-    & \multicolumn{2}{l}{\iectxcons{\iectx}{\tx = \sclosedvalue, \tdx = \icloseddvalue}
-      \qquad \rem{Binding}} \\
-}{
     & \iectxcons{\iectx}{\tx = \sclosedvalue, \tdx = \icloseddvalue}
     & \rem{Binding} \\
-}
     & \mid & \iectxempty
     & \rem{Empty} \\
     \nextline
