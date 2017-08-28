@@ -47,6 +47,11 @@ baseProcessor = pdflatex
 # Name of TeX base format. Often coincides with baseProcessor.
 baseFormat = $(baseProcessor)
 
+TeXOpts := -synctex=1 -file-line-error -recorder
+TeXOpts += -interaction=nonstopmode -halt-on-error
+TeXOpts += -shell-escape
+#TeXOpts += -interaction=errorstopmode
+
 .PHONY: FORCE
 %.tex: %.lhs $(lhsFormat)
 	lhs2TeX -P .: -o $*.tex $*.lhs
@@ -54,12 +59,14 @@ baseFormat = $(baseProcessor)
 # all other dependencies thanks to code in .latexmkrc.
 # This line is hence only for the first build. Keep it in sync with .latexmkrc!
 %.fmt: %.ltx
-	$(baseProcessor) -ini -jobname="$*" "&${baseFormat} $*.ltx \dump"
+	$(baseProcessor) -ini -recorder -jobname="$*" "&${baseFormat} $*.ltx \dump"
+# Save log file.
+	mv $*.log $*-fmt.log
 %.pdf: %.tex %.fmt $(INTERM_PRODUCTS) $(sources) FORCE
-	latexmk -pdf $* $(REDIR)
+	latexmk $* $(REDIR)
 # Pass pdflatex the same options as latexmk would.
 quick: $(PAPER_NAME).tex $(PAPER_NAME).fmt $(INTERM_PRODUCTS) $(sources)
-	$(baseProcessor) -shell-escape -synctex=1 -file-line-error -recorder $(PAPER_NAME)
+	$(baseProcessor) $(TeXOpts) $(PAPER_NAME)
 	$(OPEN) $(PDF_NAME)
 
 .PRECIOUS: %.tex
@@ -68,7 +75,9 @@ quick: $(PAPER_NAME).tex $(PAPER_NAME).fmt $(INTERM_PRODUCTS) $(sources)
 clean:
 	rm -f \
 	$(PAPER_NAME).aux $(PAPER_NAME).bbl $(PAPER_NAME).blg $(PAPER_NAME).log \
-	$(PAPER_NAME).pdf $(PAPER_NAME).ptb $(PAPER_NAME).toc $(INTERM_PRODUCTS)
+	$(PAPER_NAME).pdf $(PAPER_NAME).ptb $(PAPER_NAME).toc \
+	$(PAPER_NAME).fmt \
+	$(INTERM_PRODUCTS)
 
 fresh:
 	make clean
