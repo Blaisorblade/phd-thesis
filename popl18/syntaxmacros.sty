@@ -62,7 +62,7 @@
 \newcommand\sectxcons[2]{#1; #2}
 \newcommand\sdectx{dE}
 \newcommand\sconst{\ell}
-\newcommand\sprim{\textbf{p}}
+\newcommand\sprim{\mathbf{p}}
 \newcommand\scall[2]{@(#1, #2)}
 
 % Constructions
@@ -72,7 +72,7 @@
 \newcommand\let@in{\mathbf{in}}
 \newcommand\slam[2]{\lambda #1\mathpunct{.} #2}
 \newcommand\sapp[2]{#1\, #2}
-\newcommand\slet[2]{\lett\,#1\,\let@in\,#2}
+\newcommand\slet[2]{\lett\;#1\;\let@in\;#2}
 \newcommand\stuple[1]{(#1)}
 \newcommand\sectxhole{[]}
 \newcommand\sectxapp[2]{#1[#2]}
@@ -115,16 +115,17 @@
 \newcommand\newtcachedclosedvalues{V_{c2}}
 \newcommand\tconst{\ell}
 \newcommand\tdconst{d\ell}
-\newcommand\tdnil{\textbf{nil}}
-\newcommand\tprim{\textbf{p}}
-\newcommand\tdprim{d\textbf{p}}
+\newcommand\tdnil{\mathbf{nil}}
+\newcommand\tprim{\mathbf{p}}
+\newcommand\tdprim{d\mathbf{p}}
 \newcommand\tclosure[2]{#1[#2]}
 
 % Constructions
 \newcommand\tlam[2]{\lambda #1\mathpunct{.} #2}
 \newcommand\tapp[2]{#1\,#2}
 \newcommand\tdapp[3]{#1\, #2\, #3}
-\newcommand\tlet[2]{\lett\,#1\;\let@in\,#2}
+\let \tlet=\slet
+%\newcommand\tlet[2]{\lett\,#1\;\let@in\,#2}
 \newcommand\tectxhole{[]}
 \newcommand\tectxapp[2]{#1[#2]}
 \newcommand\tectxcons[2]{#1; #2}
@@ -179,16 +180,18 @@
 \newcommand\iectx{dE}
 \newcommand\iectxcons[2]{#1; #2}
 \newcommand\iectxempty{\bullet}
-\newcommand\iconst{\imark{\textbf{c}}}
+\newcommand\iconst{\imark{\mathbf{c}}}
 \newcommand\idconst{d\ell}
-\newcommand\inil{\textbf{nil}}
+\newcommand\inil{\mathbf{nil}}
 % Constructions
 \newcommand\iclosure[2]{#1[#2]}
 \newcommand\ichange[2]{#1 \oplus #2}
 \newcommand\ilam[2]{\lambda #1\mathpunct{.} #2}
 \newcommand\iapp[2]{#1\, #2}
 \newcommand\idapp[2]{#1\, #2}
-\newcommand\ilet[2]{\lett\,#1\,\let@in\,#2}
+
+\let \ilet=\slet
+%\newcommand\ilet[2]{\lett\,#1\,\let@in\,#2}
 \newcommand\iectxhole{[]}
 \newcommand\iectxapp[2]{#1[#2]}
 \newcommand\replace[1]{!#1}
