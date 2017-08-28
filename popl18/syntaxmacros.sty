@@ -1,3 +1,14 @@
+%%% Math Bold setup %%%
+%
+% The setup done by newtxmath is equivalent to:
+%\DeclareMathAlphabet{\mathbf}{\tx@enc}{\rmdefaultB}{sb}{n}
+% where `sb` is calculated through some conditionals.
+%
+% However, that's too hard to distinguish from Roman for my goals (and in my
+% font sizes).
+% So redefine \mathbf to be Bold instead of SemiBold.
+\DeclareMathAlphabet{\mathbf}{\tx@enc}{\rmdefaultB}{b}{n}
+
 % General macros
 \newcommand\proofcase[1]{\medskip\noindent$\bullet$\; Case ``#1''. \\[0.3em]\locallabelreset}
 \newcommand\proofsubcase[1]{\medskip\noindent$\triangleright$\; Subcase ``#1''. \\[0.3em]}
