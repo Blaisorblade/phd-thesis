@@ -75,7 +75,7 @@ mylhs2tex.sty: mylhs2tex.lhs
 	latexmk $* $(REDIR)
 # Pass pdflatex the same options as latexmk would.
 quick: $(PAPER_NAME).tex $(PAPER_NAME).fmt $(INTERM_PRODUCTS) FORCE
-	$(baseProcessor) $(TeXOpts)  $(PAPER_NAME)
+	$(baseProcessor) $(TeXOpts) $(PAPER_NAME)
 	$(OPEN) $(PDF_NAME)
 
 .PRECIOUS: %.tex
