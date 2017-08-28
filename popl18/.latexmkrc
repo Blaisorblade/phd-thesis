@@ -12,9 +12,9 @@
 # occurrences of pdflatex below (especially the second) with your TeX
 # processor (etex, latex, lualatex, etc.)
 
-# Add -shell-escape to my defaults.
-$pdflatex="pdflatex -synctex=1 -file-line-error -shell-escape %O %S";
 # Enable correct dependency tracking.
+# Add -shell-escape to my defaults.
+$pdflatex="pdflatex -synctex=1 -file-line-error -shell-escape -interaction=nonstopmode -halt-on-error %O %S";
 $recorder = 1;
 # Declare that pdflatex also reads .fmt files.
 add_input_ext('pdflatex','fmt');
@@ -26,7 +26,7 @@ sub compilepreamble {
     my $source = "$_[0].ltx";
     my $fmt_file = "$_[0].fmt";
     # Precompile format file.
-    my $return = system( "pdflatex", "-interaction=batchmode",
+    my $return = system( "pdflatex",
                          "-ini", "-recorder", "-jobname=$_[0]",
                          "&pdflatex $source \\dump" );
     if ($return) {
