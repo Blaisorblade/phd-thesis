@@ -877,7 +877,7 @@ well-founded recursion on step-indexes.
                     ^&^ (exists Gamma1 Gamma Gamma2 . ^^ Gamma1 /- t1 : tau `wand` ^^ Gamma /-- dt : tau `wand` Gamma2 /- t2 : tau) ^^^
                     ^&^ `wandnosp` ^^^
                     ^&^ forall j v1 v2 . ^^^
-                    ^&^ qua ((j < k `wand` bseval t1 rho1 v1 `wand` bseval t2 rho2 v2)) => ^^^
+                    ^&^ qua ((j < k `wand` ibseval t1 rho1 j v1 `wand` bseval t2 rho2 v2)) => ^^^
                     ^&^ qua (exists dv . ^^ dbseval dt rho drho dv `wand` (k - j, v1, dv, v2) `elem` valset tau) | \, \}\\
                   \\
   |envset emptyCtx| ={} & \{ \, |(k, emptyRho, emptyRho, emptyRho)| \, \} \\
@@ -1216,7 +1216,7 @@ details~\citep{Ahmed2006stepindexed}.
   |compsetunt| ={}&
                   \{ \, |(k, envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `such` ^^^
                     ^&^ forall j v1 v2 . ^^^
-                    ^&^ qua ((j < k `wand` bseval t1 rho1 v1 `wand` bseval t2 rho2 v2)) => ^^^
+                    ^&^ qua ((j < k `wand` ibseval t1 rho1 j v1 `wand` bseval t2 rho2 v2)) => ^^^
                     ^&^ qua (exists dv . dbseval dt rho drho dv `wand` (k - j, v1, dv, v2) `elem` valsetunt) | \, \}\\
   \\
   |envset emptyCtx| ={} & \{ \, |(k, emptyRho, emptyRho, emptyRho)| \, \} \\
