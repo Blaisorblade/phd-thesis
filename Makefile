@@ -33,7 +33,7 @@ lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 # because they're included elsewhere.
 sourcesIncluded=$(shell find . -name '*.tex' -o -name '*.sty') $(wildcard Bibs/*.bib) $(lhsFmt)
 # Sources that will be watched for changes.
-sources=$(lhsSources) $(sourcesIncluded)
+sources=$(lhsSources) $(sourcesIncluded) $(PAPER_NAME).ltx
 
 INTERM_PRODUCTS=mylhs2tex.sty $(lhsCompiled)
 
