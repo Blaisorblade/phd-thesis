@@ -20,14 +20,15 @@
 \fancypagestyle{custom}{
 % % width of the line for headers and footers
 \renewcommand{\headrulewidth}{0.5pt}
-\renewcommand{\footrulewidth}{0.5pt}
+%\renewcommand{\footrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0pt}
 
 \fancyhf{}
 % TODO: replace all lhead/rhead with fancyhead[LO,RE]/fancyhead[RO,LE] respectively.
-%\fancyhead[LO,RE]{\bfseries\rightmark}
-\fancyhead[RO,LE]{\bfseries\rightmark}
+\fancyhead[LO,RE]{\bfseries\rightmark}
+\fancyhead[RO,LE]{\thepage}
 %\rhead{\bfseries\leftmark}
-\fancyfoot[C]{\thepage}
+%\fancyfoot[C]{\thepage}
 }
 %%%%%%%%%%%%%%
 \fancypagestyle{plain}{%
@@ -40,7 +41,7 @@
 % % The above line must not appear since there is nothing over it and too much
 % % space under it.
 \renewcommand{\headrulewidth}{0pt}
-\renewcommand{\footrulewidth}{0.5pt}
+%\renewcommand{\footrulewidth}{0.5pt}
 }
 % %%%%%%%%%%%%%%
 % \fancypagestyle{nopage}{%
