@@ -1,0 +1,39 @@
+% Provide environment alignmath to produce math-mode material that is left- or right-aligned.
+% This material constitutes a complete group and paragraph.
+% To resemble \[... \], prepends \abovedisplayskip by default (unless used with
+% a star). However, it does not append \belowdisplayskip.
+% Mandatory argument must be l (for left-alignment), r (for right-alignment) or c (for center-alignment, I expect this is redundant.)
+
+% Self-developed, reusable version of the idea in this answer:
+% https://tex.stackexchange.com/a/183047/1340
+
+% Right-aligned
+% \begin{alignmath}{r}
+%   1+1
+% \end{alignmath}
+%
+% Left-aligned, without extra space thanks to star.
+%
+% \begin{alignmath}*{l}
+%   1+1
+% \end{alignmath}
+\RequirePackage{xparse}
+\NewDocumentEnvironment{alignmath}{sm}{%
+  \noindent\begingroup
+  \def\totest{#2}%
+  \if r\totest
+    \raggedleft
+  \else
+    \if l\totest
+      \raggedright
+    \else
+      \if c\totest
+        \centering
+      \else
+      \PackageError{alignmath}{Incorrect alignment argument to `alignmath' environment, must be one of l, c, r}
+      \fi
+    \fi
+  \fi%
+  \IfBooleanTF #1{}{\vspace*{\abovedisplayskip}}%
+  $\displaystyle}{$\par \endgroup \ignorespacesafterend}
+%\newenvironment{alignmath}
