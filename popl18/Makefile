@@ -26,7 +26,7 @@ lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 # because they're included elsewhere.
 sourcesIncluded=$(wildcard *.tex) $(wildcard ../Bibs/*.bib) syntaxmacros.sty $(lhsFormat)
 # Sources that will be watched for changes.
-sources=$(lhsSources) $(sourcesIncluded)
+sources=$(lhsSources) $(sourcesIncluded) *.ltx
 
 INTERM_PRODUCTS=$(lhsCompiled)
 
