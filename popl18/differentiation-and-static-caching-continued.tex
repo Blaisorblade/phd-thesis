@@ -1,11 +1,11 @@
 \begin{figure}
   \iftoggle{poplForThesis}{\small}{\vspace{-3em}\footnotesize}
-  \newcommand\categorytitle[1]{\\[-0.6em]\multicolumn{3}{r}{\textit{#1}} \\[0.5em]}%
   \iftoggle{poplForThesis}{}{\begin{multicols}{2}}
     \[
     \begin{array}{rcl}
+  \newcommand\vskipBeforeCatTitle{\\[-0.6em]}%
       %
-      \categorytitle{CTS translation of values $\compile\sclosedvalue$}
+      \categorytitle{CTS translation of values}{$\compile\sclosedvalue$}
       %
     \compile{\sclosure\sectx{\slam{\tx}{\sterm}}}
       & = &
@@ -17,7 +17,8 @@
             \sconst \\
       \nextline
       %
-      \categorytitle{CTS translation of change values $\compile\icloseddvalue$}
+      \vskipBeforeCatTitle
+      \categorytitle{CTS translation of change values}{$\compile\icloseddvalue$}
       %
       \compile{\sclosure\sdectx{\slam{\tx\,\tdx}{\iderive\sterm}}}
       & = &
@@ -38,7 +39,7 @@
   \[
     \begin{array}{rcl}
       \nextline
-      \categorytitle{CTS translation of value environments $\compile\sectx$}
+      \categorytitle{CTS translation of value environments}{$\compile\sectx$}
       %
       \compile{\sectxempty}
       & = &
@@ -50,7 +51,8 @@
             \sectxcons{\compile\sectx}{\tx = \compile\sclosedvalue}
       \\
       \nextline
-      \categorytitle{CTS translation of change environments $\compile\iectx$}
+      \vskipBeforeCatTitle
+      \categorytitle{CTS translation of change environments}{$\compile\iectx$}
       %
       \compile{\sectxempty}
       & = &

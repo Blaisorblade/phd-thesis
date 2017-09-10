@@ -21,11 +21,15 @@
     \hfill\textbf{#1} \; \fbox{#2}
   \end{minipage}
 }
+
+\newcommand\categorytitle[2]{\multicolumn{3}{r}{\textbf{#1}\;\fbox{#2}}\\[0.5em]}
+
 \newcommand\figsubcaption[1]{
   \begin{minipage}{\textwidth}
     \hfill\fbox{#1}
   \end{minipage}
 }
+
 \newcommand\rulename[1]{\textsc{\small\textcolor{gray}{[#1]}}}
 \newcommand\ruletitle[1]{\multicolumn{3}{l}{\rulename{#1}}\vspace{0.1cm}}
 \newcommand\side[1]{\\[-0.9em]&\multicolumn{2}{l}{#1}}
