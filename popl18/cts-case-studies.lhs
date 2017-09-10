@@ -380,8 +380,8 @@ for example that we can efficiently incrementalize programs on maps from keys
 to bags of elements. We implemented efficient caching and incremental primitives
 for maps and verified their correctness with QuickCheck.
 
-To build the indexes we use a |groupBy| function that we built from primitive
-functions |foldMapGroup| on bags and primitive |singleton| functions for bags
+To build the indexes, we use a |groupBy| function built from primitive
+functions |foldMapGroup| on bags and |singleton| for bags
 and maps respectively. While computing the indexes with |groupBy| is
 self-maintainable, merging them is not. We need to cache and incrementally
 update the intermediately created indexes to avoid recomputing them.
