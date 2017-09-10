@@ -35,7 +35,7 @@ sourcesIncluded=$(shell find . -name '*.tex' -o -name '*.sty') $(wildcard Bibs/*
 # Sources that will be watched for changes.
 sources=$(lhsSources) $(sourcesIncluded)
 
-INTERM_PRODUCTS=mylhs2tex.sty $(lhsCompiled)
+INTERM_PRODUCTS=mylhs2tex.sty $(lhsCompiled) *.ltx
 
 
 all: check open
