@@ -1,6 +1,5 @@
 \begin{figure}
   \iftoggle{poplForThesis}{\small}{\footnotesize \setlength{\columnseprule}{0.4pt}}
-  \newcommand\categorytitle[1]{\\[-0.2em]\multicolumn{3}{r}{\textit{#1}} \\[0.5em]}
 \begin{poplForThesis}
   \figsubcaption{Translation to Cache-Transfer Style (CTS)}
 \end{poplForThesis}
@@ -9,8 +8,9 @@
   \[
     \begin{array}{rcl}
       %
-      \categorytitle{CTS translation of toplevel definitions $\compile{\tf = \slam{\tx}{\sterm}}$}
       %
+  \newcommand\vskipBeforeCatTitle{\\[-0.2em]}
+      \categorytitle{CTS translation of toplevel definitions}{$\compile{\tf = \slam{\tx}{\sterm}}$}
       \compile{\tf = \slam{\tx}{\sterm}}
       & = &
             \tf = \slam{\tx}{\tterm}, \\
@@ -18,7 +18,8 @@
       \side{\textrm{where } (\tcache, \tterm) = \compileterm{\tcachecons\temptycache\tx}\sterm}\\
       \nextline
       %
-      \categorytitle{CTS differentiation of terms $\derive{\tupdcache}{\sterm}$}
+      \vskipBeforeCatTitle
+      \categorytitle{CTS differentiation of terms}{$\derive{\tupdcache}{\sterm}$}
       %
       \derive{\tupdcache}{\slet{\ty = \sapp{\tf}{\tx}}{\sterm}}
       & = &
@@ -46,7 +47,7 @@
     \[
     \begin{array}{rcl}
       %
-      \categorytitle{CTS translation of terms $\compileterm\tcache\sterm$}
+      \categorytitle{CTS translation of terms}{$\compileterm\tcache\sterm$}
       %
       \compileterm{\tcache}{\slet{\ty = \tapp{\tf}{\tx}}{\sterm}}
       & = &
