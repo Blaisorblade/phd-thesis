@@ -1,9 +1,14 @@
+% This layout is similar to the one in differentiation-and-static-caching.tex
 \begin{figure}
-  \iftoggle{poplForThesis}{\small}{\vspace{-3em}\footnotesize}
-  \iftoggle{poplForThesis}{}{\begin{multicols}{2}}
-    \[
-    \begin{array}{rcl}
+  \iftoggle{poplForThesis}{\small}{\footnotesize}%
   \newcommand\vskipBeforeCatTitle{\\[-0.6em]}%
+  \setlength{\arraycolsep}{0.3em}%
+  \begin{minipage}[t]{\linewidth}%
+    \iftoggle{poplForThesis}{}{%
+      \begin{minipage}[t]{.50\linewidth}%
+      }%
+      \begin{alignmath}*{\mathAlignFirst}
+        \begin{array}[t]{rcl}
       %
       \categorytitle{CTS translation of values}{$\compile\sclosedvalue$}
       %
@@ -33,12 +38,17 @@
       \compile{\tdconst}
       & = &
           \tdconst
-    \end{array}
-  \]
-
-  \[
-    \begin{array}{rcl}
-      \nextline
+            \iftoggle{poplForThesis}{
+            \\ \nextline \vskipBeforeCatTitle
+            }{}
+        \end{array}
+      \end{alignmath}
+      \iftoggle{poplForThesis}{}{%
+      \end{minipage}%
+      \begin{minipage}[t]{.50\linewidth}%
+      }%
+      \begin{alignmath}*{\mathAlignSecond}
+        \begin{array}[t]{rcl}
       \categorytitle{CTS translation of value environments}{$\compile\sectx$}
       %
       \compile{\sectxempty}
@@ -62,9 +72,12 @@
       \compile{\sectxcons{\iectx}{\tx = \sclosedvalue, \tdx = \icloseddvalue}}
       & = &
             \sectxcons{\compile\iectx}{\tx = \compile\sclosedvalue, \tdx = \compile\icloseddvalue}
-    \end{array}
-  \]
-  \iftoggle{poplForThesis}{}{\end{multicols}}
+        \end{array}
+      \end{alignmath}%
+    \iftoggle{poplForThesis}{}{%
+    \end{minipage}%
+  }
+\end{minipage}
 \caption{Extending CTS translation to values, change values, environments and change environments.}
 \label{fig:differentiation-and-static-caching-continued}
 \end{figure}

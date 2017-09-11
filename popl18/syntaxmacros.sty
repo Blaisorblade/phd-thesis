@@ -16,7 +16,6 @@
 \newcommand\rem[1]{\textit{#1}}
 \newcommand\syntaxclass[1]{\textbf{\textit{#1}}}
 \newcommand\figsubtitle[2]{
-  \vspace{-0.9em}
   \begin{minipage}{\textwidth}
     \hfill\textbf{#1} \; \fbox{#2}
   \end{minipage}
@@ -29,6 +28,15 @@
     \hfill\fbox{#1}
   \end{minipage}
 }
+
+% Arguments for mathalign for figures that are two-columns only for the paper.
+\iftoggle{poplForThesis}{
+  \newcommand\mathAlignFirst{c}
+  \newcommand\mathAlignSecond{c}
+}{%
+  \newcommand\mathAlignFirst{l}
+  \newcommand\mathAlignSecond{r}
+}%
 
 \newcommand\rulename[1]{\textsc{\small\textcolor{gray}{[#1]}}}
 \newcommand\ruletitle[1]{\multicolumn{3}{l}{\rulename{#1}}\vspace{0.1cm}}

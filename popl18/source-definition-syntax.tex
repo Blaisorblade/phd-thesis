@@ -1,8 +1,8 @@
 \begin{figure}[htb]
   \footnotesize
-  \iftoggle{poplForThesis}{}{\multicolsep = 0pt \begin{multicols}{2}}
-  \[
-    \begin{array}{rclr}
+  \begin{minipage}[t]{.50\linewidth}
+    \begin{alignmath}*{l}
+    \begin{array}[t]{rclr}
     \multicolumn{4}{r}{\syntaxclass{Base terms}} \\
     \sterm
     & ::= & \slet{\ty = \sapp{\tf}{\tx}}{\sterm}
@@ -32,15 +32,12 @@
     & \rem{Literal} \\
     & \mid & \sprim
     & \rem{Primitive} \\
-\iftoggle{poplForThesis}{
-      \nextline
-}{
     \end{array}
-\]
-
-\[
-    \begin{array}{rclr}
-}
+  \end{alignmath}
+\end{minipage}%
+\begin{minipage}[t]{.50\linewidth}
+    \begin{alignmath}*{r}
+    \begin{array}[t]{rclr}
     \multicolumn{4}{r}{\syntaxclass{Value environments}} \\
     \sectx
     & ::= & \sectxcons\sectx{\tx = \sclosedvalue}
@@ -71,8 +68,8 @@
     \nextline
     n, k & \in & \mathbb{N} & \syntaxclass{Step indexes} \\
     \end{array}
-  \]
-  \iftoggle{poplForThesis}{}{\end{multicols}}
+  \end{alignmath}
+  \end{minipage}
 \caption{Source language $\source$ (syntax).}
-  \label{fig:source-definition}
+\label{fig:source-definition}
 \end{figure}

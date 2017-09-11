@@ -1,9 +1,9 @@
 \begin{figure}[!tb]
-  \iftoggle{poplForThesis}{}{\multicolsep = 0pt \begin{multicols}{2}}
   \footnotesize
-%  \figsubtitle{Syntax}
-  \[
-  \begin{array}{rclr}
+  \begin{minipage}[t]{\linewidth}
+    \begin{minipage}[t]{.52\linewidth}
+  \begin{alignmath}*{l}
+  \begin{array}[t]{rclr}
     \multicolumn{4}{r}{\syntaxclass{Base terms}} \\
     \tterm
     & ::= &
@@ -55,15 +55,12 @@
     & \rem{Literal} \\
     & \mid & \tprim
     & \rem{Primitive} \\
-\iftoggle{poplForThesis}{
-      \nextline
-}{
     \end{array}
-\]
-
-\[
-    \begin{array}{rclr}
-}
+  \end{alignmath}
+\end{minipage}%
+\begin{minipage}[t]{.48\linewidth}
+  \begin{alignmath}*{r}
+    \begin{array}[t]{rclr}
 \multicolumn{4}{r}{\syntaxclass{Cache values}} \\
     \tcachedclosedvalues
     & ::= & \temptycache
@@ -113,9 +110,10 @@
     & \rem{Binding} \\
     & \mid & \tectxempty
     & \rem{Empty} \\
-  \end{array}
-  \]
-  \iftoggle{poplForThesis}{}{\end{multicols}}
+    \end{array}
+  \end{alignmath}
+\end{minipage}
+\end{minipage}
 \caption{Target language $\target$ (syntax).}
   \label{fig:target-definition-syntax}
 \end{figure}
@@ -123,9 +121,8 @@
 \begin{figure}[htb]
   \iftoggle{poplForThesis}{\small}{\footnotesize}
   \begin{mathpar}
-    \figsubtitle{Evaluation of base terms}{
-      $\sneval{\tectx}{\tterm}{(\tclosedvalue, \tcachedclosedvalues)}$
-    }
+    \figsubtitle{Evaluation of base terms}
+    {$\sneval{\tectx}{\tterm}{(\tclosedvalue, \tcachedclosedvalues)}$}
     \\
 
     \infer[\rulename{TResult}]{
@@ -178,9 +175,8 @@
     }
 
     \\
-    \figsubtitle{Evaluation of caches}{
-      $\sneval{\tectx}{\tcache}{\tcachedclosedvalues}$
-    }
+    \figsubtitle{Evaluation of caches}
+    {$\sneval{\tectx}{\tcache}{\tcachedclosedvalues}$}
     \\
 
     \infer[\rulename{TEmptyCache}]{
@@ -213,9 +209,8 @@
   \iftoggle{poplForThesis}{\small}{\footnotesize}
   \begin{mathpar}
     \\
-    \figsubtitle{Evaluation of change terms}{
-      $\sneval{\tdectx}{\tdterm}{(\tcloseddvalue, \tcachedclosedvalues)}$
-    }
+    \figsubtitle{Evaluation of change terms}
+    {$\sneval{\tdectx}{\tdterm}{(\tcloseddvalue, \tcachedclosedvalues)}$}
     \\
 
     \infer[\rulename{TDResult}]{
@@ -349,9 +344,8 @@
     % }
 
     \\
-    \figsubtitle{Binding of caches}{
-      $\matchcache\tcachedclosedvalues\tcache\tdectx$
-    }
+    \figsubtitle{Binding of caches}
+    {$\matchcache\tcachedclosedvalues\tcache\tdectx$}
     \\
 
     \infer[\rulename{TMatchEmptyCache}]{
