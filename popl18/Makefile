@@ -55,10 +55,12 @@ TeXOpts += -shell-escape
 .PHONY: FORCE
 %.tex: %.lhs $(lhsFormat)
 	lhs2TeX -P .: -o $*.tex $*.lhs
+mylhs2tex.sty: mylhs2tex.lhs
+	lhs2TeX -o $@ $<
 # After the first build, this file will be recompiled by latexmk accounting for
 # all other dependencies thanks to code in .latexmkrc.
 # This line is hence only for the first build. Keep it in sync with .latexmkrc!
-%.fmt: %.ltx
+%.fmt: %.ltx mylhs2tex.sty
 	$(baseProcessor) -ini -recorder -jobname="$*" "&${baseFormat} $*.ltx \dump"
 # Save log file.
 	mv $*.log $*-fmt.log
