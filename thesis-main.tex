@@ -3,6 +3,11 @@
 
 \input{lstsetup}
 
+% Ensure that ligatures in the output can be copy-pasted correctly.
+\pdfgentounicode=1
+% Loading this file in the format has no effect.
+\input{glyphtounicode}
+
 % For some reason this breaks in the static preamble, or at the point it's defined, not sure.
 \newunicodechar{⊕}{\texorpdfstring{\ensuremath{\oplus}}{⊕}}
 \newunicodechar{Δ}{\texorpdfstring{\ensuremath{\Delta}}{Δ}}
