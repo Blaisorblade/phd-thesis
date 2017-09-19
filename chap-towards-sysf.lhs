@@ -696,8 +696,8 @@ By adding a few additional rules, we can extend differentiation to System F (the
 PTS |sysf|). We choose to present the additional rules using System F syntax
 rather than PTS syntax.
 \begin{code}
-  elemDt2 (forall alpha . T) f1 f2 =
-    PPi ((alpha1 : *)) (alpha2 : *) (DtAlpha : alpha1 -> alpha2 -> star). elemDt2 T (f1 [alpha1]) (f2 [alpha2])
+  elemDt2 (forall alpha . tau) f1 f2 =
+    PPi ((alpha1 : *)) (alpha2 : *) (DtAlpha : alpha1 -> alpha2 -> star). elemDt2 tau (f1 [alpha1]) (f2 [alpha2])
   derive(PLambda alpha . t) =
     \(alpha1 alpha2: star) (DtAlpha : alpha1 -> alpha2 -> star) -> derive(t)
   derive(t [tau]) = derive t (idx1 tau) (idx2 tau) (elemDt2 tau)
