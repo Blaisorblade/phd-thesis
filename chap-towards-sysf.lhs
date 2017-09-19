@@ -697,7 +697,7 @@ PTS |sysf|). We choose to present the additional rules using System F syntax
 rather than PTS syntax.
 \begin{code}
   elemDt2 (forall alpha . tau) f1 f2 =
-    PPi ((alpha1 : *)) (alpha2 : *) (DtAlpha : alpha1 -> alpha2 -> star). elemDt2 tau (f1 [alpha1]) (f2 [alpha2])
+    PPi ((alpha1 : star)) (alpha2 : star) (DtAlpha : alpha1 -> alpha2 -> star). elemDt2 tau (f1 [alpha1]) (f2 [alpha2])
   derive(PLambda alpha . t) =
     \(alpha1 alpha2: star) (DtAlpha : alpha1 -> alpha2 -> star) -> derive(t)
   derive(t [tau]) = derive t (idx1 tau) (idx2 tau) (elemDt2 tau)
@@ -721,7 +721,7 @@ correct for System F\@@.
     rAlpha : PPi ((x1 : alpha1)) (x2 : alpha2) (dx : elemDt2 alpha x1 x2) -> cstar
 
   pElemDt2 (forall alpha. T) f1 f2 df =
-    PPi ((alpha1 : *)) (alpha2 : *) (DtAlpha : alpha1 -> alpha2 -> star)
+    PPi ((alpha1 : star)) (alpha2 : star) (DtAlpha : alpha1 -> alpha2 -> star)
     (rAlpha : PPi ((x1 : alpha1)) (x2 : alpha2) (dx : elemDt2 alpha x1 x2) -> cstar).
       pElemDt2 T (f1 [alpha1]) (f2 [alpha2]) (df [alpha1] [alpha2] [DtAlpha])
   pElemDt2 (sigma -> tau) f1 f2 df =
