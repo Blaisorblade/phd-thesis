@@ -691,6 +691,8 @@ differentiation for |stlc| so that it allows for the now generalized changes:
   derive(emptyCtx) = emptyCtx
   derive(Gamma, x : tau) = derive(Gamma), x1 : idx1(tau), x2 : idx2(tau), dx : elemDt2 tau x1 x2
   derive(Gamma, alpha : star) = derive(Gamma), alpha1 : star, alpha2 : star, DtAlpha : alpha1 -> alpha2 -> star
+
+  idxi(alpha) = alphai
 \end{code}
 By adding a few additional rules, we can extend differentiation to System F (the
 PTS |sysf|). We choose to present the additional rules using System F syntax
@@ -701,6 +703,9 @@ rather than PTS syntax.
   derive(PLambda alpha . t) =
     \(alpha1 alpha2: star) (DtAlpha : alpha1 -> alpha2 -> star) -> derive(t)
   derive(t [tau]) = derive t (idx1 tau) (idx2 tau) (elemDt2 tau)
+
+  idxi(forall alpha . tau) = forall alphai . idxi tau
+  idxi(PLambda alpha . t) = PLambda alphai . idxi t
 \end{code}
 Produced terms use a combination of System F and dependent types, which is known
 as |lap2|~\citep{Barendregt1992lambda} and is strongly normalizing. This PTS
