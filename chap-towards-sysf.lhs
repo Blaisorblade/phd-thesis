@@ -756,6 +756,37 @@ non-dependently-typed differentiation (as suggested earlier) would produce
 proofs in |sysf2|, the logic produced by extending |sysf| following
 \citeauthor{Bernardy2011realizability}.
 
+\section{Proofs}
+
+Our proofs are similar to \citet{Bernardy2011realizability}.
+TODO: add a judgement to say $\Delta \vdash \tau \text{ type}$.
+\begin{conjecture}
+If $\Delta \vdash \tau \text{ type}$ and |Gamma /- t : tau|, then
+$\Derive\Delta |, derive Gamma /- elemDt2 tau (idx1 t) (idx2 t) : star|$.
+%   If $\Delta \vdash \tau \text{ type}$
+% |idx1 Gamma /- t1 : tau1| and |idx2 Gamma /- t2 : tau2|
+% then $\Derive\Delta |, derive Gamma /- elemDt2 tau t1 t2 : star|$.
+\end{conjecture}
+\begin{conjecture}[Substitution]
+  %|idxi(t[x := s]) = (idxi t)[xi := idxi s]|
+  |derive(t[x := s]) = (derive t)[x1 := idx1 s][x2 := idx2 s][dx := derive s]|.
+\end{conjecture}
+\begin{conjecture}[Fundamental property]
+  If |Gamma /- t : tau| then
+  |idxi Gamma /- idxi t : idxi tau| (for |i = 1, 2|) and
+  \[|derive Gamma /- derive t : elemDt2 tau (idx1 t) (idx2 t)|.\]%
+  % |idx1 Gamma, idx2 Gamma, derive Gamma /- derive t :
+  % elemDt2 tau (idx1 t) (idx2 t)|.
+\end{conjecture}
+\begin{proof}
+  By mutual induction on typing derivations. We also need lemmas showing that
+  our transformations commute with substitution in suitable ways.
+
+  For the function application case, we need to show that |elemDt2 tau t1 t2| is
+  closed under $\eta$-reduction.
+\end{proof}
+
+
 %endif
 
 \section{Related work}
