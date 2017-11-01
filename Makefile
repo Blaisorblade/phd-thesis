@@ -72,7 +72,7 @@ mylhs2tex.sty: mylhs2tex.lhs
 # Save log file.
 	mv $*.log $*-fmt.log
 %.pdf: %.tex %.fmt $(INTERM_PRODUCTS) FORCE
-	latexmk $* $(REDIR)
+	latexmk -pdf $* $(REDIR)
 # Pass pdflatex the same options as latexmk would.
 quick: $(PAPER_NAME).tex $(PAPER_NAME).fmt $(INTERM_PRODUCTS) FORCE
 	$(baseProcessor) $(TeXOpts) $(PAPER_NAME)
