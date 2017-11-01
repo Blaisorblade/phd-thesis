@@ -3,8 +3,6 @@
 *.pptx
 *.docx
 *.txt
-*.csv
-*.r
 *.ps
 *.bat
 
