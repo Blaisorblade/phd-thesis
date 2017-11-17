@@ -1117,10 +1117,13 @@ prove that |`oplus`| agrees with validity.
 \end{theorem}
 \begin{theorem}[|`oplus`| agrees with step-indexed intensional validity]
   \label{thm:oplus-validity-intensional}
-If |(k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
+If |forall k. (k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
 \end{theorem}
 \begin{proof}
-  By induction on types. For type |Nat|, validity coincides with the
+  In this system the thesis holds, in fact, even if we only assume |(k, v1, dv,
+  v2) `elem` valset tau|. So we pick an arbitrary |k|.
+
+  The proof then proceeds by induction on types. For type |Nat|, validity coincides with the
   thesis. For type |pair taua taub|, we must apply the
   induction hypothesis on both pair components.
 
@@ -1138,8 +1141,18 @@ If |(k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
     |(rho1 `oplus` drho)[\x -> t] = rho2[\x -> t] = v2|
   \end{multline*}
 \end{proof}
+\begin{remark}
+  As mentioned, \cref{thm:oplus-validity-intensional} would hold even if it only
+  required validity |(k, v1, dv, v2)| to hold at a particular step-index. But we
+  still state a weaker version requiring validity at all step indexes; we
+  conjecture that for other systems we consider in this chapter, requiring
+  validity at all step-indexes is necessary. For instance, step-indexed
+  extensional validity for function types at index $0$ is vacuously true and so
+  can't agree with |`oplus`|, because it is only defined in terms of validity at
+  step-indexes smaller than 0 (which do not exist).
+\end{remark}
 
-We can also define |nilc| intensionally,as a metafunction on values and
+We can also define |nilc| intensionally, as a metafunction on values and
 environments, and prove it correct.
 For closures, we differentiate the body and recurse on the environment. The
 definition extends from values to environments variable-wise, so we omit the
