@@ -16,6 +16,7 @@
 PAPER_NAME = static-caching
 PDF_NAME=$(PAPER_NAME).pdf
 
+# Sources that will be watched for changes.
 lhsFormat = changes.fmt
 
 lhsSources = \
@@ -24,9 +25,9 @@ lhsSources = \
 lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 # Sources to watch for changes but that don't need to be compiled on their own,
 # because they're included elsewhere.
-sourcesIncluded=$(wildcard *.tex) $(wildcard ../Bibs/*.bib) syntaxmacros.sty $(lhsFormat)
+sourcesIncluded=$(wildcard *.tex) $(wildcard ../Bibs/*.bib) $(wildcard *.sty) $(lhsFormat)
 # Sources that will be watched for changes.
-sources=$(lhsSources) $(sourcesIncluded) *.ltx
+sources=$(lhsSources) $(sourcesIncluded) $(wildcard *.ltx)
 
 INTERM_PRODUCTS=$(lhsCompiled)
 
@@ -63,7 +64,7 @@ TeXOpts += -shell-escape
 # Save log file.
 	mv $*.log $*-fmt.log
 %.pdf: %.tex %.fmt $(INTERM_PRODUCTS) $(sources) FORCE
-	latexmk $* $(REDIR)
+	latexmk -pdf $* $(REDIR)
 # Pass pdflatex the same options as latexmk would.
 quick: $(PAPER_NAME).tex $(PAPER_NAME).fmt $(INTERM_PRODUCTS) $(sources)
 	$(baseProcessor) $(TeXOpts) $(PAPER_NAME)
@@ -75,9 +76,10 @@ quick: $(PAPER_NAME).tex $(PAPER_NAME).fmt $(INTERM_PRODUCTS) $(sources)
 clean:
 	rm -f \
 	$(PAPER_NAME).aux $(PAPER_NAME).bbl $(PAPER_NAME).blg $(PAPER_NAME).log \
-	$(PAPER_NAME).pdf $(PAPER_NAME).ptb $(PAPER_NAME).toc \
+	$(PAPER_NAME).pdf $(PAPER_NAME).ptb $(PAPER_NAME).toc $(PAPER_NAME).thm \
 	$(PAPER_NAME).fmt \
-	$(INTERM_PRODUCTS)
+	$(INTERM_PRODUCTS) \
+	$(find . -name '*.aux')
 
 fresh:
 	make clean
@@ -91,10 +93,10 @@ xargs = xargs -0 -n 1 -I '{}' -t
 
 demon:
 	-make
-	$(fswatch) $(sources) Makefile | $(xargs) make & \
+	$(fswatch) $(sources) Makefile | $(xargs) time make & \
 	wait
 
 quickdemon:
 	-make quick
-	$(fswatch) $(sources) Makefile | $(xargs) make quick & \
+	$(fswatch) $(sources) Makefile | $(xargs) time make quick & \
 	wait
