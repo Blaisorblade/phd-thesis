@@ -1141,16 +1141,15 @@ If |forall k. (k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
     |(rho1 `oplus` drho)[\x -> t] = rho2[\x -> t] = v2|
   \end{multline*}
 \end{proof}
-\begin{remark}
-  As mentioned, \cref{thm:oplus-validity-intensional} would hold even if it only
-  required validity |(k, v1, dv, v2)| to hold at a particular step-index. But we
-  still state a weaker version requiring validity at all step indexes; we
-  conjecture that for other systems we consider in this chapter, requiring
-  validity at all step-indexes is necessary. For instance, step-indexed
-  extensional validity for function types at index $0$ is vacuously true and so
-  can't agree with |`oplus`|, because it is only defined in terms of validity at
-  step-indexes smaller than 0 (which do not exist).
-\end{remark}
+
+As mentioned, \cref{thm:oplus-validity-intensional} would hold even if it only
+required validity |(k, v1, dv, v2)| to hold at a particular step-index. But we
+still state a weaker version requiring validity at all step indexes; we
+conjecture that for other systems we consider in this chapter, requiring
+validity at all step-indexes is necessary. For instance, step-indexed
+extensional validity for function types at index $0$ is vacuously true and so
+can't agree with |`oplus`|, because it is only defined in terms of validity at
+step-indexes smaller than 0 (which do not exist).
 
 We can also define |nilc| intensionally, as a metafunction on values and
 environments, and prove it correct.
