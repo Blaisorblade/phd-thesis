@@ -1151,7 +1151,7 @@ extensional validity for function types at index $0$ is vacuously true and so
 can't agree with |`oplus`|, because it is only defined in terms of validity at
 step-indexes smaller than 0 (which do not exist).
 
-We can also define |nilc| intensionally, as a metafunction on values and
+\paragraph{Nil changes} We can define |nilc| intensionally, as a metafunction on values and
 environments, and prove it correct.
 For closures, we differentiate the body and recurse on the environment. The
 definition extends from values to environments variable-wise, so we omit the
