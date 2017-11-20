@@ -35,8 +35,7 @@ sourcesIncluded=$(shell find . -name '*.tex' -o -name '*.sty') $(wildcard Bibs/*
 # Sources that will be watched for changes.
 sources=$(lhsSources) $(sourcesIncluded) $(PAPER_NAME).ltx
 
-INTERM_PRODUCTS=mylhs2tex.sty $(lhsCompiled) *.ltx
-
+INTERM_PRODUCTS=mylhs2tex.sty $(lhsCompiled)
 
 all: check open
 OPEN = ./open.sh
@@ -71,7 +70,7 @@ mylhs2tex.sty: mylhs2tex.lhs
 	$(baseProcessor) -ini -recorder -jobname="$*" "&${baseFormat} $*.ltx \dump"
 # Save log file.
 	mv $*.log $*-fmt.log
-%.pdf: %.tex %.fmt $(INTERM_PRODUCTS) FORCE
+%.pdf: %.tex %.fmt $(INTERM_PRODUCTS) $(sources) FORCE
 	latexmk -pdf $* $(REDIR)
 # Pass pdflatex the same options as latexmk would.
 quick: $(PAPER_NAME).tex $(PAPER_NAME).fmt $(INTERM_PRODUCTS) FORCE
