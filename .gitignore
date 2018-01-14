@@ -189,6 +189,7 @@ pythontex-files-*/
 *.dpth
 *.md5
 *.auxlock
+thesis-main-figure*.dep
 
 # todonotes
 *.tdo

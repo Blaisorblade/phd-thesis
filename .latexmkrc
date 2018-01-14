@@ -13,7 +13,8 @@
 # processor (etex, latex, lualatex, etc.)
 
 # Enable correct dependency tracking.
-$pdflatex="pdflatex -synctex=1 -file-line-error -interaction=nonstopmode -halt-on-error %O %S";
+# Add -shell-escape to my defaults.
+$pdflatex="pdflatex -synctex=1 -file-line-error -shell-escape -interaction=nonstopmode -halt-on-error %O %S";
 $recorder = 1;
 # Declare that pdflatex also reads .fmt files.
 add_input_ext('pdflatex','fmt');

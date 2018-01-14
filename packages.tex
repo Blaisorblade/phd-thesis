@@ -82,6 +82,10 @@
 \usepackage{xcolor}
 % Enable backward-incompatible tikz bugfixes. Here, it saves wasted space for graphs.
 \pgfplotsset{compat=1.14}
+% Build tikz pictures into separate files. Enabled by
+%\tikzexternalize in main document.
+\usetikzlibrary{external}
+\tikzset{external/system call={pdflatex -fmt=thesis-main.fmt \tikzexternalcheckshellescape -halt-on-error -interaction=batchmode -jobname "\image" "\texsource"}}
 
 % Theorem setup.
 \usepackage[amsmath,thmmarks,amsthm]{ntheorem}
