@@ -84,11 +84,13 @@ quick: $(PAPER_NAME).tex $(PAPER_NAME).fmt $(INTERM_PRODUCTS) $(sources)
 
 # Remove lhs2TeX and LaTeX build products.
 clean:
+	latexmk -C $(PAPER_NAME)
 	rm -f \
 	$(PAPER_NAME).aux $(PAPER_NAME).bbl $(PAPER_NAME).blg $(PAPER_NAME).log \
 	$(PAPER_NAME).pdf $(PAPER_NAME).ptb $(PAPER_NAME).toc $(PAPER_NAME).thm \
-	$(PAPER_NAME).fmt \
-	$(INTERM_PRODUCTS) \
+	$(PAPER_NAME).fmt $(PAPER_NAME).auxlock \
+	$(INTERM_PRODUCTS) comment.cut \
+	$(PAPER_NAME)-fmt.log $(PAPER_NAME)-figure?.* \
 	$(find . -name '*.aux')
 
 fresh:

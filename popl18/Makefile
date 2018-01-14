@@ -17,7 +17,8 @@ PAPER_NAME = static-caching
 PDF_NAME=$(PAPER_NAME).pdf
 
 # Sources that will be watched for changes.
-lhsFormat = changes.fmt
+# $(PAPER_NAME).fmt is a TeX format not a lhs2TeX format.
+lhsFormat=$(filter-out $(PAPER_NAME).fmt, $(wildcard *.fmt))
 
 lhsSources = \
 	cts-intro.lhs cts-motivation.lhs \
@@ -27,9 +28,9 @@ lhsCompiled=$(patsubst %.lhs,%.tex,$(lhsSources))
 # because they're included elsewhere.
 sourcesIncluded=$(wildcard *.tex) $(wildcard ../Bibs/*.bib) $(wildcard *.sty) $(lhsFormat)
 # Sources that will be watched for changes.
-sources=$(lhsSources) $(sourcesIncluded) $(wildcard *.ltx)
+sources=$(lhsSources) $(sourcesIncluded) $(PAPER_NAME).ltx
 
-INTERM_PRODUCTS=$(lhsCompiled)
+INTERM_PRODUCTS=mylhs2tex.sty $(lhsCompiled)
 
 all: open
 OPEN = ./open.sh
@@ -74,11 +75,13 @@ quick: $(PAPER_NAME).tex $(PAPER_NAME).fmt $(INTERM_PRODUCTS) $(sources)
 
 # Remove lhs2TeX and LaTeX build products.
 clean:
+	latexmk -C $(PAPER_NAME)
 	rm -f \
 	$(PAPER_NAME).aux $(PAPER_NAME).bbl $(PAPER_NAME).blg $(PAPER_NAME).log \
 	$(PAPER_NAME).pdf $(PAPER_NAME).ptb $(PAPER_NAME).toc $(PAPER_NAME).thm \
-	$(PAPER_NAME).fmt \
-	$(INTERM_PRODUCTS) \
+	$(PAPER_NAME).fmt $(PAPER_NAME).auxlock \
+	$(INTERM_PRODUCTS) comment.cut \
+	$(PAPER_NAME)-fmt.log $(PAPER_NAME)-figure?.* \
 	$(find . -name '*.aux')
 
 fresh:
