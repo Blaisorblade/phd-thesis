@@ -497,7 +497,7 @@ other approaches are possible and we omit details.
 We conjecture (but have not proven) this fix gives a type-preserving
 translation, but leave this question for future work.
 % indexed by a GADT representing the different
-% functions in the program (similarly to defunctionalized functions)~\citep{GiarrussoPhD2017}.
+% functions in the program (similarly to defunctionalized functions)~\citep{GiarrussoPhD2018}.
 
 % Our transformation adds the type of the cache to function types. It possibly
 % transforms functions with equal type to functions with different types. This

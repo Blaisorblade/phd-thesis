@@ -61,7 +61,7 @@ immediately the \emph{fundamental property} for the logical relation of
 validity and can be proven accordingly; we give a step-indexed variant of this
 proof in \cref{sec:sound-derive}.
 %\pg{For now, omit citations to my PhD thesis, especially to chapters.}
-%~\citep[Ch.~12]{GiarrussoPhD2017}.
+%~\citep[Ch.~12]{GiarrussoPhD2018}.
 If |t| is a function and |dE| is a nil change (that is, its source |E1| and
 destination |E2| coincide), then |derive t| produces a nil function change and
 is also a derivative according to \citet{CaiEtAl2014ILC}.
