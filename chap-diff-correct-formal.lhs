@@ -245,12 +245,13 @@ However, it follows that derivatives are nil function changes:
 \end{proof}
 
 Applying derivatives to nil changes gives again nil changes. This fact is useful
-when reasoning on derivatives. The proof is a useful exercise on using validity.
+when reasoning on derivatives. Its proof is a useful exercise on validity.
 \begin{lemma}[Derivatives preserve nil changes]
   \label{lem:derivatives-nil-changes}
   For any basic change structures |bchs(A)| and |bchs(B)|,
+  if
   function change |df : Dt^(A -> B)| is a derivative of |f : A -> B| (|fromto (A
-  -> B) f df f|) only if applying |df|
+  -> B) f df f|) then applying |df|
   to an arbitrary input nil change |fromto A a da a| gives a nil change
   %
   \[|fromto B (f a) (df a da) (f a)|.\]
@@ -272,8 +273,9 @@ arities require no new ideas.
 \begin{lemma}[Derivatives preserve nil changes on |A -> B -> C|]
   \label{lem:binary-derivatives-nil-changes}
   For any basic change structures |bchs(A)|, |bchs(B)| and |bchs(C)|,
+  if
   function change |df : Dt^(A -> B -> C)| is a derivative of |f : A -> B -> C|
-  \emph{only if}
+  then
   applying |df| to nil changes |fromto A a
   da a| and |fromto B b db b| gives a nil change
   \[|fromto C (f a b) (df a da b db) (f a b)|.\]
