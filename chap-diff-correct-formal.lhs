@@ -272,7 +272,7 @@ arities require no new ideas.
 \begin{lemma}[Derivatives preserve nil changes on |A -> B -> C|]
   \label{lem:binary-derivatives-nil-changes}
   For any basic change structures |bchs(A)|, |bchs(B)| and |bchs(C)|,
-  Change |df : Dt^(A -> B -> C)| is a derivative of |f : A -> B -> C|
+  function change |df : Dt^(A -> B -> C)| is a derivative of |f : A -> B -> C|
   \emph{only if}
   applying |df| to nil changes |fromto A a
   da a| and |fromto B b db b| gives a nil change
