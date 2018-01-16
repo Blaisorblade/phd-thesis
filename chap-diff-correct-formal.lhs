@@ -250,7 +250,7 @@ when reasoning on derivatives. The proof is a useful exercise on using validity.
   \label{lem:derivatives-nil-changes}
   For any basic change structures |bchs(A)| and |bchs(B)|,
   function change |df : Dt^(A -> B)| is a derivative of |f : A -> B| (|fromto (A
-  -> B) f df f|) if and only if applying |df|
+  -> B) f df f|) only if applying |df|
   to an arbitrary input nil change |fromto A a da a| gives a nil change
   %
   \[|fromto B (f a) (df a da) (f a)|.\]
@@ -263,7 +263,7 @@ when reasoning on derivatives. The proof is a useful exercise on using validity.
   (\cref{def:basic-change-structure-funs}), |fromto (A -> B) f1 df f2| means
   that from |fromto A a1 da a2| follows |fromto B (f1 a1) (df a1 da) (f2 a2)|.
   Just substitute |f1 = f2 = f| and |a1 = a2 = a| to get the required
-  equivalence.
+  implication.
 \end{proof}
 
 Also derivatives of curried $n$-ary functions |f| preserve nil changes. We only
@@ -273,7 +273,7 @@ arities require no new ideas.
   \label{lem:binary-derivatives-nil-changes}
   For any basic change structures |bchs(A)|, |bchs(B)| and |bchs(C)|,
   Change |df : Dt^(A -> B -> C)| is a derivative of |f : A -> B -> C|
-  \emph{if and only if}
+  \emph{only if}
   applying |df| to nil changes |fromto A a
   da a| and |fromto B b db b| gives a nil change
   \[|fromto C (f a b) (df a da b db) (f a b)|.\]
@@ -283,10 +283,10 @@ arities require no new ideas.
   the thesis follows by applying twice the fact that derivatives preserve nil
   changes (\cref{lem:derivatives-nil-changes}).
 
-  In detail, since derivatives preserve nil changes, |df| is a derivative if and
+  In detail, since derivatives preserve nil changes, |df| is a derivative
   only if for all |fromto A a da a| we have |fromto (B -> C) (f a) (df a da) (f
   a)|. But then, |df a da| is a nil change, that is a derivative, and since it
-  preserves nil changes, |df| is a derivative if and only if for all |fromto A a
+  preserves nil changes, |df| is a derivative only if for all |fromto A a
   da a| and |fromto B b db b| we have |fromto C (f a b) (df a da b db) (f a b)|.
 \end{proof}
 
