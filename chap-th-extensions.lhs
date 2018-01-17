@@ -23,7 +23,7 @@ using general recursion and what is the behavior of the resulting terms.
 %format letrec = "\mathbf{letrec}"
 %format fix = "\mathbf{fix}"
 
-Earlier we gave a rule for deriving (non-recursive) |lett|:
+Earlier we gave a rule for differentiating (non-recursive) |lett|:
 \begin{code}
 derive(lett x = t1 in t2)   =  lett  x   = t1
                                      dx  = derive(t1)
@@ -34,7 +34,7 @@ derive(lett x = t1 in t2)   =  lett  x   = t1
 %         dx = derive(t1)
 %   in    derive(t2)
 It turns out that we can use the same rule also for recursive
-|lett|-bindings, which we write here (and only here) |letrec| for distinction:
+|lett|-bindings, which we write here (and only here) |letrec| for emphasis:
 \begin{code}
 derive(letrec x = t1 in t2)   =  letrec  x   = t1
                                          dx  = derive(t1)
