@@ -544,11 +544,10 @@ For now we discuss this statement further; we defer the proof to
 \cref{sec:derive-correct-proof}.
 
 \begin{remark}[Why |evalInc| ignores |rho1|]
-You might wonder why |evalInc t = \rho1 drho -> eval(derive(t)) drho| appears to
-ignore |rho1|. But for all |fromto Gamma rho1 drho rho2|, change environment
-|drho| extends |rho1|, which hence provides no further information. We are only
-interested in applying |evalInc t| to valid environment changes |drho|, so
-|evalInc t rho1 drho| can safely ignore |rho1|.
+Incremental semantics |evalInc t = \rho1 drho -> eval(derive(t)) drho| can safely
+ignore |rho1| because |evalInc| assumes that change environment |drho| is valid
+(|fromto Gamma rho1 drho rho2|), so |drho| extends environment |rho1| and |rho1| provides
+no further information.
 \end{remark}
 \begin{remark}[Term derivatives]
   In \cref{ch:static-diff-intro}, we suggested that |derive t| only produced a
@@ -558,7 +557,7 @@ interested in applying |evalInc t| to valid environment changes |drho|, so
   \emph{value} of |derive t| is |eval(derive t) drho|, which is only a nil
   change if |drho| is a nil change as well. In particular, for closed terms
   (|Gamma = emptyCtx|), |drho| must equal the empty environment |emptyRho|,
-  hence a nil change. If |tau| is a function type, |df = eval(derive t) drho|
+  hence |drho| is a nil change. If |tau| is a function type, |df = eval(derive t) drho|
   accepts further inputs; since |df| must be a valid function change, it will
   also map them to valid outputs as required by our \cref{slogan:derive}.
   Finally, if |Gamma = emptyCtx| and |tau| is a function type, then |df = eval
