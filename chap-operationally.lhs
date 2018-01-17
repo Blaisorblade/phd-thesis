@@ -247,8 +247,8 @@ typed (|dilcTau|) variants.
 The syntax is summarized in \cref{fig:anf-lambda-calculus}, the
 type systems in \cref{fig:anf-lambda-calculus-typing}, and the
 semantics in \cref{fig:anf-lambda-calculus-semantics}. The base
-languages are mostly standard, while the change languages pick a
-few different choices.
+languages are mostly standard, while the change languages are slightly more
+unusual.
 
 \input{fig-syntactic-ilc}
 
