@@ -206,8 +206,10 @@
 \end{code}
 \caption{Base semantics.
   Judgement |envpair rho t (downto n) v| says that |envpair rho t|, a pair of
-  environment |rho| and term |t|, evaluates to value |v| in |n| steps, and
-  |vapply vf va (downto n) v| constructs the pair to evaluate via |vapply vf va|.}
+  environment |rho| and term |t|, evaluates to value |v| in |n| steps.
+  Notation |vapply vf va (downto n) v| (used in rule \textsc{E-App}) is short
+  for |vapply vf va = envpair rho t| and |envpair rho t (downto n) v|, that is,
+  says that the pair |envpair rho t| given by |vapply vf va| evaluates to |v| in |n| steps.}
 \label{sfig:anf-base-semantics}
 \end{subfigure}
 
@@ -246,8 +248,11 @@
 \end{code}
 \caption{Change semantics.
   Judgement |denvpair rho drho t ddown dv| says that |denvpair rho drho dt|, a triple of environment
-  |rho|, change environment |drho| and change term |t|, evaluates to change value |dv|, and |dvapply dvf va dva
-  ddown dv| constructs the triple to evaluate via |dvapply dvf va dva|.}
+  |rho|, change environment |drho| and change term |t|, evaluates to change value |dv|.
+  Notation |dvapply dvf va dva ddown dv| (used in rule \textsc{E-DApp}) is short
+  for |dvapply dvf va dva = denvpair rho drho dt| and
+  |denvpair rho drho t ddown dv|, that is, says that the triple |denvpair rho drho dt|
+  given by |dvapply dvf va dva| evalutes to |dv|.}
 \label{sfig:anf-change-semantics}
 \end{subfigure}
 
