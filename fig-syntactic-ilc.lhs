@@ -246,7 +246,7 @@
 \end{code}
 \caption{Change semantics.
   Judgement |denvpair rho drho t ddown dv| says that |denvpair rho drho dt|, a triple of environment
-  |rho|, change environment |drho| and change term |t|, evaluates to change value |dv|. and |dvapply dvf va dva
+  |rho|, change environment |drho| and change term |t|, evaluates to change value |dv|, and |dvapply dvf va dva
   ddown dv| constructs the triple to evaluate via |dvapply dvf va dva|.}
 \label{sfig:anf-change-semantics}
 \end{subfigure}
