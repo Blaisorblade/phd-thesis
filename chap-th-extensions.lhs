@@ -40,6 +40,8 @@ derive(letrec x = t1 in t2)   =  letrec  x   = t1
                                          dx  = derive(t1)
                                  in      derive(t2)
 \end{code}
+This rule applies also to recursive top-level definitions, since in our scenario
+they can be understood as uses of |letrec|.
 % derive(letrec x = t1 in t2) =
 %   letrec  x = t1
 %           dx = derive(t1)
@@ -77,12 +79,15 @@ derive(letrec x = t1 in t2)   =  letrec  x   = t1
 dmap f df Nil Nil = Nil
 dmap f df (Cons x xs) (Cons dx dxs) =
   Cons (df x dx) (dmap f df xs dxs)
+-- Other cases deal with invalid changes.
+dmap f df xs dxs = Nil
 \end{code}
 \end{example}
 
-However, derivative |dmap| is not asymptotically faster than |map|. Even when we
-consider less trivial change structures, derivatives of recursive functions
-produced using this rule are often not asymptotically faster.
+However, derivative |dmap| is not asymptotically faster than |map|, and this is typical:
+Derivatives of recursive functions
+produced using this rule are often not asymptotically faster,
+even when we consider less trivial change structures.
 Deriving |letrec x = t1 in t2| can still be useful if |derive t1|
 and/or |derive t2| is faster than its base term, but during our work we focus
 mostly on using structural recursion. Alternatively, in \cref{ch:diff-examples}
@@ -145,7 +150,7 @@ Indeed, this rule gives a correct derivative.
 Formalizing our reasoning using denotational semantics would presumably require
 the use of domain theory.
 Instead, we prove correct a variant of |fix| in \cref{ch:bsos}, but using
-operational semantics.
+operational semantics and step-indexed logical relations.
 
 % In particular
 % \begin{code}
