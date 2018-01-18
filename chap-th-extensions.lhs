@@ -48,8 +48,14 @@ derive(letrec x = t1 in t2)   =  letrec  x   = t1
 \pg{Far from perfect. Better reorganize. This order makes little sense.}
 \begin{example}
   In \cref{ex:syn-changes-map} we presented a derivative |dmap| for
-  |map|. By using rules for differentiating recursive functions, we obtain
-  |dmap| as presented from |map|:
+  |map|; since we wrote |dmap| by hand, we had to prove that |dmap| is a
+  derivative for |map|.
+
+  We can instead obtain |dmap| by deriving |map| with our new rule for recursive
+  functions:\footnote{The handling of invalid changes is however still ad-hoc;
+    we can use the generic support for sum types, obtain additional equations
+    for cases where the list length changes, and then remove them, with the
+    informal justification that we declared such changes illegal.}
 % \begin{code}
 % map f = fix go
 %   where
