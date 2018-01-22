@@ -262,8 +262,12 @@ the Edinburgh Logical Framework; such a PTS is known as
 |lamp|~\citep{Barendregt1992lambda}.
 
 For type variables |alpha|, we specialize the transformation further, ensuring
-that |alpha1 = alpha2 = alpha| (and adapting |idx1, idx2| accordingly to \emph{not} add
-subscripts to type variable). Without this
+that |alpha1 = alpha2 = alpha| and adapting |idx1, idx2| accordingly to \emph{not} add
+subscripts to type variable:
+\begin{code}
+  idxi(alpha) = alpha
+\end{code}
+Without this
 specialization, we get to deal with changes across different types, which we
 don't do just yet but defer to \cref{sec:param-derive-changes-across-types}.
 
