@@ -34,7 +34,7 @@ $\sclosedvalue_2$ and that $\icloseddvalue$ is a \emph{valid}
 description of the differences between~$\sclosedvalue_1$ 
 and~$\sclosedvalue_2$, with validity tested with up to~$k$~steps.
 %
-To justify this intuition of validity, we later state and prove two
+To justify this intuition of validity, we state and prove two
 lemmas: a valid change from~$\sclosedvalue_1$ to~$\sclosedvalue_2$
 goes indeed from~$\sclosedvalue_1$ to~$\sclosedvalue_2$
 (Lemma~\ref{lemma:crel-oplus}), and if a change is valid up to~$k$~steps it
@@ -42,8 +42,9 @@ is also valid up to fewer steps (Lemma~\ref{lemma:vvcrel-antimono}).
 
 \begin{lemma}[$\oplus$ agrees with validity]
   \label{lemma:crel-oplus}
-  If
-  $\vvcrel {\sclosedvalue_2} k {\sclosedvalue_1} \icloseddvalue$ then
+  If we have
+  $\vvcrel {\sclosedvalue_2} k {\sclosedvalue_1} \icloseddvalue$ for all
+  step-indexes $k$, then
   $\sclosedvalue_1 \oplus \icloseddvalue = \sclosedvalue_2$.
 \end{lemma}
 \begin{lemma}[Downward-closure]
@@ -67,7 +68,7 @@ Since the function $\delta_\oplus$ is partial, the relation only holds
 for the constant changes $\idconst$ which are valid changes for
 $\sconst$.
 %
-Second, a replacement change ${\replace{\sclosedvalue_2}}$ is always a valid
+Second, a replacement change~${\replace{\sclosedvalue_2}}$ is always a valid
 change from any value~$\sclosedvalue_1$ to $\sclosedvalue_2$.
 %
 Third, a nil change is a valid change between any value and itself.
@@ -91,7 +92,7 @@ terms is defined as follows:
   \seval{\sectx_2}{\sterm_2}{}{\sclosedvalue_2} \\
   \quad\textrm{implies that } \exists \icloseddvalue,
   \seval{\iectx}{\idterm}{}{\icloseddvalue} \wedge
-  \vvcrel{\sclosedvalue_1}{n - k}{\icloseddvalue}{\sclosedvalue_2}
+  \vvcrel{\sclosedvalue_2}{n - k}{\sclosedvalue_1}{\icloseddvalue}
 \end{array}
 \]
 

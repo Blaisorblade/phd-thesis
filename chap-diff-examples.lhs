@@ -485,12 +485,12 @@ instance (ChangeStruct a, ChangeStruct b) => ChangeStruct (a, b) where
 
 Through equational reasoning as in \cref{sec:plugin-design}, we can also
 compute derivatives for basic primitives on product types, both
-the introduction form (that we alias as |pair|) and the elimination forms |fst|
+the introduction form (that we alias as |pair1|) and the elimination forms |fst|
 and |snd|. We just present the resulting definitions:
 % ∆⨟
 \begin{code}
-pair a b = (a, b)
-dpair a da b db = (da, db)
+pair1 a b = (a, b)
+dpair1 a da b db = (da, db)
 
 fst (a, b) = a
 snd (a, b) = b

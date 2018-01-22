@@ -1,5 +1,5 @@
 \begin{figure}[!tb]
-  %\begin{multicols}{2}
+  \iftoggle{poplForThesis}{}{\multicolsep = 0pt \begin{multicols}{2}}
   \footnotesize
 %  \figsubtitle{Syntax}
   \[
@@ -27,8 +27,15 @@
     \multicolumn{4}{r}{\syntaxclass{Change terms}} \\
     \tdterm
     & ::= &
+    \iftoggle{poplForThesis}{\multicolumn{2}{l}}{}
+    {
     \tlet{\tdy, \tcacheid{\ty}{\tf}{\tx} = \tdapp{\tdf}{\tdx}{\tcacheid{\ty}{\tf}{\tx}}}{\tdterm}
-    & \rem{Call} \\
+    \iftoggle{poplForThesis}{\qquad \rem{Call}}{}
+    }
+\begin{poplForPopl}
+    & \rem{Call}
+\end{poplForPopl}
+    \\
     & \mid &
     \tlet{\tdy = \stuple{\many\tdx}}{\tdterm}
     & \rem{Tuple} \\
@@ -54,8 +61,16 @@
     & \rem{Literal} \\
     & \mid & \tprim
     & \rem{Primitive} \\
-    \nextline
-    \multicolumn{4}{r}{\syntaxclass{Cache values}} \\
+\iftoggle{poplForThesis}{
+      \nextline
+}{
+    \end{array}
+\]
+
+\[
+    \begin{array}{rclr}
+}
+\multicolumn{4}{r}{\syntaxclass{Cache values}} \\
     \tcachedclosedvalues
     & ::= & \temptycache
     & \rem{Empty} \\
@@ -106,15 +121,15 @@
     & \rem{Empty} \\
   \end{array}
   \]
-%\end{multicols}
+  \iftoggle{poplForThesis}{}{\end{multicols}}
 \caption{Target language $\target$ (syntax).}
   \label{fig:target-definition-syntax}
 \end{figure}
 
 \begin{figure}[htb]
-    \small
+  \iftoggle{poplForThesis}{\small}{\footnotesize}
   \begin{mathpar}
-    \small
+    \iftoggle{poplForThesis}{\small}{\footnotesize}
     \\
     \figsubtitle{Evaluation of base terms}{
       $\sneval{\tectx}{\tterm}{(\tclosedvalue, \tcachedclosedvalues)}$
@@ -203,7 +218,7 @@
 \end{figure}
 
 \begin{figure}
-    \small
+  \iftoggle{poplForThesis}{\small}{\footnotesize}
   \begin{mathpar}
     \\
     \figsubtitle{Evaluation of change terms}{
@@ -296,7 +311,7 @@
       {\tdectx'}
       \\
       \seval{\iectxcons{\tdectx_\tf}{
-          \tx,\tdx = \sectxlookup\tdectx{\tx,\tdx};
+          \tdx = \sectxlookup\tdectx{\tdx};
           \tdectx'
       }}
       {\tdterm_\tf}{}{(\tcloseddvalue_\ty, \tcachedclosedvalues')} \\

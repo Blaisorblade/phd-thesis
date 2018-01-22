@@ -25,13 +25,12 @@ and CTS differentiation produces CTS derivatives as change terms
 in $\target$.
 
 As source language for CTS differentiation,
-we use a core language named~$\source$.  This
+we use a core language named~$\source$. This
 language is a common target of a compiler front-end for a functional
 programming language: in this language, terms are written in
-$\lambda$-lifted and in A'-normal form (A'NF), so that every
-intermediate result is named and can be reused
-and stored in a cache by CTS conversion (as described in
-\cref{sec:cts-motivation}).
+$\lambda$-lifted and A'-normal form (A'NF), so that every
+intermediate result is named, and can thus be stored in a cache by CTS conversion
+and reused later (as described in \cref{sec:cts-motivation}).
 
 The target language for CTS differentiation is
 named~$\target$. Programs in this target language are also
