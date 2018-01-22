@@ -31,7 +31,7 @@
 
 %if style /= newcode
 
-\chapter{Towards differentiation for System F}
+\chapter{Towards differentiation for System~F}
 \label{ch:diff-parametricity-system-f}
 Differentiation is closely related to both logical relations and parametricity,
 as noticed by various authors in discussions of differentiation. \Cref{ch:bsos}
