@@ -751,10 +751,64 @@ correct for System F\@@.
   deriveP(t [tau]) = deriveP t (idx1 tau) (idx2 tau) (elemDt2 tau) (pElemDt2 tau)
 \end{code}
 Produced terms live in |lap22|, the logic produced by extending |lap2| following
-\citeauthor{Bernardy2011realizability}. A variant producing proofs for a
+\citeauthor{Bernardy2011realizability}. A transformation variant producing proofs for a
 non-dependently-typed differentiation (as suggested earlier) would produce
 proofs in |sysf2|, the logic produced by extending |sysf| following
-\citeauthor{Bernardy2011realizability}.
+\citeauthor{Bernardy2011realizability}. We define this transformation variant in
+\cref{fig:system-f-no-dep-types-external-proof}.
+
+\begin{figure}
+  % Alternative typings with more (redundant) names. I omitted them all.
+  %
+  %Dt^(sigma -> tau) = PPi ((x1 : idx1 sigma)) (x2 : idx2 sigma) (dx : Dt^sigma) . Dt^tau
+  %rAlpha : PPi ((x1 : alpha1)) (x2 : alpha2) (dx : DtAlpha) -> cstar
+  %(rAlpha : PPi ((x1 : alpha1)) (x2 : alpha2) (dx : Dt^alpha) -> cstar).
+\begin{code}
+  Dt^alpha = DtAlpha
+  Dt^(sigma -> tau) = idx1 sigma -> idx2 sigma -> Dt^sigma -> Dt^tau
+  Dt^(forall alpha . tau) = forall alpha1 alpha2 DtAlpha . Dt^tau
+
+  derive(x) = dx
+  derive(\(x : sigma) -> t) = \(x1 : idx1 sigma) (x2 : idx2 sigma) (dx : Dt^sigma) -> derive(t)
+  derive(s t) = derive(s) (idx1 t) (idx2 t) (derive t)
+  derive(PLambda alpha . t) = PLambda alpha1 alpha2 DtAlpha . derive(t)
+  derive(t [tau]) = derive t [idx1 tau] [idx2 tau] [Dt^tau]
+
+  derive(emptyCtx) = emptyCtx
+  derive(Gamma, x : tau) = derive(Gamma), x1 : idx1(tau), x2 : idx2(tau), dx : Dt^tau
+  derive(Gamma, alpha) = derive(Gamma), alpha1, alpha2, DtAlpha
+  ^^^
+  deriveP(emptyCtx) = emptyCtx
+  deriveP(Gamma, x : tau) = deriveP(Gamma), x1 : idx1(tau), x2 : idx2(tau), dx : Dt^tau,
+    dxx : pElemDt2 tau x1 x2 dx
+  deriveP(Gamma, alpha) = deriveP(Gamma), alpha1 : star, alpha2 : star, DtAlpha : star,
+    rAlpha : alpha1 -> alpha2 -> DtAlpha -> cstar
+
+  pElemDt2 (forall alpha. tau) f1 f2 df =
+    PPi  ((alpha1 : star)) (alpha2 : star) (DtAlpha : star)
+         (rAlpha : alpha1 -> alpha2 -> DtAlpha -> cstar).
+         pElemDt2 tau (f1 [alpha1]) (f2 [alpha2]) (df [alpha1] [alpha2] [DtAlpha])
+  pElemDt2 (sigma -> tau) f1 f2 df =
+    PPi  ((x1 : idx1 sigma)) (x2 : idx2 sigma) (dx : Dt^sigma) (dxx : pElemDt2 sigma x1 x2 dx).
+         pElemDt2 tau (f1 x1) (f2 x2) (df x1 x2 dx)
+  pElemDt2 alpha x1 x2 dx = rAlpha x1 x2 dx
+
+  deriveP(x) = dxx
+  deriveP(\(x : sigma) -> t) =
+    \  (x1 : idx1 sigma) (x2 : idx2 sigma) (dx : Dt^sigma)
+       (dxx : pElemDt2 sigma x1 x2 dx) ->
+       deriveP(t)
+  deriveP(s t) = deriveP(s) (idx1 t) (idx2 t) (derive t) (deriveP t)
+  deriveP(PLambda alpha . t) =
+    \  (alpha1 alpha2 DtAlpha : star)
+       (rAlpha : alpha1 -> alpha2 -> DtAlpha -> cstar) ->
+       deriveP(t)
+  deriveP(t [tau]) = deriveP t (idx1 tau) (idx2 tau) Dt^tau (pElemDt2 tau)
+\end{code}
+\caption{Non-dependently-typed differentiation (with original and updated input)
+  and external proof generation.}
+\label{fig:system-f-no-dep-types-external-proof}
+\end{figure}
 
 \section{Proofs}
 
