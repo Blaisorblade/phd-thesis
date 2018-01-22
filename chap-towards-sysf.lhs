@@ -203,7 +203,7 @@ their arguments with ${}_1$ and ${}_2$, to make them refer to the first or
 second computation. To wit, the straightforward definition is:
 \begin{code}
   idxi(x) = xi
-  idxi(\(x : sigma) -> t) = \(xi : sigma) -> idxi t
+  idxi(\(x : sigma) -> t) = \(xi : idxi(sigma)) -> idxi t
   idxi(s t) = (idxi s) (idxi t)
   idxi(sigma -> tau) = idxi(sigma) -> idxi(tau)
   idxi(alpha) = alphai
