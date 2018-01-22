@@ -94,8 +94,8 @@ clean:
 	$(find . -name '*.aux')
 
 fresh:
-	make clean
-	make
+	$(MAKE) clean
+	$(MAKE)
 
 fswatch = fswatch -0o -l0.1 --event Updated
 
@@ -103,14 +103,14 @@ fswatch = fswatch -0o -l0.1 --event Updated
 # string.
 xargs = xargs -0 -n 1 -I '{}' -t
 
-demon:
-	-make
-	$(fswatch) $(sources) Makefile | $(xargs) time make & \
+demon	:
+	-$(MAKE)
+	$(fswatch) $(sources) Makefile | $(xargs) time $(MAKE) & \
 	wait
 
 quickdemon:
-	-make quick
-	$(fswatch) $(sources) Makefile | $(xargs) time make quick & \
+	-$(MAKE) quick
+	$(fswatch) $(sources) Makefile | $(xargs) time $(MAKE) quick & \
 	wait
 
 %.hs: %.lhs $(lhsFormat)
