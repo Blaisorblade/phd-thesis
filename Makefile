@@ -97,7 +97,7 @@ fresh:
 	make clean
 	make
 
-fswatch = fswatch -0o
+fswatch = fswatch -0o -l0.1 --event Updated
 
 # `cmd1 | $(xargs) cmd2` will run cmd2 each time cmd1 outputs a '\0'-terminated
 # string.
