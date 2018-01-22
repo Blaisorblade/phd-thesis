@@ -248,9 +248,9 @@ pid : pElemDt1 (alpha -> alpha) (idx1 id) (idx2 id)|.
 \section{Differentiation and parametricity}
 \label{sec:differentiation-dep-types-stlc}
 \pg{Figure out if we're just redoing \citep{Bernardy10}.}
-We obtain a close variant of differentiation by altering the transformation for
-binary parametricity. We obtain a variant very close to the one investigated by \citet*{Bernardy10}.
-Instead of only having proofs that values are related, we can modify |pElemDt1 (tau)
+By altering the transformation for binary parametricity, we obtain a variant of
+differentiation close to a parametricity transformation investigated by \citet*{Bernardy10}.
+Instead of only having proofs that values are related, we can modify |pElemDt1 tau
 t1 t2| to be a type of values---more precisely, a dependent type |elemDt2 tau t1
 t2| of valid changes, indexed by source |t1 : idx1(tau)| and destination |t2 :
 idx2(tau)|. Similarly, |rAlpha| is replaced by a dependent type of changes, not
