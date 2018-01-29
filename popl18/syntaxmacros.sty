@@ -1,3 +1,14 @@
+%%% Math Bold setup %%%
+%
+% The setup done by newtxmath is equivalent to:
+%\DeclareMathAlphabet{\mathbf}{\tx@enc}{\rmdefaultB}{sb}{n}
+% where `sb` is calculated through some conditionals.
+%
+% However, that's too hard to distinguish from Roman for my goals (and in my
+% font sizes).
+% So redefine \mathbf to be Bold instead of SemiBold.
+\DeclareMathAlphabet{\mathbf}{\tx@enc}{\rmdefaultB}{b}{n}
+
 % General macros
 \newcommand\proofcase[1]{\medskip\noindent$\bullet$\; Case ``#1''. \\[0.3em]\locallabelreset}
 \newcommand\proofsubcase[1]{\medskip\noindent$\triangleright$\; Subcase ``#1''. \\[0.3em]}
@@ -5,16 +16,28 @@
 \newcommand\rem[1]{\textit{#1}}
 \newcommand\syntaxclass[1]{\textbf{\textit{#1}}}
 \newcommand\figsubtitle[2]{
-  \vspace{-0.9em}
   \begin{minipage}{\textwidth}
-    \hfill\textrm{\bf #1} \; \fbox{#2}
+    \hfill\textbf{#1} \; \fbox{#2}
   \end{minipage}
 }
+
+\newcommand\categorytitle[2]{\multicolumn{3}{r}{\textbf{#1}\;\fbox{#2}}\\[0.5em]}
+
 \newcommand\figsubcaption[1]{
   \begin{minipage}{\textwidth}
     \hfill\fbox{#1}
   \end{minipage}
 }
+
+% Arguments for mathalign for figures that are two-columns only for the paper.
+\iftoggle{poplForThesis}{
+  \newcommand\mathAlignFirst{c}
+  \newcommand\mathAlignSecond{c}
+}{%
+  \newcommand\mathAlignFirst{l}
+  \newcommand\mathAlignSecond{r}
+}%
+
 \newcommand\rulename[1]{\textsc{\small\textcolor{gray}{[#1]}}}
 \newcommand\ruletitle[1]{\multicolumn{3}{l}{\rulename{#1}}\vspace{0.1cm}}
 \newcommand\side[1]{\\[-0.9em]&\multicolumn{2}{l}{#1}}
@@ -62,15 +85,17 @@
 \newcommand\sectxcons[2]{#1; #2}
 \newcommand\sdectx{dE}
 \newcommand\sconst{\ell}
-\newcommand\sprim{\textbf{p}}
+\newcommand\sprim{\mathbf{p}}
 \newcommand\scall[2]{@(#1, #2)}
 
 % Constructions
 \newcommand\appsym{{\scriptstyle @}}
 \newcommand\dappsym{{\scriptstyle @}}
+\newcommand\lett{\mathbf{let}}
+\newcommand\let@in{\mathbf{in}}
 \newcommand\slam[2]{\lambda #1\mathpunct{.} #2}
 \newcommand\sapp[2]{#1\, #2}
-\newcommand\slet[2]{\textbf{let}\,#1\,\textbf{in}\,#2}
+\newcommand\slet[2]{\lett\;#1\;\let@in\;#2}
 \newcommand\stuple[1]{(#1)}
 \newcommand\sectxhole{[]}
 \newcommand\sectxapp[2]{#1[#2]}
@@ -113,16 +138,17 @@
 \newcommand\newtcachedclosedvalues{V_{c2}}
 \newcommand\tconst{\ell}
 \newcommand\tdconst{d\ell}
-\newcommand\tdnil{\textbf{nil}}
-\newcommand\tprim{\textbf{p}}
-\newcommand\tdprim{d\textbf{p}}
+\newcommand\tdnil{\mathbf{nil}}
+\newcommand\tprim{\mathbf{p}}
+\newcommand\tdprim{d\mathbf{p}}
 \newcommand\tclosure[2]{#1[#2]}
 
 % Constructions
 \newcommand\tlam[2]{\lambda #1\mathpunct{.} #2}
 \newcommand\tapp[2]{#1\,#2}
 \newcommand\tdapp[3]{#1\, #2\, #3}
-\newcommand\tlet[2]{\textbf{let}\,#1\;\textbf{in}\,#2}
+\let \tlet=\slet
+%\newcommand\tlet[2]{\lett\,#1\;\let@in\,#2}
 \newcommand\tectxhole{[]}
 \newcommand\tectxapp[2]{#1[#2]}
 \newcommand\tectxcons[2]{#1; #2}
@@ -177,16 +203,18 @@
 \newcommand\iectx{dE}
 \newcommand\iectxcons[2]{#1; #2}
 \newcommand\iectxempty{\bullet}
-\newcommand\iconst{\imark{\textbf{c}}}
+\newcommand\iconst{\imark{\mathbf{c}}}
 \newcommand\idconst{d\ell}
-\newcommand\inil{\textbf{nil}}
+\newcommand\inil{\mathbf{nil}}
 % Constructions
 \newcommand\iclosure[2]{#1[#2]}
 \newcommand\ichange[2]{#1 \oplus #2}
 \newcommand\ilam[2]{\lambda #1\mathpunct{.} #2}
 \newcommand\iapp[2]{#1\, #2}
 \newcommand\idapp[2]{#1\, #2}
-\newcommand\ilet[2]{\textbf{let}\,#1\,\textbf{in}\,#2}
+
+\let \ilet=\slet
+%\newcommand\ilet[2]{\lett\,#1\,\let@in\,#2}
 \newcommand\iectxhole{[]}
 \newcommand\iectxapp[2]{#1[#2]}
 \newcommand\replace[1]{!#1}

@@ -1,7 +1,14 @@
+%
+% For the paper, this sort of layout is built out of two minipages (using each
+% 50 of % \linewidth) with opposite alignments (the first left, the second
+% right).
+% For the thesis, some of these layouts are reformatted using a single column.
+%
 \begin{figure}[hbt]
-  \iftoggle{poplForThesis}{\small}{\footnotesize}
-  \[
-  \begin{array}{l}
+  \small
+  \begin{minipage}[t]{.50\linewidth}
+  \begin{alignmath}*{l}
+  \begin{array}[t]{l}
     \bullet\;
     \vvcrel{\delta_{\oplus} (\sconst, \idconst)}{n}{\sconst}{\idconst}
     \\[1em]
@@ -28,30 +35,38 @@
     {n}
     {\stuple{\sclosedvalue_1, \ldots, \sclosedvalue_m}}
     {\stuple{\icloseddvalue_1, \ldots, \icloseddvalue_m}} \\
-    \quad\textrm{if and only if } \forall k < n,
+    \quad\textrm{if and only if }\\
+    \quad\forall k < n,
     \forall i \in [1 \ldots m ],
     \vvcrel{\sclosedvalue'_i}{n}{\sclosedvalue_i}{\icloseddvalue_i}
-    \\[1em]
-
+  \end{array}
+\end{alignmath}
+\end{minipage}%
+\begin{minipage}[t]{.50\linewidth}%
+  \begin{alignmath}*{r}
+  % Renew command to add a line break.
+\renewcommand\vvcrelterm[7]{\vvcreltrm{\\ \qquad \quad (#3 \vdash #7)}{#4}{(#1 \vdash
+    #5)}{(#2 \vdash #6)}}
+  \begin{array}[t]{l}
     \bullet\;
     \vvcrel
     {\sclosure{\sectx_2}{\slam{\tx}{\sterm}}}
     {n}
     {\sclosure{\sectx_1}{\slam{\tx}{\sterm}}}
     {\iclosure\iectx{\ilam{\tx\,\tdx}{\idterm}}} \\
-    \quad\textrm{if and only if $\sectx_2 = \sectx_1 \oplus \iectx$ and }
-    \forall k < n, \sclosedvalue_1, \icloseddvalue, \sclosedvalue_2, \\
+    \quad\textrm{if and only if $\sectx_2 = \sectx_1 \oplus \iectx$ and }\\
+    \quad\forall k < n, \sclosedvalue_1, \icloseddvalue, \sclosedvalue_2,\\
     \qquad\textrm{if }
     \vvcrel{\sclosedvalue_2}{k}{\sclosedvalue_1}{\icloseddvalue} \\
-    \qquad\textrm{then }
-    \vvcrelterm
+    \qquad\textrm{then }\\
+    \qquad\vvcrelterm
     {\sectxcons{\sectx_1}{\tx = \sclosedvalue_1}}
     {\sectxcons{\iectx}{\icloseddvalue}}
     {\sectxcons{\sectx_2}{\tx = \sclosedvalue_2}}
     {k}{\sterm}{\idterm}{\sterm}
   \end{array}
-\]
-
-  \caption{Step-indexed relation between values and changes.}
+\end{alignmath}
+\end{minipage}
+\caption{Step-indexed relation between values and changes.}
   \label{fig:step-index-relation-between-values-and-changes}
 \end{figure}

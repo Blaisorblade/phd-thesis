@@ -31,13 +31,13 @@ $\sterm$ and a cache term
 $\tcache$. This cache is a fragment of output code: in tail
 position ($\sterm = \tx$), it
 generates code to return both the result $\tx$ and the cache $\tcache$. When the
-transformation visits {\bf let}-bindings, it outputs extra bindings for
+transformation visits $\lett$-bindings, it outputs extra bindings for
 caches~$\tcacheid\ty\tf\tx$, and appends all variables newly bound in the output
-to the cache used when visiting the {\bf let}-body.
+to the cache used when visiting the $\lett$-body.
 
 Similarly to $\compileterm{\tcache}{\sterm}$, CTS
 derivation~$\derive{\tupdcache}{\sterm}$ accepts a cache update
 $\tupdcache$ to return in tail position. While cache terms record \emph{intermediate
-results}, cache updates record \emph{result updates}. For {\bf let}-bindings,
+results}, cache updates record \emph{result updates}. For $\lett$-bindings,
 to update $\ty$ by change $\tdy$, CTS derivation appends
 to $\tupdcache$ term $\ty \oplus \tdy$ to replace $\ty$.

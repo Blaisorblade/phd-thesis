@@ -1,8 +1,8 @@
 \begin{figure}[htb]
   \footnotesize
-  \iftoggle{poplForThesis}{}{\multicolsep = 0pt \begin{multicols}{2}}
-  \[
-    \begin{array}{rclr}
+  \begin{minipage}[t]{.50\linewidth}
+    \begin{alignmath}*{l}
+    \begin{array}[t]{rclr}
     \multicolumn{4}{r}{\syntaxclass{Base terms}} \\
     \sterm
     & ::= & \slet{\ty = \sapp{\tf}{\tx}}{\sterm}
@@ -15,13 +15,8 @@
     \multicolumn{4}{r}{\syntaxclass{Change terms}} \\
     \idterm
     & ::=
-\iftoggle{poplForThesis}{
-    & \multicolumn{2}{l}{\ilet{\ty = \iapp{\tf}{\tx}, \tdy = \idapp{\tdf}{\tx\,\tdx}}{\idterm}
-     \qquad \rem{Call}} \\
-}{
     & \ilet{\ty = \iapp{\tf}{\tx}, \tdy = \idapp{\tdf}{\tx\,\tdx}}{\idterm}
           & \rem{Call} \\
-}
     & \mid & \slet{\ty = \stuple{\many\tx}, \tdy = \stuple{\many\tdx}}\idterm
     & \rem{Tuple} \\
     & \mid & \tdx
@@ -37,15 +32,12 @@
     & \rem{Literal} \\
     & \mid & \sprim
     & \rem{Primitive} \\
-\iftoggle{poplForThesis}{
-      \nextline
-}{
     \end{array}
-\]
-
-\[
-    \begin{array}{rclr}
-}
+  \end{alignmath}
+\end{minipage}%
+\begin{minipage}[t]{.50\linewidth}
+    \begin{alignmath}*{r}
+    \begin{array}[t]{rclr}
     \multicolumn{4}{r}{\syntaxclass{Value environments}} \\
     \sectx
     & ::= & \sectxcons\sectx{\tx = \sclosedvalue}
@@ -69,20 +61,15 @@
     \multicolumn{4}{r}{\syntaxclass{Change environments}} \\
     \iectx
     & ::=
-\iftoggle{poplForThesis}{
-    & \multicolumn{2}{l}{\iectxcons{\iectx}{\tx = \sclosedvalue, \tdx = \icloseddvalue}
-      \qquad \rem{Binding}} \\
-}{
     & \iectxcons{\iectx}{\tx = \sclosedvalue, \tdx = \icloseddvalue}
     & \rem{Binding} \\
-}
     & \mid & \iectxempty
     & \rem{Empty} \\
     \nextline
     n, k & \in & \mathbb{N} & \syntaxclass{Step indexes} \\
     \end{array}
-  \]
-  \iftoggle{poplForThesis}{}{\end{multicols}}
+  \end{alignmath}
+  \end{minipage}
 \caption{Source language $\source$ (syntax).}
-  \label{fig:source-definition}
+\label{fig:source-definition}
 \end{figure}
