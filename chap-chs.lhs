@@ -40,7 +40,7 @@ completing the core theory of changes.
 % readers might want to jump there for the definitions. However, we
 % first build up to those definitions.\pg{Correct when revising figures.}
 
-\section{Formally defining ⊕ and change structures}
+\section{Formalizing ⊕ and change structures}
 %\subsection{Updating values by changes with ⊕}
 \label{sec:change-structures-formal}
 \label{sec:oplus}

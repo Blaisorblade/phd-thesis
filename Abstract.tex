@@ -4,15 +4,14 @@
 
 In modern programming languages, queries on in-memory collections are often more
 expensive than needed.
-While database queries can be readily optimized, collection queries often don't
-translate trivially to databases, as modern programming languages are far more
-expressive than databases, supporting both nested data and first-class functions.
+While database queries can be readily optimized, it is often not trivial to use
+them to express collection queries which employ nested data and first-class
+functions, as enabled by functional programming languages.
 
 Collection queries can be optimized and incrementalized by hand, but this
 reduces modularity, and is often too error-prone to be feasible or to enable
-maintenance of resulting programs.
-In this thesis, we optimize and incrementalize such collection queries to free
-programmers from such burdens.
+maintenance of resulting programs. To free programmers from such burdens,
+in this thesis we study how to optimize and incrementalize such collection queries.
 Resulting programs are expressed in the same core language, so that they can be
 subjected to other standard optimizations.
 
@@ -28,9 +27,9 @@ To incrementalize higher-order programs by program transformation, we extend
 \emph{finite differencing} \citep{Paige82FDC,Blakeley:1986:EUM,Gupta99MMV} and
 develop the first approach to incrementalization by program transformation for
 higher-order programs. Base programs are transformed to \emph{derivatives},
-program that transform input \emph{changes} to output changes.
+programs that transform input \emph{changes} to output changes.
 We prove that our incrementalization approach is correct: We develop the theory
-underlying this approach for simply-typed and untyped $\lambda$-calculus, and
+underlying incrementalization for simply-typed and untyped $\lambda$-calculus, and
 discuss extensions to System F\@.
 
 Derivatives often need to reuse results produced by base programs: to enable
@@ -40,7 +39,7 @@ programs to \emph{cache-transfer-style}.
 
 For efficient incrementalization, it is necessary to choose and incrementalize
 by hand appropriate primitive operations. We incrementalize a significant subset
-of collection operations and perform case studies, showing order-of-magnitude
+of collection operations and perform case studies, showing order-of-magnitude speedups
 both in practice and in asymptotic complexity.
 % To incrementalize programs efficiently, derivatives
 % To use our approach a certain domain, designers must provide

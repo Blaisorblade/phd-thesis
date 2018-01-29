@@ -245,12 +245,13 @@ However, it follows that derivatives are nil function changes:
 \end{proof}
 
 Applying derivatives to nil changes gives again nil changes. This fact is useful
-when reasoning on derivatives. The proof is a useful exercise on using validity.
+when reasoning on derivatives. Its proof is a useful exercise on validity.
 \begin{lemma}[Derivatives preserve nil changes]
   \label{lem:derivatives-nil-changes}
   For any basic change structures |bchs(A)| and |bchs(B)|,
+  if
   function change |df : Dt^(A -> B)| is a derivative of |f : A -> B| (|fromto (A
-  -> B) f df f|) if and only if applying |df|
+  -> B) f df f|) then applying |df|
   to an arbitrary input nil change |fromto A a da a| gives a nil change
   %
   \[|fromto B (f a) (df a da) (f a)|.\]
@@ -263,7 +264,7 @@ when reasoning on derivatives. The proof is a useful exercise on using validity.
   (\cref{def:basic-change-structure-funs}), |fromto (A -> B) f1 df f2| means
   that from |fromto A a1 da a2| follows |fromto B (f1 a1) (df a1 da) (f2 a2)|.
   Just substitute |f1 = f2 = f| and |a1 = a2 = a| to get the required
-  equivalence.
+  implication.
 \end{proof}
 
 Also derivatives of curried $n$-ary functions |f| preserve nil changes. We only
@@ -272,8 +273,9 @@ arities require no new ideas.
 \begin{lemma}[Derivatives preserve nil changes on |A -> B -> C|]
   \label{lem:binary-derivatives-nil-changes}
   For any basic change structures |bchs(A)|, |bchs(B)| and |bchs(C)|,
-  Change |df : Dt^(A -> B -> C)| is a derivative of |f : A -> B -> C|
-  \emph{if and only if}
+  if
+  function change |df : Dt^(A -> B -> C)| is a derivative of |f : A -> B -> C|
+  then
   applying |df| to nil changes |fromto A a
   da a| and |fromto B b db b| gives a nil change
   \[|fromto C (f a b) (df a da b db) (f a b)|.\]
@@ -283,10 +285,10 @@ arities require no new ideas.
   the thesis follows by applying twice the fact that derivatives preserve nil
   changes (\cref{lem:derivatives-nil-changes}).
 
-  In detail, since derivatives preserve nil changes, |df| is a derivative if and
+  In detail, since derivatives preserve nil changes, |df| is a derivative
   only if for all |fromto A a da a| we have |fromto (B -> C) (f a) (df a da) (f
   a)|. But then, |df a da| is a nil change, that is a derivative, and since it
-  preserves nil changes, |df| is a derivative if and only if for all |fromto A a
+  preserves nil changes, |df| is a derivative only if for all |fromto A a
   da a| and |fromto B b db b| we have |fromto C (f a b) (df a da b db) (f a b)|.
 \end{proof}
 
@@ -542,11 +544,10 @@ For now we discuss this statement further; we defer the proof to
 \cref{sec:derive-correct-proof}.
 
 \begin{remark}[Why |evalInc| ignores |rho1|]
-You might wonder why |evalInc t = \rho1 drho -> eval(derive(t)) drho| appears to
-ignore |rho1|. But for all |fromto Gamma rho1 drho rho2|, change environment
-|drho| extends |rho1|, which hence provides no further information. We are only
-interested in applying |evalInc t| to valid environment changes |drho|, so
-|evalInc t rho1 drho| can safely ignore |rho1|.
+Incremental semantics |evalInc t = \rho1 drho -> eval(derive(t)) drho| can safely
+ignore |rho1| because |evalInc| assumes that change environment |drho| is valid
+(|fromto Gamma rho1 drho rho2|), so |drho| extends environment |rho1| and |rho1| provides
+no further information.
 \end{remark}
 \begin{remark}[Term derivatives]
   In \cref{ch:static-diff-intro}, we suggested that |derive t| only produced a
@@ -556,7 +557,7 @@ interested in applying |evalInc t| to valid environment changes |drho|, so
   \emph{value} of |derive t| is |eval(derive t) drho|, which is only a nil
   change if |drho| is a nil change as well. In particular, for closed terms
   (|Gamma = emptyCtx|), |drho| must equal the empty environment |emptyRho|,
-  hence a nil change. If |tau| is a function type, |df = eval(derive t) drho|
+  hence |drho| is a nil change. If |tau| is a function type, |df = eval(derive t) drho|
   accepts further inputs; since |df| must be a valid function change, it will
   also map them to valid outputs as required by our \cref{slogan:derive}.
   Finally, if |Gamma = emptyCtx| and |tau| is a function type, then |df = eval

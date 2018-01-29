@@ -13,12 +13,12 @@ Our syntax for base terms~$\sterm$ represents $\lambda$-lifted
 programs in A'-normal form (\cref{sec:motivating-example}).
 We write $\many\tx$ for a sequence of variables of some unspecified length
 $\tx_1, \tx_2, \ldots, \tx_m$.
-A term can be either a bound variable~$\tx$, or a {\bf let}
-binding of $\ty$ in subterm~$\sterm$ to either a new
+A term can be either a bound variable~$\tx$, or a {\bf let}-binding
+of~$\ty$ in subterm~$\sterm$ to either a new
 tuple~$\stuple{\many\tx}$ ($\slet{\ty = \stuple{\many\tx}}\sterm$), or
 the result of calling function~$\tf$ on argument~$\tx$
-($\slet{\ty = \sapp{\tf}{\tx}}{\sterm}$).  Both~$\tf$ and~$\tx$ are
-variables to be looked up in the environment.  Terms cannot contain
+($\slet{\ty = \sapp{\tf}{\tx}}{\sterm}$). Both~$\tf$ and~$\tx$ are
+variables to be looked up in the environment. Terms cannot contain
 $\lambda$-abstractions as they have been $\lambda$-lifted to top-level
 definitions, which we encode as closures in the initial environments.
 %
@@ -103,7 +103,7 @@ A closure change is a pair made of an evaluation environment~$\iectx$
 and a~$\lambda$-abstraction expecting a value and a change value as
 arguments to evaluate a change term into an output change value. An
 evaluation environment~$\iectx$ follows the same structure as
-$\textbf{let}$-bindings of the change terms: it binds variables to
+$\textbf{let}$-bindings of change terms: it binds variables to
 closed values and each variable~$\tx$ is immediately followed by a
 binding for its associated change variable~$\tdx$. As with
 $\textbf{let}$-bindings of change terms, $\alpha$-renamings in an

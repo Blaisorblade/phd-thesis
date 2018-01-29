@@ -247,8 +247,8 @@ typed (|dilcTau|) variants.
 The syntax is summarized in \cref{fig:anf-lambda-calculus}, the
 type systems in \cref{fig:anf-lambda-calculus-typing}, and the
 semantics in \cref{fig:anf-lambda-calculus-semantics}. The base
-languages are mostly standard, while the change languages pick a
-few different choices.
+languages are mostly standard, while the change languages are slightly more
+unusual.
 
 \input{fig-syntactic-ilc}
 
@@ -877,7 +877,7 @@ well-founded recursion on step-indexes.
                     ^&^ (exists Gamma1 Gamma Gamma2 . ^^ Gamma1 /- t1 : tau `wand` ^^ Gamma /-- dt : tau `wand` Gamma2 /- t2 : tau) ^^^
                     ^&^ `wandnosp` ^^^
                     ^&^ forall j v1 v2 . ^^^
-                    ^&^ qua ((j < k `wand` bseval t1 rho1 v1 `wand` bseval t2 rho2 v2)) => ^^^
+                    ^&^ qua ((j < k `wand` ibseval t1 rho1 j v1 `wand` bseval t2 rho2 v2)) => ^^^
                     ^&^ qua (exists dv . ^^ dbseval dt rho drho dv `wand` (k - j, v1, dv, v2) `elem` valset tau) | \, \}\\
                   \\
   |envset emptyCtx| ={} & \{ \, |(k, emptyRho, emptyRho, emptyRho)| \, \} \\
@@ -1117,10 +1117,13 @@ prove that |`oplus`| agrees with validity.
 \end{theorem}
 \begin{theorem}[|`oplus`| agrees with step-indexed intensional validity]
   \label{thm:oplus-validity-intensional}
-If |(k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
+If |forall k. (k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
 \end{theorem}
 \begin{proof}
-  By induction on types. For type |Nat|, validity coincides with the
+  In this system the thesis holds, in fact, even if we only assume |(k, v1, dv,
+  v2) `elem` valset tau|. So we pick an arbitrary |k|.
+
+  The proof then proceeds by induction on types. For type |Nat|, validity coincides with the
   thesis. For type |pair taua taub|, we must apply the
   induction hypothesis on both pair components.
 
@@ -1139,7 +1142,16 @@ If |(k, v1, dv, v2) `elem` valset tau| then |v1 `oplus` dv = v2|.
   \end{multline*}
 \end{proof}
 
-We can also define |nilc| intensionally,as a metafunction on values and
+As mentioned, \cref{thm:oplus-validity-intensional} would hold even if it only
+required validity |(k, v1, dv, v2)| to hold at a particular step-index. But we
+still state a weaker version requiring validity at all step indexes; we
+conjecture that for other systems we consider in this chapter, requiring
+validity at all step-indexes is necessary. For instance, step-indexed
+extensional validity for function types at index $0$ is vacuously true and so
+can't agree with |`oplus`|, because it is only defined in terms of validity at
+step-indexes smaller than 0 (which do not exist).
+
+\paragraph{Nil changes} We can define |nilc| intensionally, as a metafunction on values and
 environments, and prove it correct.
 For closures, we differentiate the body and recurse on the environment. The
 definition extends from values to environments variable-wise, so we omit the
@@ -1216,7 +1228,7 @@ details~\citep{Ahmed2006stepindexed}.
   |compsetunt| ={}&
                   \{ \, |(k, envpair rho1 t1, denvpair rho drho dt, envpair rho2 t2) `such` ^^^
                     ^&^ forall j v1 v2 . ^^^
-                    ^&^ qua ((j < k `wand` bseval t1 rho1 v1 `wand` bseval t2 rho2 v2)) => ^^^
+                    ^&^ qua ((j < k `wand` ibseval t1 rho1 j v1 `wand` bseval t2 rho2 v2)) => ^^^
                     ^&^ qua (exists dv . dbseval dt rho drho dv `wand` (k - j, v1, dv, v2) `elem` valsetunt) | \, \}\\
   \\
   |envset emptyCtx| ={} & \{ \, |(k, emptyRho, emptyRho, emptyRho)| \, \} \\

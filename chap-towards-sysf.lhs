@@ -191,7 +191,7 @@ for type |tau| given the hypotheses |ppp Gamma| (or more formally,
   ppp(\(x : sigma) -> t) =
     \(x1 : idx1 sigma) (x2 : idx2 sigma) (dxx : pElemDt1 sigma x1 x2) ->
       ppp(t)
-  ppp(s t) = ppp(s) (idx1 s) (idx2 s) (ppp t)
+  ppp(s t) = ppp(s) (idx1 t) (idx2 t) (ppp t)
 
   ppp(emptyCtx) = emptyCtx
   ppp(Gamma, x : tau) = ppp(Gamma), x1 : idx1(tau), x2 : idx2(tau), dxx : pElemDt1 tau x1 x2
@@ -203,7 +203,7 @@ their arguments with ${}_1$ and ${}_2$, to make them refer to the first or
 second computation. To wit, the straightforward definition is:
 \begin{code}
   idxi(x) = xi
-  idxi(\(x : sigma) -> t) = \(xi : sigma) -> idxi t
+  idxi(\(x : sigma) -> t) = \(xi : idxi(sigma)) -> idxi t
   idxi(s t) = (idxi s) (idxi t)
   idxi(sigma -> tau) = idxi(sigma) -> idxi(tau)
   idxi(alpha) = alphai
@@ -262,8 +262,12 @@ the Edinburgh Logical Framework; such a PTS is known as
 |lamp|~\citep{Barendregt1992lambda}.
 
 For type variables |alpha|, we specialize the transformation further, ensuring
-that |alpha1 = alpha2 = alpha| (and adapting |idx1, idx2| accordingly to \emph{not} add
-subscripts to type variable). Without this
+that |alpha1 = alpha2 = alpha| and adapting |idx1, idx2| accordingly to \emph{not} add
+subscripts to type variable:
+\begin{code}
+  idxi(alpha) = alpha
+\end{code}
+Without this
 specialization, we get to deal with changes across different types, which we
 don't do just yet but defer to \cref{sec:param-derive-changes-across-types}.
 
@@ -308,7 +312,7 @@ Application provides corresponding arguments.
 \begin{code}
   derive(x) = dx
   derive(\(x : sigma) -> t) = \(x1 x2 : sigma) (dx : elemDt2 sigma x1 x2) -> derive(t)
-  derive(s t) = derive(s) (idx1 s) (idx2 s) (derive t)
+  derive(s t) = derive(s) (idx1 t) (idx2 t) (derive t)
 \end{code}
 % Unlike standard differentiation, we pass around both source and
 % destination of changes, and the type of changes is indexed by both source and
@@ -407,7 +411,7 @@ The transformation from terms to proofs then matches the definition of typing co
   deriveP(\(x : sigma) -> t) =
     \(x1 x2 : sigma) (dx : elemDt2 sigma x1 x2) (dxx : pElemDt2 sigma x1 x2 dx) ->
       deriveP(t)
-  deriveP(s t) = deriveP(s) (idx1 s) (idx2 s) (derive t) (deriveP t)
+  deriveP(s t) = deriveP(s) (idx1 t) (idx2 t) (derive t) (deriveP t)
 \end{code}
 This term produces a proof object in PTS |lamp2|, which is produced by
 augmenting |lamp| following \citet{Bernardy2011realizability}.
@@ -686,21 +690,26 @@ differentiation for |stlc| so that it allows for the now generalized changes:
 
   derive(x) = dx
   derive(\(x : sigma) -> t) = \(x1 : idx1 sigma) (x2 : idx2 sigma) (dx : elemDt2 sigma x1 x2) -> derive(t)
-  derive(s t) = derive(s) (idx1 s) (idx2 s) (derive t)
+  derive(s t) = derive(s) (idx1 t) (idx2 t) (derive t)
 
   derive(emptyCtx) = emptyCtx
   derive(Gamma, x : tau) = derive(Gamma), x1 : idx1(tau), x2 : idx2(tau), dx : elemDt2 tau x1 x2
   derive(Gamma, alpha : star) = derive(Gamma), alpha1 : star, alpha2 : star, DtAlpha : alpha1 -> alpha2 -> star
+
+  idxi(alpha) = alphai
 \end{code}
 By adding a few additional rules, we can extend differentiation to System F (the
 PTS |sysf|). We choose to present the additional rules using System F syntax
 rather than PTS syntax.
 \begin{code}
-  elemDt2 (forall alpha . T) f1 f2 =
-    PPi ((alpha1 : *)) (alpha2 : *) (DtAlpha : alpha1 -> alpha2 -> star). elemDt2 T (f1 [alpha1]) (f2 [alpha2])
+  elemDt2 (forall alpha . tau) f1 f2 =
+    PPi ((alpha1 : star)) (alpha2 : star) (DtAlpha : alpha1 -> alpha2 -> star). elemDt2 tau (f1 [alpha1]) (f2 [alpha2])
   derive(PLambda alpha . t) =
     \(alpha1 alpha2: star) (DtAlpha : alpha1 -> alpha2 -> star) -> derive(t)
   derive(t [tau]) = derive t (idx1 tau) (idx2 tau) (elemDt2 tau)
+
+  idxi(forall alpha . tau) = forall alphai . idxi tau
+  idxi(PLambda alpha . t) = PLambda alphai . idxi t
 \end{code}
 Produced terms use a combination of System F and dependent types, which is known
 as |lap2|~\citep{Barendregt1992lambda} and is strongly normalizing. This PTS
@@ -721,7 +730,7 @@ correct for System F\@@.
     rAlpha : PPi ((x1 : alpha1)) (x2 : alpha2) (dx : elemDt2 alpha x1 x2) -> cstar
 
   pElemDt2 (forall alpha. T) f1 f2 df =
-    PPi ((alpha1 : *)) (alpha2 : *) (DtAlpha : alpha1 -> alpha2 -> star)
+    PPi ((alpha1 : star)) (alpha2 : star) (DtAlpha : alpha1 -> alpha2 -> star)
     (rAlpha : PPi ((x1 : alpha1)) (x2 : alpha2) (dx : elemDt2 alpha x1 x2) -> cstar).
       pElemDt2 T (f1 [alpha1]) (f2 [alpha2]) (df [alpha1] [alpha2] [DtAlpha])
   pElemDt2 (sigma -> tau) f1 f2 df =
@@ -734,7 +743,7 @@ correct for System F\@@.
     \  (x1 : idx1 sigma) (x2 : idx2 sigma) (dx : elemDt2 sigma x1 x2)
        (dxx : pElemDt2 sigma x1 x2 dx) ->
        deriveP(t)
-  deriveP(s t) = deriveP(s) (idx1 s) (idx2 s) (derive t) (deriveP t)
+  deriveP(s t) = deriveP(s) (idx1 t) (idx2 t) (derive t) (deriveP t)
   deriveP(PLambda alpha . t) =
     \  (alpha1 alpha2: star) (DtAlpha : alpha1 -> alpha2 -> star)
        (rAlpha : PPi ((x1 : alpha1)) (x2 : alpha2) (dx : elemDt2 alpha x1 x2) -> cstar) ->
@@ -1094,7 +1103,7 @@ investigation as future work.
 %   ppp(\(x : sigma) -> t) =
 %     \(x1 x2 : sigma) (px : (x1, x2) `elem` r(sigma)) -> ppp(t)
 %   ppp(s t) =
-%     ppp(s) (idx1 s) (idx2 s) ppp(t)
+%     ppp(s) (idx1 t) (idx2 t) ppp(t)
 % \end{code}
 
 % where |idx1 s| and |idx2 s| subscript variables in terms with 1 and 2:
@@ -1122,7 +1131,7 @@ investigation as future work.
 
 %   derive(x) = dx
 %   derive(\(x : sigma) -> t) = \x1 x2 (dx : Dt2 x1 x2) -> derive(t)
-%   derive(s t) = derive(s) (idx1 s) (idx2 s) (derive t)
+%   derive(s t) = derive(s) (idx1 t) (idx2 t) (derive t)
 
 %   derive(\(x : sigma) -> t) = \x1 x2 (fromto sigma x1 dx x2) -> derive(t)
 % \end{code}

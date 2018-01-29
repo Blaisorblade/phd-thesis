@@ -958,7 +958,7 @@ Finally, \cref{sec:cts-rw,ch:incr-rw} discuss related work and
 \cref{ch:incr-conclusion} concludes this part of the thesis.
 
 \subsection{Contributions}
-In \crefrange{ch:diff-examples}{ch:term-reasoning} we make the following contributions:
+In \crefrange{ch:diff-examples}{ch:term-reasoning} and \cref{sec:applying} we make the following contributions:
 \begin{itemize}
 \item We present a novel mathematical theory of changes and derivatives, which
   is more general than other work in the field because changes are first-class
