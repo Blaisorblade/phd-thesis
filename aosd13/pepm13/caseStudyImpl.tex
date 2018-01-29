@@ -47,7 +47,7 @@ now in the context of the {\LoS}-enabled query in Fig.~\ref{fig:reifiedQuery}. I
 To understand how an expression tree of type \code{Exp[T]} can have the same interface as a value of type \code{T}, we consider two expression trees \code{str1} and \code{str2} of type \code{Exp[String]}. The implementation of lifting differs depending on the kind of expression we want to lift.
 
 \smartParagraph{Method calls and operators}
-In our example, the operator \code{+} should be available on \code{Exp[String]}, but not on \code{Exp[Boolean]}, because \code{+} is available on \code{String} but not on \code{Boolean}.
+In our example, operator \code{+} should be available on \code{Exp[String]}, but not on \code{Exp[Boolean]}, because \code{+} is available on \code{String} but not on \code{Boolean}.
 Furthermore, we want \code{str1 + str2} to have type \code{Exp[String]} and to evaluate not to a string concatenation but to a call of \code{StringConcat}, that is, to an expression tree which \emph{represents} \code{str1 + str2}. This is a somewhat unusual requirement, because usually, the interface of a generic type does not depend on the type parameters.
 
 To provide such operators and to encode expression trees, we use \emph{implicit conversions} in a similar style as \citet{rompf2010lightweight}. Scala allows to make expressions of a type \code{T} implicitly convertible to a different type \code{U}. To this end, one must declare an \emph{implicit conversion function} having type \code{T => U}. Calls to such functions will be inserted by the compiler when required to fix a type mismatch between an expression of type \code{T} and a context expecting a value of type \code{U}. In addition, a method call \code{e.m(args)} can trigger the conversion of \code{e} to a type where the method \code{m} is present\footnote{For the exact rules, see \citet[Ch.~21]{Odersky11book} and \citet{ScalaRef}.}. Similarly, an operator usage, as in \code{str1 + str2}, can also trigger an implicit conversion: an expression using an operator, like \code{str1 + str2}, is desugared to the method call \code{str1.+(str2)}, which can trigger an implicit conversion from \code{str1} to a type providing the \code{+} method. Therefore from now on we do not distinguish between operators and methods.
@@ -67,7 +67,7 @@ The implicit conversion function \code{expToStringOps} is not applicable to \cod
 In other words, expressions like \code{str1 + str2} are now \emph{lifted} on the level of expression trees in a type-safe way. For brevity, we refer to the defined operator as \code{Exp[String].+}.
 
 \smartParagraph{Literal values}
-However, a string concatenation might also include constants, as in \code{str1 + "foo"} or \code{"bar" + str1}.
+However, string concatenation might also be applied to constants, as in \code{str1 + "foo"} or \code{"bar" + str1}.
 To lift \code{str1 + "foo"}, we introduce a lifting for constants which wraps them in a \code{Const} node:
 
 \begin{lstlisting}
@@ -165,7 +165,7 @@ To represent functions, we have to represent the bound variables in the function
 
 With all operations in the function body automatically lifted, the only remaining syntactic difference between normal and lifted functions is the type annotation for the function's parameter. Fortunately, Scala's \emph{local type inference} can usually deduce the argument type from the context, for example, from the signature of the \code{map} operation being called. Type inference plays a dual role here: First, it allows the query writer to leave out the annotation, and second, it triggers lifting in the function body by requesting a lifted function instead of a normal function. This is how in Fig.~\ref{fig:reifiedQuery}, a single call to \code{asSquopt} triggers lifting of the overall query.
 
-Note that reified functions have type \code{Exp[A] => Exp[B]} instead of the more regular \code{Exp[A => B]}. We chose the former over the latter to support Scala's syntax for anonymous functions and for-comprehensions which is hard-coded to produce or consume instances of the pre-defined \code{A => B} type. We have to reflect this irregularity in the lifting of methods and functions by treating the types of higher-order arguments accordingly.
+Reified functions have type \code{Exp[A] => Exp[B]} instead of the more regular \code{Exp[A => B]}. We chose the former over the latter to support Scala's syntax for anonymous functions and for-comprehensions which is hard-coded to produce or consume instances of the pre-defined \code{A => B} type. We have to reflect this irregularity in the lifting of methods and functions by treating the types of higher-order arguments accordingly.
 
 \smartParagraph{User-defined methods, revised}
 We can now extend the lifting of signatures for methods or functions from the previous section to the general case, that is, the case of higher-order functions. We lift a method or function with signature
@@ -573,10 +573,12 @@ Conversely, function applications are represented using the constructor \code{Ap
 %\begin{lstlisting}
 %def toFOAS[S, T](funBody: Exp[S] => Exp[T]) =
 %\end{lstlisting}
-In our example, \code{Fun(str => str + "!")} produces\\
-\code{FOASFun(StringConcat(TypedVar[String](1), Const("!")), TypedVar[String](1))}%
+In our example, \code{Fun(str => str + "!")} produces
+\begin{lstlisting}
+FOASFun(StringConcat(TypedVar[String](1), Const("!")),
+  TypedVar[String](1))
+\end{lstlisting}
 %: since an unbound variable appears here, this can be easily recognized as an open term
-.
 
 \pg{Comment back in the following discussion, if it can be made good.}
 %We use a FOAS representation internally because converting back to HOAS is expensive, and because converting to FOAS removes abstraction overhead by \emph{normalizing} the produced term. Consider the following excerpt from the implementation of map fusion:
