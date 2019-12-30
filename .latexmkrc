@@ -12,12 +12,13 @@
 # occurrences of pdflatex below (especially the second) with your TeX
 # processor (etex, latex, lualatex, etc.)
 
-# Enable correct dependency tracking.
-# Add -shell-escape to my defaults.
-$pdflatex="pdflatex -synctex=1 -file-line-error -shell-escape -interaction=nonstopmode -halt-on-error %O %S";
+# Enable correct dependency tracking, and add -shell-escape to my defaults.
+$pdflatex="pdflatex -synctex=1 -file-line-error -interaction=nonstopmode -shell-escape -halt-on-error %O %S";
 $recorder = 1;
+
 # Declare that pdflatex also reads .fmt files.
-add_input_ext('pdflatex','fmt');
+#add_input_ext('pdflatex','fmt');
+$input_extensions{'pdflatex'}{'fmt'} = 1;
 # fmt files are built from ltx files by calling the compilepreamble function defined below.
 add_cus_dep('ltx', 'fmt', 0, 'compilepreamble');
 sub compilepreamble {
