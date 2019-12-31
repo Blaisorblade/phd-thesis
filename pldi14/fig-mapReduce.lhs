@@ -111,10 +111,13 @@ histogram = mapReduce bagGroup additiveGroup histogramMap histogramReduce
 
 {-"\start"-}-- Precondition:
 {-"\start"-}-- For every |key_1 :: k_1| and |key_2 :: k_2|, the terms |mapper key_1| and |reducer key_2| are homomorphisms.
-mapReduce :: {-"\constraint"-}(Ord k_1, Ord k_2, Ord v_1, Ord v_2, Eq v_3) => AbelianGroup v_1 -> AbelianGroup v_3 -> (k_1 -> v_1 -> Bag (k_2, v_2)) -> (k_2 -> Bag v_2 -> v_3) -> Map k_1 v_1 -> Map k_2 v_3
+mapReduce ::  {-"\constraint"-}(Ord k_1, Ord k_2, Ord v_1, Ord v_2, Eq v_3) => AbelianGroup v_1 -> AbelianGroup v_3 -> (k_1 -> v_1 -> Bag (k_2, v_2)) -> (k_2 -> Bag v_2 -> v_3) ->
+              Map k_1 v_1 -> Map k_2 v_3
 mapReduce v_1Group v_3Group mapper reducer = reducePerKey . groupByKey . mapPerKey
   where  mapPerKey     = foldMap  v_1Group bagGroup             mapper
-         groupByKey    = foldBag  (mapGroup bagGroup)           (\ (key, val)  -> singletonMap key (singletonBag val))
-         reducePerKey  = foldMap  bagGroup (mapGroup v_3Group)  (\ key bag     -> singletonMap key (reducer key bag))
+         groupByKey    = foldBag  (mapGroup bagGroup)
+                                  (\ (key, val)  -> singletonMap key (singletonBag val))
+         reducePerKey  = foldMap  bagGroup (mapGroup v_3Group)
+                                  (\ key bag     -> singletonMap key (reducer key bag))
 \end{code}
 \end{varwidth}\end{document}
