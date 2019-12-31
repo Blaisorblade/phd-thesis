@@ -119,8 +119,7 @@ forces programmers to trade modularity against performance, which motivates our 
 
 As our running example through the chapter, we consider representing and querying a simple in-memory bibliography. A book has, in our schema, a title, a publisher and a list of authors. Each author, in turn, has a first and last name. We represent authors and books as instances of the Scala classes \code{Author} and \code{Book} shown in Fig.~\ref{fig:schema}. The class declarations list the type of each field: Titles, publishers, and first and last names are all stored in fields of type \code{String}. The list of authors is stored in a field of type \code{Seq[Author]}, that is, a sequence of authors -- something that would be more complex to model in a relational database.
 The code fragment also defines a collection of books named \code{books}.
-\begin{figure}[t]
-\centering
+\begin{figure}[htb]
 \begin{lstlisting}
 package schema
 case class Author(firstName: String, lastName: String)
@@ -147,8 +146,7 @@ The return value of the for-comprehension is a collection of all yielded
 records. Note that if a book has multiple authors, this for-comprehensions will
 return multiple records relative to this book, one for each author.
 
-\begin{figure}[t]
-\centering
+\begin{figure}[htb]
 \begin{lstlisting}
 case class BookData(title: String, authorName: String,
   coauthors: Int)
@@ -212,8 +210,7 @@ This second optimization is only possible after inlining and thereby reducing th
 To make \code{titleFilterHandOpt} more reusable, we could turn the publisher name into a parameter.
 However, the new versions of \code{titleFilter} cannot be reused as-is if some details of the inlined code change; for instance, we might need to filter publishers differently or not at all. On the other hand, if we express queries modularly, we might lose some opportunities for optimization. The design of the collections API, both in Scala and in typical languages, forces us to manually optimize our code by repeated inlining and subsequent application of query optimization rules, which leads to a loss of modularity.
 
-\begin{figure}
-\centering
+\begin{figure}[htb]
 \begin{lstlisting}
 def titleFilterHandOpt(books: Set[Book],
                         publisher: String,
