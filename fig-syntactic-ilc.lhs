@@ -21,7 +21,7 @@
 %
 \hfill
 %
-\begin{subfigure}[c]{0.5\textwidth}
+\begin{subfigure}[c]{0.49\textwidth}
 \begin{code}
   dc      ::=  0
   dw      ::=  dx | \x dx -> dt | pair dw dw | dc
@@ -52,7 +52,9 @@
 \label{sfig:anf-derive}
 \end{subfigure}
 %
-\begin{subfigure}[t]{0.5\textwidth}
+\hfill
+%
+\begin{subfigure}[t]{0.49\textwidth}
 \begin{code}
   tau ::= Nat | taua `times` taub | sigma -> tau
 

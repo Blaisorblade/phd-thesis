@@ -17,7 +17,7 @@
 %
 \hfill
 %
-\begin{subfigure}[c]{0.5\textwidth}
+\begin{subfigure}[c]{0.45\textwidth}
 \RightFramedSignature{\Delta\Gamma}
 \begin{align*}
   \Delta\EmptyContext &= \EmptyContext \\
@@ -35,7 +35,9 @@
 \label{fig:correctness:derive}
 \end{subfigure}
 %
-\begin{subfigure}[c]{0.5\textwidth}
+\hfill
+%
+\begin{subfigure}[c]{0.45\textwidth}
   \begin{typing}
     \Rule[Derive]
     {|Gamma /- t : tau|}
