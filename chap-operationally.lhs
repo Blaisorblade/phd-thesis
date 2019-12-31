@@ -1427,9 +1427,9 @@ Gamma e1 (de1 `ocompose` de2) e3| means the absurd
 |fromtosynuntyped Gamma 0 (0 `ocompose` 0) 10|.
 
 \paragraph{A possible fix}
-Does transitivity hold if |e2| terminates?
-If |(k, e1, de1, e2) `elem` compset tau| and |(k, e2, de2, e3)
-`elem` compset tau|, we still cannot conclude anything.
+Does transitivity hold if |e2| terminates? That is not sufficient: we still
+cannot conclude anything by assuming that |(k, e1, de1, e2) `elem` compset tau| and
+|(k, e2, de2, e3) `elem` compset tau|.
 But like in \citet{Ahmed2006stepindexed}, if |e2| and |e3| are
 related at all step counts, that is, if |(k, e1, de1, e2) `elem`
 compset tau| and |(forall n. (n, e2, de2, e3) `elem` compset

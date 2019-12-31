@@ -27,7 +27,7 @@ We will also use overly simplified change structures to illustrate a few points.
 \section{Change structures as type-class instances}
 \label{sec:diff-examples-tc}
 We encode change structures, as sketched earlier in \cref{sec:change-intro},
-through a \emph{type class} named |ChangeStruct|. An instance |ChangeStruct t|
+through a \emph{type class} called |ChangeStruct|. An instance |ChangeStruct t|
 defines a change type |Dt^t| as an associated type and operations |`oplus`|,
 |`ominus`| and |`ocompose`| are defined as methods. We also define method
 |oreplace|, such that |oreplace v2| produces a \emph{replacement change} from
