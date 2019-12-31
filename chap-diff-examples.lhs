@@ -378,9 +378,9 @@ Function |dmap| is a correct derivative of |map| for this change structure,
 according to \cref{slogan:derive}: we sketch an informal argument by induction.
 The equation for |dmap f df Nil Nil| returns |Nil|, a valid change from initial
 to updated outputs, as required.
-In the equation for |dmap f df (Cons x xs) (Cons dx dxs)| we compute changes to
+In the equation for |dmap f df (Cons x xs) (Cons|\linebreak|dx dxs)| we compute changes to
 the head and tail of the result, to produce a change from
-|map f (Cons x xs)| to |map (f `oplus` df) (Cons x xs `oplus` Cons dx dxs)|. To
+|map f (Cons|\linebreak|x xs)| to |map (f `oplus` df) (Cons x xs `oplus` Cons dx dxs)|. To
 this end,
 (a) we use |df x dx| to compute a
 change to the head of the result, from |f x| to |(f `oplus` df) (x `oplus` dx)|;
