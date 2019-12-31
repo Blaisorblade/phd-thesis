@@ -1428,11 +1428,11 @@ Gamma e1 (de1 `ocompose` de2) e3| means the absurd
 
 \paragraph{A possible fix}
 Does transitivity hold if |e2| terminates?
-If |(k, e1, de1, e2) `elem` compset tau `wand` (k, e2, de2, e3)
+If |(k, e1, de1, e2) `elem` compset tau| and |(k, e2, de2, e3)
 `elem` compset tau|, we still cannot conclude anything.
 But like in \citet{Ahmed2006stepindexed}, if |e2| and |e3| are
 related at all step counts, that is, if |(k, e1, de1, e2) `elem`
-compset tau `wand` (forall n. (n, e2, de2, e3) `elem` compset
+compset tau| and |(forall n. (n, e2, de2, e3) `elem` compset
 tau)|, and if additionally |e2| terminates, we conjecture that
 \citeauthor{Ahmed2006stepindexed}'s proof goes through. We have
 however not yet examined all the details.
