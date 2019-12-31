@@ -96,7 +96,7 @@ and \cref{sec:plugin-design} we have shown how to incrementalize functions
 
 In general, when we invoke |dmap| on a change |dxs| from |xs1| to |xs2|, it is
 important that |xs1| and |xs2| are similar enough that enough computation can be
-reused. Say that |xs1 = Cons 2 (Cons 3 (Cons 4 Nil))| and |xs2 = Cons 1 (Cons 2
+reused. Say that |xs1 = Cons 2 (Cons 3 (Cons 4|\linebreak|Nil))| and |xs2 = Cons 1 (Cons 2
 (Cons 3 (Cons 4 Nil)))|: in this case, a change modifying each element of |xs1|,
 and then replacing |Nil| by |Cons 4 Nil|, would be inefficient to process, and
 naive incrementalization would produce this scenario. In this case, it is clear
