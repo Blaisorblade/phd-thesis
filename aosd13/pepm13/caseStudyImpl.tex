@@ -298,7 +298,7 @@ implicit def expToTraversableLikeOps[T, Repr]
   new TraversableLikeOps[T, Repr](v)
 \end{lstlisting}
 
-Subclasses of \code{TraversableLike[T, Repr]} also subclass both \code{Traversable[T]} and \code{Repr}; to take advantage of this during interpretation and optimization, we need to restrict the type of \code{expToTraversableLikeOps}, getting the following conversion:\footnote{Due to type inference bugs, the actual implicit conversion needs to be slightly more complex, to mention \code{T} directly in the argument type. We reported the bug at \url{https://issues.scala-lang.org/browse/SI-5298}.}
+Subclasses of \code{TraversableLike[T, Repr]} also subclass both \code{Traversable[T]} and \code{Repr}; to take advantage of this subclass relation during interpretation and optimization, we need to restrict the type of \code{expToTraversableLikeOps}, obtaining the following conversion:\footnote{Due to type inference bugs, the actual implicit conversion needs to be slightly more complex, to mention \code{T} directly in the argument type. We reported the bug at \url{https://issues.scala-lang.org/browse/SI-5298}.}
 
 %We use enrich-my-library again with an implicit conversion to \code{TraversableLikeOps[T, Repr]}, shown later, which corresponds to
 %\code{TraversableLike[T, Repr]}.
