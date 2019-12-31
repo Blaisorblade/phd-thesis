@@ -637,7 +637,7 @@ reifies queries on collections to enable analysis and optimization. Such queries
 implicit conversion between expressions and their reification as a syntax tree. There are various major differences, though.
 First, the support for expression trees is hard-coded into the compiler. This means that the techniques are not applicable in languages 
 that do not explicitly support expression trees. More importantly, the way expression trees are created in \LINQ\ is generic and fixed.
-For instance, it is not possible to create different tree nodes for method calls that are relevant to an analysis (such as the \code{map} method) than for method calls that are irrelevant for the analysis (such as the \code{toString} method). For this reason, expression trees in \LINQ\ 
+For instance, it is not possible to create different tree nodes for method calls that are relevant to an analysis (such as the \code{map} method) than for method calls that are irrelevant for the analysis (such as the \code{toString} method). For this reason, expression trees in \LINQ{}
 cannot be customized to the task at hand and contain too much low-level information. It is well-known that this makes it quite hard to
 implement programs operating on expression trees~\citep{Eini11Pain}. 
 
