@@ -26,7 +26,7 @@ optimizers used by typical (JIT) compilers.
 
 % High-level is missing. Maybe put that in the conclusion.
 %Programmers would benefit from domain-specific
-%optimizations which are not supported by 
+%optimizations which are not supported by
 %current general-purpose optimizers.
 %Such optimizations are supported instead by query optimizers in database
 %management systems (DBMS). However, such query optimizers cannot be used on their own because
@@ -66,7 +66,7 @@ different module) to enable reuse and improve understandability.%
 %be better to keep them distinct, because for instance they are part of different
 %modules, or they have logically different goals.
 %---we assume for some good reason, for instance because they are part of different modules.
-%When two functions are logically distinct, 
+%When two functions are logically distinct,
 
 For these reasons, currently developers need to choose between modularity and
 performance, as also highlighted by
@@ -80,7 +80,7 @@ this end, we are modularizing these performance concerns into a
 metaprogramming-based optimization module, which we believe
 could be called, in that terminology, \emph{aspect}.}
 
-One way to implement such an optimizer would be to extend the compiler of the language with a collection-specific optimizer, or 
+One way to implement such an optimizer would be to extend the compiler of the language with a collection-specific optimizer, or
 to add some kind of external preprocessor to the language. However, such solutions would be rather brittle (for instance, they lack
 composability with other language extensions) and they would preclude optimization opportunities that arise only at runtime.
 
@@ -95,7 +95,7 @@ flexible and has a powerful type system, and (ii) Scala has a sophisticated coll
 To evaluate \LoS, we study queries of the FindBugs tool~\citep{DBLP:journals/sigplan/HovemeyerP04}.
 We rewrote a set of queries to use the Scala collections API and show that modularization incurs significant performance overhead. Subsequently, we consider versions of the same queries using \LoS{}.
 We demonstrate that the automatic optimization can reconcile modularity and performance in many cases. Adding advanced optimizations such as indexing can even improve the performance of the analyses beyond the original non-modular analyses.
- 
+
 \section{Contributions and summary}
 \label{sec:aosd13-contributions}
 \label{sec:navigating-aosd13}
@@ -287,7 +287,7 @@ of side effects enables more optimizations.
 %remains valid.
 % PG: also, that's not even strictly true.
 
-%To simplify optimizations, the optimizer assumes no side effects are performed, and 
+%To simplify optimizations, the optimizer assumes no side effects are performed, and
 In Fig.~\ref{fig:reifiedQuery} we show a version of our running example adapted to use {\LoS}. We first discuss changes to \code{records}.
 To enable {\LoS}, a programmer needs to (a) import the \LoS\
 library, (b) import some wrapper code specific to the types the collection
@@ -304,8 +304,8 @@ For parameterized queries like \code{titleFilter}, we need to also adapt type an
 The ones in \code{titleFilterQuery} reveal some details of our implementation:
 Expressions that are reified have type \code{Exp[T]} instead of \code{T}.
 As the code shows, \code{resQuery} is optimized before compilation. This call will perform the optimizations that we previously did by hand
-and will return a query equivalent to that in Fig.~\ref{fig:titleFilterho2}, after verifying their safety conditions. For instance, 
-after inlining, the filter \code{if book.title.contains(keyword)} does not reference \code{author}; hence, it is safe to hoist. 
+and will return a query equivalent to that in Fig.~\ref{fig:titleFilterho2}, after verifying their safety conditions. For instance,
+after inlining, the filter \code{if book.title.contains(keyword)} does not reference \code{author}; hence, it is safe to hoist.
 Note that checking this safety condition would not be possible without reifying the predicate. For instance, it would
 not be sufficient to only reify the calls to the collection API, because the predicate is represented as a boolean function parameter.
 In general, our automatic optimizer inspects the whole reification of the query implementation to check that optimizations
@@ -317,7 +317,7 @@ do not introduce changes in the overall result of the query and are therefore sa
 %path indexes, nor do we cite the paper (citation key Bertino89). Is that OK?}
 % PG: yes at least for now, because of space reasons.
 
-{\LoS} also supports the transparent usage of indexes. Indexes can further improve the efficiency of queries, sometimes by orders of magnitude. 
+{\LoS} also supports the transparent usage of indexes. Indexes can further improve the efficiency of queries, sometimes by orders of magnitude.
 In our running example, the query scans all books to look for the ones having the right publisher. To speed up this query, we can preprocess \code{books} to build an index, that is, a dictionary mapping, from each publisher to a collection of all the books it published. This index can then be used to answer the original query without scanning all books.
 
 We construct a \emph{query} representing the desired dictionary, and inform the optimizer that it should use this index where appropriate:
@@ -328,12 +328,12 @@ Optimization.addIndex(idxByPublisher)
 
 The \code{indexBy} collection method accepts a function that maps a collection element to a key; \code{coll.indexBy(key)} returns a dictionary mapping each key to the collection of all elements of \code{coll} having that key. Missing keys are mapped to an empty collection.%
 \footnote{For readers familiar with the Scala collection API, we remark that the only difference with the standard \code{groupBy} method is the handling of missing keys.}
-\code{Optimization.addIndex} simply preevaluates the index and updates a dictionary mapping the index to its preevaluated result. 
+\code{Optimization.addIndex} simply preevaluates the index and updates a dictionary mapping the index to its preevaluated result.
 
 % PG: this explanation is too simplified, explain this better later.
 %In {\LoS}, the user is responsible for creating indexes, in form of \emph{queries} representing the desired dictionaries,
 %and registering them.
-%The automatic optimizer is responsible for using registered indexes where possible to speed up queries. 
+%The automatic optimizer is responsible for using registered indexes where possible to speed up queries.
 %In \LoS, an index is defined as a query which returns a map%
 %% from the index key to the rest of the collection,
 %, usually by calling the \code{indexBy} operator.
@@ -349,7 +349,7 @@ val indexedQuery =
   } yield new BookData(book.title, author.firstName + " " + author.lastName,
     book.authors.size - 1)
 \end{lstlisting}
-Since dictionaries in Scala are functions, in the above code, dictionary lookup on \code{idxByPublisher} is represented simply as function application. The above code iterates over books having the desired publisher, instead of scanning the whole library, and performs the remaining computation from the original query. Although the index use in the listing above is notated as 
+Since dictionaries in Scala are functions, in the above code, dictionary lookup on \code{idxByPublisher} is represented simply as function application. The above code iterates over books having the desired publisher, instead of scanning the whole library, and performs the remaining computation from the original query. Although the index use in the listing above is notated as
 \code{idxByPublisher("Pearson Education")}, only the cached result of evaluating the index is used when
 the query is executed, not the reified index definition.
 
@@ -447,7 +447,7 @@ converting the collection to the leaf of an expression tree.
 
 It is also possible to call methods that do not return expression trees; however, such method calls would
 then only be represented by an opaque \code{MethodCall} node in the expression tree, which means that the code
-of the method cannot be considered in optimizations. 
+of the method cannot be considered in optimizations.
 
 Crucially, these expression trees are generated at runtime. For instance,
 the first \code{Const} contains a reference to the actual collection of books to which \code{books} refers.
@@ -523,7 +523,7 @@ associative operators and
       removal of identity maps (\code{coll.map(x => x)}, typically generated by
       the translation of for-comprehensions).
 \end{itemize}
-%The optimizations are applied iteratively until no more optimizations are applicable. 
+%The optimizations are applied iteratively until no more optimizations are applicable.
 Each optimization is applied recursively bottom-up until it does not trigger
 anymore; different optimizations are composed in a fixed pipeline.
 
@@ -635,11 +635,11 @@ This chapter builds on prior work on language-integrated queries, query optimiza
 Microsoft's Language-Integrated Query technology (\LINQ)~\citep{Meijer:2006:LRO:1142473.1142552,Bierman:2007:LTF:1297027.1297063} is similar to our work in that it also
 reifies queries on collections to enable analysis and optimization. Such queries can be executed against a variety of backends (such as SQL databases or in-memory objects), and adding new back-ends is supported. Its implementation uses \emph{expression trees}, a compiler-supported
 implicit conversion between expressions and their reification as a syntax tree. There are various major differences, though.
-First, the support for expression trees is hard-coded into the compiler. This means that the techniques are not applicable in languages 
+First, the support for expression trees is hard-coded into the compiler. This means that the techniques are not applicable in languages
 that do not explicitly support expression trees. More importantly, the way expression trees are created in \LINQ\ is generic and fixed.
 For instance, it is not possible to create different tree nodes for method calls that are relevant to an analysis (such as the \code{map} method) than for method calls that are irrelevant for the analysis (such as the \code{toString} method). For this reason, expression trees in \LINQ{}
 cannot be customized to the task at hand and contain too much low-level information. It is well-known that this makes it quite hard to
-implement programs operating on expression trees~\citep{Eini11Pain}. 
+implement programs operating on expression trees~\citep{Eini11Pain}.
 
 \LINQ\ queries can also not easily be decomposed and modularized. For instance, consider the task of refactoring the filter in the query {\tt from x in y where x.z == 1 select x}
 into a function. Defining this function as {\tt bool comp(int v) \{ return v == 1; \}} would destroy the possibility of analyzing the filter for optimization, since
@@ -648,15 +648,15 @@ this function could not be used in the original query anymore, since the compile
 It could only be integrated if the expression tree of the original query is created by hand, without using the built-in support for expression trees.
 
 % Klaus: since we do not talk much about the embedding technique we should not talk about type safety here
-%Expression trees in \LINQ\ also provide little type safety. While they appear to be typed superficially (quoting an expression of type \code{T} yields 
+%Expression trees in \LINQ\ also provide little type safety. While they appear to be typed superficially (quoting an expression of type \code{T} yields
 %an expression tree of type \code{Expression<T>}) they are untyped internally. For instance, when one decomposes a node into its components,
-%the components are untyped. 
+%the components are untyped.
 % Klaus: let's not distract by talking superficially about Haskell
 % This is similar to deep embedding of expressions in Haskell, which typically use a phantom type wrapper around untyped expressions.
 
 %In contrast, expression trees in our approach are typed and simple transformations can be statically checked to be type-preserving. More complex optimizations require however type casts and rely on erasure of type parameters at run time, as we will discuss in detail later on.
 
-Although queries against in-memory collections could theoretically also be optimized in \LINQ, the standard implementation, {\LINQ}2Objects, performs no optimizations. 
+Although queries against in-memory collections could theoretically also be optimized in \LINQ, the standard implementation, {\LINQ}2Objects, performs no optimizations.
 
 A few optimized embedded DSLs allow executing queries or computations on distributed clusters.
 DryadLINQ~\citep{Yu08}, based on \LINQ, optimizes queries for distributed
@@ -679,7 +679,7 @@ the adoption, extensibility, and composability of their technique difficult%
 %PG: Remove it if we have space limits.
 
 There have been many approaches for a closer integration of SQL queries into programs, such as
-HaskellDB~\citep{Leijen99DSEC} (which also inspired \LINQ), or Ferry~\citep{Grust:2009:FDP:1559845.1559982} 
+HaskellDB~\citep{Leijen99DSEC} (which also inspired \LINQ), or Ferry~\citep{Grust:2009:FDP:1559845.1559982}
 (which moves part of a program execution to a database). In Scala, there are also
 APIs which integrate SQL queries more closely such as
 Slick.\footnote{\url{http://slick.typesafe.com/}} Its frontend allows to define
@@ -690,7 +690,7 @@ in other collections (a feature which simplified our example in
 \cref{sec:motivation}), nor distinguishes statically between different kinds of
 collections, such as \code{Set} or \code{Seq}.
 Based on Ferry, ScalaQL~\citep{JOT:issue_2010_07/article3} extends Scala with a compiler-plugin to integrate a query language on top of a relational database. The work by \citet{Spiewak09scalaql:language-integrated} is
- unrelated to~\citep{JOT:issue_2010_07/article3} but also called ScalaQL\@. It is similar to our approach in that it also 
+ unrelated to~\citep{JOT:issue_2010_07/article3} but also called ScalaQL\@. It is similar to our approach in that it also
 proposes to reify queries based on for-comprehensions, but it is not clear from their paper how the reification
 works.\footnote{We contacted the authors; they were not willing to provide more details or the sources of their approach.}
 
@@ -786,8 +786,8 @@ Like OptiQL, Jet does not apply typical database optimizations such as
 indexing or filter hoisting.
 
 \section{Code Querying}
-In our evaluation we explore the usage of \LoS\ to express queries on code and re-implement a subset of the FindBugs~\citep{DBLP:journals/sigplan/HovemeyerP04} analyses. There are various other specialized code query languages such as 
-CodeQuest~\citep{Hajiyev06CodeQuest} or D-CUBED~\citep{Wegrzynowicz:2009:GBU:1639950.1640032}. 
+In our evaluation we explore the usage of \LoS\ to express queries on code and re-implement a subset of the FindBugs~\citep{DBLP:journals/sigplan/HovemeyerP04} analyses. There are various other specialized code query languages such as
+CodeQuest~\citep{Hajiyev06CodeQuest} or D-CUBED~\citep{Wegrzynowicz:2009:GBU:1639950.1640032}.
 Since these are special-purpose query languages that are not embedded into a host language, they are not directly comparable to our approach.
 
 
@@ -796,7 +796,7 @@ Since these are special-purpose query languages that are not embedded into a hos
 \label{ch:aosd13-concl}
 
 We have illustrated the tradeoff between performance and modularity for queries on in-memory collections. We have shown that it is possible to design a deep embedding of a version of the collections API which reifies queries and can optimize them at runtime.
-Writing queries using this framework is, except minor syntactic details, the same as writing queries using the collection library, hence the adoption barrier to using our optimizer is low. 
+Writing queries using this framework is, except minor syntactic details, the same as writing queries using the collection library, hence the adoption barrier to using our optimizer is low.
 
 Our evaluation shows that using abstractions in queries introduces a significant
 performance overhead with native Scala code, while \LoS{}, in most cases, makes
