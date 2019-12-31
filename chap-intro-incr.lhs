@@ -171,12 +171,12 @@ simply-typed $\lambda$-calculus (STLC), extended with
 approach \emph{ILC} for \emph{Incremental Lambda Calculus}.
 
 The rest of this chapter is organized as follows.
-In \cref{sec:generalize-fin-diff} we explain that 
+In \cref{sec:generalize-fin-diff} we explain that
 differentiation generalizes the calculus of finite differences, a relative of
 differential calculus.
 In \cref{sec:motiv-example} we show a motivating example for
 our approach.
-In \cref{sec:change-intro} we introduce informally 
+In \cref{sec:change-intro} we introduce informally
 the concept of \emph{changes} as values, and in \cref{sec:higher-order-intro} we
 introduce \emph{changes to functions}.
 In \cref{sec:informal-derive} we define differentiation and motivate it

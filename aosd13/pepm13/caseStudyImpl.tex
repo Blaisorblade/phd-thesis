@@ -2,7 +2,7 @@
 % Scala-virtualized has no polymorphic lift, unlike us.
 % 2. Embedding collections into Scala
 % When does one need asSquopt?
-To optimize a query as described in the previous section, {\LoS} needs to reify, optimize and execute queries. 
+To optimize a query as described in the previous section, {\LoS} needs to reify, optimize and execute queries.
 Our implementation assigns responsibility for these steps to three main components: A generic library for reification and execution of general Scala expressions, a more specialized library for reification and execution of query operators, and a dedicated query optimizer.
 Queries need then to be executed through either compilation (already discussed in
 \cref{sec:execution}) or interpretation (to discuss in \cref{sec:interpretation}).
@@ -58,7 +58,7 @@ class StringOps(t: Exp[String]) {
 }
 \end{lstlisting}
 This is an example of the well-known Scala \emph{enrich-my-library pattern}\footnote{Also known as \emph{pimp-my-library} pattern.}~\citep{OderskyPimpLib}.
- 
+
 With these declarations in scope, the Scala compiler rewrites \code{str1 + str2} to
 \code{expToStringOps(str1).+(str2)}, which evaluates to \code{StringConcat(str1, str2)} as desired.
 The implicit conversion function \code{expToStringOps} is not applicable to \code{Exp[Boolean]} because it explicitly specifies the receiver of the \code{+}-call to have type \code{Exp[String]}.
@@ -82,7 +82,7 @@ Different implicit conversions cooperate successfully to lift the expression.
 Analogously, it would be convenient if the similar expression \code{"bar" + str1} would be rewritten to \code{expToStringOps(pure("bar")) + str1}, but this is not the case, because implicit coercions are not chained automatically in Scala.
 Instead, we have to manually chain existing implicit conversions into a new one:
 \begin{lstlisting}
-implicit def toStringOps(t: String) = expToStringOps(pure(t)) 
+implicit def toStringOps(t: String) = expToStringOps(pure(t))
 \end{lstlisting}
 so that \code{"bar" + str1} is rewritten to \code{toStringOps("bar") + str1}.
 
@@ -158,7 +158,7 @@ Hence, part of the expression is evaluated before being reified. This is harmles
 We have shown how to lift first-order expressions; however, the interface of collections also uses higher-order methods, that is, methods that accept functions as parameters, and we need to lift them as well to reify the complete collection EDSL\@. For instance, the \code{map} method applies a function to each element of a collection. In this section, we describe how we reify such expressions of function type.
 
 \smartParagraph{Higher-order abstract syntax}
-To represent functions, we have to represent the bound variables in the function bodies. For example, a reification of \code{str => str + "!"} needs to reify the variable \code{str} of type \code{String} in the body of the anonymous function. This reification should retain the information where \code{str} is bound. We achieve this by representing bound variables using \emph{higher-order abstract syntax} (HOAS)~\citep{Pfenning88hoas}, that is, we represent them by variables bound at the meta level. To continue the example, the above function is reified as \code{(str: Exp[String]) => str + "!"}. Note how the type of \code{str} in the body of this version is \code{Exp[String]}, because \code{str} is a reified variable now. Correspondingly, the expression \code{str + "!"} is lifted as described in the previous section. 
+To represent functions, we have to represent the bound variables in the function bodies. For example, a reification of \code{str => str + "!"} needs to reify the variable \code{str} of type \code{String} in the body of the anonymous function. This reification should retain the information where \code{str} is bound. We achieve this by representing bound variables using \emph{higher-order abstract syntax} (HOAS)~\citep{Pfenning88hoas}, that is, we represent them by variables bound at the meta level. To continue the example, the above function is reified as \code{(str: Exp[String]) => str + "!"}. Note how the type of \code{str} in the body of this version is \code{Exp[String]}, because \code{str} is a reified variable now. Correspondingly, the expression \code{str + "!"} is lifted as described in the previous section.
 
 With all operations in the function body automatically lifted, the only remaining syntactic difference between normal and lifted functions is the type annotation for the function's parameter. Fortunately, Scala's \emph{local type inference} can usually deduce the argument type from the context, for example, from the signature of the \code{map} operation being called. Type inference plays a dual role here: First, it allows the query writer to leave out the annotation, and second, it triggers lifting in the function body by requesting a lifted function instead of a normal function. This is how in Fig.~\ref{fig:reifiedQuery}, a single call to \code{asSquopt} triggers lifting of the overall query.
 
@@ -264,7 +264,7 @@ val recordsSeq = for {
 \end{lstlisting}
 
 \smartParagraph{Precise static typing}
-The Scala collections EDSL achieves precise static typing while avoiding code duplication~\citep{odersky2009fighting}. Precise static typing is necessary because the return type of a query operation can depend on subtle details of the base collection and query arguments. 
+The Scala collections EDSL achieves precise static typing while avoiding code duplication~\citep{odersky2009fighting}. Precise static typing is necessary because the return type of a query operation can depend on subtle details of the base collection and query arguments.
 To return the most specific static type, the Scala collection DSL defines a type-level relation between the source collection type, the element type for the transformed collection, and the type for the resulting collection. The relation is encoded through the concept pattern~\citep{Oliveira10TCOI}, i.e., through a type-class-style trait \code{CanBuildFrom[From, Elem, To]}, and elements of the relation are expressed as implicit instances.
 
 For example, a finite map can be treated as a set of pairs so that mapping a function from pairs to pairs over it produces another finite map. This behavior is encoded in an instance of type \code{CanBuildFrom[Map[K, V], (K1, V1), Map[K1, V1]}. The \code{Map[K, V]} is the type of the base collection, \code{(K1, V1)} is the return type of the function, and \code{Map[K1, V1]} is the return type of the map operation.
@@ -478,7 +478,7 @@ unlike during compilation.
 %We implement an environment-based
 %interpreter operating on the FOAS representation of functions, but the implementation is simplified because variable bindings have globally unique IDs, hence shadowing does not occur.
 %
-%%The current environment is not passed as a parameter to \code{interpret()}; instead, the stack of environments is maintained explicitly, similarly to the SECD machine \pg{Tillmann: citation to Landin's paper or to a textbook}. 
+%%The current environment is not passed as a parameter to \code{interpret()}; instead, the stack of environments is maintained explicitly, similarly to the SECD machine \pg{Tillmann: citation to Landin's paper or to a textbook}.
 %%We implement static scoping, hence when we create an object-language closure we save the current environment in the returned closure.
 %%Thanks to Scala's support for closures, we can simply represent an object-level closure through a meta-level closure.
 %
@@ -522,7 +522,7 @@ are essentially domain-specific and can improve complexity of a query. To enable
 
 We have implemented thus optimizations of three classes:
 \begin{itemize}
-\item general-purpose simplifications, like inlining, compile-time beta-reduction, constant folding and reassociation on primitive types, and other simplifications\footnote{Beta-reduction and simplification are run in a fixpoint loop~\citep{Peyton-Jones02}. Termination is guaranteed because our language does not admit general recursion.}; 
+\item general-purpose simplifications, like inlining, compile-time beta-reduction, constant folding and reassociation on primitive types, and other simplifications\footnote{Beta-reduction and simplification are run in a fixpoint loop~\citep{Peyton-Jones02}. Termination is guaranteed because our language does not admit general recursion.};
 \item domain-specific simplifications, whose main goal is still to enable more important optimizations;
 \item domain-specific optimizations which can change the complexity class of a query, such as filter hoisting, hash-join transformation or indexing.
 \end{itemize}
@@ -559,7 +559,7 @@ Conversely, function applications are represented using the constructor \code{Ap
 %Since HOAS does not allow reifying variable names, we introduce a thread-safe generator of fresh ones, \code{Fun.gensym[S](): TypedVar[S]}
 
 %\begin{lstlisting}
-%def toFOAS[S, T](funBody: Exp[S] => Exp[T]) = 
+%def toFOAS[S, T](funBody: Exp[S] => Exp[T]) =
 %\end{lstlisting}
 In our example, \code{Fun(str => str + "!")} produces\\
 \code{FOASFun(StringConcat(TypedVar[String](1), Const("!")), TypedVar[String](1))}%

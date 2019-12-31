@@ -48,9 +48,9 @@ More importantly for queries, \emph{pattern matching} cannot be supported by dee
 
 We also experienced problems with operators that cannot be overloaded, such as \code{==} or \code{if-else} and with lifting methods in \code{scala.Any}, which forced us to provide alternative syntax for these features in queries. The  Scala-virtualized project \citep{Moors12Virtualized} aims to address these limitations; unfortunately, it advertises no change on the other problems we found, which we subsequently detail.
 
-%Pattern matching cannot be virtualized as-is, 
+%Pattern matching cannot be virtualized as-is,
 
-It would also be desirable if we could enforce the absence of side effects in queries, but since Scala, like most practical programming languages except Haskell, does not track side effects in the type system this does not seem to be possible. 
+It would also be desirable if we could enforce the absence of side effects in queries, but since Scala, like most practical programming languages except Haskell, does not track side effects in the type system this does not seem to be possible.
 %However, we believe that the advantages of purely functional queries are a more desirable interface.
 
 Finally, compared to \emph{lightweight modular staging}~\citep{rompf2010lightweight} (the foundation of Delite) and to polymorphic embedding~\citep{hofer08polymorphic}, we have less static checking for some programming errors when writing queries; the recommended way to use Delite is to write a EDSL program in one trait, in terms of the EDSL interface only, and combine it with the implementation in another trait. In polymorphic embedding, the EDSL program is a function of the specific implementation (in this case, semantics).
@@ -59,7 +59,7 @@ However, we judged the syntactic overhead for the programmer to be too high to u
 
 The choice of interpreting expressions turned out to be a significant performance limitation. It could likely be addressed by using Delite and lightweight modular staging instead, but we wanted to experiment with how far we can get \emph{within} the language in a well-typed setting.
 
-%The first is 
+%The first is
 %\pg{We don't support pattern matching in the user interface.}
 
 \subsection{What did not work so well: Scala type inference}
@@ -67,8 +67,8 @@ The choice of interpreting expressions turned out to be a significant performanc
 
 %\pg{Continue:
 %When implementing our library, we often struggled against limitations and bugs in the Scala compiler, especially regarding type inference and its interaction with implicit resolution. Scala's type inference is not complete.
-%%, hence it does not guarantee 
-%%When using implicit conversions to encode 
+%%, hence it does not guarantee
+%%When using implicit conversions to encode
 %}
 %\pg{Examples: nested constructors; shadowing of functions; pattern matching in the optimizer}.
 %\pg{Our expression trees are only partially typed - discuss limitations of the optimizer.}
@@ -85,7 +85,7 @@ The choice of interpreting expressions turned out to be a significant performanc
 %
 %%one can often write type signatures to ensure that it works.
 %
-%In this example, type inference can consider the type of \code{map}, unify \code{T} with \code{String} and \code{T => U} with the type of \code{str => str + "!"}. Type inference deduces that \code{str} must also have type \code{T = String}, and can then typecheck the function body and deduce that its return type, \code{U}, is also \code{String}. 
+%In this example, type inference can consider the type of \code{map}, unify \code{T} with \code{String} and \code{T => U} with the type of \code{str => str + "!"}. Type inference deduces that \code{str} must also have type \code{T = String}, and can then typecheck the function body and deduce that its return type, \code{U}, is also \code{String}.
 
 
 %\pg{The interpretation overhead is higher than we expected, both with and without HOAS; maybe better JIT compilers could help?}
@@ -136,7 +136,7 @@ The choice of interpreting expressions turned out to be a significant performanc
 %Hence we need to write a new implicit conversion, chaining those two conversions explicitly:
 %
 %\begin{lstlisting}
-%implicit def toStringOps(t: String) = expToStringOps(pure(t)) 
+%implicit def toStringOps(t: String) = expToStringOps(pure(t))
 %\end{lstlisting}
 
 
@@ -167,7 +167,7 @@ The choice of interpreting expressions turned out to be a significant performanc
 %\begin{lstlisting}
 %def asExp[T](t: Exp[T]) = t
 %\end{lstlisting}
-%Note that \code{asExp} is an identity function, but restricted to expression trees; this triggers the Scala compiler to use an implicit resolution if needed. Standard rules for implicit resolution apply, which select the implicit conversion with the most specific type. Hence, while \code{pure((a, b))} would produce \code{Const((a, b))} with type \code{Exp[(Exp[A], Exp[B])]}, 
+%Note that \code{asExp} is an identity function, but restricted to expression trees; this triggers the Scala compiler to use an implicit resolution if needed. Standard rules for implicit resolution apply, which select the implicit conversion with the most specific type. Hence, while \code{pure((a, b))} would produce \code{Const((a, b))} with type \code{Exp[(Exp[A], Exp[B])]},
 %\code{asExp((a, b))} produces \code{LiftTuple2(a, b)} with type \code{Exp[(A, B)]}, that is a representation of \code{(a, b)}, as desired.
 %
 %
@@ -189,11 +189,11 @@ The code in Fig.~\ref{fig:reifiedQuery} uses the lifted \code{BookData} construc
 %\pg{Resume}
 % function of type \code{}
 % are reported as bugs; some of them were already acknowledged, others were found to be already known.
-%During our work we reported many of the bugs we found; we provide links to the ones which are still not addressed and which support 
+%During our work we reported many of the bugs we found; we provide links to the ones which are still not addressed and which support
 %\pg{Say something about bugs found.}
 
-%defined 
-%apparently the only description of its behavior 
+%defined
+%apparently the only description of its behavior
 
 %We found various limitations of type inference for Scala.
 %Note that we identify the language and its implementation in the following, since type inference is not specified, hence Scala's type inference is de facto specified by its only implementation.
@@ -242,7 +242,7 @@ In this context, let us consider again how we lift tuples. We have seen that the
 but the compiler refuses to apply it implicitly, again because of type inference issues\footnote{\url{https://issues.scala-lang.org/browse/SI-5651}, reported by us.}.
 
 Because of this type inference limitations, we failed to provide support for reifying code like \code{((a, b), c)}\footnote{One could of course write a specific implicit conversions for \emph{this} case; however, \code{(a, (b, c))} requires already a different implicit conversion, and there are infinite ways to nest pairs, let alone tuples of bounded arity.}.
-%Hence, we did not find a way to support nested tuples like 
+%Hence, we did not find a way to support nested tuples like
 
 %For instance
 %but as soon as we try supporting nesting tuples such as \code{((a, b), c},
@@ -295,7 +295,7 @@ alternatives in future work.
 %\subsection{Future work}
 %As part of future work we plan to add support for memoization~\citep{elliott03compiling} and \emph{incremental view maintenance} to \LoS~\citep{GlucheGrust97Incr}.
 %
-%%Our prototype of the optimizer is only intended to demonstrate the usefulness of our deep embedding, and is thus not itself optimized. We plan to improve 
+%%Our prototype of the optimizer is only intended to demonstrate the usefulness of our deep embedding, and is thus not itself optimized. We plan to improve
 %%Optimizing fast queries is often slower than evaluating the unoptimized version, but that is only a limitation of the implementation.
 %
 %A more complete optimizer would require common-subexpression elimination~\citep{elliott03compiling,rompf2010lightweight} and a more powerful inliner~\citep{Peyton-Jones02}~\pg{I implemented inlining as hoped}, but those issues are out of scope in this paper; we plan to integrate existing techniques in future work.
