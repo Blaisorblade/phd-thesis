@@ -855,7 +855,7 @@ must bind all those variables.
   `betaeq`  \xs dxs ys dys -> sum (merge dxs dys)
 \end{code}
 
-Next we need to transform the binding of |grandTotal2| to its body |b = \ xs ys -> sum (merge xs ys)|. We copy this binding and add a new additional binding from |dgrandTotal2| to the derivative of |b|.
+Next we need to transform the binding of |grandTotal| to its body |b = \ xs ys -> sum (merge xs ys)|. We copy this binding and add a new additional binding from |dgrandTotal| to the derivative of |b|.
 
 \begin{code}
 grandTotal   = \ xs      ys      ->  sum  (merge  xs   ys)
