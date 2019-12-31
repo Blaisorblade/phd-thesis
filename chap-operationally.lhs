@@ -1397,7 +1397,7 @@ difficulties.
 However, |`ocompose`| deserves special attention.
 \subsection{Change composition}
 We have looked into change composition, and it appears that
-composition of change expression is not always valid, but we
+composition of change expressions is not always valid, but we
 conjecture that composition of change values preserves validity.
 Showing that change composition is valid appears related to
 showing that \citeauthor{Ahmed2006stepindexed}'s logical equivalence
@@ -1430,12 +1430,12 @@ Gamma e1 (de1 `ocompose` de2) e3| means the absurd
 Does transitivity hold if |e2| terminates?
 If |(k, e1, de1, e2) `elem` compset tau `wand` (k, e2, de2, e3)
 `elem` compset tau|, we still cannot conclude anything.
-But like in \citet{Ahmed2006stepindexed}, if |e2| amd |e3| are
+But like in \citet{Ahmed2006stepindexed}, if |e2| and |e3| are
 related at all step counts, that is, if |(k, e1, de1, e2) `elem`
 compset tau `wand` (forall n. (n, e2, de2, e3) `elem` compset
 tau)|, and if additionally |e2| terminates, we conjecture that
 \citeauthor{Ahmed2006stepindexed}'s proof goes through. We have
-however not yet examined all details.
+however not yet examined all the details.
 
 % transitivity requires using a typed setting.
 % However, her
