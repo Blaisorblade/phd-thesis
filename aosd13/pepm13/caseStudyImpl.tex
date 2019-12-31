@@ -321,7 +321,8 @@ Instead, by reusing Scala type-level machinery, we obtain a reification which is
 \begin{figure}
 \begin{center}
 \begin{lstlisting}
-class TraversableLikeOps[T, Repr <: Traversable[T] with TraversableLike[T, Repr]](t: Exp[Repr]) {
+class TraversableLikeOps[T, Repr <: Traversable[T] with TraversableLike[T, Repr]](
+    t: Exp[Repr]) {
   val t: Exp[Repr]
 
   def withFilter(f: Exp[T] => Exp[Boolean]): Exp[Repr] = Filter(this.t, FuncExp(f))
