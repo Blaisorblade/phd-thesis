@@ -1,14 +1,14 @@
 \begin{abstract}
 Modularity and efficiency are often contradicting requirements, such that programers have
 to trade one for the other. We analyze this dilemma in the context of programs
-operating on collections. Performance-critical code using collections need often to be hand-optimized, leading to non-modular, brittle, 
+operating on collections. Performance-critical code using collections need often to be hand-optimized, leading to non-modular, brittle,
 and redundant code. In principle, this dilemma could be avoided by automatic collection-specific
 optimizations, such as fusion of collection traversals, usage of indexing, or
-reordering of filters. Unfortunately, it is not obvious how to encode such optimizations 
+reordering of filters. Unfortunately, it is not obvious how to encode such optimizations
 in terms of ordinary collection APIs, because the program operating on the collections is not reified and hence cannot be analyzed.
 
 We propose \LoS, the Scala Query Optimizer---a \emph{deep embedding} of the Scala collections API
-that allows such analyses and optimizations to be defined and executed within Scala, without relying on external tools 
+that allows such analyses and optimizations to be defined and executed within Scala, without relying on external tools
 or compiler extensions. \LoS\ provides the same ``look and feel'' (syntax and
 static typing guarantees) as the standard collections API\@.
 We evaluate \LoS\ by re-implementing several code analyses of the FindBugs tool

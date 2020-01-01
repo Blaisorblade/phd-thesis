@@ -125,7 +125,7 @@
       \EvalIncSmashWith{c}{\rho}{\D \rho}
         & = \NilC{\EvalConst{c}}\\
       \EvalIncSmashWith{\Lam{x}{t}}{\rho}{\D \rho}
-        & = \lambda v\;\D v.\ 
+        & = \lambda v\;\D v.\
                    \EvalIncSmashWith
                    {t}
                    {\ExtendEnv*{x}{v}}

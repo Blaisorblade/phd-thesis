@@ -693,7 +693,7 @@ is correct (\cref{thm:derive-correct}) we get
   If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
   |eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|.
 \end{restatable}
-\end{partCompile} 
+\end{partCompile}
 
 We can also define a change structure for environments.
 Recall that change structures for products define their operations to act on

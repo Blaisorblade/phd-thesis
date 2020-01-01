@@ -12,8 +12,8 @@ using \LoS{} is usually moderate, and optimizations can compensate this overhead
 modularization slowdown and improve performance of some queries by orders of
 magnitude, especially when indexes are used.
 
-%In this section, we demonstrate the potential of \LoS\ regarding 
-%%compactness and 
+%In this section, we demonstrate the potential of \LoS\ regarding
+%%compactness and
 %\emph{efficiency} by implementing queries and measuring their performance. We show that interpretation overhead is comparably moderate, whereas our optimizations can improve performance of some queries by orders of magnitude.
 
 \section{Study Setup}
@@ -27,7 +27,7 @@ As we are interested in both performance and modularization, we have a specifica
 \begin{enumerate}
 	\item[(0)] \textbf{Query specification:} We selected a set of existing real-world queries specified and implemented independently from our work and prior to it. We used only the specification of these queries.
 
-	\item[(1)] \textbf{Modularized Scala implementation:} 
+	\item[(1)] \textbf{Modularized Scala implementation:}
 	We reimplemented each query as an expression on Scala collections\--- our baseline implementation. For modularity, we separated reusable domain abstractions into subqueries. We confirmed the abstractions with a domain expert and will later illustrate them to emphasize their general nature.
 	\item[(2)] \textbf{Hand-optimized Scala implementation:} Next, we asked a domain expert to performed manual optimizations on the modularized queries. The expert should perform optimizations, such as inlining and filter hoisting, where he could find performance improvements.
 %Specifically, we inlined all subqueries into a single query and performed the following optimization: loop fusion, \chk{...}.
@@ -85,7 +85,7 @@ Typically a bug detector is furthermore scattered across the different methods o
 We believe this architecture has been chosen to achieve good performance; however, we do not consider such manual fusion of distinct bug detectors together as modular. We selected queries from FindBugs because they represent typical non-trivial queries on in-memory collections and because we believe our framework allows expressing them more modularly.
 
 We sampled queries in two batches. First, we manually selected \manualQueryCount~queries (from approx.\ 400~queries in FindBugs), chosen mainly to evaluate the potential speedups of indexing (queries that primarily looked for declarations of classes, methods, or fields with specific properties, queries that inspect the type hierarchy, and queries that required analyzing methods implementation).
-Subsequently, we \emph{randomly} selected a batch of \randomQueryCount~additional queries. 
+Subsequently, we \emph{randomly} selected a batch of \randomQueryCount~additional queries.
 The batch excluded queries that rely on control-/dataflow analyses (i.e., analyzing the effect of bytecode instructions on the stack), due to limitations of the bytecode tookit we use.
 In total, we have \queryCount{} queries as listed in \cref{table:performance} (the randomly selected queries are marked with the superscript $R$).
 
@@ -98,7 +98,7 @@ In total, we have \queryCount{} queries as listed in \cref{table:performance} (t
 %\begin{lstlisting}
 %for {
 %  cf <- classFiles
-%  m @ Method(_, "equals", MethodDescriptor(Seq(cf.thisClass), BooleanType), _) <- cf.methods 
+%  m @ Method(_, "equals", MethodDescriptor(Seq(cf.thisClass), BooleanType), _) <- cf.methods
 %  if m.isAbstract
 %} yield (cf, m)
 %\end{lstlisting}
@@ -121,13 +121,13 @@ for {
 
 %reimplementation
 We implemented each query three times (see implementations (1)--(3) in \cref{sec:implemenationsandspeedups}) following the specifications given in the FindBugs documentation (0). Instead of using a hierarchy of visitors as the original implementations of the queries in FindBugs, we wrote the queries as for-comprehensions in Scala on an in-memory representation created by the Scala toolkit BAT\@.\footnote{\url{http://github.com/Delors/BAT}}
-BAT in particular provides comprehensive support for 
+BAT in particular provides comprehensive support for
 writing queries against Java bytecode in an idiomatic way.
-We exemplify an analysis in \cref{fig:covariant-equals}: It detects all co-variant \code{equals} methods in a project by iterating over all class files (line 2) and all methods, searching for methods named ``\code{equals}'' that return a boolean value and define a single parameter of the type of the current class. 
+We exemplify an analysis in \cref{fig:covariant-equals}: It detects all co-variant \code{equals} methods in a project by iterating over all class files (line 2) and all methods, searching for methods named ``\code{equals}'' that return a boolean value and define a single parameter of the type of the current class.
 
 
 \smartParagraph{Abstractions}
-In the reference implementations (1), we identified several reusable abstractions as shown in \cref{table:implemented-abstractions}. 
+In the reference implementations (1), we identified several reusable abstractions as shown in \cref{table:implemented-abstractions}.
 The reference implementations of all queries except \querySEBADFIELDINNERCLASS{} use exactly one of these abstractions, which encapsulate the main loops of the queries.
 
 \smartParagraph{Indexes}
@@ -210,7 +210,7 @@ As expected, not all queries benefit from optimizations;
 out of \queryCount{} queries, optimization affords for \nSpeededUpQueries{} of them significant speedups ranging from a \minOptimSpeedup{} factor to a \maxOptimSpeedup{} factor; \nBigSpeededUpQueries{} queries are faster by a factor of at least \speedupBigThreshold{}.
 Only queries \queryMSPKGPROTECT{}, \querySICINNERSHOULDBESTATICANON{} and \queryITAINEFFICIENTTOARRAY{} fail to recover any modularization overhead.
 
-We have analyzed the behavior of a few queries after optimization, to understand why their performance has 
+We have analyzed the behavior of a few queries after optimization, to understand why their performance has
 (or has not) improved.
 
 Optimization makes query \querySEBADFIELDINNERCLASS{} slower; we believe this is because optimization replaces filtering by lazy filtering, which is usually faster, but not here.
@@ -220,20 +220,20 @@ After optimization, query \queryDONTCATCHIMSE{} becomes simply an index lookup o
 
 \smartParagraph{Optimization Overhead}
 The current implementation of the optimizer is not yet optimized for speed (of the optimization algorithm). For instance, expression trees are traversed and rebuilt completely once for each transformation.
-However, the optimization overhead is usually not excessive and 
+However, the optimization overhead is usually not excessive and
 is $\avgOptimTime \pm \stdDevOptimTime$ ms, varying between \minOptimTime{} ms and \maxOptimTime{} ms (mostly depending on the query size).
 
 \smartParagraph{Limitations}
 Although many speedups are encouraging, our optimizer is currently a proof-of-concept and we experienced some limitations:
 \begin{itemize}
 \item In a few cases hand-optimized queries are still faster than what the optimizer can produce. We believe these problems could be addressed by adding further optimizations.
-\item Our implementation of indexing is currently limited to immutable collections. For mutable collections, indexes must be maintained incrementally. 
+\item Our implementation of indexing is currently limited to immutable collections. For mutable collections, indexes must be maintained incrementally.
 Since indexes are defined as special queries in {\LoS},  incremental index maintenance becomes an instance of incremental maintenance of query results, that is, of incremental view maintenance. We plan to support incremental view maintenance as part of future work; however,
 indexing in the current form is already useful, as illustrated by our experimental results.
 \end{itemize}
 
 \smartParagraph{Threats to Validity}
-With rigorous performance measurements and the chosen setup, our study was setup to maximize internal and construct validity. Although we did not involve an external domain expert and we did not compare the results of our queries with the ones from FindBugs (except while developing the queries), we believe that the queries adequately represent the modularity and performance characteristics of FindBugs and {\LoS}. However, since we selected only queries from a single project, external validity is limited. 
+With rigorous performance measurements and the chosen setup, our study was setup to maximize internal and construct validity. Although we did not involve an external domain expert and we did not compare the results of our queries with the ones from FindBugs (except while developing the queries), we believe that the queries adequately represent the modularity and performance characteristics of FindBugs and {\LoS}. However, since we selected only queries from a single project, external validity is limited.
 While we cannot generalize our results beyond FindBugs yet, we believe that the FindBugs queries are representative for complex in-memory queries performed by applications.
 
 

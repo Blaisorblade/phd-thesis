@@ -14,16 +14,16 @@ v.map(x => (x + 1) * 3)
 \end{lstlisting}
 
 This optimization is specific to the domain of collections. In general, domain-specific optimizations are typically not performed by compilers or virtual machines, because they require domain knowledge
-about the behavior and invariants of the code, something which is beyond the capabilities of general-purpose static analysis. For instance, the 
+about the behavior and invariants of the code, something which is beyond the capabilities of general-purpose static analysis. For instance, the
 optimization above is only behavior-preserving, if the functions mapped over the collection do not perform order-dependent side effects,
 %\pg{TR: static analysis could allow optimizing this example. Also discuss map fusion in related work.}
 which is complex to determine in general. Namely, verifying that a function is pure requires verifying that all the invoked functions are also pure, but already understanding which functions are invoked can be difficult, especially when late-bound function calls are involved.
 % I wrote 'late-bound function calls' instead of 'virtual method calls' to include the same problem in functional programs.
 
-Nowadays, mostly programmers have to perform domain-specific optimizations by hand. In our example, this does not seem too bad; but 
+Nowadays, mostly programmers have to perform domain-specific optimizations by hand. In our example, this does not seem too bad; but
 when considering further optimizations, such as indexing, reordering and fusion of filters, and computing hash joins
 instead of Cartesian products, then it becomes clear that hand-coding such optimizations can lead to complicated
-and redundant code, because the same optimization patterns are applied again and again. Hand-coding such optimizations also tends to lead to brittle and \emph{non-modular} code. For instance, consider a program which 
+and redundant code, because the same optimization patterns are applied again and again. Hand-coding such optimizations also tends to lead to brittle and \emph{non-modular} code. For instance, consider a program which
 computes \code{w = v.map(x => x + 1)}, only to pass \code{w} to another function which computes
 \code{z = w.map(x => x * 3)}. If \code{w} is not used further, it gets built just to be transformed again. Again, we would like to apply map fusion, but this time the code crosses modularity boundaries. Hence, in a modular structure, a developer might not even see optimization potential.
 In contrast, an automated domain-specific optimizer can inline the function to fuse code from different modules together
@@ -37,7 +37,7 @@ of the meaning of the other API functions.
 We regard the Scala collections API as a \emph{embedded domain-specific language} (EDSL); this style of compositional DSL implementation by libraries is often
 called \emph{shallow embedding}%
 %~\chk{add reference} %PG: I know it's crazy, but nobody gives a reference for this term.
-. The alternative, which we pursue, is a \emph{deep embedding} of the DSL, where programs written in the DSL (in our case: 
+. The alternative, which we pursue, is a \emph{deep embedding} of the DSL, where programs written in the DSL (in our case:
 queries on collections) are reified as data or, more specifically, as abstract syntax trees, which can be subject to non-compositional semantics. Among others, they can then be analyzed, optimized, transformed, interpreted, or compiled.
 
 In this paper we present \LoS, a deep embedding of the Scala collections EDSL with the goal of supporting more flexible semantics and especially automatic optimization.
@@ -65,7 +65,7 @@ Overall, we make the following contributions:
 \end{itemize}
 
 % PG: I integrated the outline into the contribution list, I like it better.
-%The remainder of this work is structured as follows. First, we discuss related work. 
+%The remainder of this work is structured as follows. First, we discuss related work.
 %In \cref{sec:intro} we give an informal overview of \LoS. \Cref{sec:implementation} describes the implementation of \LoS. \Cref{sec:evaluation} presents the result of our evaluation. \cref{sec:discussion} reflects on the results and discusses implications for object- and meta-language design. \Cref{sec:concl} concludes.
 
 %%%%%%%%

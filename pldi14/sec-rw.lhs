@@ -50,7 +50,7 @@ approach still requires expensive runtime bookkeeping during the initial run.
 Our approach, like other static ones, uses a standard runtime
 environment and has no overhead
 during base computation, but may be less efficient when processing
-changes. This pays off if the initial input is 
+changes. This pays off if the initial input is
 big compared to its changes.
 
 
@@ -67,9 +67,9 @@ folding the elements of a bag with a left or right fold will not
 have efficient incremental behavior; instead, it's necessary that
 the fold be shaped like a balanced tree. In general,
 incremental computations become efficient only if they are \emph{stable}~\citep{Acar05}.
-Hence one may need to massage the program to make it efficient. Our methodology is 
+Hence one may need to massage the program to make it efficient. Our methodology is
 different: Since we do not aim to incrementalize arbitrary programs written in standard
-programming languages, we can select primitives that have efficient derivatives and thereby require 
+programming languages, we can select primitives that have efficient derivatives and thereby require
 the programmer to use them.
 
 Functional reactive programming \citep{Elliott:1997:FRA:258948.258973}
@@ -268,7 +268,7 @@ any additional results which can be computed cheaply by the base
 program to help make the incremental program more efficient.
 
 Since it is hard to fully automate such reasoning, we move
-equational reasoning to the plugin design phase. A 
+equational reasoning to the plugin design phase. A
 plugin provides general-purpose higher-order primitives for which
 the plugin authors have devised efficient derivatives (by using
 equational reasoning in the design phase). Then, the

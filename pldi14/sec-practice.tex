@@ -50,7 +50,7 @@ other differentiation plugins for the other base types of that
 language.
 
 \input{pldi14/fig-case-study-pseudocode}
-  
+
 For base types with no known incrementalization strategy,
 the precise interfaces for differentiation and
 proof plugins can guide the implementation effort. These
@@ -126,15 +126,15 @@ operation on maps needed in our case study.
 \section{Predicting nil changes}
 Handling changes to all inputs can induce excessive overhead in incremental
 programs~\citep{Acar09}. It is also often
-unnecessary; for instance, the function argument of $\Term{fold}$ in 
+unnecessary; for instance, the function argument of $\Term{fold}$ in
 \cref{sec:intro} does not change since it is a closed subterm of the program, so
 $\Term{fold}$ will receive a nil change for it.
-A (conservative) static analysis can detect changes that are guaranteed to be nil at runtime. 
+A (conservative) static analysis can detect changes that are guaranteed to be nil at runtime.
 We can then specialize derivatives that receive this change, so that they need not
 inspect the change at runtime.
 
 For our case study, we have implemented a simple static analysis which
-detects and propagates information about closed terms. The analysis is not interesting and 
+detects and propagates information about closed terms. The analysis is not interesting and
 we omit details for lack of space.
 
 
@@ -152,7 +152,7 @@ word-count example~\citep{Lammel07}. We define a
 suitable differentiation plugin, adapt the program to use it and show
 that incremental computation is faster than recomputation.
 %
-We designed and implemented the differentiation plugin 
+We designed and implemented the differentiation plugin
 following the requirements of the corresponding proof plugin,
 even though we did not formalize
 the proof plugin (e.g. in Agda).
@@ -372,7 +372,7 @@ structure for abelian groups. After erasure, the change structure is as follows
 
 The derivative of $\App{\FOLDBAG}{f}$ is efficient on $\Term{Update}$ changes when $df$ is
 known to be a nil change; in that case,
-$\App{\FOLDBAG}{f}$ is a homomorphism, hence self-maintainable (\cref{sec:performance-cons}). To see why, take any homomorphism $\HasType f {\Fun \Gs \Gt}$ 
+$\App{\FOLDBAG}{f}$ is a homomorphism, hence self-maintainable (\cref{sec:performance-cons}). To see why, take any homomorphism $\HasType f {\Fun \Gs \Gt}$
 between user-defined
 abelian groups $G_\Gs$ and $G_\Gt$, and suppose
 $\D v = \HasType{\Term{Update} \; (G_\Gs, u)}{\Change \Gs}$. By homomorphism properties,

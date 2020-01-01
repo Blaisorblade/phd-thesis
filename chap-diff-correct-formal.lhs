@@ -218,7 +218,7 @@ Among valid function changes, derivatives play a central role, especially in the
 statement of correctness of differentiation.
 
 \begin{definition}[Derivatives]
-  \label{def:derivative-raw} 
+  \label{def:derivative-raw}
   Given function |f: ^^ A -> B|, function |df: ^^ A -> Dt^A -> Dt^B| is a
   derivative for |f| if, for all changes |da| from |a1| to |a2| on set |A|, change
   |df a1 da| is valid from |f a1| to |f a2|.
@@ -634,7 +634,7 @@ Hence, updating base result |eval(t) rho1| by change
   If |Gamma /- t : tau| and |fromto Gamma rho1 drho rho2| then
   |eval(t) rho1 `oplus` eval(derive(t)) drho = eval(t) rho2|.
 \end{restatable}
-\end{partCompile} 
+\end{partCompile}
 We anticipate the proof of this corollary:
 \begin{proof}
   First, differentiation is correct (\cref{thm:derive-correct}), so under the hypotheses
