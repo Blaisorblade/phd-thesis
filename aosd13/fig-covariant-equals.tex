@@ -1,0 +1,25 @@
+% Omit - this only showcases BAT, not our code. Show our implementation instead.
+\begin{figure}[htb]
+\centering
+%\begin{lstlisting}
+%for {
+%  cf <- classFiles
+%  m @ Method(_, "equals", MethodDescriptor(Seq(cf.thisClass), BooleanType), _) <- cf.methods
+%  if m.isAbstract
+%} yield (cf, m)
+%\end{lstlisting}
+%import BATLifting._
+\begin{lstlisting}
+for {
+  classFile <- classFiles.asSquopt
+  method <- classFile.methods
+  if method.isAbstract && method.name ==# "equals" &&
+     method.descriptor.returnType ==# BooleanType
+  parameterTypes <- Let(method.descriptor.parameterTypes)
+  if parameterTypes.length ==# 1 &&
+     parameterTypes(0) ==# classFile.thisClass
+} yield (classFile, method)
+\end{lstlisting}
+\caption{Find covariant \code{equals} methods.}
+\label{fig:covariant-equals}
+\end{figure}
