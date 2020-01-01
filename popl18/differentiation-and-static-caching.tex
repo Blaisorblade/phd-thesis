@@ -1,12 +1,7 @@
-\begin{figure}
-  \iftoggle{poplForThesis}{\small}{\footnotesize}
+\begin{figure}[htb]
   \newcommand\vskipBeforeCatTitle{\\[-0.2em]}
   \begin{minipage}{\linewidth}
-    \iftoggle{poplForThesis}{}{
-      \setlength{\arraycolsep}{0.3em}
-      \begin{minipage}[t]{.50\linewidth}
-    }
-    \begin{alignmath}*{\mathAlignFirst}
+    \begin{alignmath}*{c}
       \begin{array}[t]{rcl}
       \categorytitle{CTS translation of toplevel definitions}{$\compile{\tf = \slam{\tx}{\sterm}}$}
       \compile{\tf = \slam{\tx}{\sterm}}
@@ -36,15 +31,7 @@
       \derive{\tupdcache}{\tx}
       & = &
             \tquote{(\tdx, \tupdcache)}
-            \iftoggle{poplForThesis}{\\\nextline\vskipBeforeCatTitle}{}
-    \end{array}
-  \end{alignmath}
-  \iftoggle{poplForThesis}{}{%
-  \end{minipage}%
-  \begin{minipage}[t]{.50\linewidth}%
-  }
-  \begin{alignmath}*{\mathAlignSecond}
-    \begin{array}[t]{rcl}
+            \\\nextline\vskipBeforeCatTitle
       %
       \categorytitle{CTS translation of terms}{$\compileterm\tcache\sterm$}
       %
@@ -63,10 +50,9 @@
       \nextline
       \compileterm{\tcache}{\tx}
       & = &
-            (\tcache, \tquote{(\tx, \tcache)}) \\
+            (\tcache, \tquote{(\tx, \tcache)})
     \end{array}
 \end{alignmath}
-  \iftoggle{poplForThesis}{}{\end{minipage}}
 \end{minipage}
 \caption{Cache-Transfer Style (CTS) conversion from $\source$ to $\target$.}
 \label{fig:differentiation-and-static-caching}

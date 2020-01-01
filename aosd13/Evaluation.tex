@@ -66,7 +66,7 @@ In \cref{fig:measurements-overview}, we provide an overview of the setup.
 	We made our raw data available and our results reproducible~\citep{Vitek11R3}.%
 \footnote{Data available at: \url{http://www.informatik.uni-marburg.de/~pgiarrusso/SQuOpt}}
 
-\begin{figure}
+\begin{figure}[htb]
 	\centering
 		\includegraphics[width=\linewidth]{aosd13/graphs/measurements-overview}
 	\caption{Measurement Setup: Overview}
@@ -90,33 +90,7 @@ The batch excluded queries that rely on control-/dataflow analyses (i.e., analyz
 In total, we have \queryCount{} queries as listed in \cref{table:performance} (the randomly selected queries are marked with the superscript $R$).
 
 
-
-
-%Omit - this only showcases BAT, not our code. Show our implementation instead.
-\begin{figure}
-\centering
-%\begin{lstlisting}
-%for {
-%  cf <- classFiles
-%  m @ Method(_, "equals", MethodDescriptor(Seq(cf.thisClass), BooleanType), _) <- cf.methods
-%  if m.isAbstract
-%} yield (cf, m)
-%\end{lstlisting}
-%import BATLifting._
-\begin{lstlisting}
-for {
-  classFile <- classFiles.asSquopt
-  method <- classFile.methods
-  if method.isAbstract && method.name ==# "equals" &&
-     method.descriptor.returnType ==# BooleanType
-  parameterTypes <- Let(method.descriptor.parameterTypes)
-  if parameterTypes.length ==# 1 &&
-     parameterTypes(0) ==# classFile.thisClass
-} yield (classFile, method)
-\end{lstlisting}
-\caption{Find covariant \code{equals} methods.}
-\label{fig:covariant-equals}
-\end{figure}
+\input{aosd13/fig-covariant-equals}
 
 
 
@@ -151,17 +125,7 @@ For our test data, index construction takes less than 200 ms for the first two i
 %The second index maps any exception type to exception handlers catching them (together with the containing method bodies, methods and class).
 %The third index allows to look for occurrences of bytecode instructions of a given type; it maps any type of bytecode instruction (like \code{INVOKESTATIC}, \code{INVOKEVIRTUAL} and so on) to its occurrences.
 
-\begin{figure}
-\centering
-\begin{lstlisting}
-val methodNameIdx: Exp[Map[String, Seq[(ClassFile, Method)]]] = (for {
-  classFile <- classFiles.asSquopt
-  method <- classFile.methods
-} yield (classFile, method)).indexBy(entry => entry._2.name)
-\end{lstlisting}
-\caption{A simple index definition}
-\label{fig:indexes}
-\end{figure}
+\input{aosd13/fig-indexes}
 
 
 

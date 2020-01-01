@@ -1,0 +1,11 @@
+\begin{figure}
+\centering
+\begin{lstlisting}
+val methodNameIdx: Exp[Map[String, Seq[(ClassFile, Method)]]] = (for {
+  classFile <- classFiles.asSquopt
+  method <- classFile.methods
+} yield (classFile, method)).indexBy(entry => entry._2.name)
+\end{lstlisting}
+\caption{A simple index definition}
+\label{fig:indexes}
+\end{figure}
