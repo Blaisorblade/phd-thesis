@@ -842,7 +842,7 @@ where |Dt ^ Gamma| is a context that binds a change |dx| for each
 base input |x| bound in the context |Gamma|.
 
 Next we consider |\xs ys -> sum (merge xs ys)|.
-Since |xs, dxs, ys, dys| are free in |derive(sum (merge xs ys))| (ignoring later
+Since variables |xs, dxs, ys, dys| appear free in |derive(sum (merge xs ys))| (ignoring later
 optimizations), term
 \begin{code}
 derive(\xs ys -> sum (merge xs ys))
