@@ -1,4 +1,9 @@
 % Hey Emacs this is -*- latex -*-
+
+\newcommand{\codesize}{\small}
+% When line-breaking is desired. Beware there's no automatic escaping/highlighting!
+\newcommand\textcode[1]{\texttt{\codesize{}#1}}
+
 % From http://tihlde.org/~eivindw/latex-listings-for-scala/
 % "define" Scala
 %Keyword list taken from the scaladoc definition.
@@ -22,7 +27,7 @@
 \lstset{%
     language=Scala,%
     tabsize=2,%
-    basicstyle=\ttfamily,%
+    basicstyle=\codesize\ttfamily,%
     commentstyle=\itshape,%
     keywordstyle=\bfseries,%
     identifierstyle=,% nothing
@@ -43,13 +48,9 @@ keepspaces
 %keepspaces was described at: http://tex.stackexchange.com/questions/41954/listings-bug-space-after-literate-replacement-lost-with-spaceflexible-fullflexi
 }
 
-\newcommand{\codesize}{}
-
 % Command for in-text code snippets, if needed.
 \newcommand{\code}{%
     \lstinline[basicstyle=\codesize\ttfamily]}
-% When line-breaking is desired. Beware there's no automatic escaping!
-\newcommand\textcode[1]{\texttt{\codesize{}#1}}
 
 % I use ^ as the only decent alternative - not-ASCII characters don't work in this setup (probably because of UTF-8).}
 % literate programming: replace some operators by nicer equivalents.

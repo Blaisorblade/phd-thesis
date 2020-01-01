@@ -110,7 +110,8 @@ for {
   if method.isAbstract && method.name ==# "equals" &&
      method.descriptor.returnType ==# BooleanType
   parameterTypes <- Let(method.descriptor.parameterTypes)
-  if parameterTypes.length ==# 1 && parameterTypes(0) ==# classFile.thisClass
+  if parameterTypes.length ==# 1 &&
+     parameterTypes(0) ==# classFile.thisClass
 } yield (classFile, method)
 \end{lstlisting}
 \caption{Find covariant \code{equals} methods.}

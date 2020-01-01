@@ -16,13 +16,15 @@ A core idea of {\LoS} is to reify Scala code as a data structure in memory. A pr
 \label{subsec:repexptrees}
 In the previous section, we have seen that expressions that would have type \code{T} in a native Scala query are reified and have type \code{Exp[T]} in \LoS. The generic type \code{Exp[T]} is the base for our reification of Scala expression as expression trees, that is, as data structures in memory. We provide a subclass of \code{Exp[T]} for every different form of expression we want to reify. For example, in Fig.~\ref{fig:query} the expression \code{author.firstName + " " + author.lastName} must be reified even though it is not collection-related, for otherwise the optimizer could not see whether \code{author} is used. Knowing this is needed for instance to remove variables which are bound but not used. Hence, this expression is reified as
 \begin{lstlisting}
-StringConcat(StringConcat(AuthorFirstName(author), Const(" ")), AuthorLastName(author))
+StringConcat(StringConcat(AuthorFirstName(author), Const(" ")),
+  AuthorLastName(author))
 \end{lstlisting}
 This example uses the constructors of the following subclasses of \code{Exp[T]} to create the expression tree.
 
 \begin{lstlisting}
 case class Const[T](t: T) extends Exp[T]
-case class StringConcat(str1: Exp[String], str2: Exp[String]) extends Exp[String]
+case class StringConcat(str1: Exp[String], str2: Exp[String])
+  extends Exp[String]
 case class AuthorFirstName(t: Exp[Author]) extends Exp[String]
 case class AuthorLastName(t: Exp[Author]) extends Exp[String]
 \end{lstlisting}
@@ -60,7 +62,7 @@ class StringOps(t: Exp[String]) {
 This is an example of the well-known Scala \emph{enrich-my-library pattern}\footnote{Also known as \emph{pimp-my-library} pattern.}~\citep{OderskyPimpLib}.
 
 With these declarations in scope, the Scala compiler rewrites \code{str1 + str2} to
-\code{expToStringOps(str1).+(str2)}, which evaluates to \code{StringConcat(str1, str2)} as desired.
+\code{expToStringOps(}\linebreak\code{str1).+(str2)}, which evaluates to \code{StringConcat(str1, str2)} as desired.
 The implicit conversion function \code{expToStringOps} is not applicable to \code{Exp[Boolean]} because it explicitly specifies the receiver of the \code{+}-call to have type \code{Exp[String]}.
 In other words, expressions like \code{str1 + str2} are now \emph{lifted} on the level of expression trees in a type-safe way. For brevity, we refer to the defined operator as \code{Exp[String].+}.
 
@@ -74,7 +76,7 @@ implicit def pure[T](t: T): Exp[T] = Const(t)
 %Since this conversion evaluates its argument and does not preserve its structure, it is only appropriate for atomic expressions.
 
 The compiler will now rewrite \code{str1 + "foo"} to \code{expToStringOps(str1) + pure("foo")}, and
-\code{str1 + "foo" + str2} to \code{expToStringOps(str1) + pure("foo") + str2}.
+\code{str1}\linebreak\code{+ "foo" + str2} to \code{expToStringOps(str1) + pure("foo") + str2}.
 Different implicit conversions cooperate successfully to lift the expression.
 %Since \code{Exp[String].+} requires an argument of type \code{Exp[String]} but \code{"foo"} has type \code{String},
 %the compiler wraps \code{"foo"} with a call to \code{pure}. Hence
@@ -101,7 +103,7 @@ class AuthorOps(t: Exp[Author]) {
 }
 \end{lstlisting}
 
-Implicit conversions for user-defined types cooperate with other ones; for instance, \code{author.firstName + " " + author.lastName} is rewritten to
+Implicit conversions for user-defined types cooperate with other ones; for instance, \code{author.}\linebreak\code{firstName + " " + author.lastName} is rewritten to
 \begin{lstlisting}
 (expToStringOps(expToAuthorOps(author).firstName) + pure(" ")) +
   expToAuthorOps(author).lastName
@@ -131,9 +133,10 @@ For example, the expression \code{(str1, str2)} will always call Scala's built-i
 Even though we cannot intercept the call to \code{Tuple2}, we can add an implicit conversion to be called \emph{after} the tuple is constructed.
 
 \begin{lstlisting}
-implicit def tuple2ToTuple2Exp[A1, A2](tuple: (Exp[A1], Exp[A2])): LiftTuple2[A1, A2] =
-  LiftTuple2[A1, A2](tuple._1, tuple._2)
-case class LiftTuple2[A1, A2](t1: Exp[A1], t2: Exp[A2]) extends Exp[(A1, A2)]
+implicit def tuple2ToTuple2Exp[A1, A2](tuple: (Exp[A1], Exp[A2])):
+    LiftTuple2[A1, A2] = LiftTuple2[A1, A2](tuple._1, tuple._2)
+case class LiftTuple2[A1, A2](t1: Exp[A1], t2: Exp[A2])
+  extends Exp[(A1, A2)]
 \end{lstlisting}
 
 We generate such conversions for different arities with a code generator. These conversions will be used only when the context requires an expression tree. Note that this technique is only applicable because tuples are generic and support arbitrary components, including expression trees.
@@ -193,7 +196,8 @@ class ListOps(coll: Exp[List[T]]) {
   def map[U](f: Exp[T] => Exp[U]) = ListMapNode(coll, Fun(f))
 }
 
-case class ListMapNode[T, U](coll: Exp[List[T]], mapping: Exp[T => U]) extends Exp[List[U]]
+case class ListMapNode[T, U](coll: Exp[List[T]], mapping: Exp[T => U])
+  extends Exp[List[U]]
 \end{lstlisting}
 
 Note how \code{map}'s parameter \code{f} has type \code{Exp[T] => Exp[U]} as necessary to enable Scala's syntax for anonymous functions and automatic lifting of the function body. This implementation would work for queries on lists, but does not support other collection types or queries where the collection type changes. We show in \cref{subsec:collections} how {\LoS} integrates with such advanced features of the Scala Collection EDSL\@.
@@ -227,7 +231,8 @@ The Scala compiler desugars for-comprehensions into calls to three collection me
 val records = books.
   withFilter(book => book.publisher == "Pearson Education").
   flatMap(book => book.authors.
-  map(author => BookData(book.title, author.firstName + " " + author.lastName,
+  map(author => BookData(book.title,
+    author.firstName + " " + author.lastName,
     book.authors.size - 1)))
 \end{lstlisting}
 \end{center}
@@ -278,7 +283,8 @@ Even though these two use cases for mapping over a finite map have different ret
 
 \begin{lstlisting}
 def map[U](f: T => U)(implicit cbf: CanBuildFrom[Repr, U, That]): That
-def flatMap[U](f: T => Traversable[U])(implicit cbf: CanBuildFrom[Repr, U, That]): That
+def flatMap[U](f: T => Traversable[U])
+  (implicit cbf: CanBuildFrom[Repr, U, That]): That
 def withFilter[U](p: T => Boolean): Repr.
 \end{lstlisting}
 
@@ -287,19 +293,20 @@ The \code{Repr} type parameter represents the specific type of the receiver of t
 \smartParagraph{The lifting}
 The basic idea is to use the enrich-my-library pattern to lift collection methods from \code{TraversableLike[T, Repr]} to \code{TraversableLikeOps[T, Repr]}:
 \begin{lstlisting}
-implicit def expToTraversableLikeOps[T, Repr](v: Exp[TraversableLike[T, Repr]]) =
+implicit def expToTraversableLikeOps[T, Repr]
+    (v: Exp[TraversableLike[T, Repr]]) =
   new TraversableLikeOps[T, Repr](v)
 \end{lstlisting}
 
-Subclasses of \code{TraversableLike[T, Repr]} also subclass both \code{Traversable[T]} and \code{Repr}; to take advantage of this during interpretation and optimization, we need to restrict the type of \code{expToTraversableLikeOps}, getting the following conversion:\footnote{Due to type inference bugs, the actual implicit conversion needs to be slightly more complex, to mention \code{T} directly in the argument type. We reported the bug at \url{https://issues.scala-lang.org/browse/SI-5298}.}
+Subclasses of \code{TraversableLike[T, Repr]} also subclass both \code{Traversable[T]} and \code{Repr}; to take advantage of this subclass relation during interpretation and optimization, we need to restrict the type of \code{expToTraversableLikeOps}, obtaining the following conversion:\footnote{Due to type inference bugs, the actual implicit conversion needs to be slightly more complex, to mention \code{T} directly in the argument type. We reported the bug at \url{https://issues.scala-lang.org/browse/SI-5298}.}
 
 %We use enrich-my-library again with an implicit conversion to \code{TraversableLikeOps[T, Repr]}, shown later, which corresponds to
 %\code{TraversableLike[T, Repr]}.
 %We provide an implicit conversion to \code{TraversableLikeOps[T, Repr]} from \code{Exp[Repr]} for any type \code{Repr} which is a subtype of \code{TraversableLike[T, Repr]} and \code{Traversable[T]} (for some element type \code{T}). This can be expressed as:
 \begin{lstlisting}
-implicit def expToTraversableLikeOps
-  [T, Repr <: Traversable[T] with TraversableLike[T, Repr]](v: Exp[Repr]) =
-    new TraversableLikeOps[T, Repr](v)
+implicit def expToTraversableLikeOps[T,
+    Repr <: Traversable[T] with TraversableLike[T, Repr]](v: Exp[Repr]) =
+  new TraversableLikeOps[T, Repr](v)
 \end{lstlisting}
 
 The query operations are defined in class \code{TraversableLikeOps[T, Repr]}; a few examples are shown in Fig.~\ref{fig:liftTrav}.%
@@ -321,13 +328,16 @@ Instead, by reusing Scala type-level machinery, we obtain a reification which is
 \begin{figure}
 \begin{center}
 \begin{lstlisting}
-class TraversableLikeOps[T, Repr <: Traversable[T] with TraversableLike[T, Repr]](t: Exp[Repr]) {
+class TraversableLikeOps[T,
+    Repr <: Traversable[T] with TraversableLike[T, Repr]](t: Exp[Repr]) {
   val t: Exp[Repr]
 
-  def withFilter(f: Exp[T] => Exp[Boolean]): Exp[Repr] = Filter(this.t, FuncExp(f))
+  def withFilter(f: Exp[T] => Exp[Boolean]): Exp[Repr] =
+    Filter(this.t, FuncExp(f))
 
   def map[U, That <: TraversableLike[U, That]](f: Exp[T] => Exp[U])
-         (implicit c: CanBuildFrom[Repr, U, That]): Exp[That] = MapNode(this.t, FuncExp(f))
+         (implicit c: CanBuildFrom[Repr, U, That]): Exp[That] =
+    Node(this.t, FuncExp(f))
   //... other methods ...
 }
 //definitions of MapNode, Filter omitted.
@@ -451,7 +461,8 @@ After optimization, {\LoS} needs to interpret the optimized expression trees to 
 For example, the interpretation of string concatenation is simply string concatenation, as shown in the following fragment of the interpreter. Note that type-safety of the interpreter is checked automatically by the Scala compiler when it compiles the fragments.
 
 \begin{lstlisting}
-case class StringConcat(str1: Exp[String], str2: Exp[String]) extends Exp[String] {
+case class StringConcat(str1: Exp[String], str2: Exp[String])
+    extends Exp[String] {
   def interpret() = str1.interpret() + str2.interpret()
 }
 \end{lstlisting}
@@ -536,7 +547,7 @@ Scala for-comprehension are however more general than monoid comprehensions\foot
 \smartParagraph{Manipulating functions}
 %\section*{More about functions.}
 %\tr{This material is left over from Sec. 4.3. It is partly needed in later sections and needs to be moved there.}
-To be able to inspect a HOAS function body \code{funBody: Exp[S] => Exp[T]}, like \code{str => str + "!"}, we convert it to \emph{first-order} abstract syntax (FOAS), that is to an expression tree of type \code{Exp[T]}.
+To be able to inspect a HOAS function body \code{funBody: Exp[S] =>}\linebreak\code{Exp[T]}, like \code{str => str + "!"}, we convert it to \emph{first-order} abstract syntax (FOAS), that is to an expression tree of type \code{Exp[T]}.
 To this end, we introduce a representation of variables and a generator of fresh ones; since variable names are auto-generated, they are internally represented simply as integers instead of strings for efficiency.
 
 To convert \code{funBody} from HOAS to FOAS we apply it to a fresh variable \code{v} of type \code{TypedVar[S]}, obtaining a first-order representation of the function body, having type \code{Exp[T]}, and containing occurrences of \code{v}.
@@ -549,7 +560,8 @@ def Fun[-S, +T](f: Exp[S] => Exp[T]): Exp[S => T] = {
   val v = Fun.gensym[S]()
   FOASFun(funBody(v), v)
 }
-case class FOASFun[S, T](val foasBody: Exp[T], v: TypedVar[S]) extends Exp[S => T]
+case class FOASFun[S, T](val foasBody: Exp[T], v: TypedVar[S])
+  extends Exp[S => T]
 implicit def app[S, T](f: Exp[S => T]): Exp[S] => Exp[T] =
   arg => App(f, arg)
 \end{lstlisting}

@@ -527,9 +527,9 @@ In our example, we have applied |derive(param)| to
 |grandTotal|, and simplify the result via
 $\beta$-reduction to produce |dgrandTotal|, as we show in \cref{sec:derive-example-merge}.
 Correctness of |derive(param)| guarantees
-that |sum (merge dxs dys)| evaluates to a change from
+that |sum (merge dxs|\linebreak|dys)| evaluates to a change from
 |sum (merge xs ys)| evaluated on old inputs |xs1| and |ys1| to
-|sum (merge xs ys)| evaluated on new inputs |xs2| and |ys2|.
+|sum (merge|\linebreak|xs ys)| evaluated on new inputs |xs2| and |ys2|.
 
 In this section, we have sketched the meaning of differentiation
 informally. We discuss incrementalization on higher-order
@@ -795,7 +795,7 @@ grandTotal   = \ xs ys -> sum (merge xs ys)
 s            = grandTotal {{1}} {{2, 3, 4}} = 11
 \end{code}
 Differentiation is a structurally recursive program transformation,
-so we first compute |derive(merge xs ys)|. To compute its change
+so we first differentiate |merge xs|\linebreak|ys|. To compute its change
 we simply call the derivative of |merge|, that is |dmerge|, and
 apply it to the base inputs and their changes: hence we write
 \begin{code}
