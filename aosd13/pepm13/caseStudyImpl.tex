@@ -62,7 +62,7 @@ class StringOps(t: Exp[String]) {
 This is an example of the well-known Scala \emph{enrich-my-library pattern}\footnote{Also known as \emph{pimp-my-library} pattern.}~\citep{OderskyPimpLib}.
 
 With these declarations in scope, the Scala compiler rewrites \code{str1 + str2} to
-\code{expToStringOps(str1).+(str2)}, which evaluates to \code{StringConcat(str1, str2)} as desired.
+\code{expToStringOps(}\linebreak\code{str1).+(str2)}, which evaluates to \code{StringConcat(str1, str2)} as desired.
 The implicit conversion function \code{expToStringOps} is not applicable to \code{Exp[Boolean]} because it explicitly specifies the receiver of the \code{+}-call to have type \code{Exp[String]}.
 In other words, expressions like \code{str1 + str2} are now \emph{lifted} on the level of expression trees in a type-safe way. For brevity, we refer to the defined operator as \code{Exp[String].+}.
 
@@ -76,7 +76,7 @@ implicit def pure[T](t: T): Exp[T] = Const(t)
 %Since this conversion evaluates its argument and does not preserve its structure, it is only appropriate for atomic expressions.
 
 The compiler will now rewrite \code{str1 + "foo"} to \code{expToStringOps(str1) + pure("foo")}, and
-\code{str1 + "foo" + str2} to \code{expToStringOps(str1) + pure("foo") + str2}.
+\code{str1}\linebreak\code{+ "foo" + str2} to \code{expToStringOps(str1) + pure("foo") + str2}.
 Different implicit conversions cooperate successfully to lift the expression.
 %Since \code{Exp[String].+} requires an argument of type \code{Exp[String]} but \code{"foo"} has type \code{String},
 %the compiler wraps \code{"foo"} with a call to \code{pure}. Hence
@@ -103,7 +103,7 @@ class AuthorOps(t: Exp[Author]) {
 }
 \end{lstlisting}
 
-Implicit conversions for user-defined types cooperate with other ones; for instance, \code{author.firstName + " " + author.lastName} is rewritten to
+Implicit conversions for user-defined types cooperate with other ones; for instance, \code{author.}\linebreak\code{firstName + " " + author.lastName} is rewritten to
 \begin{lstlisting}
 (expToStringOps(expToAuthorOps(author).firstName) + pure(" ")) +
   expToAuthorOps(author).lastName
@@ -547,7 +547,7 @@ Scala for-comprehension are however more general than monoid comprehensions\foot
 \smartParagraph{Manipulating functions}
 %\section*{More about functions.}
 %\tr{This material is left over from Sec. 4.3. It is partly needed in later sections and needs to be moved there.}
-To be able to inspect a HOAS function body \code{funBody: Exp[S] => Exp[T]}, like \code{str => str + "!"}, we convert it to \emph{first-order} abstract syntax (FOAS), that is to an expression tree of type \code{Exp[T]}.
+To be able to inspect a HOAS function body \code{funBody: Exp[S] =>}\linebreak\code{Exp[T]}, like \code{str => str + "!"}, we convert it to \emph{first-order} abstract syntax (FOAS), that is to an expression tree of type \code{Exp[T]}.
 To this end, we introduce a representation of variables and a generator of fresh ones; since variable names are auto-generated, they are internally represented simply as integers instead of strings for efficiency.
 
 To convert \code{funBody} from HOAS to FOAS we apply it to a fresh variable \code{v} of type \code{TypedVar[S]}, obtaining a first-order representation of the function body, having type \code{Exp[T]}, and containing occurrences of \code{v}.
