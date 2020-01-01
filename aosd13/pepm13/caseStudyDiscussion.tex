@@ -241,7 +241,7 @@ In this context, let us consider again how we lift tuples. We have seen that the
 \code{(Exp[A], Exp[B])}, the implicit conversion should require \code{(A, B)} with the condition that \code{A} can be converted to \code{Exp[A']} and \code{B} to \code{Exp[B']}. This conversion solves the problem if applied explicitly,
 but the compiler refuses to apply it implicitly, again because of type inference issues\footnote{\url{https://issues.scala-lang.org/browse/SI-5651}, reported by us.}.
 
-Because of this type inference limitations, we failed to provide support for reifying code like \code{((a, b), c)}\footnote{One could of course write a specific implicit conversions for \emph{this} case; however, \code{(a, (b, c))} requires already a different implicit conversion, and there are infinite ways to nest pairs, let alone tuples of bounded arity.}.
+Because of these type inference limitations, we failed to provide support for reifying code like \code{((a, b), c)}\footnote{One could of course write a specific implicit conversions for \emph{this} case; however, \code{(a, (b, c))} requires already a different implicit conversion, and there are infinite ways to nest pairs, let alone tuples of bounded arity.}.
 %Hence, we did not find a way to support nested tuples like
 
 %For instance
