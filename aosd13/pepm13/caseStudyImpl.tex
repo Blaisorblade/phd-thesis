@@ -23,7 +23,8 @@ This example uses the constructors of the following subclasses of \code{Exp[T]} 
 
 \begin{lstlisting}
 case class Const[T](t: T) extends Exp[T]
-case class StringConcat(str1: Exp[String], str2: Exp[String]) extends Exp[String]
+case class StringConcat(str1: Exp[String], str2: Exp[String])
+  extends Exp[String]
 case class AuthorFirstName(t: Exp[Author]) extends Exp[String]
 case class AuthorLastName(t: Exp[Author]) extends Exp[String]
 \end{lstlisting}
@@ -134,7 +135,8 @@ Even though we cannot intercept the call to \code{Tuple2}, we can add an implici
 \begin{lstlisting}
 implicit def tuple2ToTuple2Exp[A1, A2](tuple: (Exp[A1], Exp[A2])):
     LiftTuple2[A1, A2] = LiftTuple2[A1, A2](tuple._1, tuple._2)
-case class LiftTuple2[A1, A2](t1: Exp[A1], t2: Exp[A2]) extends Exp[(A1, A2)]
+case class LiftTuple2[A1, A2](t1: Exp[A1], t2: Exp[A2])
+  extends Exp[(A1, A2)]
 \end{lstlisting}
 
 We generate such conversions for different arities with a code generator. These conversions will be used only when the context requires an expression tree. Note that this technique is only applicable because tuples are generic and support arbitrary components, including expression trees.
@@ -229,7 +231,8 @@ The Scala compiler desugars for-comprehensions into calls to three collection me
 val records = books.
   withFilter(book => book.publisher == "Pearson Education").
   flatMap(book => book.authors.
-  map(author => BookData(book.title, author.firstName + " " + author.lastName,
+  map(author => BookData(book.title,
+    author.firstName + " " + author.lastName,
     book.authors.size - 1)))
 \end{lstlisting}
 \end{center}
@@ -301,8 +304,8 @@ Subclasses of \code{TraversableLike[T, Repr]} also subclass both \code{Traversab
 %\code{TraversableLike[T, Repr]}.
 %We provide an implicit conversion to \code{TraversableLikeOps[T, Repr]} from \code{Exp[Repr]} for any type \code{Repr} which is a subtype of \code{TraversableLike[T, Repr]} and \code{Traversable[T]} (for some element type \code{T}). This can be expressed as:
 \begin{lstlisting}
-implicit def expToTraversableLikeOps
-  [T, Repr <: Traversable[T] with TraversableLike[T, Repr]](v: Exp[Repr]) =
+implicit def expToTraversableLikeOps[T,
+  Repr <: Traversable[T] with TraversableLike[T, Repr]](v: Exp[Repr]) =
     new TraversableLikeOps[T, Repr](v)
 \end{lstlisting}
 
