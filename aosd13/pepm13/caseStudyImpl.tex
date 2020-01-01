@@ -16,7 +16,8 @@ A core idea of {\LoS} is to reify Scala code as a data structure in memory. A pr
 \label{subsec:repexptrees}
 In the previous section, we have seen that expressions that would have type \code{T} in a native Scala query are reified and have type \code{Exp[T]} in \LoS. The generic type \code{Exp[T]} is the base for our reification of Scala expression as expression trees, that is, as data structures in memory. We provide a subclass of \code{Exp[T]} for every different form of expression we want to reify. For example, in Fig.~\ref{fig:query} the expression \code{author.firstName + " " + author.lastName} must be reified even though it is not collection-related, for otherwise the optimizer could not see whether \code{author} is used. Knowing this is needed for instance to remove variables which are bound but not used. Hence, this expression is reified as
 \begin{lstlisting}
-StringConcat(StringConcat(AuthorFirstName(author), Const(" ")), AuthorLastName(author))
+StringConcat(StringConcat(AuthorFirstName(author), Const(" ")),
+  AuthorLastName(author))
 \end{lstlisting}
 This example uses the constructors of the following subclasses of \code{Exp[T]} to create the expression tree.
 
@@ -131,8 +132,8 @@ For example, the expression \code{(str1, str2)} will always call Scala's built-i
 Even though we cannot intercept the call to \code{Tuple2}, we can add an implicit conversion to be called \emph{after} the tuple is constructed.
 
 \begin{lstlisting}
-implicit def tuple2ToTuple2Exp[A1, A2](tuple: (Exp[A1], Exp[A2])): LiftTuple2[A1, A2] =
-  LiftTuple2[A1, A2](tuple._1, tuple._2)
+implicit def tuple2ToTuple2Exp[A1, A2](tuple: (Exp[A1], Exp[A2])):
+    LiftTuple2[A1, A2] = LiftTuple2[A1, A2](tuple._1, tuple._2)
 case class LiftTuple2[A1, A2](t1: Exp[A1], t2: Exp[A2]) extends Exp[(A1, A2)]
 \end{lstlisting}
 
@@ -193,7 +194,8 @@ class ListOps(coll: Exp[List[T]]) {
   def map[U](f: Exp[T] => Exp[U]) = ListMapNode(coll, Fun(f))
 }
 
-case class ListMapNode[T, U](coll: Exp[List[T]], mapping: Exp[T => U]) extends Exp[List[U]]
+case class ListMapNode[T, U](coll: Exp[List[T]], mapping: Exp[T => U])
+  extends Exp[List[U]]
 \end{lstlisting}
 
 Note how \code{map}'s parameter \code{f} has type \code{Exp[T] => Exp[U]} as necessary to enable Scala's syntax for anonymous functions and automatic lifting of the function body. This implementation would work for queries on lists, but does not support other collection types or queries where the collection type changes. We show in \cref{subsec:collections} how {\LoS} integrates with such advanced features of the Scala Collection EDSL\@.
@@ -278,7 +280,8 @@ Even though these two use cases for mapping over a finite map have different ret
 
 \begin{lstlisting}
 def map[U](f: T => U)(implicit cbf: CanBuildFrom[Repr, U, That]): That
-def flatMap[U](f: T => Traversable[U])(implicit cbf: CanBuildFrom[Repr, U, That]): That
+def flatMap[U](f: T => Traversable[U])
+  (implicit cbf: CanBuildFrom[Repr, U, That]): That
 def withFilter[U](p: T => Boolean): Repr.
 \end{lstlisting}
 
@@ -328,7 +331,8 @@ class TraversableLikeOps[T, Repr <: Traversable[T] with TraversableLike[T, Repr]
   def withFilter(f: Exp[T] => Exp[Boolean]): Exp[Repr] = Filter(this.t, FuncExp(f))
 
   def map[U, That <: TraversableLike[U, That]](f: Exp[T] => Exp[U])
-         (implicit c: CanBuildFrom[Repr, U, That]): Exp[That] = MapNode(this.t, FuncExp(f))
+         (implicit c: CanBuildFrom[Repr, U, That]): Exp[That] =
+    Node(this.t, FuncExp(f))
   //... other methods ...
 }
 //definitions of MapNode, Filter omitted.
