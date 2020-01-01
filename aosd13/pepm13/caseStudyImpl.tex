@@ -293,7 +293,8 @@ The \code{Repr} type parameter represents the specific type of the receiver of t
 \smartParagraph{The lifting}
 The basic idea is to use the enrich-my-library pattern to lift collection methods from \code{TraversableLike[T, Repr]} to \code{TraversableLikeOps[T, Repr]}:
 \begin{lstlisting}
-implicit def expToTraversableLikeOps[T, Repr](v: Exp[TraversableLike[T, Repr]]) =
+implicit def expToTraversableLikeOps[T, Repr]
+    (v: Exp[TraversableLike[T, Repr]]) =
   new TraversableLikeOps[T, Repr](v)
 \end{lstlisting}
 
@@ -327,11 +328,12 @@ Instead, by reusing Scala type-level machinery, we obtain a reification which is
 \begin{figure}
 \begin{center}
 \begin{lstlisting}
-class TraversableLikeOps[T, Repr <: Traversable[T] with TraversableLike[T, Repr]](
-    t: Exp[Repr]) {
+class TraversableLikeOps[T,
+    Repr <: Traversable[T] with TraversableLike[T, Repr]](t: Exp[Repr]) {
   val t: Exp[Repr]
 
-  def withFilter(f: Exp[T] => Exp[Boolean]): Exp[Repr] = Filter(this.t, FuncExp(f))
+  def withFilter(f: Exp[T] => Exp[Boolean]): Exp[Repr] =
+    Filter(this.t, FuncExp(f))
 
   def map[U, That <: TraversableLike[U, That]](f: Exp[T] => Exp[U])
          (implicit c: CanBuildFrom[Repr, U, That]): Exp[That] =
@@ -459,7 +461,8 @@ After optimization, {\LoS} needs to interpret the optimized expression trees to 
 For example, the interpretation of string concatenation is simply string concatenation, as shown in the following fragment of the interpreter. Note that type-safety of the interpreter is checked automatically by the Scala compiler when it compiles the fragments.
 
 \begin{lstlisting}
-case class StringConcat(str1: Exp[String], str2: Exp[String]) extends Exp[String] {
+case class StringConcat(str1: Exp[String], str2: Exp[String])
+    extends Exp[String] {
   def interpret() = str1.interpret() + str2.interpret()
 }
 \end{lstlisting}
@@ -557,7 +560,8 @@ def Fun[-S, +T](f: Exp[S] => Exp[T]): Exp[S => T] = {
   val v = Fun.gensym[S]()
   FOASFun(funBody(v), v)
 }
-case class FOASFun[S, T](val foasBody: Exp[T], v: TypedVar[S]) extends Exp[S => T]
+case class FOASFun[S, T](val foasBody: Exp[T], v: TypedVar[S])
+  extends Exp[S => T]
 implicit def app[S, T](f: Exp[S => T]): Exp[S] => Exp[T] =
   arg => App(f, arg)
 \end{lstlisting}
