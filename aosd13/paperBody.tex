@@ -270,7 +270,7 @@ def titleFilterQuery(records: Exp[Set[BookData]], keyword: Exp[String]) = for {
 val resQuery = titleFilterQuery(recordsQuery, "Principles")
 val res = resQuery.optimize.eval
 \end{lstlisting}
-\caption{\LoS\ version of Fig.~\ref{fig:query}; \code{recordQuery} contains a reification of the query, \code{records} its result.}
+\caption{\LoS\ version of Fig.~\ref{fig:query}; \code{recordsQuery} contains a reification of the query, \code{records} its result.}
 \label{fig:reifiedQuery}
 \end{figure}
 
