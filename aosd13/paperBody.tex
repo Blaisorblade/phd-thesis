@@ -350,9 +350,7 @@ val indexedQuery =
     book.authors.size - 1)
 \end{lstlisting}
 Since dictionaries in Scala are functions, in the above code, dictionary lookup on \code{idxByPublisher} is represented simply as function application. The above code iterates over books having the desired publisher, instead of scanning the whole library, and performs the remaining computation from the original query. Although the index use in the listing above is written as
-%Beware: \linebreak simulates a normal break, hence it doesn't cause an
-%underfull hbox. See https://tex.stackexchange.com/questions/39629/why-is-linebreak-failing#comment80030_39629.
-\code{idxByPublisher("Pearson}\linebreak\code{Education")}, only the cached result of evaluating the index is used when
+\code{idxByPublisher(}\codebreak\code{"Pearson Education")}, only the cached result of evaluating the index is used when
 the query is executed, not the reified index definition.
 
 This optimization could also be performed manually, of course, but the queries are on a higher abstraction level and more maintainable if indexing is defined separately and applied automatically.
@@ -580,7 +578,7 @@ code for expressions which differ only in the embedded values.
 
 More in detail, our compilation algorithm is as follows.
 (a) We implement CSP by replacing embedded Scala values by references to the
-function arguments; so for instance \code{List(1, 2, 3).map(}\linebreak\code{x => x + 1)} becomes
+function arguments; so for instance \code{List(1, 2, 3).map(}\codebreak\code{x => x + 1)} becomes
 the function \code{(s1: List[Int], s2: Int) => s1.map(x => x + s2)}.
 (b) We look up the produced expression tree, together with the types of the
 constants we just removed, in a cache mapping to the generated classes. If the
