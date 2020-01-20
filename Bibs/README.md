@@ -15,11 +15,13 @@ Your paper coauthors can work with you without learning any of this.
 ## Get started:
 
 1. Fork this repo, unless you have write access to it.
-2. Let $remote be a Git URL for your fork (for instance, `remote=git@github.com:Blaisorblade/Bibs.git`).
-3. Run the following bash commands, replacing `$remote` as above.
+2. Let `$remote` be a Git URL for your fork (for instance, `remote=git@github.com:Blaisorblade/Bibs.git`).
+3. Let `$local` be either a path to a local checkout of `$remote`, or `$remote` itself. The first setup is recommended.
+4. Run the following bash commands, replacing `$remote` as above.
 
     ```bash
-    $ git remote add bibs $remote
+    $ git remote add bibs $local
+    $ git remote add rbibs $remote
     $ git fetch bibs
     $ git subtree add --squash -P Bibs bibs/master
     ```
@@ -45,7 +47,8 @@ repository root*:
 ./Bibs/push-updates.sh
 ```
 
-Caveat: If you care about commit messages in your bibliography repo, you need to
+- Caveat: this will push to `rbibs`, but won't update a local checkout (because `git push` can't).
+- Caveat: If you care about commit messages in your bibliography repo, you need to
 ask them to have separate commits (with specific commit messages) for the
 bibliography directory. But this is not technically required: git subtree will
 remove unrelated changes from commits without problems.
@@ -53,7 +56,7 @@ remove unrelated changes from commits without problems.
 ## Warning
 
 * Git subtree was broken in Git 1.8.3.3 and 1.8.3.4, and only [fixed in release 1.8.4][Regression].
-  Avoid using push or split with a broken `git subtree`: otherwise, spurious '-n' will be added to extracted commit
+  Avoid using push or split with a broken `git subtree`: otherwise, spurious `-n` will be added to extracted commit
   messages. Rewinding history in the bibs repo, and running `git fetch bibs` in the parent repo will undo the averse effects; repeating the operation with a fixed `git subtree` will not run again in the problem.
 
 * Avoid having branches in the bibliography repositories. It seems that git

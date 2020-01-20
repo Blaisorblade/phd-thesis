@@ -1,8 +1,7 @@
 %% This BibTeX bibliography file was created using BibDesk.
 %% http://bibdesk.sourceforge.net/
 
-
-%% Created for Paolo Giosué Giarrusso at 2017-08-11 23:02:38 +0200 
+%% Created for Paolo G. Giarrusso at 2018-12-01 01:31:49 +0100 
 
 
 %% Saved with string encoding Unicode (UTF-8) 
@@ -74,6 +73,20 @@
 	Title = {Incremental $\lambda$-Calculus in Cache-Transfer Style: Static Memoization by Program Transformation},
 	Year = {\noopsort{2018}Submitted}}
 
+@inproceedings{Giarrusso2019Incremental,
+  title = {Incremental {$\lambda$}-Calculus in Cache-Transfer Style},
+  booktitle = {Programming {{Languages}} and {{Systems}}},
+  author = {Giarrusso, Paolo G. and {R{\'e}gis-Gianas}, Yann and Schuster, Philipp},
+  editor = {Caires, Lu{\'i}s},
+  year = {2019},
+  pages = {553--580},
+  publisher = {{Springer International Publishing}},
+  abstract = {Incremental computation requires propagating changes and reusing intermediate results of base computations. Derivatives, as produced by static differentiation [7], propagate changes but do not reuse intermediate results, leading to wasteful recomputation. As a solution, we introduce conversion to Cache-Transfer-Style, an additional program transformations producing purely incremental functional programs that create and maintain nested tuples of intermediate results. To prove CTS conversion correct, we extend the correctness proof of static differentiation from STLC to untyped {$\mathsl{\lambda}\lambda\backslash$}lambda -calculus via step-indexed logical relations, and prove sound the additional transformation via simulation theorems.To show ILC-based languages can improve performance relative to from-scratch recomputation, and that CTS conversion can extend its applicability, we perform an initial performance case study. We provide derivatives of primitives for operations on collections and incrementalize selected example programs using those primitives, confirming expected asymptotic speedups.},
+  isbn = {978-3-030-17184-1},
+  language = {en},
+  series = {Lecture {{Notes}} in {{Computer Science}}}
+}
+
 @phdthesis{CaiPhD,
 	Author = {Yufei Cai},
 	Date-Added = {2017-05-10 14:27:52 +0000},
@@ -86,7 +99,7 @@
 	Author = {Paolo G. Giarrusso},
 	Date-Added = {2017-05-10 14:27:52 +0000},
 	Date-Modified = {2018-01-14 22:54:15 +0000},
-	Note = {Submitted. Draft available at \url{http://inc-lc.github.io/}},
+	Note = {Defended. Draft available at \url{http://inc-lc.github.io/}},
 	School = {University of T{\"u}bingen},
 	Title = {Optimizing and Incrementalizing Higher-order Collection Queries by {AST} Transformation},
 	Year = {2018}}
@@ -106,7 +119,7 @@
 	Pages = {145--155},
 	Publisher = {ACM},
 	Series = {PLDI '14},
-	Title = {A Theory of Changes for Higher-Order Languages --- {Incrementalizing} {$\lambda$}-Calculi by Static Differentiation},
+	Title = {A theory of changes for higher-order languages --- {Incrementalizing} {$\lambda$}-calculi by static differentiation},
 	Url = {http://doi.acm.org/10.1145/2594291.2594304},
 	Year = {2014},
 	Bdsk-Url-1 = {http://doi.acm.org/10.1145/2594291.2594304},
@@ -287,3 +300,20 @@ features.
 	Volume = {abs/1210.6284},
 	Year = {2012},
 	Bdsk-Url-1 = {http://arxiv.org/abs/1210.6284}}
+
+@inproceedings{Stucki18Truly,
+	Acmid = {3241658},
+	Address = {New York, NY, USA},
+	Author = {Stucki, Nicolas and Giarrusso, Paolo G. and Odersky, Martin},
+	Booktitle = {Proceedings of the 9th ACM SIGPLAN International Symposium on Scala},
+	Doi = {10.1145/3241653.3241658},
+	Isbn = {978-1-4503-5836-1},
+	Keywords = {Scala, abstract types, extractors, interfaces, pattern matching},
+	Location = {St. Louis, MO, USA},
+	Numpages = {5},
+	Pages = {56--60},
+	Publisher = {ACM},
+	Series = {Scala 2018},
+	Title = {Truly Abstract Interfaces for Algebraic Data Types: The Extractor Typing Problem},
+	Url = {http://doi.acm.org/10.1145/3241653.3241658},
+	Year = {2018}}

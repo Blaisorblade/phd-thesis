@@ -1,7 +1,7 @@
 %% This BibTeX bibliography file was created using BibDesk.
 %% http://bibdesk.sourceforge.net/
 
-%% Created for Paolo Giarrusso at 2017-12-09 23:07:52 +0100 
+%% Created for Paolo G. Giarrusso at 2019-04-17 05:37:55 +0200 
 
 
 %% Saved with string encoding Unicode (UTF-8) 
@@ -232,6 +232,181 @@
 @string{wrt = {Proc.\ ECOOP Workshop on Refactoring Tools (WRT)}}
 
 
+@article{Stovring2012First,
+	Abstract = {We present the topos S of trees as a model of guarded recursion. We study the internal dependently-typed higher-order logic of S and show that S models two modal operators, on predicates and types, which serve as guards in recursive definitions of terms, predicates, and types. In particular, we show how to solve recursive type equations involving dependent types. We propose that the internal logic of S provides the right setting for the synthetic construction of abstract versions of step-indexed models of programming languages and program logics. As an example, we show how to construct a model of a programming language with higher-order store and recursive types entirely inside the internal logic of S. Moreover, we give an axiomatic categorical treatment of models of synthetic guarded domain theory and prove that, for any complete Heyting algebra A with a well-founded basis, the topos of sheaves over A forms a model of synthetic guarded domain theory, generalizing the results for S.},
+	Author = {St\o{}vring, Kristian and Schwinghammer, Jan and M\o{}gelberg, Rasmus Ejlers and Birkedal, Lars},
+	Date-Added = {2019-01-17 16:29:28 +0100},
+	Date-Modified = {2019-01-17 16:29:28 +0100},
+	File = {/Users/pgiarrusso/Zotero/storage/KYNSYFZ8/St{\o}vring-Schwinghammer-M{\o}gelberg-Birkedal - 2012 - First steps in synthetic guarded domain theory - step-indexing in the topos of trees.pdf;/Users/pgiarrusso/Zotero/storage/69KJA482/1041.html},
+	Journal = {Logical Methods in Computer Science},
+	Language = {en},
+	Month = oct,
+	Shorttitle = {First steps in synthetic guarded domain theory},
+	Title = {First steps in synthetic guarded domain theory: step-indexing in the topos of trees},
+	Volume = {Volume 8, Issue 4},
+	Year = {2012}}
+
+@article{Birkedal2010categorytheoretic,
+	Abstract = {It is well known that one can use an adaptation of the inverse-limit construction to solve recursive equations in the category of complete ultrametric spaces. We show that this construction generalizes to a large class of categories with metric-space structure on each set of morphisms: the exact nature of the objects is less important. In particular, the construction immediately applies to categories where the objects are ultrametric spaces with `extra structure', and where the morphisms preserve this extra structure. The generalization is inspired by classical domain-theoretic work by Smyth and Plotkin. For many of the categories we consider, there is a natural subcategory in which each set of morphisms is required to be a compact metric space. Our setting allows for a proof that such a subcategory always inherits solutions of recursive equations from the full category. As another application, we present a construction that relates solutions of generalized domain equations in the sense of Smyth and Plotkin to solutions of equations in our class of categories. Our primary motivation for solving generalized recursive metric-space equations comes from recent and ongoing work on Kripke-style models in which the sets of worlds must be recursively defined. We show a series of examples motivated by this line of work.},
+	Author = {Birkedal, Lars and St\o{}vring, Kristian and Thamsborg, Jacob},
+	Date-Added = {2018-12-01 01:25:41 +0100},
+	Date-Modified = {2018-12-01 01:25:41 +0100},
+	Doi = {10.1016/j.tcs.2010.07.010},
+	File = {/Users/pgiarrusso/Zotero/storage/PUHI74FK/Birkedal-St{\o}vring-Thamsborg - 2010 - The category-theoretic solution of recursive metric-space equations.pdf;/Users/pgiarrusso/Zotero/storage/AKH5I9VH/S0304397510003968.html},
+	Issn = {0304-3975},
+	Journal = {Theoretical Computer Science},
+	Keywords = {Fixed point,Metric space,Recursive equation},
+	Month = oct,
+	Number = {47},
+	Pages = {4102-4122},
+	Title = {The category-theoretic solution of recursive metric-space equations},
+	Volume = {411},
+	Year = {2010}}
+
+@article{Harper1993Type,
+	Abstract = {Standard ML is a useful programming language with a polymorphic type system and a flexible module facility. One notable feature of the core expression language of ML is that it is implicitly typed: no explicit type information need be supplied by the programmer. In contrast, the module language of ML is explicitly typed; in particular, the types of parameters in parametric modules must be supplied by the programmer. We study the type structure of Standard ML by giving an explicitly-typed, polymorphic function calculus that captures many of the essential aspects of both the core and module language. In this setting, implicitly-typed core language expressions are regarded as a convenient short-hand for an explicitly-typed counterpart in our function calculus. In contrast to the Girard-Reynolds polymorphic calculus, our function calculus is predicative: the type system may be built up by induction on type levels. We show that, in a precise sense, the language becomes inconsistent if restrictions imposed by type levels are relaxed. More specifically, we prove that the important programming features of ML cannot be added to any impredicative language, such as the Girard-Reynolds calculus, without implicitly assuming a type of all types.},
+	Author = {Harper, Robert and Mitchell, John C.},
+	Date-Added = {2018-11-29 13:51:23 +0100},
+	Date-Modified = {2018-11-29 13:51:23 +0100},
+	Doi = {10.1145/169701.169696},
+	File = {/Users/pgiarrusso/Zotero/storage/YFBB9Q3D/Harper-Mitchell - 1993 - On the Type Structure of Standard ML.pdf},
+	Issn = {0164-0925},
+	Journal = {ACM Trans. Program. Lang. Syst.},
+	Month = apr,
+	Number = {2},
+	Pages = {211--252},
+	Title = {On the Type Structure of Standard ML},
+	Volume = {15},
+	Year = {1993}}
+
+@article{Yang2017Unifying,
+	Abstract = {In recent years dependent types have become a hot topic in programming language research. A key reason why dependent types are interesting is that they allow unifying types and terms, which enables both additional expressiveness and economy of concepts. Unfortunately there has been much less work on dependently typed calculi for object-oriented programming. This is partly because it is widely acknowledged that the combination between dependent types and subtyping is particularly challenging. This paper presents $\lambda$ I$\leq$, which is a dependently typed generalization of System F$\leq$. The resulting calculus follows the style of Pure Type Systems, and contains a single unified syntactic sort that accounts for expressions, types and kinds. To address the challenges posed by the combination of dependent types and subtyping, $\lambda$ I$\leq$ employs a novel technique that unifies typing and subtyping. In $\lambda$ I$\leq$ there is only a judgement that is akin to a typed version of subtyping. Both the typing relation, as well as type well-formedness are just special cases of the subtyping relation. The resulting calculus has a rich metatheory and enjoys of several standard and desirable properties, such as subject reduction, transitivity of subtyping, narrowing as well as standard substitution lemmas. All the metatheory of $\lambda$ I$\leq$ is mechanically proved in the Coq theorem prover. Furthermore, (and as far as we are aware) $\lambda$ I$\leq$ is the first dependently typed calculus that completely subsumes System F$\leq$, while preserving various desirable properties.},
+	Author = {Yang, Yanpeng and Oliveira, Bruno C. d. S.},
+	Date-Added = {2018-11-29 13:44:53 +0100},
+	Date-Modified = {2018-11-29 13:44:53 +0100},
+	Doi = {10.1145/3133871},
+	File = {/Users/pgiarrusso/Zotero/storage/R8GHV2CS/Yang-Oliveira - 2017 - Unifying Typing and Subtyping.pdf},
+	Issn = {2475-1421},
+	Journal = {Proc. ACM Program. Lang.},
+	Keywords = {dependent types,subtyping,object-oriented programming},
+	Month = oct,
+	Number = {OOPSLA},
+	Pages = {47:1--47:26},
+	Title = {Unifying Typing and Subtyping},
+	Volume = {1},
+	Year = {2017}}
+
+@inproceedings{Hutchins2010Pure,
+	Abstract = {This paper introduces a new approach to type theory called pure subtype systems . Pure subtype systems differ from traditional approaches to type theory (such as pure type systems) because the theory is based on subtyping, rather than typing. Proper types and typing are completely absent from the theory; the subtype relation is defined directly over objects. The traditional typing relation is shown to be a special case of subtyping, so the loss of types comes without any loss of generality. Pure subtype systems provide a uniform framework which seamlessly integrates subtyping with dependent and singleton types. The framework was designed as a theoretical foundation for several problems of practical interest, including mixin modules, virtual classes, and feature-oriented programming. The cost of using pure subtype systems is the complexity of the meta-theory. We formulate the subtype relation as an abstract reduction system, and show that the theory is sound if the underlying reductions commute. We are able to show that the reductions commute locally, but have thus far been unable to show that they commute globally. Although the proof is incomplete, it is ``close enough'' to rule out obvious counter-examples. We present it as an open problem in type theory.},
+	Address = {New York, NY, USA},
+	Author = {Hutchins, DeLesley S.},
+	Booktitle = {Proceedings of the 37th Annual ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+	Date-Added = {2018-11-29 13:44:45 +0100},
+	Date-Modified = {2018-11-29 13:44:45 +0100},
+	Doi = {10.1145/1706299.1706334},
+	File = {/Users/pgiarrusso/Zotero/storage/GGGYL7AE/Hutchins - 2010 - Pure Subtype Systems.pdf},
+	Isbn = {978-1-60558-479-9},
+	Keywords = {abstract reduction systems,dependent types,singleton types,subtyping,transitivity elimination},
+	Pages = {287--298},
+	Publisher = {{ACM}},
+	Series = {POPL '10},
+	Title = {Pure Subtype Systems},
+	Year = {2010}}
+
+@inproceedings{Gasiunas2007Dependent,
+	Abstract = {Virtual classes allow nested classes to be refined in subclasses. In this way nested classes can be seen as dependent abstractions of the objects of the enclosing classes. Expressing dependency via nesting, however, has two limitations: Abstractions that depend on more than one object cannot be modeled and a class must know all classes that depend on its objects. This paper presents dependent classes, a generalization of virtual classes that expresses similar semantics by parameterization rather than by nesting. This increases expressivity of class variations as well as the flexibility of their modularization. Besides, dependent classes complement multimethods in scenarios where multi-dispatched abstractions rather than multi-dispatched methods are needed. They can also be used to express more precise signatures of multimethods and even extend their dispatch semantics. We present a formal semantics of dependent classes and a machine-checked type soundness proof in Isabelle/HOL [29], the first of this kind for a language with virtual classes and path-dependent types.},
+	Address = {New York, NY, USA},
+	Author = {Gasiunas, Vaidas and Mezini, Mira and Ostermann, Klaus},
+	Booktitle = {Proceedings of the 22nd Annual ACM SIGPLAN Conference on Object-oriented Programming Systems and Applications},
+	Date-Added = {2018-11-29 13:44:35 +0100},
+	Date-Modified = {2018-11-29 13:44:35 +0100},
+	Doi = {10.1145/1297027.1297038},
+	File = {/Users/pgiarrusso/Zotero/storage/AI6DIFCU/Gasiunas-Mezini-Ostermann - 2007 - Dependent Classes.pdf},
+	Isbn = {978-1-59593-786-5},
+	Keywords = {variability,multiple dispatch,virtual classes,dynamic dispatch,multimethods,dependent classes},
+	Pages = {133--152},
+	Publisher = {{ACM}},
+	Series = {OOPSLA '07},
+	Title = {Dependent Classes},
+	Year = {2007}}
+
+@inproceedings{Ernst2006virtual,
+	Abstract = {Virtual classes are class-valued attributes of objects. Like virtual methods, virtual classes are defined in an object's class and may be redefined within subclasses. They resemble inner classes, which are also defined within a class, but virtual classes are accessed through object instances, not as static components of a class. When used as types, virtual classes depend upon object identity -- each object instance introduces a new family of virtual class types. Virtual classes support large-scale program composition techniques, including higher-order hierarchies and family polymorphism. The original definition of virtual classes in BETA left open the question of static type safety, since some type errors were not caught until runtime. Later the languages Caesar and gbeta have used a more strict static analysis in order to ensure static type safety. However, the existence of a sound, statically typed model for virtual classes has been a long-standing open question. This paper presents a virtual class calculus, VC, that captures the essence of virtual classes in these full-fledged programming languages. The key contributions of the paper are a formalization of the dynamic and static semantics of VC and a proof of the soundness of VC.},
+	Address = {New York, NY, USA},
+	Author = {Ernst, Erik and Ostermann, Klaus and Cook, William R.},
+	Booktitle = {Conference Record of the 33rd ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+	Date-Added = {2018-11-29 13:44:19 +0100},
+	Date-Modified = {2018-11-29 13:44:19 +0100},
+	Doi = {10.1145/1111037.1111062},
+	File = {/Users/pgiarrusso/Zotero/storage/V896UNP2/Ernst et al - 2006 - A Virtual Class Calculus.pdf},
+	Isbn = {1-59593-027-2},
+	Keywords = {soundness,virtual classes},
+	Pages = {270--282},
+	Publisher = {{ACM}},
+	Series = {POPL '06},
+	Title = {A Virtual Class Calculus},
+	Year = {2006}}
+
+@techreport{Wang2018Demystifying,
+	Author = {Wang, Fei and Wu, Xilun and Essertel, Gregory and Decker, James and Rompf, Tiark},
+	Date = {2018-03-27},
+	Date-Added = {2018-11-17 10:34:56 +0100},
+	Date-Modified = {2018-11-17 10:35:02 +0100},
+	File = {/Users/pgiarrusso/Zotero/storage/GFGJVN6Z/Wang-Wu-Essertel-Decker-Rompf - 2018 - Demystifying Differentiable Programming - Shift-Reset the Penultimate Backpropagator.pdf;/Users/pgiarrusso/Zotero/storage/RACZVCUP/Wang-Wu-Essertel-Decker-Rompf - 2018 - Demystifying Differentiable Programming - Shift-Reset the Penultimate Backpropagator.pdf;/Users/pgiarrusso/Zotero/storage/GPIBTZ59/1803.html;/Users/pgiarrusso/Zotero/storage/YXSB34ND/1803.html},
+	Keywords = {Computer Science - Machine Learning,Statistics - Machine Learning},
+	Langid = {english},
+	Shorttitle = {Demystifying Differentiable Programming},
+	Title = {Demystifying Differentiable Programming: Shift/Reset the Penultimate Backpropagator},
+	Url = {https://arxiv.org/abs/1803.10228},
+	Urldate = {2018-09-30},
+	Year = {2018}}
+
+@misc{Wadler98expression,
+	Author = {Wadler, Philip},
+	Date-Added = {2018-08-02 15:34:26 +0200},
+	Date-Modified = {2018-08-02 15:37:18 +0200},
+	Howpublished = {Email on the Java Genericity mailing list},
+	Keywords = {expression problem},
+	Month = {Nov},
+	Title = {The Expression Problem},
+	Year = {1998}}
+
+@article{Compagnoni2003Typed,
+	Abstract = {Bounded operator abstraction is a language construct relevant to object oriented programming languages and to ML2000, the successor to Standard ML. In this paper, we introduce Fω⩽, a variant of F$<$:ω with this feature and with Cardelli and Wegner's kernel Fun rule for quantifiers. We define a typed-operational semantics with subtyping and prove that it is equivalent with Fω⩽, using logical relations to prove soundness. The typed-operational semantics provides a powerful and uniform technique to study metatheoretic properties of Fω⩽, such as Church--Rosser, subject reduction, the admissibility of structural rules, and the equivalence with the algorithmic presentation of the system that performs weak-head reductions. Furthermore, we can show decidability of subtyping using the typed-operational semantics and its equivalence with the usual presentation. Hence, this paper demonstrates for the first time that logical relations can be used to show decidability of subtyping.},
+	Author = {Compagnoni, Adriana and Goguen, Healfdene},
+	Date = {2003-08-01},
+	Date-Added = {2018-06-20 13:04:14 +0000},
+	Date-Modified = {2018-06-20 13:07:41 +0000},
+	Doi = {10.1016/S0890-5401(03)00062-2},
+	File = {/Users/pgiarrusso/Zotero/storage/NTK42FPK/Compagnoni-Goguen - 2003 - Typed operational semantics for higher-order subtyping.pdf;/Users/pgiarrusso/Zotero/storage/MCJ6DB34/S0890540103000622.html},
+	Issn = {0890-5401},
+	Journal = {Information and Computation},
+	Keywords = {Subtyping,Type theory,Dependent kinds,Lambda calculus,Typed-operational semantics},
+	Number = {2},
+	Pages = {242-297},
+	Shortjournal = {Information and Computation},
+	Title = {Typed Operational Semantics for Higher-Order Subtyping},
+	Url = {http://www.sciencedirect.com/science/article/pii/S0890540103000622},
+	Urldate = {2018-06-19},
+	Volume = {184},
+	Year = {2003}}
+
+@inproceedings{Crary1999what,
+	Abstract = {A hierarchical module system is an effective tool for structuring large programs. Strictly hierarchical module systems impose an acyclic ordering on import dependencies among program units. This can impede modular programming by forcing mutually-dependent components to be consolidated into a single module. Recently there have been several proposals for module systems that admit cyclic dependencies, but it is not clear how these proposals relate to one another, nor how one might integrate them into an expressive module system such as that of ML.To address this question we provide a type-theoretic analysis of the notion of a recursive module in the context of a "phase-distinction" formalism for higher-order module systems. We extend this calculus with a recursive module mechanism and a new form of signature, called a recursively dependent signature, to support the definition of recursive modules. These extensions are justified by an interpretation in terms of more primitive language constructs. This interpretation may also serve as a guide for implementation.},
+	Address = {New York, NY, USA},
+	Author = {Crary, Karl and Harper, Robert and Puri, Sidd},
+	Booktitle = {Proceedings of the {{ACM SIGPLAN}} 1999 {{Conference}} on {{Programming Language Design}} and {{Implementation}}},
+	Date-Added = {2018-05-16 03:32:54 +0000},
+	Date-Modified = {2018-05-16 03:32:54 +0000},
+	Doi = {10.1145/301618.301641},
+	Isbn = {1-58113-094-5},
+	Pages = {50--63},
+	Publisher = {{ACM}},
+	Series = {PLDI '99},
+	Title = {What Is a Recursive Module?},
+	Urldate = {2015-07-09},
+	Year = {1999}}
+
 @article{Dreyer2011logical,
 	Abstract = {Appel and McAllester's "step-indexed" logical relations have proven to be a simple and effective technique for reasoning about programs in languages with semantically interesting types, such as general recursive types and general reference types. However, proofs using step-indexed models typically involve tedious, error-prone, and proof-obscuring step-index arithmetic, so it is important to develop clean, high-level, equational proof principles that avoid mention of step indices. In this paper, we show how to reason about binary step-indexed logical relations in an abstract and elegant way. Specifically, we define a logic LSLR, which is inspired by Plotkin and Abadi's logic for parametricity, but also supports recursively defined relations by means of the modal "later" operator from Appel, Melli$\backslash$`es, Richards, and Vouillon's "very modal model" paper. We encode in LSLR a logical relation for reasoning relationally about programs in call-by-value System F extended with general recursive types. Using this logical relation, we derive a set of useful rules with which we can prove contextual equivalence and approximation results without counting steps.},
 	Archiveprefix = {arXiv},
@@ -286,26 +461,6 @@
 	Urldate = {2016-01-26},
 	Year = {2016}}
 
-@inproceedings{Rompf2016type,
-	Abstract = {Scala's type system unifies aspects of ML modules, object- oriented, and functional programming. The Dependent Object Types (DOT) family of calculi has been proposed as a new theoretic foundation for Scala and similar expressive languages. Unfortunately, type soundness has only been established for restricted subsets of DOT. In fact, it has been shown that important Scala features such as type refinement or a subtyping relation with lattice structure break at least one key metatheoretic property such as environment narrowing or invertible subtyping transitivity, which are usually required for a type soundness proof. The main contribution of this paper is to demonstrate how, perhaps surprisingly, even though these properties are lost in their full generality, a rich DOT calculus that includes recursive type refinement and a subtyping lattice with intersection types can still be proved sound. The key insight is that subtyping transitivity only needs to be invertible in code paths executed at runtime, with contexts consisting entirely of valid runtime objects, whereas inconsistent subtyping contexts can be permitted for code that is never executed.},
-	Address = {New York, NY, USA},
-	Author = {Rompf, Tiark and Amin, Nada},
-	Booktitle = {Proceedings of the 2016 {{ACM SIGPLAN International Conference}} on {{Object}}-{{Oriented Programming}}, {{Systems}}, {{Languages}}, and {{Applications}}},
-	Date-Added = {2017-11-16 22:06:36 +0000},
-	Date-Modified = {2017-11-16 22:06:36 +0000},
-	Doi = {10.1145/2983990.2984008},
-	File = {Rompf_Amin - 2016 - Type Soundness for Dependent Object Types (DOT).pdf:/Users/pgiarrusso/Zotero/storage/SJ7HCPXJ/Rompf_Amin - 2016 - Type Soundness for Dependent Object Types (DOT).pdf:application/pdf},
-	Isbn = {978-1-4503-4444-9},
-	Keywords = {dependent object types,Scala,_tablet,DOT,soundness},
-	Pages = {624--641},
-	Publisher = {{ACM}},
-	Series = {OOPSLA 2016},
-	Timestamp = {2016-11-01T13:07:50Z},
-	Title = {Type {{Soundness}} for {{Dependent Object Types}} ({{DOT}})},
-	Urldate = {2016-11-01},
-	Year = {2016},
-	Bdsk-Url-1 = {http://dx.doi.org/10.1145/2983990.2984008}}
-
 @inproceedings{Hobor2010theory,
 	Abstract = {Building semantic models that account for various kinds of indirect reference has traditionally been a difficult problem. Indirect reference can appear in many guises, such as heap pointers, higher-order functions, object references, and shared-memory mutexes. We give a general method to construct models containing indirect reference by presenting a "theory of indirection". Our method can be applied in a wide variety of settings and uses only simple, elementary mathematics. In addition to various forms of indirect reference, the resulting models support powerful features such as impredicative quantification and equirecursion; moreover they are compatible with the kind of powerful substructural accounting required to model (higher-order) separation logic. In contrast to previous work, our model is easy to apply to new settings and has a simple axiomatization, which is complete in the sense that all models of it are isomorphic. Our proofs are machine-checked in Coq.},
 	Address = {New York, NY, USA},
@@ -336,61 +491,6 @@
 	Timestamp = {2017-11-14T21:47:54Z},
 	Title = {Constructing {{Hereditary Worlds Within Worlds}}},
 	Year = {2012}}
-
-@article{Rapoport2017simple,
-	Abstract = {Dependent Object Types (DOT) is intended to be a core calculus for modelling Scala. Its distinguishing feature is abstract type members, fields in objects that hold types rather than values. Proving soundness of DOT has been surprisingly challenging, and existing proofs are complicated, and reason about multiple concepts at the same time (e.g. types, values, evaluation). To serve as a core calculus for Scala, DOT should be easy to experiment with and extend, and therefore its soundness proof needs to be easy to modify. This paper presents a simple and modular proof strategy for reasoning in DOT. The strategy separates reasoning about types from other concerns. It is centred around a theorem that connects the full DOT type system to a restricted variant in which the challenges and paradoxes caused by abstract type members are eliminated. Almost all reasoning in the proof is done in the intuitive world of this restricted type system. Once we have the necessary results about types, we observe that the other aspects of DOT are mostly standard and can be incorporated into a soundness proof using familiar techniques known from other calculi. Our paper comes with a machine-verified version of the proof in Coq.},
-	Archiveprefix = {arXiv},
-	Author = {Rapoport, Marianna and Kabir, Ifaz and He, Paul and Lhot{\'a}k, Ond{\v r}ej},
-	Date-Added = {2017-11-14 22:33:37 +0000},
-	Date-Modified = {2017-11-14 22:33:37 +0000},
-	Eprint = {1706.03814},
-	Eprinttype = {arxiv},
-	File = {Rapoport et al - 2017 - A Simple Soundness Proof for Dependent Object Types.pdf:/Users/pgiarrusso/Zotero/storage/WNAKE2N8/Rapoport et al - 2017 - A Simple Soundness Proof for Dependent Object Types.pdf:application/pdf;arXiv.org Snapshot:/Users/pgiarrusso/Zotero/storage/B2NN7UZH/1706.html:text/html},
-	Journal = {arXiv:1706.03814 [cs]},
-	Keywords = {Computer Science - Programming Languages,_tablet},
-	Month = jun,
-	Primaryclass = {cs},
-	Timestamp = {2017-09-11T13:44:07Z},
-	Title = {A {{Simple Soundness Proof}} for {{Dependent Object Types}}},
-	Year = {2017}}
-
-@article{Rapoport2016mutable,
-	Abstract = {The Dependent Object Types (DOT) calculus aims to model the essence of Scala, with a focus on abstract type members, path-dependent types, and subtyping. Other Scala features could be defined by translation to DOT. Mutation is a fundamental feature of Scala currently missing in DOT. Mutation in DOT is needed not only to model effectful computation and mutation in Scala programs, but even to precisely specify how Scala initializes immutable variables and fields (vals). We present an extension to DOT that adds typed mutable reference cells. We have proven the extension sound with a mechanized proof in Coq. We present the key features of our extended calculus and its soundness proof, and discuss the challenges that we encountered in our search for a sound design and the alternative solutions that we considered.},
-	Archiveprefix = {arXiv},
-	Author = {Rapoport, Marianna and Lhot{\'a}k, Ond{\v r}ej},
-	Date-Added = {2017-11-14 22:33:37 +0000},
-	Date-Modified = {2017-11-14 22:33:37 +0000},
-	Eprint = {1611.07610},
-	Eprinttype = {arxiv},
-	File = {Rapoport_Lhot{\'a}k - 2016 - Mutable WadlerFest DOT.pdf:/Users/pgiarrusso/Zotero/storage/ZMG67T43/Rapoport_Lhot{\'a}k - 2016 - Mutable WadlerFest DOT.pdf:application/pdf;arXiv.org Snapshot:/Users/pgiarrusso/Zotero/storage/44R5R43B/1611.html:text/html},
-	Journal = {arXiv:1611.07610 [cs]},
-	Keywords = {Computer Science - Programming Languages,_tablet},
-	Month = nov,
-	Primaryclass = {cs},
-	Timestamp = {2017-01-06T18:48:31Z},
-	Title = {Mutable {{WadlerFest DOT}}},
-	Urldate = {2017-01-06},
-	Year = {2016}}
-
-@inproceedings{Wang2017strong,
-	Address = {Dagstuhl, Germany},
-	Author = {Wang, Fei and Rompf, Tiark},
-	Booktitle = {31st {{European Conference}} on {{Object}}-{{Oriented Programming}} ({{ECOOP}} 2017)},
-	Date-Added = {2017-09-26 01:27:19 +0000},
-	Date-Modified = {2017-09-26 01:27:19 +0000},
-	Doi = {10.4230/LIPIcs.ECOOP.2017.27},
-	Editor = {M{\"u}ller, Peter},
-	File = {Wang_Rompf - 2017 - Towards Strong Normalization for Dependent Object Types (DOT).pdf:/Users/pgiarrusso/Library/Application Support/Zotero/Profiles/0lm7uqnz.default/zotero/storage/TQ28KV6T/Wang_Rompf - 2017 - Towards Strong Normalization for Dependent Object Types (DOT).pdf:application/pdf;Snapshot:/Users/pgiarrusso/Library/Application Support/Zotero/Profiles/0lm7uqnz.default/zotero/storage/JF5STNRB/7276.html:text/html},
-	Isbn = {978-3-95977-035-4},
-	Keywords = {DOT,logical relations,recursive types,Scala,Strong Normalization},
-	Pages = {27:1--27:25},
-	Publisher = {{Schloss Dagstuhl\textendash{}Leibniz-Zentrum fuer Informatik}},
-	Series = {Leibniz International Proceedings in Informatics (LIPIcs)},
-	Timestamp = {2017-09-25T23:29:39Z},
-	Title = {Towards {{Strong Normalization}} for {{Dependent Object Types}} ({{DOT}})},
-	Volume = {74},
-	Year = {2017},
-	Bdsk-Url-1 = {http://dx.doi.org/10.4230/LIPIcs.ECOOP.2017.27}}
 
 @inproceedings{Svendsen2016transfinite,
 	Abstract = {Step-indexing has proven to be a powerful technique for defining logical relations for languages with advanced type systems and models of expressive program logics. In both cases, the model is stratified using natural numbers to solve a recursive equation that has no naive solutions. As a result of this stratification, current models require that each unfolding of the recursive equation \textendash{} each logical step \textendash{} must coincide with a concrete reduction step. This tight coupling is problematic for applications where the number of logical steps cannot be statically bounded.In this paper we demonstrate that this tight coupling between logical and concrete steps is artificial and show how to loosen it using transfinite step-indexing. We present a logical relation that supports an arbitrary but finite number of logical steps for each concrete step.},
@@ -647,7 +747,7 @@
 	Publisher = {{ACM}},
 	Series = {TLDI '10},
 	Timestamp = {2016-02-29T23:17:09Z},
-	Title = {F-Ing {{Modules}}},
+	Title = {F-ing modules},
 	Urldate = {2014-06-12},
 	Year = {2010},
 	Bdsk-Url-1 = {http://dx.doi.org/10.1145/1708016.1708028}}
@@ -667,7 +767,7 @@
 	Primaryclass = {cs},
 	Shorttitle = {Typed {{Adapton}}},
 	Timestamp = {2017-07-07T17:06:59Z},
-	Title = {Typed {{Adapton}}: {{Refinement}} Types for Incremental Computations with Precise Names},
+	Title = {Typed {{Adapton}}: refinement types for incremental computations with precise names},
 	Year = {2016}}
 
 @inproceedings{Hammer2014adapton,
@@ -686,7 +786,7 @@
 	Series = {PLDI '14},
 	Shorttitle = {Adapton},
 	Timestamp = {2016-02-29T23:17:09Z},
-	Title = {Adapton: {{Composable}}, {{Demand}}-Driven {{Incremental Computation}}},
+	Title = {Adapton: composable, demand-driven incremental computation},
 	Urldate = {2014-09-01},
 	Year = {2014},
 	Bdsk-Url-1 = {http://dx.doi.org/10.1145/2594291.2594324}}
@@ -918,7 +1018,7 @@ http://homepages.inf.ed.ac.uk/wadler},
 	Pages = {69--83},
 	Publisher = {{Springer, Berlin, Heidelberg}},
 	Timestamp = {2017-01-13T00:19:01Z},
-	Title = {Step-{{Indexed Syntactic Logical Relations}} for {{Recursive}} and {{Quantified Types}}},
+	Title = {Step-indexed syntactic logical relations for recursive and quantified types},
 	Urldate = {2017-01-13},
 	Year = {2006},
 	Bdsk-Url-1 = {http://dx.doi.org/10.1007/11693024_6}}
@@ -1218,27 +1318,6 @@ A thorough analysis of the abstract machine for CPS terms show that the actions 
 	Bdsk-Url-1 = {http://doi.acm.org/10.1145/2658761.2658771},
 	Bdsk-Url-2 = {http://dx.doi.org/10.1145/2658761.2658771}}
 
-@inproceedings{Amin2017,
-	Acmid = {3009866},
-	Address = {New York, NY, USA},
-	Author = {Amin, Nada and Rompf, Tiark},
-	Booktitle = {Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages},
-	Date-Added = {2017-01-18 14:00:16 +0000},
-	Date-Modified = {2017-01-18 14:00:18 +0000},
-	Doi = {10.1145/3009837.3009866},
-	Isbn = {978-1-4503-4660-3},
-	Keywords = {DOT, Definitional interpreters, Scala, dependent object types, type soundness},
-	Location = {Paris, France},
-	Numpages = {14},
-	Pages = {666--679},
-	Publisher = {ACM},
-	Series = {POPL 2017},
-	Title = {Type Soundness Proofs with Definitional Interpreters},
-	Url = {http://doi.acm.org/10.1145/3009837.3009866},
-	Year = {2017},
-	Bdsk-Url-1 = {http://doi.acm.org/10.1145/3009837.3009866},
-	Bdsk-Url-2 = {http://dx.doi.org/10.1145/3009837.3009866}}
-
 @inproceedings{Cicek2016type,
 	Abstract = {Incremental computation aims to speed up re-runs of a program after its inputs have been modified slightly. It works by recording a trace of the program's first run and propagating changes through the trace in incremental runs, trying to re-use as much of the original trace as possible. The recent work CostIt is a type and effect system to establish the time complexity of incremental runs of a program, as a function of input changes. However, CostIt is limited in two ways. First, it prohibits input changes that influence control flow. This makes it impossible to type programs that, for instance, branch on inputs that may change. Second, the soundness of CostIt is proved relative to an abstract cost semantics, but it is unclear how the semantics can be realized.   In this paper, we address both these limitations. We present DuCostIt, a re-design of CostIt, that combines reasoning about costs of change propagation and costs of from-scratch evaluation. The latter lifts the restriction on control flow changes. To obtain the type system, we refine Flow Caml, a type system for information flow analysis, with cost effects. Additionally, we inherit from CostIt index refinements to track data structure sizes and a co-monadic type. Using a combination of binary and unary step-indexed logical relations, we prove DuCostIt's cost analysis sound relative to not only an abstract cost semantics, but also a concrete semantics, which is obtained by translation to an ML-like language.},
 	Address = {New York, NY, USA},
@@ -1254,7 +1333,7 @@ A thorough analysis of the abstract machine for CPS terms show that the actions 
 	Publisher = {{ACM}},
 	Series = {ICFP 2016},
 	Timestamp = {2017-02-07T18:31:46Z},
-	Title = {A {{Type Theory}} for {{Incremental Computational Complexity}} with {{Control Flow Changes}}},
+	Title = {A type theory for incremental computational complexity with control flow changes},
 	Urldate = {2017-02-07},
 	Year = {2016},
 	Bdsk-Url-1 = {http://dx.doi.org/10.1145/2951913.2951950}}
@@ -1323,7 +1402,7 @@ A thorough analysis of the abstract machine for CPS terms show that the actions 
 	Publisher = {{Springer International Publishing}},
 	Series = {Lecture Notes in Computer Science},
 	Timestamp = {2016-10-05T13:36:04Z},
-	Title = {Purely {{Functional Incremental Computing}}},
+	Title = {Purely functional incremental computing},
 	Urldate = {2016-10-05},
 	Year = {2016},
 	Bdsk-Url-1 = {http://dx.doi.org/10.1007/978-3-319-45279-1_5}}
@@ -1372,7 +1451,7 @@ A thorough analysis of the abstract machine for CPS terms show that the actions 
 @inproceedings{Marlow2004making,
 	Abstract = {Higher-order languages that encourage currying are implemented using one of two basic evaluation models: push/enter or eval/apply. Implementors use their intuition and qualitative judgements to choose one model or the other.Our goal in this paper is to provide, for the first time, a more substantial basis for this choice, based on our qualitative and quantitative experience of implementing both models in a state-of-the-art compiler for Haskell.Our conclusion is simple, and contradicts our initial intuition: compiled implementations should use eval/apply.},
 	Address = {New York, NY, USA},
-	Author = {{Marlow}, Simon and {Jones}, Simon Peyton},
+	Author = {{Marlow}, Simon and {Peyton Jones}, Simon},
 	Booktitle = {Proceedings of the ninth {{ACM SIGPLAN International Conference}} on {{Functional Programming}}},
 	Date-Added = {2016-03-01 10:01:59 +0000},
 	Date-Modified = {2016-03-01 10:02:38 +0000},
@@ -1390,7 +1469,7 @@ A thorough analysis of the abstract machine for CPS terms show that the actions 
 
 @article{Marlow2006making,
 	Abstract = {Higher-order languages that encourage currying are typically implemented using one of two basic evaluation models: push/enter or eval/apply. Implementors use their intuition and qualitative judgements to choose one model or the other. Our goal in this paper is to provide, for the first time, a more substantial basis for this choice, based on our qualitative and quantitative experience of implementing both models in a state-of-the-art compiler for Haskell. Our conclusion is simple, and contradicts our initial intuition: compiled implementations should use eval/apply.},
-	Author = {{Marlow}, Simon and {Jones}, Simon Peyton},
+	Author = {{Marlow}, Simon and {Peyton Jones}, Simon},
 	Date-Added = {2016-03-01 10:01:15 +0000},
 	Date-Modified = {2016-03-01 10:01:41 +0000},
 	Doi = {10.1017/S0956796806005995},
@@ -1421,7 +1500,7 @@ A thorough analysis of the abstract machine for CPS terms show that the actions 
 	Publisher = {{ACM}},
 	Series = {Haskell '09},
 	Timestamp = {2016-02-08T23:14:19Z},
-	Title = {Types Are Calling Conventions},
+	Title = {Types are calling conventions},
 	Urldate = {2016-02-08},
 	Year = {2009},
 	Bdsk-Url-1 = {http://dx.doi.org/10.1145/1596638.1596640}}
@@ -1441,7 +1520,7 @@ A thorough analysis of the abstract machine for CPS terms show that the actions 
 	Publisher = {{ACM}},
 	Series = {POPL '14},
 	Timestamp = {2016-03-01T09:25:28Z},
-	Title = {Modular, Higher-order Cardinality Analysis in Theory and Practice},
+	Title = {Modular, higher-order cardinality analysis in theory and practice},
 	Urldate = {2016-03-01},
 	Year = {2014},
 	Bdsk-Url-1 = {http://dx.doi.org/10.1145/2535838.2535861}}
@@ -1699,7 +1778,7 @@ I've read Sec. 1 and 2, with a safety proof for omega and Y, and I've been mind-
 	Pages = {657--683},
 	Publisher = {ACM},
 	Rating = {5},
-	Title = {An Indexed Model of Recursive Types for Foundational Proof-carrying Code},
+	Title = {An indexed model of recursive types for foundational proof-carrying code},
 	Url = {http://doi.acm.org/10.1145/504709.504712},
 	Volume = {23},
 	Year = {2001},
@@ -2072,7 +2151,7 @@ In this paper, we describe the architecture, implementation, and evaluation of I
 	Author = {Acar, Umut A},
 	Date-Added = {2013-10-08 23:54:44 +0000},
 	Date-Modified = {2013-10-08 23:54:50 +0000},
-	School = {Princeton University},
+	School = {Carnegie Mellon University},
 	Title = {Self-Adjusting Computation},
 	Year = {2005}}
 
@@ -2297,7 +2376,7 @@ In this paper, we describe the architecture, implementation, and evaluation of I
 	Numpages = {53},
 	Pages = {402--454},
 	Publisher = {ACM},
-	Title = {Finite Differencing of Computable Expressions},
+	Title = {Finite differencing of computable expressions},
 	Volume = {4},
 	Year = {1982},
 	Bdsk-Url-1 = {http://doi.acm.org/10.1145/357172.357177},
@@ -2466,7 +2545,7 @@ Since every non-trivial computation proceeds by iteration or recursion, the appr
 	Number = {4},
 	Pages = {289-313},
 	Publisher = kluwer,
-	Title = {Efficiency by Incrementalization: An Introduction},
+	Title = {Efficiency by incrementalization: an introduction},
 	Volume = {13},
 	Year = {2000},
 	Bdsk-Url-1 = {http://dx.doi.org/10.1023/A%3A1026547031739},
@@ -2979,7 +3058,7 @@ We evaluate the effectiveness of our approach by considering a range of benchmar
 	Pages = {227--240},
 	Publisher = {ACM},
 	Series = {ICFP '14},
-	Title = {Functional Programming for Dynamic and Large Data with Self-adjusting Computation},
+	Title = {Functional programming for dynamic and large data with self-adjusting computation},
 	Url = {http://doi.acm.org/10.1145/2628136.2628150},
 	Year = {2014},
 	Bdsk-Url-1 = {http://doi.acm.org/10.1145/2628136.2628150},
@@ -3193,40 +3272,6 @@ We evaluate the effectiveness of our approach by considering a range of benchmar
 	Year = {2008},
 	Bdsk-Url-1 = {http://doi.acm.org/10.1145/1411204.1411251},
 	Bdsk-Url-2 = {http://dx.doi.org/10.1145/1411204.1411251}}
-
-@inproceedings{Amin12,
-	Abstract = {We propose a new type-theoretic foundation of Scala and
-                 languages like it: the Dependent Object Types (DOT)
-                 calculus. DOT models Scala's path-dependent types,
-                 abstract type members and its mixture of nominal and
-                 structural typing through the use of refinement types. The
-                 core formalism makes no attempt to model inheritance and
-                 mixin composition. DOT normalizes Scala's type system by
-                 unifying the constructs for type members and by providing
-                 classical intersection and union types which simplify
-                 greatest lower bound and least upper bound computations.
-                 In this paper, we present the DOT calculus, both formally
-                 and informally. We also discuss our work-in-progress to
-                 prove typesafety of the calculus.},
-	Affiliation = {EPFL},
-	Author = {Amin, Nada and Moors, Adriaan and Odersky, Martin},
-	Booktitle = {19{t}h {I}nternational {W}orkshop on {F}oundations of {O}bject-{O}riented {L}anguages},
-	Date-Added = {2013-01-23 18:13:15 +0000},
-	Date-Modified = {2013-01-23 18:13:17 +0000},
-	Details = {http://infoscience.epfl.ch/record/183030},
-	Documenturl = {http://infoscience.epfl.ch/record/183030/files/fool.pdf},
-	Keywords = {calculus; objects; dependent types},
-	Location = {Tucson, Arizona, USA},
-	Oai-Id = {oai:infoscience.epfl.ch:183030},
-	Oai-Set = {conf},
-	Review = {REVIEWED},
-	Status = {PUBLISHED},
-	Submitter = {164625},
-	Title = {Dependent {O}bject {T}ypes},
-	Unit = {LAMP},
-	Url = {https://github.com/namin/dot},
-	Year = 2012,
-	Bdsk-Url-1 = {https://github.com/namin/dot}}
 
 @inproceedings{Demetrescu11,
 	Acmid = {2048100},
@@ -3483,7 +3528,7 @@ We evaluate the effectiveness of our approach by considering a range of benchmar
 	Read = {1},
 	Title = {Independently Extensible Solutions to the Expression Problem},
 	Year = 2005,
-	Bdsk-File-1 = {YnBsaXN0MDDUAQIDBAUGJCVYJHZlcnNpb25YJG9iamVjdHNZJGFyY2hpdmVyVCR0b3ASAAGGoKgHCBMUFRYaIVUkbnVsbNMJCgsMDxJXTlMua2V5c1pOUy5vYmplY3RzViRjbGFzc6INDoACgAOiEBGABIAFgAdccmVsYXRpdmVQYXRoWWFsaWFzRGF0YV8QiC4uLy4uLy4uL0Ryb3Bib3gvUGFwZXJzL1Byb2dyYW1taW5nIExhbmd1YWdlcy9TY2FsYS9JbmRlcGVuZGVudGx5IEV4dGVuc2libGUgU29sdXRpb25zIHRvIHRoZSBFeHByZXNzaW9uIFByb2JsZW0gLSBleHByZXNzaW9uUHJvYmxlbS5wZGbSFwsYGVdOUy5kYXRhTxECtgAAAAACtgACAAAMTWFjaW50b3NoIEhEAAAAAAAAAAAAAAAAAAAAzpe500grAAAAFi24H0luZGVwZW5kZW50bHkgRXh0ZW5zIzE2MkRDNC5wZGYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWLcTM7kSdAAAAAAAAAAAAAwAFAAAJIAAAAAAAAAAAAAAAAAAAAAVTY2FsYQAAEAAIAADOl6vDAAAAEQAIAADM7jaNAAAAAQAYABYtuAAWJ4gAFiZ7ABYh+wANl58AAmSOAAIAbk1hY2ludG9zaCBIRDpVc2VyczoAcGdpYXJydXNzbzoARHJvcGJveDoAUGFwZXJzOgBQcm9ncmFtbWluZyBMYW5ndWFnZXM6AFNjYWxhOgBJbmRlcGVuZGVudGx5IEV4dGVucyMxNjJEQzQucGRmAA4AqgBUAEkAbgBkAGUAcABlAG4AZABlAG4AdABsAHkAIABFAHgAdABlAG4AcwBpAGIAbABlACAAUwBvAGwAdQB0AGkAbwBuAHMAIAB0AG8AIAB0AGgAZQAgAEUAeABwAHIAZQBzAHMAaQBvAG4AIABQAHIAbwBiAGwAZQBtACAALQAgAGUAeABwAHIAZQBzAHMAaQBvAG4AUAByAG8AYgBsAGUAbQAuAHAAZABmAA8AGgAMAE0AYQBjAGkAbgB0AG8AcwBoACAASABEABIAkFVzZXJzL3BnaWFycnVzc28vRHJvcGJveC9QYXBlcnMvUHJvZ3JhbW1pbmcgTGFuZ3VhZ2VzL1NjYWxhL0luZGVwZW5kZW50bHkgRXh0ZW5zaWJsZSBTb2x1dGlvbnMgdG8gdGhlIEV4cHJlc3Npb24gUHJvYmxlbSAtIGV4cHJlc3Npb25Qcm9ibGVtLnBkZgATAAEvAAAVAAIAEf//AACABtIbHB0eWiRjbGFzc25hbWVYJGNsYXNzZXNdTlNNdXRhYmxlRGF0YaMdHyBWTlNEYXRhWE5TT2JqZWN00hscIiNcTlNEaWN0aW9uYXJ5oiIgXxAPTlNLZXllZEFyY2hpdmVy0SYnVHJvb3SAAQAIABEAGgAjAC0AMgA3AEAARgBNAFUAYABnAGoAbABuAHEAcwB1AHcAhACOARkBHgEmA+AD4gPnA/ID+wQJBA0EFAQdBCIELwQyBEQERwRMAAAAAAAAAgEAAAAAAAAAKAAAAAAAAAAAAAAAAAAABE4=}}
+	Bdsk-File-1 = {YnBsaXN0MDDSAQIDBFxyZWxhdGl2ZVBhdGhZYWxpYXNEYXRhXxCFLi4vLi4vRHJvcGJveC9QYXBlcnMvUHJvZ3JhbW1pbmcgTGFuZ3VhZ2VzL1NjYWxhL0luZGVwZW5kZW50bHkgRXh0ZW5zaWJsZSBTb2x1dGlvbnMgdG8gdGhlIEV4cHJlc3Npb24gUHJvYmxlbSAtIGV4cHJlc3Npb25Qcm9ibGVtLnBkZk8RAqYAAAAAAqYAAgAADE1hY2ludG9zaCBIRAAAAAAAAAAAAAAAAAAAAAAAAABCRAAB/////x9JbmRlcGVuZGVudGx5IEV4dGUjRkZGRkZGRkYucGRmAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/////AAAAAAAAAAAAAAAAAAIABQAACiBjdQAAAAAAAAAAAAAAAAAFU2NhbGEAAAIAki86VXNlcnM6cGdpYXJydXNzbzpEcm9wYm94OlBhcGVyczpQcm9ncmFtbWluZyBMYW5ndWFnZXM6U2NhbGE6SW5kZXBlbmRlbnRseSBFeHRlbnNpYmxlIFNvbHV0aW9ucyB0byB0aGUgRXhwcmVzc2lvbiBQcm9ibGVtIC0gZXhwcmVzc2lvblByb2JsZW0ucGRmAA4AqgBUAEkAbgBkAGUAcABlAG4AZABlAG4AdABsAHkAIABFAHgAdABlAG4AcwBpAGIAbABlACAAUwBvAGwAdQB0AGkAbwBuAHMAIAB0AG8AIAB0AGgAZQAgAEUAeABwAHIAZQBzAHMAaQBvAG4AIABQAHIAbwBiAGwAZQBtACAALQAgAGUAeABwAHIAZQBzAHMAaQBvAG4AUAByAG8AYgBsAGUAbQAuAHAAZABmAA8AGgAMAE0AYQBjAGkAbgB0AG8AcwBoACAASABEABIAkFVzZXJzL3BnaWFycnVzc28vRHJvcGJveC9QYXBlcnMvUHJvZ3JhbW1pbmcgTGFuZ3VhZ2VzL1NjYWxhL0luZGVwZW5kZW50bHkgRXh0ZW5zaWJsZSBTb2x1dGlvbnMgdG8gdGhlIEV4cHJlc3Npb24gUHJvYmxlbSAtIGV4cHJlc3Npb25Qcm9ibGVtLnBkZgATAAEvAAAVAAIAEf//AAAACAANABoAJACsAAAAAAAAAgEAAAAAAAAABQAAAAAAAAAAAAAAAAAAA1Y=}}
 
 @inproceedings{Lindley12EmbeddingF,
 	Acmid = {2364402},
@@ -4684,10 +4729,91 @@ We evaluate the effectiveness of our approach by considering a range of benchmar
 	Bdsk-Url-1 = {http://doi.acm.org/10.1145/2384592.2384611},
 	Bdsk-Url-2 = {http://dx.doi.org/10.1145/2384592.2384611}}
 
-@article{jung2017iris,
-	Author = {Jung, Ralf and Krebbers, Robbert and Jourdan, Jacques-Henri and Bizjak, Ale{\v{s}} and Birkedal, Lars and Dreyer, Derek},
-	Journal = {Submitted for publication},
-	Title = {Iris from the ground up: A modular foundation for higher-order concurrent separation logic.(2017)},
-	Url = {https://people.mpi-sws.org/~dreyer/papers/iris-ground-up/paper.pdf},
-	Year = {2017},
-	Bdsk-Url-1 = {https://people.mpi-sws.org/~dreyer/papers/iris-ground-up/paper.pdf}}
+@article{Jung2018iris,
+  author    = {Ralf Jung and
+               Robbert Krebbers and
+               Jacques{-}Henri Jourdan and
+               Ales Bizjak and
+               Lars Birkedal and
+               Derek Dreyer},
+  title     = {{I}ris from the ground up: {A} modular foundation for higher-order concurrent
+               separation logic},
+  journal   = {JFP},
+  volume    = {28},
+  pages     = {e20},
+  year      = {2018},
+}
+
+@inproceedings{HofmannPW12,
+	Author = {Martin Hofmann and Benjamin C. Pierce and Daniel Wagner},
+	Bibsource = {dblp computer science bibliography, https://dblp.org},
+	Biburl = {https://dblp.org/rec/bib/conf/popl/HofmannPW12},
+	Booktitle = {Proceedings of the 39th {ACM} {SIGPLAN-SIGACT} Symposium on Principles of Programming Languages, {POPL} 2012, Philadelphia, Pennsylvania, USA, January 22-28, 2012},
+	Crossref = {DBLP:conf/popl/2012},
+	Doi = {10.1145/2103656.2103715},
+	Pages = {495--508},
+	Timestamp = {Sun, 03 Dec 2017 00:17:33 +0100},
+	Title = {Edit lenses},
+	Url = {http://doi.acm.org/10.1145/2103656.2103715},
+	Year = {2012}}
+
+@incollection{Johnsson1985lambda,
+	Author = {Johnsson, Thomas},
+	Booktitle = {Functional {{Programming Languages}} and {{Computer Architecture}}},
+	Copyright = {\textcopyright{}1985 Springer-Verlag},
+	Editor = {Jouannaud, Jean-Pierre},
+	File = {/Users/pgiarrusso/Zotero/storage/I9Z29UDX/Johnsson - 1985 - Lambda lifting - Transforming programs to recursive equations.pdf;/Users/pgiarrusso/Zotero/storage/JEX7KZA7/3-540-15975-4_37.html},
+	Isbn = {978-3-540-15975-9 978-3-540-39677-2},
+	Keywords = {Processor Architectures},
+	Language = {en},
+	Month = sep,
+	Number = {201},
+	Pages = {190--203},
+	Publisher = {{Springer Berlin Heidelberg}},
+	Series = {Lecture Notes in Computer Science},
+	Shorttitle = {Lambda Lifting},
+	Title = {Lambda lifting: transforming programs to recursive equations},
+	Urldate = {2015-09-15},
+	Year = {1985}}
+
+@article{Rossberg2014fing,
+	Abstract = {ML modules are a powerful language mechanism for decomposing programs into reusable components. Unfortunately, they also have a reputation for being ``complex'' and requiring fancy type theory that is mostly opaque to non-experts. While this reputation is certainly understandable, given the many non-standard methodologies that have been developed in the process of studying modules, we aim here to demonstrate that it is undeserved. To do so, we present a novel formalization of ML modules, which defines their semantics directly by a compositional ``elaboration'' translation into plain System F$\omega$ (the higher-order polymorphic $\lambda$-calculus). To demonstrate the scalability of our ``F-ing'' semantics, we use it to define a representative, higher-order ML-style module language, encompassing all the major features of existing ML module dialects (except for recursive modules). We thereby show that ML modules are merely a particular mode of use of System F$\omega$. To streamline the exposition, we present the semantics of our module language in stages. We begin by defining a subset of the language supporting a Standard ML-like language with second-class modules and generative functors. We then extend this sublanguage with the ability to package modules as first-class values (a very simple extension, as it turns out) and OCaml-style applicative functors (somewhat harder). Unlike previous work combining both generative and applicative functors, we do not require two distinct forms of functor or signature sealing. Instead, whether a functor is applicative or not depends only on the computational purity of its body. In fact, we argue that applicative/generative is rather incidental terminology for pure versus impure functors. This approach results in a semantics that we feel is simpler and more natural than previous accounts, and moreover prohibits breaches of abstraction safety that were possible under them.},
+	Author = {Rossberg, Andreas and Russo, Claudio and Dreyer, Derek},
+	Doi = {10.1017/S0956796814000264},
+	File = {/Users/pgiarrusso/Zotero/storage/78KK5S5J/displayAbstract.html},
+	Issn = {1469-7653},
+	Journal = {Journal of Functional Programming},
+	Number = {05},
+	Pages = {529--607},
+	Title = {F-ing modules},
+	Volume = {24},
+	Year = {2014}}
+
+@inproceedings{Brady2003Inductive,
+  series = {Lecture {{Notes}} in {{Computer Science}}},
+  title = {Inductive Families Need Not Store Their Indices},
+  isbn = {978-3-540-24849-1},
+  abstract = {We consider the problem of efficient representation of dependently typed data. In particular, we consider a language TT based on Dybjer's notion of inductive families [10] and reanalyse their general form with a view to optimising the storage associated with their use. We introduce an execution language, ExTT, which allows the commenting out of computationally irrelevant subterms and show how to use properties of elimination rules to elide constructor arguments and tags in ExTT. We further show how some types can be collapsed entirely at run-time. Several examples are given, including a representation of the simply typed {$\lambda$}-calculus for which our analysis yields an 80\% reduction in run-time storage requirements.},
+  language = {en},
+  booktitle = {Types for Proofs and Programs},
+  publisher = {{Springer Berlin Heidelberg}},
+  author = {Brady, Edwin and McBride, Conor and McKinna, James},
+  editor = {Berardi, Stefano and Coppo, Mario and Damiani, Ferruccio},
+  year = {2003},
+  keywords = {Elimination Rule,Type Theory,Dependent Type,Functional Language,Alternative Implementation},
+  pages = {115-129}
+}
+
+@inproceedings{Ariola1995callbyneed,
+  address = {{New York, NY, USA}},
+  series = {{{POPL}} '95},
+  title = {A Call-by-Need Lambda Calculus},
+  isbn = {0-89791-692-1},
+  abstract = {The mismatch between the operational semantics of the lambda calculus and the actual behavior of implementations is a major obstacle for compiler writers. They cannot explain the behavior of their evaluator in terms of source level syntax, and they cannot easily compare distinct implementations of different lazy strategies. In this paper we derive an equational characterization of call-by-need and prove it correct with respect to the original lambda calculus. The theory is a strictly smaller theory than the lambda calculus. Immediate applications of the theory concern the correctness proofs of a number of implementation strategies, e.g., the call-by-need continuation passing transformation and the realization of sharing via assignments.},
+  booktitle = {Proceedings of the {{22Nd ACM SIGPLAN}}-{{SIGACT Symposium}} on {{Principles}} of {{Programming Languages}}},
+  publisher = {{ACM}},
+  doi = {10.1145/199448.199507},
+  author = {Ariola, Zena M. and Maraist, John and Odersky, Martin and Felleisen, Matthias and Wadler, Philip},
+  year = {1995},
+  pages = {233--246},
+}
