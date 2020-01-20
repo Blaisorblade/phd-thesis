@@ -67,7 +67,7 @@ The implicit conversion function \code{expToStringOps} is not applicable to \cod
 In other words, expressions like \code{str1 + str2} are now \emph{lifted} on the level of expression trees in a type-safe way. For brevity, we refer to the defined operator as \code{Exp[String].+}.
 
 \smartParagraph{Literal values}
-However, string concatenation might also be applied to constants, as in \code{str1 + "foo"} or \code{"bar" + str1}.
+However, string concatenation might also be applied to constants, as in \code{str1 +}\codebreakSpace\code{"foo"} or \code{"bar" + str1}.
 To lift \code{str1 + "foo"}, we introduce a lifting for constants which wraps them in a \code{Const} node:
 
 \begin{lstlisting}
