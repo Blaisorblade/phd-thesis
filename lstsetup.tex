@@ -50,8 +50,11 @@ keepspaces
 
 % Command for in-text code snippets, if needed.
 \newcommand{\code}{%
+  % Doesn't work well enough
+  % \lstinline[basicstyle=\codesize\ttfamily,breaklines=true,postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}}]}
     \lstinline[basicstyle=\codesize\ttfamily]}
-
+\newcommand\codebreak{\discretionary{}{}{}}
+\newcommand\codebreakSpace{\discretionary{}{}{\mbox{ }}}
 % I use ^ as the only decent alternative - not-ASCII characters don't work in this setup (probably because of UTF-8).}
 % literate programming: replace some operators by nicer equivalents.
 %{==}{{$\equiv$}}1 {!=}{{$\neq$}}1
