@@ -458,7 +458,7 @@ instead of proving a small-step progress lemma or extending the semantics with
 errors, we just prove that all typed terms normalize in the standard way.
 As usual, this fails if we add fixpoints or for untyped terms. If we wanted to
 ensure type safety in such a case, we could switch to functional big-step
-semantics or definitional interpreters~\citep{Amin2017,Owens2016functional}.
+semantics or definitional interpreters~\citep{Amin2017Type,Owens2016functional}.
 
 \begin{theorem}[CBV normalization]
   \label{thm:bsos-normalization}
@@ -517,7 +517,7 @@ semantics (which counts $\beta$-reductions). Such a lemma is not
 actually needed in other proofs, but only useful as a sanity
 check.
 We also attempted using the style of step-indexing
-used by \citet{Amin2017}, but were unable to produce a proof. To
+used by \citet{Amin2017Type}, but were unable to produce a proof. To
 the best of our knowledge all proofs using step-indexed logical
 relations, even with functional big-step semantics
 \citep{Owens2016functional}, use step-indexing that agrees with

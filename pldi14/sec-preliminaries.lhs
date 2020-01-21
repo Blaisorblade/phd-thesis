@@ -459,7 +459,7 @@ advocated, either using denotational
 semantics~\citep{Chlipala08}, or using \emph{functional} big-step
 semantics. Functional semantics are so convenient that their use
 has been advocated even for languages that are \emph{not}
-strongly normalizing~\citep{Owens2016functional,Amin2017}, even
+strongly normalizing~\citep{Owens2016functional,Amin2017Type}, even
 at the cost of dealing with step-indexes.
 
 \subsection{Language plugins}
