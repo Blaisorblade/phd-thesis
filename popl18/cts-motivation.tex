@@ -1,0 +1,956 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+% Emacs, this is -*- latex -*-!
+
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+
+
+\section{Introducing Cache-Transfer Style}
+\label{sec:cts-motivation}
+In this section we motivate cache-transfer style (CTS).
+\Cref{sec:ilc-background} summarizes a reformulation of ILC, so we recommend it
+also to readers familiar with \citet{CaiEtAl2014ILC}.
+In \cref{sec:motivating-example} we consider a minimal first-order example, namely an
+average function. We incrementalize it using ILC, explain why the result is
+inefficient, and show that remembering results via cache-transfer style enables
+efficient incrementalization with asymptotic speedups.
+In \cref{sec:higher-order-example} we consider a higher-order example that
+requires not just cache-transfer style but also efficient support for both nil
+and non-nil function changes, together with the ability to detect nil changes.
+
+\subsection{Background}
+\label{sec:ilc-background}
+ILC considers simply-typed programs, and assumes that base types and primitives
+come with support for incrementalization.
+
+The ILC framework describes changes as first-class values, and types them using
+dependent types. To each type \ensuremath{\Conid{A}} we associate a type \ensuremath{\Delta \Conid{A}} of changes for
+\ensuremath{\Conid{A}}, and an \emph{update operator} \ensuremath{\oplus \mathrel{:\mkern-1mu:}\Conid{A}\to \Delta \Conid{A}\to \Conid{A}}, that updates an
+initial value with a change to compute an updated value.
+We also consider changes for evaluation environments, which contain changes for
+each environment entry.
+
+A change \ensuremath{\Varid{da}\mathrel{:\mkern-1mu:}\Delta \Conid{A}} can be \emph{valid} from \ensuremath{\Varid{a}_{1}\mathrel{:\mkern-1mu:}\Conid{A}} to \ensuremath{\Varid{a}_{2}\mathrel{:\mkern-1mu:}\Conid{A}}, and we write
+then \ensuremath{\vvcreltau{\Varid{a}_{2}}{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}}. Then \ensuremath{\Varid{a}_{1}} is the \emph{source} or \emph{initial value}
+for \ensuremath{\Varid{da}}, and \ensuremath{\Varid{a}_{2}} is the \emph{destination} or \emph{updated value} for \ensuremath{\Varid{da}}.
+From \ensuremath{\vvcreltau{\Varid{a}_{2}}{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}} follows that \ensuremath{\Varid{a}_{2}} coincides with \ensuremath{\Varid{a}_{1}\oplus \Varid{da}}, but
+validity imposes additional invariants that are useful during
+incrementalization.
+A change can be valid for more than one source, but a change \ensuremath{\Varid{da}} and a source
+\ensuremath{\Varid{a}_{1}} uniquely determine the destination \ensuremath{\Varid{a}_{2}\mathrel{=}\Varid{a}_{1}\oplus \Varid{da}}.
+To avoid ambiguity, we always consider a change together with a specific source.
+
+Each type comes with its definition of validity: Validity is a ternary
+\emph{logical relation}.
+%
+For function types \ensuremath{\Conid{A}\to \Conid{B}}, we
+define \ensuremath{\Delta (\Conid{A}\to \Conid{B})\mathrel{=}\Conid{A}\to \Delta \Conid{A}\to \Delta \Conid{B}}, and say that
+a function change \ensuremath{\Varid{df}\mathrel{:\mkern-1mu:}\Delta (\Conid{A}\to \Conid{B})} is valid from \ensuremath{\Varid{f}_{1}\mathrel{:\mkern-1mu:}\Conid{A}\to \Conid{B}} to \ensuremath{\Varid{f}_{2}\mathrel{:\mkern-1mu:}\Conid{A}\to \Conid{B}} (that is, \ensuremath{\vvcreltau{\Varid{f}_{2}}{\Conid{A}\to \Conid{B}}{\Varid{f}_{1}}{\Varid{df}}}) if and only if \ensuremath{\Varid{df}} maps valid input
+changes to valid output changes; by that,
+we mean that if \ensuremath{\vvcreltau{\Varid{a}_{2}}{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}}, then \ensuremath{\vvcreltau{\Varid{f}_{2}\;\Varid{a}_{2}}{\Conid{B}}{\Varid{f}_{1}\;\Varid{a}_{1}}{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}}}.
+Source and destination of \ensuremath{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}}, that is \ensuremath{\Varid{f}_{1}\;\Varid{a}_{1}} and \ensuremath{\Varid{f}_{2}\;\Varid{a}_{2}}, are the result of
+applying two different functions, that is \ensuremath{\Varid{f}_{1}} and \ensuremath{\Varid{f}_{2}}.
+
+\pg{Rewritten to generalize ``derivative''.}
+ILC expresses incremental programs as \emph{derivatives}. Generalizing previous
+usage, we simply say derivative for all terms produced by differentiation.
+If \ensuremath{\Varid{dE}} is a valid environment change from \ensuremath{\Conid{E}_{1}} to \ensuremath{\Conid{E}_{2}}, and term \ensuremath{\Varid{t}} is
+well-typed and can be evaluated against environments \ensuremath{\Conid{E}_{1},\Conid{E}_{2}},
+then term \ensuremath{\iderive{\Varid{t}}}, the derivative of \ensuremath{\Varid{t}}, evaluated against \ensuremath{\Varid{dE}}, produces
+a change from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}}, where \ensuremath{\Varid{v}_{1}} is the value of \ensuremath{\Varid{t}} in environment \ensuremath{\Conid{E}_{1}},
+and \ensuremath{\Varid{v}_{2}} is the value of \ensuremath{\Varid{t}} in environment \ensuremath{\Conid{E}_{2}}. This correctness property follows
+immediately the \emph{fundamental property} for the logical relation of
+validity and can be proven accordingly; we give a step-indexed variant of this
+proof in \cref{sec:sound-derive}.
+%\pg{For now, omit citations to my PhD thesis, especially to chapters.}
+%~\citep[Ch.~12]{GiarrussoPhD2018}.
+If \ensuremath{\Varid{t}} is a function and \ensuremath{\Varid{dE}} is a nil change (that is, its source \ensuremath{\Conid{E}_{1}} and
+destination \ensuremath{\Conid{E}_{2}} coincide), then \ensuremath{\iderive{\Varid{t}}} produces a nil function change and
+is also a derivative according to \citet{CaiEtAl2014ILC}.
+
+To support incrementalization, one must define change types and validity for
+each base type, and a correct derivative for each primitive. Functions written
+in terms of primitives can be differentiated automatically.
+As in all approaches to incrementalization (see \cref{sec:cts-rw}), one cannot
+incrementalize efficiently an arbitrary program: ILC limits the effort to base
+types and primitives.
+
+\subsection{A first-order motivating example: computing averages}
+\label{sec:motivating-example}
+% XXX I'm not happy with these variable names.
+Suppose we need to compute the average \ensuremath{\Varid{y}} of a bag of numbers \ensuremath{\Varid{xs}\mathrel{:\mkern-1mu:}\Conid{Bag}\;\mathbb{Z}},
+and that whenever we receive a change \ensuremath{\Varid{dxs}\mathrel{:\mkern-1mu:}\Delta (\Conid{Bag}\;\mathbb{Z})} to this bag we
+need to compute the change \ensuremath{\Varid{dy}} to the average \ensuremath{\Varid{y}}.
+
+%For simplicity, we omit ominus... we use
+
+In fact, we expect multiple consecutive updates to our bag. Hence, we say we have
+an initial bag \ensuremath{\Varid{xs}_{1}} and compute its average \ensuremath{\Varid{y}_{1}} as \ensuremath{\Varid{y}_{1}\mathrel{=}\Varid{avg}\;\Varid{xs}_{1}}, and then consecutive changes
+\ensuremath{\Varid{dxs}_{1},\Varid{dxs}_{2},\ldots}. Change \ensuremath{\Varid{dxs}_{1}} goes from \ensuremath{\Varid{xs}_{1}} to \ensuremath{\Varid{xs}_{2}},
+\ensuremath{\Varid{dxs}_{2}} goes from \ensuremath{\Varid{xs}_{2}} to \ensuremath{\Varid{xs}_{3}}, and so on. We need to compute \ensuremath{\Varid{y}_{2}\mathrel{=}\Varid{avg}\;\Varid{xs}_{2}},
+\ensuremath{\Varid{y}_{3}\mathrel{=}\Varid{avg}\;\Varid{xs}_{3}}, but more quickly than we would by calling \ensuremath{\Varid{avg}} again.
+
+We can compute the average through the following function (that we present in Haskell):
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{avg}\;\Varid{xs}\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{let}\;{}\<[8]%
+\>[8]{}\Varid{s}\mathrel{=}{}\<[13]%
+\>[13]{}\Varid{sum}\;\Varid{xs}{}\<[E]%
+\\
+\>[8]{}\Varid{n}\mathrel{=}{}\<[13]%
+\>[13]{}\Varid{length}\;\Varid{xs}{}\<[E]%
+\\
+\>[8]{}\Varid{r}\mathrel{=}{}\<[13]%
+\>[13]{}\Varid{div}\;\Varid{s}\;\Varid{n}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{in}\;{}\<[8]%
+\>[8]{}\Varid{r}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+We write this function in \emph{A'-normal form} (A'NF), a small variant of
+\emph{A-normal form} (ANF)~\cite{sabry1993reasoning} that we introduce. In
+A'NF, programs bind to a variable the result of each function call in \ensuremath{\Varid{avg}},
+instead of using it directly; unlike plain ANF, A'NF also binds the result of
+tail calls such as \ensuremath{\Varid{div}\;\Varid{s}\;\Varid{n}} in \ensuremath{\Varid{avg}}. A'NF simplifies conversion to
+cache-transfer style.
+
+We can incrementalize efficiently both \ensuremath{\Varid{sum}} and \ensuremath{\Varid{length}} by generating via
+ILC their derivatives \ensuremath{\Varid{dsum}} and \ensuremath{\Varid{dlength}}, assuming a language plugin
+supporting bags supporting folds.
+
+But division is more challenging. To be sure, we can write the following
+derivative:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{ddiv}\;\Varid{a}_{1}\;\Varid{da}\;\Varid{b}_{1}\;\Varid{db}\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{let}\;{}\<[8]%
+\>[8]{}\Varid{a}_{2}\mathrel{=}\Varid{a}_{1}\oplus \Varid{da}{}\<[E]%
+\\
+\>[8]{}\Varid{b}_{2}\mathrel{=}\Varid{b}_{1}\oplus \Varid{db}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{in}\;{}\<[8]%
+\>[8]{}\Varid{div}\;\Varid{a}_{2}\;\Varid{b}_{2}\ominus \Varid{div}\;\Varid{a}_{1}\;\Varid{b}_{1}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Function \ensuremath{\Varid{ddiv}} computes the difference between the updated and the original
+result without any special optimization, but still takes $O(1)$ for machine
+integers. But unlike other derivatives, \ensuremath{\Varid{ddiv}} uses its base inputs \ensuremath{\Varid{a}_{1}} and
+\ensuremath{\Varid{b}_{1}}, that is, it is not \emph{self-maintainable}~\citep{CaiEtAl2014ILC}.
+
+Because \ensuremath{\Varid{ddiv}} is not self-maintainable, a derivative calling it will not be
+efficient. To wit, let us look at \ensuremath{\Varid{davg}}, the derivative of \ensuremath{\Varid{avg}}:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{davg}\;\Varid{xs}\;\Varid{dxs}\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{let}\;{}\<[8]%
+\>[8]{}\Varid{s}{}\<[12]%
+\>[12]{}\mathrel{=}{}\<[15]%
+\>[15]{}\Varid{sum}\;\Varid{xs}{}\<[E]%
+\\
+\>[8]{}\Varid{ds}{}\<[12]%
+\>[12]{}\mathrel{=}\Varid{dsum}\;\Varid{xs}\;\Varid{dxs}{}\<[E]%
+\\
+\>[8]{}\Varid{n}{}\<[12]%
+\>[12]{}\mathrel{=}{}\<[15]%
+\>[15]{}\Varid{length}\;\Varid{xs}{}\<[E]%
+\\
+\>[8]{}\Varid{dn}{}\<[12]%
+\>[12]{}\mathrel{=}\Varid{dlength}\;\Varid{xs}\;\Varid{dxs}{}\<[E]%
+\\
+\>[8]{}\Varid{r}{}\<[12]%
+\>[12]{}\mathrel{=}\Varid{div}\;\Varid{s}\;\Varid{n}{}\<[E]%
+\\
+\>[8]{}\Varid{dr}{}\<[12]%
+\>[12]{}\mathrel{=}\Varid{ddiv}\;\Varid{s}\;\Varid{ds}\;\Varid{n}\;\Varid{dn}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{in}\;{}\<[8]%
+\>[8]{}\Varid{dr}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+This function recomputes \ensuremath{\Varid{s}}, \ensuremath{\Varid{n}} and \ensuremath{\Varid{r}} just like in \ensuremath{\Varid{avg}}, but \ensuremath{\Varid{r}} is not
+used so its recomputation can easily be removed by later optimizations. On the
+other hand, derivative \ensuremath{\Varid{ddiv}} will use the values of its base inputs \ensuremath{\Varid{a}_{1}} and \ensuremath{\Varid{b}_{1}},
+so derivative \ensuremath{\Varid{davg}} will need to recompute \ensuremath{\Varid{s}} and \ensuremath{\Varid{n}} and save no time over
+recomputation!
+If \ensuremath{\Varid{ddiv}} were instead a \emph{self-maintainable} derivative, the computations
+of \ensuremath{\Varid{s}} and \ensuremath{\Varid{n}} would also be unneeded and could be optimized away.
+\citeauthor{CaiEtAl2014ILC} leave efficient support for non-self-maintainable
+derivatives for future work.
+%Let's enjoy self-righteous self-bashing!
+
+\pg{TODO: caches mostly do not contain actual intermediate results, but other
+  caches; the only exception is for the ``leaves'', that is primitives.}
+To avoid recomputation we must simply remember intermediate results as needed.
+Executing \ensuremath{\Varid{davg}\;\Varid{xs}_{1}\;\Varid{dxs}_{1}} will compute exactly the
+same \ensuremath{\Varid{s}} and \ensuremath{\Varid{n}} as executing \ensuremath{\Varid{avg}\;\Varid{xs}_{1}}, so we must just save and reuse them,
+without needing to use memoization proper.
+Hence, we CTS-convert each function \ensuremath{\Varid{f}} to a \emph{CTS function} \ensuremath{\Varid{fC}} and a \emph{CTS
+derivative} \ensuremath{\Varid{dfC}}: CTS function \ensuremath{\Varid{fC}} produces, together with its final result, a
+\emph{cache}, that the caller must pass to CTS derivative \ensuremath{\Varid{dfC}}. A cache is just a tuple of
+values, containing information from subcalls---either inputs (as we explain in a
+bit), intermediate results or
+\emph{subcaches}, that is caches returned from further function calls.
+%
+In fact,
+typically only primitive functions like \ensuremath{\Varid{div}} need to recall actual result;
+automatically transformed functions only need to remember subcaches or inputs.
+% Callers must be updated to remember
+% the cache |c1| produced by CTS function |fC x| and pass it to \emph{CTS
+%   derivative} |dfC|, invoked as |dfC x dx c1|.
+
+% A first version of |avgC| and |davgC| in CTS is hence:
+% \begin{code}
+% data AvgC = AvgC SumC LengthC DivC
+% avgC :: [Int] -> (Int, AvgC)
+
+% avgC xs =
+%   let  (s, cs1)  = sumC xs
+%        (n, cn1)  = lengthC xs
+%        (r, cr1)  = s `divC` n
+%   in   (r, AvgC cs1 cn1 cr1)
+
+% davgC :: [Int] -> Dt ^ [Int] -> AvgC -> (Dt ^ Int, AvgC)
+% davgC xs dxs (AvgC cs1 cn1 cr1) =
+%   let  (ds, cs2)  = dsumC xs dxs cs1
+%        (dn, cn2)  = dlengthC xs dxs cn1
+%        (dr, cr2)  = ddivC s ds n dn cr1
+%        in   (dr, AvgC cs2 cn2 cr2)
+% \end{code}
+% %
+CTS conversion is simplified by first converting to A'NF, where all results of
+subcomputations are bound to variables: we just collect all caches in scope and
+return them.
+% it is easy to return caches for all
+% subcomputation results when writing |avgC| and |davgC|: we just collect together
+% all caches in scope.
+
+As an additional step, we avoid always passing base inputs to derivatives by
+defining \ensuremath{\Delta (\Conid{A}\to \Conid{B})\mathrel{=}\Delta \Conid{A}\to \Delta \Conid{B}}.
+Instead of always passing a base input and possibly not using it, we can simply
+assume that primitives whose derivative needs a base input store the input in
+the cache.
+%needing a base store it in the cache together with the needed intermediate results.
+
+To make the translation uniform, we stipulate all functions in the program are
+transformed to CTS, using a (potentially empty) cache. Since the
+type of the cache for a function \ensuremath{\Varid{f}\mathrel{:\mkern-1mu:}\Conid{A}\to \Conid{B}} depends on implementation of \ensuremath{\Varid{f}}, we
+introduce for each function \ensuremath{\Varid{f}} a type for its cache \ensuremath{\Conid{FC}}, so that CTS function
+\ensuremath{\Varid{fC}} has type \ensuremath{\Conid{A}\to (\Conid{B},\Conid{FC})} and CTS derivative \ensuremath{\Varid{dfC}} has type \ensuremath{\Delta \Conid{A}\to \Conid{FC}\to (\Delta \Conid{B},\Conid{FC})}.
+
+The definition of \ensuremath{\Conid{FC}} is only needed inside \ensuremath{\Varid{fC}} and \ensuremath{\Varid{dfC}}, and it can be
+hidden in other functions to keep implementation details hidden in transformed
+code; because of limitations of Haskell modules, we can only hide such
+definitions from functions in other modules.
+
+Since functions of the same type translate to functions of different types, the
+translation does not preserve well-typedness in a higher-order language in
+general, but it works well in our case studies
+(\cref{sec:case-studies}); \cref{sec:incr-an-aver} shows how to map such functions. We
+return to this point briefly in~\cref{sec:hiding-cache-type}.
+
+%Using this variation, |avgC| stays the same but |davgC| becomes:
+CTS-converting our example produces the following code:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{19}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;\Conid{AvgC}\mathrel{=}\Conid{AvgC}\;\Conid{SumC}\;\Conid{LengthC}\;\Conid{DivC}{}\<[E]%
+\\
+\>[B]{}\Varid{avgC}\mathrel{:\mkern-1mu:}\Conid{Bag}\;\mathbb{Z}\to (\mathbb{Z},\Conid{AvgC}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{avgC}\;\Varid{xs}\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{let}\;{}\<[8]%
+\>[8]{}(\Varid{s},\Varid{cs}_{1}){}\<[18]%
+\>[18]{}\mathrel{=}\Varid{sumC}\;\Varid{xs}{}\<[E]%
+\\
+\>[8]{}(\Varid{n},\Varid{cn}_{1}){}\<[18]%
+\>[18]{}\mathrel{=}\Varid{lengthC}\;\Varid{xs}{}\<[E]%
+\\
+\>[8]{}(\Varid{r},\Varid{cr}_{1}){}\<[18]%
+\>[18]{}\mathrel{=}\Varid{s}\mathbin{`\Varid{divC}`}\Varid{n}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{in}\;{}\<[8]%
+\>[8]{}(\Varid{r},\Conid{AvgC}\;\Varid{cs}_{1}\;\Varid{cn}_{1}\;\Varid{cr}_{1}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{davgC}\mathrel{:\mkern-1mu:}\Delta (\Conid{Bag}\;\mathbb{Z})\to \Conid{AvgC}\to (\Delta \mathbb{Z},\Conid{AvgC}){}\<[E]%
+\\
+\>[B]{}\Varid{davgC}\;\Varid{dxs}\;(\Conid{AvgC}\;\Varid{cs}_{1}\;\Varid{cn}_{1}\;\Varid{cr}_{1})\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{let}\;{}\<[8]%
+\>[8]{}(\Varid{ds},\Varid{cs}_{2}){}\<[19]%
+\>[19]{}\mathrel{=}\Varid{dsumC}\;\Varid{dxs}\;\Varid{cs}_{1}{}\<[E]%
+\\
+\>[8]{}(\Varid{dn},\Varid{cn}_{2}){}\<[19]%
+\>[19]{}\mathrel{=}\Varid{dlengthC}\;\Varid{dxs}\;\Varid{cn}_{1}{}\<[E]%
+\\
+\>[8]{}(\Varid{dr},\Varid{cr}_{2}){}\<[19]%
+\>[19]{}\mathrel{=}\Varid{ddivC}\;\Varid{ds}\;\Varid{dn}\;\Varid{cr}_{1}{}\<[E]%
+\\
+\>[8]{}\mathbf{in}\;{}\<[13]%
+\>[13]{}(\Varid{dr},\Conid{AvgC}\;\Varid{cs}_{2}\;\Varid{cn}_{2}\;\Varid{cr}_{2}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+In the above program, \ensuremath{\Varid{sumC}} and \ensuremath{\Varid{lengthC}} are self-maintainable, that is they
+need no base inputs and can be transformed to use empty caches. On the other
+hand, \ensuremath{\Varid{ddiv}} is not self-maintainable, so we transform it to remember and use
+its base inputs.
+%Hence, we show an altered version of |div| called |divC| and the associated derivative |ddivC|:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{divC}\;\Varid{a}\;\Varid{b}\mathrel{=}(\Varid{a}\mathbin{\Varid{`div`}}\Varid{b},(\Varid{a},\Varid{b})){}\<[E]%
+\\
+\>[B]{}\Varid{ddivC}\;\Varid{da}\;\Varid{db}\;(\Varid{a}_{1},\Varid{b}_{1})\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{let}\;{}\<[8]%
+\>[8]{}\Varid{a}_{2}{}\<[12]%
+\>[12]{}\mathrel{=}\Varid{a}_{1}\oplus \Varid{da}{}\<[E]%
+\\
+\>[8]{}\Varid{b}_{2}{}\<[12]%
+\>[12]{}\mathrel{=}\Varid{b}_{1}\oplus \Varid{db}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{in}\;{}\<[8]%
+\>[8]{}(\Varid{div}\;\Varid{a}_{2}\;\Varid{b}_{2}\ominus \Varid{div}\;\Varid{a}_{1}\;\Varid{b}_{1},(\Varid{a}_{2},\Varid{b}_{2})){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Crucially, \ensuremath{\Varid{ddivC}} must return an updated cache to ensure correct
+incrementalization, so that application of further changes works correctly. In
+general, if \ensuremath{(\Varid{y},\Varid{c}_{1})\mathrel{=}\Varid{fC}\;\Varid{x}} and \ensuremath{(\Varid{dy},\Varid{c}_{2})\mathrel{=}\Varid{dfC}\;\Varid{dx}\;\Varid{c}_{1}}, then \ensuremath{(\Varid{y}\oplus \Varid{dy},\Varid{c}_{2})} must equal the result of the base function \ensuremath{\Varid{fC}} applied to the new input \ensuremath{\Varid{x}\oplus \Varid{dx}}, that is \ensuremath{(\Varid{y}\oplus \Varid{dy},\Varid{c}_{2})\mathrel{=}\Varid{fC}\;(\Varid{x}\oplus \Varid{dx})}.
+
+Finally, to use these functions, we need to adapt the caller. Let's first show
+how to deal with a sequence of changes: imagine that \ensuremath{\Varid{dxs}_{1}} is a valid change
+for \ensuremath{\Varid{xs}}, and that \ensuremath{\Varid{dxs}_{2}} is a valid change for \ensuremath{\Varid{xs}\oplus \Varid{dxs}_{1}}. To update the
+average for both changes, we can then call the \ensuremath{\Varid{avgC}} and \ensuremath{\Varid{davgC}} as follows:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{34}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mbox{\onelinecomment  A simple example caller with two consecutive changes}{}\<[E]%
+\\
+\>[B]{}\Varid{avgDAvgC}\mathrel{:\mkern-1mu:}\Conid{Bag}\;\mathbb{Z}\to \Delta (\Conid{Bag}\;\mathbb{Z})\to \Delta (\Conid{Bag}\;\mathbb{Z})\to {}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\mathbb{Z},\Delta \mathbb{Z},\Delta \mathbb{Z},\Conid{AvgC}){}\<[E]%
+\\
+\>[B]{}\Varid{avgDAvgC}\;\Varid{xs}\;\Varid{dxs}_{1}\;\Varid{dxs}_{2}\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{let}\;{}\<[8]%
+\>[8]{}(\Varid{res}_{1},{}\<[17]%
+\>[17]{}\Varid{cache}_{1})\mathrel{=}\Varid{avgC}\;{}\<[34]%
+\>[34]{}\Varid{xs}{}\<[E]%
+\\
+\>[8]{}(\Varid{dres}_{1},{}\<[17]%
+\>[17]{}\Varid{cache}_{2})\mathrel{=}\Varid{davgC}\;{}\<[34]%
+\>[34]{}\Varid{dxs}_{1}\;\Varid{cache}_{1}{}\<[E]%
+\\
+\>[8]{}(\Varid{dres}_{2},{}\<[17]%
+\>[17]{}\Varid{cache}_{3})\mathrel{=}\Varid{davgC}\;{}\<[34]%
+\>[34]{}\Varid{dxs}_{2}\;\Varid{cache}_{2}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{in}\;{}\<[8]%
+\>[8]{}(\Varid{res}_{1},\Varid{dres}_{1},\Varid{dres}_{2},\Varid{cache}_{3}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Incrementalization guarantees that the produced changes update the output
+correctly in response to the input changes: that is, we have \ensuremath{\Varid{res}_{1}\oplus \Varid{dres}_{1}\mathrel{=}\Varid{avg}\;(\Varid{xs}\oplus \Varid{dxs}_{1})} and \ensuremath{\Varid{res}_{1}\oplus \Varid{dres}_{1}\oplus \Varid{dres}_{2}\mathrel{=}\Varid{avg}\;(\Varid{xs}\oplus \Varid{dxs}_{1}\oplus \Varid{dxs}_{2})}. We also return the last cache to allow further updates to
+be processed.
+
+Alternatively, we can try writing a caller that gets an initial input and a
+(lazy) list of changes, does incremental computation, and prints updated
+outputs:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{processChangeList}\;(\Varid{dxsN}\typcolon\Varid{dxss})\;\Varid{yN}\;\Varid{cacheN}\mathrel{=}\mathbf{do}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{let}\;(\Varid{dy},\Varid{cacheN'})\mathrel{=}\Varid{avg'}\;\Varid{dxsN}\;\Varid{cacheN}{}\<[E]%
+\\
+\>[3]{}\hsindent{4}{}\<[7]%
+\>[7]{}\Varid{yN'}\mathrel{=}\Varid{yN}\oplus \Varid{dy}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{print}\;\Varid{yN'}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{processChangeList}\;\Varid{dxss}\;\Varid{yN'}\;\Varid{cacheN'}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mbox{\onelinecomment  Example caller with multiple consecutive}{}\<[E]%
+\\
+\>[B]{}\mbox{\onelinecomment  changes}{}\<[E]%
+\\
+\>[B]{}\Varid{someCaller}\;\Varid{xs}_{1}\;\Varid{dxss}\mathrel{=}\mathbf{do}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{let}\;(\Varid{y}_{1},\Varid{cache}_{1})\mathrel{=}\Varid{avgC}\;\Varid{xs}_{1}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{processChangeList}\;\Varid{dxss}\;\Varid{y}_{1}\;\Varid{cache}_{1}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+% XXX the subfunctions haven't been transformed yet.
+% Explain WHAT THE HECK happened, in general.
+
+More in general, we produce both an augmented base function and a derivative,
+where the augmented base function communicates with the derivative by returning
+a cache. The contents of this cache are determined statically, and can be
+accessed by tuple projections without dynamic lookups.
+% mention initial runs and incremental updates.
+In the rest of the paper, we use the above idea to develop a correct
+transformation that allows incrementalizing programs using cache-transfer style.
+
+We'll return to this example in~\cref{sec:incr-an-aver}.
+% XXX mention other contributions: prove correctness, show how to use it, evaluate it...
+
+\subsection{A higher-order motivating example: nested loops}
+\label{sec:higher-order-example}
+
+Next, we consider CTS differentiation on a minimal higher-order
+example. To incrementalize this example, we enable detecting nil function
+changes at runtime by representing function changes as closures that can be
+inspected by incremental programs. We'll return to this example
+in~\cref{sec:incr-nest-loop}.
+
+We take an example of nested loops over sequences, implemented in terms of
+standard Haskell functions \ensuremath{\Varid{map}} and \ensuremath{\Varid{concat}}. For simplicity, we compute the
+Cartesian product of inputs:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{cartesianProduct}\mathrel{:\mkern-1mu:}\Conid{Sequence}\;\Varid{a}\to \Conid{Sequence}\;\Varid{b}\to \Conid{Sequence}\;(\Varid{a},\Varid{b}){}\<[E]%
+\\
+\>[3]{}\Varid{cartesianProduct}\;\Varid{xs}\;\Varid{ys}\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{concatMap}\;(\lambda \Varid{x}\to \Varid{map}\;(\lambda \Varid{y}\to (\Varid{x},\Varid{y}))\;\Varid{ys})\;\Varid{xs}{}\<[E]%
+\\
+\>[3]{}\Varid{concatMap}\;\Varid{f}\;\Varid{xs}\mathrel{=}\Varid{concat}\;(\Varid{map}\;\Varid{f}\;\Varid{xs}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Computing \ensuremath{\Varid{cartesianProduct}\;\Varid{xs}\;\Varid{ys}} loops over each element \ensuremath{\Varid{x}} from sequence
+\ensuremath{\Varid{xs}} and \ensuremath{\Varid{y}} from sequence \ensuremath{\Varid{ys}}, and produces a list of pairs \ensuremath{(\Varid{x},\Varid{y})}, taking
+quadratic time $O(n^2)$ (we assume for simplicity that \ensuremath{\left|{\Varid{xs}}\right|} and \ensuremath{\left|{\Varid{ys}}\right|}
+are both $O(n)$).
+Adding a fresh element to either
+\ensuremath{\Varid{xs}} or \ensuremath{\Varid{ys}} generates an output change containing $\Theta(n)$ fresh pairs:
+hence derivative \ensuremath{\Varid{dcartesianProduct}} must take at least linear time. Thanks to
+specialized derivatives \ensuremath{\Varid{dmap}} and \ensuremath{\Varid{dconcat}} for primitives \ensuremath{\Varid{map}} and \ensuremath{\Varid{concat}},
+\ensuremath{\Varid{dcartesianProduct}} has asymptotically optimal time complexity. To achieve this
+complexity, \ensuremath{\Varid{dmap}\;\Varid{f}\;\Varid{df}} must detect when \ensuremath{\Varid{df}} is a nil function change and avoid
+applying it to unchanged input elements.
+% We consider \emph{total} derivatives, that is
+% derivatives with respect to changes for all inputs. Hence,
+
+To simplify the transformations we describe, we $\lambda$-lift
+programs\pg{citation} before differentiating and transforming them.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{10}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{cartesianProduct}\;\Varid{xs}\;\Varid{ys}\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{concatMap}\;(\Varid{mapPair}\;\Varid{ys})\;\Varid{xs}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Varid{mapPair}\;\Varid{ys}\mathrel{=}\lambda \Varid{x}\to \Varid{map}\;(\Varid{pair}\;\Varid{x})\;\Varid{ys}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Varid{pair}\;\Varid{x}\mathrel{=}\lambda \Varid{y}\to (\Varid{x},\Varid{y}){}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Varid{concatMap}\;\Varid{f}\;\Varid{xs}\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mathbf{let}\;{}\<[10]%
+\>[10]{}\Varid{yss}\mathrel{=}\Varid{map}\;\Varid{f}\;\Varid{xs}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mathbf{in}\;{}\<[10]%
+\>[10]{}\Varid{concat}\;\Varid{yss}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\pg{show derivatives here? probably use already the caching variant.}
+Suppose we add an element to either \ensuremath{\Varid{xs}} or \ensuremath{\Varid{ys}}.\pg{what about both?}
+%Incrementalizing this program using ILC is not straightforward.
+If change \ensuremath{\Varid{dys}} adds one element to \ensuremath{\Varid{ys}}, then \ensuremath{\Varid{dmapPair}\;\Varid{ys}\;\Varid{dys}}, the argument
+to \ensuremath{\Varid{dconcatMap}}, is a non-nil function change taking constant time, so \ensuremath{\Varid{dconcatMap}}
+must apply it to each element of \ensuremath{\Varid{xs}\oplus \Varid{dxs}}.\pg{show reuse of previous results/caches.}
+
+Suppose next that change \ensuremath{\Varid{dxs}} adds one element to \ensuremath{\Varid{xs}} and \ensuremath{\Varid{dys}} is a nil change
+for \ensuremath{\Varid{ys}}. Then \ensuremath{\Varid{dmapPair}\;\Varid{ys}\;\Varid{dys}} is a nil function change. And we must detect
+this dynamically.\pg{Why do we care about detection?}
+If a function change \ensuremath{\Varid{df}\mathrel{:\mkern-1mu:}\Delta (\Conid{A}\to \Conid{B})} is represented as a
+function, and \ensuremath{\Conid{A}} is infinite, one cannot detect dynamically that it is a nil change.
+To enable runtime nil change detection, we apply closure
+conversion on function changes: a function change \ensuremath{\Varid{df}}, represented as a closure is
+nil for \ensuremath{\Varid{f}} only if all environment changes it contains are also nil, and if the
+contained function is a derivative of \ensuremath{\Varid{f}}'s function.

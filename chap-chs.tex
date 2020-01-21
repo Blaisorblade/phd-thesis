@@ -1,0 +1,1663 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+\chapter{Change structures}
+\label{ch:change-theory}
+In the previous chapter, we have shown that evaluating the result
+of differentiation produces a valid change \ensuremath{\Varid{dv}} from the old
+output \ensuremath{\Varid{v}_{1}} to the new one \ensuremath{\Varid{v}_{2}}.
+%
+To \emph{compute} \ensuremath{\Varid{v}_{2}} from \ensuremath{\Varid{v}_{1}} and \ensuremath{\Varid{dv}}, in this chapter we
+introduce formally the operator \ensuremath{\oplus } mentioned earlier.
+
+To define differentiation on primitives, plugins need a few operations on
+changes,
+% Moreover, it is not yet clear concretely how plugins should
+% define differentiation on primitives.
+% To write derivatives on
+% primitives, we will need operations on changes,
+not just \ensuremath{\oplus }, \ensuremath{\ominus }, \ensuremath{\circledcirc } and \ensuremath{\NilC{}}.
+
+To formalize these operators and specify their behavior, we extend the notion of
+basic change structure into the notion of \emph{change structure} in
+\cref{sec:change-structures-formal}.
+The change structure for function spaces is not entirely intuitive, so we
+motivate it in \cref{sec:chs-funs-informal}.
+Then, we show how to take change structures on \ensuremath{\Conid{A}} and \ensuremath{\Conid{B}} and
+define new ones on \ensuremath{\Conid{A}\to \Conid{B}} in \cref{sec:chs-fun-chs}. Using
+these structures, we finally show that starting from change
+structures for base types, we define change structures for
+all types \ensuremath{\tau} and contexts \ensuremath{\Gamma} in \cref{sec:chs-types-contexts},
+completing the core theory of changes.
+
+% \pg{elsewhere, where?}
+% As anticipated, we use changes to generalize the calculus of finite differences
+% from groups (see \cref{sec:generalize-fin-diff}). We show how change structures
+% generalize groups in \cref{sec:change-structure-groups}.
+
+% We will summarize this section in \cref{fig:change-structures};
+% readers might want to jump there for the definitions. However, we
+% first build up to those definitions.\pg{Correct when revising figures.}
+
+\section{Formalizing ⊕ and change structures}
+%\subsection{Updating values by changes with ⊕}
+\label{sec:change-structures-formal}
+\label{sec:oplus}
+%\label{sec:invalid}
+In this section, we define what is a \emph{change structure} on a
+set \ensuremath{\Conid{V}}. A change structure \ensuremath{\ChangeStruct{\Conid{V}}} extends a basic change structure
+\ensuremath{\widetilde{\Conid{V}}} with
+\emph{change operators} \ensuremath{\oplus }, \ensuremath{\ominus }, \ensuremath{\circledcirc } and
+\ensuremath{\NilC{}}. Change structures also require change operators to
+respect validity, as described below.
+Key properties of change structures follow in
+\cref{sec:chs-properties}.
+
+As usual, we'll use metavariables \ensuremath{\Varid{v},\Varid{v}_{1},\Varid{v}_{2},\ldots} will range over elements of
+\ensuremath{\Conid{V}}, while \ensuremath{\Varid{dv},\Varid{dv}_{1},\Varid{dv}_{2},\ldots} will range over elements of
+\ensuremath{\Delta \Conid{V}}.
+
+% For instance, updating a value |v1| with a valid change |fromto
+% tau v1 dv v2| must produce its destination |v2| (that is, |v1
+% `oplus` dv = v2|).
+% and explain why the converse is not true.
+\pg{Make sure we explain \emph{somewhere} why the converse is not true.}
+
+\pg{Update earlier mention in chapter 11}
+Let's first recall change operators.
+Operator \ensuremath{\oplus } (``oplus'') updates a value with a change: If \ensuremath{\Varid{dv}} is a
+valid change from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}}, then \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}} (read as
+``\ensuremath{\Varid{v}_{1}} updated by \ensuremath{\Varid{dv}}'' or ``\ensuremath{\Varid{v}_{1}} oplus \ensuremath{\Varid{dv}}'') is guaranteed to
+return \ensuremath{\Varid{v}_{2}}.
+Operator \ensuremath{\ominus } (``ominus'') produces a difference between two values: \ensuremath{\Varid{v}_{2}\ominus \Varid{v}_{1}} is a valid change from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}}.
+Operator \ensuremath{\NilC{}} (``nil'') produces nil changes: \ensuremath{\NilC{\Varid{v}}} is a nil
+change for \ensuremath{\Varid{v}}.
+Finally, change composition \ensuremath{\circledcirc } (``ocompose'') ``pastes
+changes together'': if \ensuremath{\Varid{dv}_{1}} is a valid change from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}}
+and \ensuremath{\Varid{dv}_{2}} is a valid change from \ensuremath{\Varid{v}_{2}} to \ensuremath{\Varid{v}_{3}}, then \ensuremath{\Varid{dv}_{1}\circledcirc\Varid{dv}_{2}} (read ``\ensuremath{\Varid{dv}_{1}} composed with \ensuremath{\Varid{dv}_{2}}'') is a valid change from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{3}}.
+% It's useful to
+% compare the statement of this law to the transitivity of a
+% relation or to the typing of function
+% composition.\footnote{This analogy can be made formal by
+%   saying that triples |(v1, dv, v2)| such that |fromto V v1
+%   dv v2| are the arrows of a category under change
+%   composition, where objects are individual values.}
+
+We summarize these descriptions in the following definition.
+
+\begin{definition}
+  \label{def:change-structure}
+  A change structure \ensuremath{\ChangeStruct{\Conid{V}}} over a set \ensuremath{\Conid{V}} requires:
+  \begin{subdefinition}
+  \item A basic change structure for \ensuremath{\Conid{V}} (hence change set \ensuremath{\Delta \Conid{V}}
+    and validity \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}}).
+  \item An update operation \ensuremath{\oplus \typcolon\Conid{V}\to \Delta \Conid{V}\to \Conid{V}} that
+    \emph{updates} a value with a change. Update must agree with
+    validity: for all \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}} we require \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}\mathrel{=}\Varid{v}_{2}}.
+  \item A nil change operation \ensuremath{\NilC{}\typcolon\Conid{V}\to \Delta \Conid{V}}, that must
+    produce nil changes: for all \ensuremath{\Varid{v}\typcolon\Conid{V}} we require \ensuremath{\validfromto{\Conid{V}}{\Varid{v}}{\NilC{\Varid{v}}}{\Varid{v}}}.
+  \item a difference operation \ensuremath{\ominus \typcolon\Conid{V}\to \Conid{V}\to \Delta \Conid{V}} that
+    produces a change across two values: for all \ensuremath{\Varid{v}_{1},\Varid{v}_{2}\typcolon\Conid{V}} we require
+    \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{v}_{2}\ominus \Varid{v}_{1}}{\Varid{v}_{2}}}.
+  \item a change composition operation
+    \ensuremath{\circledcirc \typcolon\Delta \Conid{V}\to \Delta \Conid{V}\to \Delta \Conid{V}},
+    that composes together two changes relative to a base value.
+    Change composition must preserve validity:
+    for all \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}_{1}}{\Varid{v}_{2}}} and \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{2}}{\Varid{dv}_{2}}{\Varid{v}_{3}}}
+    we require \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}_{1}\circledcirc\Varid{dv}_{2}}{\Varid{v}_{3}}}.
+  \end{subdefinition}
+\end{definition}
+
+\begin{notation}
+Operators \ensuremath{\oplus } and \ensuremath{\ominus } can be subscripted to
+highlight their base set, but we will usually omit such
+subscripts. Moreover, \ensuremath{\oplus } is left-associative, so that
+\ensuremath{\Varid{v}\oplus \Varid{dv}_{1}\oplus \Varid{dv}_{2}} means \ensuremath{(\Varid{v}\oplus \Varid{dv}_{1})\oplus \Varid{dv}_{2}}.
+
+Finally, whenever we have a change structure such as
+\ensuremath{\ChangeStruct{\Conid{A}}}, \ensuremath{\ChangeStruct{\Conid{B}}}, \ensuremath{\ChangeStruct{\Conid{V}}}, and so on, we write respectively
+\ensuremath{\Conid{A}}, \ensuremath{\Conid{B}}, \ensuremath{\Conid{V}} to refer to its base set.
+\end{notation}
+
+\subsection{Example: Group changes}
+\label{sec:change-structure-groups}
+
+As an example, we show next that each group induces a change structure on its
+carrier. This change structure also subsumes basic change structures we saw
+earlier on integers.
+% To define aggregation, we will need to use a change structure on
+% groups.
+\begin{definition}[Change structure on groups \ensuremath{\Conid{G}}]
+\label{def:chs-group}
+Given any group \ensuremath{(\Conid{G},\Varid{e},\mathbin{+},\mathbin{-})} we can define a change structure
+\ensuremath{\ChangeStruct{\Conid{G}}} on carrier set \ensuremath{\Conid{G}} as follows.
+\begin{subdefinition}
+\item The change set is \ensuremath{\Conid{G}}.
+\item Validity is defined as \ensuremath{\validfromto{\Conid{G}}{\Varid{g}_{1}}{\Varid{dg}}{\Varid{g}_{2}}} if and only if
+  \ensuremath{\Varid{g}_{2}\mathrel{=}\Varid{g}_{1}\mathbin{+}\Varid{dg}}.
+\item Change update coincides with \ensuremath{\mathbin{+}}: \ensuremath{\Varid{g}_{1}\oplus \Varid{dg}\mathrel{=}\Varid{g}_{1}\mathbin{+}\Varid{dg}}. Hence \ensuremath{\oplus } agrees \emph{perfectly} with validity: for all \ensuremath{\Varid{g}_{1}\in \Conid{G}}, all
+  changes \ensuremath{\Varid{dg}} are valid from \ensuremath{\Varid{g}_{1}} to \ensuremath{\Varid{g}_{1}\oplus \Varid{dg}} (that is
+  \ensuremath{\validfromto{\Conid{G}}{\Varid{g}_{1}}{\Varid{dg}}{\Varid{g}_{1}\oplus \Varid{dg}}}).
+\item We define difference as \ensuremath{\Varid{g}_{2}\ominus \Varid{g}_{1}\mathrel{=}(\mathbin{-}\Varid{g}_{1})\mathbin{+}\Varid{g}_{2}}.
+  Verifying \ensuremath{\validfromto{\Conid{G}}{\Varid{g}_{1}}{\Varid{g}_{2}\ominus \Varid{g}_{1}}{\Varid{g}_{2}}} reduces to
+  verifying \ensuremath{\Varid{g}_{1}\mathbin{+}((\mathbin{-}\Varid{g}_{1})\mathbin{+}\Varid{g}_{2})\mathrel{=}\Varid{g}_{2}}, which follows from group axioms.
+\item The only nil change is the identity element: \ensuremath{\NilC{\Varid{g}}\mathrel{=}\Varid{e}}.
+  Validity \ensuremath{\validfromto{\Conid{G}}{\Varid{g}}{\NilC{\Varid{g}}}{\Varid{g}}} reduces to \ensuremath{\Varid{g}\mathbin{+}\Varid{e}\mathrel{=}\Varid{g}} which
+  follows from group axioms.
+\item Change composition also coincides with \ensuremath{\mathbin{+}}: \ensuremath{\Varid{dg}_{1}\circledcirc\Varid{dg}_{2}\mathrel{=}\Varid{dg}_{1}\mathbin{+}\Varid{dg}_{2}}. Let's prove that composition respects
+  validity. Our hypothesis is \ensuremath{\validfromto{\Conid{G}}{\Varid{g}_{1}}{\Varid{dg}_{1}}{\Varid{g}_{2}}} and \ensuremath{\validfromto{\Conid{G}}{\Varid{g}_{2}}{\Varid{dg}_{2}}{\Varid{g}_{3}}}.
+  Because \ensuremath{\oplus } agrees perfectly with validity, the
+  hypothesis is equivalent to \ensuremath{\Varid{g}_{2}\mathrel{=}\Varid{g}_{1}\oplus \Varid{dg}_{1}} and
+  \[\ensuremath{\Varid{g}_{3}\mathrel{=}\Varid{g}_{2}\oplus \Varid{dg}_{2}\mathrel{=}(\Varid{g}_{1}\oplus \Varid{dg}_{1})\oplus \Varid{dg}_{2}}.\]
+  Our thesis is \ensuremath{\validfromto{\Conid{G}}{\Varid{g}_{1}}{\Varid{dg}_{1}\circledcirc \Varid{dg}_{2}}{\Varid{g}_{3}}}, that is
+  \[\ensuremath{\Varid{g}_{3}\mathrel{=}\Varid{g}_{1}\oplus (\Varid{dg}_{1}\circledcirc \Varid{dg}_{2})}.\]
+  Hence the thesis reduces to
+  \[\ensuremath{(\Varid{g}_{1}\oplus \Varid{dg}_{1})\oplus \Varid{dg}_{2}\mathrel{=}\Varid{g}_{1}\oplus (\Varid{dg}_{1}\circledcirc \Varid{dg}_{2})},\]
+  hence to \ensuremath{\Varid{g}_{1}\mathbin{+}(\Varid{dg}_{1}\mathbin{+}\Varid{dg}_{2})\mathrel{=}(\Varid{g}_{1}\mathbin{+}\Varid{dg}_{1})\mathbin{+}\Varid{dg}_{2}}, which is just
+  the associative law for group \ensuremath{\Conid{G}}.
+\end{subdefinition}
+\end{definition}
+
+As we show later\pg{where}, group change structures are useful to support
+aggregation.
+\subsection{Properties of change structures}
+\label{sec:chs-properties}
+To understand better the definition of change structures, we
+present next a few lemmas following from this definition.
+
+\begin{restatable}[\ensuremath{\ominus } inverts \ensuremath{\oplus }]{lemma}{oplusOminusChS}
+  \label{thm:oplusOminusChS}
+  \ensuremath{\oplus } inverts \ensuremath{\ominus }, that is
+  \[\ensuremath{\Varid{v}_{1}\oplus (\Varid{v}_{2}\ominus \Varid{v}_{1})\mathrel{=}\Varid{v}_{2}},\] for change structure
+  \ensuremath{\ChangeStruct{\Conid{V}}} and any values \ensuremath{\Varid{v}_{1},\Varid{v}_{2}\typcolon\Conid{V}}.
+\end{restatable}
+\begin{proof}
+  For change structures, we know \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{v}_{2}\ominus \Varid{v}_{1}}{\Varid{v}_{2}}}, and \ensuremath{\Varid{v}_{1}\oplus (\Varid{v}_{2}\ominus \Varid{v}_{1})\mathrel{=}\Varid{v}_{2}} follows.
+
+  More in detail: Change \ensuremath{\Varid{dv}\mathrel{=}\Varid{v}_{2}\ominus \Varid{v}_{1}} is a valid change
+  from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}} (because \ensuremath{\ominus } produces valid changes,
+  \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{v}_{2}\ominus \Varid{v}_{1}}{\Varid{v}_{2}}}), so updating \ensuremath{\Varid{dv}}'s source
+  \ensuremath{\Varid{v}_{1}} with \ensuremath{\Varid{dv}} produces \ensuremath{\Varid{dv}}'s destination \ensuremath{\Varid{v}_{2}} (because
+  \ensuremath{\oplus } agrees with validity, that is if \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}}
+  then \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}\mathrel{=}\Varid{v}_{2}}).
+\end{proof}
+
+\begin{lemma}[A change can't be valid for two destinations with the same source]
+  Given a change \ensuremath{\Varid{dv}\typcolon\Delta \Conid{V}} and a source \ensuremath{\Varid{v}_{1}\typcolon\Conid{V}}, \ensuremath{\Varid{dv}} can only
+  be valid with \ensuremath{\Varid{v}_{1}} as source for a \emph{single} destination.
+  That is, if \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}}{v_{2a}}} and \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}}{v_{2b}}} then \ensuremath{v_{2a}\mathrel{=}v_{2b}}.
+\end{lemma}
+\begin{proof}
+  The proof follows, intuitively, because \ensuremath{\oplus } also maps
+  change \ensuremath{\Varid{dv}} and its source \ensuremath{\Varid{v}_{1}} to its destination, and
+  \ensuremath{\oplus } is a function.
+
+  More technically, since \ensuremath{\oplus } respects validity, the
+  hypotheses mean that \ensuremath{v_{2a}\mathrel{=}\Varid{v}_{1}\oplus \Varid{dv}\mathrel{=}v_{2b}} as required.
+\end{proof}
+Beware that, changes can be valid for multiple sources, and associate
+them to different destination. For instance, integer \ensuremath{\mathrm{0}} is a
+valid change for all integers.\pg{For this we need to know that
+  there's a change structure for integers.}
+
+If a change \ensuremath{\Varid{dv}} has source \ensuremath{\Varid{v}}, \ensuremath{\Varid{dv}}'s destination equals \ensuremath{\Varid{v}\oplus \Varid{dv}}.
+So, to specify that \ensuremath{\Varid{dv}} is valid with source \ensuremath{\Varid{v}}, without mentioning \ensuremath{\Varid{dv}}'s
+destination, we introduce the following definition.
+\begin{definition}[One-sided validity]
+  We define relation \ensuremath{\mathcal{V}_{\Conid{A}}} as
+  \ensuremath{\{\mskip1.5mu (\Varid{v},\Varid{dv})\in \Conid{A}\times\Delta \Conid{A}\mid\validfromto{\Conid{V}}{\Varid{v}}{\Varid{dv}}{\Varid{v}\oplus \Varid{dv}}\mskip1.5mu\}}.
+\end{definition}
+
+We use this definition right away:
+\begin{lemma}[\ensuremath{\circledcirc } and \ensuremath{\oplus } interact correctly]
+  If \ensuremath{(\Varid{v}_{1} , \Varid{dv}_{1}) \in V_{\Conid{V}}} and \ensuremath{(\Varid{v}_{1}\oplus \Varid{dv}_{1} , \Varid{dv}_{2}) \in V_{\Conid{V}}} then
+  \ensuremath{\Varid{v}_{1}\oplus (\Varid{dv}_{1}\circledcirc\Varid{dv}_{2})\mathrel{=}\Varid{v}_{1}\oplus \Varid{dv}_{1}\oplus \Varid{dv}_{2}}.
+\end{lemma}
+\begin{proof}
+  We know that \ensuremath{\circledcirc } preserves validity, so under the
+  hypotheses \ensuremath{(\Varid{v}_{1} , \Varid{dv}_{1}) \in V_{\Conid{V}}} and \ensuremath{(\Varid{v}_{1}\oplus \Varid{dv}_{1} , \Varid{dv}_{2}) \in V_{\Conid{V}}}
+  we get that \ensuremath{\Varid{dv}\mathrel{=}\Varid{dv}_{1}\circledcirc\Varid{dv}_{2}} is a valid change from
+  \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}_{1}\oplus \Varid{dv}_{2}}:
+  \[\ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}_{1}\circledcirc\Varid{dv}_{2}}{\Varid{v}_{1}}\oplus \Varid{dv}_{1}\oplus \Varid{dv}_{2}}.\]
+  Hence, updating \ensuremath{\Varid{dv}}'s source \ensuremath{\Varid{v}_{1}} with \ensuremath{\Varid{dv}}
+  produces \ensuremath{\Varid{dv}}'s destination \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}_{1}\oplus \Varid{dv}_{2}}:
+  \[\ensuremath{\Varid{v}_{1}\oplus (\Varid{dv}_{1}\circledcirc\Varid{dv}_{2})\mathrel{=}\Varid{v}_{1}\oplus \Varid{dv}_{1}\oplus \Varid{dv}_{2}}.\]
+\end{proof}
+
+% \begin{lemma}[|`ocompose`| and |`oplus`| interact correctly]
+%   If |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3| then |v1
+%   `oplus` (ocompose dv1 dv2) = v1 `oplus` dv1 `oplus` dv2|.
+% \end{lemma}
+% \begin{proof}
+%   We know that |`ocompose`| preserves validity, so under the
+%   hypotheses |fromto V v1 dv1 v2| and |fromto V v2 dv2 v3| we get
+%   that |dv = ocompose dv1 dv2| is a valid change from |v1| to
+%   |v3| (|fromto V v1 (ocompose dv1 dv2) v3|). Hence, updating
+%   |dv|'s source |v1| with |dv| produces |dv|'s destination |v3|.
+% \end{proof}
+
+We can define \ensuremath{\NilC{}} in terms of other
+operations, and prove they satisfy their requirements for change
+structures.
+
+\begin{lemma}[\ensuremath{\NilC{}} can be derived from \ensuremath{\ominus }]
+  \label{lem:nilc-derived}
+  If we define \ensuremath{\NilC{\Varid{v}}\mathrel{=}\Varid{v}\ominus \Varid{v}}, then \ensuremath{\NilC{}} produces
+  valid changes as required (\ensuremath{\validfromto{\Conid{V}}{\Varid{v}}{\NilC{\Varid{v}}}{\Varid{v}}}), for any
+  change structure \ensuremath{\ChangeStruct{\Conid{V}}} and value \ensuremath{\Varid{v}\typcolon\Conid{V}}.
+\end{lemma}
+\begin{proof}
+  This follows from validity of \ensuremath{\ominus } (\ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{v}_{2}\ominus \Varid{v}_{1}}{\Varid{v}_{2}}}) instantiated with \ensuremath{\Varid{v}_{1}\mathrel{=}\Varid{v}} and \ensuremath{\Varid{v}_{2}\mathrel{=}\Varid{v}}.
+\end{proof}
+
+Moreover, nil changes are a right identity element for \ensuremath{\oplus }:
+\begin{restatable}[Nil changes are identity elements]{corollary}{nilChangesRightId}
+  \label{lem:nilChangesRightId}
+  Any nil change \ensuremath{\Varid{dv}} for a value \ensuremath{\Varid{v}} is a right identity element for
+  \ensuremath{\oplus }, that is we have \ensuremath{\Varid{v}\oplus \Varid{dv}\mathrel{=}\Varid{v}} for every set \ensuremath{\Conid{V}}
+  with a basic change structure, every element \ensuremath{\Varid{v}\in \Conid{V}} and
+  every nil change \ensuremath{\Varid{dv}} for \ensuremath{\Varid{v}}.
+\end{restatable}
+\begin{proof}
+  This follows from \cref{thm:valid-oplus} and the definition of
+  nil changes.
+\end{proof}
+
+The converse of this theorem does not hold: there exists changes
+\ensuremath{\Varid{dv}} such that \ensuremath{\Varid{v}\oplus \Varid{dv}\mathrel{=}\Varid{v}} yet \ensuremath{\Varid{dv}} is not a valid change
+from \ensuremath{\Varid{v}} to \ensuremath{\Varid{v}}.
+More in general, \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}\mathrel{=}\Varid{v}_{2}} does not imply that \ensuremath{\Varid{dv}} is a valid
+change.
+For instance, under earlier definitions for
+changes on naturals, if we take \ensuremath{\Varid{v}\mathrel{=}\mathrm{0}} and \ensuremath{\Varid{dv}\mathrel{=}\mathbin{-}\mathrm{5}}, we have \ensuremath{\Varid{v}\oplus \Varid{dv}\mathrel{=}\Varid{v}} even though \ensuremath{\Varid{dv}} is not valid; examples of
+invalid changes on functions are discussed at \cref{sec:invalid,sec:very-invalid}.
+However, we prefer to define ``\ensuremath{\Varid{dv}} is a nil change'' as we do,
+to imply that \ensuremath{\Varid{dv}} is valid, not just a neutral element.
+
+\section{Operations on function changes, informally}
+\label{sec:chs-funs-informal}
+\subsection{Examples of nil changes}
+\label{sec:nil-changes-intro}
+
+We have not defined any change structure yet, but we can already exhibit nil
+changes for some values, including a few functions.
+\begin{examples}
+  \begin{itemize}
+  \item
+An environment change for an empty environment \ensuremath{\EmptyEnv\typcolon\Eval{\EmptyContext}} must be an environment for the empty context
+\ensuremath{\Delta \EmptyContext\mathrel{=}\EmptyContext}, so it must be the empty environment! In
+other words, if and only if \ensuremath{\validfromto{\EmptyContext}{\EmptyEnv}{\D\rho}{\EmptyEnv}}, then and only then \ensuremath{\D\rho\mathrel{=}\EmptyEnv} and, in
+particular, \ensuremath{\D\rho} is a nil change.
+
+\item If all values in an environment \ensuremath{\rho} have nil changes,
+the environment has a nil change \ensuremath{\D\rho\mathrel{=}\NilC{\rho}} associating
+each value to a nil change. Indeed, take a context \ensuremath{\Gamma} and a
+suitable environment \ensuremath{\rho\typcolon\Eval{\Gamma}}. For each typing
+assumption \ensuremath{\Varid{x}\typcolon\tau} in \ensuremath{\Gamma}, assume we have a nil change \ensuremath{\NilC{\Varid{v}}} for \ensuremath{\Varid{v}}. Then we define \ensuremath{\NilC{\rho}\typcolon\Eval{\Delta \Gamma}} by
+structural recursion on \ensuremath{\rho} as:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\NilC{\EmptyEnv}\mathrel{=}\EmptyEnv{}\<[E]%
+\\
+\>[3]{}\NilC{\rho,\Varid{x}\mathrel{=}\Varid{v}}\mathrel{=}\NilC{\rho},\Varid{x}\mathrel{=}\Varid{v},\Varid{dx}\mathrel{=}\NilC{\Varid{v}}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Then we can see that \ensuremath{\NilC{\rho}} is indeed a nil change for \ensuremath{\rho},
+that is, \ensuremath{\validfromto{\Gamma}{\rho}{\NilC{\rho}}{\rho}}.
+\item We have seen in \cref{thm:derive-correct} that, whenever
+  \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}, \ensuremath{\Eval{\Varid{t}}} has nil change \ensuremath{\EvalInc{\Varid{t}}}.
+  Moreover, if we have an appropriate nil environment change
+  \ensuremath{\validfromto{\Gamma}{\rho}{\D\rho}{\rho}} (which we often do, as discussed
+  above), then we also get a nil change \ensuremath{\EvalInc{\Varid{t}}\;\rho\;\D\rho} for
+  \ensuremath{\Eval{\Varid{t}}\;\rho}:
+\[\ensuremath{\validfromto{\tau}{\Eval{\Varid{t}}\;\rho}{\EvalInc{\Varid{t}}\;\rho\;\D\rho}{\Eval{\Varid{t}}\;\rho}}.\]
+In particular, for all closed well-typed terms \ensuremath{\vdash\Varid{t}\typcolon\tau} we have
+\[\ensuremath{\validfromto{\tau}{\Eval{\Varid{t}}\;\EmptyEnv}{\EvalInc{\Varid{t}}\;\EmptyEnv\;\EmptyEnv}{\Eval{\Varid{t}}\;\EmptyEnv}}.\]
+\end{itemize}
+\end{examples}
+
+\subsection{Nil changes on arbitrary functions}
+\label{sec:nil-changes-fun-intro}
+
+We have discussed how to find a nil change \ensuremath{\NilC{\Varid{f}}} for a function
+\ensuremath{\Varid{f}} if we know the \emph{intension} of \ensuremath{\Varid{f}}, that is, its
+definition. What if we have only its \emph{extension}, that is,
+its behavior? Can we still find \ensuremath{\NilC{\Varid{f}}}?
+That's necessary to implement \ensuremath{\NilC{}} as an
+object-language function \ensuremath{\NilC{}} from \ensuremath{\Varid{f}} to \ensuremath{\NilC{\Varid{f}}}, since such a
+function does not have access to \ensuremath{\Varid{f}}'s implementation. That's
+also necessary to define \ensuremath{\NilC{}} on metalanguage function spaces---and we look at this case first.
+
+We seek a nil change \ensuremath{\NilC{\Varid{f}}} for an arbitrary
+metalanguage function \ensuremath{\Varid{f}\typcolon\Conid{A}\to \Conid{B}}, where \ensuremath{\Conid{A}} and \ensuremath{\Conid{B}} are
+arbitrary sets; we assume a basic change structure on \ensuremath{\Conid{A}\to \Conid{B}},
+and will require \ensuremath{\Conid{A}} and \ensuremath{\Conid{B}} to support a few additional
+operations. We require that
+\begin{equation}
+  \label{eq:search-nil-fun}
+  \ensuremath{\validfromto{\Conid{A}\to \Conid{B}}{\Varid{f}}{\NilC{\Varid{f}}}{\Varid{f}}}.
+\end{equation}
+Equivalently, whenever \ensuremath{\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}} then \ensuremath{\validfromto{\Conid{B}}{\Varid{f}\;\Varid{a}_{1}}{\NilC{\Varid{f}}\;\Varid{a}_{1}\;\Varid{da}}{\Varid{f}\;\Varid{a}_{2}}}. By \cref{thm:valid-oplus}, it follows that
+\begin{equation}
+  \label{eq:search-nil-fun-oplus}
+  \ensuremath{\Varid{f}\;\Varid{a}_{1}\oplus \NilC{\Varid{f}}\;\Varid{a}_{1}\;\Varid{da}\mathrel{=}\Varid{f}\;\Varid{a}_{2}},
+\end{equation}
+where \ensuremath{\Varid{a}_{1}\oplus \Varid{da}\mathrel{=}\Varid{a}_{2}}.
+
+To define \ensuremath{\NilC{\Varid{f}}} we solve \cref{eq:search-nil-fun-oplus}. To understand how, we
+use an analogy.
+\ensuremath{\oplus } and \ensuremath{\ominus } are intended to resemble \ensuremath{\mathbin{+}} and \ensuremath{\mathbin{-}}.
+To solve \ensuremath{\Varid{f}\;\Varid{a}_{1}\mathbin{+}\NilC{\Varid{f}}\;\Varid{a}_{1}\;\Varid{da}\mathrel{=}\Varid{f}\;\Varid{a}_{2}}, we subtract \ensuremath{\Varid{f}\;\Varid{a}_{1}}
+from both sides and write \ensuremath{\NilC{\Varid{f}}\;\Varid{a}_{1}\;\Varid{da}\mathrel{=}\Varid{f}\;\Varid{a}_{2}\mathbin{-}\Varid{f}\;\Varid{a}_{1}}.
+
+Similarly, here we use operator \ensuremath{\ominus }: \ensuremath{\NilC{\Varid{f}}} must equal
+\begin{equation}
+  \label{eq:define-nil-fun}
+\ensuremath{\NilC{\Varid{f}}\mathrel{=}\lambda \Varid{a}_{1}\;\Varid{da}\to \Varid{f}\;(\Varid{a}_{1}\oplus \Varid{da})\ominus \Varid{f}\;\Varid{a}_{1}}.
+\end{equation}
+Because \ensuremath{\validfromto{\Conid{B}}{\Varid{b}_{1}}{\Varid{b}_{2}\ominus \Varid{b}_{1}}{\Varid{b}_{2}}} for all \ensuremath{\Varid{b}_{1},\Varid{b}_{2}\typcolon\Conid{B}}, we can verify
+that \ensuremath{\NilC{\Varid{f}}} as defined by \cref{eq:define-nil-fun} satisfies our original
+requirement \cref{eq:search-nil-fun}, not just its weaker consequence
+\cref{eq:search-nil-fun-oplus}.
+
+We have shown that, to define \ensuremath{\NilC{}} on functions \ensuremath{\Varid{f}\typcolon\Conid{A}\to \Conid{B}},
+we can use \ensuremath{\ominus } at type \ensuremath{\Conid{B}}. Without using \ensuremath{\Varid{f}}'s intension,
+we are aware of no alternative. To ensure \ensuremath{\NilC{\Varid{f}}} is defined for
+all \ensuremath{\Varid{f}}, we require that change structures define \ensuremath{\ominus }. We
+can then define \ensuremath{\NilC{}} as a derived operation via \ensuremath{\NilC{\Varid{v}}\mathrel{=}\Varid{v}\ominus \Varid{v}}, and verify this derived definition satisfies
+requirements for \ensuremath{\NilC{\text{\textendash}}}.
+
+Next, we show how to define \ensuremath{\ominus } on functions. We seek a
+valid function change \ensuremath{\Varid{f}_{2}\ominus \Varid{f}_{1}} from \ensuremath{\Varid{f}_{1}} to \ensuremath{\Varid{f}_{2}}. We have
+just sought and found a valid change from \ensuremath{\Varid{f}} to \ensuremath{\Varid{f}};
+generalizing the reasoning we used, we obtain that whenever
+\ensuremath{\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}} then we need to have \ensuremath{\validfromto{\Conid{B}}{\Varid{f}_{1}\;\Varid{a}_{1}}{(\Varid{f}_{2}\ominus \Varid{f}_{1})\;\Varid{a}_{1}\;\Varid{da}}{\Varid{f}_{2}\;\Varid{a}_{2}}}; since \ensuremath{\Varid{a}_{2}\mathrel{=}\Varid{a}_{1}\oplus \Varid{da}}, we can
+define
+
+\begin{equation}
+  \label{eq:ominus-fun-1}
+\ensuremath{\Varid{f}_{2}\ominus \Varid{f}_{1}\mathrel{=}\lambda \Varid{a}_{1}\;\Varid{da}\to \Varid{f}_{2}\;(\Varid{a}_{1}\oplus \Varid{da})\ominus \Varid{f}_{1}\;\Varid{a}_{1}}.
+\end{equation}
+
+One can verify that \cref{eq:ominus-fun-1} defines \ensuremath{\Varid{f}_{2}\ominus \Varid{f}_{1}} as a valid function from \ensuremath{\Varid{f}_{1}} to \ensuremath{\Varid{f}_{2}}, as desired.
+And after defining \ensuremath{\Varid{f}_{2}\ominus \Varid{f}_{1}}, we need no more to define
+\ensuremath{\NilC{\Varid{f}}} separately using \cref{eq:define-nil-fun}.
+We can just define \ensuremath{\NilC{\Varid{f}}\mathrel{=}\Varid{f}\ominus \Varid{f}} simplify through the definition
+of \ensuremath{\ominus } in \cref{eq:ominus-fun-1}, and reobtain \cref{eq:define-nil-fun}
+as a derived equation:
+%
+\[
+  \ensuremath{\NilC{\Varid{f}}\mathrel{=}\Varid{f}\ominus \Varid{f}\mathrel{=}\lambda \Varid{a}_{1}\;\Varid{da}\to \Varid{f}\;(\Varid{a}_{1}\oplus \Varid{da})\ominus \Varid{f}\;\Varid{a}_{1}},
+\]
+
+We defined \ensuremath{\Varid{f}_{2}\ominus \Varid{f}_{1}} on metalanguage functions. We can also internalize
+change operators in our object language, that is, define for each type \ensuremath{\tau}
+object-level terms \ensuremath{\oplus_{\tau}}, \ensuremath{\ominus_{\tau}}, and so on, with the same
+behavior.
+We can define object-language change operators such as \ensuremath{\ominus } using the same
+equations. However, the produced function change \ensuremath{\Varid{df}} is slow, because it
+recomputes the old output \ensuremath{\Varid{f}_{1}\;\Varid{a}_{1}}, computes the new output \ensuremath{\Varid{f}_{2}\;\Varid{a}_{2}} and takes the
+difference.
+
+However, we can implement \ensuremath{\ominus_{\sigma\to \tau}} using replacement changes, if
+they are supported by the change structure on type \ensuremath{\tau}.
+Let us define \ensuremath{\ominus_{\tau}} as \ensuremath{\Varid{b}_{2}\ominus \Varid{b}_{1}\mathrel{=}\mathbin{!}\Varid{b}_{2}} and simplify
+\cref{eq:ominus-fun-1}; we obtain
+\[\ensuremath{\Varid{f}_{2}\ominus \Varid{f}_{1}\mathrel{=}\lambda \Varid{a}_{1}\;\Varid{da}\to \mathbin{!}(\Varid{f}_{2}\;(\Varid{a}_{1}\oplus \Varid{da}))}.\]
+
+We could even imagine allowing replacement changes on functions
+themselves. However, here the bang operator needs to be defined
+to produce a function change that can be applied, hence
+\[\ensuremath{\mathbin{!}\Varid{f}_{2}\mathrel{=}\lambda \Varid{a}_{1}\;\Varid{da}\to \mathbin{!}(\Varid{f}_{2}\;(\Varid{a}_{1}\oplus \Varid{da}))}.\]
+
+Alternatively, as we see in
+\cref{ch:defunc-fun-changes}, we could represent function changes
+not as functions but as data through \emph{defunctionalization},
+and provide a function applying defunctionalized function changes
+\ensuremath{\Varid{df}\typcolon\Delta (\sigma\to \tau)} to inputs \ensuremath{\Varid{t}_{1}\typcolon\sigma} and \ensuremath{\Varid{dt}\typcolon\Delta \sigma}. In this case, \ensuremath{\mathbin{!}\Varid{f}_{2}} would simply be another way to
+produce defunctionalized function changes.
+
+\subsection{Constraining ⊕ on functions}
+\label{sec:oplus-fun-intro}
+Next, we discuss how \ensuremath{\oplus } must be defined on functions, and
+show informally why we must define \ensuremath{\Varid{f}_{1}\oplus \Varid{df}\mathrel{=}\lambda \Varid{v}\to \Varid{f}_{1}\;\Varid{x}\oplus \Varid{df}\;\Varid{v}\;\NilC{\Varid{v}}} to prove that \ensuremath{\oplus } on functions agrees
+with validity (that is, \cref{thm:valid-oplus}).
+
+We know that a valid function change \ensuremath{\validfromto{\Conid{A}\to \Conid{B}}{\Varid{f}_{1}}{\Varid{df}}{\Varid{f}_{2}}} takes valid input changes \ensuremath{\validfromto{\Conid{A}}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}} to a valid
+output change \ensuremath{\validfromto{\Conid{B}}{\Varid{f}_{1}\;\Varid{v}_{1}}{\Varid{df}\;\Varid{v}_{1}\;\Varid{dv}}{\Varid{f}_{2}\;\Varid{v}_{2}}}. We require
+that \ensuremath{\oplus } agrees with validity (\cref{thm:valid-oplus}), so
+\ensuremath{\Varid{f}_{2}\mathrel{=}\Varid{f}_{1}\oplus \Varid{df}}, \ensuremath{\Varid{v}_{2}\mathrel{=}\Varid{v}_{1}\oplus \Varid{dv}} and
+%
+\begin{equation}
+  \label{eq:fun-preserv-eq}
+\ensuremath{\Varid{f}_{2}\;\Varid{v}_{2}\mathrel{=}(\Varid{f}_{1}\oplus \Varid{df})\;(\Varid{v}_{1}\oplus \Varid{dv})\mathrel{=}\Varid{f}_{1}\;\Varid{v}_{1}\oplus \Varid{df}\;\Varid{v}_{1}\;\Varid{dv}}.
+\end{equation}
+%
+Instantiating \ensuremath{\Varid{dv}} with \ensuremath{\NilC{\Varid{v}}} gives equation
+%
+\[\ensuremath{(\Varid{f}_{1}\oplus \Varid{df})\;\Varid{v}_{1}\mathrel{=}(\Varid{f}_{1}\oplus \Varid{df})\;(\Varid{v}_{1}\oplus \NilC{\Varid{v}})\mathrel{=}\Varid{f}_{1}\;\Varid{v}_{1}\oplus \Varid{df}\;\Varid{v}_{1}\;\NilC{\Varid{v}}},\]
+%
+which is not only a requirement on \ensuremath{\oplus } for functions but
+also defines \ensuremath{\oplus } effectively.
+
+\section{Families of change structures}
+\label{sec:chs-fun-chs}
+
+In this section, we derive change structures for \ensuremath{\Conid{A}\to \Conid{B}} and \ensuremath{\Conid{A}\times\Conid{B}} from
+two change structures \ensuremath{\ChangeStruct{\Conid{A}}} and \ensuremath{\ChangeStruct{\Conid{B}}}.
+The change structure on \ensuremath{\Conid{A}\to \Conid{B}} enables defining change structures for function
+types.
+Similarly, the change structure on \ensuremath{\Conid{A}\times\Conid{B}} enables defining a change
+structure for product types in a language plugin, as described informally in
+\cref{sec:chs-products-intro}.
+\pg{Revise maybe?}
+In \cref{sec:chs-sums} we also discuss informally
+change structures for disjoint sums: Formally, we can derive a change structure
+for disjoint union of sets \ensuremath{\Conid{A}\mathbin{+}\Conid{B}} (from change structures for \ensuremath{\Conid{A}} and \ensuremath{\Conid{B}}), and
+this enables defining change structures for sum types; we have mechanized the
+required proofs, but omit the tedious details here.
+% In \cref{sec:chs-product,sec:chs-sums} we will also define change
+% structures for |A `times` B| and |A + B|, for use in language
+% plugins for types |sigma `times` tau| and |sigma + tau|.
+
+\subsection{Change structures for function spaces}
+\Cref{sec:chs-funs-informal} introduces informally how to define change
+operations on \ensuremath{\Conid{A}\to \Conid{B}}. Next, we define formally change structures on function
+spaces, and then prove its operations respect their constraints.
+
+\begin{definition}[Change structure for \ensuremath{\Conid{A}\to \Conid{B}}]
+  \label{def:chs-fun}
+  Given change structures \ensuremath{\ChangeStruct{\Conid{A}}} and \ensuremath{\ChangeStruct{\Conid{B}}} we define a change structure on
+  their function space \ensuremath{\Conid{A}\to \Conid{B}}, written \ensuremath{\ChangeStruct{\Conid{A}}\to \ChangeStruct{\Conid{B}}}, where:
+  \begin{subdefinition}
+  \item The change set is defined as: \ensuremath{\Delta (\Conid{A}\to \Conid{B})\mathrel{=}\Conid{A}\to \Delta \Conid{A}\to \Delta \Conid{B}}.
+  \item Validity is defined as
+    \begin{multline*}
+      \ensuremath{\validfromto{\Conid{A}\to \Conid{B}}{\Varid{f}_{1}}{\Varid{df}}{\Varid{f}_{2}}\mathrel{=}\forall \Varid{a}_{1}\hsforall \;\Varid{da}\;\Varid{a}_{2}\hsdot{\circ }{\mathpunct{.}}(\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}})} \\
+      \text{ implies } \ensuremath{(\validfromto{\Conid{B}}{\Varid{f}_{1}\;\Varid{a}_{1}}{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}}{\Varid{f}_{2}\;\Varid{a}_{2}})}.
+    \end{multline*}
+  \item We define change update by
+    \[\ensuremath{\Varid{f}_{1}\oplus \Varid{df}\mathrel{=}\lambda \Varid{a}\to \Varid{f}_{1}\;\Varid{a}\oplus \Varid{df}\;\Varid{a}\;\NilC{\Varid{a}}}.\]
+  \item We define difference by \[\ensuremath{\Varid{f}_{2}\ominus \Varid{f}_{1}\mathrel{=}\lambda \Varid{a}\;\Varid{da}\to \Varid{f}_{2}\;(\Varid{a}\oplus \Varid{da})\ominus \Varid{f}_{1}\;\Varid{a}}.\]
+  \item We define \ensuremath{\NilC{}} like in \cref{lem:nilc-derived} as \[\ensuremath{\NilC{\Varid{f}}\mathrel{=}\Varid{f}\ominus \Varid{f}}.\]
+  \item We define change composition as \[\ensuremath{\Varid{df}_{1}\circledcirc\Varid{df}_{2}\mathrel{=}\lambda \Varid{a}\;\Varid{da}\to \Varid{df}_{1}\;\Varid{a}\;\NilC{\Varid{a}}\circledcirc\Varid{df}_{2}\;\Varid{a}\;\Varid{da}}.\]
+  \end{subdefinition}
+\end{definition}
+
+\begin{lemma}
+  \Cref{def:chs-fun} defines a correct change structure \ensuremath{\ChangeStruct{\Conid{A}}\to \ChangeStruct{\Conid{B}}}.
+\end{lemma}
+\begin{proof}
+
+  \begin{itemize}
+  \item We prove that \ensuremath{\oplus } agrees with validity on \ensuremath{\Conid{A}\to \Conid{B}}. Consider \ensuremath{\Varid{f}_{1},\Varid{f}_{2}\typcolon\Conid{A}\to \Conid{B}} and \ensuremath{\validfromto{\Conid{A}\to \Conid{B}}{\Varid{f}_{1}}{\Varid{df}}{\Varid{f}_{2}}}; we must show that \ensuremath{\Varid{f}_{1}\oplus \Varid{df}\mathrel{=}\Varid{f}_{2}}. By functional extensionality, we only need prove that \ensuremath{(\Varid{f}_{1}\oplus \Varid{df})\;\Varid{a}\mathrel{=}\Varid{f}_{2}\;\Varid{a}}, that is that \ensuremath{\Varid{f}_{1}\;\Varid{a}\oplus \Varid{df}\;\Varid{a}\;\NilC{\Varid{a}}\mathrel{=}\Varid{f}_{2}\;\Varid{a}}. Since
+    \ensuremath{\oplus } agrees with validity on \ensuremath{\Conid{B}}, we just need to show that \ensuremath{\validfromto{\Conid{B}}{\Varid{f}_{1}\;\Varid{a}}{\Varid{df}\;\Varid{a}\;\NilC{\Varid{a}}}{\Varid{f}_{2}\;\Varid{a}}}, which follows because \ensuremath{\NilC{\Varid{a}}} is a valid
+    change from \ensuremath{\Varid{a}} to \ensuremath{\Varid{a}} and because \ensuremath{\Varid{df}} is a valid change from \ensuremath{\Varid{f}_{1}} to \ensuremath{\Varid{f}_{2}}.
+  \item We prove that \ensuremath{\ominus } produces valid changes on \ensuremath{\Conid{A}\to \Conid{B}}. Consider
+    \ensuremath{\Varid{df}\mathrel{=}\Varid{f}_{2}\ominus \Varid{f}_{1}} for \ensuremath{\Varid{f}_{1},\Varid{f}_{2}\typcolon\Conid{A}\to \Conid{B}}. For any valid input \ensuremath{\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}}, we must show that \ensuremath{\Varid{df}} produces a valid output with the correct
+    vertexes, that is, that \ensuremath{\validfromto{\Conid{B}}{\Varid{f}_{1}\;\Varid{a}_{1}}{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}}{\Varid{f}_{2}\;\Varid{a}_{2}}}. Since
+    \ensuremath{\oplus } agrees with validity, \ensuremath{\Varid{a}_{2}} equals \ensuremath{\Varid{a}_{1}\oplus \Varid{da}}. By substituting
+    away \ensuremath{\Varid{a}_{2}} and \ensuremath{\Varid{df}} the thesis becomes \ensuremath{\validfromto{\Conid{B}}{\Varid{f}_{1}\;\Varid{a}_{1}}{\Varid{f}_{2}\;(\Varid{a}_{1}\oplus \Varid{da})\ominus \Varid{f}_{1}\;\Varid{a}_{1}}{\Varid{f}_{2}\;(\Varid{a}_{1}\oplus \Varid{da})}}, which is true because \ensuremath{\ominus }
+    produces valid changes on \ensuremath{\Conid{B}}.
+  \item \ensuremath{\NilC{}} produces valid changes as proved in \cref{lem:nilc-derived}.
+  \item We prove that change composition preserves validity on \ensuremath{\Conid{A}\to \Conid{B}}. That
+    is, we must prove \[\ensuremath{\validfromto{\Conid{B}}{\Varid{f}_{1}\;\Varid{a}_{1}}{\Varid{df}_{1}\;\Varid{a}_{1}\;\NilC{\Varid{a}_{1}}\circledcirc\Varid{df}_{2}\;\Varid{a}_{1}\;\Varid{da}}{\Varid{f}_{3}\;\Varid{a}_{2}}}\] for every \ensuremath{\Varid{f}_{1},\Varid{f}_{2},\Varid{f}_{3},\Varid{df}_{1},\Varid{df}_{2},\Varid{a}_{1},\Varid{da},\Varid{a}_{2}} satifsfying
+    \ensuremath{\validfromto{\Conid{A}\to \Conid{B}}{\Varid{f}_{1}}{\Varid{df}_{1}}{\Varid{f}_{2}}}, \ensuremath{\validfromto{\Conid{A}\to \Conid{B}}{\Varid{f}_{2}}{\Varid{df}_{2}}{\Varid{f}_{3}}} and \ensuremath{\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}}.
+
+    Because change composition preserves validity on \ensuremath{\Conid{B}}, it's enough to prove
+    that (1) \ensuremath{\validfromto{\Conid{B}}{\Varid{f}_{1}\;\Varid{a}_{1}}{\Varid{df}_{1}\;\Varid{a}_{1}\;\NilC{\Varid{a}_{1}}}{\Varid{f}_{2}\;\Varid{a}_{1}}} (2) \ensuremath{\validfromto{\Conid{B}}{\Varid{f}_{2}\;\Varid{a}_{1}}{\Varid{df}_{2}\;\Varid{a}_{1}\;\Varid{da}}{\Varid{f}_{3}\;\Varid{a}_{2}}}. That is, intuitively, we create a composite change
+    using \ensuremath{\circledcirc }, and it goes from \ensuremath{\Varid{f}_{1}\;\Varid{a}_{1}} to \ensuremath{\Varid{f}_{3}\;\Varid{a}_{2}} passing through \ensuremath{\Varid{f}_{2}\;\Varid{a}_{1}}. Part (1) follows because \ensuremath{\Varid{df}_{1}} is a valid function change from \ensuremath{\Varid{f}_{1}} to
+    \ensuremath{\Varid{f}_{2}}, applied to a valid change \ensuremath{\NilC{\Varid{a}_{1}}} from \ensuremath{\Varid{a}_{1}} to \ensuremath{\Varid{a}_{1}}.\pg{} Part (2)
+    follows because \ensuremath{\Varid{df}_{2}} is a valid function change from \ensuremath{\Varid{f}_{2}} to \ensuremath{\Varid{f}_{3}}, applied
+    to a valid change \ensuremath{\Varid{da}} from \ensuremath{\Varid{a}_{1}} to \ensuremath{\Varid{a}_{2}}.
+  \end{itemize}
+\end{proof}
+% \paragraph{Aside}\pg{mention alternative definition of change composition?}
+
+\subsection{Change structures for products}
+\label{sec:chs-product}
+
+We can define change structures on products \ensuremath{\Conid{A}\times\Conid{B}}, given
+change structures on \ensuremath{\Conid{A}} and \ensuremath{\Conid{B}}: a change on pairs is just a
+pair of changes; all other change structure definitions
+distribute componentwise the same way, and their correctness
+reduce to the correctness on components.
+
+Change structures on $n$-ary products or records present no additional
+difficulty.
+
+\begin{definition}[Change structure for \ensuremath{\Conid{A}\times\Conid{B}}]
+  \label{def:chs-prod}
+  Given change structures \ensuremath{\ChangeStruct{\Conid{A}}} and \ensuremath{\ChangeStruct{\Conid{B}}} we define a
+  change structure \ensuremath{\ChangeStruct{\Conid{A}}\times\ChangeStruct{\Conid{B}}} on product \ensuremath{\Conid{A}\times\Conid{B}}.
+  \begin{subdefinition}
+  \item The change set is defined as: \ensuremath{\Delta (\Conid{A}\times\Conid{B})\mathrel{=}\Delta \Conid{A}\times\Delta \Conid{B}}.
+  \item Validity is defined as
+    \begin{multline*}
+      \ensuremath{\validfromto{\Conid{A}\times\Conid{B}}{(\Varid{a}_{1},\Varid{b}_{1})}{(\Varid{da},\Varid{db})}{(\Varid{a}_{2},\Varid{b}_{2})}\mathrel{=}} \\
+      \ensuremath{(\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}})} \text{ and } \ensuremath{(\validfromto{\Conid{B}}{\Varid{b}_{1}}{\Varid{db}}{\Varid{b}_{2}})}.
+    \end{multline*}
+    %
+    In other words, validity distributes componentwise: a product change
+    is valid if each component is valid.
+  \item We define change update by
+    \[\ensuremath{(\Varid{a}_{1},\Varid{b}_{1})\oplus (\Varid{da},\Varid{db})\mathrel{=}(\Varid{a}_{1}\oplus \Varid{da},\Varid{b}_{1}\oplus \Varid{db})}.\]
+  \item We define difference by
+    \[\ensuremath{(\Varid{a}_{2},\Varid{b}_{2})\ominus (\Varid{a}_{1},\Varid{b}_{1})\mathrel{=}(\Varid{a}_{2}\ominus \Varid{a}_{1},\Varid{b}_{2}\ominus \Varid{b}_{1})}.\]
+  \item We define \ensuremath{\NilC{}} to distribute componentwise:
+    \[\ensuremath{\NilC{\Varid{a},\Varid{b}}\mathrel{=}(\NilC{\Varid{a}},\NilC{\Varid{b}})}.\]
+  \item We define change composition to distribute componentwise:
+    \[\ensuremath{(\Varid{da}_{1},\Varid{db}_{1})\circledcirc(\Varid{da}_{2},\Varid{db}_{2})\mathrel{=}(\Varid{da}_{1}\circledcirc\Varid{da}_{2},\Varid{db}_{1}\circledcirc\Varid{db}_{2})}.\]
+  \end{subdefinition}
+\end{definition}
+
+\begin{lemma}
+  \Cref{def:chs-prod} defines a correct change structure \ensuremath{\ChangeStruct{\Conid{A}}\times\ChangeStruct{\Conid{B}}}.
+\end{lemma}
+\begin{proof}
+Since all these proofs are similar and spelling out their details does not make
+them clearer, we only give the first such proof in full.
+  \begin{itemize}
+  \item \ensuremath{\oplus } agrees with validity on \ensuremath{\Conid{A}\times\Conid{B}} because
+    \ensuremath{\oplus } agrees with validity on both \ensuremath{\Conid{A}} and \ensuremath{\Conid{B}}. For this
+    property we give a full proof.
+
+    For each \ensuremath{\Varid{p}_{1},\Varid{p}_{2}\typcolon\Conid{A}\times\Conid{B}}
+    and \ensuremath{\validfromto{\Conid{A}\times\Conid{B}}{\Varid{p}_{1}}{\Varid{dp}}{\Varid{p}_{2}}}, we must show that \ensuremath{\Varid{p}_{1}\oplus \Varid{dp}\mathrel{=}\Varid{p}_{2}}. Instead of quantifying over pairs \ensuremath{\Varid{p}\typcolon\Conid{A}\times\Conid{B}}, we can quantify equivalently over components \ensuremath{\Varid{a}\typcolon\Conid{A},\Varid{b}\typcolon\Conid{B}}.
+    Hence, consider \ensuremath{\Varid{a}_{1},\Varid{a}_{2}\typcolon\Conid{A}}, \ensuremath{\Varid{b}_{1},\Varid{b}_{2}\typcolon\Conid{B}}, and changes \ensuremath{\Varid{da},\Varid{db}} that are valid, that is, \ensuremath{\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}} and \ensuremath{\validfromto{\Conid{B}}{\Varid{b}_{1}}{\Varid{db}}{\Varid{b}_{2}}}: We must show that \[\ensuremath{(\Varid{a}_{1},\Varid{b}_{1})\oplus (\Varid{da},\Varid{db})\mathrel{=}(\Varid{a}_{2},\Varid{b}_{2})}.\] That follows from \ensuremath{\Varid{a}_{1}\oplus \Varid{da}\mathrel{=}\Varid{a}_{2}} (which
+    follows from \ensuremath{\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}}) and \ensuremath{\Varid{b}_{1}\oplus \Varid{db}\mathrel{=}\Varid{b}_{2}}
+    (which follows from \ensuremath{\validfromto{\Conid{B}}{\Varid{b}_{1}}{\Varid{db}}{\Varid{b}_{2}}}).
+  \item \ensuremath{\ominus } produces valid changes on \ensuremath{\Conid{A}\times\Conid{B}}
+    because \ensuremath{\ominus } produces valid changes on both \ensuremath{\Conid{A}} and
+    \ensuremath{\Conid{B}}. We omit a full proof; the key step reduces the thesis
+    \[\ensuremath{\validfromto{\Conid{A}\times\Conid{B}}{(\Varid{a}_{1},\Varid{b}_{1})}{(\Varid{a}_{2},\Varid{b}_{2})\ominus (\Varid{a}_{1},\Varid{b}_{1})}{(\Varid{a}_{2},\Varid{b}_{2})}}\] to \ensuremath{\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{a}_{2}\ominus \Varid{a}_{1}}{\Varid{a}_{2}}} and \ensuremath{\validfromto{\Conid{B}}{\Varid{b}_{1}}{\Varid{b}_{2}\ominus \Varid{b}_{1}}{\Varid{b}_{2}}} (where free variables range on
+    suitable domains).
+  \item \ensuremath{\NilC{\Varid{a},\Varid{b}}} is correct, that is \ensuremath{\validfromto{\Conid{A}\times\Conid{B}}{(\Varid{a},\Varid{b})}{(\NilC{\Varid{a}},\NilC{\Varid{b}})}{(\Varid{a},\Varid{b})}}, because \ensuremath{\NilC{}} is
+    correct on each component.
+  \item Change composition is correct on \ensuremath{\Conid{A}\times\Conid{B}}, that is
+    \[\ensuremath{\validfromto{\Conid{A}\times\Conid{B}}{(\Varid{a}_{1},\Varid{b}_{1})}{(\Varid{da}_{1}\circledcirc\Varid{da}_{2},\Varid{db}_{1}\circledcirc\Varid{db}_{2})}{(\Varid{a}_{3},\Varid{b}_{3})}}\] whenever \ensuremath{\validfromto{\Conid{A}\times\Conid{B}}{(\Varid{a}_{1},\Varid{b}_{1})}{(\Varid{da}_{1},\Varid{db}_{1})}{(\Varid{a}_{2},\Varid{b}_{2})}} and \ensuremath{\validfromto{\Conid{A}\times\Conid{B}}{(\Varid{a}_{2},\Varid{b}_{2})}{(\Varid{da}_{2},\Varid{db}_{2})}{(\Varid{a}_{3},\Varid{b}_{3})}}, in essence because
+    change composition is correct on both \ensuremath{\Conid{A}} and \ensuremath{\Conid{B}}. We omit details.
+  \end{itemize}
+\end{proof}
+
+\section{Change structures for types and contexts}
+\label{sec:chs-types-contexts}
+
+As promised, given change structures for base types we can
+provide change structures for all types:
+
+\begin{restatable}[Change structures for base types]{requirement}{baseChs}
+  \label{req:base-change-structures}
+  For each base type \ensuremath{\iota} we must have a change structure
+  \ensuremath{\ChangeStruct{\iota}} defined on base set \ensuremath{\Eval{\iota}}, based on the
+  basic change structures defined earlier.
+\end{restatable}
+
+\begin{definition}[Change structure for types]
+  \label{def:chs-types}
+  For each type \ensuremath{\tau} we define a change structure \ensuremath{\ChangeStruct{\tau}} on
+  base set \ensuremath{\Eval{\tau}}.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\ChangeStruct{\iota}\mathrel{=}\ldots{}\<[E]%
+\\
+\>[3]{}\ChangeStruct{\sigma\to \tau}\mathrel{=}\ChangeStruct{\sigma}\to \ChangeStruct{\tau}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\end{definition}
+\begin{lemma}
+  Change sets and validity, as defined in \cref{def:chs-types},
+  give rise to the same basic change structures as the ones
+  defined earlier in \cref{def:bchs-types}, and to the change operations
+  described in \cref{fig:chs-types}.
+\end{lemma}
+\begin{proof}
+  This can be verified by induction on types. For each case, it
+  is sufficient to compare definitions.
+\end{proof}
+\begin{fullCompile}
+\validOplus
+\end{fullCompile}
+\begin{partCompile}
+  \begin{restatable}[\ensuremath{\oplus } agrees with validity]{lemma}{validOplus}
+    \label{thm:valid-oplus}
+    If \ensuremath{\validfromto{\tau}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}} then \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}\mathrel{=}\Varid{v}_{2}}.
+  \end{restatable}
+\end{partCompile}
+\begin{proof}
+  Because \ensuremath{\ChangeStruct{\tau}} is a change structure and in change structures \ensuremath{\oplus }
+  agrees with validity.
+\end{proof}
+
+As shortly proved in \cref{sec:correct-derive}, since \ensuremath{\oplus }
+agrees with validity (\cref{thm:valid-oplus}) and \ensuremath{\Derive{\text{\textendash}}}
+is correct (\cref{thm:derive-correct}) we get
+\cref{thm:derive-correct-oplus}:
+
+\begin{fullCompile}
+\deriveCorrectOplus
+\end{fullCompile}
+\begin{partCompile}
+\begin{restatable}[\ensuremath{\Derive{\text{\textendash}}} is correct, corollary]{corollary}{deriveCorrectOplus}
+  \label{thm:derive-correct-oplus}
+  If \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} and \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}} then
+  \ensuremath{\Eval{\Varid{t}}\;\rho_{1}\oplus \Eval{\Derive{\Varid{t}}}\;\D\rho\mathrel{=}\Eval{\Varid{t}}\;\rho_{2}}.
+\end{restatable}
+\end{partCompile}
+
+We can also define a change structure for environments.
+Recall that change structures for products define their operations to act on
+each component.
+Each change structure operation for environments acts ``variable-wise''. Recall
+that a typing context \ensuremath{\Gamma} is a list of variable assignment \ensuremath{\Varid{x}\typcolon\tau}. For
+each such entry, environments \ensuremath{\rho} and environment changes \ensuremath{\D\rho} contain a
+base entry \ensuremath{\Varid{x}\mathrel{=}\Varid{v}} where \ensuremath{\Varid{v}\typcolon\Eval{\tau}}, and possibly a change \ensuremath{\Varid{dx}\mathrel{=}\Varid{dv}} where
+\ensuremath{\Varid{dv}\typcolon\Eval{\Delta \tau}}.
+
+
+\begin{definition}[Change structure for environments]
+  \label{def:chs-envs}
+  To each context \ensuremath{\Gamma} we associate a change structure
+  \ensuremath{\ChangeStruct{\Gamma}}, that extends the basic change structure from \cref{def:bchs-contexts}.
+  Operations are defined as shown in \cref{fig:chs-env}.
+\end{definition}
+Base values \ensuremath{\Varid{v'}} in environment changes are redundant with base values \ensuremath{\Varid{v}} in
+base environments, because for valid changes \ensuremath{\Varid{v}\mathrel{=}\Varid{v'}}.
+So when consuming an environment change, we choose arbitrarily to use \ensuremath{\Varid{v}} instead
+of \ensuremath{\Varid{v'}}. Alternatively, we could also use \ensuremath{\Varid{v'}} and get the same results for
+valid inputs.
+When producing an environment change, they are created to ensure validity of the
+resulting environment change.
+
+\begin{lemma}
+  \Cref{def:chs-envs} defines a correct change structure \ensuremath{\ChangeStruct{\Gamma}} for each
+  context \ensuremath{\Gamma}.
+\end{lemma}
+\begin{proof}
+  All proofs are by structural induction on contexts.
+  Most details are analogous to the ones for products and add no
+  details, so we refer to our mechanization for most proofs.
+
+  However we show by induction that \ensuremath{\oplus } agrees with validity.
+  For the empty context there's a single environment \ensuremath{\EmptyEnv\typcolon\Eval{\EmptyContext}}, so \ensuremath{\oplus } returns the correct environment \ensuremath{\EmptyEnv}.
+  For the inductive case \ensuremath{\Gamma\myquote,\Varid{x}\typcolon\tau},
+  inversion on the validity judgment reduces our hypothesis to \ensuremath{\validfromto{\tau}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}} and \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}}, and our thesis to \ensuremath{(\rho_{1},\Varid{x}\mathrel{=}\Varid{v}_{1})\oplus (\D\rho,\Varid{x}\mathrel{=}\Varid{v}_{1},\Varid{dx}\mathrel{=}\Varid{dv})\mathrel{=}(\rho_{2},\Varid{x}\mathrel{=}\Varid{v}_{2})}, where \ensuremath{\Varid{v}_{1}} appears both in the base
+  environment and the environment change. The thesis follows because \ensuremath{\oplus }
+  agrees with validity on both \ensuremath{\Gamma} and \ensuremath{\tau}.
+\end{proof}
+
+%%%%
+% What's below must be revised.
+%%%%
+We summarize definitions on types in \cref{fig:change-structures}.
+
+Finally, we can lift change operators from the semantic level to the syntactic
+level so that their meaning is coherent.
+
+\begin{definition}[Term-level change operators]
+  \label{def:term-change-ops}
+  We define type-indexed families of change operators at the term level with the following signatures:
+  %For each type |tau| we define type-indexed families  operators at the term-level
+  \begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\oplus_{\tau}\typcolon\;\tau\to \Delta \tau\to \tau{}\<[E]%
+\\
+\>[3]{}\ominus_{\tau}\typcolon\;\tau\to \tau\to \Delta \tau{}\<[E]%
+\\
+\>[3]{}\NilC{\tau,\text{\textendash}}\typcolon\;\tau\to \Delta \tau{}\<[E]%
+\\
+\>[3]{}\circledcirc_{\tau}\typcolon\;\Delta \tau\to \Delta \tau\to \Delta \tau{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+and definitions:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{34}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{42}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{tf}_{1}\;\oplus_{\sigma\to \tau}\;\Varid{dtf}\mathrel{=}\lambda \Varid{x}\to \Varid{tf}_{1}\;\Varid{x}\oplus \Varid{dtf}\;\Varid{x}\;\NilC{\Varid{x}}{}\<[E]%
+\\
+\>[3]{}\Varid{tf}_{2}\;\ominus_{\sigma\to \tau}\;\Varid{tf}_{1}\mathrel{=}\lambda \Varid{x}\;\Varid{dx}\to \Varid{tf}_{2}\;(\Varid{x}\oplus \Varid{dx})\ominus \Varid{tf}_{1}\;\Varid{x}{}\<[E]%
+\\
+\>[3]{}\NilC{\sigma\to \tau,\Varid{tf}}\mathrel{=}\Varid{tf}\;\ominus_{\sigma\to \tau}\;\Varid{tf}{}\<[E]%
+\\
+\>[3]{}\Varid{dtf}_{1}\;\circledcirc_{\sigma\to \tau}\;\Varid{dtf}_{2}{}\<[42]%
+\>[42]{}\mathrel{=}\lambda \Varid{x}\;\Varid{dx}\to \Varid{dtf}_{1}\;\Varid{x}\;\NilC{\Varid{x}}\circledcirc \Varid{dtf}_{2}\;\Varid{x}\;\Varid{dx}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Varid{tf}_{1}\;\oplus_{\iota}\;\Varid{dtf}\mathrel{=}\ldots{}\<[E]%
+\\
+\>[3]{}\Varid{tf}_{2}\;\ominus_{\iota}\;\Varid{tf}_{1}\mathrel{=}\ldots{}\<[E]%
+\\
+\>[3]{}\NilC{\iota,\Varid{tf}}\mathrel{=}\ldots{}\<[E]%
+\\
+\>[3]{}\Varid{dtf}_{1}\;\circledcirc_{\iota}\;\Varid{dtf}_{2}{}\<[34]%
+\>[34]{}\mathrel{=}\ldots{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\end{definition}
+
+\begin{lemma}[Term-level change operators agree with change structures]
+  \label{lem:chops-coherent}
+  The following equations hold for all types \ensuremath{\tau}, contexts \ensuremath{\Gamma}
+  well-typed terms \ensuremath{\Gamma\vdash\Varid{t}_{1},\Varid{t}_{2}\typcolon\tau}, \ensuremath{\Delta \Gamma\vdash\Varid{dt},\Varid{dt}_{1},\Varid{dt}_{2}\typcolon\Delta \tau}
+  and environments \ensuremath{\rho\typcolon\Eval{\Gamma}} \ensuremath{\D\rho\typcolon\Eval{\Delta \Gamma}} such that all
+  expressions are defined.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Eval{\Varid{t}_{1}\;\oplus_{\tau}\;\Varid{dt}}\;\D\rho\mathrel{=}\Eval{\Varid{t}_{1}}\;\D\rho\oplus \Eval{\Varid{dt}}\;\D\rho{}\<[E]%
+\\
+\>[B]{}\Eval{\Varid{t}_{2}\;\ominus_{\tau}\;\Varid{t}_{1}}\;\rho\mathrel{=}\Eval{\Varid{t}_{2}}\;\rho\oplus \Eval{\Varid{t}_{1}}\;\rho{}\<[E]%
+\\
+\>[B]{}\Eval{\NilC{\tau,\Varid{t}}}\;\rho\mathrel{=}\NilC{\Eval{\Varid{t}}\;\rho}{}\<[E]%
+\\
+\>[B]{}\Eval{\Varid{dt}_{1}\;\circledcirc_{\tau}\;\Varid{dt}_{2}}\;\D\rho\mathrel{=}\Eval{\Varid{dt}_{1}}\;\D\rho\circledcirc \Eval{\Varid{dt}_{2}}\;\D\rho{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\end{lemma}
+\begin{proof}
+  By induction on types and simplifying both sides of the equalities. The proofs
+  for \ensuremath{\oplus } and \ensuremath{\ominus } must be done by simultaneous induction.
+\end{proof}
+\pg{Fix this?}
+At the time of writing, we have not mechanized the proof for \ensuremath{\circledcirc }.
+
+To define the lifting and prove it coherent on base types, we must add a further
+plugin requirement.
+
+\begin{restatable}[Term-level change operators for base types]{requirement}{baseChOps}
+  For each base type \ensuremath{\iota} we define change operators as required by \cref{def:term-change-ops}
+  and satisfying requirements for \cref{lem:chops-coherent}.
+\end{restatable}
+% \pg{Both change structure requirements, theorems on types}
+% \begin{restatable}[|`ominus`| produces valid changes]{lemma}{validOminus}
+%   \label{thm:valid-ominus}
+%   |`ominus`| produces valid changes, that is |fromto tau v1 (v2
+%   `ominus` v1) v2| and |v1 `oplus` (v2 `ominus` v1) = v2| for any
+%   type |tau| and any |v1, v2 : eval(tau)|.
+% \end{restatable}
+% \begin{restatable}[|`ominus`| inverts |`oplus`|]{lemma}{oplusOminus}
+%   For any type |tau| and any values |v1, v2 : eval(tau)|,
+%   |`oplus`| inverts |`ominus`|, that is |v1 `oplus` (v2 `ominus`
+%   v1) = v2|.
+% \end{restatable}
+% \begin{proof}
+%   From \cref{thm:valid-ominus,thm:valid-oplus}.
+% \end{proof}
+
+%% Remember that, as we proved earlier:
+%% \deriveCorrectOplus*
+
+% \nilChangesExist*
+% \begin{proof}\pg{?}
+% \end{proof}
+
+
+% We only need |`ominus`| to be able to define nil changes on
+% arbitrary functions |f : eval(sigma -> tau)|.
+
+% However, as anticipated earlier, if |f| is the semantics of a
+% well-typed term |t|, that is |f = eval(t) emptyRho|, we can
+% define the nil change of |f| through its derivative.\pg{See
+%   before}
+% no, we need full abstraction, unless the term is closed.
+
+% \NewDocumentCommand{\RightFramedSignatureML}{m}
+% {\vbox{\hfill\fbox{\(
+%         #1
+% \)
+%     }}}
+
+\begin{figure}
+\begin{subfigure}[c]{\textwidth}
+  \RightFramedSignature{\ensuremath{\oplus_{\tau}\typcolon\Eval{\tau\to \Delta \tau\to \tau}}}
+  \RightFramedSignature{\ensuremath{\ominus_{\tau}\typcolon\Eval{\tau\to \tau\to \Delta \tau}}}
+  \RightFramedSignature{\ensuremath{\NilC{\text{\textendash}}\typcolon\Eval{\tau\to \Delta \tau}}}
+  \RightFramedSignature{\ensuremath{\circledcirc_{\tau}\typcolon\Eval{\Delta \tau\to \Delta \tau\to \Delta \tau}}}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{36}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{41}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{f}_{1}\;\oplus_{\sigma\to \tau}\;{}\<[36]%
+\>[36]{}\Varid{df}{}\<[41]%
+\>[41]{}\mathrel{=}\lambda \Varid{v}\to \Varid{f}_{1}\;\Varid{v}\oplus \Varid{df}\;\Varid{v}\;\NilC{\Varid{v}}{}\<[E]%
+\\
+\>[3]{}\Varid{v}_{1}\;\oplus_{\iota}\;{}\<[36]%
+\>[36]{}\Varid{dv}{}\<[41]%
+\>[41]{}\mathrel{=}\ldots{}\<[E]%
+\\
+\>[3]{}\Varid{f}_{2}\;\ominus_{\sigma\to \tau}\;{}\<[36]%
+\>[36]{}\Varid{f}_{1}{}\<[41]%
+\>[41]{}\mathrel{=}\lambda \Varid{v}\;\Varid{dv}\to \Varid{f}_{2}\;(\Varid{v}\oplus \Varid{dv})\ominus \Varid{f}_{1}\;\Varid{v}{}\<[E]%
+\\
+\>[3]{}\Varid{v}_{2}\;\ominus_{\iota}\;{}\<[36]%
+\>[36]{}\Varid{v}_{1}{}\<[41]%
+\>[41]{}\mathrel{=}\ldots{}\<[E]%
+\\
+\>[3]{}\NilC{\Varid{v}}{}\<[41]%
+\>[41]{}\mathrel{=}\Varid{v}\;\ominus_{\tau}\;\Varid{v}{}\<[E]%
+\\
+\>[3]{}\Varid{dv}_{1}\;\circledcirc_{\iota}\;{}\<[36]%
+\>[36]{}\Varid{dv}_{2}{}\<[41]%
+\>[41]{}\mathrel{=}\ldots{}\<[E]%
+\\
+\>[3]{}\Varid{df}_{1}\;\circledcirc_{\sigma\to \tau}\;{}\<[36]%
+\>[36]{}\Varid{df}_{2}{}\<[41]%
+\>[41]{}\mathrel{=}\lambda \Varid{v}\;\Varid{dv}\to \Varid{df}_{1}\;\Varid{v}\;\NilC{\Varid{v}}\circledcirc \Varid{df}_{2}\;\Varid{v}\;\Varid{dv}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\caption{Change structure operations on types (see \cref{def:chs-types}).}
+\label{fig:chs-types}
+\end{subfigure}
+\begin{subfigure}[c]{\textwidth}
+  \RightFramedSignature{\ensuremath{\oplus_{\Gamma}\typcolon\Eval{\Gamma\to \Delta \Gamma\to \Gamma}}}
+  \RightFramedSignature{\ensuremath{\ominus_{\Gamma}\typcolon\Eval{\Gamma\to \Gamma\to \Delta \Gamma}}}
+  \RightFramedSignature{\ensuremath{\NilC{\text{\textendash}}\typcolon\Eval{\Gamma\to \Delta \Gamma}}}
+  \RightFramedSignature{\ensuremath{\circledcirc_{\Gamma}\typcolon\Eval{\Delta \Gamma\to \Delta \Gamma\to \Delta \Gamma}}}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{69}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{69E}{@{}l@{}}%
+\column{74}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{83}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\EmptyEnv\oplus \EmptyEnv{}\<[83]%
+\>[83]{}\mathrel{=}\EmptyEnv{}\<[E]%
+\\
+\>[3]{}(\rho,\Varid{x}\mathrel{=}\Varid{v})\oplus (\D\rho,\Varid{x}\mathrel{=}\Varid{v'},\Varid{dx}\mathrel{=}\Varid{dv}){}\<[83]%
+\>[83]{}\mathrel{=}(\rho\oplus \D\rho,\Varid{x}\mathrel{=}\Varid{v}\oplus \Varid{dv}){}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\EmptyEnv\ominus \EmptyEnv{}\<[83]%
+\>[83]{}\mathrel{=}\EmptyEnv{}\<[E]%
+\\
+\>[3]{}(\rho_{2},\Varid{x}\mathrel{=}\Varid{v}_{2})\ominus (\rho_{1},\Varid{x}\mathrel{=}\Varid{v}_{1}){}\<[83]%
+\>[83]{}\mathrel{=}(\rho_{2}\ominus \rho_{1},\Varid{x}\mathrel{=}\Varid{v}_{1},\Varid{dx}\mathrel{=}\Varid{v}_{2}\ominus \Varid{v}_{1}){}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\NilC{\EmptyEnv}{}\<[83]%
+\>[83]{}\mathrel{=}\EmptyEnv{}\<[E]%
+\\
+\>[3]{}\NilC{\rho,\Varid{x}\mathrel{=}\Varid{v}}{}\<[83]%
+\>[83]{}\mathrel{=}(\NilC{\rho},\Varid{x}\mathrel{=}\Varid{v},\Varid{dx}\mathrel{=}\NilC{\Varid{v}}){}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\EmptyEnv\circledcirc\EmptyEnv{}\<[74]%
+\>[74]{}\mathrel{=}\EmptyEnv{}\<[E]%
+\\
+\>[3]{}(\D\rho_{1},\Varid{x}\mathrel{=}\Varid{v}_{1},\Varid{dx}\mathrel{=}\Varid{dv}_{1})\circledcirc(\D\rho_{2},\Varid{x}\mathrel{=}\Varid{v}_{2},\Varid{dx}\mathrel{=}\Varid{dv}_{2}){}\<[69]%
+\>[69]{}\mathrel{=}{}\<[69E]%
+\\
+\>[3]{}\hsindent{4}{}\<[7]%
+\>[7]{}(\D\rho_{1}\circledcirc\D\rho_{2},\Varid{x}\mathrel{=}\Varid{v}_{1},\Varid{dx}\mathrel{=}\Varid{dv}_{1}\circledcirc\Varid{dv}_{2}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+  % nil emptyRho = emptyRho
+  % nil (rho, x = v) = nil rho, x = v, dx = nil v
+\caption{Change structure operations on environments (see \cref{def:chs-envs}).}
+\label{fig:chs-env}
+\end{subfigure}
+\validOplus*
+  \deriveCorrectOplus*
+
+  \caption{Defining change structures.}
+  \label{fig:change-structures}
+\end{figure}
+
+% \subsection{Change structures, algebraically}
+% \label{sec:chs-alg}
+% \pg{INCOMPLETE}
+% \pg{Move to later, *if* we keep this.}
+% If we ignore validity requirements, we can rephrase laws of
+% change structures as algebraic equations:
+% \begin{code}
+%   v1 `oplus` (v2 `ominus` v1) = v2
+%   v1 `oplus` (nil v1) = v1
+%   v1 `oplus` (ocompose dv1 dv2) = v1 `oplus` dv1 `oplus` dv2
+% \end{code}
+% Later, once we define a suitable equivalence relation |`doe`| on
+% changes, we'll also be able to state a few further algebraic laws:
+% \begin{code}
+%   nil v1 `doe` v1 `ominus` v1
+%   (v1 `oplus` dv) `ominus` v1 `doe` dv
+% \end{code}
+
+% Now this equation is a bit more confusing.
+%   ocompose dv1 dv2 = v1 `oplus` dv1 `oplus` dv2 `ominus` v1
+
+% We can define
+% \begin{code}
+%   valid : (v : V) -> (dv : Dt V) -> Set
+%   valid v dv = fromto V dv v (v `oplus` dv)
+%   Dt : (v : V) -> Set
+%   Dt^v = Sigma [ dv `elem` Dt V ] valid v dv
+% \end{code}
+
+% Alternatively, with two-sided validity, we could define:
+% \begin{code}
+%   Dt2 : (v1 v2 : V)
+%   Dt2 : (v1 v2 : V) -> Set
+%   Dt2 v1 v2 = Sigma [ dv `elem` Dt V ] ch dv from v1 to v2
+
+%   oplus : (v1 : V) -> {v2 : V} -> (dv : Dt2 v1 v2) -> V
+%   ominus : (v2 v1 : V) -> (Dt2 v2 v1)
+%   `ocompose` : {v1 v2 v3 : V} -> (dv1 : Dt2 v1 v2) -> (dv2 : Dt2 v2 v3) -> Dt2 v1 v3
+% \end{code}
+
+\section{Development history}
+\label{sec:ilc-dev-history}
+The proof presented in this and the previous chapter is an
+significant evolution of the original one by \citet{CaiEtAl2014ILC}.
+%
+While this formalization and the mechanization are both original
+with this thesis, some ideas were suggested by other
+(currently unpublished) developments by Yufei Cai and by Yann
+Régis-Gianas. Yufei Cai gives a simpler pen-and-paper set-theoretic proof by
+separating validity, while we noticed separating validity works
+equally well in a mechanized type theory and simplifies the
+mechanization.
+The first to use a two-sided validity relation was Yann Régis-Gianas, but using
+a big-step operational semantics, while we were collaborating on an ILC
+correctness proof for untyped $\lambda$-calculus (as in \cref{ch:bsos}).
+I gave the first complete and mechanized ILC correctness proof
+using two-sided validity, again for a simply-typed
+$\lambda$-calculus with a denotational semantics. Based on
+two-sided validity, I also reconstructed the rest of the theory
+of changes.
+
+\section{Chapter conclusion}
+In this chapter, we have seen how to define change operators, both on semantic
+values nad on terms, and what are their guarantees, via the notion of change
+structures. We have also defined change structures for groups, function spaces
+and products. Finally, we have explained and shown
+\cref{thm:derive-correct-oplus}.
+We continue in next chapter by discussing how to reason syntactically about
+changes, before finally showing how to define some language plugins.
+
+% \citeauthor{CaiEtAl2014ILC}'s definition resembles our definition
+% of |Dt^v = Sigma [ dv `elem` Dt V ] valid v dv| in
+% \cref{sec:chs-alg}; indeed, for any natural |n : Nat| the two
+% definitions of |Dt^n| are the same.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \subsection{Derivatives are nil changes}
+% \pg{This now goes earlier?}
+% When we introduced derivatives, we claimed we can compute them by
+% applying differentiation to function bodies.
+% In fact, we can
+% compute the derivative of a closed lambda abstraction by
+% differentiating the whole abstraction!
+
+% To see why, let's first consider an arbitrary closed term |t|,
+% such that |/- t : tau|.
+
+% If we differentiate a closed term |/- t : tau|, we get a change
+% term |derive(t)| from |t| to itself\pg{Lexicon not introduced for
+%   terms.}: |fromto tau (eval(t)
+% emptyRho) (eval(derive(t)) emptyRho) (eval(t) emptyRho)|. We call such changes nil changes;
+% they're important for two reasons. First, we will soon see that a
+% identity element for |`oplus`| has its uses. Second, nil changes at
+% function type are even more useful. A nil function change for
+% function |f| takes an input |v1| and input change |dv| to a
+% change from |f v1| and |f (v1 `oplus` dv)|. In other words, a nil
+% function change for |f| is a \emph{derivative} for |f|!
+
+% %\pg{steps}
+% To sum up, if |f| is a closed function |derive(f)| is its
+% derivative. So, if |f| is unary, \cref{eq:derivative-requirement}
+% becomes in particular:
+% \begin{equation}
+%   \label{eq:correctness}
+%   |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
+% \end{equation}
+
+\pg{move back in, readd, ...}
+
+% \subsection{Differentiation}
+% After we defined our language, its type system and its semantics, we motivate
+% and sketch what differentiation does on an arbitrary well-typed term |t| such
+% that |Gamma /- t : tau|. We will later make all this more formal.
+
+% For any type |tau|, we introduce type |Dt ^ tau|, the type of changes for terms
+% of type |tau|. We also have operator |oplusIdx(tau) : tau -> Dt ^ tau -> tau|;
+% we typically omit its subscript. So if |x : tau| and |dx : Dt ^ tau| is a change
+% for |x|, then |x `oplus` dx| is the destination of that change. We overload
+% |`oplus`| also on semantic values. So if |v : eval(tau)|, and if |dv : eval(Dt ^
+% tau)| is a change for |v|, then |v `oplus` dv : eval(tau)| is the destination of
+% |dv|.
+
+% We design differentiation to satisfy two (informal) invariants:
+% \begin{itemize}
+% \item Whenever the output of |t| depends on a base input |x : sigma|, |derive(t)| depends on
+%   input |x : sigma| and a change |dx : Dt ^ sigma| for |x|.
+% \item Term |derive(t)| has type |Dt ^ tau|. In particular, |derive(t)| produces
+%   a change from |t| evaluated on all base inputs, to |t| evaluated on all base
+%   inputs updated with the respective changes.
+% \end{itemize}
+
+% Consider |\x -> x + y|.
+
+% Term |t| depends on values for free variables. So whenever |x : sigma| is free
+% in |t|, |dx : Dt ^ sigma| should be free in |derive(t)|. To state this more
+% formally we define \emph{change contexts} |Dt ^ Gamma|.\pg{Definition.}
+% \begin{code}
+%   Dt ^ emptyCtx = emptyCtx
+%   Dt ^ (Gamma, x : tau) = Dt ^ Gamma, dx : Dt ^ tau
+% \end{code}
+
+% We can then state the static semantics of differentiation.
+% \begin{typing}
+% \Rule[Derive]
+%   {\Typing{t}{\tau}}
+%   {\Typing[\Append{\GG}{\DeltaContext{\GG}}]{\Derive{t}}{\DeltaType{\tau}}}
+% \end{typing}
+
+% Moreover, |eval(t)| takes an environment |rho : eval(Gamma)|, so
+% |eval(derive(t))| must take environment |rho| and a \emph{environment change}
+% |drho : eval(Dt ^ Gamma)| that is a change for |rho|.
+
+% We also extend |`oplus`| to contexts pointwise:
+% \begin{code}
+%   emptyRho `oplus` emptyRho = emptyRho
+%   (rho , x = v) `oplus` (drho, dx = dv) = (rho `oplus` drho, x = v `oplus` dv)
+% \end{code}
+
+% Since |derive(t)| is defined in a typing context |Gamma, Dt ^ Gamma| that merges
+% |Gamma| and |Dt ^ Gamma|, |eval(derive(t))| takes an environment |rho, drho|
+% that similarly merges |rho| and |drho|.
+% \begin{code}
+%   eval(t) rho `oplus` eval(derive(t)) (rho, drho) = eval(t) (rho `oplus` drho)
+% \end{code}
+
+% To exemplify the above invariants, take a term |t| with one free variable: |x :
+% sigma /- t : tau|. Values of free variables are inputs to terms just like
+% function arguments. So take an input |v `elem` eval(sigma)| and change |dv| for
+% |v|. Then we can state the correctness condition as follows:
+% \begin{code}
+%   eval(t) (emptyRho, x = v) `oplus` eval(derive(t)) (emptyRho, x = v, dx = dv) =
+%   eval(t) (emptyRho, x = v `oplus` dv)
+% \end{code}
+
+% Earlier we looked at derivatives of functions.
+% Let |t| is a unary closed
+% function: | /- t : sigma -> tau|. Take an input |v `elem` eval(sigma)| and
+% change |dv| for |v|. Then |emptyCtx /- derive(t) : sigma -> Dt ^ sigma -> Dt ^
+% tau| and
+% \begin{code}
+%   eval(t) emptyRho v `oplus` eval(derive(t)) emptyRho v dv = eval(t) emptyRho (v `oplus` dv)
+% \end{code}
+
+% Next, we look at differentiating a function. Take again a term |t| such that |x
+% : sigma /- t : tau|, and consider term |t1 = \x : sigma . t| (which is
+% well-typed: | /- \x : sigma -> t : sigma -> tau|).
+% From requirements above, we want |emptyCtx /- derive(\x : sigma . t) : Dt ^
+% (sigma -> tau)|.
+
+% Consider a few examples:
+
+% \begin{itemize}
+% \item
+% \item
+%   Let |t| be a unary closed function: | /- t : sigma -> tau|. Take an input |v `elem` eval(sigma)| and
+%   change |dv| for |v|. Then |emptyCtx /- derive(t) : sigma -> Dt ^ sigma -> Dt ^ tau| and
+% \begin{code}
+%   eval(t) emptyRho v `oplus` eval(derive(t)) emptyRho v dv = eval(t) emptyRho (v `oplus` dv)
+% \end{code}
+% %
+% \item Take a binary closed function |t| : | /- t : sigma1 -> sigma2 -> tau|, inputs |v `elem` eval(sigma1)|, |u `elem` eval(sigma2)|, and changes |dv| for |v| and |du| for |u|.
+%   Then |emptyCtx /- derive(t) : sigma1 -> Dt ^ sigma1 -> sigma2 -> Dt ^ sigma2 -> Dt ^ tau|.
+% \begin{code}
+%   eval(t) emptyRho v u `oplus` eval(derive(t)) emptyRho v dv u du =
+%   eval(t) emptyRho (v `oplus` dv) (u `oplus` du)
+% \end{code}
+% %
+% \end{itemize}
+
+% As we see, we want |derive(t)| to handle changes to both values of free
+% variables and function arguments. We define
+
+% To handle changes to free variables, we define changes contexts |Dt ^ Gamma|
+
+
+% To better understand what are the appropriate inputs to consider,
+% let's recall what are the inputs to the semantics of |t|.
+% Semantics |eval(t)| takes an environment |rho1 : eval(Gamma)| to an output |v1|.
+% If |tau| is a function type |sigma1 -> tau1|, output |v1| is in turn a function
+% |f1|, and applying this function to a further input |a1 : eval(sigma1)| will
+% produce an output |u1 `elem` eval(tau1)|. In turn, |tau1| can be a function type,
+% so that |u1| takes another argument\ldots
+% Overall we can apply |eval(t)| to an appropriate environment |rho1| and as
+% many inputs as called for by |tau| to get, in the end, a result of base type.
+% Similarly, we can evaluate |t| with updated input |rho2| getting output |v2|. If
+% |tau| is a function type, |v2| is a function |f2| that takes further input |a2|
+% to output |u2 `elem` eval(tau1)|, and soon.
+
+% We design differentiation so that the semantics of the derivative of |t|,
+% |eval(derive(t))|, takes inputs and changes for all those inputs. So
+% |eval(derive(t))| takes a base environment |rho1| and a environment change
+% |drho| from |rho1| to |rho2| and produces a change |dv| from |v1| to |v2|. If
+% |tau| is a function type, |dv| is a \emph{function change} |df| from |f1| to
+% |f2|. that in turn takes base input |a1| and an input change |da| from |a1| to
+% |a2|, and evaluate to an output change |du| from |u1| to |u2|.
+
+% \begin{code}
+%   derive(\x -> t) = \x dx -> derive(t)
+%   derive(s t) = derive(s) t (derive(t))
+%   derive(x) = dx
+% \end{code}
+% % Inputs to |t| include the environment it is
+% % evaluated in, while the output of |t| might be a function. Since a function takes in
+% % turn further inputs, we want a function change to
+% % change, in turn, takes further inputs
+
+% % To refine this definition we must consider however \emph{all}
+% % inputs: this includes both the environment in which we evaluate |t|, as well as
+% % any function arguments it takes (if |t| evaluates to a function). In fact, |t| might be a function change itself
+% % Hence we say that
+
+% % \begin{itemize}
+% % \item function |eval(derive(t)| is a for function |eval(t)|
+% % \item a function change for |f| takes a
+% %   , that is, a change from |eval(t)| to |eval(t)|
+% %  )
+% % \item the derivative of a function takes
+% %   evaluating with |eval(-)| the derivative
+% %   |eval(derive(t))|
+% %   |t| might be in general an open term in context |Gamma|, that must be evaluated in an environment |rho1| that matches |Gamma|; we define the evaluation . Then evaluating |eval(Derive(t))|
+% % \item
+% % a change to a function |f : A -> B| is a function |df| that takes a base input
+% % \end{itemize}
+% % As we hinted, derivative computes the
+
+% % More in general, we extend differentiation on arbitrary terms.
+% % The derivative of a term |t| is a new term |Derive(t)| in
+% % the same language, that accepts changes to all inputs of |t| (call them |x1, x2,
+% % ..., xn| of |t| and evaluates to the change of |t|)
+
+
+% \begin{code}
+%   t ::= t1 t2 | \x -> t | x | c
+% \end{code}
+
+% \section{A program transformation}
+% To support automatic incrementalization, in the next chapters we
+% introduce the \ILC\ (incrementalizing $\Gl$-calculi) framework.
+% We define an automatic program transformation $\DERIVE$ that
+% \emph{differentiates} programs, that is, computes their total
+% derivatives with respect to all inputs.
+
+% $\DERIVE$ guarantees that
+% \begin{equation}
+%   \label{eq:correctness}
+%   |f (a `oplus` da) `cong` (f a) `oplus` (derive(f) a da)|
+% \end{equation}
+% where
+% $\cong$ is denotational equality,
+% |da| is a change on |a| and |a `oplus` da| denotes |a|
+% updated with change |da|, that is, the updated input of |f|.
+% Hence, when the derivative is faster than
+% recomputation, we can optimize programs by replacing the
+% left-hand side, which recomputes the output from scratch, with
+% the right-hand side, which computes the output incrementally
+% using derivatives, while preserving the program result.
+
+% To understand this equation we must also formalize changes for
+% functions. That's because \ILC\ applies to higher-order
+% languages, where functions can be inputs or outputs. This makes
+% \cref{eq:correctness} less trivial to state and prove.
+
+% To simplify the formalization we consider, beyond derivatives of
+% programs, also derivatives of pure mathematical functions
+% (\cref{sec:1st-order-changes}). We distinguish programs and
+% mathematical functions as in denotational semantics. We avoid
+% however using domain theory. To this end, we restrict attention
+% in our theory to strongly normalizing calculi.
+% %
+% We define those with an analogue of
+% \cref{eq:correctness}: function |df| is a derivative of |f| if
+% and only if
+% \begin{equation}
+%   \label{eq:correctness-math-funs}
+%   |f (a `oplus` da) = (f a) `oplus` (df a da)|
+% \end{equation}
+% Once we establish a theory of changes and derivatives for
+% mathematical functions, we will be able to lift that to programs:
+% intuitively, a program function |df| is a derivative of |f| if
+% the semantics of |df|, that is |eval(df)|, is the derivative of
+% the semantics of |f|, giving us \cref{eq:correctness} from
+% \cref{eq:correctness-math-funs}.\footnote{A few technical details
+%   complicate the picture, but we'll discuss them later.}
+
+% \section{Based changes}
+% \pg{We can study }
+

@@ -1,0 +1,771 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+\begin{figure}[h]
+  \small
+\begin{subfigure}[c]{0.5\textwidth}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{9E}{@{}l@{}}%
+\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{p}{}\<[9]%
+\>[9]{}\mathbin{::=}{}\<[9E]%
+\>[14]{}\mathbf{succ}\mid \mathbf{add}\mid \ldots{}\<[E]%
+\\
+\>[3]{}\Varid{m},\Varid{n}{}\<[9]%
+\>[9]{}\mathbin{::=}{}\<[9E]%
+\>[14]{}\ldots\mbox{\onelinecomment  numbers}{}\<[E]%
+\\
+\>[3]{}\Varid{c}{}\<[9]%
+\>[9]{}\mathbin{::=}{}\<[9E]%
+\>[14]{}\Varid{n}\mid \ldots{}\<[E]%
+\\
+\>[3]{}\Varid{w}{}\<[9]%
+\>[9]{}\mathbin{::=}{}\<[9E]%
+\>[14]{}\Varid{x}\mid \lambda \Varid{x}\to \Varid{t}\mid \langle\Varid{w},\Varid{w}\rangle\mid \Varid{c}{}\<[E]%
+\\
+\>[3]{}\Varid{s},\Varid{t}{}\<[9]%
+\>[9]{}\mathbin{::=}{}\<[9E]%
+\>[14]{}\Varid{w}\mid \Varid{w}\;\Varid{w}\mid \Varid{p}\;\Varid{w}\mid \mathbf{let}\;\Varid{x}\mathrel{=}\Varid{t}\;\mathbf{in}\;\Varid{t}{}\<[E]%
+\\
+\>[3]{}\Varid{v}{}\<[9]%
+\>[9]{}\mathbin{::=}{}\<[9E]%
+\>[14]{}\rho\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu]\mid \langle\Varid{v},\Varid{v}\rangle\mid \Varid{c}{}\<[E]%
+\\
+\>[3]{}\rho{}\<[9]%
+\>[9]{}\mathbin{::=}{}\<[9E]%
+\>[14]{}\Varid{x}_{1}\mathbin{:=}\Varid{v}_{1},\ldots,\Varid{x}_n\mathbin{:=}v_n{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\caption{Base terms (\ilcUntau).}
+\label{sfig:anf-syntax}
+\end{subfigure}
+%
+\hfill
+%
+\begin{subfigure}[c]{0.49\textwidth}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{11}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{11E}{@{}l@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{dc}{}\<[11]%
+\>[11]{}\mathbin{::=}{}\<[11E]%
+\>[16]{}\mathrm{0}{}\<[E]%
+\\
+\>[3]{}\Varid{dw}{}\<[11]%
+\>[11]{}\mathbin{::=}{}\<[11E]%
+\>[16]{}\Varid{dx}\mid \lambda \Varid{x}\;\Varid{dx}\to \Varid{dt}\mid \langle\Varid{dw},\Varid{dw}\rangle\mid \Varid{dc}{}\<[E]%
+\\
+\>[3]{}\Varid{ds},\Varid{dt}{}\<[11]%
+\>[11]{}\mathbin{::=}{}\<[11E]%
+\>[16]{}\Varid{dw}\mid \Varid{dw}\;\Varid{w}\;\Varid{dw}\mid \NilC{\Varid{p}}\;\Varid{w}\;\Varid{dw}\mid {}\<[E]%
+\\
+\>[16]{}\mathbf{let}\;\Varid{x}\mathrel{=}\Varid{t};\Varid{dx}\mathrel{=}\Varid{dt}\;\mathbf{in}\;\Varid{dt}{}\<[E]%
+\\
+\>[3]{}\Varid{dv}{}\<[11]%
+\>[11]{}\mathbin{::=}{}\<[11E]%
+\>[16]{}\rho\mathrel{\filleddiamond}\D\rho\;[\mskip1.5mu \lambda \Varid{x}\;\Varid{dx}\to \Varid{dt}\mskip1.5mu]\mid \langle\Varid{dv},\Varid{dv}\rangle\mid \Varid{dc}{}\<[E]%
+\\
+\>[3]{}\D\rho{}\<[11]%
+\>[11]{}\mathbin{::=}{}\<[11E]%
+\>[16]{}\Varid{dx}_{1}\mathbin{:=}\Varid{dv}_{1},\ldots,\Varid{dx}_n\mathbin{:=}\Varid{dv}_n{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\caption{Change terms (\dilcUntau).}
+\label{sfig:anf-change-syntax}
+\end{subfigure}
+
+\begin{subfigure}[t]{0.5\textwidth}
+\begin{align*}
+  \ensuremath{\DeriveConst{\Varid{n}}} &= \ensuremath{\mathrm{0}}\\
+  \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\lambda \Varid{x}\to \Varid{t}}} &= \ensuremath{\lambda \Varid{x}\;\Varid{dx}\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\langle\Varid{w}_a,\Varid{w}_b\rangle}} &= \ensuremath{\langle\Derive{\Varid{w}_a},\Derive{\Varid{w}_b}\rangle}\\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}\\
+  \\
+  \ensuremath{\Derive{\Varid{w}_f\;\Varid{w}_a}} &= \ensuremath{\Derive{\Varid{w}_f}\;\Varid{w}_a\;\Derive{\Varid{w}_a}} \\
+  \ensuremath{\Derive{\Varid{p}\;\Varid{w}}} &= \ensuremath{\NilC{\Varid{p}}\;\Varid{w}\;\Derive{\Varid{w}}} \\
+  \ensuremath{\Derive{\mathbf{let}\;\Varid{x}\mathrel{=}\Varid{s}\;\mathbf{in}\;\Varid{t}}} &= \ensuremath{\mathbf{let}\;\Varid{x}\mathrel{=}\Varid{s};\Varid{dx}\mathrel{=}\Derive{\Varid{s}}\;\mathbf{in}\;\Derive{\Varid{t}}}
+\end{align*}
+\caption{Differentiation.}
+%\caption{Differentiation, from base terms to change terms}
+\label{sfig:anf-derive}
+\end{subfigure}
+%
+\hfill
+%
+\begin{subfigure}[t]{0.49\textwidth}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{27}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\tau\mathbin{::=}\mathbb{N}\mid \tau_a\times\tau_b\mid \sigma\to \tau{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Delta \mathbb{N}{}\<[27]%
+\>[27]{}\mathrel{=}\mathbb{N}{}\<[E]%
+\\
+\>[3]{}\Delta (\tau_a\times\tau_b){}\<[27]%
+\>[27]{}\mathrel{=}\Delta \tau_a\times\Delta \tau_b{}\<[E]%
+\\
+\>[3]{}\Delta (\sigma\to \tau){}\<[27]%
+\>[27]{}\mathrel{=}\sigma\to \Delta \sigma\to \Delta \tau{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Delta \EmptyContext{}\<[27]%
+\>[27]{}\mathrel{=}\EmptyContext{}\<[E]%
+\\
+\>[3]{}\Delta (\Gamma,\Varid{x}\typcolon\tau){}\<[27]%
+\>[27]{}\mathrel{=}\Delta \Gamma,\Varid{dx}\typcolon\Delta \tau{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\caption{Types and contexts.}
+\label{sfig:anf-types}
+\end{subfigure}
+
+\caption{ANF $\lambda$-calculus: \ilcUntau{} and \dilcUntau{}.}
+\label{fig:anf-lambda-calculus}
+\end{figure}
+
+\begin{figure}
+  \footnotesize
+\begin{subfigure}[t]{\textwidth}
+\begin{typing}
+\Axiom[T-Lit]{\ensuremath{\vdash_{\CONST}\Varid{n}\typcolon\mathbb{N}}}
+
+\Axiom[T-Succ]{\ensuremath{\vdash_{\mathcal{P}}\mathbf{succ}\typcolon\mathbb{N}\to \mathbb{N}}}
+
+\Axiom[T-Add]{\ensuremath{\vdash_{\mathcal{P}}\mathbf{add}\typcolon(\mathbb{N}\times\mathbb{N})\to \mathbb{N}}}
+\end{typing}
+\begin{typing}
+\noindent
+\Rule[T-Var]
+  {\ensuremath{\Varid{x}\typcolon\tau\in \Gamma}}
+  {\ensuremath{\Gamma\vdash\Varid{x}\typcolon\tau}}
+
+\Rule[T-Const]
+ {\ensuremath{\vdash_{\CONST}\Varid{c}\typcolon\tau}}
+ {\ensuremath{\Gamma\vdash\Varid{c}\typcolon\tau}}
+
+\raisebox{0.5\baselineskip}{\fbox{\ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}}}
+
+\Rule[T-App]
+  {\ensuremath{\Gamma\vdash\Varid{w}_f\typcolon\sigma\to \tau}\\
+  \ensuremath{\Gamma\vdash\Varid{w}_a\typcolon\sigma}}
+  {\ensuremath{\Gamma\vdash\Varid{w}_f\;\Varid{w}_a\typcolon\tau}}
+
+\Rule[T-Lam]
+  {\ensuremath{\Gamma,\Varid{x}\typcolon\sigma\vdash\Varid{t}\typcolon\tau}}
+  {\ensuremath{\Gamma\vdash\lambda \Varid{x}\to \Varid{t}\typcolon\sigma\to \tau}}
+
+\Rule[T-Let]
+  {\ensuremath{\Gamma\vdash\Varid{s}\typcolon\sigma}\\
+  \ensuremath{\Gamma,\Varid{x}\typcolon\sigma\vdash\Varid{t}\typcolon\tau}}
+  {\ensuremath{\Gamma\vdash\mathbf{let}\;\Varid{x}\mathrel{=}\Varid{s}\;\mathbf{in}\;\Varid{t}\typcolon\tau}}
+
+\Rule[T-Pair]
+  {\ensuremath{\Gamma\vdash\Varid{w}_a\typcolon\tau_a}\\
+  \ensuremath{\Gamma\vdash\Varid{w}_b\typcolon\tau_b}}
+  {\ensuremath{\Gamma\vdash\langle\Varid{w}_a,\Varid{w}_b\rangle\typcolon\tau_a\times\tau_b}}
+
+\Rule[T-Prim]
+  {\ensuremath{\vdash_{\mathcal{P}}\Varid{p}\typcolon\sigma\to \tau}\\
+   \ensuremath{\Gamma\vdash\Varid{w}\typcolon\sigma}}
+ {\ensuremath{\Gamma\vdash\Varid{p}\;\Varid{w}\typcolon\tau}}
+\end{typing}
+\caption{\ilcTau{} base typing.}
+\label{sfig:anf-base-typing}
+\end{subfigure}
+
+\begin{subfigure}[t]{\textwidth}
+\begin{typing}
+\Rule[T-DVar]
+  {\ensuremath{\Varid{x}\typcolon\tau\in \Gamma}}
+  {\ensuremath{\Gamma\vdash_{\Delta}\Varid{dx}\typcolon\tau}}
+
+\Rule[T-DConst]
+ {\ensuremath{\vdash_{\CONST}\Varid{c}\typcolon\Delta \tau}}
+ {\ensuremath{\Gamma\vdash_{\Delta}\Varid{c}\typcolon\tau}}
+
+\raisebox{0.5\baselineskip}{\fbox{\ensuremath{\Gamma\vdash_{\Delta}\Varid{dt}\typcolon\tau}}}
+
+\Rule[T-DApp]
+  {\ensuremath{\Gamma\vdash_{\Delta}\Varid{dw}_f\typcolon\sigma\to \tau}\\
+    \ensuremath{\Gamma\vdash\Varid{w}_a\typcolon\sigma}\\
+    \ensuremath{\Gamma\vdash_{\Delta}\Varid{dw}_a\typcolon\sigma}}
+  {\ensuremath{\Gamma\vdash_{\Delta}\Varid{dw}_f\;\Varid{w}_a\;\Varid{dw}_a\typcolon\tau}}
+
+\Rule[T-DLet]{
+  \ensuremath{\Gamma\vdash\Varid{s}\typcolon\sigma}\\
+  \ensuremath{\Gamma\vdash_{\Delta}\Varid{ds}\typcolon\sigma}\\
+  \ensuremath{\Gamma,\Varid{x}\typcolon\sigma\vdash_{\Delta}\Varid{dt}\typcolon\tau}}
+  {\ensuremath{\Gamma\vdash_{\Delta}\mathbf{let}\;\Varid{x}\mathrel{=}\Varid{s};\Varid{dx}\mathrel{=}\Varid{ds}\;\mathbf{in}\;\Varid{dt}\typcolon\tau}}
+
+\Rule[T-DLam]
+  {\ensuremath{\Gamma,\Varid{x}\typcolon\sigma\vdash_{\Delta}\Varid{dt}\typcolon\tau}}
+  {\ensuremath{\Gamma\vdash_{\Delta}\lambda \Varid{x}\;\Varid{dx}\to \Varid{dt}\typcolon\sigma\to \tau}}
+
+\Rule[T-DPair]
+  {\ensuremath{\Gamma\vdash_{\Delta}\Varid{dw}_a\typcolon\tau_a}\\
+  \ensuremath{\Gamma\vdash_{\Delta}\Varid{dw}_b\typcolon\tau_b}}
+  {\ensuremath{\Gamma\vdash_{\Delta}\langle\Varid{dw}_a,\Varid{dw}_b\rangle\typcolon\tau_a\times\tau_b}}
+
+\Rule[T-DPrim]
+  {\ensuremath{\vdash_{\mathcal{P}}\Varid{p}\typcolon\sigma\to \tau}\\
+    \ensuremath{\Gamma\vdash\Varid{w}\typcolon\sigma}\\
+    \ensuremath{\Gamma\vdash_{\Delta}\Varid{dw}\typcolon\sigma}}
+ {\ensuremath{\Gamma\vdash_{\Delta}\NilC{\Varid{p}}\;\Varid{w}\;\Varid{dw}\typcolon\tau}}
+\end{typing}
+\caption{\dilcTau{} change typing. Judgement \ensuremath{\Gamma\vdash_{\Delta}\Varid{dt}\typcolon\tau} means that variables from
+  both \ensuremath{\Gamma} and \ensuremath{\Delta \Gamma} are in scope in \ensuremath{\Varid{dt}}, and the final type is in fact
+  \ensuremath{\Delta \tau}.}
+\label{sfig:anf-change-typing}
+\end{subfigure}
+
+\caption{ANF $\lambda$-calculus, \ilcTau{} and \dilcTau{} type system.}
+\label{fig:anf-lambda-calculus-typing}
+\end{figure}
+
+
+\begin{figure}
+  \footnotesize
+\begin{subfigure}[t]{\textwidth}
+\begin{typing}
+  \Axiom[E-Prim]{\ensuremath{\rho\vdash\Varid{p}\;\Varid{w}\Downarrow_{\mathrm{1}}\mathcal{P}\mean{\Varid{p}}(\mathcal{V}\mean{\Varid{w}}\rho)}}
+
+  \Axiom[E-Val]{\ensuremath{\rho\vdash\Varid{w}\Downarrow_{\mathrm{0}}\mathcal{V}\mean{\Varid{w}}\rho}}
+
+  \raisebox{0.5\baselineskip}{\fbox{\ensuremath{\rho\vdash\Varid{t}\Downarrow_{\Varid{n}}\Varid{v}}}}
+
+  \Rule[E-Let]{\ensuremath{\rho\vdash\Varid{s}\Downarrow_{\Varid{n}_s}\Varid{v}_s}\\\ensuremath{(\rho,\Varid{x}\mathbin{:=}\Varid{v}_s)\vdash\Varid{t}\Downarrow_{\Varid{n}_t}\Varid{v}_t}}{\ensuremath{\rho\vdash\mathbf{let}\;\Varid{x}\mathrel{=}\Varid{s}\;\mathbf{in}\;\Varid{t}\Downarrow_{\mathrm{1}\mathbin{+}\Varid{n}_s\mathbin{+}\Varid{n}_t}\Varid{v}_t}}
+
+  \Rule[E-App]{
+    \ensuremath{\rho\vdash\Varid{w}_f\Downarrow_{\mathrm{0}}\Varid{v}_f}\\
+    \ensuremath{\rho\vdash\Varid{w}_a\Downarrow_{\mathrm{0}}\Varid{v}_a}\\
+    \ensuremath{\mathsf{app}\;\Varid{v}_f\;\Varid{v}_a\;\negthickspace\Downarrow_{\Varid{n}}\negthickspace\;\Varid{v}}
+  }{\ensuremath{\rho\vdash\Varid{w}_f\;\Varid{w}_a\Downarrow_{\mathrm{1}\mathbin{+}\Varid{n}}\Varid{v}}}
+\end{typing}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{30}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathsf{app}\;(\rho\myquote\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu])\;\Varid{v}_a{}\<[30]%
+\>[30]{}\mathrel{=}(\rho\myquote,\Varid{x}\mathbin{:=}\Varid{v}_a)\vdash\Varid{t}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathcal{V}\mean{\Varid{x}}\rho{}\<[30]%
+\>[30]{}\mathrel{=}\rho\;(\Varid{x}){}\<[E]%
+\\
+\>[3]{}\mathcal{V}\mean{\lambda \Varid{x}\to \Varid{t}}\rho{}\<[30]%
+\>[30]{}\mathrel{=}\rho\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu]{}\<[E]%
+\\
+\>[3]{}\mathcal{V}\mean{\langle\Varid{w}_a,\Varid{w}_b\rangle}\rho{}\<[30]%
+\>[30]{}\mathrel{=}\langle\mathcal{V}\mean{\Varid{w}_a}\rho,\mathcal{V}\mean{\Varid{w}_b}\rho\rangle{}\<[E]%
+\\
+\>[3]{}\mathcal{V}\mean{\Varid{c}}\rho{}\<[30]%
+\>[30]{}\mathrel{=}\Varid{c}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathcal{P}\mean{\mathbf{succ}}\Varid{n}{}\<[30]%
+\>[30]{}\mathrel{=}\mathrm{1}\mathbin{+}\Varid{n}{}\<[E]%
+\\
+\>[3]{}\mathcal{P}\mean{\mathbf{add}}(\Varid{m},\Varid{n}){}\<[30]%
+\>[30]{}\mathrel{=}\Varid{m}\mathbin{+}\Varid{n}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\caption{Base semantics.
+  Judgement \ensuremath{\rho\vdash\Varid{t}\;\negthickspace\Downarrow_{\Varid{n}}\negthickspace\;\Varid{v}} says that \ensuremath{\rho\vdash\Varid{t}}, a pair of
+  environment \ensuremath{\rho} and term \ensuremath{\Varid{t}}, evaluates to value \ensuremath{\Varid{v}} in \ensuremath{\Varid{n}} steps.
+  Notation \ensuremath{\mathsf{app}\;\Varid{v}_f\;\Varid{v}_a\;\negthickspace\Downarrow_{\Varid{n}}\negthickspace\;\Varid{v}} (used in rule \textsc{E-App}) is short
+  for \ensuremath{\mathsf{app}\;\Varid{v}_f\;\Varid{v}_a\mathrel{=}\rho\vdash\Varid{t}} and \ensuremath{\rho\vdash\Varid{t}\;\negthickspace\Downarrow_{\Varid{n}}\negthickspace\;\Varid{v}}, that is,
+  says that the pair \ensuremath{\rho\vdash\Varid{t}} given by \ensuremath{\mathsf{app}\;\Varid{v}_f\;\Varid{v}_a} evaluates to \ensuremath{\Varid{v}} in \ensuremath{\Varid{n}} steps.}
+\label{sfig:anf-base-semantics}
+\end{subfigure}
+
+\begin{subfigure}[t]{\textwidth}
+\begin{typing}
+  \Axiom[E-DVal]{\ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dw}\Downarrow\mathcal{V}_{\Delta}\mean{\Varid{dw}}\rho\;\D\rho}}
+
+\raisebox{0.5\baselineskip}{\fbox{\ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt}\Downarrow\Varid{dv}}}}
+
+  \Axiom[E-DPrim]{\ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\NilC{\Varid{p}}\;\Varid{w}\;\Varid{dw}\Downarrow\mathcal{P}_{\Delta}\mean{\Varid{p}}(\mathcal{V}\mean{\Varid{w}}\rho)\;(\mathcal{V}_{\Delta}\mean{\Varid{dw}}\rho\;\D\rho)}}
+
+  \Rule[E-DApp]{%
+    \ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dw}_f\Downarrow\Varid{dv}_f}\\
+    \ensuremath{\rho\vdash\Varid{w}_a\Downarrow\Varid{v}_a}\\
+    \ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dw}_a\Downarrow\Varid{dv}_a}\\
+    \ensuremath{\mathsf{dapp}\;\Varid{dv}_f\;\Varid{v}_a\;\Varid{dv}_a\;\negthickspace\Downarrow\negthickspace\;\Varid{dv}}}
+  {\ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dw}_f\;\Varid{w}_a\;\Varid{dw}_a\Downarrow\Varid{dv}}}
+
+  \Rule[E-DLet]{
+    \ensuremath{\rho\vdash\Varid{s}\Downarrow\Varid{v}_s}\\
+    \ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{ds}\Downarrow\Varid{dvs}}\\
+    \ensuremath{(\rho,\Varid{x}\mathbin{:=}\Varid{v}_s)\mathrel{\filleddiamond}(\D\rho;\Varid{dx}\mathbin{:=}\Varid{dvs})\vdash_{\Delta}\Varid{dt}\Downarrow\Varid{dvt}}}
+  {\ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\mathbf{let}\;\Varid{x}\mathrel{=}\Varid{s};\Varid{dx}\mathrel{=}\Varid{ds}\;\mathbf{in}\;\Varid{dt}\Downarrow\Varid{dvt}}}
+\end{typing}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{54}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathsf{dapp}\;(\rho\myquote\mathrel{\filleddiamond}\D\rho\myquote\;[\mskip1.5mu \lambda \Varid{x}\;\Varid{dx}\to \Varid{dt}\mskip1.5mu])\;\Varid{v}_a\;\Varid{dv}_a{}\<[54]%
+\>[54]{}\mathrel{=}(\rho\myquote,\Varid{x}\mathbin{:=}\Varid{v}_a)\mathrel{\filleddiamond}(\D\rho\myquote,\Varid{dx}\mathbin{:=}\Varid{dv}_a)\vdash_{\Delta}\Varid{dt}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathcal{V}_{\Delta}\mean{\Varid{dx}}\rho\;\D\rho{}\<[54]%
+\>[54]{}\mathrel{=}\D\rho\;(\Varid{dx}){}\<[E]%
+\\
+\>[3]{}\mathcal{V}_{\Delta}\mean{\lambda \Varid{x}\;\Varid{dx}\to \Varid{dt}}\rho\;\D\rho{}\<[54]%
+\>[54]{}\mathrel{=}\rho\mathrel{\filleddiamond}\D\rho\;[\mskip1.5mu \lambda \Varid{x}\;\Varid{dx}\to \Varid{dt}\mskip1.5mu]{}\<[E]%
+\\
+\>[3]{}\mathcal{V}_{\Delta}\mean{\langle\Varid{dw}_a,\Varid{dw}_b\rangle}\rho\;\D\rho{}\<[54]%
+\>[54]{}\mathrel{=}\langle\mathcal{V}_{\Delta}\mean{\Varid{dw}_a}\rho\;\D\rho,\mathcal{V}_{\Delta}\mean{\Varid{dw}_b}\rho\;\D\rho\rangle{}\<[E]%
+\\
+\>[3]{}\mathcal{V}_{\Delta}\mean{\Varid{c}}\rho\;\D\rho{}\<[54]%
+\>[54]{}\mathrel{=}\Varid{c}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathcal{P}_{\Delta}\mean{\mathbf{succ}}\Varid{n}\;\Varid{dn}{}\<[54]%
+\>[54]{}\mathrel{=}\Varid{dn}{}\<[E]%
+\\
+\>[3]{}\mathcal{P}_{\Delta}\mean{\mathbf{add}}\langle\Varid{m},\Varid{n}\rangle\;\langle\Varid{dm},\Varid{dn}\rangle{}\<[54]%
+\>[54]{}\mathrel{=}\Varid{dm}\mathbin{+}\Varid{dn}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\caption{Change semantics.
+  Judgement \ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{t}\;\negthickspace\Downarrow\negthickspace\;\Varid{dv}} says that \ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt}}, a triple of environment
+  \ensuremath{\rho}, change environment \ensuremath{\D\rho} and change term \ensuremath{\Varid{t}}, evaluates to change value \ensuremath{\Varid{dv}}.
+  Notation \ensuremath{\mathsf{dapp}\;\Varid{dv}_f\;\Varid{v}_a\;\Varid{dv}_a\;\negthickspace\Downarrow\negthickspace\;\Varid{dv}} (used in rule \textsc{E-DApp}) is short
+  for \ensuremath{\mathsf{dapp}\;\Varid{dv}_f\;\Varid{v}_a\;\Varid{dv}_a\mathrel{=}\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt}} and
+  \ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{t}\;\negthickspace\Downarrow\negthickspace\;\Varid{dv}}, that is, says that the triple \ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt}}
+  given by \ensuremath{\mathsf{dapp}\;\Varid{dv}_f\;\Varid{v}_a\;\Varid{dv}_a} evalutes to \ensuremath{\Varid{dv}}.}
+\label{sfig:anf-change-semantics}
+\end{subfigure}
+
+\caption{ANF $\lambda$-calculus (\ilcUntau{} and \dilcUntau{}), CBV semantics.}
+\label{fig:anf-lambda-calculus-semantics}
+\end{figure}

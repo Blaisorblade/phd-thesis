@@ -1,0 +1,1790 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+
+\chapter{Defunctionalizing function changes}
+\label{ch:defunc-fun-changes}
+
+In~\cref{ch:derive-formally}, and throughout most of~\cref{part:incr}, we represent
+function changes as functions, which can only be applied.
+However, incremental programs often inspect changes to decide how to
+react to them most efficiently. Also inspecting function changes would help
+performance further.
+Representing function changes as closures, as we do in~\cref{ch:cts}
+and~\cref{ch:bsos}, allows implementing some operations more efficient, but is
+not fully satisfactory.
+In this chapter, we address these restrictions by \emph{defunctionalizing}
+functions and function changes, so that we can inspect both at runtime without
+restrictions.
+
+% In particular, by encoding functions and functions changes as
+% values of algebraic datatypes, it becomes possible to test whether the function
+% change is a nil change for the function.
+
+Once we defunctionalize function changes, we can detect at runtime whether a
+function change is nil. As we have mentioned in \cref{sec:plugins}, nil function
+changes can typically be handled more efficiently. For instance, consider \ensuremath{\Varid{t}\mathrel{=}\Varid{map}\;\Varid{f}\;\Varid{xs}}, a term that maps function \ensuremath{\Varid{f}} to each element of sequence \ensuremath{\Varid{xs}}. In
+general, \ensuremath{\Derive{\Varid{t}}\mathrel{=}\Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Varid{xs}\;\Varid{dxs}} must handle any change in \ensuremath{\Varid{dxs}} (which
+we assume to be small) but also apply function change \ensuremath{\Varid{df}} to each element of
+\ensuremath{\Varid{xs}} (which we assume to be big). However, if \ensuremath{\Varid{df}} is nil we can skip this step,
+decreasing time complexity of \ensuremath{\Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Varid{xs}\;\Varid{dxs}} from \ensuremath{\Conid{O}\;(\left|{\Varid{xs}}\right|\mathbin{+}\left|{\Varid{dxs}}\right|)}
+to \ensuremath{\Conid{O}\;(\left|{\Varid{dxs}}\right|)}.
+
+We will also present a change structure on defunctionalized function changes,
+and show that operations on defunctionalized function changes become cheaper.
+% and show its benefits.\pg{Furthermore, other operations on function and
+%   function changes become cheaper, such as |`oplus`|, |nilc|, and so on.}
+%Moreover, as we have discussed
+
+% \chapter{Defunctionalizing function changes}
+% \label{ch:defunc-fun-changes}
+% If we represent function changes as functions, we can only apply them. This and
+% other problems are vastly simplified if we instead defunctionalize function
+% changes. Furthermore, assembling changes for functions becomes easier if the
+% functions are defunctionalized as well.
+
+% In this chapter, we show how to systematically incrementalize such
+% defunctionalized programs by systematic program transformation.
+
+% \subsection{Avoiding the closed-world assumption}
+% \pg{Move this somewhere better.}
+
+% \pg{cite Uroboro.}
+
+% Defunctionalization as usually defined can only be performed on a closed
+% program. Using open algebraic datatypes can lift this restriction, though
+% usually at the cost of exhaustiveness checking.
+
+% Representing changes as data instead of functions is not a goal per se. Rather,
+% our goal is defining other primitive operations on function changes beyond
+% application, and that is not possible if function changes are represented as
+% functions. However, this problem could also be solved by representing function
+% changes as more general \emph{codata} using copatterns. Codata generalize
+% functions; while functions can only be \emph{observed} by applying them to an
+% argument, codata can support further observations. Moreover, when defining
+% codata using copatterns, the codata definition fixes a set of observations,
+% while new generators can be defined in the entire program, similarly to how
+% functions can be defined in a whole programs.
+
+% Hence we could potentially represent changes as codata. We leave this for future
+% work.
+
+\section{Setup}
+\label{sec:change-struct-tc}
+
+We write incremental programs based on ILC by manually writing Haskell code,
+containing both manually-written plugin code, and code that is transformed
+systematically, based on informal generalizations and variants of
+\ensuremath{\Derive{\text{\textendash}}}. Our main goal is to study variants of differentiation and of
+encodings in Haskell, while also studying language plugins for non-trivial
+primitives, such as different sorts of collections. We make liberal use of GHC
+extensions where needed.
+
+Code in this chapter has been extracted and type-checked, though we elide a few
+details (mostly language extensions and imports from the standard library).
+Code in this \lcnamecref{ch:defunc-fun-changes} is otherwise self-contained.
+We have also tested a copy of this code more extensively.
+
+As sketched before, we define change structure inside Haskell.
+%We choose for now a different subset of operations.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;\Conid{ChangeStruct}\;\Varid{t}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mbox{\onelinecomment  Next line declares \ensuremath{\Delta \Varid{t}} as an injective type function}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Delta \Varid{t}\mathrel{=}\Varid{r}\mid \Varid{r}\to \Varid{t}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\oplus)\mathrel{:\mkern-1mu:}\Varid{t}\to \Delta \Varid{t}\to \Varid{t}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{oreplace}\mathrel{:\mkern-1mu:}\Varid{t}\to \Delta \Varid{t}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{class}\;\Conid{ChangeStruct}\;\Varid{t}\Rightarrow\Conid{NilChangeStruct}\;\Varid{t}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\NilC{}\mathrel{:\mkern-1mu:}\Varid{t}\to \Delta \Varid{t}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{class}\;\Conid{ChangeStruct}\;\Varid{a}\Rightarrow\Conid{CompChangeStruct}\;\Varid{a}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mbox{\onelinecomment  Compose change \ensuremath{\Varid{dx}_{1}} with \ensuremath{\Varid{dx}_{2}}, so that}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mbox{\onelinecomment  \ensuremath{\Varid{x}\oplus (\Varid{dx}_{1}\circledcirc \Varid{dx}_{2})\equiv\Varid{x}\oplus \Varid{dx}_{1}\oplus \Varid{dx}_{2}}.}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\circledcirc )\mathrel{:\mkern-1mu:}\Delta \Varid{a}\to \Delta \Varid{a}\to \Delta \Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+%ocompose :: Dt^t -> Dt^t -> Dt^t
+With this code we define type classes \ensuremath{\Conid{ChangeStruct}}, \ensuremath{\Conid{NilChangeStruct}} and
+\ensuremath{\Conid{CompChangeStruct}}. We explain each of the declared members in turn.
+
+First, type \ensuremath{\Delta \Varid{t}} represents the change type for type \ensuremath{\Varid{t}}. To improve Haskell
+type inference, we declare that \ensuremath{\Delta} is injective, so that \ensuremath{\Delta \Varid{t}_{1}\mathrel{=}\Delta \Varid{t}_{2}}
+implies \ensuremath{\Varid{t}_{1}\mathrel{=}\Varid{t}_{2}}. This forbids some potentially useful change structures, but
+in exchange it makes type inference vastly more usable.
+
+Next, we declare \ensuremath{\oplus }, \ensuremath{\NilC{}} and \ensuremath{\circledcirc } as available to object programs.
+%
+Last, we introduce \ensuremath{\Varid{oreplace}} to construct replacement
+changes, characterized by the \emph{absorption law} \ensuremath{\Varid{x}\oplus \Varid{oreplace}\;\Varid{y}\mathrel{=}\Varid{y}}
+for all \ensuremath{\Varid{x}}.
+Function \ensuremath{\Varid{oreplace}} encodes \ensuremath{\mathbin{!}\Varid{t}}, that is the bang operator. We use a different
+notation because \ensuremath{\mathbin{!}} is reserved for other purposes in Haskell.
+
+These typeclasses omit operation \ensuremath{\ominus } intentionally: we do \emph{not}
+require that change structures support a proper difference operation.
+Nevertheless, as discussed \ensuremath{\Varid{b}\ominus \Varid{a}} can be expressed through \ensuremath{\Varid{oreplace}\;\Varid{b}}.
+
+We can then differentiate Haskell functions---even polymorphic ones. We show a
+few trivial examples to highlight how derivatives are encoded in Haskell,
+especially polymorphic ones.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mbox{\onelinecomment  The standard \ensuremath{\Varid{id}} function:}{}\<[E]%
+\\
+\>[B]{}\Varid{id}\mathrel{:\mkern-1mu:}\Varid{a}\to \Varid{a}{}\<[E]%
+\\
+\>[B]{}\Varid{id}\;\Varid{x}\mathrel{=}\Varid{x}{}\<[E]%
+\\
+\>[B]{}\mbox{\onelinecomment  and its derivative:}{}\<[E]%
+\\
+\>[B]{}\Varid{did}\mathrel{:\mkern-1mu:}\Varid{a}\to \Delta \Varid{a}\to \Delta \Varid{a}{}\<[E]%
+\\
+\>[B]{}\Varid{did}\;\Varid{x}\;\Varid{dx}\mathrel{=}\Varid{dx}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;({}\<[13]%
+\>[13]{}\Conid{NilChangeStruct}\;\Varid{a},\Conid{ChangeStruct}\;\Varid{b})\Rightarrow{}\<[E]%
+\\
+\>[13]{}\Conid{ChangeStruct}\;(\Varid{a}\to \Varid{b})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Delta (\Varid{a}\to \Varid{b})\mathrel{=}\Varid{a}\to \Delta \Varid{a}\to \Delta \Varid{b}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{f}\oplus \Varid{df}\mathrel{=}\lambda \Varid{x}\to \Varid{f}\;\Varid{x}\oplus \Varid{df}\;\Varid{x}\;\NilC{\Varid{x}}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{oreplace}\;\Varid{f}\mathrel{=}\lambda \Varid{x}\;\Varid{dx}\to \Varid{oreplace}\;(\Varid{f}\;(\Varid{x}\oplus \Varid{dx})){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;({}\<[13]%
+\>[13]{}\Conid{NilChangeStruct}\;\Varid{a},\Conid{ChangeStruct}\;\Varid{b})\Rightarrow{}\<[E]%
+\\
+\>[13]{}\Conid{NilChangeStruct}\;(\Varid{a}\to \Varid{b})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\NilC{\Varid{f}}\mathrel{=}\Varid{oreplace}\;\Varid{f}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mbox{\onelinecomment  Same for \ensuremath{\Varid{apply}}:}{}\<[E]%
+\\
+\>[B]{}\Varid{apply}\mathrel{:\mkern-1mu:}(\Varid{a}\to \Varid{b})\to \Varid{a}\to \Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{apply}\;\Varid{f}\;\Varid{x}\mathrel{=}\Varid{f}\;\Varid{x}{}\<[E]%
+\\
+\>[B]{}\Varid{dapply}\mathrel{:\mkern-1mu:}(\Varid{a}\to \Varid{b})\to \Delta (\Varid{a}\to \Varid{b})\to \Varid{a}\to \Delta \Varid{a}\to \Delta \Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{dapply}\;\Varid{f}\;\Varid{df}\;\Varid{x}\;\Varid{dx}\mathrel{=}\Varid{df}\;\Varid{x}\;\Varid{dx}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\paragraph{Which polymorphism?}
+As visible here, polymorphism does not cause particular problems. However, we
+only support ML (or prenex) polymorphism, not first-class
+polymorphism, for two reasons.
+
+
+First, with first-class polymorphism, we can encode
+existential types \ensuremath{\exists \Conid{X}\hsforall \hsdot{\circ }{\mathpunct{.}}\Conid{T}}, and two values \ensuremath{\Varid{v}_{1},\Varid{v}_{2}} of the same existential type
+\ensuremath{\exists \Conid{X}\hsforall \hsdot{\circ }{\mathpunct{.}}\Conid{T}} can hide different types \ensuremath{\Conid{T}_{1},\Conid{T}_{2}},
+Hence, a change between \ensuremath{\Varid{v}_{1}} and \ensuremath{\Varid{v}_{2}} requires handling changes between types.
+While we discuss such topics in~\cref{ch:diff-parametricity-system-f}, we avoid
+them here.
+
+Second, prenex polymorphism is a small extension of simply-typed lambda calculus
+metatheoretically. We can treat prenex-polymorphic definitions as families of
+monomorphic (hence simply-typed) definitions; to each definition we can apply
+all the ILC theory we developed to show differentiation is correct.
+% Alternatively, we can regard type variables as additional base types without
+% primitives, so that we can treat our function definitions as one functions.
+
+\section{Defunctionalization}
+Defunctionalization is a whole-program transformation that turns a program
+relying on first-class functions into a first-order program. The resulting
+program is expressed in a first-order language (often a subset of the original
+language); closures are encoded by data values, which embed both the closure
+environment and a tag to distinguish different function. Defunctionalization
+also generates a function that interprets encoded closures, which we call
+\ensuremath{\Varid{applyFun}}.
+
+% We have multiple versions of the same definitions, hide the version numbers in
+% LaTeX output.
+
+
+
+
+
+% Here indexes are not to be hidden.
+
+
+
+In a typed language, defunctionalization can be done using generalized algebraic
+datatypes (GADTs)~\citep{Pottier2004polymorphic}. Each first-class function of
+type \ensuremath{\sigma\to \tau} is replaced by a value of a new GADT \ensuremath{\Conid{Fun}\;\sigma\;\tau}, that
+represents defunctionalized function values and has a constructor for each
+different function. If a first-class function \ensuremath{\Varid{t}_{1}} closes over \ensuremath{\Varid{x}\mathrel{:\mkern-1mu:}\tau_{1}}, the
+corresponding constructor \ensuremath{\Conid{C}_{1}} will take \ensuremath{\Varid{x}\mathrel{:\mkern-1mu:}\tau_{1}} as an argument. The
+interpreter for defunctionalized function values has type signature \ensuremath{\Varid{applyFun}\mathrel{:\mkern-1mu:}\Conid{Fun}\;\sigma\;\tau\to \sigma\to \tau}. The resulting programs are expressed in a
+first-order subset of the original programming language.
+In defunctionalized programs, all remaining functions are first-order top-level
+functions.
+
+For instance, consider the program on sequences in \cref{fig:defunc-example}.
+\begin{figure}[h]
+\texths %drop extra space around figure
+% From https://tex.stackexchange.com/a/186335/1340
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{successors}\mathrel{:\mkern-1mu:}[\mskip1.5mu \mathbb{Z}\mskip1.5mu]\to [\mskip1.5mu \mathbb{Z}\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{successors}\;\Varid{xs}\mathrel{=}\Varid{map}\;(\lambda \Varid{x}\to \Varid{x}\mathbin{+}\mathrm{1})\;\Varid{xs}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{nestedLoop}\mathrel{:\mkern-1mu:}[\mskip1.5mu \sigma\mskip1.5mu]\to [\mskip1.5mu \tau\mskip1.5mu]\to [\mskip1.5mu (\sigma,\tau)\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{nestedLoop}\;\Varid{xs}\;\Varid{ys}\mathrel{=}\Varid{concatMap}\;(\lambda \Varid{x}\to \Varid{map}\;(\lambda \Varid{y}\to (\Varid{x},\Varid{y}))\;\Varid{ys})\;\Varid{xs}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{map}\mathrel{:\mkern-1mu:}(\sigma\to \tau)\to [\mskip1.5mu \sigma\mskip1.5mu]\to [\mskip1.5mu \tau\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{map}\;\Varid{f}\;[\mskip1.5mu \mskip1.5mu]\mathrel{=}[\mskip1.5mu \mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{map}\;\Varid{f}\;(\Varid{x}\typcolon\Varid{xs})\mathrel{=}\Varid{f}\;\Varid{x}\typcolon\Varid{map}\;\Varid{f}\;\Varid{xs}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{concatMap}\mathrel{:\mkern-1mu:}(\sigma\to [\mskip1.5mu \tau\mskip1.5mu])\to [\mskip1.5mu \sigma\mskip1.5mu]\to [\mskip1.5mu \tau\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{concatMap}\;\Varid{f}\;\Varid{xs}\mathrel{=}\Varid{concat}\;(\Varid{map}\;\Varid{f}\;\Varid{xs}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\caption{A small example program for defunctionalization.}
+\label{fig:defunc-example}
+\end{figure}
+
+In this program, the first-class function values arise from evaluating the three
+terms \ensuremath{\lambda \Varid{y}\to (\Varid{x},\Varid{y})}, that we call \ensuremath{\Varid{pair}}, \ensuremath{\lambda \Varid{x}\to \Varid{map}\;(\lambda \Varid{y}\to (\Varid{x},\Varid{y}))\;\Varid{ys}},
+that we call \ensuremath{\Varid{mapPair}}, and \ensuremath{\lambda \Varid{x}\to \Varid{x}\mathbin{+}\mathrm{1}}, that we call \ensuremath{\Varid{addOne}}.
+Defunctionalization creates a type \ensuremath{\Conid{Fun}\;\sigma\;\tau} with a constructor for each
+of the three terms, respectively \ensuremath{\Conid{Pair}}, \ensuremath{\Conid{MapPair}} and \ensuremath{\Conid{AddOne}}.
+Both \ensuremath{\Varid{pair}} and \ensuremath{\Varid{mapPair}} close over some free variables, so their
+corresponding constructors will take an argument
+for each free variable; for \ensuremath{\Varid{pair}} we have
+%
+\[\ensuremath{\Varid{x}\mathrel{:\mkern-1mu:}\sigma\vdash\lambda \Varid{y}\to (\Varid{x},\Varid{y})\mathrel{:\mkern-1mu:}\tau\to (\sigma,\tau)},\]
+%
+while for \ensuremath{\Varid{mapPair}} we have
+%
+\[\ensuremath{\Varid{ys}\mathrel{:\mkern-1mu:}[\mskip1.5mu \tau\mskip1.5mu]\vdash\lambda \Varid{x}\to \Varid{map}\;(\lambda \Varid{y}\to (\Varid{x},\Varid{y}))\;\Varid{ys}\mathrel{:\mkern-1mu:}\sigma\to [\mskip1.5mu (\sigma,\tau)\mskip1.5mu]}.\]
+%
+Hence, the type of defunctionalized functions \ensuremath{\Conid{Fun}\;\sigma\;\tau} and its
+interpreter \ensuremath{\Varid{applyFun}} become:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{23}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{23E}{@{}l@{}}%
+\column{27}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{34}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{39}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;\Conid{Fun}\;\sigma\;\tau\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{AddOne}{}\<[13]%
+\>[13]{}\mathrel{:\mkern-1mu:}{}\<[27]%
+\>[27]{}\Conid{Fun}\;\mathbb{Z}\;{}\<[39]%
+\>[39]{}\mathbb{Z}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{Pair}{}\<[13]%
+\>[13]{}\mathrel{:\mkern-1mu:}\sigma{}\<[23]%
+\>[23]{}\to {}\<[23E]%
+\>[27]{}\Conid{Fun}\;\tau\;{}\<[39]%
+\>[39]{}(\sigma,\tau){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{MapPair}{}\<[13]%
+\>[13]{}\mathrel{:\mkern-1mu:}[\mskip1.5mu \tau\mskip1.5mu]{}\<[23]%
+\>[23]{}\to {}\<[23E]%
+\>[27]{}\Conid{Fun}\;\sigma\;{}\<[39]%
+\>[39]{}[\mskip1.5mu (\sigma,\tau)\mskip1.5mu]{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{applyFun}\mathrel{:\mkern-1mu:}{}\<[15]%
+\>[15]{}\Conid{Fun}\;\sigma\;\tau\to {}\<[34]%
+\>[34]{}\sigma\to \tau{}\<[E]%
+\\
+\>[B]{}\Varid{applyFun}\;{}\<[15]%
+\>[15]{}\Conid{AddOne}\;{}\<[34]%
+\>[34]{}\Varid{x}\mathrel{=}\Varid{x}\mathbin{+}\mathrm{1}{}\<[E]%
+\\
+\>[B]{}\Varid{applyFun}\;{}\<[15]%
+\>[15]{}(\Conid{Pair}\;\Varid{x})\;{}\<[34]%
+\>[34]{}\Varid{y}\mathrel{=}(\Varid{x},\Varid{y}){}\<[E]%
+\\
+\>[B]{}\Varid{applyFun}\;{}\<[15]%
+\>[15]{}(\Conid{MapPair}\;\Varid{ys})\;{}\<[34]%
+\>[34]{}\Varid{x}\mathrel{=}\Varid{mapDF}\;(\Conid{Pair}\;\Varid{x})\;\Varid{ys}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+We need to also transform the rest of the program accordingly.
+
+\begin{figure}[h!]
+\texths %drop extra space around figure
+% From https://tex.stackexchange.com/a/186335/1340
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{successors}\mathrel{:\mkern-1mu:}[\mskip1.5mu \mathbb{Z}\mskip1.5mu]\to [\mskip1.5mu \mathbb{Z}\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{successors}\;\Varid{xs}\mathrel{=}\Varid{map}\;(\lambda \Varid{x}\to \Varid{x}\mathbin{+}\mathrm{1})\;\Varid{xs}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{nestedLoopDF}\mathrel{:\mkern-1mu:}[\mskip1.5mu \sigma\mskip1.5mu]\to [\mskip1.5mu \tau\mskip1.5mu]\to [\mskip1.5mu (\sigma,\tau)\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{nestedLoopDF}\;\Varid{xs}\;\Varid{ys}\mathrel{=}\Varid{concatMapDF}\;(\Conid{MapPair}\;\Varid{ys})\;\Varid{xs}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{mapDF}\mathrel{:\mkern-1mu:}\Conid{Fun}\;\sigma\;\tau\to [\mskip1.5mu \sigma\mskip1.5mu]\to [\mskip1.5mu \tau\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{mapDF}\;\Varid{f}\;[\mskip1.5mu \mskip1.5mu]\mathrel{=}[\mskip1.5mu \mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{mapDF}\;\Varid{f}\;(\Varid{x}\typcolon\Varid{xs})\mathrel{=}\Varid{applyFun}\;\Varid{f}\;\Varid{x}\typcolon\Varid{mapDF}\;\Varid{f}\;\Varid{xs}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{concatMapDF}\mathrel{:\mkern-1mu:}\Conid{Fun}\;\sigma\;[\mskip1.5mu \tau\mskip1.5mu]\to [\mskip1.5mu \sigma\mskip1.5mu]\to [\mskip1.5mu \tau\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{concatMapDF}\;\Varid{f}\;\Varid{xs}\mathrel{=}\Varid{concat}\;(\Varid{mapDF}\;\Varid{f}\;\Varid{xs}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\caption{Defunctionalized program.}
+\label{prog:defunc-curried}
+\end{figure}
+
+Some readers might notice this program still uses first-class function, because
+it encodes multi-argument functions through currying. To get a fully first-order
+program, we encode multi-arguments functions using tuples instead of currying.%
+\footnote{Strictly speaking, the resulting program is still not first-order,
+  because in Haskell multi-argument data constructors, such as the pair
+  constructor $(\mathord{,})$ that we use, are still first-class curried functions, unlike
+  for instance in OCaml. To make this program truly first-order, we must
+  formalize tuple constructors as a term constructor, or formalize these
+  function definitions as multi-argument functions. At this point, this
+  discussion is merely a technicality that does not affect our goals, but it
+  becomes relevant if we formalize the resulting first-order
+  language as in~\cref{sec:formalization}.}
+%
+Using tuples our example becomes:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{44}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{applyFun}\mathrel{:\mkern-1mu:}{}\<[16]%
+\>[16]{}(\Conid{Fun}\;\sigma\;\tau,\sigma)\to {}\<[44]%
+\>[44]{}\tau{}\<[E]%
+\\
+\>[B]{}\Varid{applyFun}\;{}\<[16]%
+\>[16]{}(\Conid{AddOne},\Varid{x}){}\<[44]%
+\>[44]{}\mathrel{=}\Varid{x}\mathbin{+}\mathrm{1}{}\<[E]%
+\\
+\>[B]{}\Varid{applyFun}\;{}\<[16]%
+\>[16]{}(\Conid{Pair}\;\Varid{x},\Varid{y}){}\<[44]%
+\>[44]{}\mathrel{=}(\Varid{x},\Varid{y}){}\<[E]%
+\\
+\>[B]{}\Varid{applyFun}\;{}\<[16]%
+\>[16]{}(\Conid{MapPair}\;\Varid{ys},\Varid{x}){}\<[44]%
+\>[44]{}\mathrel{=}\Varid{mapDF}\;(\Conid{Pair}\;\Varid{x},\Varid{ys}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{mapDF}\mathrel{:\mkern-1mu:}(\Conid{Fun}\;\sigma\;\tau,[\mskip1.5mu \sigma\mskip1.5mu])\to [\mskip1.5mu \tau\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{mapDF}\;(\Varid{f},[\mskip1.5mu \mskip1.5mu])\mathrel{=}[\mskip1.5mu \mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{mapDF}\;(\Varid{f},\Varid{x}\typcolon\Varid{xs})\mathrel{=}\Varid{applyFun}\;(\Varid{f},\Varid{x})\typcolon\Varid{mapDF}\;(\Varid{f},\Varid{xs}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{concatMapDF}\mathrel{:\mkern-1mu:}(\Conid{Fun}\;\sigma\;[\mskip1.5mu \tau\mskip1.5mu],[\mskip1.5mu \sigma\mskip1.5mu])\to [\mskip1.5mu \tau\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{concatMapDF}\;(\Varid{f},\Varid{xs})\mathrel{=}\Varid{concat}\;(\Varid{mapDF}\;(\Varid{f},\Varid{xs})){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{nestedLoopDF}\mathrel{:\mkern-1mu:}([\mskip1.5mu \sigma\mskip1.5mu],[\mskip1.5mu \tau\mskip1.5mu])\to [\mskip1.5mu (\sigma,\tau)\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{nestedLoopDF}\;(\Varid{xs},\Varid{ys})\mathrel{=}\Varid{concatMapDF}\;(\Conid{MapPair}\;\Varid{ys},\Varid{xs}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+However, we'll often write such defunctionalized programs using Haskell's
+typical curried syntax, as in \cref{prog:defunc-curried}. Such programs must not
+contain partial applications.
+% \pg{Revise this.} But for now we'll avoid using tuples and stick to currying, as
+% it makes for more idiomatic Haskell syntax.
+
+In general, defunctionalization creates a constructor \ensuremath{\Conid{C}} of type \ensuremath{\Conid{Fun}\;\sigma\;\tau} for each first-class function expression \ensuremath{\Gamma\vdash\Varid{t}\typcolon\sigma\to \tau} in the
+source program.\footnote{We only need codes for functions that are used as
+  first-class arguments, not for other functions, though codes for the latter
+  can be added as well.}
+%
+While lambda expression \ensuremath{\Varid{l}} closes \emph{implicitly} over environment \ensuremath{\rho\typcolon\Eval{\Gamma}}, \ensuremath{\Conid{C}} closes over it explicitly: the values bound to free variables
+in environment \ensuremath{\rho} are passed as arguments to constructor \ensuremath{\Conid{C}}. As a standard
+optimization, we only includes variables that actually occur free in \ensuremath{\Varid{l}}, not
+all those that are bound in the context where \ensuremath{\Varid{l}} occurs.
+
+\subsection{Defunctionalization with separate function codes}
+Next, we show a slight variant of defunctionalization, that we use to achieve
+our goals with less code duplication, even at the expense of some efficiency; we
+call this variant \emph{defunctionalization with separate function codes}.
+
+We first encode contexts as types and environments as values. Empty environments
+are encoded as empty tuples. Environments for a context such as \ensuremath{\Varid{x}\mathrel{:\mkern-1mu:}\tau_{1},\Varid{y}\mathrel{:\mkern-1mu:}\tau_{2},\ldots} are encoded as values of type \ensuremath{\tau_{1}\times\tau_{2}\times\ldots}
+
+In this defunctionalization variant, instead of defining directly a GADT of
+defunctionalized functions \ensuremath{\Conid{Fun}\;\sigma\;\tau}, we define a GADT of \emph{function
+  codes} \ensuremath{\Conid{Code}\;\Varid{env}\;\sigma\;\tau}, whose values contain no environment. Type \ensuremath{\Conid{Code}}
+is indexed not just by \ensuremath{\sigma} and \ensuremath{\tau} but also by the type of environments,
+and has a constructor for each first-class function expression in the source
+program, like \ensuremath{\Conid{Fun}\;\sigma\;\tau} does in conventional defunctionalization. We then
+define \ensuremath{\Conid{Fun}\;\sigma\;\tau} as a pair of a function code of type \ensuremath{\Conid{Code}\;\Varid{env}\;\sigma\;\tau}
+and an environment of type \ensuremath{\Varid{env}}.
+
+As a downside, separating function codes adds a few indirections to the memory
+representation of closures: for instance we use \ensuremath{(\Conid{AddOne},())} instead of
+\ensuremath{\Conid{AddOne}}, and \ensuremath{(\Conid{Pair},\mathrm{1})} instead of \ensuremath{\Conid{Pair}\;\mathrm{1}}.
+
+As an upside, with separate function codes we can define many operations
+generically across all function codes (see \cref{sec:defunc-func-changes}),
+instead of generating definitions matching on each function. What's more, we
+later define operations that use raw function codes and need no environment; we
+could alternatively define function codes without using them in the
+representation of function values, at the expense of even more code duplication.
+%
+Code duplication is especially relevant because we currently perform
+defunctionalization by hand, though we are confident it would be conceptually
+straightforward to automate the process.\pg{Revise this.}
+
+Defunctionalizing the program with separate function codes produces the
+following GADT of function codes:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{30}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{43}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{50}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{type}\;\Conid{Env}\;\Varid{env}\mathrel{=}(\Conid{CompChangeStruct}\;\Varid{env},\Conid{NilTestable}\;\Varid{env}){}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;\Conid{Code}\;\Varid{env}\;\sigma\;\tau\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{AddOne}{}\<[13]%
+\>[13]{}\mathrel{:\mkern-1mu:}{}\<[30]%
+\>[30]{}\Conid{Code}\;()\;{}\<[43]%
+\>[43]{}\mathbb{Z}\;{}\<[50]%
+\>[50]{}\mathbb{Z}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{Pair}{}\<[13]%
+\>[13]{}\mathrel{:\mkern-1mu:}{}\<[30]%
+\>[30]{}\Conid{Code}\;\sigma\;{}\<[43]%
+\>[43]{}\tau\;{}\<[50]%
+\>[50]{}(\sigma,\tau){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{MapPair}{}\<[13]%
+\>[13]{}\mathrel{:\mkern-1mu:}\Conid{Env}\;\sigma\Rightarrow{}\<[30]%
+\>[30]{}\Conid{Code}\;[\mskip1.5mu \tau\mskip1.5mu]\;{}\<[43]%
+\>[43]{}\sigma\;{}\<[50]%
+\>[50]{}[\mskip1.5mu (\sigma,\tau)\mskip1.5mu]{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+In this definition, type \ensuremath{\Conid{Env}} names a set of typeclass constraints on the type
+of the environment, using the \ensuremath{\Conid{ConstraintKinds}} GHC language
+extension.
+Satisfying these constraints is necessary to implement a few operations on
+functions.
+We also require an interpretation function
+\ensuremath{\Varid{applyCode}} for function codes. If \ensuremath{\Varid{c}} is the code for a function \ensuremath{\Varid{f}\mathrel{=}\lambda \Varid{x}\to \Varid{t}},
+calling \ensuremath{\Varid{applyCode}\;\Varid{c}} computes \ensuremath{\Varid{f}}'s output from an environment \ensuremath{\Varid{env}} for \ensuremath{\Varid{f}}
+and an argument for \ensuremath{\Varid{x}}.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{40}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{48}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{55}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{55E}{@{}l@{}}%
+\column{58}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{applyCode}\mathrel{:\mkern-1mu:}{}\<[16]%
+\>[16]{}\Conid{Code}\;\Varid{env}\;\sigma\;\tau\to {}\<[40]%
+\>[40]{}\Varid{env}\to {}\<[48]%
+\>[48]{}\sigma\to {}\<[58]%
+\>[58]{}\tau{}\<[E]%
+\\
+\>[B]{}\Varid{applyCode}\;{}\<[16]%
+\>[16]{}\Conid{AddOne}\;{}\<[40]%
+\>[40]{}()\;{}\<[48]%
+\>[48]{}\Varid{x}{}\<[55]%
+\>[55]{}\mathrel{=}{}\<[55E]%
+\>[58]{}\Varid{x}\mathbin{+}\mathrm{1}{}\<[E]%
+\\
+\>[B]{}\Varid{applyCode}\;{}\<[16]%
+\>[16]{}\Conid{Pair}\;{}\<[40]%
+\>[40]{}\Varid{x}\;{}\<[48]%
+\>[48]{}\Varid{y}{}\<[55]%
+\>[55]{}\mathrel{=}{}\<[55E]%
+\>[58]{}(\Varid{x},\Varid{y}){}\<[E]%
+\\
+\>[B]{}\Varid{applyCode}\;{}\<[16]%
+\>[16]{}\Conid{MapPair}\;{}\<[40]%
+\>[40]{}\Varid{ys}\;{}\<[48]%
+\>[48]{}\Varid{x}{}\<[55]%
+\>[55]{}\mathrel{=}{}\<[55E]%
+\>[58]{}\Varid{mapDF}\;(\Conid{F}\;(\Conid{Pair},\Varid{x}))\;\Varid{ys}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+The implementation of \ensuremath{\Varid{applyCode}\;\Conid{MapPair}} only works because of the \ensuremath{\Conid{Env}\;\sigma}
+constraint for constructor \ensuremath{\Conid{MapPair}}: this constraint is required when
+constructing the defunctionalized function value that we pass as argument to \ensuremath{\Varid{mapDF}}.
+
+We represent defunctionalized function values through type \ensuremath{\Conid{RawFun}\;\Varid{env}\;\sigma\;\tau},
+a type synonym of the product of \ensuremath{\Conid{Code}\;\Varid{env}\;\sigma\;\tau} and \ensuremath{\Varid{env}}. We encode type \ensuremath{\sigma\to \tau} through type \ensuremath{\Conid{Fun}\;\sigma\;\tau}, defined as \ensuremath{\Conid{RawFun}\;\Varid{env}\;\sigma\;\tau} where
+\ensuremath{\Varid{env}} is existentially bound. We add constraint \ensuremath{\Conid{Env}\;\Varid{env}} to the definition of
+\ensuremath{\Conid{Fun}\;\sigma\;\tau}, because implementing \ensuremath{\oplus } on function changes will require
+using \ensuremath{\oplus } on environments.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{type}\;\Conid{RawFun}\;\Varid{env}\;\sigma\;\tau\mathrel{=}(\Conid{Code}\;\Varid{env}\;\sigma\;\tau,\Varid{env}){}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;\Conid{Fun}\;\sigma\;\tau\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{F}\mathrel{:\mkern-1mu:}\Conid{Env}\;\Varid{env}\Rightarrow\Conid{RawFun}\;\Varid{env}\;\sigma\;\tau\to \Conid{Fun}\;\sigma\;\tau{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+To interpret defunctionalized function values, we wrap \ensuremath{\Varid{applyCode}} in a new
+version of \ensuremath{\Varid{applyFun}}, having the same interface as the earlier \ensuremath{\Varid{applyFun}}.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{applyFun}\mathrel{:\mkern-1mu:}\Conid{Fun}\;\sigma\;\tau\to \sigma\to \tau{}\<[E]%
+\\
+\>[B]{}\Varid{applyFun}\;(\Conid{F}\;(\Varid{code},\Varid{env}))\;\Varid{arg}\mathrel{=}\Varid{applyCode}\;\Varid{code}\;\Varid{env}\;\Varid{arg}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+The rest of the source program is defunctionalized like before, using the new
+definition of \ensuremath{\Conid{Fun}\;\sigma\;\tau} and of \ensuremath{\Varid{applyFun}}.
+
+% Not shown.
+\pg{show this maybe?}
+
+\subsection{Defunctionalizing function changes}
+\label{sec:defunc-func-changes}
+Defunctionalization encodes function values as pairs of function codes and
+environments. In ILC, a function value can change because the environment
+changes or because the whole closure is replaced by a different one, with a
+different function code and different environment. For now, we focus on
+environment changes for simplicity. To allow inspecting function changes, we
+defunctionalize them as well, but treat them specially.
+
+Assume we want to defunctionalize a function change \ensuremath{\Varid{df}} with type \ensuremath{\Delta (\sigma\to \tau)\mathrel{=}\sigma\to \Delta \sigma\to \Delta \tau}, valid for function \ensuremath{\Varid{f}\typcolon\sigma\to \tau}.
+Instead of transforming type \ensuremath{\Delta (\sigma\to \tau)} into \ensuremath{\Conid{Fun}\;\sigma\;(\Conid{Fun}\;\Delta \sigma\;\Delta \tau)}, we transform \ensuremath{\Delta (\sigma\to \tau)} into a new type \ensuremath{\Conid{DFun}\;\sigma\;\tau}, the
+change type of \ensuremath{\Conid{Fun}\;\sigma\;\tau} (\ensuremath{\Delta (\Conid{Fun}\;\sigma\;\tau)\mathrel{=}\Conid{DFun}\;\sigma\;\tau}).
+%
+To apply \ensuremath{\Conid{DFun}\;\sigma\;\tau} we introduce an interpreter \ensuremath{\Varid{dapplyFun}\mathrel{:\mkern-1mu:}\Conid{Fun}\;\sigma\;\tau\to \Delta (\Conid{Fun}\;\sigma\;\tau)\to \Delta (\sigma\to \tau)}, or equivalently \ensuremath{\Varid{dapplyFun}\mathrel{:\mkern-1mu:}\Conid{Fun}\;\sigma\;\tau\to \Conid{DFun}\;\sigma\;\tau\to \sigma\to \Delta \sigma\to \Delta \tau}, which also
+serves as derivative of \ensuremath{\Varid{applyFun}}.
+\pg{Or maybe we first do CTS and then defunctionalization?}
+
+Like we did for \ensuremath{\Conid{Fun}\;\sigma\;\tau}, we define \ensuremath{\Conid{DFun}\;\sigma\;\tau} using function
+codes. That is, \ensuremath{\Conid{DFun}\;\sigma\;\tau} pairs a function code \ensuremath{\Conid{Code}\;\Varid{env}\;\sigma\;\tau}
+together with an environment change and a change structure for the environment
+type.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;\Conid{DFun}\;\sigma\;\tau\mathrel{=}\forall \Varid{env}\hsforall \hsdot{\circ }{\mathpunct{.}}\Conid{ChangeStruct}\;\Varid{env}\Rightarrow\Conid{DF}\;(\Delta \Varid{env},\Conid{Code}\;\Varid{env}\;\sigma\;\tau){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Without separate function codes, the definition of \ensuremath{\Conid{DFun}} would have to include
+one case for each first-class function.
+
+\subsubsection{Environment changes}
+\label{sec:defunc-env-changes}
+Instead of defining change structures for environments, we encode environments
+using tuples and define change structures for tuples.
+
+We define first change structures for empty tuples and pairs:
+\cref{sec:envs-without-base-inputs-intro}
+\pg{Maybe these change structures are needed earlier?}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;\Conid{ChangeStruct}\;()\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Delta ()\mathrel{=}(){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\text{\textunderscore}\oplus \text{\textunderscore}\mathrel{=}(){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{oreplace}\;\text{\textunderscore}\mathrel{=}(){}\<[E]%
+\\
+\>[B]{}\mathbf{instance}\;(\Conid{ChangeStruct}\;\Varid{a},\Conid{ChangeStruct}\;\Varid{b})\Rightarrow\Conid{ChangeStruct}\;(\Varid{a},\Varid{b})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Delta (\Varid{a},\Varid{b})\mathrel{=}(\Delta \Varid{a},\Delta \Varid{b}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Varid{a},\Varid{b})\oplus (\Varid{da},\Varid{db})\mathrel{=}(\Varid{a}\oplus \Varid{da},\Varid{b}\oplus \Varid{db}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{oreplace}\;(\Varid{a}_{2},\Varid{b}_{2})\mathrel{=}(\Varid{oreplace}\;\Varid{a}_{2},\Varid{oreplace}\;\Varid{b}_{2}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+To define change structures for $n$-uples of other arities we have two choices,
+which we show on triples \ensuremath{(\Varid{a},\Varid{b},\Varid{c})} and can be easily generalized.
+
+We can encode triples as nested pairs \ensuremath{(\Varid{a},(\Varid{b},(\Varid{c},())))}. Or we can define
+change structures for triples directly:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;({}\<[13]%
+\>[13]{}\Conid{ChangeStruct}\;\Varid{a},\Conid{ChangeStruct}\;\Varid{b},{}\<[E]%
+\\
+\>[13]{}\Conid{ChangeStruct}\;\Varid{c})\Rightarrow\Conid{ChangeStruct}\;(\Varid{a},\Varid{b},\Varid{c})\;\mathbf{where}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Delta (\Varid{a},\Varid{b},\Varid{c})\mathrel{=}(\Delta \Varid{a},\Delta \Varid{b},\Delta \Varid{c}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Varid{a},\Varid{b},\Varid{c})\oplus (\Varid{da},\Varid{db},\Varid{dc})\mathrel{=}(\Varid{a}\oplus \Varid{da},\Varid{b}\oplus \Varid{db},\Varid{c}\oplus \Varid{dc}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{oreplace}\;(\Varid{a}_{2},\Varid{b}_{2},\Varid{c}_{2})\mathrel{=}(\Varid{oreplace}\;\Varid{a}_{2},\Varid{oreplace}\;\Varid{b}_{2},\Varid{oreplace}\;\Varid{c}_{2}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Generalizing from pairs and triples, one can define similar instances for
+$n$-uples in general (say, for values of $n$ up to some high threshold).
+%
+
+% In fact, we can also replace a function value by another one with different
+% code. However, for now we set aside support for this case; as we will see, for
+% that case we can simply support replacing a function value with a new code and
+% associated environment, that is, simply support a replacement change.
+
+\subsubsection{Validity and ⊕ on defunctionalized function changes}
+A function change \ensuremath{\Varid{df}} is valid for \ensuremath{\Varid{f}} if \ensuremath{\Varid{df}} has the same function code as
+\ensuremath{\Varid{f}} and if \ensuremath{\Varid{df}}'s environment change is valid for \ensuremath{\Varid{f}}'s environment:
+\[\ensuremath{\validfromto{\Conid{Fun}\;\sigma\;\tau}{\Conid{F}\;\rho_{1}\;\Varid{c}}{\Conid{DF}\;\D\rho\;\Varid{c}}{\Conid{F}\;\rho_{2}\;\Varid{c}}\mathrel{=}\validfromto{\Varid{env}}{\rho_{1}}{\D\rho}{\rho_{2}}}\] where \ensuremath{\Varid{c}} is a function code of type \ensuremath{\Conid{Code}\;\Varid{env}\;\sigma\;\tau}, and
+where \ensuremath{\Varid{c}}'s type binds the type variable \ensuremath{\Varid{env}} we use on the right-hand side.
+
+Next, we implement \ensuremath{\oplus } on function changes to match our definition of
+validity, as required. We only need \ensuremath{\Varid{f}\oplus \Varid{df}} to give a result if \ensuremath{\Varid{df}} is a
+valid change for \ensuremath{\Varid{f}}. Hence, if the function code embedded in \ensuremath{\Varid{df}} does not
+match the one in \ensuremath{\Varid{f}}, we give an error.\footnote{We originally specified
+\ensuremath{\oplus } as a total function to avoid formalizing partial functions, but as
+mentioned in \cref{sec:change-intro}, we do not rely on the behavior of
+\ensuremath{\oplus } on invalid changes.}
+However, our first attempt does not typecheck, since the typechecker does not
+know whether the environment and the environment change have compatible types.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;\Conid{ChangeStruct}\;(\Conid{Fun}\;\sigma\;\tau)\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Delta (\Conid{Fun}\;\sigma\;\tau)\mathrel{=}\Conid{DFun}\;\sigma\;\tau{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{F}\;(\Varid{env},\Varid{c}_{1})\oplus \Conid{DF}\;(\Varid{denv},\Varid{c}_{2})\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mathbf{if}\;\Varid{c}_{1}\equiv\Varid{c}_{2}\;\mathbf{then}{}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}\Conid{F}\;(\Varid{env}\oplus \Varid{denv})\;\Varid{c}_{1}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mathbf{else}{}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}\Varid{error}\;\text{\ttfamily \char34 Invalid~function~change~in~oplus\char34}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+In particular, \ensuremath{\Varid{env}\oplus \Varid{denv}} is reported as ill-typed, because we don't
+know that \ensuremath{\Varid{env}} and \ensuremath{\Varid{denv}} have compatible types. Take \ensuremath{\Varid{c}_{1}\mathrel{=}\Conid{Pair},\Varid{c}_{2}\mathrel{=}\Conid{MapPair},\Varid{f}\mathrel{=}\Conid{F}\;(\Varid{env},\Conid{Pair})\mathrel{:\mkern-1mu:}\sigma\to \tau} and \ensuremath{\Varid{df}\mathrel{=}\Conid{DF}\;(\Varid{denv},\Conid{MapPair})\mathrel{:\mkern-1mu:}\Delta (\sigma\to \tau)}. Assume we evaluate \ensuremath{\Varid{f}\oplus \Varid{df}\mathrel{=}\Conid{F}\;(\Varid{env},\Conid{Pair})\oplus \Conid{DF}\;(\Varid{denv},\Conid{MapPair})}: there, indeed, \ensuremath{\Varid{env}\mathrel{:\mkern-1mu:}\sigma} and \ensuremath{\Varid{denv}\mathrel{:\mkern-1mu:}[\mskip1.5mu \tau\mskip1.5mu]}, so
+\ensuremath{\Varid{env}\oplus \Varid{denv}} is not type-correct. Yet, evaluating \ensuremath{\Varid{f}\oplus \Varid{df}} would
+\emph{not} fail, because \ensuremath{\Conid{MapPair}} and \ensuremath{\Conid{Pair}} are different, \ensuremath{\Varid{c}_{1}\equiv\Varid{c}_{2}} will
+return false and \ensuremath{\Varid{env}\oplus \Varid{denv}} won't be evaluated. But the typechecker does
+not know that.
+
+Hence, we need an equality operation that produces a witness of type equality. We
+define the needed infrastructure with few lines of code. First, we need a GADT
+of witnesses of type equality; we can borrow from GHC's standard library its
+definition, which is just:
+
+\pg{add link, not ``in GHC 8.0''}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mbox{\onelinecomment  From \ensuremath{\Conid{\Conid{Data}.\Conid{Type}.Equality}}}{}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;\tau_{1}\mathrel{:\mkern-1mu\sim\mkern-1mu:}\tau_{2}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{Refl}\mathrel{:\mkern-1mu:}\tau\mathrel{:\mkern-1mu\sim\mkern-1mu:}\tau{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+If \ensuremath{\Varid{x}} has type \ensuremath{\tau_{1}\mathrel{:\mkern-1mu\sim\mkern-1mu:}\tau_{2}} and matches pattern \ensuremath{\Conid{Refl}}, then by standard
+GADT typing rules \ensuremath{\tau_{1}} and \ensuremath{\tau_{2}} are equal.
+Even if \ensuremath{\tau_{1}\mathrel{:\mkern-1mu\sim\mkern-1mu:}\tau_{2}} has only constructor \ensuremath{\Conid{Refl}}, a match is necessary
+since \ensuremath{\Varid{x}} might be bottom. Readers familiar with type theory, Agda or Coq will
+recognize that \ensuremath{\mathrel{:\mkern-1mu\sim\mkern-1mu:}} resembles Agda's propositional equality or Martin-Löf's
+identity types, even though it can only represents equality between types and
+not between values.
+
+Next, we implement function \ensuremath{\Varid{codeMatch}} to compare codes. For equal codes, this
+operation produces a witness that their environment types match.\footnote{%
+If a code is polymorphic in the environment type, it must take as argument a
+representation of its type argument, to be used to implement \ensuremath{\Varid{codeMatch}}.
+We represent type arguments at runtime via instances of \ensuremath{\Conid{Typeable}}, and omit
+standard details here.}
+Using this operation, we can complete the above instance of
+\ensuremath{\Conid{ChangeStruct}\;(\Conid{Fun}\;\sigma\;\tau)}.
+
+% codeMatch1 :: Code1 env1 sigma1 tau1 -> Code1 env2 sigma2 tau2 -> IsEq (env1, sigma1, tau1) (env2, sigma2, tau2)
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{codeMatch}\mathrel{:\mkern-1mu:}\Conid{Code}\;\Varid{env}_{1}\;\sigma\;\tau\to \Conid{Code}\;\Varid{env}_{2}\;\sigma\;\tau\to \Conid{Maybe}\;(\Varid{env}_{1}\mathrel{:\mkern-1mu\sim\mkern-1mu:}\Varid{env}_{2}){}\<[E]%
+\\
+\>[B]{}\Varid{codeMatch}\;\Conid{AddOne}\;\Conid{AddOne}\mathrel{=}\Conid{Just}\;\Conid{Refl}{}\<[E]%
+\\
+\>[B]{}\Varid{codeMatch}\;\Conid{Pair}\;\Conid{Pair}\mathrel{=}\Conid{Just}\;\Conid{Refl}{}\<[E]%
+\\
+\>[B]{}\Varid{codeMatch}\;\Conid{MapPair}\;\Conid{MapPair}\mathrel{=}\Conid{Just}\;\Conid{Refl}{}\<[E]%
+\\
+\>[B]{}\Varid{codeMatch}\;\text{\textunderscore}\;\text{\textunderscore}\mathrel{=}\Conid{Nothing}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;\Conid{ChangeStruct}\;(\Conid{Fun}\;\sigma\;\tau)\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Delta (\Conid{Fun}\;\sigma\;\tau)\mathrel{=}\Conid{DFun}\;\sigma\;\tau{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{F}\;(\Varid{c}_{1},\Varid{env})\oplus \Conid{DF}\;(\Varid{c}_{2},\Varid{denv})\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mathbf{case}\;\Varid{codeMatch}\;\Varid{c}_{1}\;\Varid{c}_{2}\;\mathbf{of}{}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}\Conid{Just}\;\Conid{Refl}\to \Conid{F}\;(\Varid{c}_{1},\Varid{env}\oplus \Varid{denv}){}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}\Conid{Nothing}\to \Varid{error}\;\text{\ttfamily \char34 Invalid~function~change~in~oplus\char34}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\subsubsection{Applying function changes}
+After defining environment changes, we define an incremental interpretation
+function \ensuremath{\Varid{dapplyCode}}. If \ensuremath{\Varid{c}} is the code for a function \ensuremath{\Varid{f}\mathrel{=}\lambda \Varid{x}\to \Varid{t}}, as
+discussed, calling \ensuremath{\Varid{applyCode}\;\Varid{c}} computes the output of \ensuremath{\Varid{f}} from an environment
+\ensuremath{\Varid{env}} for \ensuremath{\Varid{f}} and an argument for \ensuremath{\Varid{x}}. Similarly, calling \ensuremath{\Varid{dapplyCode}\;\Varid{c}}
+computes the output of \ensuremath{\Derive{\Varid{f}}} from an environment \ensuremath{\Varid{env}} for \ensuremath{\Varid{f}}, an
+environment change \ensuremath{\Varid{denv}} valid for \ensuremath{\Varid{env}}, an argument for \ensuremath{\Varid{x}} and an argument
+change \ensuremath{\Varid{dx}}.
+
+% To implement function application, we first need to define how to interpret the
+% function code for |f| as the derivative of |f| \pg{nonsense sentence.}, that is,
+% a mapping from function codes to the behavior of their derivatives.
+% %
+% We define hence |dapplyCode1| for the interpreter of function codes
+% |applyCode1|.
+
+In our example, we have
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{41}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{49}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{60}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{70}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{83}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{83E}{@{}l@{}}%
+\column{86}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{dapplyCode}\mathrel{:\mkern-1mu:}{}\<[17]%
+\>[17]{}\Conid{Code}\;\Varid{env}\;\sigma\;\tau\to {}\<[41]%
+\>[41]{}\Varid{env}\to {}\<[49]%
+\>[49]{}\Delta \Varid{env}\to {}\<[60]%
+\>[60]{}\sigma\to {}\<[70]%
+\>[70]{}\Delta \sigma\to {}\<[86]%
+\>[86]{}\Delta \tau{}\<[E]%
+\\
+\>[B]{}\Varid{dapplyCode}\;{}\<[17]%
+\>[17]{}\Conid{AddOne}\;{}\<[41]%
+\>[41]{}()\;{}\<[49]%
+\>[49]{}()\;{}\<[60]%
+\>[60]{}\Varid{x}\;{}\<[70]%
+\>[70]{}\Varid{dx}{}\<[83]%
+\>[83]{}\mathrel{=}{}\<[83E]%
+\>[86]{}\Varid{dx}{}\<[E]%
+\\
+\>[B]{}\Varid{dapplyCode}\;{}\<[17]%
+\>[17]{}\Conid{Pair}\;{}\<[41]%
+\>[41]{}\Varid{x}\;{}\<[49]%
+\>[49]{}\Varid{dx}\;{}\<[60]%
+\>[60]{}\Varid{y}\;{}\<[70]%
+\>[70]{}\Varid{dy}{}\<[83]%
+\>[83]{}\mathrel{=}{}\<[83E]%
+\>[86]{}(\Varid{dx},\Varid{dy}){}\<[E]%
+\\
+\>[B]{}\Varid{dapplyCode}\;{}\<[17]%
+\>[17]{}\Conid{MapPair}\;{}\<[41]%
+\>[41]{}\Varid{ys}\;{}\<[49]%
+\>[49]{}\Varid{dys}\;{}\<[60]%
+\>[60]{}\Varid{x}\;{}\<[70]%
+\>[70]{}\Varid{dx}{}\<[83]%
+\>[83]{}\mathrel{=}{}\<[83E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{dmapDF}\;(\Conid{F}\;(\Conid{Pair},\Varid{x}))\;(\Conid{DF}\;(\Conid{Pair},\Varid{dx}))\;\Varid{ys}\;\Varid{dys}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+On top of \ensuremath{\Varid{dapplyCode}} we can define \ensuremath{\Varid{dapplyFun}}, which functions as a
+a derivative for \ensuremath{\Varid{applyFun}} and allows applying function changes:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{dapplyFun}\mathrel{:\mkern-1mu:}\Conid{Fun}\;\sigma\;\tau\to \Conid{DFun}\;\sigma\;\tau\to \sigma\to \Delta \sigma\to \Delta \tau{}\<[E]%
+\\
+\>[B]{}\Varid{dapplyFun}\;(\Conid{F}\;(\Varid{c}_{1},\Varid{env}))\;(\Conid{DF}\;(\Varid{c}_{2},\Varid{denv}))\;\Varid{x}\;\Varid{dx}\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{case}\;\Varid{codeMatch}\;\Varid{c}_{1}\;\Varid{c}_{2}\;\mathbf{of}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{Just}\;\Conid{Refl}\to \Varid{dapplyCode}\;\Varid{c}_{1}\;\Varid{env}\;\Varid{denv}\;\Varid{x}\;\Varid{dx}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{Nothing}\to \Varid{error}\;\text{\ttfamily \char34 Invalid~function~change~in~dapplyFun\char34}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+% \pg{resume}
+% Next, we add support for derivatives and function changes.
+% % We can start by
+% % simply adding a derivative for |applyFun1|:
+% % \begin{code}
+% % dapplyFun1 :: Fun1 sigma tau -> DFun1 sigma tau -> sigma -> Dt^sigma -> Dt^tau
+% % dapplyFun1 (F1 (c1, env)) (DF1 (c2, denv)) = undefined
+% % \end{code}
+% \begin{code}
+% dapplyFun1 :: Fun1 sigma tau -> DFun1 sigma tau -> sigma -> Dt^sigma -> Dt^tau
+% dapplyFun1 (F1 (c1, env)) (DF1 (c2, denv)) x dx =
+%   case codeMatch1 c1 c2 of
+%     Just Refl -> dapplyCode1 c1 env denv x dx
+%     Nothing -> error "Invalid function change in dapplyFun"
+% \end{code}
+
+However, we can also implement further accessors that inspect function changes.
+We can now finally detect if a change is nil. To this end, we first define a
+typeclass that allows testing changes to determine if they're nil:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;\Conid{NilChangeStruct}\;\Varid{t}\Rightarrow\Conid{NilTestable}\;\Varid{t}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{isNil}\mathrel{:\mkern-1mu:}\Delta \Varid{t}\to \Conid{Bool}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Now, a function change is nil only if the contained environment is nil.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;\Conid{NilTestable}\;(\Conid{Fun}\;\sigma\;\tau)\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{isNil}\mathrel{:\mkern-1mu:}\Conid{DFun}\;\sigma\;\tau\to \Conid{Bool}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{isNil}\;(\Conid{DF}\;(\Varid{denv},\Varid{code}))\mathrel{=}\Varid{isNil}\;\Varid{denv}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+However, this definition of \ensuremath{\Varid{isNil}} only works given a typeclass instance for
+\ensuremath{\Conid{NilTestable}\;\Varid{env}}; we need to add this requirement as a constraint, but we
+cannot add it to \ensuremath{\Varid{isNil}}'s type signature since type variable \ensuremath{\Varid{env}} is not in
+scope there.
+Instead, we must add the constraint where we introduce it by existential
+quantification, just like the constraint \ensuremath{\Conid{ChangeStruct}\;\Varid{env}}. In particular, we
+can reuse the constraint \ensuremath{\Conid{Env}\;\Varid{env}}.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;\Conid{DFun}\;\sigma\;\tau\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\forall \Varid{env}\hsforall \hsdot{\circ }{\mathpunct{.}}\Conid{Env}\;\Varid{env}\Rightarrow{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{DF}\;(\Conid{Code}\;\Varid{env}\;\sigma\;\tau,\Delta \Varid{env}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;\Conid{NilChangeStruct}\;(\Conid{Fun}\;\sigma\;\tau)\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\NilC{\Conid{F}\;(\Varid{code},\Varid{env})}\mathrel{=}\Conid{DF}\;(\Varid{code},\NilC{\Varid{env}}){}\<[E]%
+\\
+\>[B]{}\mathbf{instance}\;\Conid{NilTestable}\;(\Conid{Fun}\;\sigma\;\tau)\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{isNil}\mathrel{:\mkern-1mu:}\Conid{DFun}\;\sigma\;\tau\to \Conid{Bool}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{isNil}\;(\Conid{DF}\;(\Varid{code},\Varid{denv}))\mathrel{=}\Varid{isNil}\;\Varid{denv}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+We can then wrap a derivative via function \ensuremath{\Varid{wrapDF}} to return a nil change immediately if at runtime
+all input changes turn out to be nil. This was not possible in the setting
+described by \citet{CaiEtAl2014ILC}, because
+nil function changes could not be detected at runtime, only at compile time.
+To do so, we must produce directly a nil change for \ensuremath{\Varid{v}\mathrel{=}\Varid{applyFun}\;\Varid{f}\;\Varid{x}}. To avoid
+computing \ensuremath{\Varid{v}}, we assume we can compute a nil change for \ensuremath{\Varid{v}} without access to
+\ensuremath{\Varid{v}} via operation \ensuremath{\Varid{onil}} and typeclass \ensuremath{\Conid{OnilChangeStruct}} (omitted here);
+argument \ensuremath{\Conid{Proxy}} is a constant required for purely technical reasons.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{wrapDF}\mathrel{:\mkern-1mu:}\Conid{OnilChangeStruct}\;\tau\Rightarrow\Conid{Fun}\;\sigma\;\tau\to \Conid{DFun}\;\sigma\;\tau\to \sigma\to \Delta \sigma\to \Delta \tau{}\<[E]%
+\\
+\>[B]{}\Varid{wrapDF}\;\Varid{f}\;\Varid{df}\;\Varid{x}\;\Varid{dx}\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{if}\;\Varid{isNil}\;\Varid{df}\;\mathbf{then}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{onil}\;\Conid{Proxy}\mbox{\onelinecomment  Change-equivalent to \ensuremath{\NilC{\Varid{applyFun}\;\Varid{f}\;\Varid{x}}}}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{else}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{dapplyFun}\;\Varid{f}\;\Varid{df}\;\Varid{x}\;\Varid{dx}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\section{Defunctionalization and cache-transfer-style}
+%\pg{Read!}
+We can combine the above ideas with cache-transfer-style (\cref{ch:cts}). We
+show the details quickly.
+
+Combining the above with caching, we can use defunctionalization as described to
+implement the following interface for functions in caches. For extra generality,
+we use extension \ensuremath{\Conid{ConstraintKinds}} to allow instances to define the required
+typeclass constraints.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;\Conid{FunOps}\;\Varid{k}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Conid{Dk}\;\Varid{k}\mathrel{=}(\Varid{dk}\mathrel{:\mkern-1mu:}\mathbin{*}\to \mathbin{*}\to \mathbin{*}\to \mathbin{*}\to \mathbin{*})\mid \Varid{dk}\to \Varid{k}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Conid{ApplyCtx}\;\Varid{k}\;\Varid{i}\;\Varid{o}\mathrel{:\mkern-1mu:}\Conid{Constraint}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{apply}\mathrel{:\mkern-1mu:}\Conid{ApplyCtx}\;\Varid{k}\;\Varid{i}\;\Varid{o}\Rightarrow\Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}\to \Varid{i}\to (\Varid{o},\Varid{cache}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Conid{DApplyCtx}\;\Varid{k}\;\Varid{i}\;\Varid{o}\mathrel{:\mkern-1mu:}\Conid{Constraint}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{dApply}\mathrel{:\mkern-1mu:}\Conid{DApplyCtx}\;\Varid{k}\;\Varid{i}\;\Varid{o}\Rightarrow{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{Dk}\;\Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}_{1}\;\Varid{cache}_{2}\to \Delta \Varid{i}\to \Varid{cache}_{1}\to (\Delta \Varid{o},\Varid{cache}_{2}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Conid{DerivCtx}\;\Varid{k}\;\Varid{i}\;\Varid{o}\mathrel{:\mkern-1mu:}\Conid{Constraint}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{deriv}\mathrel{:\mkern-1mu:}\Conid{DerivCtx}\;\Varid{k}\;\Varid{i}\;\Varid{o}\Rightarrow{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}\to \Conid{Dk}\;\Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}\;\Varid{cache}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Conid{FunUpdCtx}\;\Varid{k}\;\Varid{i}\;\Varid{o}\mathrel{:\mkern-1mu:}\Conid{Constraint}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{funUpdate}\mathrel{:\mkern-1mu:}\Conid{FunUpdCtx}\;\Varid{k}\;\Varid{i}\;\Varid{o}\Rightarrow{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}_{1}\to \Conid{Dk}\;\Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}_{1}\;\Varid{cache}_{2}\to \Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}_{2}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{isNilFun}\mathrel{:\mkern-1mu:}\Conid{Dk}\;\Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}_{1}\;\Varid{cache}_{2}\to \Conid{Maybe}\;(\Varid{cache}_{1}\mathrel{:\mkern-1mu\sim\mkern-1mu:}\Varid{cache}_{2}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{updatedDeriv}\mathrel{:\mkern-1mu:}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Conid{FunOps}\;\Varid{k},\Conid{FunUpdCtx}\;\Varid{k}\;\Varid{i}\;\Varid{o},\Conid{DerivCtx}\;\Varid{k}\;\Varid{i}\;\Varid{o})\Rightarrow{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}_{1}\to \Conid{Dk}\;\Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}_{1}\;\Varid{cache}_{2}\to \Conid{Dk}\;\Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}_{2}\;\Varid{cache}_{2}{}\<[E]%
+\\
+\>[B]{}\Varid{updatedDeriv}\;\Varid{f}\;\Varid{df}\mathrel{=}\Varid{deriv}\;(\Varid{f}\mathbin{`\Varid{funUpdate}`}\Varid{df}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Type constructor \ensuremath{\Varid{k}} defines the specific constructor for the function type.
+In this interface, the type of function changes \ensuremath{\Conid{DK}\;\Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}_{1}\;\Varid{cache}_{2}}
+represents functions (encoded by type constructor \ensuremath{\Conid{Dk}\;\Varid{k}}) with inputs of type
+\ensuremath{\Varid{i}}, outputs of type \ensuremath{\Varid{o}}, input cache type \ensuremath{\Varid{cache}_{1}} and output cache type
+\ensuremath{\Varid{cache}_{2}}. Types \ensuremath{\Varid{cache}_{1}} and \ensuremath{\Varid{cache}_{2}} coincide for typical function changes, but
+can be different for replacement function changes, or more generally for
+function changes across functions with different implementations and cache types.
+Correspondingly, \ensuremath{\Varid{dApply}} supports applying such changes across closures with
+different implementations: unfortunately, unless the two implementations are
+similar, the cache content cannot be reused.
+
+To implement this interface it is sufficient to define a type of codes that
+admits an instance of type-class \ensuremath{\Conid{Codelike}}. Earlier definitions of
+\ensuremath{\Varid{codeMatch}}, \ensuremath{\Varid{applyFun}} and \ensuremath{\Varid{dapplyFun}}, adapted to cache-transfer style.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;\Conid{Codelike}\;\Varid{code}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{codeMatch}\mathrel{:\mkern-1mu:}\Varid{code}\;\Varid{env}_{1}\;\Varid{a}_{1}\;\Varid{r}_{1}\;\Varid{cache}_{1}\to \Varid{code}\;\Varid{env}_{2}\;\Varid{a}_{2}\;\Varid{r}_{2}\;\Varid{cache}_{2}\to {}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{Maybe}\;((\Varid{env}_{1},\Varid{cache}_{1})\mathrel{:\mkern-1mu\sim\mkern-1mu:}(\Varid{env}_{2},\Varid{cache}_{2})){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{applyCode}\mathrel{:\mkern-1mu:}\Varid{code}\;\Varid{env}\;\Varid{a}\;\Varid{b}\;\Varid{cache}\to \Varid{env}\to \Varid{a}\to (\Varid{b},\Varid{cache}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{dapplyCode}\mathrel{:\mkern-1mu:}\Varid{code}\;\Varid{env}\;\Varid{a}\;\Varid{b}\;\Varid{cache}\to \Delta \Varid{env}\to \Delta \Varid{a}\to \Varid{cache}\to (\Delta \Varid{b},\Varid{cache}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Typically, a defunctionalized program uses no first-class functions and has a
+single type of functions. Having a type class of function codes weakens that
+property. We can still use a single type of codes throughout our program; we can
+also use different types of codes for different parts of a program, without
+allowing for communications between those parts.
+% Defining such instances
+% %Observe that |dapply| produces caches
+
+On top of the \ensuremath{\Conid{Codelike}} interface, we can define instances of interface \ensuremath{\Conid{FunOps}} and
+\ensuremath{\Conid{ChangeStruct}}. To demonstrate this, we show a complete implementation in
+\cref{fig:chs-codelike,fig:funops-codelike}.
+Similarly to \ensuremath{\oplus }, we can implement \ensuremath{\circledcirc } by comparing codes
+contained in function changes; this is not straightforward when using closure
+conversion as in \cref{sec:incr-nest-loop}, unless we store even more type
+representations.
+% In representations using closure conversion , it is
+% possible to apply functions to correspondingly caches and to update a function
+% with a function change, but it is not possible to define the change composition
+% of two function changes.
+
+We can detect nil changes at runtime even in cache-passing style. We can for
+instance define function \ensuremath{\Varid{wrapDer1}} which does something trickier than \ensuremath{\Varid{wrapDF}}:
+here we assume that \ensuremath{\Varid{dg}} is a derivative taking function change \ensuremath{\Varid{df}} as
+argument. Then, if \ensuremath{\Varid{df}} is nil, \ensuremath{\Varid{dg}\;\Varid{df}} must also be nil, so we can return a nil
+change directly, together with the input cache.
+The input cache has the required type because in this case, the type \ensuremath{\Varid{cache}_{2}} of
+the desired output cache has matches type \ensuremath{\Varid{cache}_{1}} of the input cache (because
+we have a nil change \ensuremath{\Varid{df}} across them): the return value of \ensuremath{\Varid{isNilFun}} witnesses
+this type equality.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{wrapDer1}\mathrel{:\mkern-1mu:}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Conid{FunOps}\;\Varid{k},\Conid{OnilChangeStruct}\;\Varid{r'})\Rightarrow{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Conid{Dk}\;\Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}_{1}\;\Varid{cache}_{2}\to \Varid{f}\;\Varid{cache}_{1}\to (\Delta \Varid{r'},\Varid{f}\;\Varid{cache}_{2}))\to {}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Conid{Dk}\;\Varid{k}\;\Varid{i}\;\Varid{o}\;\Varid{cache}_{1}\;\Varid{cache}_{2}\to \Varid{f}\;\Varid{cache}_{1}\to (\Delta \Varid{r'},\Varid{f}\;\Varid{cache}_{2})){}\<[E]%
+\\
+\>[B]{}\Varid{wrapDer1}\;\Varid{dg}\;\Varid{df}\;\Varid{c}\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{case}\;\Varid{isNilFun}\;\Varid{df}\;\mathbf{of}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{Just}\;\Conid{Refl}\to (\Varid{onil}\;\Conid{Proxy},\Varid{c}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{Nothing}\to \Varid{dg}\;\Varid{df}\;\Varid{c}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+We can also hide the difference between difference cache types by defining a
+uniform type of caches, \ensuremath{\Conid{Cache}\;\Varid{code}}.
+To hide caches, we can use a pair of a cache (of type \ensuremath{\Varid{cache}})
+and a code for that cache type. When applying a function (change) to a cache, or
+when composing the function, we can compare the function code with the cache
+code.
+
+In this code we have not shown support for replacement values for functions; we
+leave details to our implementation.
+
+\begin{figure}[p]
+\texths %drop extra space around figure
+% From https://tex.stackexchange.com/a/186335/1340
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{type}\;\Conid{RawFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\;\Varid{env}\;\Varid{cache}\mathrel{=}(\Varid{code}\;\Varid{env}\;\Varid{a}\;\Varid{b}\;\Varid{cache},\Varid{env}){}\<[E]%
+\\
+\>[B]{}\mathbf{type}\;\Conid{RawDFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\;\Varid{env}\;\Varid{cache}\mathrel{=}(\Varid{code}\;\Varid{env}\;\Varid{a}\;\Varid{b}\;\Varid{cache},\Delta \Varid{env}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{data}\;\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\mathrel{=}\forall \Varid{env}\hsforall \;\Varid{cache}\hsdot{\circ }{\mathpunct{.}}\Conid{Env}\;\Varid{env}\Rightarrow{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{F}\;(\Conid{RawFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\;\Varid{env}\;\Varid{cache}){}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;\Conid{DFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\mathrel{=}\forall \Varid{env}\hsforall \;\Varid{cache}\hsdot{\circ }{\mathpunct{.}}\Conid{Env}\;\Varid{env}\Rightarrow{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{DF}\;(\Conid{RawDFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\;\Varid{env}\;\Varid{cache}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mbox{\onelinecomment  This cache is not indexed by \ensuremath{\Varid{a}} and \ensuremath{\Varid{b}}}{}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;\Conid{Cache}\;\Varid{code}\mathrel{=}\forall \Varid{a}\hsforall \;\Varid{b}\;\Varid{env}\;\Varid{cache}\hsdot{\circ }{\mathpunct{.}}\Conid{C}\;(\Varid{code}\;\Varid{env}\;\Varid{a}\;\Varid{b}\;\Varid{cache})\;\Varid{cache}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mbox{\onelinecomment  Wrapper}{}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;\Conid{FunW}\;\Varid{code}\;\Varid{a}\;\Varid{b}\;\Varid{cache}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{W}\mathrel{:\mkern-1mu:}\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\to \Conid{FunW}\;\Varid{code}\;\Varid{a}\;\Varid{b}\;(\Conid{Cache}\;\Varid{code}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{data}\;\Conid{DFunW}\;\Varid{code}\;\Varid{a}\;\Varid{b}\;\Varid{cache}_{1}\;\Varid{cache}_{2}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{DW}\mathrel{:\mkern-1mu:}\Conid{DFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\to \Conid{DFunW}\;\Varid{code}\;\Varid{a}\;\Varid{b}\;(\Conid{Cache}\;\Varid{code})\;(\Conid{Cache}\;\Varid{code}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{derivFun}\mathrel{:\mkern-1mu:}\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\to \Conid{DFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}{}\<[E]%
+\\
+\>[B]{}\Varid{derivFun}\;(\Conid{F}\;(\Varid{code},\Varid{env}))\mathrel{=}\Conid{DF}\;(\Varid{code},\NilC{\Varid{env}}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{oplusBase}\mathrel{:\mkern-1mu:}\Conid{Codelike}\;\Varid{code}\Rightarrow\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\to \Conid{DFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\to \Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{code}{}\<[E]%
+\\
+\>[B]{}\Varid{oplusBase}\;(\Conid{F}\;(\Varid{c}_{1},\Varid{env}))\;(\Conid{DF}\;(\Varid{c}_{2},\Varid{denv}))\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{case}\;\Varid{codeMatch}\;\Varid{c}_{1}\;\Varid{c}_{2}\;\mathbf{of}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{Just}\;\Conid{Refl}\to {}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}\Conid{F}\;(\Varid{c}_{1},\Varid{env}\oplus \Varid{denv}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\text{\textunderscore}\to \Varid{error}\;\text{\ttfamily \char34 INVALID~call~to~oplusBase!\char34}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{ocomposeBase}\mathrel{:\mkern-1mu:}\Conid{Codelike}\;\Varid{code}\Rightarrow\Conid{DFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\to \Conid{DFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\to \Conid{DFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}{}\<[E]%
+\\
+\>[B]{}\Varid{ocomposeBase}\;(\Conid{DF}\;(\Varid{c}_{1},\Varid{denv}_{1}))\;(\Conid{DF}\;(\Varid{c}_{2},\Varid{denv}_{2}))\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{case}\;\Varid{codeMatch}\;\Varid{c}_{1}\;\Varid{c}_{2}\;\mathbf{of}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{Just}\;\Conid{Refl}\to {}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}\Conid{DF}\;(\Varid{c}_{1},\Varid{denv}_{1}\circledcirc \Varid{denv}_{2}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\text{\textunderscore}\to \Varid{error}\;\text{\ttfamily \char34 INVALID~call~to~ocomposeBase!\char34}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;\Conid{Codelike}\;\Varid{code}\Rightarrow\Conid{ChangeStruct}\;(\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{code})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Delta (\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{code})\mathrel{=}\Conid{DFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\oplus)\mathrel{=}\Varid{oplusBase}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;\Conid{Codelike}\;\Varid{code}\Rightarrow\Conid{NilChangeStruct}\;(\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{code})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\NilC{\Conid{F}\;(\Varid{c},\Varid{env})}\mathrel{=}\Conid{DF}\;(\Varid{c},\NilC{\Varid{env}}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;\Conid{Codelike}\;\Varid{code}\Rightarrow\Conid{CompChangeStruct}\;(\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{code})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{df}_{1}\circledcirc\Varid{df}_{2}\mathrel{=}\Varid{ocomposeBase}\;\Varid{df}_{1}\;\Varid{df}_{2}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;\Conid{Codelike}\;\Varid{code}\Rightarrow\Conid{NilTestable}\;(\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{code})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{isNil}\;(\Conid{DF}\;(\Varid{c},\Varid{env}))\mathrel{=}\Varid{isNil}\;\Varid{env}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\caption{Implementing change structures using \ensuremath{\Conid{Codelike}} instances.}
+\label{fig:chs-codelike}
+\end{figure}
+
+\begin{figure}[p]
+\texths %drop extra space around figure
+% From https://tex.stackexchange.com/a/186335/1340
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{applyRaw}\mathrel{:\mkern-1mu:}\Conid{Codelike}\;\Varid{code}\Rightarrow\Conid{RawFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\;\Varid{env}\;\Varid{cache}\to \Varid{a}\to (\Varid{b},\Varid{cache}){}\<[E]%
+\\
+\>[B]{}\Varid{applyRaw}\;(\Varid{code},\Varid{env})\mathrel{=}\Varid{applyCode}\;\Varid{code}\;\Varid{env}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{dapplyRaw}\mathrel{:\mkern-1mu:}\Conid{Codelike}\;\Varid{code}\Rightarrow\Conid{RawDFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\;\Varid{env}\;\Varid{cache}\to \Delta \Varid{a}\to \Varid{cache}\to (\Delta \Varid{b},\Varid{cache}){}\<[E]%
+\\
+\>[B]{}\Varid{dapplyRaw}\;(\Varid{code},\Varid{denv})\mathrel{=}\Varid{dapplyCode}\;\Varid{code}\;\Varid{denv}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{applyFun}\mathrel{:\mkern-1mu:}\Conid{Codelike}\;\Varid{code}\Rightarrow\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\to \Varid{a}\to (\Varid{b},\Conid{Cache}\;\Varid{code}){}\<[E]%
+\\
+\>[B]{}\Varid{applyFun}\;(\Conid{F}\;\Varid{f}\mathrel{@}(\Varid{code},\Varid{env}))\;\Varid{arg}\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Varid{id}\mathbin{* \mkern-5mu * \mkern-5mu *}\Conid{C}\;\Varid{code})\mathbin{\$}\Varid{applyRaw}\;\Varid{f}\;\Varid{arg}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{dapplyFun}\mathrel{:\mkern-1mu:}\Conid{Codelike}\;\Varid{code}\Rightarrow\Conid{DFun}\;\Varid{a}\;\Varid{b}\;\Varid{code}\to \Delta \Varid{a}\to \Conid{Cache}\;\Varid{code}\to (\Delta \Varid{b},\Conid{Cache}\;\Varid{code}){}\<[E]%
+\\
+\>[B]{}\Varid{dapplyFun}\;(\Conid{DF}\;(\Varid{code}_{1},\Varid{denv}))\;\Varid{darg}\;(\Conid{C}\;\Varid{code}_{2}\;\Varid{cache}_{1})\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{case}\;\Varid{codeMatch}\;\Varid{code}_{1}\;\Varid{code}_{2}\;\mathbf{of}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{Just}\;\Conid{Refl}\to {}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}(\Varid{id}\mathbin{* \mkern-5mu * \mkern-5mu *}\Conid{C}\;\Varid{code}_{1})\mathbin{\$}\Varid{dapplyCode}\;\Varid{code}_{1}\;\Varid{denv}\;\Varid{darg}\;\Varid{cache}_{1}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\text{\textunderscore}\to \Varid{error}\;\text{\ttfamily \char34 INVALID~call~to~dapplyFun!\char34}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;\Conid{Codelike}\;\Varid{code}\Rightarrow\Conid{FunOps}\;(\Conid{FunW}\;\Varid{code})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Conid{Dk}\;(\Conid{FunW}\;\Varid{code})\mathrel{=}\Conid{DFunW}\;\Varid{code}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{apply}\;(\Conid{W}\;\Varid{f})\mathrel{=}\Varid{applyFun}\;\Varid{f}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{dApply}\;(\Conid{DW}\;\Varid{df})\mathrel{=}\Varid{dapplyFun}\;\Varid{df}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{deriv}\;(\Conid{W}\;\Varid{f})\mathrel{=}\Conid{DW}\;(\Varid{derivFun}\;\Varid{f}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{funUpdate}\;(\Conid{W}\;\Varid{f})\;(\Conid{DW}\;\Varid{df})\mathrel{=}\Conid{W}\;(\Varid{f}\oplus \Varid{df}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{isNilFun}\;(\Conid{DW}\;\Varid{df})\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mathbf{if}\;\Varid{isNil}\;\Varid{df}\;\mathbf{then}{}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}\Conid{Just}\;\Conid{Refl}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mathbf{else}{}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}\Conid{Nothing}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\caption{Implementing \ensuremath{\Conid{FunOps}} using \ensuremath{\Conid{Codelike}} instances.}
+\label{fig:funops-codelike}
+\end{figure}
+
+%  LocalWords:  dapplyFun dapply oreplace ChangeStruct Codelike RawFun

@@ -1,0 +1,510 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+\begin{figure}
+
+  \begin{subfigure}[c]{0.5\textwidth}
+\RightFramedSignature{\Delta\Gt}
+\begin{align*}
+  \ensuremath{\Delta \iota} &= \ldots\\
+  \ensuremath{\Delta (\sigma\to \tau)} &= \ensuremath{\sigma\to \Delta \sigma\to \Delta \tau}
+\end{align*}
+\caption{Change types (\cref{def:change-types}).}
+\label{fig:change-types}
+\label{fig:correctness:change-types}
+\end{subfigure}
+%
+\hfill
+%
+\begin{subfigure}[c]{0.45\textwidth}
+\RightFramedSignature{\Delta\Gamma}
+\begin{align*}
+  \Delta\EmptyContext &= \EmptyContext \\
+  \Delta\Extend*{x}{\tau} &= \Extend[\Extend[\Delta\Gamma]{x}{\tau}]{\D x}{\Delta\tau}
+\end{align*}
+\caption{Change contexts (\cref{def:change-contexts}).}
+\label{fig:correctness:change-contexts}
+\end{subfigure}
+\vskip \baselineskip
+
+\begin{subfigure}[c]{0.5\textwidth}
+  \RightFramedSignature{\ensuremath{\Derive{\Varid{t}}}}
+ \deriveDefCore
+\caption{Differentiation (\cref{def:derive}).}
+\label{fig:correctness:derive}
+\end{subfigure}
+%
+\hfill
+%
+\begin{subfigure}[c]{0.45\textwidth}
+  \begin{typing}
+    \Rule[Derive]
+    {\ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}}
+    {\ensuremath{\Delta \Gamma\vdash\Derive{\Varid{t}}\typcolon\Delta \tau}}
+\end{typing}
+\caption{Differentiation typing (\cref{lem:derive-typing}).}
+\label{fig:derive}
+\end{subfigure}
+
+\vskip \baselineskip
+\begin{subfigure}[c]{1.0\textwidth}
+  \RightFramedSignature{\ensuremath{\validfromto{\tau}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}}\text{ with }\ensuremath{\Varid{v}_{1},\Varid{v}_{2}\typcolon\Eval{\tau},\Varid{dv}\typcolon\Eval{\Delta \tau}}}
+\begin{align*}
+  \ensuremath{\validfromto{\iota}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}} &= \ldots \\
+  \ensuremath{\validfromto{\sigma\to \tau}{\Varid{f}_{1}}{\Varid{df}}{\Varid{f}_{2}}} &=
+  \ensuremath{\forall \validfromto{\sigma}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}\hsforall \hsdot{\circ }{\mathpunct{.}}\;\validfromto{\tau}{\Varid{f}_{1}\;\Varid{a}_{1}}{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}}{\Varid{f}_{2}\;\Varid{a}_{2}}}
+  \end{align*}
+
+  \RightFramedSignature{\ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}}\text{ with }\ensuremath{\rho_{1},\rho_{2}\typcolon\Eval{\Gamma},\D\rho\typcolon\Eval{\Delta \Gamma}}}
+\begin{typing}
+  \Axiom
+  {\validfromto{\EmptyContext}{\EmptyEnv}{\EmptyEnv}{\EmptyEnv}}
+
+  \Rule{\ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}}\\
+    \ensuremath{\validfromto{\tau}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}}}{
+  \validfromto{\Extend{x}{\tau}}
+  {\ExtendEnv*[\rho_1]{x}{a_1}}
+  {\ExtendEnv*[\ExtendEnv[\D\rho]{x}{a_1}]{dx}{\D{a}}}
+  {\ExtendEnv*[\rho_2]{x}{a_2}}}
+\end{typing}
+
+\caption{Validity (\cref{def:ch-validity,def:env-ch-validity}).}
+\label{fig:validity}
+\label{fig:correctness:change-environments}
+\end{subfigure}
+
+\vskip 2\baselineskip
+\begin{subfigure}[c]{1.0\textwidth}
+  \centering
+If \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} then
+% \[|fromto (eval(Gamma) -> eval(tau)) (eval t) (evalInc t) (eval t)|\]
+% that is
+\[\ensuremath{\forall \validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}\hsforall \hsdot{\circ }{\mathpunct{.}}\;\validfromto{\tau}{\Eval{\Varid{t}}\;\rho_{1}}{\Eval{\Derive{\Varid{t}}}\;\D\rho}{\Eval{\Varid{t}}\;\rho_{2}}}.\]
+\caption{Correctness of \ensuremath{\Derive{\text{\textendash}}} (from \cref{thm:derive-correct}).}
+\label{fig:correctness:derive-correct}
+\end{subfigure}
+\pg{Say this is a summary of definitions throughout the chapter.}
+\caption{Defining differentiation and proving it correct. The rest of this chapter explains and motivates the above definitions.}
+  \label{fig:differentiation}
+\end{figure}

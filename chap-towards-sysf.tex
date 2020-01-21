@@ -1,0 +1,1796 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+
+
+
+%  "\lambda^2_{\to}"
+
+
+\chapter{Towards differentiation for System~F}
+\label{ch:diff-parametricity-system-f}
+Differentiation is closely related to both logical relations and parametricity,
+as noticed by various authors in discussions of differentiation. \Cref{ch:bsos}
+presents novel proofs of ILC correctness by adapting some logical relation techniques.
+As a demonstration, we
+define in this chapter differentiation for System F, by adapting results about parametricity.
+%
+We stop short of a full proof that this generalization is correct, but we have
+implemented and tested it on a mature implementation of a System F typechecker;
+we believe the proof will mostly be a straightforward adaptation of existing ones about
+parametricity, but we leave verification for future work.
+A key open issue is discussed in \cref{rem:validity-oplus-system-f-not-really}.
+
+% define a form of differentiation to System F that arises as
+% an immediate generalization.
+% conjecture
+
+% In this chapter, we show how differentiation and the core of its correctness proof
+% appear to generalize naturally to System F. We define a transformation
+% We stop short of giving a full formal proof,
+% but we conjecture our results follow as variations of existing proofs.
+
+% To gain
+% initial evidence, we have implemented the transformations described here on top
+% of an existing PTS implementation.
+
+% We show a variant of differentiation (that we still write |derive t|) that is
+% closer to their transformation for parametricity (which they write |eval t|).
+
+\paragraph{History and motivation}
+Various authors noticed that differentiation appears related to (binary)
+parametricity (including \citet{Atkey2015ILC}).
+In particular, it resembles a transformation presented by
+\citet{Bernardy2011realizability} for arbitrary PTSs.%
+\footnote{\citeauthor{Bernardy2011realizability} were not the first to introduce
+  such a transformation. But most earlier work
+focuses on System F, and our presentation follows theirs and uses their added
+generality. We refer for details to existing discussions of related
+work~\citep{Wadler2007girardreynolds,Bernardy2011realizability}.}
+By analogy with unary parametricity, Yufei Cai sketched an extension of
+differentiation for arbitrary PTSs, but many questions remained open, and at the
+time our correctness proof for ILC was significantly more involved and trickier
+to extend to System F, since it was defined in terms of denotational equivalence.
+Later, we reduced the proof core to defining a logical relation, proving its
+fundamental property and a few corollaries, as shown in~\cref{ch:derive-formally},
+Extending this logical relation to System F proved comparably more straightforward.
+
+\paragraph{Parametricity versus ILC}
+Both parametricity and ILC define logical relations across program executions on
+different inputs. When studying parametricity, differences are only allowed in
+the implementations of abstractions (through abstract types or other
+mechanisms). To be related, different implementations of the same abstraction
+must give results that are equivalent according to the calling program.
+Indeed, parametricity defines not just a logical relation but a \emph{logical
+equivalence}, that can be shown to be equivalent to contextual
+equivalence~(as explained for instance by \citet[Ch.~48]{Harper2016PFPL} or by
+\citet{Ahmed2006stepindexed}).
+
+When studying ILC, logical equivalence between terms \ensuremath{\Varid{t}_{1}} and \ensuremath{\Varid{t}_{2}}
+(written \ensuremath{(\Varid{t}_{1},\Varid{t}_{2})\in \mathcal{P}\mean{\tau}}), appears to be generalized by the existence
+of a valid change \ensuremath{\Varid{de}} between \ensuremath{\Varid{t}_{1}} and \ensuremath{\Varid{t}_{2}} (that is, \ensuremath{\validfromto{\tau}{\Varid{t}_{1}}{\Varid{dt}}{\Varid{t}_{2}}}).
+As in earlier chapters, if terms \ensuremath{\Varid{e}_{1}} and \ensuremath{\Varid{e}_{2}} are equivalent, any valid change
+\ensuremath{\Varid{dt}} between them is a nil change, but validity allows describing other changes.
+% The syntax we use
+% for change types suggests that
+
+% then extend differentiation to System F.
+
+\section{The parametricity transformation}
+\label{sec:parametricity-transform}
+First, we show a variant of their parametricity transformation, adapted to a
+variant of STLC without base types but with type variables. Presenting \ensuremath{\lambda_{\to}}
+using type variables will help when we come back to System F, and allows
+discussing parametricity on STLC\@.
+This transformation
+is based on the presentation of STLC as calculus \ensuremath{\lambda_{\to}}, a \emph{Pure Type
+System} (PTS)~\citep[Sec.~5.2]{Barendregt1992lambda}.
+
+\paragraph{Background}
+In PTSs, terms and types form a single syntactic category, but are distinguished
+through an extended typing judgement (written \ensuremath{\Gamma\vdash\Varid{t}\typcolon\Varid{t}}) using additional
+terms called \emph{sorts}. Function types \ensuremath{\sigma\to \tau} are generalized by
+\ensuremath{\Pi}-type \ensuremath{\Pi \Varid{x}\typcolon\Varid{s}\hsforall \hsdot{\circ }{\mathpunct{.}}\Varid{t}}, where \ensuremath{\Varid{x}} can in general appear free in \ensuremath{\Varid{t}},
+a generalization of \ensuremath{\Pi}-types in dependently-typed languages, but also of
+universal types \ensuremath{\forall \Conid{X}\hsforall \hsdot{\circ }{\mathpunct{.}}\Conid{T}} in the System F family; if \ensuremath{\Varid{x}} does not appear
+free in \ensuremath{\Varid{t}}, we write \ensuremath{\Varid{s}\to \Varid{t}}.
+Typing restricts whether terms of some sort \ensuremath{\Varid{s}_{1}} can abstract over terms of sort
+\ensuremath{\Varid{s}_{2}}; different PTSs allow different combinations of sorts \ensuremath{\Varid{s}_{1}} and \ensuremath{\Varid{s}_{2}}
+(specified by \emph{relations} \ensuremath{\mathcal{R}}), but
+lots of metatheory for PTSs is parameterized over the choice of combinations.
+In STLC presented as a PTS, there is an additional
+sort \ensuremath{\star}; those terms \ensuremath{\tau} such that \ensuremath{\vdash\tau\typcolon\star} are
+types.\footnote{Calculus \ensuremath{\lambda_{\to}} has also a sort \ensuremath{\Box} such that \ensuremath{\vdash\star\typcolon\Box},
+but \ensuremath{\Box} itself has no type. Such a sort appears only in PTS typing
+derivations, not in well-typed terms themselves, so we do not discuss it
+further.} We do not intend to give a full introduction to PTSs, only to
+introduce what's strictly needed for our presentation, and refer the readers to
+existing presentations~\citep{Barendregt1992lambda}.
+
+Instead of base types, \ensuremath{\lambda_{\to}} use uninterpreted type variables \ensuremath{\alpha}, but
+do not allow terms to bind them. Nevertheless, we can write open terms, free in
+type variables for, say, naturals, and term variables for operations on
+naturals. STLC restricts \ensuremath{\Pi}-types \ensuremath{\Pi \Varid{x}\typcolon\Conid{A}\hsforall \hsdot{\circ }{\mathpunct{.}}\Conid{B}} to the usual arrow types \ensuremath{\Conid{A}\to \Conid{B}} through \ensuremath{\mathcal{R}}: one can show that in \ensuremath{\Pi \Varid{x}\typcolon\Conid{A}\hsforall \hsdot{\circ }{\mathpunct{.}}\Conid{B}}, variable \ensuremath{\Varid{x}}
+cannot occur free in \ensuremath{\Conid{B}}.
+
+\paragraph{Parametricity}
+\citeauthor{Bernardy2011realizability} show how to transform a typed term \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} in a strongly normalizing PTS $P$ into a proof that \ensuremath{\Varid{t}} satisfies a
+parametricity statement for \ensuremath{\tau}. The proof is in a logic represented by PTS
+$P^2$. PTS $P^2$ is constructed uniformly from $P$, and is strongly normalizing
+whenever $P$ is.
+When the base PTS $P$ is \ensuremath{\lambda_{\to}},
+\citeauthor{Bernardy2011realizability}'s transformation produces terms
+in a PTS \ensuremath{\lambda_{\to}^2}, produced by transforming \ensuremath{\lambda_{\to}}.
+PTS \ensuremath{\lambda_{\to}^2} extends \ensuremath{\lambda_{\to}} with a separate sort \ensuremath{\lceil \star \rceil} of propositions, together with
+enough abstraction power to abstract propositions over values.
+Like \ensuremath{\lambda_{\to}}, \ensuremath{\lambda_{\to}^2} uses uninterpreted type variables \ensuremath{\alpha} and does not
+allow abstracting over them.
+
+In parametricity statements about \ensuremath{\lambda_{\to}}, we write \ensuremath{(\Varid{t}_{1},\Varid{t}_{2})\in \mathcal{P}\mean{\tau}} for a
+proposition (hence, living in \ensuremath{\lceil \star \rceil}) that states that \ensuremath{\Varid{t}_{1}} and \ensuremath{\Varid{t}_{2}} are
+related. This proposition is defined, as usual, via a \emph{logical relation}.
+We write \ensuremath{\Varid{dxx}} for a proof that \ensuremath{\Varid{x}_{1}} and \ensuremath{\Varid{x}_{2}} are related. For type variables \ensuremath{\alpha},
+transformed terms abstract over an arbitrary relation \ensuremath{\mathcal{R}^\alpha} between \ensuremath{\alpha_{1}} and
+\ensuremath{\alpha_{2}}. When \ensuremath{\alpha} is instantiated by \ensuremath{\tau}, \ensuremath{\mathcal{R}^\alpha} \emph{can} (but does
+not have to) be instantiated with relation \ensuremath{(\text{\textendash},\text{\textendash})\in \mathcal{P}\mean{\tau}}, but \ensuremath{\mathcal{R}^\alpha} abstracts
+over arbitrary \emph{candidate} relations (similar to the notion of reducibility
+candidates~\citep[Ch.~14.1.1]{girard1989proofs}). Allowing alternative
+instantiations makes parametricity statements more powerful, and it is also
+necessary to define parametricity for impredicative type systems (like System F)
+in a predicative ambient logic.%
+\footnote{Specifically, if we require \ensuremath{\mathcal{R}^\alpha} to be instantiated with the
+logical relation itself for \ensuremath{\tau} when \ensuremath{\alpha} is instantiated with \ensuremath{\tau}, the
+definition becomes circular. Consider the definition of \ensuremath{(\Varid{t}_{1},\Varid{t}_{2})\in \mathcal{P}\mean{\forall \alpha\hsforall \hsdot{\circ }{\mathpunct{.}}\tau}}: type variable \ensuremath{\alpha} can be instantiated with the same type
+\ensuremath{\forall \alpha\hsforall \hsdot{\circ }{\mathpunct{.}}\tau}, so the definition of \ensuremath{(\Varid{t}_{1},\Varid{t}_{2})\in \mathcal{P}\mean{\forall \alpha\hsforall \hsdot{\circ }{\mathpunct{.}}\tau}}
+becomes impredicative.}
+
+A transformed term \ensuremath{\mathcal{P}\mean{\Varid{t}}} relates two executions of terms \ensuremath{\Varid{t}} in different
+environments: it can be read as a proof that term \ensuremath{\Varid{t}} maps related inputs to
+related outputs. The proof strategy that \ensuremath{\mathcal{P}\mean{\Varid{t}}}
+uses is the standard one for proving fundamental properties of logical relations;
+but instead of doing a proof in the metalevel logic (by induction on terms and
+typing derivations), \ensuremath{\lambda_{\to}^2} serves as an object-level logic, and \ensuremath{\mathcal{P}\mean{\text{\textendash}}}
+generates proof terms in this logic by recursion on terms. At the metalevel,
+\citeauthor[Th. 3]{Bernardy2011realizability} prove that for any well-typed term
+\ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}, proof \ensuremath{\mathcal{P}\mean{\Varid{t}}} shows that \ensuremath{\Varid{t}} satisfies the parametricity statement
+for type \ensuremath{\tau} given the hypotheses \ensuremath{\mathcal{P}\mean{\Gamma}} (or more formally,
+\ensuremath{\mathcal{P}\mean{\Gamma}\vdash\mathcal{P}\mean{\Varid{t}}\typcolon(\mathcal{S}_1 \mean{\Varid{t}},\mathcal{S}_2 \mean{\Varid{t}})\in \mathcal{P}\mean{\tau}}).
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}(\Varid{f}_{1},\Varid{f}_{2})\in \mathcal{P}\mean{\sigma\to \tau}\mathrel{=}\Pi (\Varid{x}_{1}\typcolon\mathcal{S}_1 \mean{\sigma})\hsforall \;(\Varid{x}_{2}\typcolon\mathcal{S}_2 \mean{\sigma})\;(\Varid{dxx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \mathcal{P}\mean{\sigma})\hsdot{\circ }{\mathpunct{.}}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}(\Varid{f}_{1}\;\Varid{x}_{1},\Varid{f}_{2}\;\Varid{x}_{2})\in \mathcal{P}\mean{\tau}{}\<[E]%
+\\
+\>[3]{}(\Varid{x}_{1},\Varid{x}_{2})\in \mathcal{P}\mean{\alpha}\mathrel{=}\mathcal{R}^\alpha\;\Varid{x}_{1}\;\Varid{x}_{2}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathcal{P}\mean{\Varid{x}}\mathrel{=}\Varid{dxx}{}\<[E]%
+\\
+\>[3]{}\mathcal{P}\mean{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\lambda (\Varid{x}_{1}\typcolon\mathcal{S}_1 \mean{\sigma})\;(\Varid{x}_{2}\typcolon\mathcal{S}_2 \mean{\sigma})\;(\Varid{dxx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \mathcal{P}\mean{\sigma})\to {}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}\mathcal{P}\mean{\Varid{t}}{}\<[E]%
+\\
+\>[3]{}\mathcal{P}\mean{\Varid{s}\;\Varid{t}}\mathrel{=}\mathcal{P}\mean{\Varid{s}}\;\mathcal{S}_1 \mean{\Varid{t}}\;\mathcal{S}_2 \mean{\Varid{t}}\;\mathcal{P}\mean{\Varid{t}}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathcal{P}\mean{\EmptyContext}\mathrel{=}\EmptyContext{}\<[E]%
+\\
+\>[3]{}\mathcal{P}\mean{\Gamma,\Varid{x}\typcolon\tau}\mathrel{=}\mathcal{P}\mean{\Gamma},\Varid{x}_{1}\typcolon\mathcal{S}_1 \mean{\tau},\Varid{x}_{2}\typcolon\mathcal{S}_2 \mean{\tau},\Varid{dxx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \mathcal{P}\mean{\tau}{}\<[E]%
+\\
+\>[3]{}\mathcal{P}\mean{\Gamma,\alpha\typcolon\star}\mathrel{=}\mathcal{P}\mean{\Gamma},\alpha_{1}\typcolon\star,\alpha_{2}\typcolon\star,\mathcal{R}^\alpha\typcolon\alpha_{1}\to \alpha_{2}\to \lceil \star \rceil{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+In the above, \ensuremath{\mathcal{S}_1 \mean{\Varid{s}}} and \ensuremath{\mathcal{S}_2 \mean{\Varid{s}}} simply subscript all (term and type) variables in
+their arguments with ${}_1$ and ${}_2$, to make them refer to the first or
+second computation. To wit, the straightforward definition is:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathcal{S}_i \mean{\Varid{x}}\mathrel{=}\Varid{x}_i{}\<[E]%
+\\
+\>[3]{}\mathcal{S}_i \mean{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}\mathrel{=}\lambda (\Varid{x}_i\typcolon\mathcal{S}_i \mean{\sigma})\to \mathcal{S}_i \mean{\Varid{t}}{}\<[E]%
+\\
+\>[3]{}\mathcal{S}_i \mean{\Varid{s}\;\Varid{t}}\mathrel{=}\mathcal{S}_i \mean{\Varid{s}}\;\mathcal{S}_i \mean{\Varid{t}}{}\<[E]%
+\\
+\>[3]{}\mathcal{S}_i \mean{\sigma\to \tau}\mathrel{=}\mathcal{S}_i \mean{\sigma}\to \mathcal{S}_i \mean{\tau}{}\<[E]%
+\\
+\>[3]{}\mathcal{S}_i \mean{\alpha}\mathrel{=}\alpha_i{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+It might be unclear how the proof \ensuremath{\mathcal{P}\mean{\Varid{t}}} references the original term \ensuremath{\Varid{t}}.
+Indeed, it does not do so explicitly. But since in PTS $\beta$-equivalent types
+have the same members, we can construct typing judgement that mention \ensuremath{\Varid{t}}. As
+mentioned, from \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} it follows that
+\ensuremath{\mathcal{P}\mean{\Gamma}\vdash\mathcal{P}\mean{\Varid{t}}\typcolon(\mathcal{S}_1 \mean{\Varid{t}},\mathcal{S}_2 \mean{\Varid{t}})\in \mathcal{P}\mean{\tau}}~\citep[Th.
+3]{Bernardy2011realizability}. This is best shown on a small example.
+
+\begin{example}
+Take for instance an identity function \ensuremath{\Varid{id}\mathrel{=}\lambda (\Varid{x}\typcolon\alpha)\to \Varid{x}}, which is typed
+in an open context (that is, \ensuremath{\alpha\typcolon\star\vdash\lambda (\Varid{x}\typcolon\alpha)\to \Varid{x}}).
+The transformation gives us
+\[\ensuremath{\Varid{pid}\mathrel{=}\mathcal{P}\mean{\Varid{id}}\mathrel{=}\lambda (\Varid{x}_{1}\typcolon\alpha_{1})\;(\Varid{x}_{2}\typcolon\alpha_{2})\;(\Varid{dxx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \mathcal{P}\mean{\alpha})\to \Varid{dxx}},\]
+which simply returns the proofs that inputs are related:
+\begin{multline*}
+\ensuremath{\alpha_{1}\typcolon\star,\alpha_{2}\typcolon\star,\mathcal{R}^\alpha\typcolon\alpha_{1}\to \alpha_{2}\to \lceil \star \rceil\vdash} \\
+  \ensuremath{\Varid{pid}\typcolon\Pi (\Varid{x}_{1}\typcolon\alpha_{1})\hsforall \;(\Varid{x}_{2}\typcolon\alpha_{2})\hsdot{\circ }{\mathpunct{.}}(\Varid{x}_{1},\Varid{x}_{2})\in \mathcal{P}\mean{\alpha}\to (\Varid{x}_{1},\Varid{x}_{2})\in \mathcal{P}\mean{\alpha}}.
+\end{multline*}
+
+This typing judgement does not mention \ensuremath{\Varid{id}}. But since \ensuremath{\Varid{x}_{1}=_{\beta}\mathcal{S}_1 \mean{\Varid{id}}\;\Varid{x}_{1}} and
+\ensuremath{\Varid{x}_{2}\mathrel{=}\mathcal{S}_2 \mean{\Varid{id}}\;\Varid{x}_{2}}, we can also show that \ensuremath{\Varid{id}}'s outputs are related whenever the
+inputs are:
+\begin{multline*}
+\ensuremath{\alpha_{1}\typcolon\star,\alpha_{2}\typcolon\star,\mathcal{R}^\alpha\typcolon\alpha_{1}\to \alpha_{2}\to \lceil \star \rceil\vdash} \\
+  \ensuremath{\Varid{pid}\typcolon\Pi (\Varid{x}_{1}\typcolon\alpha_{1})\hsforall \;(\Varid{x}_{2}\typcolon\alpha_{2})\hsdot{\circ }{\mathpunct{.}}(\Varid{x}_{1},\Varid{x}_{2})\in \mathcal{P}\mean{\alpha}\to (\mathcal{S}_1 \mean{\Varid{id}}\;\Varid{x}_{1},\mathcal{S}_2 \mean{\Varid{id}}\;\Varid{x}_{2})\in \mathcal{P}\mean{\alpha}}.
+\end{multline*}
+More concisely, we can show that:
+\[
+\ensuremath{\alpha_{1}\typcolon\star,\alpha_{2}\typcolon\star,\mathcal{R}^\alpha\typcolon\alpha_{1}\to \alpha_{2}\to \lceil \star \rceil\vdash\Varid{pid}\typcolon(\mathcal{S}_1 \mean{\Varid{id}},\mathcal{S}_2 \mean{\Varid{id}})\in \mathcal{P}\mean{\alpha\to \alpha}}.
+\]
+\end{example}
+
+\section{Differentiation and parametricity}
+\label{sec:differentiation-dep-types-stlc}
+\pg{Figure out if we're just redoing \citep{Bernardy10}.}
+By altering the transformation for binary parametricity, we obtain a variant of
+differentiation close to a parametricity transformation investigated by \citet*{Bernardy10}.
+Instead of only having proofs that values are related, we can modify \ensuremath{(\Varid{t}_{1},\Varid{t}_{2})\in \mathcal{P}\mean{\tau}} to be a type of values---more precisely, a dependent type \ensuremath{(\Varid{t}_{1},\Varid{t}_{2})\in \Delta_2\mean{\tau}} of valid changes, indexed by source \ensuremath{\Varid{t}_{1}\typcolon\mathcal{S}_1 \mean{\tau}} and destination \ensuremath{\Varid{t}_{2}\typcolon\mathcal{S}_2 \mean{\tau}}. Similarly, \ensuremath{\mathcal{R}^\alpha} is replaced by a dependent type of changes, not
+propositions, that we write \ensuremath{\Delta_\alpha}.
+Formally, this is encoded by replacing sort \ensuremath{\lceil \star \rceil} with \ensuremath{\star} in
+\citet{Bernardy2011realizability}'s transform, and by moving
+target programs in a PTS that allows for both simple and dependent types, like
+the Edinburgh Logical Framework; such a PTS is known as
+\ensuremath{\lambda_P}~\citep{Barendregt1992lambda}.
+
+For type variables \ensuremath{\alpha}, we specialize the transformation further, ensuring
+that \ensuremath{\alpha_{1}\mathrel{=}\alpha_{2}\mathrel{=}\alpha} and adapting \ensuremath{\mathcal{S}_1 \mean{\text{\textendash}},\mathcal{S}_2 \mean{\text{\textendash}}} accordingly to \emph{not} add
+subscripts to type variable:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathcal{S}_i \mean{\alpha}\mathrel{=}\alpha{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Without this
+specialization, we get to deal with changes across different types, which we
+don't do just yet but defer to \cref{sec:param-derive-changes-across-types}.
+
+We first show how the transformation affects typing contexts:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Derive{\EmptyContext}\mathrel{=}\EmptyContext{}\<[E]%
+\\
+\>[3]{}\Derive{\Gamma,\Varid{x}\typcolon\sigma}\mathrel{=}\Derive{\Gamma},\Varid{x}_{1}\typcolon\sigma,\Varid{x}_{2}\typcolon\sigma,\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\sigma}{}\<[E]%
+\\
+\>[3]{}\Derive{\Gamma,\alpha\typcolon\star}\mathrel{=}\Derive{\Gamma},\alpha\typcolon\star,\Delta_\alpha\typcolon\alpha\to \alpha\to \star{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Unlike standard differentiation, transformed programs bind, for each input
+variable \ensuremath{\Varid{x}\typcolon\sigma},
+a source \ensuremath{\Varid{x}_{1}\typcolon\sigma}, a destination \ensuremath{\Varid{x}_{2}\typcolon\sigma}, and a valid change \ensuremath{\Varid{dx}} from
+\ensuremath{\Varid{x}_{1}} to \ensuremath{\Varid{x}_{2}}. More in detail, for each variable in input programs \ensuremath{\Varid{x}\typcolon\sigma}, programs produced by standard
+differentiation bind both \ensuremath{\Varid{x}\typcolon\sigma} and \ensuremath{\Varid{dx}\typcolon\sigma}; valid use of these
+programs requires \ensuremath{\Varid{dx}} to be a valid change with source \ensuremath{\Varid{x}}, but this is not
+enforced through types.
+Instead, programs produced by \emph{this variant} of differentiation bind,
+for each variable in input programs \ensuremath{\Varid{x}\typcolon\sigma}, both source \ensuremath{\Varid{x}_{1}\typcolon\sigma}, destination \ensuremath{\Varid{x}_{2}\typcolon\sigma}, and a valid change \ensuremath{\Varid{dx}} from \ensuremath{\Varid{x}_{1}} to \ensuremath{\Varid{x}_{2}},
+where validity is enforced through dependent types.
+
+For input type variables \ensuremath{\alpha}, output programs also bind a dependent type of
+valid changes \ensuremath{\Delta_\alpha}.
+
+Next, we define the type of changes. Since change types are indexed by source
+and destination, the type of function changes forces them to be valid, and the
+definition of function changes resembles our earlier logical relation for
+validity.
+More precisely, if \ensuremath{\Varid{df}} is a change from \ensuremath{\Varid{f}_{1}} to \ensuremath{\Varid{f}_{2}} (\ensuremath{\Varid{df}\typcolon(\Varid{f}_{1},\Varid{f}_{2})\in \Delta_2\mean{\sigma\to \tau}}), then
+\ensuremath{\Varid{df}} must map any change \ensuremath{\Varid{dx}} from initial input \ensuremath{\Varid{x}_{1}} to updated input \ensuremath{\Varid{x}_{2}} to a
+change from initial output \ensuremath{\Varid{f}_{1}\;\Varid{x}_{1}} to updated output \ensuremath{\Varid{f}_{2}\;\Varid{x}_{2}}.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}(\Varid{f}_{1},\Varid{f}_{2})\in \Delta_2\mean{\sigma\to \tau}\mathrel{=}\Pi (\Varid{x}_{1}\;\Varid{x}_{2}\typcolon\sigma)\hsforall \;(\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\sigma})\hsdot{\circ }{\mathpunct{.}}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}(\Varid{f}_{1}\;\Varid{x}_{1},\Varid{f}_{2}\;\Varid{x}_{2})\in \Delta_2\mean{\tau}{}\<[E]%
+\\
+\>[3]{}(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\alpha}\mathrel{=}\Delta_\alpha\;\Varid{x}_{1}\;\Varid{x}_{2}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+At this point, the transformation on terms acts on abstraction and application
+to match the transformation on typing contexts. The definition of \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} follows the definition of \ensuremath{\Derive{\Gamma,\Varid{x}\typcolon\sigma}}---both
+transformation results bind the same variables \ensuremath{\Varid{x}_{1},\Varid{x}_{2},\Varid{dx}} with the same types.
+Application provides corresponding arguments.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Derive{\Varid{x}}\mathrel{=}\Varid{dx}{}\<[E]%
+\\
+\>[3]{}\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}\mathrel{=}\lambda (\Varid{x}_{1}\;\Varid{x}_{2}\typcolon\sigma)\;(\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\sigma})\to \Derive{\Varid{t}}{}\<[E]%
+\\
+\>[3]{}\Derive{\Varid{s}\;\Varid{t}}\mathrel{=}\Derive{\Varid{s}}\;\mathcal{S}_1 \mean{\Varid{t}}\;\mathcal{S}_2 \mean{\Varid{t}}\;\Derive{\Varid{t}}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+% Unlike standard differentiation, we pass around both source and
+% destination of changes, and the type of changes is indexed by both source and
+% destination.
+% Making different choices would still give us a correct
+% transformation; but
+% The transformation
+% Here, we could just as well pass only the source, but
+% next section we are going to alter this transformation to produce proofs of
+% correctness
+% are next going to pass around
+
+If we extend the language to support primitives and their manually-written
+derivatives, it is useful to have contexts also bind,
+next to type variables \ensuremath{\alpha}, also change structures for \ensuremath{\alpha}, to
+allow terms to use change operations. Since the differentiation output does not
+use change operations here, we omit change structures for now.
+
+\begin{remark}[Validity and \ensuremath{\oplus }]
+  \label{rem:validity-oplus-system-f-not-really}
+Because we omit change structures (here and through most of the chapter),
+the type of differentiation only suggests that \ensuremath{\Derive{\Varid{t}}} is a valid change, but
+not that validity agrees with \ensuremath{\oplus }.
+
+In other words, dependent types as used
+here do not prove all theorems expected of an incremental transformation.
+While we can prove the fundamental property
+of our logical relation, we cannot prove that \ensuremath{\oplus } agrees with
+differentiation for abstract types. As we did in \cref{sec:chs-types-contexts} (in
+particular \cref{req:base-change-structures}), we must require that validity
+relations provided for type variables agree with implementations of \ensuremath{\oplus } as
+provided for type variables: formally, we must state (internally) that
+\ensuremath{\forall (\Varid{x}_{1}\;\Varid{x}_{2}\typcolon\alpha)\hsforall \;(\Varid{dx}\typcolon\Delta_\alpha\;\Varid{x}_{1}\;\Varid{x}_{2})\hsdot{\circ }{\mathpunct{.}}(\Varid{x}_{1}\oplus \Varid{dx},\Varid{x}_{2})\in \mathcal{P}\mean{\alpha}}.
+We can state this requirement by internalizing
+logical equivalence (such as shown in \cref{sec:parametricity-transform}, or
+using \citet{Bernardy10}'s variant in \ensuremath{\lambda_P}). But since this statement
+quantifies over members of \ensuremath{\alpha}, it is not clear if it can be proven
+internally when instantiating \ensuremath{\alpha} with a type argument. We leave this
+question (admittedly crucial) for future work.
+%or if such a proof resembles .
+%
+% we expect it cannot be proved internally without
+% extending the language, similarly to how parametricity cannot be proven
+% internally to System F.
+\end{remark}
+
+This transformation is not incremental,
+as it recomputes both source and destination for each application,
+but we could fix this by replacing \ensuremath{\mathcal{S}_2 \mean{\Varid{s}}} with \ensuremath{\mathcal{S}_1 \mean{\Varid{s}}\oplus \Derive{\Varid{s}}} (and
+passing change structures to make \ensuremath{\oplus } available to terms), or by not
+passing destinations. We ignore such complications here.
+\pg{Don't. A formal proof becomes a variant of Bernardy2011realizability.}
+% A proof that this variant of |derive| is correct proceeds similarly to our
+% earlier proof of \cref{thm:derive-correct}, but it requires additional
+% lemmas about |idx1| and |idx2|.
+% \begin{theorem}
+% If |Gamma /- t : tau| then |derive (Gamma) /- derive t : elemDt2 tau (idx1 t) (idx2 t)|.
+% \end{theorem}
+
+\section{Proving differentiation correct externally}
+Instead of producing dependently-typed programs that show their correctness, we
+might want to produce simply-typed programs (which are easier to compile
+efficiently) and use an external correctness proof, as in
+\cref{ch:derive-formally}. We show how to generate such external proofs here.
+For simplicity, here we produce external correctness proofs for the
+transformation we just defined on dependently-typed outputs, rather than
+defining a separate simply-typed transformation.
+
+Specifically, we show how to generate
+%Along similar lines, we believe we can also generate
+from well-typed terms \ensuremath{\Varid{t}} a proof that \ensuremath{\Derive{\Varid{t}}} is correct, that is, that
+\ensuremath{(\mathcal{S}_1 \mean{\Varid{t}},\mathcal{S}_2 \mean{\Varid{t}},\Derive{\Varid{t}})\in \Delta\mathcal{V}\mean{\tau}}.
+% \pg{This variant is pointless because |derive t| is intrinsically correct, but
+%   we could show this for transformations that are not.}
+%While we show this proof for intrinsically-typed
+
+Proofs are generated through the following transformation, defined in terms of
+the transformation from \cref{sec:differentiation-dep-types-stlc}. Again, we
+show first typing contexts and the logical relation:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathcal{DP}\mean{\EmptyContext}\mathrel{=}\EmptyContext{}\<[E]%
+\\
+\>[3]{}\mathcal{DP}\mean{\Gamma,\Varid{x}\typcolon\tau}\mathrel{=}\mathcal{DP}\mean{\Gamma},\Varid{x}_{1}\typcolon\tau,\Varid{x}_{2}\typcolon\tau,{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\tau},\Varid{dxx}\typcolon(\Varid{x}_{1},\Varid{x}_{2},\Varid{dx})\in \Delta\mathcal{V}\mean{\tau}{}\<[E]%
+\\
+\>[3]{}\mathcal{DP}\mean{\Gamma,\alpha\typcolon\star}\mathrel{=}\mathcal{DP}\mean{\Gamma},\alpha\typcolon\star,{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Delta_\alpha\typcolon\alpha\to \alpha\to \star,{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mathcal{R}^\alpha\typcolon\Pi (\Varid{x}_{1}\typcolon\alpha)\hsforall \;(\Varid{x}_{2}\typcolon\alpha)\;(\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\alpha})\to \lceil \star \rceil{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}(\Varid{f}_{1},\Varid{f}_{2},\Varid{df})\in \Delta\mathcal{V}\mean{\sigma\to \tau}\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Pi (\Varid{x}_{1}\;\Varid{x}_{2}\typcolon\sigma)\hsforall \;(\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\sigma})\;(\Varid{dxx}\typcolon(\Varid{x}_{1},\Varid{x}_{2},\Varid{dx})\in \Delta\mathcal{V}\mean{\sigma})\hsdot{\circ }{\mathpunct{.}}{}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}(\Varid{f}_{1}\;\Varid{x}_{1},\Varid{f}_{2}\;\Varid{x}_{2},\Varid{df}\;\Varid{x}_{1}\;\Varid{x}_{2}\;\Varid{dx})\in \Delta\mathcal{V}\mean{\tau}{}\<[E]%
+\\
+\>[3]{}(\Varid{x}_{1},\Varid{x}_{2},\Varid{dx})\in \Delta\mathcal{V}\mean{\alpha}\mathrel{=}\mathcal{R}^\alpha\;\Varid{x}_{1}\;\Varid{x}_{2}\;\Varid{dx}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+The transformation from terms to proofs then matches the definition of typing contexts:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathcal{DP}\mean{\Varid{x}}\mathrel{=}\Varid{dxx}{}\<[E]%
+\\
+\>[3]{}\mathcal{DP}\mean{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\lambda (\Varid{x}_{1}\;\Varid{x}_{2}\typcolon\sigma)\;(\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\sigma})\;(\Varid{dxx}\typcolon(\Varid{x}_{1},\Varid{x}_{2},\Varid{dx})\in \Delta\mathcal{V}\mean{\sigma})\to {}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}\mathcal{DP}\mean{\Varid{t}}{}\<[E]%
+\\
+\>[3]{}\mathcal{DP}\mean{\Varid{s}\;\Varid{t}}\mathrel{=}\mathcal{DP}\mean{\Varid{s}}\;\mathcal{S}_1 \mean{\Varid{t}}\;\mathcal{S}_2 \mean{\Varid{t}}\;\Derive{\Varid{t}}\;\mathcal{DP}\mean{\Varid{t}}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+This term produces a proof object in PTS \ensuremath{\lambda_P^2}, which is produced by
+augmenting \ensuremath{\lambda_P} following \citet{Bernardy2011realizability}.
+The informal proof content of generated proofs follows
+the proof of \ensuremath{\Derive{\text{\textendash}}}'s correctness (\cref{thm:derive-correct}):
+For a variable \ensuremath{\Varid{x}}, we just use the assumption \ensuremath{\Varid{dxx}} that
+\ensuremath{(\Varid{x}_{1},\Varid{dx},\Varid{x}_{2})\in \Delta\mathcal{V}\mean{\tau}}, that we have in context.
+For abstractions \ensuremath{\lambda \Varid{x}\to \Varid{t}}, we have to show that \ensuremath{\Derive{\Varid{t}}} is correct for all
+valid input changes \ensuremath{\Varid{x}_{1}}, \ensuremath{\Varid{x}_{2}}, \ensuremath{\Varid{dx}} and for all proofs \ensuremath{\Varid{dxx}\typcolon(\Varid{x}_{1},\Varid{dx},\Varid{x}_{2})\in \Delta\mathcal{V}\mean{\sigma}} that \ensuremath{\Varid{dx}} is indeed a valid input change, so we bind
+all those variables in context, including proof \ensuremath{\Varid{dxx}}, and use \ensuremath{\mathcal{DP}\mean{\Varid{t}}}
+recursively to prove that \ensuremath{\Derive{\Varid{t}}} is correct in the extended context.
+For applications \ensuremath{\Varid{s}\;\Varid{t}}, we use the proof that \ensuremath{\Derive{\Varid{s}}} is correct (obtained
+recursively via \ensuremath{\mathcal{DP}\mean{\Varid{s}}}). To show that \ensuremath{\Derive{\Varid{s}}\;\Derive{\Varid{t}}}, that is
+\ensuremath{\Derive{\Varid{s}}\;\mathcal{S}_1 \mean{\Varid{s}}\;\mathcal{S}_2 \mean{\Varid{s}}\;\Derive{\Varid{t}}}, we simply show that \ensuremath{\Derive{\Varid{s}}} is
+being applied to valid inputs, using the proof that \ensuremath{\Derive{\Varid{t}}} is correct
+(obtained recursively via \ensuremath{\mathcal{DP}\mean{\Varid{t}}}).
+
+% End of %if style /= newcode:
+
+\section{Combinators for polymorphic change structures}
+\label{sec:param-derive-changes-across-types}
+
+
+%instance bnilc = "\mathbf{0}_2"
+
+
+
+Earlier, we restricted our transformation on \ensuremath{\lambda_{\to}} terms, so that there could be a change
+\ensuremath{\Varid{dt}} from \ensuremath{\Varid{t}_{1}} to \ensuremath{\Varid{t}_{2}} only if \ensuremath{\Varid{t}_{1}} and if \ensuremath{\Varid{t}_{2}} have the same type. In this
+section we lift this restriction and define \emph{polymorphic} change
+structures (also called change structures when no ambiguity arises). To do so,
+we sketch how to extend core change-structure operations to polymorphic change structures.
+
+We also show a few \emph{combinators}, combining existing polymorphic change
+structures into new ones. We believe the combinator types are more enlightening
+than their implementations, but we include them here for completeness.
+We already described a few constructions on non-polymorphic change structures;
+however, polymorphic change structures enable new constructions that insert or
+remove data, or apply isomorphisms to the source or destination type.
+
+We conjecture that combinators for polymorphic change structure can be used to
+compose, out of small building blocks, change structures that, for instance,
+allow inserting or removing elements from a recursive datatype such as lists.
+Derivatives for primitives could then be produced using equational reasoning as
+described in \cref{sec:plugin-design}.
+However, we leave investigation of such avenues to future work.
+
+We describe change operations for polymorphic change structures via a Haskell
+record containing change operations, and we define combinators on polymorphic
+change structures. Of all change operations, we only consider \ensuremath{\oplus }; to
+avoid confusion, we write \ensuremath{\myboxplus} for the polymorphic variant of \ensuremath{\oplus }.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;\mathbb{CS}\;\tau_{1}\;\delta_\tau\;\tau_{2}\mathrel{=}\mathbb{CS}\;\{\mskip1.5mu {}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\myboxplus)\mathrel{:\mkern-1mu:}\tau_{1}\to \delta_\tau\to \tau_{2}{}\<[E]%
+\\
+\>[B]{}\mskip1.5mu\}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+This code define a record type constructor \ensuremath{\mathbb{CS}} with a data constructor also
+written \ensuremath{\mathbb{CS}}, and a field accessor written \ensuremath{(\myboxplus)}; we use \ensuremath{\tau_{1}}, \ensuremath{\delta_\tau} and
+\ensuremath{\tau_{2}} (and later also \ensuremath{\sigma_{1}}, \ensuremath{\delta_\sigma} and \ensuremath{\sigma_{2}}) for
+Haskell type variables. To follow Haskell lexical rules, we use here lowercase
+letters (even though Greek ones).
+
+We have not formalized definitions of validity, or proofs that it agrees with
+\ensuremath{\myboxplus}, but for all the change structures and combinators in this section,
+this exercise appears no harder than the ones in \cref{ch:change-theory}.
+
+In \cref{sec:diff-examples-tc,sec:cts-motivation} change structures are embedded in Haskell
+using type class \ensuremath{\Conid{ChangeStruct}\;\tau}. Conversely, here we do not define a type
+class of polymorphic change
+structures, because (apart from the simplest scenarios), Haskell type class
+resolution is unable to choose a \emph{canonical} way to construct a polymorphic
+change structure using our combinators.
+
+All existing change structures (that is, instances of \ensuremath{\Conid{ChangeStruct}\;\tau}) induce
+generalized change structures \ensuremath{\mathbb{CS}\;\tau\;(\Delta \tau)\;\tau}.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{typeCS}\mathrel{:\mkern-1mu:}\Conid{ChangeStruct}\;\tau\Rightarrow\mathbb{CS}\;\tau\;(\Delta \tau)\;\tau{}\<[E]%
+\\
+\>[B]{}\Varid{typeCS}\mathrel{=}\mathbb{CS}\;(\oplus){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+We can also have change structures across different types.
+Replacement changes are possible:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{replCS}\mathrel{:\mkern-1mu:}\mathbb{CS}\;\tau_{1}\;\tau_{2}\;\tau_{2}{}\<[E]%
+\\
+\>[B]{}\Varid{replCS}\mathrel{=}\mathbb{CS}\mathrel{\$}\lambda \Varid{x}_{1}\;\Varid{x}_{2}\to \Varid{x}_{2}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+% Unbreak Emacs syntax highlighting with $
+But replacement changes are not the only option. For product types, or for any
+form of nested data, we can apply changes to
+the different components, changing the type of some components. We can also
+define a change structure for nullary products (the unit type) which can be
+useful as a building block in other change structures:%
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{prodCS}\mathrel{:\mkern-1mu:}\mathbb{CS}\;\sigma_{1}\;\delta_\sigma\;\sigma_{2}\to \mathbb{CS}\;\tau_{1}\;\delta_\tau\;\tau_{2}\to \mathbb{CS}\;(\sigma_{1},\tau_{1})\;(\delta_\sigma,\delta_\tau)\;(\sigma_{2},\tau_{2}){}\<[E]%
+\\
+\>[B]{}\Varid{prodCS}\;\Varid{scs}\;\Varid{tcs}\mathrel{=}\mathbb{CS}\mathrel{\$}\lambda (\Varid{s}_{1},\Varid{t}_{1})\;(\Varid{ds},\Varid{dt})\to ((\myboxplus)\;\Varid{scs}\;\Varid{s}_{1}\;\Varid{ds},(\myboxplus)\;\Varid{tcs}\;\Varid{t}_{1}\;\Varid{dt}){}\<[E]%
+\\
+\>[B]{}\Varid{unitCS}\mathrel{:\mkern-1mu:}\mathbb{CS}\;()\;()\;(){}\<[E]%
+\\
+\>[B]{}\Varid{unitCS}\mathrel{=}\mathbb{CS}\mathrel{\$}\lambda ()\;()\to (){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+% Unbreak Emacs syntax highlighting with $
+The ability to modify a field to one of a different type is also known as
+in the Haskell community as \emph{polymorphic record update}, a feature that has
+proven desirable in the context of lens
+libraries~\citep{OConnor2012polymorphic,Kmett2012mirrored}.
+
+We can also define a combinator \ensuremath{\Varid{sumCS}} for change structures on sum types,
+similarly to our earlier construction described in \cref{sec:chs-sums}.
+This time, we choose to forbid changes across branches since they're
+inefficient, though we could support them as well, if desired.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{sumCS}\mathrel{:\mkern-1mu:}\mathbb{CS}\;\Varid{s}_{1}\;\Varid{ds}\;\Varid{s}_{2}\to \mathbb{CS}\;\Varid{t}_{1}\;\Varid{dt}\;\Varid{t}_{2}\to {}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbb{CS}\;(\Conid{Either}\;\Varid{s}_{1}\;\Varid{t}_{1})\;(\Conid{Either}\;\Varid{ds}\;\Varid{dt})\;(\Conid{Either}\;\Varid{s}_{2}\;\Varid{t}_{2}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{sumCS}\;\Varid{scs}\;\Varid{tcs}\mathrel{=}\mathbb{CS}\;\Varid{go}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{go}\;(\Conid{Left}\;\Varid{s}_{1})\;(\Conid{Left}\;\Varid{ds})\mathrel{=}\Conid{Left}\mathrel{\$}(\myboxplus)\;\Varid{scs}\;\Varid{s}_{1}\;\Varid{ds}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{go}\;(\Conid{Right}\;\Varid{t}_{1})\;(\Conid{Right}\;\Varid{dt})\mathrel{=}\Conid{Right}\mathrel{\$}(\myboxplus)\;\Varid{tcs}\;\Varid{t}_{1}\;\Varid{dt}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{go}\;\text{\textunderscore}\;\text{\textunderscore}\mathrel{=}\Varid{error}\;\text{\ttfamily \char34 Invalid~changes\char34}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Given two change structures from \ensuremath{\tau_{1}} to \ensuremath{\tau_{2}}, with respective change types
+\ensuremath{\delta_{\tau a}} and \ensuremath{\delta_{\tau b}}, we can also define a new change structure with change type
+\ensuremath{\Conid{Either}\;\delta_{\tau a}\;\delta_{\tau b}}, that allows using changes from either structure.
+We capture this construction through combinator \ensuremath{\Varid{mSumCS}}, having the following
+signature:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{mSumCS}\mathrel{:\mkern-1mu:}\mathbb{CS}\;\tau_{1}\;\delta_{\tau a}\;\tau_{2}\to \mathbb{CS}\;\tau_{1}\;\delta_{\tau b}\;\tau_{2}\to \mathbb{CS}\;\tau_{1}\;(\Conid{Either}\;\delta_{\tau a}\;\delta_{\tau b})\;\tau_{2}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{mSumCS}\;\Varid{acs}\;\Varid{bcs}\mathrel{=}\mathbb{CS}\;\Varid{go}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{go}\;\Varid{t}_{1}\;(\Conid{Left}\;\Varid{dt})\mathrel{=}(\myboxplus)\;\Varid{acs}\;\Varid{t}_{1}\;\Varid{dt}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{go}\;\Varid{t}_{1}\;(\Conid{Right}\;\Varid{dt})\mathrel{=}(\myboxplus)\;\Varid{bcs}\;\Varid{t}_{1}\;\Varid{dt}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+This construction is possible for non-polymorphic change structures; we only
+need change structures to be first-class (instead of a type class) to be able to internalize this construction in Haskell.
+
+Using combinator \ensuremath{\Varid{lInsCS}} we can describe updates going from type \ensuremath{\tau_{1}} to type \ensuremath{(\sigma,\tau_{2})},
+assuming a change structure from \ensuremath{\tau_{1}} to \ensuremath{\tau_{2}}:
+that is, we can prepend a value of type \ensuremath{\sigma} to our data while we modify it.
+Similarly, combinator \ensuremath{\Varid{lRemCS}} allows removing values:
+% What's more, we can also define change structures that allow inserting or
+% removing elements into nested tuples.
+% We believe combining such change structures might produce
+% more interesting ones.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{lInsCS}\mathrel{:\mkern-1mu:}\mathbb{CS}\;\Varid{t}_{1}\;\Varid{dt}\;\Varid{t}_{2}\to \mathbb{CS}\;\Varid{t}_{1}\;(\Varid{s},\Varid{dt})\;(\Varid{s},\Varid{t}_{2}){}\<[E]%
+\\
+\>[B]{}\Varid{lInsCS}\;\Varid{tcs}\mathrel{=}\mathbb{CS}\mathrel{\$}\lambda \Varid{t}_{1}\;(\Varid{s},\Varid{dt})\to (\Varid{s},(\myboxplus)\;\Varid{tcs}\;\Varid{t}_{1}\;\Varid{dt}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{lRemCS}\mathrel{:\mkern-1mu:}\mathbb{CS}\;\Varid{t}_{1}\;\Varid{dt}\;(\Varid{s},\Varid{t}_{2})\to \mathbb{CS}\;\Varid{t}_{1}\;\Varid{dt}\;\Varid{t}_{2}{}\<[E]%
+\\
+\>[B]{}\Varid{lRemCS}\;\Varid{tcs}\mathrel{=}\mathbb{CS}\mathrel{\$}\lambda \Varid{t}_{1}\;\Varid{dt}\to \Varid{snd}\mathrel{\$}(\myboxplus)\;\Varid{tcs}\;\Varid{t}_{1}\;\Varid{dt}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+% Unbreak Emacs syntax highlighting with $
+
+We can also transform change structures given suitable conversion functions.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{lIsoCS}\mathrel{:\mkern-1mu:}(\Varid{t}_{1}\to \Varid{s}_{1})\to \mathbb{CS}\;\Varid{s}_{1}\;\Varid{dt}\;\Varid{t}_{2}\to \mathbb{CS}\;\Varid{t}_{1}\;\Varid{dt}\;\Varid{t}_{2}{}\<[E]%
+\\
+\>[B]{}\Varid{mIsoCS}\mathrel{:\mkern-1mu:}(\Varid{dt}\to \Varid{ds})\to \mathbb{CS}\;\Varid{t}_{1}\;\Varid{ds}\;\Varid{t}_{2}\to \mathbb{CS}\;\Varid{t}_{1}\;\Varid{dt}\;\Varid{t}_{2}{}\<[E]%
+\\
+\>[B]{}\Varid{rIsoCS}\mathrel{:\mkern-1mu:}(\Varid{s}_{2}\to \Varid{t}_{2})\to \mathbb{CS}\;\Varid{t}_{1}\;\Varid{dt}\;\Varid{s}_{2}\to \mathbb{CS}\;\Varid{t}_{1}\;\Varid{dt}\;\Varid{t}_{2}{}\<[E]%
+\\
+\>[B]{}\Varid{isoCS}\mathrel{:\mkern-1mu:}(\Varid{t}_{1}\to \Varid{s}_{1})\to (\Varid{dt}\to \Varid{ds})\to (\Varid{s}_{2}\to \Varid{t}_{2})\to \mathbb{CS}\;\Varid{s}_{1}\;\Varid{ds}\;\Varid{s}_{2}\to \mathbb{CS}\;\Varid{t}_{1}\;\Varid{dt}\;\Varid{t}_{2}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+To do so, we must only compose \ensuremath{\myboxplus} with the given conversion functions
+according to the types. Combinator \ensuremath{\Varid{isoCS}} arises by simply combining the other ones:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{lIsoCS}\;\Varid{f}\;\Varid{tcs}{}\<[18]%
+\>[18]{}\mathrel{=}\mathbb{CS}\mathrel{\$}\lambda \Varid{s}_{1}\;\Varid{dt}\to (\myboxplus)\;\Varid{tcs}\;(\Varid{f}\;\Varid{s}_{1})\;\Varid{dt}{}\<[E]%
+\\
+\>[B]{}\Varid{mIsoCS}\;\Varid{g}\;\Varid{tcs}{}\<[18]%
+\>[18]{}\mathrel{=}\mathbb{CS}\mathrel{\$}\lambda \Varid{t}_{1}\;\Varid{ds}\to (\myboxplus)\;\Varid{tcs}\;\Varid{t}_{1}\;(\Varid{g}\;\Varid{ds}){}\<[E]%
+\\
+\>[B]{}\Varid{rIsoCS}\;\Varid{h}\;\Varid{tcs}{}\<[18]%
+\>[18]{}\mathrel{=}\mathbb{CS}\mathrel{\$}\lambda \Varid{t}_{1}\;\Varid{dt}\to \Varid{h}\mathrel{\$}(\myboxplus)\;\Varid{tcs}\;\Varid{t}_{1}\;\Varid{dt}{}\<[E]%
+\\
+\>[B]{}\Varid{isoCS}\;\Varid{f}\;\Varid{g}\;\Varid{h}\;\Varid{scs}{}\<[18]%
+\>[18]{}\mathrel{=}\Varid{lIsoCS}\;\Varid{f}\mathrel{\$}\Varid{mIsoCS}\;\Varid{g}\mathrel{\$}\Varid{rIsoCS}\;\Varid{h}\;\Varid{scs}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+With a bit of datatype-generic programming infrastructure, we can reobtain only
+using combinators the change
+structure for lists shown in \cref{sec:simple-changes-list-map}, which allows
+modifying list elements. The core definition is the following one:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{11}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{listMuChangeCS}\mathrel{:\mkern-1mu:}\mathbb{CS}\;\Varid{a}_{1}\;\Varid{da}\;\Varid{a}_{2}\to \mathbb{CS}\;(\Conid{List}_{\mu}\;\Varid{a}_{1})\;(\Conid{List}_{\mu}\;\Varid{da})\;(\Conid{List}_{\mu}\;\Varid{a}_{2}){}\<[E]%
+\\
+\>[B]{}\Varid{listMuChangeCS}\;\Varid{acs}\mathrel{=}\Varid{go}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{go}\mathrel{=}{}\<[11]%
+\>[11]{}\Varid{isoCS}\;\Varid{unRollL}\;\Varid{unRollL}\;\Varid{rollL}\mathrel{\$}{}\<[E]%
+\\
+\>[11]{}\Varid{sumCS}\;\Varid{unitCS}\mathrel{\$}\Varid{prodCS}\;\Varid{acs}\;\Varid{go}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+The needed infrastructure appears in \cref{fig:change-structure-list-w-combinators}.
+
+% -- This change structure is implemented directly, but should be done using combinators.
+% listChangeCS :: CS a1 da a2 -> CS (List a1) (List da) (List a2)
+% listChangeCS acs = resCS
+%   where
+%     resCS = CS go
+%     go Nil Nil = Nil
+%     go (Cons a1 as1) (Cons da das) = Cons (bplus acs a1 da) (bplus resCS as1 das)
+%     go _ _ = error "Invalid change"
+
+\begin{figure}[h]
+\texths %drop extra space around figure
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mbox{\onelinecomment  Our list type:}{}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;\Conid{List}\;\Varid{a}\mathrel{=}\Conid{Nil}\mid \Conid{Cons}\;\Varid{a}\;(\Conid{List}\;\Varid{a}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mbox{\onelinecomment  Equivalently, we can represent lists as a fixpoint of a sum-of-product pattern functor:}{}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;\Conid{Mu}\;\Varid{f}\mathrel{=}\Conid{Roll}\;\{\mskip1.5mu \Varid{unRoll}\mathrel{:\mkern-1mu:}\Varid{f}\;(\Conid{Mu}\;\Varid{f})\mskip1.5mu\}{}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;\Conid{ListF}\;\Varid{a}\;\Varid{x}\mathrel{=}\Conid{L}\;\{\mskip1.5mu \Varid{unL}\mathrel{:\mkern-1mu:}\Conid{Either}\;()\;(\Varid{a},\Varid{x})\mskip1.5mu\}{}\<[E]%
+\\
+\>[B]{}\mathbf{type}\;\Conid{List}_{\mu}\;\Varid{a}\mathrel{=}\Conid{Mu}\;(\Conid{ListF}\;\Varid{a}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{rollL}\mathrel{:\mkern-1mu:}\Conid{Either}\;()\;(\Varid{a},\Conid{List}_{\mu}\;\Varid{a})\to \Conid{List}_{\mu}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\Varid{rollL}\mathrel{=}\Conid{Roll}\hsdot{\circ }{\mathpunct{.}}\Conid{L}{}\<[E]%
+\\
+\>[B]{}\Varid{unRollL}\mathrel{:\mkern-1mu:}\Conid{List}_{\mu}\;\Varid{a}\to \Conid{Either}\;()\;(\Varid{a},\Conid{List}_{\mu}\;\Varid{a}){}\<[E]%
+\\
+\>[B]{}\Varid{unRollL}\mathrel{=}\Varid{unL}\hsdot{\circ }{\mathpunct{.}}\Varid{unRoll}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mbox{\onelinecomment  Isomorphism between \ensuremath{\Conid{List}} and \ensuremath{\Conid{List}_{\mu}}:}{}\<[E]%
+\\
+\>[B]{}\Varid{lToLMu}\mathrel{:\mkern-1mu:}\Conid{List}\;\Varid{a}\to \Conid{List}_{\mu}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\Varid{lToLMu}\;\Conid{Nil}\mathrel{=}\Varid{rollL}\mathrel{\$}\Conid{Left}\;(){}\<[E]%
+\\
+\>[B]{}\Varid{lToLMu}\;(\Conid{Cons}\;\Varid{a}\;\Varid{as})\mathrel{=}\Varid{rollL}\mathrel{\$}\Conid{Right}\;(\Varid{a},\Varid{lToLMu}\;\Varid{as}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{lMuToL}\mathrel{:\mkern-1mu:}\Conid{List}_{\mu}\;\Varid{a}\to \Conid{List}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\Varid{lMuToL}\mathrel{=}\Varid{go}\hsdot{\circ }{\mathpunct{.}}\Varid{unRollL}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{go}\;(\Conid{Left}\;())\mathrel{=}\Conid{Nil}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{go}\;(\Conid{Right}\;(\Varid{a},\Varid{as}))\mathrel{=}\Conid{Cons}\;\Varid{a}\;(\Varid{lMuToL}\;\Varid{as}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mbox{\onelinecomment  A change structure for \ensuremath{\Conid{List}}:}{}\<[E]%
+\\
+\>[B]{}\Varid{listChangesCS}\mathrel{:\mkern-1mu:}\mathbb{CS}\;\Varid{a}_{1}\;\Varid{da}\;\Varid{a}_{2}\to \mathbb{CS}\;(\Conid{List}\;\Varid{a}_{1})\;(\Conid{List}\;\Varid{da})\;(\Conid{List}\;\Varid{a}_{2}){}\<[E]%
+\\
+\>[B]{}\Varid{listChangesCS}\;\Varid{acs}\mathrel{=}\Varid{isoCS}\;\Varid{lToLMu}\;\Varid{lToLMu}\;\Varid{lMuToL}\mathrel{\$}\Varid{listMuChangeCS}\;\Varid{acs}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+% Unbreak Emacs syntax highlighting with $
+
+  \caption{A change structure that allows modifying list elements.}
+  \label{fig:change-structure-list-w-combinators}
+\end{figure}
+
+\paragraph{Section summary}
+We have defined polymorphic change structures and shown they admit a rich
+combinator language. Now, we return to using these change structures for
+differentiating \ensuremath{\lambda_{\to}} and System F.
+% With a better way to describe a change from values of type |a| to
+% values of type |b|,
+%\pg{Later we sketch change structures across types.}
+
+%\pg{Idea: |ChangeStruct2 t1 t2, Iso t2 t3) => ChangeStruct2 t1 t3|}
+% Lists can be described as the fixpoint of a sum of
+% product: |List a = mu X. 1 + A `times` X|
+
+\section{Differentiation for System F}
+\label{sec:param-derive-changes-across-types-transform}
+After introducing changes across different types, we can also generalize
+differentiation for \ensuremath{\lambda_{\to}} so that it allows for the now generalized changes:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}(\Varid{f}_{1},\Varid{f}_{2})\in \Delta_2\mean{\sigma\to \tau}\mathrel{=}\Pi (\Varid{x}_{1}\typcolon\mathcal{S}_1 \mean{\sigma})\hsforall \;(\Varid{x}_{2}\typcolon\mathcal{S}_2 \mean{\sigma})\;(\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\sigma})\hsdot{\circ }{\mathpunct{.}}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}(\Varid{f}_{1}\;\Varid{x}_{1},\Varid{f}_{2}\;\Varid{x}_{2})\in \Delta_2\mean{\tau}{}\<[E]%
+\\
+\>[3]{}(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\alpha}\mathrel{=}\Delta_\alpha\;\Varid{x}_{1}\;\Varid{x}_{2}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Derive{\Varid{x}}\mathrel{=}\Varid{dx}{}\<[E]%
+\\
+\>[3]{}\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}\mathrel{=}\lambda (\Varid{x}_{1}\typcolon\mathcal{S}_1 \mean{\sigma})\;(\Varid{x}_{2}\typcolon\mathcal{S}_2 \mean{\sigma})\;(\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\sigma})\to \Derive{\Varid{t}}{}\<[E]%
+\\
+\>[3]{}\Derive{\Varid{s}\;\Varid{t}}\mathrel{=}\Derive{\Varid{s}}\;\mathcal{S}_1 \mean{\Varid{t}}\;\mathcal{S}_2 \mean{\Varid{t}}\;\Derive{\Varid{t}}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Derive{\EmptyContext}\mathrel{=}\EmptyContext{}\<[E]%
+\\
+\>[3]{}\Derive{\Gamma,\Varid{x}\typcolon\tau}\mathrel{=}\Derive{\Gamma},\Varid{x}_{1}\typcolon\mathcal{S}_1 \mean{\tau},\Varid{x}_{2}\typcolon\mathcal{S}_2 \mean{\tau},\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\tau}{}\<[E]%
+\\
+\>[3]{}\Derive{\Gamma,\alpha\typcolon\star}\mathrel{=}\Derive{\Gamma},\alpha_{1}\typcolon\star,\alpha_{2}\typcolon\star,\Delta_\alpha\typcolon\alpha_{1}\to \alpha_{2}\to \star{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathcal{S}_i \mean{\alpha}\mathrel{=}\alpha_i{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+By adding a few additional rules, we can extend differentiation to System F (the
+PTS \ensuremath{\lambda_{2}}). We choose to present the additional rules using System F syntax
+rather than PTS syntax.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}(\Varid{f}_{1},\Varid{f}_{2})\in \Delta_2\mean{\forall \alpha\hsforall \hsdot{\circ }{\mathpunct{.}}\tau}\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Pi (\alpha_{1}\typcolon\star)\hsforall \;(\alpha_{2}\typcolon\star)\;(\Delta_\alpha\typcolon\alpha_{1}\to \alpha_{2}\to \star)\hsdot{\circ }{\mathpunct{.}}(\Varid{f}_{1}\;[\mskip1.5mu \alpha_{1}\mskip1.5mu],\Varid{f}_{2}\;[\mskip1.5mu \alpha_{2}\mskip1.5mu])\in \Delta_2\mean{\tau}{}\<[E]%
+\\
+\>[3]{}\Derive{\Lambda \alpha\hsforall \hsdot{\circ }{\mathpunct{.}}\Varid{t}}\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\lambda (\alpha_{1}\;\alpha_{2}\typcolon\star)\;(\Delta_\alpha\typcolon\alpha_{1}\to \alpha_{2}\to \star)\to \Derive{\Varid{t}}{}\<[E]%
+\\
+\>[3]{}\Derive{\Varid{t}\;[\mskip1.5mu \tau\mskip1.5mu]}\mathrel{=}\Derive{\Varid{t}}\;\mathcal{S}_1 \mean{\tau}\;\mathcal{S}_2 \mean{\tau}\;((\text{\textendash},\text{\textendash})\in \Delta_2\mean{\tau}){}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathcal{S}_i \mean{\forall \alpha\hsforall \hsdot{\circ }{\mathpunct{.}}\tau}\mathrel{=}\forall \alpha_i\hsforall \hsdot{\circ }{\mathpunct{.}}\mathcal{S}_i \mean{\tau}{}\<[E]%
+\\
+\>[3]{}\mathcal{S}_i \mean{\Lambda \alpha\hsforall \hsdot{\circ }{\mathpunct{.}}\Varid{t}}\mathrel{=}\Lambda \alpha_i\hsforall \hsdot{\circ }{\mathpunct{.}}\mathcal{S}_i \mean{\Varid{t}}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Produced terms use a combination of System F and dependent types, which is known
+as \ensuremath{\lambda_{P2}}~\citep{Barendregt1992lambda} and is strongly normalizing. This PTS
+corresponds to second-order (intuitionistic) predicate logic and is part of
+Barendregt's \emph{lambda cube}; \ensuremath{\lambda_{P2}} does not admit types depending on types
+(that is, type-level functions), but admits all other forms of abstraction in
+the lambda cube (terms on terms like \ensuremath{\lambda_{\to}}, terms on types like System F, and
+types on terms like LF/\ensuremath{\lambda_P}).
+
+Finally, we sketch a transformation producing proofs that differentiation is
+correct for System F\@.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathcal{DP}\mean{\EmptyContext}\mathrel{=}\EmptyContext{}\<[E]%
+\\
+\>[3]{}\mathcal{DP}\mean{\Gamma,\Varid{x}\typcolon\tau}\mathrel{=}\mathcal{DP}\mean{\Gamma},\Varid{x}_{1}\typcolon\mathcal{S}_1 \mean{\tau},\Varid{x}_{2}\typcolon\mathcal{S}_2 \mean{\tau},{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\tau},\Varid{dxx}\typcolon(\Varid{x}_{1},\Varid{x}_{2},\Varid{dx})\in \Delta\mathcal{V}\mean{\tau}{}\<[E]%
+\\
+\>[3]{}\mathcal{DP}\mean{\Gamma,\alpha\typcolon\star}\mathrel{=}\mathcal{DP}\mean{\Gamma},{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\alpha_{1}\typcolon\star,\alpha_{2}\typcolon\star,\Delta_\alpha\typcolon\alpha_{1}\to \alpha_{2}\to \star{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mathcal{R}^\alpha\typcolon\Pi (\Varid{x}_{1}\typcolon\alpha_{1})\hsforall \;(\Varid{x}_{2}\typcolon\alpha_{2})\;(\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\alpha})\to \lceil \star \rceil{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}(\Varid{f}_{1},\Varid{f}_{2},\Varid{df})\in \Delta\mathcal{V}\mean{\forall \alpha\hsforall \hsdot{\circ }{\mathpunct{.}}\Conid{T}}\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Pi (\alpha_{1}\typcolon\star)\hsforall \;(\alpha_{2}\typcolon\star)\;(\Delta_\alpha\typcolon\alpha_{1}\to \alpha_{2}\to \star){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}(\mathcal{R}^\alpha\typcolon\Pi (\Varid{x}_{1}\typcolon\alpha_{1})\hsforall \;(\Varid{x}_{2}\typcolon\alpha_{2})\;(\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\alpha})\to \lceil \star \rceil)\hsdot{\circ }{\mathpunct{.}}{}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}(\Varid{f}_{1}\;[\mskip1.5mu \alpha_{1}\mskip1.5mu],\Varid{f}_{2}\;[\mskip1.5mu \alpha_{2}\mskip1.5mu],\Varid{df}\;[\mskip1.5mu \alpha_{1}\mskip1.5mu]\;[\mskip1.5mu \alpha_{2}\mskip1.5mu]\;[\mskip1.5mu \Delta_\alpha\mskip1.5mu])\in \Delta\mathcal{V}\mean{\Conid{T}}{}\<[E]%
+\\
+\>[3]{}(\Varid{f}_{1},\Varid{f}_{2},\Varid{df})\in \Delta\mathcal{V}\mean{\sigma\to \tau}\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Pi (\Varid{x}_{1}\typcolon\mathcal{S}_1 \mean{\sigma})\hsforall \;(\Varid{x}_{2}\typcolon\mathcal{S}_2 \mean{\sigma})\;(\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\sigma})\;(\Varid{dxx}\typcolon(\Varid{x}_{1},\Varid{x}_{2},\Varid{dx})\in \Delta\mathcal{V}\mean{\sigma})\hsdot{\circ }{\mathpunct{.}}{}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}(\Varid{f}_{1}\;\Varid{x}_{1},\Varid{f}_{2}\;\Varid{x}_{2},\Varid{df}\;\Varid{x}_{1}\;\Varid{x}_{2}\;\Varid{dx})\in \Delta\mathcal{V}\mean{\tau}{}\<[E]%
+\\
+\>[3]{}(\Varid{x}_{1},\Varid{x}_{2},\Varid{dx})\in \Delta\mathcal{V}\mean{\alpha}\mathrel{=}\mathcal{R}^\alpha\;\Varid{x}_{1}\;\Varid{x}_{2}\;\Varid{dx}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathcal{DP}\mean{\Varid{x}}\mathrel{=}\Varid{dxx}{}\<[E]%
+\\
+\>[3]{}\mathcal{DP}\mean{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\lambda {}\<[8]%
+\>[8]{}(\Varid{x}_{1}\typcolon\mathcal{S}_1 \mean{\sigma})\;(\Varid{x}_{2}\typcolon\mathcal{S}_2 \mean{\sigma})\;(\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\sigma}){}\<[E]%
+\\
+\>[8]{}(\Varid{dxx}\typcolon(\Varid{x}_{1},\Varid{x}_{2},\Varid{dx})\in \Delta\mathcal{V}\mean{\sigma})\to {}\<[E]%
+\\
+\>[8]{}\mathcal{DP}\mean{\Varid{t}}{}\<[E]%
+\\
+\>[3]{}\mathcal{DP}\mean{\Varid{s}\;\Varid{t}}\mathrel{=}\mathcal{DP}\mean{\Varid{s}}\;\mathcal{S}_1 \mean{\Varid{t}}\;\mathcal{S}_2 \mean{\Varid{t}}\;\Derive{\Varid{t}}\;\mathcal{DP}\mean{\Varid{t}}{}\<[E]%
+\\
+\>[3]{}\mathcal{DP}\mean{\Lambda \alpha\hsforall \hsdot{\circ }{\mathpunct{.}}\Varid{t}}\mathrel{=}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\lambda {}\<[8]%
+\>[8]{}(\alpha_{1}\;\alpha_{2}\typcolon\star)\;(\Delta_\alpha\typcolon\alpha_{1}\to \alpha_{2}\to \star){}\<[E]%
+\\
+\>[8]{}(\mathcal{R}^\alpha\typcolon\Pi (\Varid{x}_{1}\typcolon\alpha_{1})\hsforall \;(\Varid{x}_{2}\typcolon\alpha_{2})\;(\Varid{dx}\typcolon(\Varid{x}_{1},\Varid{x}_{2})\in \Delta_2\mean{\alpha})\to \lceil \star \rceil)\to {}\<[E]%
+\\
+\>[8]{}\mathcal{DP}\mean{\Varid{t}}{}\<[E]%
+\\
+\>[3]{}\mathcal{DP}\mean{\Varid{t}\;[\mskip1.5mu \tau\mskip1.5mu]}\mathrel{=}\mathcal{DP}\mean{\Varid{t}}\;\mathcal{S}_1 \mean{\tau}\;\mathcal{S}_2 \mean{\tau}\;((\text{\textendash},\text{\textendash})\in \Delta_2\mean{\tau})\;((\text{\textendash},\text{\textendash},\text{\textendash})\in \Delta\mathcal{V}\mean{\tau}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Produced terms live in \ensuremath{\lambda_{P2}^2}, the logic produced by extending \ensuremath{\lambda_{P2}} following
+\citeauthor{Bernardy2011realizability}. A variant producing proofs for a
+non-dependently-typed differentiation (as suggested earlier) would produce
+proofs in \ensuremath{\lambda_{2}^2}, the logic produced by extending \ensuremath{\lambda_{2}} following
+\citeauthor{Bernardy2011realizability}.
+
+
+\section{Related work}
+Dependently-typed differentiation for System F, as given, coincides with the
+parametricity transformation for System F given by \citet*[Sec.~3.1]{Bernardy10}. But our
+application is fundamentally different: for known types, \citeauthor{Bernardy10}
+only consider identity relations, while we can consider non-identity relations
+as long as we assume that \ensuremath{\ominus } is available for all types.\pg{say this
+  earlier!}
+What is more, \citeauthor{Bernardy10} do not consider changes, the update
+operator \ensuremath{\oplus }, or change structures across different types: changes are
+replaced by proofs of relatedness with no computational significance.
+Finally, non-dependently-typed differentiation (and its corectness proof) is
+novel here, as it makes limited sense in the context of parametricity, even
+though it is a small variant of \citeauthor{Bernardy10}'s parametricity transform.
+%(if we assume |`ominus`| is available)
+\pg{Demonstrate the actual contributions, they aren't here!}
+
+\section{Prototype implementation}
+\label{sec:param-derive-implementation}
+We have written a prototype implementation of the above rules for a PTS
+presentation of System F, and verified it on a few representative examples of
+System F terms. We have built our implementation on top of an existing
+typechecker for PTSs.\footnote{\url{https://github.com/Toxaris/pts/}, by Tillmann
+  Rendel, based on \citet{vanBenthemJutting1994checking}'s algorithm for
+  PTS typechecking.}
+
+Since our implementation is defined in terms of a generic PTS, some of the rules
+presented above are unified and generalized in our implementation, suggesting
+the transformation might generalize to arbitrary PTSs. In the absence of
+further evidence on the correctness of this generalization, we leave a detailed
+investigation as future work.
+
+  % elemDt2 (forall X . T) f1 f2 = PPi ((X1 : *)) (X2 : *) (DX : *). elemDt2 T (f1 [X1]) (f2 [X2])
+  % derive(Lambda X . t) = Lambda X1 X2 DX. derive(t)
+  % derive(t [T]) = derive t [idx1 T] [idx2 T] [elemDt2 T]
+
+% \chapter{Stuff}
+% In this chapter, we relate our formalization of changes with the one by
+% \citet{CaiEtAl2014ILC} in \cref{sec:alt-change-validity}.
+% \pg{We have proved equivalence with the one-sided definition of validity.}
+% \subsection{Alternative definitions of change validity}
+% \label{sec:alt-change-validity}
+
+% % \newcommand{\ilcA}{ILC'14}
+% % \newcommand{\ilcB}{ILC'17}
+
+% In this section we compare the formalization of ILC in this thesis (\ilcB)
+% with the one we and others used in our \emph{old-style}
+% formalization, that is, our first formalization of change
+% theory~\citep{CaiEtAl2014ILC} (\ilcA).
+% We discuss both formalizations using our current notation and terminology, except for concepts
+% that are not present here.
+% Both formalizations model function changes semantically, but the two models we
+% present are different. Overall, \ilcB{} uses simpler machinery and seems easier
+% to extend to more general base languages. Instead, \ilcA{} studies additional
+% entities, which however are in some ways better behaved.
+
+% In \ilcB{} function changes whose input and output domains contain
+% \emph{invalid} changes; but function changes must map valid changes to valid
+% changes. As shown, |eval(derive t)| maps valid changes to valid changes.
+
+% Instead, \ilcA{} does not define validity on change set |Dt^A|. For each value
+% |a : A| \ilcA{} defines a \emph{based} change set |Dt^a|; elements of |Dt^a|
+% \emph{correspond} to changes that are valid with respect to |a|.
+% Changes |df : Dt^f| for a function |f : A -> B| have a dependent type |df : (a :
+% A) -> Dt^a -> Dt^(f a)|, hence their input and output domains are restricted to
+% \emph{only} contain ``valid'' changes. Based change sets are in some ways better
+% behaved. However, |eval(derive t)| does not belong to any based change set, because
+% it has the ``wrong'' domain, even though |eval(derive t)|, when applied to
+% ``valid changes'', has in some sense the ``correct behavior''. More precisely,
+% \ilcA{} introduces an incremental semantics |evalInc t| (different from the one in \ilcB{}), proves it
+% has a ``correct behavior'', and shows that |eval(derive t)| has a behavior that ``matches''
+% |evalInc t|. In turn, to make this precise, \ilcA{} defines formally when when a
+% based change and a change have ``matching behaviors'' through a logical
+% relation called \emph{erasure}: function change |df : (a : A) -> Dt^a -> Dt^(f
+% a)| (with source |f : A -> B)| erases to erased change |df' : A -> Dt^A -> Dt^B|
+% (written |erase f df df'|)
+% if, given any change |da : Dt^a| with source |a| that erases to |da' : Dt^A|,
+% output change |df a da : Dt^(f a)| erases to |df' a da' : Dt^B|.
+% For base types, erasure simply connects corresponding |da' : Dt^a| with |da :
+% Dt^A| in a manner dependent from the base type (often, just throwing away any
+% embedded proofs of validity).
+% This relation is called erasure because it goes from dependently-typed functions
+% to non-dependently-typed functions. This style of relation resembles the ones
+% used to show that a compiler produces outputs that relate to their inputs.
+% Changes are then ``well-behaved'' if they are the erasure of a based
+% change.\footnote{\citeauthor{CaiEtAl2014ILC} use different terminology: They say
+% ``changes'' instead of ``based changes'', and ``erased changes'' instead of
+% ``changes''. Here we change terms to use a single, consistent terminology.}
+
+% \paragraph{Relating the two models}
+% The two approaches have a different architecture, but reach similar results.
+% In particular, they give the same definition and predict the same behavior for
+% |eval(derive t)| in any example we are aware of.
+
+% Based on a partial mechanized proof, we conjecture that a change is valid in
+% \ilcB{} if and only if it is the erasure of a based change in \ilcA{}.
+
+% We have sketched a mechanized proof of this conjecture, and have a partial proof
+% for functions. To complete this proof, we would however need to combine the two
+% definitions of change structures (the one in \ilcA{} using based change sets and
+% the one in \ilcB{} using plain change sets), and show each operation mirrors the
+% other one. For instance, we'd need proofs relating the different definitions of
+% |`oplus`|, so that |erases a da da' -> a `oplus` da = a `oplus` da'|.
+% We have not completed such proofs as of this writing.
+
+% % We have also sketched a proof of our conjecture. However,
+
+% % In this thesis we have given a novel semantic model of function changes.
+
+% % In particular, we focus on change
+% % validity for function spaces, and its role in the overall proof
+% % of |derive(param)|'s correctness. Specifically, we compare
+% % new-style valid function changes to old-style ones, and sketch in
+% % which sense they are equivalent.
+
+% We have seen that based function changes have type |df : (a : A) -> Dt^a ->
+% Dt^(f a)|.
+% However, based function changes have to also satisfy an additional
+% equation called \emph{preservation of future}:\footnote{Name suggested by Yufei Cai.}
+%   \[|f1 a1 `oplus` df a1 da = (f1 `oplus` df) (a1 `oplus` da)|.\]
+% This equation appears inelegant, and formal proofs were often complicated by the
+% need to perform rewritings using it.
+% If we replace |f1 `oplus` df| with |f2| and |a1 `oplus` da| with |a2|, this
+% equation becomes |f1 a1 `oplus` df a1 da = f2 a2|, a consequence of |fromto f1
+% df f2|. So one might suspect that valid function changes also satisfy this
+% equation. We show this is indeed the case:
+
+% % This equation is one requirement that old-style function changes
+% % had to satisfy. What we have seen is that the new-style
+% % definition of validity, although different (and we believe
+% % simpler), implies the same equation.
+% % First, we show that our valid function changes satisfy
+% \begin{lemma}
+%   A valid function change |fromto (A -> B) f1 df f2| satisfies equation
+%   \[|f1 a1 `oplus` df a1 da = (f1 `oplus` df) (a1 `oplus` da)|\]
+%   on any valid input |fromto (A -> B) a1 da a2|.
+% \end{lemma}
+% Beware, however, this equation on changes is not actually equivalent to the same
+% equation for based changes, since variables quantify over different sets (based
+% change sets versus change sets) and since operators like |`oplus`| refer to
+% different (though related) operations.
+
+% Also beware the two models are unlikely to be isomorphic in any straightforward
+% sense. Initially, we conjectured such an isomorphism would actually exist and
+% tried defining it. Please keep in mind we work in a constructive setting, hence
+% we tried defining a constructive isomorphism.
+% %
+% However, try converting a based function change |df' : Dt^f| with source |f : A
+% -> B| to a valid function change |df : Dt^(A -> B) = \(a : A) (da : Dt^A) ->
+% dt|. We would expect |dt| to compute |df' a da|, modulo a few conversions. But
+% first, |da| need not be valid. We'd have to generate some output change anyway.
+% We can pick |df a (nil a)|, or |nil (f a)|, or something else. But then, if
+% |df'| results from converting a valid function change |df0|, |df| will not have
+% the same behavior as |df0| on invalid changes. Hence, our conversion would not
+% be an isomorphism.
+% Worse, in a constructive and proof-relevant setting, we need to a decision
+% procedure that given |a : A| and |da : Dt^A| produces either a proof that |da|
+% is valid for |a|, or a proof that it is not valid. But validity might be
+% undecidable in general, especially if |A| is in turn a set of functions.
+
+% Overall, the relation between the two models is vaguely similar to the relation
+% between two models of the same language: while their elements have different
+% characteristics, they enable showing similar facts about the language (though
+% not necessarily the same ones).
+
+% % While that formulation has lots of conceptual elegance, programs
+% % produced by |derive(param)| are expressed in STLC, which does not
+% % support dependent types and cannot express proofs; hence
+% % |derive(param)| cannot produce changes that are valid according
+% % to \citeauthor{CaiEtAl2014ILC}. Instead,
+% % \citeauthor{CaiEtAl2014ILC} need to give a separate semantics
+% % mapping terms to their validity-embedding changes, and then
+% % relate validity-embedding changes to the ``erased changes''
+% % produced by |derive(param)|.\footnote{While we didn't realize
+% %   back then, we could have probably reused the theory of
+% %   realizability to perform erasure and extract the computational
+% %   content from validity-embedding changes.} While this additional
+% % step is not conceptually hard, mechanizing it took significant
+% % work; moreover, dealing with both validity-embedding changes and
+% % erased changes introduced significant inelegant noise in quite a
+% % few definitions and theorem statements.
+
+% % Using our formalization, we have also defined a type of
+% % validity-embedding changes |Dt^v|, with elements that pair a
+% % change and its validity proof:
+% % \[|Dt^v = Sigma [ dv `elem` Dt^V ] valid v dv|.\]
+
+% % However, such new-style validity-embedding changes are not
+% % equivalent to old-style changes on function spaces, even if we
+% % restrict our attention to valid inputs; we need one last step to
+% % relate them together. Take an arbitrary function |f1 : A -> B|.
+% % For \citeauthor{CaiEtAl2014ILC}, |df' : Dt^f1| means that |df'|
+% % maps validity-embedding changes to validity-embedding changes;
+% % for us, |df' : Dt^f1| means that |df'| contains (1) a map |df|
+% % from changes to changes and (2) a proof that |df| preserves
+% % validity: in a sense, new-style changes split what was a map of
+% % validity-embedding changes into its action on changes and its
+% % action on validity proofs. This ``splitting'' becomes trickier
+% % for higher-order function types, such as |(A -> B) -> (C -> D)|,
+% % so it must be defined by induction on types; essentially, we need
+% % to adapt \citeauthor{CaiEtAl2014ILC}'s erasure.
+
+% % We have not attempted a mechanization of the full equivalence,
+% % but we have been satisfied with mechanizing several fragments
+% % without further issues.
+
+% \paragraph{Mechanization overhead}
+% The mechanization of \ilcB{} appears simpler and
+% smaller than the mechanization for \ilcA{}, because we avoid needing erasure,
+% but also for other smaller simplifications.
+
+% Most importantly, our fundamental relation is ``two-sided''
+% (|fromto V v1 dv v2|) rather than ``one-sided'' (|valid V v dv| or |dv : Dt^v|);
+% that is, validity specifies both the source and the destination
+% explicitly. This is easier now that validity proofs are separate
+% from changes. While this might seem trivial, it's somewhat
+% significant for functions, especially in terms of mechanization
+% overhead in Agda.
+% %
+% Indeed, \ilcB{} validity allows stating that |df : Dt^(A -> B)|
+% is a change from |f1| to |f2|, instead of stating that |df| is a
+% change from |f1| to |f1 `oplus` df = \a -> f1 a `oplus` df a (nil
+% a)|. What's more, assume |fromto A a1 da a2|: according to
+% \ilcB validity preservation, change |df a1 da| has
+% destination |f2 a2|. Instead, according to \ilcA{} validity
+% preservation, change |df a1 da| has destination |(f1 `oplus` df)
+% (a1 `oplus` da)|, that is |f1 (a1 `oplus` da) `oplus` df (a1
+% `oplus` da) (nil (a1 `oplus` da))|, which adds significant noise
+% to mechanized proving with \ilcA definitions.
+
+% \subsection{Further alternatives and related work}
+% %\paragraph{Possible alternatives and related work}
+% \paragraph{Junkless models}
+% Change sets in \ilcB{} contain invalid elements, or \emph{junk}
+% A model without junk, like \ilcA{}, can be desirable.\pg{Can it?}
+% We conjecture we could combine
+% the benefits of the two models by defining change sets indexed from both sides:
+
+% |Dt2 (A -> B) f1 f2 = Dt2 A a1 a2 -> Dt2 B (f1 a1) (f2 a2)|.
+
+% One could then define a set of valid changes containing their source and
+% destination:
+
+% |Dt^V = exists v1 : V, v2 : V. ^^ Dt2^V v1 v2|.
+
+% In this approach, |Dt^(A -> B)| is not a set of functions, but we can still
+% define an operation that applies an element of |Dt^(A -> B)| to an element of
+% |Dt^A| and produces an element of |Dt^B|.
+
+% We believe the main open question is not whether defining such a model is
+% possible, but about the formalization overhead and their exact properties.
+
+% Such junkless models are closely related to models based on directed graphs and reflexive
+% graphs, where values are graphs vertexes, changes are edges between change
+% source and change destination (as hinted earlier). In graph language, validity
+% preservation means that function changes are graph homomorphisms.
+
+% Based on similar insights, \citet{Atkey2015ILC} suggests modeling ILC using
+% reflexive graphs, which have been used to construct parametric models for System
+% F and extensions, and calls for research on the relation between ILC and
+% parametricity.
+% As a follow-up work \citet{CaiPhD} studies models of ILC based on directed and
+% reflexive graphs.
+
+% In ILC, instead, |fromto V v1 dv v2| holds even if |v1| and |v2| are different
+% and this difference is observable in the program, but require that |dv| is a
+% correct description of these differences.
+
+% Similarly to our proof, \citet*{Acar08} prove correctness of incrementalization
+% using a logical relation across executions of programs on base and updated
+% inputs. There, incremental computation proceeds by executing the same program
+% using an incremental semantics.
+% The proof is done on an untyped language using a step-indexed logical relation,
+% and authors choose to use a step-indexed big-step semantics, where the
+% step-indexing is sound relative to step counts for a standard small-step
+% semantics.
+% Based on a few preliminary
+% experiments by me and Yann Régis-Gianas, we conjecture it should be possible to
+% adapt the approach to step-indexing in that proof to give a correctness proof of
+% ILC on an untyped language using an operational semantics.
+
+% \Citeauthor*{Acar08}'s step-indexed logical relation for incremental computation
+% resembles the step-indexed logical relation by \citet{Ahmed2006stepindexed} to
+% model parametricity and program equivalence.
+% However, if terms |t1| and |t2| are
+% related according to \citeauthor*{Ahmed2006stepindexed}'s program equivalence
+% (at a certain step count) and |t1| terminates (at certain step counts), then
+% |t2| terminates and |t1| and |t2|'s results are related (at a certain step count).
+% Instead, if terms |t1| and |t2| are related according to \citeauthor*{Acar08}'s
+% relation (at a certain step count),
+% |t1| terminates (at certain step counts) \emph{and} |t2| terminates,
+% \emph{then} |t1| and |t2|'s results are related (at a certain step count).%
+% \footnote{The step-indexing details we omit are the same in both definitions.}
+% That is, with \citeauthor*{Acar08}'s logical relation, termination of |t1| in no
+% way implies termination of |t2|, exactly because |t1| and |t2| need not be
+% equivalent.
+
+% Let us see concretely why a logical relation for incrementalization must relate |t1|
+% and |t2| even if they are not equivalent and in particular |t1| terminates and |t2|
+% doesn't. Consider incrementalizing function |t = if x then 0 else loop| when |x|
+% goes from |true| to |false|, assuming that |loop| is a diverging subterm. Such a
+% change for |x| is valid, hence it must be mapped (by function application and
+% $\beta$-reduction) to a valid change from terminating term |if true then 0 else
+% loop| to non-terminating term |if false then 0 else loop|.
+
+% \section{The relation with parametricity and the abstraction theorem}
+
+% In this section we discuss similarities between correctness of |derive(param)|
+% (\cref{thm:derive-correct}) and the fundamental property of logical relations,
+% for the case of binary logical relations. This section is intended for logical
+% relation experts, and we keep it rather informal.
+
+% %format ppp(t) = "\mathcal{P}(" t ")"
+
+% Most studies of logical relations mention no term transformation that relates to
+% |derive(param)|; one exception is given by \citet{Bernardy2011realizability}.
+% They study relational parametricity, a particular binary logical relation, where
+% the fundamental property of logical relations becomes the abstraction theorem. To
+% prove the abstraction theorem, \citeauthor{Bernardy2011realizability} present a
+% term transformation |ppp(param)|; we'll show the analogy between this term
+% transformation and
+% |derive(param)|.%
+% %
+% \footnote{\citeauthor{Bernardy2011realizability} were not the first to introduce
+%   such a transformation, but we base our comparison off their presentation and
+%   avoid discussing their related work.}
+
+% Transformation |ppp(t)| takes a term |t| to a proof term |ppp(t)| in a suitable
+% object logic (related to the one of |t|), that proves that |t| maps logically
+% related inputs to logically related outputs. For binary logical relations and
+% simply-typed $\lambda$-calculus, we can specialize their definition to the
+% following:
+
+% %format (idx1 (t)) = "\mathcal{S}_1(" t ")"
+% %format (idx2 (t)) = "\mathcal{S}_2(" t ")"
+
+% \begin{code}
+%   (t1, t2) `elem` r(sigma -> tau) =
+%     forall x1 x2 : sigma, px : (x1, x2) `elem` r(sigma). (t1 x1, t2 x2) `elem` r(tau)
+%   ppp(x) =
+%       px
+%   ppp(\(x : sigma) -> t) =
+%     \(x1 x2 : sigma) (px : (x1, x2) `elem` r(sigma)) -> ppp(t)
+%   ppp(s t) =
+%     ppp(s) (idx1 t) (idx2 t) ppp(t)
+% \end{code}
+
+% where |idx1 s| and |idx2 s| subscript variables in terms with 1 and 2:
+% \begin{code}
+%   idx1(x) = x1
+%   idx1(\(x : sigma) -> t) = \(x1 : sigma) -> idx1 t
+%   idx1(s t) = (idx1 s) (idx1 t)
+
+%   idx2(x) = x2
+%   idx2(\(x : sigma) -> t) = \(x2 : sigma) -> idx2 t
+%   idx2(s t) = (idx2 s) (idx2 t)
+% \end{code}
+
+% To see the analogy, let's show a variant of differentiation. This time,
+% |derive(\x -> t) = \x1 x2 dx -> derive(t)| is a function that binds not just the
+% source of |dx|, but also its target, and the additional symmetry simplifies its
+% theoretical study.
+
+% \begin{code}
+%   Dt2 : (v1 v2 : V)
+%   Dt2 : (v1 v2 : V) -> Set
+%   Dt2 v1 v2 = Sigma [ dv `elem` Dt^V ] (fromto sigma v1 dv v2)
+%   (f1, df, f2) `elem` r(sigma -> tau) =
+%     forall x1, dx, x2 : sigma, dxx : r(sigma) . (f1 x1, df x1 x2 dx, f2 x2) `elem` r(tau)
+
+%   derive(x) = dx
+%   derive(\(x : sigma) -> t) = \x1 x2 (dx : Dt2 x1 x2) -> derive(t)
+%   derive(s t) = derive(s) (idx1 t) (idx2 t) (derive t)
+
+%   derive(\(x : sigma) -> t) = \x1 x2 (fromto sigma x1 dx x2) -> derive(t)
+% \end{code}
+
+% \pg{connection}
+% For readers familiar with staging,
+% we explain how \citeauthor{Bernardy2011realizability}'s
+% transformation relates to standard proofs of the abstraction theorem.
+% In short, (a) the usual proof of the abstraction theorem
+% can be regarded as an \emph{interpreter} from object-level terms to metalevel
+% proofs; (b) standard interpreters can be turned into compilers by staging, so
+% that they evaluate object-level code for a function instead of the function
+% itself at the metalevel; (c) an ``interpreter'' that produces a metalevel proof
+% can be staged into a ``compiler'' (or term transformation) into an object-level
+% proof term in a suitable logic; (d) the above definition of |p(t)| corresponds
+% (informally) to staging the proof of the abstraction theorem.
+% \begin{enumerate}
+% \item Recall that the abstraction theorem is proven by
+% induction on terms.\footnote{Or on typing derivations, but as discussed we
+%   regard the two as isomorphic, since typing is syntax-directed.} Let's write
+% |P(t)| to say that term |t| satisfies the abstraction theorem; then the theorem
+% statement is |forall t. P(t)| in the metalevel logic. The proof is constructive,
+% so we can regard it (informally) under the lens of the Curry-Howard isomorphism.
+% Under this lens, a metalevel proof of |forall t. P (t)| is a function from terms
+% |t| to a metalevel proof of |P(t)|; a proof by induction is a structurally
+% recursive function from terms to metalevel proofs, just like an interpreter is a
+% structural recursive function from terms to metalevel functions. Hence, we
+% regard the proof of the abstraction theorem as an interpreter.
+% \item Staging an interpreter produces a compiler, which evaluates
+%   not to a value |v| but to code that will later evaluate to
+%   value |v|; this code will already be specialized for the input
+%   term.
+% \item Similarly, by staging an interpreter that produces proofs,
+%   we produce a compiler from term to proofs.
+% \end{enumerate}
+
+% % Most other proofs,
+% % instead of creating a proof term, but simply produce a similar proof in the meta
+% % logic by induction on terms. The two proof strategies are related by an analogue
+% % of staging.
+
+
+% % Here we discuss the relation with parametricity, the abstraction theorem, and
+% % the fundamental property of logical relations, for readers familiar with these
+% % topics. Parametricity is typically studied for type systems containing System F,
+% % but \citet{Bernardy2011realizability} generalize it to arbitrary PTSs.
+
+
+
+% % Correctness of |derive(param)| (\cref{thm:derive-correct}) relates to binary
+% % parametricity. However, usual statements of binary parametricity mention no
+% % analog of changes or |derive(param)|. One defines a relational interpretation of
+% % terms, mapping input relations to output relations, and shows this maps
+
+\section{Chapter conclusion}
+In this chapter, we have sketched how to define and prove correct
+differentiation following \citet{Bernardy2011realizability}'s and
+\citet{Bernardy10}'s work on
+parametricity by code transformation. We give no formal correctness proof, but
+proofs appear mostly an extension of their methods. An important open point is
+\cref{rem:validity-oplus-system-f-not-really}.
+We have implemented and tested differentiation in an existing mature PTS
+implementation, and verified it is type-correct on a few typical terms.
+
+We leave further investigation as future work.

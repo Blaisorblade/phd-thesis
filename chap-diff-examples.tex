@@ -1,0 +1,1339 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+\chapter{A tour of differentiation examples}
+\label{ch:diff-examples}
+Before formalizing ILC, we show more example of change structures and
+primitives, to show (a) designs for reusable primitives and their
+derivatives, (b) to what extent we can incrementalize basic building
+blocks such as recursive functions and algebraic data types, and (c) to sketch how
+we can incrementalize collections efficiently. We make no attempt at
+incrementalizing a complete collection API here; we discuss briefly more
+complete implementations in \cref{sec:applying} and \cref{sec:case-studies}.
+
+To describe these examples informally, we use Haskell notation and
+\ensuremath{\mathbf{let}} polymorphism as appropriate (see \cref{sec:intro-stlc}).
+% We already sketch, how a change structure
+% can be represented in Haskell terms:
+
+We also motivate a few extensions to differentiation that we describe later. As
+we'll see in this chapter, we'll need to enable some forms of introspection on
+function changes to manipulate the embedded environments, as we discuss in
+\cref{ch:defunc-fun-changes}. We will also need ways to remember intermediate
+results, which we will discuss in \cref{ch:cts}.
+We will also use overly simplified change structures to illustrate a few points.
+
+\section{Change structures as type-class instances}
+\label{sec:diff-examples-tc}
+We encode change structures, as sketched earlier in \cref{sec:change-intro},
+through a \emph{type class} called \ensuremath{\Conid{ChangeStruct}}. An instance \ensuremath{\Conid{ChangeStruct}\;\Varid{t}}
+defines a change type \ensuremath{\Delta \Varid{t}} as an associated type and operations \ensuremath{\oplus },
+\ensuremath{\ominus } and \ensuremath{\circledcirc } are defined as methods. We also define method
+\ensuremath{\Varid{oreplace}}, such that \ensuremath{\Varid{oreplace}\;\Varid{v}_{2}} produces a \emph{replacement change} from
+any source to \ensuremath{\Varid{v}_{2}}; by default, \ensuremath{\Varid{v}_{2}\ominus \Varid{v}_{1}} is simply an alias for
+\ensuremath{\Varid{oreplace}\;\Varid{v}_{2}}.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;\Conid{ChangeStruct}\;\Varid{t}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Delta \Varid{t}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\oplus)\mathrel{:\mkern-1mu:}\Varid{t}\to \Delta \Varid{t}\to \Varid{t}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{oreplace}\mathrel{:\mkern-1mu:}\Varid{t}\to \Delta \Varid{t}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\ominus)\mathrel{:\mkern-1mu:}\Varid{t}\to \Varid{t}\to \Delta \Varid{t}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{v}_{2}\ominus \Varid{v}_{1}\mathrel{=}\Varid{oreplace}\;\Varid{v}_{2}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\circledcirc )\mathrel{:\mkern-1mu:}\Delta \Varid{t}\to \Delta \Varid{t}\to \Delta \Varid{t}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\NilC{}\mathrel{:\mkern-1mu:}\Varid{t}\to \Delta \Varid{t}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+In this chapter we will
+often show change structures where only some methods are defined; in actual
+implementations we use a type class hierarchy to encode what operations are
+available, but we collapse this hierarchy here to simplify presentation.
+% We'll come back to this definition and refine it,
+% describing the laws it satisfies, in \cref{sec:change-struct-tc}.
+
+\section{How to design a language plugin}
+\label{sec:plugin-design}
+
+When adding support for a datatype \ensuremath{\Conid{T}}, we will strive to
+define both a change structure and derivatives of introduction and
+elimination forms for \ensuremath{\Conid{T}}, since such forms constitute a complete API
+for using that datatype. However, we will sometimes have to restrict
+elimination forms to scenarios that can be incrementalized efficiently.
+
+In general, to differentiate a primitive \ensuremath{\Varid{f}\typcolon\Conid{A}\to \Conid{B}} once we have defined a
+change structure for \ensuremath{\Conid{A}}, we can start by defining
+\begin{equation}
+  \label{eq:diff-primitive-eq-reasoning}
+  \ensuremath{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}\mathrel{=}\Varid{f}\;(\Varid{a}_{1}\oplus \Varid{da})\ominus \Varid{f}\;\Varid{a}_{1}},
+\end{equation}
+where \ensuremath{\Varid{da}} is a valid change from \ensuremath{\Varid{a}_{1}} to \ensuremath{\Varid{a}_{2}}. We then try to
+simplify and rewrite the expression using \emph{equational reasoning}, so that it does
+not refer to \ensuremath{\ominus } any more, as far as possible. We can assume that all
+argument changes are valid, especially if that allows producing faster
+derivatives; we formalize equational reasoning for valid changes in
+\cref{sec:denot-equivalence-valid}.
+In fact, instead of defining \ensuremath{\ominus } and simplifying \ensuremath{\Varid{f}\;\Varid{a}_{2}\ominus \Varid{f}\;\Varid{a}_{1}} to
+not use it, it is sufficient to produce a change from \ensuremath{\Varid{f}\;\Varid{a}_{1}} to \ensuremath{\Varid{f}\;\Varid{a}_{2}}, even a
+different one. We write \ensuremath{\Varid{da}_{1}\Doe\Varid{da}_{2}} to mean that changes \ensuremath{\Varid{da}_{1}} and \ensuremath{\Varid{da}_{2}} are
+equivalent, that is they have the same source and destination. We define this
+concept properly in~\cref{sec:change-equivalence}.
+
+We try to avoid running \ensuremath{\ominus } on arguments of non-constant size, since it
+might easily take time linear or superlinear in the argument sizes; if
+\ensuremath{\ominus } produces replacement values, it completes in constant time but
+derivatives invoked on the produced changes are not efficient.
+%implement it on lists to produce a minimal-size difference,\citep{Cormen2001}.
+% Running |`ominus`| can take time linear on input sizes, or worse: If we wanted
+% to find a minimal description of a change between lists,
+
+\section{Incrementalizing a collection API}
+\label{sec:incr-coll-api-intro}
+In this section, we describe a collection API that we incrementalize (partially)
+in this chapter.
+
+To avoid notation conflicts, we represent lists via
+datatype \ensuremath{\Conid{List}\;\Varid{a}}, defined as follows:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;\Conid{List}\;\Varid{a}\mathrel{=}\Conid{Nil}\mid \Conid{Cons}\;\Varid{a}\;(\Conid{List}\;\Varid{a}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+We also consider as primitive operation a standard mapping function \ensuremath{\Varid{map}}.
+We also support two restricted forms of aggregation:
+(a) folding over an abelian group via
+\ensuremath{\Varid{fold}}, similar to how one usually folds over a monoid;\footnote{\url{https://hackage.haskell.org/package/base-4.9.1.0/docs/Data-Foldable.html}.}
+(b) list concatenation via \ensuremath{\Varid{concat}}. We will not discuss how to differentiate
+\ensuremath{\Varid{concat}}, as we reuse existing solutions by \citet{Firsov2016purely}.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{singleton}\mathrel{:\mkern-1mu:}\Varid{a}\to \Conid{List}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\Varid{singleton}\;\Varid{x}\mathrel{=}\Conid{Cons}\;\Varid{x}\;\Conid{Nil}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{map}\mathrel{:\mkern-1mu:}(\Varid{a}\to \Varid{b})\to \Conid{List}\;\Varid{a}\to \Conid{List}\;\Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{map}\;\Varid{f}\;\Conid{Nil}\mathrel{=}\Conid{Nil}{}\<[E]%
+\\
+\>[B]{}\Varid{map}\;\Varid{f}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\mathrel{=}\Conid{Cons}\;(\Varid{f}\;\Varid{x})\;(\Varid{map}\;\Varid{f}\;\Varid{xs}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{fold}\mathrel{:\mkern-1mu:}\Conid{AbelianGroupChangeStruct}\;\Varid{b}\Rightarrow\Conid{List}\;\Varid{b}\to \Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{fold}\;\Conid{Nil}\mathrel{=}\Varid{mempty}{}\<[E]%
+\\
+\>[B]{}\Varid{fold}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\mathrel{=}\Varid{x} \diamond \Varid{fold}\;\Varid{xs}\mbox{\onelinecomment  Where \ensuremath{ \diamond } is infix for \ensuremath{\Varid{mappend}}.}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{concat}\mathrel{:\mkern-1mu:}\Conid{List}\;(\Conid{List}\;\Varid{a})\to \Conid{List}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\Varid{concat}\mathrel{=}\ldots{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+While usually \ensuremath{\Varid{fold}} requires only an instance \ensuremath{\Conid{Monoid}\;\Varid{b}} of type class \ensuremath{\Conid{Monoid}} to aggregate
+collection elements, our variant of \ensuremath{\Varid{fold}} requires an instance of type class \ensuremath{\Conid{GroupChangeStruct}}, a
+subclass of \ensuremath{\Conid{Monoid}}. This type class is not used by \ensuremath{\Varid{fold}} itself, but only by
+its derivative, as we explain in \cref{sec:incr-fold}; nevertheless,
+we add this stronger constraint to \ensuremath{\Varid{fold}} itself because we forbid derivatives
+with stronger type-class constraints. With this approach, all clients of \ensuremath{\Varid{fold}}
+can be incrementalized using differentiation.
+
+Using those primitives, one can define further higher-order functions on
+collections such as \ensuremath{\Varid{concatMap}}, \ensuremath{\Varid{filter}}, \ensuremath{\Varid{foldMap}}. In turn, these functions
+form the kernel of a collection API, as studied for instance by work on the
+\emph{monoid comprehension calculus}~\citep{Grust96Monoid,Fegaras95,Fegaras99},
+even if they are not complete by themselves.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{concatMap}\mathrel{:\mkern-1mu:}(\Varid{a}\to \Conid{List}\;\Varid{b})\to \Conid{List}\;\Varid{a}\to \Conid{List}\;\Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{concatMap}\;\Varid{f}\mathrel{=}\Varid{concat}\hsdot{\circ }{\mathpunct{.}}\Varid{map}\;\Varid{f}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{filter}\mathrel{:\mkern-1mu:}(\Varid{a}\to \Conid{Bool})\to \Conid{List}\;\Varid{a}\to \Conid{List}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\Varid{filter}\;\Varid{p}\mathrel{=}\Varid{concatMap}\;(\lambda \Varid{x}\to \mathbf{if}\;\Varid{p}\;\Varid{x}\;\mathbf{then}\;\Varid{singleton}\;\Varid{x}\;\mathbf{else}\;\Conid{Nil}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{foldMap}\mathrel{:\mkern-1mu:}\Conid{AbelianGroupChangeStruct}\;\Varid{b}\Rightarrow(\Varid{a}\to \Varid{b})\to \Conid{List}\;\Varid{a}\to \Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{foldMap}\;\Varid{f}\mathrel{=}\Varid{fold}\hsdot{\circ }{\mathpunct{.}}\Varid{map}\;\Varid{f}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+In first-order DSLs such as SQL, such functionality must typically be added through separate
+primitives (consider for instance \ensuremath{\Varid{filter}}), while here we can simply
+\emph{define}, for instance, \ensuremath{\Varid{filter}} on top of \ensuremath{\Varid{concatMap}}, and incrementalize
+the resulting definitions using differentiation.
+
+Function \ensuremath{\Varid{filter}} uses conditionals, which we haven't discussed yet; we show how
+to incrementalize \ensuremath{\Varid{filter}} successfully in \cref{sec:chs-sums}.\pg{Do it!}
+
+\subsection{Changes to type-class instances?}
+In this whole chapter, we assume that type-class instances, such as \ensuremath{\Varid{fold}}'s
+\ensuremath{\Conid{AbelianGroupChangeStruct}} argument, do not undergo changes. Since
+type-class instances are closed top-level definitions of operations and are
+canonical for a datatype, it is hard to imagine a change to a type-class
+instance. On the other hand, type-class instances can be encoded as first-class
+values. We can for instance imagine a fold taking a unit value and an
+associative operation as argument.
+In such scenarios, one needs additional effort to propagate changes to operation
+arguments, similarly to changes to the function argument to \ensuremath{\Varid{map}}.
+\pg{this is OKish, but where is \ensuremath{\Varid{map}} now discussed?}
+
+\subsection{Incrementalizing aggregation}
+\label{sec:incr-fold}
+Let's now discuss how to incrementalize \ensuremath{\Varid{fold}}.
+We consider an oversimplified change structure that
+allows only two sorts of changes: prepending an element to a list or removing
+the list head of a non-empty list, and study how to incrementalize \ensuremath{\Varid{fold}} for
+such changes:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;\Conid{ListChange}\;\Varid{a}\mathrel{=}\Conid{Prepend}\;\Varid{a}\mid \Conid{Remove}{}\<[E]%
+\\
+\>[B]{}\mathbf{instance}\;\Conid{ChangeStruct}\;(\Conid{List}\;\Varid{a})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Delta (\Conid{List}\;\Varid{a})\mathrel{=}\Conid{ListChange}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{xs}\oplus \Conid{Prepend}\;\Varid{x}\mathrel{=}\Conid{Cons}\;\Varid{x}\;\Varid{xs}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\oplus \Conid{Remove}\mathrel{=}\Varid{xs}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{Nil}\oplus \Conid{Remove}\mathrel{=}\Varid{error}\;\text{\ttfamily \char34 Invalid~change\char34}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{dfold}\;\Varid{xs}\;(\Conid{Prepend}\;\Varid{x})\mathrel{=}\ldots{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Removing an element from an empty list is an invalid change, hence it is safe to
+give an error in that scenario as mentioned when introducing \ensuremath{\oplus }
+(\cref{sec:change-intro}).
+
+By using equational reasoning as suggested in \cref{sec:plugin-design}, starting
+from \cref{eq:diff-primitive-eq-reasoning},
+one can show formally that \ensuremath{\Varid{dfold}\;\Varid{xs}\;(\Conid{Prepend}\;\Varid{x})} should be a change that,
+in a sense, ``adds'' \ensuremath{\Varid{x}} to the result using group operations:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{BE}{@{}l@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[8]{}\Varid{dfold}\;\Varid{xs}\;(\Conid{Prepend}\;\Varid{x}){}\<[E]%
+\\
+\>[B]{}\Doe{}\<[BE]%
+\>[8]{}\Varid{fold}\;(\Varid{xs}\oplus \Conid{Prepend}\;\Varid{x})\ominus \Varid{fold}\;\Varid{xs}{}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[BE]%
+\>[8]{}\Varid{fold}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\ominus \Varid{fold}\;\Varid{xs}{}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[BE]%
+\>[8]{}(\Varid{x} \diamond \Varid{fold}\;\Varid{xs})\ominus \Varid{fold}\;\Varid{xs}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Similarly, \ensuremath{\Varid{dfold}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\;\Conid{Remove}} should instead ``subtract'' \ensuremath{\Varid{x}} from the result:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{BE}{@{}l@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[8]{}\Varid{dfold}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\;\Conid{Remove}{}\<[E]%
+\\
+\>[B]{}\Doe{}\<[BE]%
+\>[8]{}\Varid{fold}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs}\oplus \Conid{Remove})\ominus \Varid{fold}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs}){}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[BE]%
+\>[8]{}\Varid{fold}\;\Varid{xs}\ominus \Varid{fold}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs}){}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[BE]%
+\>[8]{}\Varid{fold}\;\Varid{xs}\ominus (\Varid{x} \diamond \Varid{fold}\;\Varid{xs}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+As discussed, using \ensuremath{\ominus } is fast enough on, say, integers or other
+primitive types, but not in general.
+To avoid using \ensuremath{\ominus } we must rewrite its invocation to an equivalent expression.
+In this scenario we can use group changes for abelian groups, and restrict \ensuremath{\Varid{fold}} to
+situations where such changes are available.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{dfold}\mathrel{:\mkern-1mu:}\Conid{AbelianGroupChangeStruct}\;\Varid{b}\Rightarrow\Conid{List}\;\Varid{b}\to \Delta (\Conid{List}\;\Varid{b})\to \Delta \Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{dfold}\;\Varid{xs}\;(\Conid{Prepend}\;\Varid{x})\mathrel{=}\Varid{inject}\;\Varid{x}{}\<[E]%
+\\
+\>[B]{}\Varid{dfold}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\;\Conid{Remove}\mathrel{=}\Varid{inject}\;(\Varid{invert}\;\Varid{x}){}\<[E]%
+\\
+\>[B]{}\Varid{dfold}\;\Conid{Nil}\;\Conid{Remove}\mathrel{=}\Varid{error}\;\text{\ttfamily \char34 Invalid~change\char34}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+To support group changes we define the following type classes to model abelian groups
+and group change structures, omitting APIs for more general groups.
+\ensuremath{\Conid{AbelianGroupChangeStruct}} only requires that group
+elements of type \ensuremath{\Varid{g}} can be converted into changes (type \ensuremath{\Delta \Varid{g}}), allowing
+change type \ensuremath{\Delta \Varid{g}} to contain other sorts of changes.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{10}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{class}\;\Conid{Monoid}\;\Varid{g}\Rightarrow\Conid{AbelianGroup}\;\Varid{g}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{invert}\mathrel{:\mkern-1mu:}\Varid{g}\to \Varid{g}{}\<[E]%
+\\
+\>[B]{}\mathbf{class}\;({}\<[10]%
+\>[10]{}\Conid{AbelianGroup}\;\Varid{a},\Conid{ChangeStruct}\;\Varid{a})\Rightarrow{}\<[E]%
+\\
+\>[10]{}\Conid{AbelianGroupChangeStruct}\;\Varid{a}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\mbox{\onelinecomment  Inject group elements into changes. Law:}{}\<[E]%
+\\
+\>[B]{}\mbox{\onelinecomment  \ensuremath{\Varid{a}\oplus \Varid{inject}\;\Varid{b}\mathrel{=}\Varid{a} \diamond \Varid{b}}}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{inject}\mathrel{:\mkern-1mu:}\Varid{a}\to \Delta \Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\Cref{sec:applying} discusses how
+we can use group changes without assuming a single group is defined on elements, but here we
+simply select the canonical group as chosen by type-class resolution. To use a
+different group, as usual, one defines a different but isomorphic type via the
+Haskell \ensuremath{\mathbf{newtype}} construct. As a downside, derivatives \ensuremath{\mathbf{newtype}} constructors
+must convert changes across different representations.
+
+Rewriting \ensuremath{\ominus } away can also be possible for other specialized folds,
+though sometimes they can be incrementalized directly; for
+instance \ensuremath{\Varid{map}} can be written as a fold. Incrementalizing \ensuremath{\Varid{map}} for the
+insertion of \ensuremath{\Varid{x}} into \ensuremath{\Varid{xs}} requires simplifying \ensuremath{\Varid{map}\;\Varid{f}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\ominus \Varid{map}\;\Varid{f}\;\Varid{xs}}. To avoid \ensuremath{\ominus } we can rewrite this change statically to \ensuremath{\Conid{Insert}\;(\Varid{f}\;\Varid{x})}; indeed, we can incrementalize \ensuremath{\Varid{map}} also for more realistic change structures.
+
+\paragraph{Associative tree folds}
+Other usages of fold over sequences produce result type of small bounded size
+(such as integers). In this scenario, one can incrementalize the given fold
+efficiently using \ensuremath{\ominus } instead of relying on group operations.
+For such scenarios, one can design a primitive
+\[\ensuremath{\Varid{foldMonoid}\mathrel{:\mkern-1mu:}\Conid{Monoid}\;\Varid{a}\Rightarrow\Conid{List}\;\Varid{a}\Rightarrow\Varid{a}}\]
+for \emph{associative tree folds}, that is, a function that folds
+over the input sequence using a \emph{monoid} (that is, an associative operation
+with a unit). For efficient incrementalization, \ensuremath{\Varid{foldMonoid}}'s intermediate
+results should form a \emph{balanced} tree and
+updating this tree should take \emph{logarithmic} time: one approach to ensure
+this is to represent the input sequence itself using a balanced tree, such as a
+finger tree~\citep{hinze2006finger}.
+
+Various algorithms store intermediate results of folding
+inside an input balanced tree, as described by \citet[Ch.~14]{Cormen2001} or by
+\citet{hinze2006finger}. But intermediate results can also be stored outside the
+input tree, as is commonly done using self-adjusting
+computation~\citep[Sec.~9.1]{Acar05}, or as can be done in our setting.
+While we do not use such folds, we describe the existing algorithms briefly and
+sketch how to integrate them in our setting.
+
+Function \ensuremath{\Varid{foldMonoid}} must record the intermediate results, and the derivative
+\ensuremath{\Varid{dfoldMonoid}} must propagate input changes to affected intermediate
+results.%
+
+\footnote{We discuss in \cref{ch:cts} how base functions communicate results to derivatives.}
+% Moreover, folding must store the tree of intermediate results for reuse by the
+% derivative;
+To study time complexity  of input change propagation, it is useful to consider
+the \emph{dependency graph} of intermediate results: in this graph, an
+intermediate result \ensuremath{\Varid{v}_{1}} has an arc to intermediate result \ensuremath{\Varid{v}_{2}} if and only if computing \ensuremath{\Varid{v}_{1}}
+depends on \ensuremath{\Varid{v}_{2}}.
+To ensure \ensuremath{\Varid{dfoldMonoid}} is efficient, the dependency graph of intermediate
+results from \ensuremath{\Varid{foldMonoid}} must form a balanced tree of logarithmic height, so
+that changes to a leaf only affect a logarithmic number of intermediate
+results.
+
+In contrast, implementing \ensuremath{\Varid{foldMonoid}} using \ensuremath{\Varid{foldr}} on a list produces an
+unbalanced graph of intermediate results.
+For instance, take input list \ensuremath{\Varid{xs}\mathrel{=}[\mskip1.5mu \mathrm{1}\mathinner{\ldotp\ldotp}\mathrm{8}\mskip1.5mu]}, containing numbers from 1 to 8, and
+assume a given monoid.
+Summing them with \ensuremath{\Varid{foldr}\;( \diamond )\;\Varid{mempty}\;\Varid{xs}} means evaluating
+\[\ensuremath{\mathrm{1} \diamond (\mathrm{2} \diamond (\mathrm{3} \diamond (\mathrm{4} \diamond (\mathrm{5} \diamond (\mathrm{6} \diamond (\mathrm{7} \diamond (\mathrm{8} \diamond \Varid{mempty})))))))}.\]
+Then, a change to the last element of input \ensuremath{\Varid{xs}} affects all intermediate
+results, hence incrementalization takes at least $O(n)$.
+In contrast, using \ensuremath{\Varid{foldAssoc}} on \ensuremath{\Varid{xs}} should evaluate a balanced tree similar to
+\[\ensuremath{((\mathrm{1} \diamond \mathrm{2}) \diamond (\mathrm{3} \diamond \mathrm{4})) \diamond ((\mathrm{5} \diamond \mathrm{6}) \diamond (\mathrm{7} \diamond \mathrm{8}))},\]
+so that any individual change to a leave, insertion or
+deletion only affects $O(\log n)$ intermediate results (where $n$ is the
+sequence size).
+% To ensure each |dfoldMonoid| takes logarithmic time,
+% as it it were a balanced tree, using
+% any associative operations
+% , where intermediate results
+% form a balanced tree,
+Upon modifications to the tree, one must ensure that the balancing is
+stable~\citep[Sec.~9.1]{Acar05}.
+In other words, altering the tree (by inserting or removing an element) must only alter
+$O(\log n)$ nodes.
+
+We have implemented associative tree folds on very simple but unbalanced tree
+structures; we believe they could be implemented and incrementalized over
+balanced trees representing sequences, such as finger trees or random access
+zippers~\citep{Headley2016random}, but doing so requires transforming their
+implementation of their data structure to cache-transfer style (CTS)
+(\cref{ch:cts}). We leave this for future work, together with an
+automated implementation of CTS transformation.
+
+% % Aggregation
+% \pg{To move}
+% To study aggregation we consider |foldNat|.
+% % \begin{code}
+% %   foldNat z s 0 = z
+% %   foldNat z s (n + 1) = s (foldNat z s n)
+% %   -- Assuming that dz and ds are nil.
+% %   dfoldNat z dz s ds n 0 = foldNat z s n
+% %   dfoldNat z dz s ds n dn = if dn > 0 then foldNat (foldNat z s n) s dn
+% % \end{code}
+% % Missing sections from chap-intro-incr.lhs.
+
+% \pg{Ask question: can we define such change structures in terms of simpler ones?}
+
+\subsection{Modifying list elements}
+\label{sec:simple-changes-list-map}
+In this section, we consider another change structure on lists that allows
+expressing changes to individual elements.
+Then, we present \ensuremath{\Varid{dmap}}, derivative of \ensuremath{\Varid{map}} for this change structure. Finally,
+we sketch informally the correctness of \ensuremath{\Varid{dmap}}, which we prove formally in
+\cref{ex:syn-changes-map}.
+
+We can then represent changes to a list (\ensuremath{\Conid{List}\;\Varid{a}}) as a list of changes (\ensuremath{\Conid{List}\;(\Delta \Varid{a})}), one for each element.
+A list change \ensuremath{\Varid{dxs}} is valid for source \ensuremath{\Varid{xs}} if
+they have the same length and each element change is valid for
+its corresponding element.
+For this change structure we can define \ensuremath{\oplus } and
+\ensuremath{\circledcirc }, but not a total \ensuremath{\ominus }: such list changes can't express the
+difference between two lists of different lengths.
+% We discuss
+% product and sum types more in general in \cref{ch:prod-sums}.
+Nevertheless, this change structure is sufficient to define
+derivatives that act correctly on the changes that can be expressed.
+We can describe this change structure in Haskell using a
+type-class instance for class \ensuremath{\Conid{ChangeStruct}}:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;\Conid{ChangeStruct}\;(\Conid{List}\;\Varid{a})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Delta (\Conid{List}\;\Varid{a})\mathrel{=}\Conid{List}\;(\Delta \Varid{a}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{Nil}\oplus \Conid{Nil}\mathrel{=}\Conid{Nil}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\oplus (\Conid{Cons}\;\Varid{dx}\;\Varid{dxs})\mathrel{=}\Conid{Cons}\;(\Varid{x}\oplus \Varid{xs})\;(\Varid{dx}\oplus \Varid{dxs}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\text{\textunderscore}\oplus \text{\textunderscore}\mathrel{=}\Conid{Nil}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+The following \ensuremath{\Varid{dmap}} function is a derivative for the
+standard \ensuremath{\Varid{map}} function (included for reference) and the given
+change structure. We discuss derivatives for recursive functions
+in \cref{sec:general-recursion}.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{map}\typcolon(\Varid{a}\to \Varid{b})\to \Conid{List}\;\Varid{a}\to \Conid{List}\;\Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{map}\;\Varid{f}\;\Conid{Nil}\mathrel{=}\Conid{Nil}{}\<[E]%
+\\
+\>[B]{}\Varid{map}\;\Varid{f}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\mathrel{=}\Conid{Cons}\;(\Varid{f}\;\Varid{x})\;(\Varid{map}\;\Varid{f}\;\Varid{xs}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{dmap}\typcolon(\Varid{a}\to \Varid{b})\to \Delta (\Varid{a}\to \Varid{b})\to \Conid{List}\;\Varid{a}\to \Delta \Conid{List}\;\Varid{a}\to \Delta \Conid{List}\;\Varid{b}{}\<[E]%
+\\
+\>[B]{}\mbox{\onelinecomment  A valid list change has the same length as the base list:}{}\<[E]%
+\\
+\>[B]{}\Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Conid{Nil}\;\Conid{Nil}\mathrel{=}\Conid{Nil}{}\<[E]%
+\\
+\>[B]{}\Varid{dmap}\;\Varid{f}\;\Varid{df}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\;(\Conid{Cons}\;\Varid{dx}\;\Varid{dxs})\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{Cons}\;(\Varid{df}\;\Varid{x}\;\Varid{dx})\;(\Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Varid{xs}\;\Varid{dxs}){}\<[E]%
+\\
+\>[B]{}\mbox{\onelinecomment  Remaining cases deal with invalid changes, and a dummy}{}\<[E]%
+\\
+\>[B]{}\mbox{\onelinecomment  result is sufficient.}{}\<[E]%
+\\
+\>[B]{}\Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Varid{xs}\;\Varid{dxs}\mathrel{=}\Conid{Nil}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Function \ensuremath{\Varid{dmap}} is a correct derivative of \ensuremath{\Varid{map}} for this change structure,
+according to \cref{slogan:derive}: we sketch an informal argument by induction.
+The equation for \ensuremath{\Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Conid{Nil}\;\Conid{Nil}} returns \ensuremath{\Conid{Nil}}, a valid change from initial
+to updated outputs, as required.
+In the equation for \ensuremath{\Varid{dmap}\;\Varid{f}\;\Varid{df}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\;(\Conid{Cons}}\linebreak\ensuremath{\Varid{dx}\;\Varid{dxs})} we compute changes to
+the head and tail of the result, to produce a change from
+\ensuremath{\Varid{map}\;\Varid{f}\;(\Conid{Cons}}\linebreak\ensuremath{\Varid{x}\;\Varid{xs})} to \ensuremath{\Varid{map}\;(\Varid{f}\oplus \Varid{df})\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs}\oplus \Conid{Cons}\;\Varid{dx}\;\Varid{dxs})}. To
+this end,
+(a) we use \ensuremath{\Varid{df}\;\Varid{x}\;\Varid{dx}} to compute a
+change to the head of the result, from \ensuremath{\Varid{f}\;\Varid{x}} to \ensuremath{(\Varid{f}\oplus \Varid{df})\;(\Varid{x}\oplus \Varid{dx})};
+(b) we use \ensuremath{\Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Varid{xs}\;\Varid{dxs}} recursively to compute a change to the tail of the
+result, from \ensuremath{\Varid{map}\;\Varid{f}\;\Varid{xs}} to \ensuremath{\Varid{map}\;(\Varid{f}\oplus \Varid{df})\;(\Varid{xs}\oplus \Varid{dxs})};
+(c) we assemble changes to head and tail with \ensuremath{\Conid{Cons}} into a change from
+In other words, \ensuremath{\Varid{dmap}} turns input changes to output changes correctly according
+to our \cref{slogan:derive}: it is a correct derivative for \ensuremath{\Varid{map}} according to
+this change structure.
+We have reasoned informally; we formalize this
+style of reasoning in \cref{sec:denot-syntactic-reasoning}. Crucially, our
+conclusions only hold if input changes are valid, hence term \ensuremath{\Varid{map}\;\Varid{f}\;\Varid{xs}\oplus \Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Varid{xs}\;\Varid{dxs}} is not denotationally equal to \ensuremath{\Varid{map}\;(\Varid{f}\oplus \Varid{df})\;(\Varid{xs}\oplus \Varid{dxs})}
+for arbitrary change environments:
+these two terms only evaluate to the same result for valid input changes.
+
+Since this definition of \ensuremath{\Varid{dmap}} is a correct derivative, we could use it in an incremental DSL for
+list manipulation, together with other primitives. Because of limitations we
+describe next, we will use instead improved language plugins for sequences.
+
+\subsection{Limitations}
+We have shown simplified list changes, but they have a few limitations. Fixing
+those requires more sophisticated definitions.
+
+As discussed, our list changes intentionally forbid changing the length of a list.
+And our definition of \ensuremath{\Varid{dmap}} has further limitations: a change to a list of $n$
+elements takes size $O(n)$, even when most elements do not change, and calling
+\ensuremath{\Varid{dmap}\;\Varid{f}\;\Varid{df}} on it requires $n$ calls to \ensuremath{\Varid{df}}. This is only faster if \ensuremath{\Varid{df}} is
+faster than \ensuremath{\Varid{f}}, but adds no further speedup.
+
+We can describe instead a change to an arbitrary list element \ensuremath{\Varid{x}} in \ensuremath{\Varid{xs}} by
+giving the change \ensuremath{\Varid{dx}} and the position of \ensuremath{\Varid{x}} in \ensuremath{\Varid{xs}}. A list change is then a
+sequence of such changes:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{type}\;\Delta (\Conid{List}\;\Varid{a})\mathrel{=}\Conid{List}\;(\Conid{AtomicChange}\;\Varid{a}){}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;\Conid{AtomicChange}\;\Varid{a}\mathrel{=}\Conid{Modify}\;\mathbb{Z}\;(\Delta \Varid{a}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+However, fetching the \ensuremath{\Varid{i}}-th list element still takes time linear in \ensuremath{\Varid{i}}: we
+need a better representation of sequences. In next section, we switch to a change structure
+on sequences defined by finger trees~\citep{hinze2006finger},
+following \citet{Firsov2016purely}.
+
+\section{Efficient sequence changes}
+\pg{move/merge this to chapter on CTS and add pointer}
+\citet{Firsov2016purely} define an efficient representation of list changes in a
+framework similar to ILC, and incrementalize selected operations over this change
+structure. They also provide combinators to assemble further operations on top
+of the provided ones.
+We extend their framework to handle function changes and generate derivatives
+for all functions that can be expressed in terms of the primitives.
+
+\pg{Consider resuming here}
+%\pg{Code size for snippets?}
+Conceptually, a change for type \ensuremath{\Conid{Sequence}\;\Varid{a}} is a sequence of atomic changes.
+Each atomic change inserts one element at a given position, or removes one
+element, or changes an element at one
+position.\footnote{\citet{Firsov2016purely} and our actual implementation allow changes
+  to multiple elements.}
+% data AtomicChange a
+%   =  Insert Int a
+%   |  Delete Int
+%   |  ShiftAt
+%   |  ChangeAt Int (Dt^a)
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{3E}{@{}l@{}}%
+\column{6}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{16}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;\Conid{SeqSingleChange}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathrel{=}{}\<[3E]%
+\>[6]{}\Conid{Insert}\;{}\<[16]%
+\>[16]{}\{\mskip1.5mu \Varid{idx}\mathrel{:\mkern-1mu:}\mathbb{Z},\Varid{x}\mathrel{:\mkern-1mu:}\Varid{a}\mskip1.5mu\}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mid {}\<[3E]%
+\>[6]{}\Conid{Remove}\;{}\<[16]%
+\>[16]{}\{\mskip1.5mu \Varid{idx}\mathrel{:\mkern-1mu:}\mathbb{Z}\mskip1.5mu\}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mid {}\<[3E]%
+\>[6]{}\Conid{ChangeAt}\;{}\<[16]%
+\>[16]{}\{\mskip1.5mu \Varid{idx}\mathrel{:\mkern-1mu:}\mathbb{Z},\Varid{dx}\mathrel{:\mkern-1mu:}\Delta \Varid{a}\mskip1.5mu\}{}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;\Conid{SeqChange}\;\Varid{a}\mathrel{=}\Conid{Sequence}\;(\Conid{SeqSingleChange}\;\Varid{a}){}\<[E]%
+\\
+\>[B]{}\mathbf{type}\;\Delta (\Conid{Sequence}\;\Varid{a})\mathrel{=}\Conid{SeqChange}\;\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+We use \citeauthor{Firsov2016purely}'s variant of this change structure in \cref{sec:cts-case-studies}.
+% \pg{Nil change detection}
+% \pg{Move here example on list later}
+
+% \pg{Real list}
+
+% \pg{Average}
+
+% \subsection{Incremental higher-order primitives and nested loops}
+% \pg{Nested loops}
+% \pg{we need to discuss how map propagates changes to functions.}
+
+\section{Products}
+\label{sec:chs-products-intro}
+It is also possible to define change structures for arbitrary sum and product
+types, and to provide derivatives for introduction and elimination forms for
+such datatypes. In this section we discuss products, in the next section sums.
+
+We define a simple change structure for product type \ensuremath{\Conid{A}\times\Conid{B}} from change
+structures for \ensuremath{\Conid{A}} and \ensuremath{\Conid{B}}, similar to change structures for environments:
+operations act pointwise on the two components.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{instance}\;(\Conid{ChangeStruct}\;\Varid{a},\Conid{ChangeStruct}\;\Varid{b})\Rightarrow\Conid{ChangeStruct}\;(\Varid{a},\Varid{b})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Delta (\Varid{a},\Varid{b})\mathrel{=}(\Delta \Varid{a},\Delta \Varid{b}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Varid{a},\Varid{b})\oplus (\Varid{da},\Varid{db})\mathrel{=}(\Varid{a}\oplus \Varid{da},\Varid{b}\oplus \Varid{db}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Varid{a}_{2},\Varid{b}_{2})\ominus (\Varid{a}_{1},\Varid{b}_{1})\mathrel{=}(\Varid{a}_{2}\ominus \Varid{a}_{1},\Varid{b}_{2}\ominus \Varid{b}_{1}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{oreplace}\;(\Varid{a}_{2},\Varid{b}_{2})\mathrel{=}(\Varid{oreplace}\;\Varid{a}_{2},\Varid{oreplace}\;\Varid{b}_{2}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\NilC{\Varid{a},\Varid{b}}\mathrel{=}(\NilC{\Varid{a}},\NilC{\Varid{b}}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Varid{da}_{1},\Varid{db}_{1})\circledcirc (\Varid{da}_{2},\Varid{db}_{2})\mathrel{=}(\Varid{da}_{1}\circledcirc \Varid{da}_{2},\Varid{db}_{1}\circledcirc \Varid{db}_{2}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Through equational reasoning as in \cref{sec:plugin-design}, we can also
+compute derivatives for basic primitives on product types, both
+the introduction form (that we alias as \ensuremath{\Varid{pair}}) and the elimination forms \ensuremath{\Varid{fst}}
+and \ensuremath{\Varid{snd}}. We just present the resulting definitions:
+% ∆⨟
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{pair}\;\Varid{a}\;\Varid{b}\mathrel{=}(\Varid{a},\Varid{b}){}\<[E]%
+\\
+\>[B]{}\Varid{dpair}\;\Varid{a}\;\Varid{da}\;\Varid{b}\;\Varid{db}\mathrel{=}(\Varid{da},\Varid{db}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{fst}\;(\Varid{a},\Varid{b})\mathrel{=}\Varid{a}{}\<[E]%
+\\
+\>[B]{}\Varid{snd}\;(\Varid{a},\Varid{b})\mathrel{=}\Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{dfst}\mathrel{:\mkern-1mu:}\Delta (\Varid{a},\Varid{b})\to \Delta \Varid{a}{}\<[E]%
+\\
+\>[B]{}\Varid{dfst}\;(\Varid{da},\Varid{db})\mathrel{=}\Varid{da}{}\<[E]%
+\\
+\>[B]{}\Varid{dsnd}\mathrel{:\mkern-1mu:}\Delta (\Varid{a},\Varid{b})\to \Delta \Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{dsnd}\;(\Varid{da},\Varid{db})\mathrel{=}\Varid{db}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{uncurry}\mathrel{:\mkern-1mu:}(\Varid{a}\to \Varid{b}\to \Varid{c})\to (\Varid{a},\Varid{b})\to \Varid{c}{}\<[E]%
+\\
+\>[B]{}\Varid{uncurry}\;\Varid{f}\;(\Varid{a},\Varid{b})\mathrel{=}\Varid{f}\;\Varid{a}\;\Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{duncurry}\mathrel{:\mkern-1mu:}(\Varid{a}\to \Varid{b}\to \Varid{c})\to \Delta (\Varid{a}\to \Varid{b}\to \Varid{c})\to (\Varid{a},\Varid{b})\to \Delta (\Varid{a},\Varid{b})\to \Delta \Varid{c}{}\<[E]%
+\\
+\>[B]{}\Varid{duncurry}\;\Varid{\char95 f}\;\Varid{df}\;(\Varid{x},\Varid{y})\;(\Varid{dx},\Varid{dy})\mathrel{=}\Varid{df}\;\Varid{x}\;\Varid{dx}\;\Varid{y}\;\Varid{dy}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+One can also define $n$-ary products in a similar way. However, a product change
+contains as many entries as a product.\pg{Sketch alternatives.}
+
+\section{Sums, pattern matching and conditionals}
+\label{sec:chs-sums}
+In this section we define change structures for sum types, together with the
+derivative of their introduction and elimination forms.
+We also obtain support for booleans (which can be encoded as sum type \ensuremath{\mathrm{1}\mathbin{+}\mathrm{1}})
+and conditionals (which can be encoded in terms of elimination for sums).
+We have mechanically proved correctness of this change structure and
+derivatives, but we do not present the tedious details in this thesis and refer
+to our Agda formalization.
+
+Changes structures for sums are more challenging than ones for products. We can
+define them, but in many cases we can do better with specialized structures.
+Nevertheless, such changes are useful in some scenarios.
+
+In Haskell, sum types \ensuremath{\Varid{a}\mathbin{+}\Varid{b}} are conventionally defined via datatype \ensuremath{\Conid{Either}\;\Varid{a}\;\Varid{b}}, with introduction forms \ensuremath{\Conid{Left}} and \ensuremath{\Conid{Right}} and elimination form \ensuremath{\Varid{either}}
+which will be our primitives:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;\Conid{Either}\;\Varid{a}\;\Varid{b}\mathrel{=}\Conid{Left}\;\Varid{a}\mid \Conid{Right}\;\Varid{b}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{either}\mathrel{:\mkern-1mu:}(\Varid{a}\to \Varid{c})\to (\Varid{b}\to \Varid{c})\to \Conid{Either}\;\Varid{a}\;\Varid{b}\to \Varid{c}{}\<[E]%
+\\
+\>[B]{}\Varid{either}\;\Varid{f}\;\Varid{g}\;(\Conid{Left}\;\Varid{a})\mathrel{=}\Varid{f}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\Varid{either}\;\Varid{f}\;\Varid{g}\;(\Conid{Right}\;\Varid{b})\mathrel{=}\Varid{g}\;\Varid{b}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+We can define the following change structure.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{6}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{12}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{38}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;\Conid{EitherChange}\;\Varid{a}\;\Varid{b}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathrel{=}{}\<[6]%
+\>[6]{}\Conid{LeftC}\;(\Delta \Varid{a}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mid {}\<[6]%
+\>[6]{}\Conid{RightC}\;(\Delta \Varid{b}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mid {}\<[6]%
+\>[6]{}\Conid{EitherReplace}\;(\Conid{Either}\;\Varid{a}\;\Varid{b}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{instance}\;({}\<[13]%
+\>[13]{}\Conid{ChangeStruct}\;\Varid{a},\Conid{ChangeStruct}\;\Varid{b})\Rightarrow{}\<[E]%
+\\
+\>[13]{}\Conid{ChangeStruct}\;(\Conid{Either}\;\Varid{a}\;\Varid{b})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{type}\;\Delta (\Conid{Either}\;\Varid{a}\;\Varid{b})\mathrel{=}\Conid{EitherChange}\;\Varid{a}\;\Varid{b}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{Left}\;\Varid{a}{}\<[12]%
+\>[12]{}\oplus \Conid{LeftC}\;\Varid{da}{}\<[38]%
+\>[38]{}\mathrel{=}\Conid{Left}\;(\Varid{a}\oplus \Varid{da}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{Right}\;\Varid{b}{}\<[12]%
+\>[12]{}\oplus \Conid{RightC}\;\Varid{db}{}\<[38]%
+\>[38]{}\mathrel{=}\Conid{Right}\;(\Varid{b}\oplus \Varid{db}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{Left}\;\text{\textunderscore}{}\<[12]%
+\>[12]{}\oplus \Conid{RightC}\;\text{\textunderscore}{}\<[38]%
+\>[38]{}\mathrel{=}\Varid{error}\;\text{\ttfamily \char34 Invalid~change!\char34}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{Right}\;\text{\textunderscore}{}\<[12]%
+\>[12]{}\oplus \Conid{LeftC}\;\text{\textunderscore}{}\<[38]%
+\>[38]{}\mathrel{=}\Varid{error}\;\text{\ttfamily \char34 Invalid~change!\char34}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\text{\textunderscore}{}\<[12]%
+\>[12]{}\oplus \Conid{EitherReplace}\;\Varid{e}_{2}{}\<[38]%
+\>[38]{}\mathrel{=}\Varid{e}_{2}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{oreplace}\mathrel{=}\Conid{EitherReplace}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\NilC{\Conid{Left}\;\Varid{a}}\mathrel{=}\Conid{LeftC}\;\NilC{\Varid{a}}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\NilC{\Conid{Right}\;\Varid{a}}\mathrel{=}\Conid{RightC}\;\NilC{\Varid{a}}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Changes to a sum value can either keep the same ``branch'' (left or right) and
+modify the contained value, or replace the sum value with another one altogether.
+Specifically, change \ensuremath{\Conid{LeftC}\;\Varid{da}} is valid from \ensuremath{\Conid{Left}\;\Varid{a}_{1}} to \ensuremath{\Conid{Left}\;\Varid{a}_{2}} if \ensuremath{\Varid{da}} is valid from
+\ensuremath{\Varid{a}_{1}} to \ensuremath{\Varid{a}_{2}}. Similarly, change \ensuremath{\Conid{RightC}\;\Varid{db}} is valid from \ensuremath{\Conid{Right}\;\Varid{b}_{1}} to \ensuremath{\Conid{Right}\;\Varid{b}_{2}} if \ensuremath{\Varid{db}} is valid from \ensuremath{\Varid{b}_{1}} to \ensuremath{\Varid{b}_{2}}.
+Finally, replacement change \ensuremath{\Conid{EitherReplace}\;\Varid{e}_{2}} is valid from \ensuremath{\Varid{e}_{1}} to \ensuremath{\Varid{e}_{2}} for
+any \ensuremath{\Varid{e}_{1}}.
+
+Using \cref{eq:diff-primitive-eq-reasoning}, we can then obtain definitions for
+derivatives of primitives \ensuremath{\Conid{Left}}, \ensuremath{\Conid{Right}} and \ensuremath{\Varid{either}}. The resulting code is as follows:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{dLeft}\mathrel{:\mkern-1mu:}\Varid{a}\to \Delta \Varid{a}\to \Delta (\Conid{Either}\;\Varid{a}\;\Varid{b}){}\<[E]%
+\\
+\>[B]{}\Varid{dLeft}\;\Varid{a}\;\Varid{da}\mathrel{=}\Conid{LeftC}\;\Varid{da}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{dRight}\mathrel{:\mkern-1mu:}\Varid{b}\to \Delta \Varid{b}\to \Delta (\Conid{Either}\;\Varid{a}\;\Varid{b}){}\<[E]%
+\\
+\>[B]{}\Varid{dRight}\;\Varid{b}\;\Varid{db}\mathrel{=}\Conid{RightC}\;\Varid{db}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{deither}\mathrel{:\mkern-1mu:}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Conid{NilChangeStruct}\;\Varid{a},\Conid{NilChangeStruct}\;\Varid{b},\Conid{DiffChangeStruct}\;\Varid{c})\Rightarrow{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\Varid{a}\to \Varid{c})\to \Delta (\Varid{a}\to \Varid{c})\to (\Varid{b}\to \Varid{c})\to \Delta (\Varid{b}\to \Varid{c})\to {}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{Either}\;\Varid{a}\;\Varid{b}\to \Delta (\Conid{Either}\;\Varid{a}\;\Varid{b})\to \Delta \Varid{c}{}\<[E]%
+\\
+\>[B]{}\Varid{deither}\;\Varid{f}\;\Varid{df}\;\Varid{g}\;\Varid{dg}\;(\Conid{Left}\;\Varid{a})\;(\Conid{LeftC}\;\Varid{da})\mathrel{=}\Varid{df}\;\Varid{a}\;\Varid{da}{}\<[E]%
+\\
+\>[B]{}\Varid{deither}\;\Varid{f}\;\Varid{df}\;\Varid{g}\;\Varid{dg}\;(\Conid{Right}\;\Varid{b})\;(\Conid{RightC}\;\Varid{db})\mathrel{=}\Varid{dg}\;\Varid{b}\;\Varid{db}{}\<[E]%
+\\
+\>[B]{}\Varid{deither}\;\Varid{f}\;\Varid{df}\;\Varid{g}\;\Varid{dg}\;\Varid{e}_{1}\;(\Conid{EitherReplace}\;\Varid{e}_{2})\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{either}\;(\Varid{f}\oplus \Varid{df})\;(\Varid{g}\oplus \Varid{dg})\;\Varid{e}_{2}\ominus \Varid{either}\;\Varid{f}\;\Varid{g}\;\Varid{e}_{1}{}\<[E]%
+\\
+\>[B]{}\Varid{deither}\;\text{\textunderscore}\;\text{\textunderscore}\;\text{\textunderscore}\;\text{\textunderscore}\;\text{\textunderscore}\;\text{\textunderscore}\mathrel{=}\Varid{error}\;\text{\ttfamily \char34 Invalid~sum~change\char34}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+We show only one case of the derivation of \ensuremath{\Varid{deither}} as an example:
+\begin{equational}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[7]{}\Varid{deither}\;\Varid{f}\;\Varid{df}\;\Varid{g}\;\Varid{dg}\;(\Conid{Left}\;\Varid{a})\;(\Conid{LeftC}\;\Varid{da}){}\<[E]%
+\\
+\>[B]{}\Doe\mbox{\commentbegin  using variants of \cref{eq:diff-primitive-eq-reasoning} for multiple arguments  \commentend}{}\<[E]%
+\\
+\>[B]{}\hsindent{7}{}\<[7]%
+\>[7]{}\Varid{either}\;(\Varid{f}\oplus \Varid{df})\;(\Varid{g}\oplus \Varid{dg})\;(\Conid{Left}\;\Varid{a}\oplus \Conid{LeftC}\;\Varid{da})\ominus \Varid{either}\;\Varid{f}\;\Varid{g}\;(\Conid{Left}\;\Varid{a}){}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[7]%
+\>[7]{}\mbox{\commentbegin  simplify \ensuremath{\oplus }  \commentend}{}\<[E]%
+\\
+\>[7]{}\Varid{either}\;(\Varid{f}\oplus \Varid{df})\;(\Varid{g}\oplus \Varid{dg})\;(\Conid{Left}\;(\Varid{a}\oplus \Varid{da}))\ominus \Varid{either}\;\Varid{f}\;\Varid{g}\;(\Conid{Left}\;\Varid{a}){}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[7]%
+\>[7]{}\mbox{\commentbegin  simplify \ensuremath{\Varid{either}}  \commentend}{}\<[E]%
+\\
+\>[7]{}(\Varid{f}\oplus \Varid{df})\;(\Varid{a}\oplus \Varid{da})\ominus \Varid{f}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\Doe\mbox{\commentbegin  because \ensuremath{\Varid{df}} is a valid change for \ensuremath{\Varid{f}}, and \ensuremath{\Varid{da}} for \ensuremath{\Varid{a}}  \commentend}{}\<[E]%
+\\
+\>[B]{}\hsindent{7}{}\<[7]%
+\>[7]{}\Varid{df}\;\Varid{a}\;\Varid{da}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\end{equational}
+
+Unfortunately, with this change structure a change from \ensuremath{\Conid{Left}\;\Varid{a}_{1}} to \ensuremath{\Conid{Right}\;\Varid{b}_{2}}
+is simply a replacement change, so derivatives processing it must recompute
+results from scratch.
+In general, we cannot do better, since there need be no shared data between two
+branches of a datatype. We need to find specialized scenarios where better
+implementations are possible.
+
+\paragraph{Extensions, changes for ADTs and future work}
+In some cases, we consider changes for type \ensuremath{\Conid{Either}\;\Varid{a}\;\Varid{b}}, where \ensuremath{\Varid{a}} and \ensuremath{\Varid{b}} both
+contain some other type \ensuremath{\Varid{c}}. Take again lists: a change from
+list \ensuremath{\Varid{as}} to list \ensuremath{\Conid{Cons}\;\Varid{a}_{2}\;\Varid{as}} should simply say that we prepend \ensuremath{\Varid{a}_{2}} to the
+list. In a sense, we are just using a change structure from type \ensuremath{\Conid{List}\;\Varid{a}} to
+\ensuremath{(\Varid{a},\Conid{List}\;\Varid{a})}.
+More in general, if change \ensuremath{\Varid{das}} from \ensuremath{\Varid{as}_{1}} to \ensuremath{\Varid{as}_{2}} is small, a change from
+list \ensuremath{\Varid{as}_{1}} to list \ensuremath{\Conid{Cons}\;\Varid{a}_{2}\;\Varid{as}_{2}} should simply ``say'' that we prepend \ensuremath{\Varid{a}_{2}} and
+that we modify \ensuremath{\Varid{as}_{1}} into \ensuremath{\Varid{as}_{2}}, and similarly for removals.
+
+In \cref{sec:param-derive-changes-across-types}, we suggest how to
+construct such change structures, based on the concept of \emph{polymorphic
+  change structure}, where changes have source and destination of different
+types. Based on initial experiments, we believe one could develop these
+constructions into a powerful combinator language for change structures. In particular,
+it should be possible to build change structures for lists similar to the ones
+in \cref{sec:incr-fold}. Generalizing beyond lists, similar systematic constructions
+should be able to represent insertions and removals of one-hole
+contexts~\citep{McBride2001derivative} for
+arbitrary algebraic datatypes (ADTs); for ADTs representing balanced data
+structures, such changes could enable efficient incrementalization in many
+scenarios.
+However, many questions remain open, so we leave this effort for future work.
+
+\subsection{Optimizing \ensuremath{\Varid{filter}}}
+In \cref{sec:incr-coll-api-intro} we have defined \ensuremath{\Varid{filter}} using a conditional,
+and now we have just explained that in general conditionals are inefficient!
+This seems pretty unfortunate. But luckily, we can optimize \ensuremath{\Varid{filter}} using
+equational reasoning.
+
+Consider again the earlier definition of \ensuremath{\Varid{filter}}:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{filter}\mathrel{:\mkern-1mu:}(\Varid{a}\to \Conid{Bool})\to \Conid{List}\;\Varid{a}\to \Conid{List}\;\Varid{a}{}\<[E]%
+\\
+\>[B]{}\Varid{filter}\;\Varid{p}\mathrel{=}\Varid{concatMap}\;(\lambda \Varid{x}\to \mathbf{if}\;\Varid{p}\;\Varid{x}\;\mathbf{then}\;\Varid{singleton}\;\Varid{x}\;\mathbf{else}\;\Conid{Nil}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+As explained, we can encode conditionals using \ensuremath{\Varid{either}} and differentiate the
+resulting program. However, if \ensuremath{\Varid{p}\;\Varid{x}} changes from \ensuremath{\Conid{True}} to \ensuremath{\Conid{False}}, or
+viceversa (that is, for all elements \ensuremath{\Varid{x}} for which \ensuremath{\Varid{dp}\;\Varid{x}\;\Varid{dx}} is a non-nil
+change), we must compute \ensuremath{\ominus } at runtime. However, \ensuremath{\ominus } will compare
+empty list \ensuremath{\Conid{Nil}} with a singleton list produced by \ensuremath{\Varid{singleton}\;\Varid{x}} (in one
+direction or the other). We can have \ensuremath{\ominus } detect this situation at
+runtime. But since the implementation of \ensuremath{\Varid{filter}} is known statically, we can
+optimize this code at runtime, rewriting \ensuremath{\Varid{singleton}\;\Varid{x}\ominus \Conid{Nil}} to \ensuremath{\Conid{Insert}\;\Varid{x}}, and \ensuremath{\Conid{Nil}\ominus \Varid{singleton}\;\Varid{x}} to \ensuremath{\Conid{Remove}}. To enable this optimization in
+\ensuremath{\Varid{dfilter}}, we need to inline the function that \ensuremath{\Varid{filter}} passes as argument to
+\ensuremath{\Varid{concatMap}} and all the functions it calls except \ensuremath{\Varid{p}}. Moreover, we need to
+case-split on possible return values for \ensuremath{\Varid{p}\;\Varid{x}} and \ensuremath{\Varid{dp}\;\Varid{x}\;\Varid{dx}}. We omit the steps
+because they are both tedious and standard.
+
+It appears in principle possible to automate such transformations by adding
+domain-specific knowledge to a sufficiently smart compiler, though we have made
+no attempt at an actual implementation. It would be first necessary to
+investigate further classes of examples where optimizations are
+applicable.\pg{claim we have more}
+Sufficiently smart compilers are rare, but since our approach produces purely
+functional programs we have access to GHC and HERMIT~\citep{Farmer2012hermit}.
+An interesting alternative (which does have some support for side effects) is
+LMS~\citep{rompf2010lightweight} and Delite~\citep{Brown11}.
+We leave further investigation for future work.
+
+\section{Chapter conclusion}
+In this chapter we have toured what can and cannot be incrementalized using
+differentiation, and how using higher-order functions allows defining generic
+primitives to incrementalize.

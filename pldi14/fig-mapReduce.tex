@@ -1,0 +1,175 @@
+% To compile this file:
+% lhs2TeX mapReduce.lhs > fig-mapReduce.tex && pdflatex fig-mapReduce.tex
+\documentclass{standalone}
+\usepackage{varwidth}
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+
+
+\newcommand{\Keyword}[1]{\mathrm{#1}}
+
+
+% a hack to put comments at the left column
+\def\start{\hspace{-2ex}}
+
+% do not display type class bounds
+% assumption: type class bounds end with \Rightarrow
+% if assumption changes, the macro must be updated.
+\def\constraint#1\Rightarrow{}
+
+\begin{document}\begin{varwidth}{500pt}
+\fontsize{8pt}{9pt}\selectfont % sigplan \small
+\mathindent=0pt
+
+
+\begingroup\par\noindent\advance\leftskip\mathindent\(
+\begin{pboxed}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{10}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{24}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{29}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{35}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{50}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{65}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{histogram}\mathbin{::}\constraint(\Conid{Ord}\;\Varid{word})\Rightarrow \Keyword{Map}\;\Keyword{Int}\;(\Keyword{Bag}\;\Varid{word})\to \Keyword{Map}\;\Varid{word}\;\Keyword{Int}{}\<[E]%
+\\
+\>[B]{}\Varid{histogram}\mathrel{=}\Varid{mapReduce}\;\Keyword{groupOnBags}\;\Varid{additiveGroupOnIntegers}\;\Varid{histogramMap}\;\Varid{histogramReduce}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{where}\;{}\<[10]%
+\>[10]{}\Varid{additiveGroupOnIntegers}{}\<[29]%
+\>[29]{}\mathrel{=}\Keyword{Group}\;(\mathbin{+})\;(\lambda \Varid{n}\to \mathbin{-}\Varid{n})\;\mathrm{0}{}\<[E]%
+\\
+\>[10]{}\Varid{histogramMap}\;\anonymous {}\<[29]%
+\>[29]{}\mathrel{=}\Keyword{fold}\Keyword{Bag}\;\Keyword{groupOnBags}\;(\lambda \Varid{n}\to \Keyword{singleton}\Keyword{Bag}\;(\Varid{n},\mathrm{1})){}\<[E]%
+\\
+\>[10]{}\Varid{histogramReduce}\;\anonymous {}\<[29]%
+\>[29]{}\mathrel{=}\Keyword{fold}\Keyword{Bag}\;\Varid{additiveGroupOnIntegers}\;\Keyword{id}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\start\mbox{\onelinecomment  Precondition:}{}\<[E]%
+\\
+\>[B]{}\start\mbox{\onelinecomment  For every \ensuremath{\Varid{key}_{\mathrm{1}}\mathbin{::}\Varid{k}_{\mathrm{1}}} and \ensuremath{\Varid{key}_{\mathrm{2}}\mathbin{::}\Varid{k}_{\mathrm{2}}}, the terms \ensuremath{\Varid{mapper}\;\Varid{key}_{\mathrm{1}}} and \ensuremath{\Varid{reducer}\;\Varid{key}_{\mathrm{2}}} are homomorphisms.}{}\<[E]%
+\\
+\>[B]{}\Varid{mapReduce}\mathbin{::}{}\<[15]%
+\>[15]{}\constraint(\Conid{Ord}\;\Varid{k}_{\mathrm{1}},\Conid{Ord}\;\Varid{k}_{\mathrm{2}},\Conid{Ord}\;\Varid{v}_{\mathrm{1}},\Conid{Ord}\;\Varid{v}_{\mathrm{2}},\Conid{Eq}\;\Varid{v}_{\mathrm{3}})\Rightarrow \Keyword{Group}\;\Varid{v}_{\mathrm{1}}\to \Keyword{Group}\;\Varid{v}_{\mathrm{3}}\to (\Varid{k}_{\mathrm{1}}\to \Varid{v}_{\mathrm{1}}\to \Keyword{Bag}\;(\Varid{k}_{\mathrm{2}},\Varid{v}_{\mathrm{2}}))\to (\Varid{k}_{\mathrm{2}}\to \Keyword{Bag}\;\Varid{v}_{\mathrm{2}}\to \Varid{v}_{\mathrm{3}})\to {}\<[E]%
+\\
+\>[15]{}\Keyword{Map}\;\Varid{k}_{\mathrm{1}}\;\Varid{v}_{\mathrm{1}}\to \Keyword{Map}\;\Varid{k}_{\mathrm{2}}\;\Varid{v}_{\mathrm{3}}{}\<[E]%
+\\
+\>[B]{}\Varid{mapReduce}\;group_1\;group_3\;\Varid{mapper}\;\Varid{reducer}\mathrel{=}\Varid{reducePerKey}\mathbin{\circ}\Varid{groupByKey}\mathbin{\circ}\Varid{mapPerKey}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{where}\;{}\<[10]%
+\>[10]{}\Varid{mapPerKey}{}\<[24]%
+\>[24]{}\mathrel{=}\Keyword{fold}\Keyword{Map}\;{}\<[35]%
+\>[35]{}group_1\;\Keyword{groupOnBags}\;{}\<[65]%
+\>[65]{}\Varid{mapper}{}\<[E]%
+\\
+\>[10]{}\Varid{groupByKey}{}\<[24]%
+\>[24]{}\mathrel{=}\Keyword{fold}\Keyword{Bag}\;{}\<[35]%
+\>[35]{}(\Keyword{groupOnMaps}\;\Keyword{groupOnBags})\;{}\<[E]%
+\\
+\>[35]{}(\lambda (\Varid{key},\Varid{val}){}\<[50]%
+\>[50]{}\to \Keyword{singleton}\Keyword{Map}\;\Varid{key}\;(\Keyword{singleton}\Keyword{Bag}\;\Varid{val})){}\<[E]%
+\\
+\>[10]{}\Varid{reducePerKey}{}\<[24]%
+\>[24]{}\mathrel{=}\Keyword{fold}\Keyword{Map}\;{}\<[35]%
+\>[35]{}\Keyword{groupOnBags}\;(\Keyword{groupOnMaps}\;group_3)\;{}\<[E]%
+\\
+\>[35]{}(\lambda \Varid{key}\;\Varid{bag}{}\<[50]%
+\>[50]{}\to \Keyword{singleton}\Keyword{Map}\;\Varid{key}\;(\Varid{reducer}\;\Varid{key}\;\Varid{bag})){}\<[E]%
+\ColumnHook
+\end{pboxed}
+\)\par\noindent\endgroup\resethooks
+\end{varwidth}\end{document}

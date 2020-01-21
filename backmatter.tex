@@ -1,0 +1,696 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+\chapter{More on our formalization}
+\section{Mechanizing plugins modularly and limitations}
+\label{sec:modularity-limits}
+Next, we discuss our mechanization of language plugins in Agda, and its
+limitations. For the concerned reader, we can say these limitations affect
+essentially how modular our proofs are, and not their cogency.
+
+In essence, it's not possible to express in Agda the correct interface for
+language plugins, so some parts of language plugins can't be modularized as desirable.
+Alternatively, we can mechanize any fixed language plugin together with
+the main formalization, which is not truly modular, or mechanize a core
+formulation parameterized on a language plugin, which that runs into a few
+limitations, or encode plugins so they can be modularized and deal with encoding
+overhead.
+
+This section requires some Agda knowledge not provided here, but
+we hope that readers familiar with both Haskell and Coq will be
+able to follow along.
+
+Our mechanization is divided into multiple Agda modules. Most
+modules have definitions that depend on language plugins,
+directly or indirectly. Those take definitions from language
+plugins as \emph{module parameters}.
+
+For instance, STLC object types are formalized through Agda type
+\ensuremath{\Conid{Type}}, defined in module \ensuremath{\Conid{\Conid{Parametric}.\Conid{Syntax}.Type}}. The latter is
+parameterized over \ensuremath{\Conid{Base}}, the type of base types.
+
+For instance, \ensuremath{\Conid{Base}} can support a base type of integers, and a
+base type of bags of elements of type \ensuremath{\iota} (where \ensuremath{\iota\typcolon\Conid{Base}}). Simplifying a few details, our definition is equivalent
+to the following Agda code:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{11}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{11E}{@{}l@{}}%
+\column{12}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{12E}{@{}l@{}}%
+\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{32}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{48}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{module}\;\Conid{\Conid{Parametric}.\Conid{Syntax}.Type}\;(\Conid{Base}\typcolon\Conid{Set})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{data}\;\Conid{Type}\typcolon\Conid{Set}\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{base}{}\<[11]%
+\>[11]{}\typcolon{}\<[11E]%
+\>[14]{}\;(\iota\typcolon\Conid{Base}){}\<[48]%
+\>[48]{}\to \Conid{Type}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\text{\textunderscore}\mathord{\Rightarrow}\text{\textunderscore}{}\<[11]%
+\>[11]{}\typcolon{}\<[11E]%
+\>[14]{}\;(\sigma\typcolon\Conid{Type}){}\<[32]%
+\>[32]{}\to (\tau\typcolon\Conid{Type})\to \Conid{Type}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mbox{\onelinecomment  Elsewhere, in plugin:}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{data}\;\Conid{Base}\typcolon\Conid{Set}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{baseInt}{}\<[12]%
+\>[12]{}\typcolon{}\<[12E]%
+\>[15]{}\;\Conid{Base}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{baseBag}{}\<[12]%
+\>[12]{}\typcolon{}\<[12E]%
+\>[15]{}\;(\iota\typcolon\Conid{Base})\to \Conid{Base}{}\<[E]%
+\\
+\>[B]{}\mbox{\onelinecomment  ...}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+But with these definitions, we only have bags of elements of base type. If
+\ensuremath{\iota} is a base type, \ensuremath{\Varid{base}\;(\Varid{baseBag}\;\iota)} is the type of bags with elements
+of type \ensuremath{\Varid{base}\;\iota}. Hence, we have bags of elements of base type. But we don't
+have a way to encode \ensuremath{\Conid{Bag}\;\tau} if \ensuremath{\tau} is an arbitrary non-base type, such as
+\ensuremath{\Varid{base}\;\Varid{baseInt}\Rightarrow\Varid{base}\;\Varid{baseInt}} (the encoding of object type \ensuremath{\mathbb{Z}\to \mathbb{Z}}).
+%
+Can we do better? If we ignore modularization, we can define types through the
+following mutually recursive datatypes:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{11}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{11E}{@{}l@{}}%
+\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{32}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{48}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\textbf{mutual}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{data}\;\Conid{Type}\typcolon\Conid{Set}\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{base}{}\<[11]%
+\>[11]{}\typcolon{}\<[11E]%
+\>[14]{}\;(\iota\typcolon\Conid{Base}\;\Conid{Type}){}\<[48]%
+\>[48]{}\to \Conid{Type}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\text{\textunderscore}\mathord{\Rightarrow}\text{\textunderscore}{}\<[11]%
+\>[11]{}\typcolon{}\<[11E]%
+\>[14]{}\;(\sigma\typcolon\Conid{Type}){}\<[32]%
+\>[32]{}\to (\tau\typcolon\Conid{Type})\to \Conid{Type}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{data}\;\Conid{Base}\typcolon\Conid{Set}\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{baseInt}{}\<[14]%
+\>[14]{}\typcolon{}\<[17]%
+\>[17]{}\;\Conid{Base}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{baseBag}{}\<[14]%
+\>[14]{}\typcolon{}\<[17]%
+\>[17]{}\;(\iota\typcolon\Conid{Type})\to \Conid{Base}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+So far so good, but these types have to be defined together. We
+can go a step further by defining:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{11}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{11E}{@{}l@{}}%
+\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{32}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{48}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\textbf{mutual}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{data}\;\Conid{Type}\typcolon\Conid{Set}\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{base}{}\<[11]%
+\>[11]{}\typcolon{}\<[11E]%
+\>[14]{}\;(\iota\typcolon\Conid{Base}\;\Conid{Type}){}\<[48]%
+\>[48]{}\to \Conid{Type}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\text{\textunderscore}\mathord{\Rightarrow}\text{\textunderscore}{}\<[11]%
+\>[11]{}\typcolon{}\<[11E]%
+\>[14]{}\;(\sigma\typcolon\Conid{Type}){}\<[32]%
+\>[32]{}\to (\tau\typcolon\Conid{Type})\to \Conid{Type}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{data}\;\Conid{Base}\;(\Conid{Type}\typcolon\Conid{Set})\typcolon\Conid{Set}\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{baseInt}{}\<[14]%
+\>[14]{}\typcolon{}\<[17]%
+\>[17]{}\;\Conid{Base}\;\Conid{Type}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{baseBag}{}\<[14]%
+\>[14]{}\typcolon{}\<[17]%
+\>[17]{}\;(\iota\typcolon\Conid{Type})\to \Conid{Base}\;\Conid{Type}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Here, \ensuremath{\Conid{Base}} takes the type of object types as a parameter, and
+\ensuremath{\Conid{Type}} uses \ensuremath{\Conid{Base}\;\Conid{Type}} to tie the recursion. This definition
+still works, but only as long as \ensuremath{\Conid{Base}} and \ensuremath{\Conid{Type}} are defined together.
+
+If we try to separate the definitions of \ensuremath{\Conid{Base}} and \ensuremath{\Conid{Type}} into
+different modules, we run into trouble.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{11}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{11E}{@{}l@{}}%
+\column{12}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{12E}{@{}l@{}}%
+\column{14}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{15}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{32}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{48}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{module}\;\Conid{\Conid{Parametric}.\Conid{Syntax}.Type}\;(\Conid{Base}\typcolon\Conid{Set}\to \Conid{Set})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{data}\;\Conid{Type}\typcolon\Conid{Set}\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{base}{}\<[11]%
+\>[11]{}\typcolon{}\<[11E]%
+\>[14]{}\;(\iota\typcolon\Conid{Base}\;\Conid{Type}){}\<[48]%
+\>[48]{}\to \Conid{Type}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\text{\textunderscore}\mathord{\Rightarrow}\text{\textunderscore}{}\<[11]%
+\>[11]{}\typcolon{}\<[11E]%
+\>[14]{}\;(\sigma\typcolon\Conid{Type}){}\<[32]%
+\>[32]{}\to (\tau\typcolon\Conid{Type})\to \Conid{Type}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mbox{\onelinecomment  Elsewhere, in plugin:}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{data}\;\Conid{Base}\;(\Conid{Type}\typcolon\Conid{Set})\typcolon\Conid{Set}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{baseInt}{}\<[12]%
+\>[12]{}\typcolon{}\<[12E]%
+\>[15]{}\;\Conid{Base}\;\Conid{Type}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{baseBag}{}\<[12]%
+\>[12]{}\typcolon{}\<[12E]%
+\>[15]{}\;(\iota\typcolon\Conid{Type})\to \Conid{Base}\;\Conid{Type}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Here, \ensuremath{\Conid{Type}} is defined for an arbitrary function on types \ensuremath{\Conid{Base}\typcolon\Conid{Set}\to \Conid{Set}}. However, this definition is rejected by Agda's
+\emph{positivity checker}. Like Coq, Agda forbids defining
+datatypes that are not strictly positive, as they can introduce
+inconsistencies.
+\pg{Add the ``Bad'' example from Agda's wiki, with link for credit.}
+
+The above definition of \ensuremath{\Conid{Type}} is \emph{not} strictly positive,
+because we could pass to it as argument \ensuremath{\Conid{Base}\mathrel{=}\lambda \tau\to (\tau\to \tau)} so that \ensuremath{\Conid{Base}\;\Conid{Type}\mathrel{=}\Conid{Type}\to \Conid{Type}}, making \ensuremath{\Conid{Type}} occur in
+a negative position. However, the actual uses of \ensuremath{\Conid{Base}} we are
+interested in are fine. The problem is that we cannot inform the
+positivity checker that \ensuremath{\Conid{Base}} is supposed to be a strictly
+positive type function, because Agda doesn't supply the needed
+expressivity.
+
+This problem is well-known. It could be solved if Agda function spaces supported
+positivity annotations,\footnote{As discussed in
+  \url{https://github.com/agda/agda/issues/570} and
+  \url{https://github.com/agda/agda/issues/2411}.} or by encoding a universe of
+strictly-positive type constructors. This encoding is not fully transparent and
+adds hard-to-hide noise to
+development~\citep{Schwaab2013modular}.\footnote{Using pattern synonyms and
+  \texttt{DISPLAY} pragmas might successfully hide this noise.}
+Few alternatives remain:
+\begin{itemize}
+\item We can forbid types from occurring in base types, as we did in our
+  original paper~\citep{CaiEtAl2014ILC}. There we did not discuss at all a
+  recursive definition of base types.
+\item We can use the modular mechanization, disable positivity checking and risk
+  introducing inconsistencies. We tried this successfully in a branch of that
+  formalization. We believe we did not introduce inconsistencies in that branch
+  but have no hard evidence.
+\item We can simply combine the core formalization with a sample plugin. This is
+  not truly modular because the core modularization can only be reused by
+  copy-and-paste. Moreover, in dependently-typed languages the content of a
+  definition can affect whether later definitions typecheck, so alternative
+  plugins using the same interface might not typecheck.\footnote{Indeed, if
+    \ensuremath{\Conid{Base}} were not strictly positive, the application \ensuremath{\Conid{Type}\;\Conid{Base}} would be
+    ill-typed as it would fail positivity checking, even though \ensuremath{\Conid{Base}\typcolon\Conid{Set}\to \Conid{Set}} does not require \ensuremath{\Conid{Base}} to be strictly positive.}
+\end{itemize}
+
+Sadly, giving up on modularity altogether appears the more conventional choice.
+Either way, as we claimed at the outset, these modularity concerns only limit
+the modularity of the mechanized proofs, not their cogency.

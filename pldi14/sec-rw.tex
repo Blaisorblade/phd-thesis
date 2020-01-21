@@ -1,0 +1,705 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+\chapter{Related work}
+\label{sec:rw}
+\label{ch:incr-rw}
+
+Existing work on incremental computation can be divided into two
+groups: Static incrementalization and dynamic incrementalization.
+Static approaches analyze a program statically and generate an incremental
+version of it. Dynamic approaches create dynamic dependency graphs while
+the program runs and propagate changes along these graphs.
+
+The trade-off between the two is that static approaches have the potential
+to be faster because no dependency tracking at runtime is needed, whereas
+dynamic approaches can support more expressive programming languages.
+%
+\ILC\ is a static approach, but compared to the other static
+approaches it supports more expressive languages.
+
+In the remainder of this section, we analyze the relation to the
+most closely related prior works. \Citet{Ramalingam93}, \citet{Gupta99MMV}
+and \citet{Acar06} discuss further related work.
+Other related work, more closely to cache-transfer style, is
+discussed in \cref{sec:cts-rw}.
+
+\section{Dynamic approaches}
+One of the most advanced dynamic approach to incrementalization is
+self-adjusting computation, which has been applied to Standard ML
+and large subsets of C~\citep{Acar09,Hammer11}.
+In this approach, programs execute on the original
+input in an enhanced runtime environment that tracks the
+dependencies between values in a \emph{dynamic
+  dependence graph}~\citep{Acar06}; intermediate results are
+memoized.
+Later, changes to the input propagate through
+dependency graphs from changed inputs to results,
+updating both intermediate and final results;
+this processing is often more efficient than recomputation.
+
+However, creating dynamic
+dependence graphs imposes a large constant-factor overhead during
+runtime, ranging from 2 to 30 in reported
+experiments~\citep{Acar09EAS,Acar10TDT}, and affecting the
+initial run of the program on its base input.
+\citet{Acar10TDT} show how to support high-level data
+types in the context of self-adjusting computation; however, the
+approach still requires expensive runtime bookkeeping during the initial run.
+Our approach, like other static ones, uses a standard runtime
+environment and has no overhead
+during base computation, but may be less efficient when processing
+changes. This pays off if the initial input is
+big compared to its changes.
+
+
+\citet{Chen11} have developed a static transformation for purely
+functional programs, but this transformation just provides a superior interface to use
+the runtime support with less boilerplate, and does not reduce
+this performance overhead. Hence, it is still a dynamic approach, unlike
+the transformation this work presents.
+
+Another property of self-adjusting computation
+is that incrementalization is only efficient if the program has a suitable
+computation structure. For instance, a program
+folding the elements of a bag with a left or right fold will not
+have efficient incremental behavior; instead, it's necessary that
+the fold be shaped like a balanced tree. In general,
+incremental computations become efficient only if they are \emph{stable}~\citep{Acar05}.
+Hence one may need to massage the program to make it efficient. Our methodology is
+different: Since we do not aim to incrementalize arbitrary programs written in standard
+programming languages, we can select primitives that have efficient derivatives and thereby require
+the programmer to use them.
+
+Functional reactive programming \citep{Elliott:1997:FRA:258948.258973}
+can also be seen as a dynamic approach to incremental computation;
+recent work by \citet{Maier2013} has
+focused on speeding up reactions to input changes by making them
+incremental on collections. \citet{Willis08} use dynamic techniques
+ to incrementalize JQL queries.
+
+\section{Static approaches}
+Static approaches analyze a program at compile-time and produce an
+incremental version that efficiently updates the output
+of the original program according to changing inputs.
+
+Static approaches have the potential to be more efficient than dynamic approaches,
+because no bookkeeping at runtime is required. Also, the computed incremental
+versions can often be optimized using standard compiler techniques
+such as constant folding or inlining.
+However, none of them support first-class functions; some
+approaches have further restrictions.
+
+Our aim is to apply static incrementalization to more expressive languages;
+in particular, \ILC\ supports first-class functions and an open
+set of base types with associated primitive operations.
+
+\citet{Sundaresh91} propose to incrementalize programs using
+partial evaluation: given a partitioning of program inputs in parts
+that change and parts that stay constant,
+\citeauthor{Sundaresh91} partially evaluates a given program relative
+to the constant input parts, and combine the result with the
+changing inputs.
+
+\subsection{Finite differencing}
+\label{sec:finite-diff}
+\citet{Paige82FDC} present derivatives for a first-order language
+with a fixed set of primitives.
+\citet{Blakeley:1986:EUM} apply these ideas to a class of relational queries.
+The database community extended
+this work to queries on relational data, such as in \emph{algebraic
+  differencing}~\citep{Gupta99MMV}, which inspired our work and
+terminology. However, most of this work does not apply to nested
+collections or algebraic data types, but only to relational
+(flat) data, and no previous approach handles first-class
+functions or programs resulting from defunctionalization or
+closure conversion. Incremental support is typically designed
+monolithically for a whole language, rather than piecewise.
+Improving on algebraic differencing, DBToaster (\citet{Koch10IQE,Koch14})
+\emph{guarantees} asymptotic speedups with a compositional query
+transformation and delivers huge speedup in realistic benchmarks,
+though still for a first-order database language.
+\pg{continue with new work, discuss why we don't do iterated differentiation.}
+
+More general (non-relational) data types are considered in the work by \citet{GlucheGrust97Incr};
+our support for bags and the use of groups is inspired by their work,
+but their architecture is still rather restrictive: they lack
+support for function changes and restrict incrementalization to
+self-maintainable views, without hinting at a possible solution.
+
+It seems possible to transform higher-order functional programs
+to database queries, using a variety of approaches
+\citep{Grust:2009:FDP:1559845.1559982,Cheney2013practical}, some
+of which support first-class functions via closure conversion
+\citep{Grust2013first,Grust2013functions}, and incrementalize the
+resulting programs using standard database technology. Such a
+solution would inherit limitations of database incrementalization
+approaches: in particular, it appears that database
+incrementalization approaches such as DBToaster can handle the
+insertion and removal of entire table rows, not of smaller
+changes. Nevertheless, such an alternative approach might be
+worth investigating.
+
+Unlike later approaches to higher-order differentiation, we do
+not restrict our base types to
+groups unlike \citet{Koch2016incremental}, and transformed programs we
+produce do not require further runtime
+transformation unlike \citet{Koch2016incremental} and \citet{Huesca2015incrementality},
+as we discuss further next.
+
+\newcommand{\ldiff}{\TitleLambda--diff}
+\subsection{\TitleLambda{}--diff and partial differentials}
+\label{sec:rw-partial-differentials}
+In work concurrent with \citet{CaiEtAl2014ILC}, \citet{Huesca2015incrementality}
+introduces an alternative formalism, called \ldiff, for incremental computation
+by program transformation. While \ldiff{} has some appealing features, it
+currently appears to require program transformations at
+runtime. Other systems appear to share this
+feature~\citep{Koch2016incremental}. Hence, this section
+discusses the reason in some detail.
+
+Instead of differentiating a term \ensuremath{\Varid{t}} relative to all inputs (free
+variables and function arguments) via \ensuremath{\Derive{\Varid{t}}}, like ILC,
+\ldiff{} differentiates terms
+relative to one input variable, and writes
+$\sfrac{\partial t}{\partial x, d_x}$
+for the result of differentiating $t$
+relative to $x$, a term that computes the change in $t$ when the
+value for $x$ is updated by change $d_x$. The formalism also uses
+pointwise function changes, similarly to what we discussed in
+\cref{ssec:pointwise-changes}.
+
+Unfortunately, it is not known how to define such a
+transformation for a $\lambda$-calculus with a standard
+semantics, and the needed semantics appear to require runtime
+term transformations, which are usually considered problematic
+when implementing functional languages.
+In particular, it appears necessary to introduce a new term
+constructor \ensuremath{\Conid{D}\;\Varid{t}}, which evaluates \ensuremath{\Varid{t}} to a function value \ensuremath{\lambda \Varid{y}\to \Varid{u}}, and then evaluates to $\lambda (y, d_y) \to \sfrac{\partial
+t}{\partial y, d_y}$, which differentiates \ensuremath{\Varid{t}} at runtime
+relative to its head variable \ensuremath{\Varid{y}}. As an indirect consequence, if the
+program under incrementalization contains function term \ensuremath{\Gamma\vdash\Varid{t}\typcolon\sigma\to \tau}, where \ensuremath{\Gamma} contains \ensuremath{\Varid{n}} free variables, it
+can be necessary in the worst-case to differentiate \ensuremath{\Varid{t}} over any
+subset of the \ensuremath{\Varid{n}} free variables in \ensuremath{\Gamma}. There are $2^n$ such
+subsets. To perform all term transformations before runtime, it
+seems hence necessary in the worst case to precompute $2^n$
+partial derivatives for each function term \ensuremath{\Varid{t}}, which appears
+unfeasible.
+On the other hand, it is not clear how often this worst-case is
+realized, or how big \ensuremath{\Varid{n}} grows in typical programs, or if it is
+simply feasible to perform differentiation at runtime, similarly
+to JIT compilation. Overall, an efficient implementation of
+\ldiff{} remains an open problem.
+It appears also \citet{Koch2016incremental}
+suffer similar problems, but a few details appear simpler since
+they restrict focus to functions over groups.
+
+To see why \ldiff{} need introduce \ensuremath{\Conid{D}\;\Varid{t}}, consider
+differentiating $\sfrac{\partial s\;t}{\partial x, d_x}$, that is,
+the change $d$ of $s\;t$ when $x$x is updated by change $d_x$.
+Change $d$ depends (a) on the change of $t$ when $x$ is updated
+by $d_x$, that is
+$\sfrac{\partial t}{\partial x, d_x}$;
+(b) on how $s$ changes when its input $t$ is updated by
+$\sfrac{\partial t}{\partial x, d_x}$; to express this change, \ldiff{}
+expresses this via $\ensuremath{(\Conid{D}\;\Varid{s})\;\Varid{t}}\; \sfrac{\partial t}{\partial x, d_x}$;
+(c) on the change of $s$ (applied to the updated $t$) when $x$ is
+updated by $d_x$, that is $\sfrac{\partial t}{\partial x, d_x}$.
+To compute component (b), \ldiff{} writes \ensuremath{\Conid{D}\;\Varid{s}} to
+differentiate \ensuremath{\Varid{s}} not relative to \ensuremath{\Varid{x}}, but relative to the still unknown head
+variable of \ensuremath{\Varid{s}}.
+If \ensuremath{\Varid{s}} evaluates to \ensuremath{\lambda \Varid{y}\to \Varid{u}}, then \ensuremath{\Varid{y}} is the head variable of \ensuremath{\Varid{s}}, and \ensuremath{\Conid{D}\;\Varid{s}}
+differentiates \ensuremath{\Varid{u}} relative to \ensuremath{\Varid{y}} and evaluates to $\lambda (y, d_y) \to
+\sfrac{\partial u}{\partial y, d_y}$.
+% Hence, \citeauthor{Huesca2015incrementality} adds term |D t| to
+% the syntax of $\lambda$-calculus; evaluating
+
+Overall, the rule for differentiating application in $\lambda$-diff is
+\[
+  \frac{\partial s\;t}{\partial x, d_x} = (D s)\left(t, \frac{\partial t}{\partial x,
+d_x}\right) \circledcirc \frac{\partial s}{\partial x, d_x}\left(t \oplus \frac{\partial
+t}{\partial x, d_x}\right).
+  \]
+
+This rule appears closely related to \cref{eq:pointwise-rewrite},
+hence we refer to its discussion for clarification.
+
+On the other hand, differentiating a term relative to all its
+inputs introduces a different sort of overhead. For instance, it
+is much more efficient to differentiate \ensuremath{\Varid{map}\;\Varid{f}\;\Varid{xs}} relative to
+\ensuremath{\Varid{xs}} than relative to \ensuremath{\Varid{f}}: if \ensuremath{\Varid{f}} undergoes a non-nil change
+\ensuremath{\Varid{df}}, \ensuremath{\Derive{\Varid{map}\;\Varid{f}\;\Varid{xs}}} must apply \ensuremath{\Varid{df}} to each elements in the
+updated input \ensuremath{\Varid{xs}}. Therefore, in our practical implementations
+\ensuremath{\Derive{\Varid{map}\;\Varid{f}\;\Varid{xs}}} tests whether \ensuremath{\Varid{df}} is nil and uses a more
+efficient implementation. In \cref{sec:applying}, we detect at
+compile time whether \ensuremath{\Varid{df}} is guaranteed to be nil. In
+\cref{sec:incr-nest-loop}, we instead detect at runtime whether \ensuremath{\Varid{df}} is
+nil. In both cases, authors of derivatives must implement this
+optimization by hand. Instead, \ldiff{} hints at a more general
+solution.
+
+\subsection{Static memoization}
+\label{ssec:staticmemo}
+\citeauthor{Liu00}'s work~\citep{Liu00} allows to incrementalize a first-order base
+program $f(\Old{x})$ to compute $f(\New{x})$, knowing how
+$\New{x}$ is related to $\Old{x}$. To this end, they transform
+$f(\New{x})$ into an incremental program which reuses the
+intermediate results produced while computing $f(\Old{x})$, the
+base program. To this end, (i) first the base program is
+transformed to save all its intermediate results, then (ii) the
+incremental program is transformed to reuse those intermediate
+results, and finally (iii) intermediate results which are not
+needed are pruned from the base program. However, to reuse
+intermediate results, the incremental program must often be
+rearranged, using some form of equational reasoning, into some
+equivalent program where partial results appear literally. For
+instance, if the base program $f$ uses a left fold to sum the
+elements of a list of integers $\Old{x}$, accessing them from the
+head onwards, and $\New{x}$ prepends a new element $h$ to the
+list, at no point does $f(\New{x})$ recompute the same results.
+But since addition is commutative on integers, we can rewrite
+$f(\New{x})$ as $f(\Old{x}) + h$. The author's CACHET system will
+try to perform such rewritings automatically, but it is not
+guaranteed to succeed. Similarly, CACHET will try to synthesize
+any additional results which can be computed cheaply by the base
+program to help make the incremental program more efficient.
+
+Since it is hard to fully automate such reasoning, we move
+equational reasoning to the plugin design phase. A
+plugin provides general-purpose higher-order primitives for which
+the plugin authors have devised efficient derivatives (by using
+equational reasoning in the design phase). Then, the
+differentiation algorithm computes incremental
+versions of user programs without requiring further user intervention.
+It would be useful to combine \ILC\ with some form of static
+caching to make the computation of derivatives which
+are not self-maintainable more efficient. We plan to do so
+in future work.
+%Our approach is instead fully automatic, and will always produce
+%a result, which in the worst case will merely be slow;
+%% they can also fail and then 'produce a slow program'.
+%
+%we envision the use of directed rewrite rules for further
+%optimization of programs, instead of undirected search.
+%% Not so important.

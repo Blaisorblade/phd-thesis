@@ -1,0 +1,1144 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+% Emacs, this is -*- latex -*-!
+
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+
+
+\section{Incrementalization case studies}
+\label{sec:case-studies}
+\label{sec:cts-case-studies}
+
+In this section, we investigate whether our transformations incrementalize
+efficiently programs in a typed language such as Haskell.
+And indeed, after providing support for the needed bulk operations on sequences,
+bags and maps, we successfully transform a few case studies and obtain efficient
+incremental programs, that is ones for which incremental computation is faster
+than from scratch recomputation.
+
+We type CTS programs by by associating to each function \ensuremath{\Varid{f}} a cache type \ensuremath{\Conid{FC}}.
+We can transform programs that use higher-order functions by making closure
+construction explicit.
+
+We illustrate those points on three case studies: average computation over bags of
+integers, a nested loop over two sequences and a more involved example inspired
+by \citeauthor{Koch14}'s work on incrementalizing database queries.
+
+In all cases, we confirm that results are consistent between from scratch
+recomputation and incremental evaluation.
+
+Our benchmarks were compiled by GHC 8.0.2. They were run on a 2.60GHz dual core
+Intel i7-6600U CPU with 12GB of RAM running Ubuntu 16.04.
+
+\subsection{Averaging integers bags}
+\label{sec:incr-an-aver}
+
+Section \cref{sec:motivating-example} motivates our transformation with a
+running example of computing the average over a bag of integers.
+We represent bags as maps from elements to (possibly negative) multiplicities.
+Earlier work \citep{CaiEtAl2014ILC,Koch14} represents bag changes as bags
+of removed and added elements: to update element \ensuremath{\Varid{a}} with change \ensuremath{\Varid{da}}, one removes
+\ensuremath{\Varid{a}} and adds \ensuremath{\Varid{a}\oplus \Varid{da}}. Instead, our bag changes contain element changes: a
+valid bag change is either a replacement change (with a new bag) or a list of atomic
+changes.
+An atomic change contains an element \ensuremath{\Varid{a}}, a valid change for that element
+\ensuremath{\Varid{da}}, a multiplicity \ensuremath{\Varid{n}} and a change to that multiplicity \ensuremath{\Varid{dn}}. Updating a bag
+with an atomic change means removing \ensuremath{\Varid{n}} occurrences of \ensuremath{\Varid{a}} and
+inserting \ensuremath{\Varid{n}\oplus \Varid{dn}} occurrences of updated element \ensuremath{\Varid{a}\oplus \Varid{da}}.
+% Incremental functions can handle such changes
+% In other representations, modifying an element
+% when representing bag changes as
+% bags of additions and removals~\citep{CaiEtAl2014ILC,Koch14}, element ch
+% When represe
+% In contrast to
+% Compared to a representation of bag changes as bags as in
+% \citet{CaiEtAl2014ILC} this representation allows us to represent changes to
+% elements more directly making some programs more incremental.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{type}\;\Conid{Bag}\;\Varid{a}\mathrel{=}\Conid{Map}\;\Varid{a}\;\mathbb{Z}{}\<[E]%
+\\
+\>[B]{}\mathbf{type}\;\Delta (\Conid{Bag}\;\Varid{a})\mathrel{=}\Conid{Replace}\;(\Conid{Bag}\;\Varid{a})\mid \Conid{Ch}\;[\mskip1.5mu \Conid{AtomicChange}\;\Varid{a}\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;\Conid{AtomicChange}\;\Varid{a}\mathrel{=}\Conid{AtomicChange}\;\Varid{a}\;(\Delta \Varid{a})\;\mathbb{Z}\;(\Delta \mathbb{Z}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+This change type enables both users and derivatives to express efficiently various bag
+changes, such as inserting a single element or changing a single element, but
+also changing some but not all occurrences of an element in a bag.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{insertSingle}\mathrel{:\mkern-1mu:}\Varid{a}\to \Delta (\Conid{Bag}\;\Varid{a}){}\<[E]%
+\\
+\>[B]{}\Varid{insertSingle}\;\Varid{a}\mathrel{=}\Conid{Ch}\;[\mskip1.5mu \Conid{AtomicChange}\;\Varid{a}\;\NilC{\Varid{a}}\;\mathrm{0}\;(\Conid{Ch}\;\mathrm{1})\mskip1.5mu]{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{changeSingle}\mathrel{:\mkern-1mu:}\Varid{a}\to \Delta \Varid{a}\to \Delta (\Conid{Bag}\;\Varid{a}){}\<[E]%
+\\
+\>[B]{}\Varid{changeSingle}\;\Varid{a}\;\Varid{da}\mathrel{=}\Conid{Ch}\;[\mskip1.5mu \Conid{AtomicChange}\;\Varid{a}\;\Varid{da}\;\mathrm{1}\;\NilC{\mathrm{1}}\mskip1.5mu]{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Based on this change structure, we provide efficient primitives and their
+derivatives. The CTS variant of \ensuremath{\Varid{map}}, that we call \ensuremath{\Varid{mapC}} takes a function
+\ensuremath{\Varid{fC}} in CTS and a bag \ensuremath{\Varid{as}} and produces a bag and a cache. Because \ensuremath{\Varid{map}} is not
+self-maintainable the cache stores the arguments \ensuremath{\Varid{fC}} and \ensuremath{\Varid{as}}. In addition the
+cache stores for each invocation of \ensuremath{\Varid{fC}}, and therefore for each distinct element
+in \ensuremath{\Varid{as}}, the result of \ensuremath{\Varid{fC}} of type \ensuremath{\Varid{b}} and the cache of type \ensuremath{\Varid{c}}.
+The incremental function \ensuremath{\Varid{dmapC}} has to produce an
+updated cache. We check that this is the same cache that \ensuremath{\Varid{mapC}} would produce
+when applied to updated inputs using the QuickCheck library.
+
+Following ideas inspired by~\citet{Rossberg2010fing}, all higher-order functions
+(and typically, also their caches) are parametric over cache types of their
+function arguments. Here, functions \ensuremath{\Varid{mapC}} and \ensuremath{\Varid{dmapC}} and cache type \ensuremath{\Conid{MapC}}
+are parametric over the cache type \ensuremath{\Varid{c}} of \ensuremath{\Varid{fC}} and \ensuremath{\Varid{dfC}}.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{map}\mathrel{:\mkern-1mu:}(\Varid{a}\to \Varid{b})\to \Conid{Bag}\;\Varid{a}\to \Conid{Bag}\;\Varid{b}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathbf{type}\;\Conid{MapC}\;\Varid{a}\;\Varid{b}\;\Varid{c}\mathrel{=}(\Varid{a}\to (\Varid{b},\Varid{c}),\Conid{Bag}\;\Varid{a},\Conid{Map}\;\Varid{a}\;(\Varid{b},\Varid{c})){}\<[E]%
+\\
+\>[B]{}\Varid{mapC}\mathrel{:\mkern-1mu:}(\Varid{a}\to (\Varid{b},\Varid{c}))\to \Conid{Bag}\;\Varid{a}\to (\Conid{Bag}\;\Varid{b},\Conid{MapC}\;\Varid{a}\;\Varid{b}\;\Varid{c}){}\<[E]%
+\\
+\>[B]{}\Varid{dmapC}\mathrel{:\mkern-1mu:}(\Delta \Varid{a}\to \Varid{c}\to (\Delta \Varid{b},\Varid{c}))\to \Delta (\Conid{Bag}\;\Varid{a})\to {}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{MapC}\;\Varid{a}\;\Varid{b}\;\Varid{c}\to (\Delta (\Conid{Bag}\;\Varid{b}),\Conid{MapC}\;\Varid{a}\;\Varid{b}\;\Varid{c}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+We wrote the \ensuremath{\Varid{length}} and \ensuremath{\Varid{sum}} function used in our benchmarks in terms of
+primitives \ensuremath{\Varid{map}} and \ensuremath{\Varid{foldGroup}}. We applied our transformations to get
+\ensuremath{\Varid{lengthC}}, \ensuremath{\Varid{dlengthC}}, \ensuremath{\Varid{sumC}} and \ensuremath{\Varid{dsumC}}. This transformation could in
+principle be automated. Implementing the CTS variant and CTS derivative of
+primitives efficiently requires manual work.
+
+
+We evaluate whether we can produce an updated result with \ensuremath{\Varid{davgC}} faster than
+by from scratch recomputation with \ensuremath{\Varid{avg}}. We use the \ensuremath{\Varid{criterion}} library for
+benchmarking. The benchmarking code and our raw results are available in the
+supplementarty material. We fix an initial bag of size \ensuremath{\Varid{n}}. It contains the
+integers
+from \ensuremath{\mathrm{1}} to \ensuremath{\Varid{n}}. We define a sequence of consecutive changes of length \ensuremath{\Varid{r}}
+as the insertion of \ensuremath{\mathrm{1}}, the deletion of \ensuremath{\mathrm{1}}, the insertion of \ensuremath{\mathrm{2}}, the deletion
+of \ensuremath{\mathrm{2}} and so on. We update the initial bag with these changes, one after
+another, to obtain a sequence of input bags.
+
+We measure the time taken by from scratch recomputation. We apply \ensuremath{\Varid{avg}} to
+each input bag in the sequence and fully force all results. We report the time
+from scratch recomputation takes as this measured time divided by the number \ensuremath{\Varid{r}}
+of input bags. We measure the time taken by our CTS variant \ensuremath{\Varid{avgC}} similarly.
+We make sure to fully force all results and caches \ensuremath{\Varid{avgC}} produces on the sequence
+of input bags.
+
+We measure the time taken by our CTS derivative \ensuremath{\Varid{davgC}}. We assume a fully
+forced initial result and cache. We apply \ensuremath{\Varid{davgC}} to each change in the
+sequence of bag changes using the cache from the previous invocation. We then
+apply the result change to the previous result. We fully force the obtained
+sequence of results. Finally we measure the time taken to only produce the sequence
+of result changes without applying them.
+
+Because of laziness, choosing what exactly to measure is tricky.
+We ensure that reported times include the entire cost of computing the whole
+sequence of results. To measure this cost, we ensure any thunks within the
+sequence are forced. We need not force any partial results, such as output
+changes or caches. Doing so would distort the results because forcing the whole
+cache can cost asymptotically more than running derivatives. However, not using
+the cache at all underestimates the cost of incremental computation. Hence, we
+measure a sequence of consecutive updates, each using the cache produced by the
+previous one.
+
+\begin{figure}
+  \footnotesize
+  \begin{subfigure}[l]{0.495\linewidth}
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\linewidth,
+        height=\linewidth,
+        xlabel=input size,
+        ylabel=time in milliseconds,
+        y filter/.code={\pgfmathparse{#1*1000}\pgfmathresult},
+        legend pos=north west
+      ]
+      \addplot table[x=size, y=from_scratch, col sep=comma]{\poplPath{benchmark-results/average.csv}};
+      \addlegendentry{original}
+      \addplot table[x=size, y=caching, col sep=comma]{\poplPath{benchmark-results/average.csv}};
+      \addlegendentry{caching}
+      \addplot table[x=size, y=change_only, col sep=comma]{\poplPath{benchmark-results/average.csv}};
+      \addlegendentry{change only}
+      \addplot table[x=size, y=incremental, col sep=comma]{\poplPath{benchmark-results/average.csv}};
+      \addlegendentry{incremental}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Benchmark results for \ensuremath{\Varid{avg}}}
+  \label{fig:average-results}
+\end{subfigure}
+\hfill
+\begin{subfigure}[r]{0.495\linewidth}
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\linewidth,
+        height=\linewidth,
+        xlabel=input size,
+        ylabel=time in milliseconds,
+        y filter/.code={\pgfmathparse{#1*1000}\pgfmathresult},
+        legend pos=north west
+      ]
+      \addplot table[x=size, y=from_scratch, col sep=comma]{\poplPath{benchmark-results/indexedJoin.csv}};
+      \addlegendentry{original}
+      \addplot table[x=size, y=caching, col sep=comma]{\poplPath{benchmark-results/indexedJoin.csv}};
+      \addlegendentry{caching}
+      \addplot table[x=size, y=change_only, col sep=comma]{\poplPath{benchmark-results/indexedJoin.csv}};
+      \addlegendentry{change only}
+      \addplot table[x=size, y=incremental, col sep=comma]{\poplPath{benchmark-results/indexedJoin.csv}};
+      \addlegendentry{incremental}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Benchmark results for \ensuremath{\Varid{totalPrice}}}
+  \label{fig:indexedJoin-results}
+\end{subfigure}
+\end{figure}
+
+The plot in \cref{fig:average-results} shows execution time versus the size
+\ensuremath{\Varid{n}} of the initial input. To produce the initial result and cache, \ensuremath{\Varid{avgC}} takes
+longer than the original \ensuremath{\Varid{avg}} function takes to produce just the result. This
+is to be expected. Producing the result incrementally is much faster than from
+scratch recomputation. This speedup increases with the size of the initial bag.
+For an initial bag size of 800 incrementally updating the result is 70 times faster
+than from scratch recomputation.
+
+The difference between only producing the output change versus producing
+the output change and updating the result is very small in this example. This is
+to be expected because in this example the result is an integer and updating
+and evaluating an integer is fast. We will see an example where there is a
+bigger difference between the two.
+
+
+\subsection{Nested loops over two sequences}
+\label{sec:incr-nest-loop}
+
+We implemented incremental sequences and related primitives following \citet{Firsov2016purely}: our
+change operations and first-order operations (such as \ensuremath{\Varid{concat}}) reuse their
+implementation. On the other hand, we must extend higher-order operations such
+as \ensuremath{\Varid{map}} to handle non-nil function changes and caching. A correct and efficient
+CTS incremental \ensuremath{\Varid{dmapC}} function has to work differently depending on whether the
+given function change is nil or not: For a non-nil function change it has to
+go over the input sequence; for a nil function change it can avoid that.
+
+\ps{Briefly describe change structure for sequences}
+
+Consider the running example again, this time in A'NF\@. The partial application of
+a lambda lifted function constructs a closure. We made that explicit with a
+\ensuremath{\Varid{closure}} function.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{cartesianProduct}\;\Varid{xs}\;\Varid{ys}\mathrel{=}\mathbf{let}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{mapPairYs}\mathrel{=}\Varid{closure}\;\Varid{mapPair}\;\Varid{ys}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{xys}\mathrel{=}\Varid{concatMap}\;\Varid{mapPairYs}\;\Varid{xs}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mathbf{in}\;\Varid{xys}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\Varid{mapPair}\;\Varid{ys}\mathrel{=}\lambda \Varid{x}\to \mathbf{let}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{pairX}\mathrel{=}\Varid{closure}\;\Varid{pair}\;\Varid{x}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Varid{xys}\mathrel{=}\Varid{map}\;\Varid{pairX}\;\Varid{ys}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\mathbf{in}\;\Varid{xys}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+While the only valid change for closed functions is their nil change, for closures
+we can have non-nil function changes. We represent closed functions and closures
+as variants of the same type. Correspondingly we represent changes to a closed
+function and changes to a closure as variants of the same type of function changes.
+We inspect this representation at runtime to find out if a function change
+is a nil change.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathbf{data}\;\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{c}\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{Closed}\mathrel{:\mkern-1mu:}(\Varid{a}\to (\Varid{b},\Varid{c}))\to \Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{c}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{Closure}\mathrel{:\mkern-1mu:}(\Varid{e}\to \Varid{a}\to (\Varid{b},\Varid{c}))\to \Varid{e}\to \Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{c}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\mathbf{data}\;\Delta (\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{c})\;\mathbf{where}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{DClosed}\mathrel{:\mkern-1mu:}(\Delta \Varid{a}\to \Varid{c}\to (\Delta \Varid{b},\Varid{c}))\to \Delta (\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{c}){}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\Conid{DClosure}\mathrel{:\mkern-1mu:}(\Delta \Varid{e}\to \Delta \Varid{a}\to \Varid{c}\to (\Delta \Varid{b},\Varid{c}))\to \Delta \Varid{e}\to \Delta (\Conid{Fun}\;\Varid{a}\;\Varid{b}\;\Varid{c}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+We have also evaluated another representation of function changes with different
+tradeoffs where we use defunctionalization instead of closure conversion.
+\begin{poplForThesis}
+We discuss the use of defunctionalization in \cref{ch:defunc-fun-changes}.
+\end{poplForThesis}
+
+We use the same benchmark setup as in the benchmark for the average computation on bags.
+The input for size \ensuremath{\Varid{n}} is a pair of sequences \ensuremath{(\Varid{xs},\Varid{ys})}. Each sequence
+initially contains the integers from \ensuremath{\mathrm{1}} to \ensuremath{\Varid{n}}. Updating the result in reaction
+to a change \ensuremath{\Varid{dxs}} to \ensuremath{\Varid{xs}} takes less time than updating the result in reaction
+to a change \ensuremath{\Varid{dys}} to \ensuremath{\Varid{ys}}. The reason is that when \ensuremath{\Varid{dys}} is a nil change we
+dynamically detect that the function change passed to \ensuremath{\Varid{dconcatMapc}} is the nil
+change and avoid looping over \ensuremath{\Varid{xs}} entirely.
+
+We benchmark changes to the outer sequence \ensuremath{\Varid{xs}} and the inner sequence \ensuremath{\Varid{ys}}
+separately. In both cases the sequence of changes are insertions and deletions of
+different numbers at different positions.
+When we benchmark changes to the outer sequence \ensuremath{\Varid{xs}}
+we take this sequence of changes for \ensuremath{\Varid{xs}} and all changes to \ensuremath{\Varid{ys}} will be nil
+changes. When we benchmark changes to the inner sequence \ensuremath{\Varid{ys}} we take this sequence
+of changes for \ensuremath{\Varid{ys}} and all changes to \ensuremath{\Varid{xs}} will be nil changes.
+
+\begin{figure}
+  \footnotesize
+  \begin{subfigure}[l]{0.495\linewidth}
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\linewidth,
+        height=\linewidth,
+        xlabel=input size,
+        ylabel=time in seconds,
+        legend pos=north west
+      ]
+      \addplot table[x=size, y=from_scratch, col sep=comma]{\poplPath{benchmark-results/nestedLoopInner.csv}};
+      \addlegendentry{original}
+      \addplot table[x=size, y=caching, col sep=comma]{\poplPath{benchmark-results/nestedLoopInner.csv}};
+      \addlegendentry{caching}
+      \addplot table[x=size, y=change_only, col sep=comma]{\poplPath{benchmark-results/nestedLoopInner.csv}};
+      \addlegendentry{change only}
+      \addplot table[x=size, y=incremental, col sep=comma]{\poplPath{benchmark-results/nestedLoopInner.csv}};
+      \addlegendentry{incremental}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Benchmark results for cartesian product changing \emph{inner} sequence.}
+  \label{fig:nestedLoopInner-results}
+\end{subfigure}
+\hfill
+\begin{subfigure}[r]{0.495\linewidth}
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\linewidth,
+        height=\linewidth,
+        xlabel=input size,
+        ylabel=time in seconds,
+        legend pos=north west
+      ]
+      \addplot table[x=size, y=from_scratch, col sep=comma]{\poplPath{benchmark-results/nestedLoopOuter.csv}};
+      \addlegendentry{original}
+      \addplot table[x=size, y=caching, col sep=comma]{\poplPath{benchmark-results/nestedLoopOuter.csv}};
+      \addlegendentry{caching}
+      \addplot table[x=size, y=change_only, col sep=comma]{\poplPath{benchmark-results/nestedLoopOuter.csv}};
+      \addlegendentry{change only}
+      \addplot table[x=size, y=incremental, col sep=comma]{\poplPath{benchmark-results/nestedLoopOuter.csv}};
+      \addlegendentry{incremental}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Benchmark results for Cartesian product changing \emph{outer} sequence.}
+  \label{fig:nestedLoopOuter-results}
+\end{subfigure}
+\end{figure}
+
+In this example preparing the cache takes much longer than from scratch
+recomputation. The speedup of incremental computation over from scratch
+recomputation increases with the size of the initial sequences. It reaches
+\ensuremath{\mathrm{2.5}} for a change to the inner sequences and \ensuremath{\mathrm{8.8}} for a change to the outer
+sequence when the initial sequences have size \ensuremath{\mathrm{800}}. Producing and fully forcing
+only the changes to the results is \ensuremath{\mathrm{5}} times faster for a change to the inner
+sequence and \ensuremath{\mathrm{370}} times faster for a change to the outer sequence.
+
+While we do get speedups for both kinds of
+changes (to the inner and to the outer sequence) the speedups for changes to the
+outer sequence are bigger.
+Due to our benchmark methodology we have to fully force updated results. This alone
+takes time quadratic in the size of the input sequences \ensuremath{\Varid{n}}. Threrefore we also
+report the time it takes to produce and fully force only the output changes which
+is of a lower time complexity.
+
+
+\subsection{Indexed joins of two bags}
+\label{sec:incr-an-index}
+
+As expected, we found that we can compose functions into larger and more complex programs and
+apply CTS differentiation to get a fast incremental program.
+
+For this example imagine we have a bag of orders and a bag of line items. An
+order is a pair of an integer key and an exchange rate represented as an integer.
+A line item is a pair of a key of a corresponding order and a price represented
+as an integer. The price of an order is the sum of the prices of the
+corresponding line items multiplied by the exchange rate. We want to find the
+total price defined as the sum of the prices of all orders.
+
+To do so efficiently we build an index for line items and an index for orders.
+We represent indexes as maps. We build a map from order key to the sum of the
+prices of corresponding line items. Because orders are not necessarily unique
+by key and because multiplication distributes over addition we can build an index
+mapping each order key to the sum of all exchange rates for this order key.
+We then compute the total price by merging the two maps by key, multiplying
+corresponding sums of exchange rates and sums of prices. We compute the total
+price as the sum of those products.
+
+Because our indexes are maps we need a change structure for maps. We generalize
+the change structure for bags by generalizing from multiplicities to arbitrary
+values as long as they have a group structure. A change to a map is either a
+replacement change (with a new map) or a list of atomic changes. An atomic
+change is a key \ensuremath{\Varid{k}}, a valid change to that key \ensuremath{\Varid{dk}}, a value \ensuremath{\Varid{a}} and a valid
+change to that value \ensuremath{\Varid{da}}. To update a map with an atomic change means to use
+the group structure of the type of \ensuremath{\Varid{a}} to subtract \ensuremath{\Varid{a}} at key \ensuremath{\Varid{k}} and to add \ensuremath{\Varid{a}\oplus \Varid{da}} at key \ensuremath{\Varid{k}\oplus \Varid{dk}}.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{type}\;\Delta (\Conid{Map}\;\Varid{k}\;\Varid{a})\mathrel{=}\Conid{Replace}\;(\Conid{Map}\;\Varid{k}\;\Varid{a})\mid \Conid{Ch}\;[\mskip1.5mu \Conid{AtomicChange}\;\Varid{k}\;\Varid{a}\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\mathbf{data}\;\Conid{AtomicChange}\;\Varid{k}\;\Varid{a}\mathrel{=}\Conid{AtomicChange}\;\Varid{k}\;(\Delta \Varid{k})\;\Varid{a}\;(\Delta \Varid{a}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Bags have a group structure as long as the elements have a group structure. Maps
+have a group structure as long as the values have a group structure. This means
+for example that we can efficiently incrementalize programs on maps from keys
+to bags of elements. We implemented efficient caching and incremental primitives
+for maps and verified their correctness with QuickCheck.
+
+To build the indexes, we use a \ensuremath{\Varid{groupBy}} function built from primitive
+functions \ensuremath{\Varid{foldMapGroup}} on bags and \ensuremath{\Varid{singleton}} for bags
+and maps respectively. While computing the indexes with \ensuremath{\Varid{groupBy}} is
+self-maintainable, merging them is not. We need to cache and incrementally
+update the intermediately created indexes to avoid recomputing them.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{type}\;\Conid{Order}\mathrel{=}(\mathbb{Z},\mathbb{Z}){}\<[E]%
+\\
+\>[B]{}\mathbf{type}\;\Conid{LineItem}\mathrel{=}(\mathbb{Z},\mathbb{Z}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{totalPrice}\mathrel{:\mkern-1mu:}\Conid{Bag}\;\Conid{Order}\to \Conid{Bag}\;\Conid{LineItem}\to \mathbb{Z}{}\<[E]%
+\\
+\>[B]{}\Varid{totalPrice}\;\Varid{orders}\;\Varid{lineItems}\mathrel{=}\mathbf{let}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{orderIndex}\mathrel{=}\Varid{groupBy}\;\Varid{fst}\;\Varid{orders}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{orderSumIndex}\mathrel{=}\Varid{\Conid{Map}.map}\;(\Varid{\Conid{Bag}.foldMapGroup}\;\Varid{snd})\;\Varid{orderIndex}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{lineItemIndex}\mathrel{=}\Varid{groupBy}\;\Varid{fst}\;\Varid{lineItems}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{lineItemSumIndex}\mathrel{=}\Varid{\Conid{Map}.map}\;(\Varid{\Conid{Bag}.foldMapGroup}\;\Varid{snd})\;\Varid{lineItemIndex}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{merged}\mathrel{=}\Varid{\Conid{Map}.merge}\;\Varid{orderSumIndex}\;\Varid{lineItemSumIndex}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{total}\mathrel{=}\Varid{\Conid{Map}.foldMapGroup}\;\Varid{multiply}\;\Varid{merged}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{in}\;\Varid{total}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+This example is inspired by \citet{Koch14}.
+%
+Unlike them, we don't automate indexing, so to get good performance we start
+from a program that explicitly uses indexes.
+% While indexing arise automatically
+% from their transformations,
+% to get good performance we must start from a program
+% that explicitly uses indexes
+
+We evaluate the performace in the same way we did for the average computation on bags. The
+initial input of size \ensuremath{\Varid{n}} is a pair of bags where both contain the pairs
+\ensuremath{(\Varid{i},\Varid{i})} for \ensuremath{\Varid{i}} between \ensuremath{\mathrm{1}} and \ensuremath{\Varid{n}}. The sequence of changes are alternations
+between insertion and deletion of pairs \ensuremath{(\Varid{j},\Varid{j})} for different \ensuremath{\Varid{j}}. We
+alternate the insertions and deletions between the orders bag and the line items
+bag.
+
+Our CTS derivative of the original program produces updated results much faster
+than from scratch recomputation and again the speedup increases with the size
+of the initial bags. For an initial size of the two bags of \ensuremath{\mathrm{800}}
+incrementally updating the result is 180 times faster than from scratch
+recomputation.
+
+
+\iftoggle{poplForThesis}{\section}{\subsection}{Limitations and future work}
+\iftoggle{poplForThesis}{\let \limSection = \subsection}{\let \limSection = \subsubsection}
+\label{sec:cts-limitations}
+% Knowing myself, I'm probably doing this too much.
+In this section we describe limitations to be addressed in future work.
+
+\pg{Commenting this out, don't believe it any more in general. Unless we
+  do a group fold, we need to run \ensuremath{\ominus }!}
+% \subsubsection{Inductive data types and structural recursion}
+
+% We believe that we can extend our transformation to work with folds over inductive
+% data types.
+% Derivatives for folds still need be written by hand, but mainly to handle
+% structural insertions or deletions; value changes can be handled by the main
+% transformation.
+% General recursive functions induce recursive cache types.
+
+% DOES THIS MEAN WE NEVER NEED ANY MAINTENANCE? Probably not. But where do we fail?
+
+  % XXX no idea how to actually explain this, so don't at this point.
+
+  % but only for one
+  % reason. When our tree undergoes a structural change, such as inserting an
+  % element, existing elements can be shuffled around. Intermediate results must
+  % be shuffled around in a corresponding way.
+
+% \paragraph{Associative incremental folds}
+% Associative folds are a common case study in incremental literature; we don't
+% claim this example is original. However, many implementations mix intermediate
+% results for \emph{a single fold} together with the input finger tree, as
+% described even by Cormen (2nd ed., Ch. 14). Our implementation stores results in
+% a separate parallel tree, and thus allows performing different computations
+% \emph{modularly}, without modifying the input tree.
+
+% % unclear
+% %This is only possible because we update input and cache in lockstep.
+% \ps{Note it here so we don't forget to say a few words}
+
+
+% pg: We say enough earlier, re expressiveness.
+% \subsubsection{Incremental programs on sum types}
+
+% We believe that our transformation can be extended to work on programs that
+% use sum types. For example a change structure for |Either| could be
+
+% \begin{code}
+%   data Dt (Either a b) =
+%     ChangeLeft a (Dt a) |
+%     ChangeLeftToRight a b |
+%     ChangeRight b (Dt b) |
+%     ChangeRightToLeft b a
+% \end{code}
+
+% When a value changes from |Left a| to |Right b| we would use |`ominus`| to
+% produce a change in the result. Every change structure can support |`ominus`|
+% by adjoining a replacement change. In this case a change from |Left a| to
+% |Right b| would trigger recomputation.
+% \ps{Just some notes}
+
+
+\limSection{Hiding the cache type}
+\label{sec:hiding-cache-type}
+%\ps{A limitation that the defunctionalization solution did not have}
+
+In our experiments, functions of the same type \ensuremath{\Varid{f}_{1},\Varid{f}_{2}\mathrel{:\mkern-1mu:}\Conid{A}\to \Conid{B}} can be
+transformed to CTS functions \ensuremath{\Varid{f}_{1}\mathrel{:\mkern-1mu:}\Conid{A}\to (\Conid{B},\Conid{C}_{1}),\Varid{f}_{2}\mathrel{:\mkern-1mu:}\Conid{A}\to (\Conid{B},\Conid{C}_{2})} with
+different cache types \ensuremath{\Conid{C}_{1},\Conid{C}_{2}}, since cache types depend on the implementation.
+We can fix this problem with some runtime overhead by using a single cache type \ensuremath{\Conid{Cache}},
+defined as a tagged union of all cache types. If we defunctionalize function
+changes, we can index this cache type with tags representing functions, but
+other approaches are possible and we omit details.
+We conjecture (but have not proven) this fix gives a type-preserving
+translation, but leave this question for future work.
+% indexed by a GADT representing the different
+% functions in the program (similarly to defunctionalized functions)~\citep{GiarrussoPhD2018}.
+
+% Our transformation adds the type of the cache to function types. It possibly
+% transforms functions with equal type to functions with different types. This
+% means that our transformation makes some well-typed programs ill-typed.
+
+% For example we can't in general store functions in a homogeneous collection.
+
+% Another example:
+
+% \begin{code}
+%   selectFirst :: (a -> b) -> (a -> b) -> (a -> b)
+%   selectFirst f g = f
+% \end{code}
+
+% \ps{This becomes more limiting with ifthenelse}
+% \ps{Just noting it}
+
+
+\limSection{Nested bags}
+
+Our implementation of bags makes nested bags overly slow: we represent bags as
+tree-based maps from elements to multiplicity, so looking up a bag \ensuremath{\Varid{b}} in a bag
+of bags takes time proportional to the size of \ensuremath{\Varid{b}}. Possible solutions in this
+case include shredding, like done by \citep{Koch2016incremental}. We have no
+such problem for nested sequences, or other nested data which can be addressed
+in $O(1)$.
+% the element size
+% % The presented language plugin for bags is less efficient on nested bags than
+% % it could be:
+% The tree-based implementation of maps that we rely on compares keys (in this case
+% bag elements) for insert and lookup. If the elements themselves are bags, this
+% comparison is rather slow.
+%
+% We believe that another implementation based on hashmaps together with hash-consing
+% could solve this problem.
+% \ps{Handwavy, just noting}
+
+
+\limSection{Proper tail calls}
+\label{sec:tail-calls}
+CTS transformation conflicts with proper tail calls, as it turns most tail calls
+into non-tail calls.
+In \ensuremath{\Conid{A'NF}} syntax, tail calls such as \ensuremath{\mathbf{let}\;\Varid{y}\mathrel{=}\Varid{f}\;\Varid{x}\;\mathbf{in}\;\Varid{g}\;\Varid{y}} become \ensuremath{\mathbf{let}\;\Varid{y}\mathrel{=}\Varid{f}\;\Varid{x}\;\mathbf{in}\;\mathbf{let}\;\Varid{z}\mathrel{=}\Varid{g}\;\Varid{y}\;\mathbf{in}\;\Varid{z}}, and in CTS that becomes \ensuremath{\mathbf{let}\;(\Varid{y},\Varid{c}_{\Varid{y}})\mathrel{=}\Varid{f}\;\Varid{x}\;\mathbf{in}\;\mathbf{let}\;(\Varid{z},\Varid{c}_{\Varid{z}})\mathrel{=}\Varid{g}\;\Varid{y}\;\mathbf{in}\;(\Varid{z},(\Varid{c}_{\Varid{y}},\Varid{c}_{\Varid{z}}))}, where the call to \ensuremath{\Varid{g}} is genuinely \emph{not} in tail
+position.
+% An optimizer could still restore some tail calls, turning e.g. |let (y, c_y) = f
+% x in (y, c_y)| back into |f x|.
+This prevents recursion on deeply nested data structures like long lists: but such
+programs incrementalize inefficiently if deeply nested data is affected, so
+it is advisable to replace lists by other sequences anyway. It's unclear whether
+such fixes are available for other uses of tail calls.
+% \pg{Which ones? I can only think of CPS but CTS-transforming a CPS program as
+% a normal one makes no sense.}
+
+\limSection{Pervasive replacement values}
+\label{sec:annoying-replacement}
+Thanks to replacement changes, we can compute a change from any \ensuremath{\Varid{v}_{1}} to any \ensuremath{\Varid{v}_{2}}
+in constant time. \citet{CaiEtAl2014ILC} use a difference operator \ensuremath{\ominus } instead, but
+it's hard to implement \ensuremath{\ominus } in constant time on values of non-constant size.
+So our formalization and implementation allow replacement values everywhere to
+ensure all computations can be incrementalized in some sense.
+Supporting replacement changes introduces overhead even if they are not used,
+because it prevents writing self-maintainable CTS derivatives. Hence, to improve
+performance, one should consider dropping support for replacement values and
+restricting supported computations.
+Consider a call to a binary CTS derivative \ensuremath{\Varid{dfc}\;\Varid{da}\;\Varid{db}\;\Varid{c}_{1}} after computing \ensuremath{(\Varid{y}_{1},\Varid{c}_{1})\mathrel{=}\Varid{fc}\;\Varid{a}_{1}\;\Varid{b}_{1}}: if \ensuremath{\Varid{db}} is a replacement change \ensuremath{\mathbin{!}\Varid{b}_{2}}, then \ensuremath{\Varid{dfc}} must compute
+a result afresh by invoking \ensuremath{\Varid{fc}\;\Varid{a}_{2}\;\Varid{b}_{2}}, and \ensuremath{\Varid{a}_{2}\mathrel{=}\Varid{a}_{1}\oplus \Varid{da}} requires
+remembering previous input \ensuremath{\Varid{a}_{1}} inside \ensuremath{\Varid{c}_{1}}. By the same argument, \ensuremath{\Varid{c}_{1}} must
+also remember input \ensuremath{\Varid{b}_{1}}. Worse, replacement values are only needed to handle
+cases where incremental computation reduces to recomputation, because the new
+input is completely different, or because the condition of an \ensuremath{\mathbf{if}} expression
+changed. Such changes to conditions are forbidden by other
+works~\citep{Koch2016incremental}, we believe for similar reasons.
+
+%New in the thesis, include in paper?
+\begin{poplForThesis}
+\limSection{Recomputing updated values}
+\label{sec:cts-limit-reupdate}
+In some cases, the same updated input might be recomputed more than once.
+If a derivative \ensuremath{\Varid{df}} needs some base input \ensuremath{\Varid{x}} (that is, if \ensuremath{\Varid{df}} is not
+self-maintainable), \ensuremath{\Varid{df}}'s input cache will contain a copy of \ensuremath{\Varid{x}}, and \ensuremath{\Varid{df}}'s
+output cache will contain its updated value \ensuremath{\Varid{x}\oplus \Varid{dx}}. When all or most
+derivatives are self-maintainable this is convenient, because in most cases
+updated inputs will not need to be computed. But if most derivatives are not self-maintainable, the same updated input might be computed multiple times: specifically,
+if derivative \ensuremath{\Varid{dh}} calls functions \ensuremath{\Varid{df}} and \ensuremath{\Varid{dg}}, and both \ensuremath{\Varid{df}} and \ensuremath{\Varid{dg}} need
+the same base input \ensuremath{\Varid{x}}, caches for both \ensuremath{\Varid{df}} and \ensuremath{\Varid{dg}} will contain the updated
+value of \ensuremath{\Varid{x}\oplus \Varid{dx}}, computed independently. Worse, because of pervasive
+replacement values (\cref{sec:annoying-replacement}), derivatives in our case
+studies tend to not be self-maintainable.
+%On the other hand, it appears that the slowdown factor is a function of the program text,
+% Not clear: a loop calling |df| will recompute |x `oplus` dx| once per iteration.
+
+In some cases, such repeated updates should be removable by a standard optimizer
+after inlining and common-subexpression elimination, but it is unclear how often this happens.
+To solve this problem, derivatives could take and return both old inputs \ensuremath{\Varid{x}_{1}}
+and updated ones \ensuremath{\Varid{x}_{2}\mathrel{=}\Varid{x}_{1}\oplus \Varid{dx}}, and \ensuremath{\Varid{x}_{2}} could be computed at the single
+location where \ensuremath{\Varid{dx}} is bound. In this case, to avoid updates for unused base
+inputs we would have to rely more on absence analysis
+(\cref{sec:cache-pruning}); pruning function inputs appears easier than pruning
+caches. Otherwise, computations of updated inputs that are not used, in a lazy
+context, might cause space leaks, where thunks for \ensuremath{\Varid{x}_{2}\mathrel{=}\Varid{x}_{1}\oplus \Varid{dx}_{1}}, \ensuremath{\Varid{x}_{3}\mathrel{=}\Varid{x}_{2}\oplus \Varid{dx}_{2}} and so on might accumulate and grow without bounds.
+\end{poplForThesis}
+
+\limSection{Cache pruning via absence analysis}
+\label{sec:cache-pruning}
+To reduce memory usage and runtime overhead, it should be possible to
+automatically remove from transformed programs any caches or cache fragments
+that are not used (directly or indirectly) to compute outputs. \Citet{Liu00}
+performs this transformation on CTS programs by using
+\emph{absence analysis}, which was later extended to higher-order languages by
+\citet{Sergey2014modular}. In lazy languages, absence analysis removes thunks
+that are not needed to compute the output. We conjecture that, as long as the
+analysis is extended to \emph{not} treat caches as part of the output, it should
+be able to remove unused caches or inputs (assuming unused inputs exist, see
+\cref{sec:annoying-replacement}).
+% shown how to approach the problem for first-order languages by a first-order
+% static analysis called \emph{absence analysis}, and because this analysis was
+% later extended to higher-order languages by \citet{Sergey2014modular}.
+% In a lazy
+% program, \emph{absence analysis} identifies thunks that are not going to be
+% evaluated, so that they can be later removed. As long as the cache is treated as
+% a product of thunks (or \emph{negative product}), absence analysis can be
+% applied directly to find out which intermediate results can be dropped.
+
+% But GHC's implementation of absence analysis and optimizations appears to not
+% remove unused intermediate results from caches (or even to detect that such
+% results are unused). We conjecture the analysis is not aware that the cache is
+% only shared between functions |fc| and derivatives |df| (even if we
+% enforce that through existential types, or by avoiding the cache ever being
+% returned).
+% Such removal already happens when the functions are suitably combined
+% together, %PG show example, clarify it is rather limited.
+% so we are satisfied with leaving this for future work.
+
+
+\limSection{Unary vs n-ary abstraction}
+\label{sec:nary-abstraction}
+We only show our transformation correct for unary functions and tuples. But many
+languages provide efficient support for applying curried functions such as \ensuremath{\Varid{div}\mathrel{:\mkern-1mu:}\mathbb{Z}\to \mathbb{Z}\to \mathbb{Z}}, via either the \emph{push-enter} or \emph{eval-apply} evaluation
+model. For instance, invoking \ensuremath{\Varid{div}\;\Varid{m}\;\Varid{n}} should not require the overhead of a
+function invocation for each argument~\citep{Marlow2006making}. Naively
+transforming such a curried functions to CTS would produce a function \ensuremath{\Varid{divc}} of
+type \ensuremath{\mathbb{Z}\to (\mathbb{Z}\to (\mathbb{Z},\Conid{DivC}_{2})),\Conid{DivC}_{1})} with \ensuremath{\Conid{DivC}_{1}\mathrel{=}()}, which adds
+excessive overhead.%
+\footnote{In \cref{sec:cts-motivation} and our evaluation we use curried functions
+and never need to use this naive encoding, but only because we always invoke
+functions of known arity.}
+Based on preliminary experiments, we believe we can straightforwardly combine our
+approach with a push-enter or eval-apply evaluation strategy for
+transformed curried functions. Alternatively, we expect that translating
+Haskell to Strict Core~\citep{Bolingbroke2009types} would take care of turning
+Haskell into a language where function types describe their arity, which our
+transformation can easily take care of.
+We leave a more proper investigation for future work.

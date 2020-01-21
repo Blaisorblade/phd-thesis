@@ -1,0 +1,1928 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+\chapter{(Un)typed ILC, operationally}
+\label{ch:bsos}
+
+In \cref{ch:derive-formally} we have proved ILC correct for a
+simply-typed $\lambda$-calculus. What about other languages, with more expressive
+type systems or no type system at all?
+
+In this chapter, we prove that ILC is still correct in untyped
+call-by-value (CBV) $\lambda$-calculus. We do so without using
+denotational semantics, but using only an environment-based
+big-step operational semantics and \emph{step-indexed logical
+relations}. The formal development in this chapter stands alone
+from the rest of the thesis, though we do not repeat ideas
+present elsewhere.
+
+We prove ILC correct using, in increasing order of complexity,
+\begin{enumerate}
+\item STLC and standard syntactic logical relations;
+\item STLC and step-indexed logical relations;
+\item an untyped $\lambda$-calculus and step-indexed logical relations.
+\end{enumerate}
+We have fully mechanized the second proof in Agda\footnote{Source code available
+in this GitHub repo: \url{https://github.com/inc-lc/ilc-agda}.}, and done the
+others on paper. In all cases we prove the fundamental property for
+validity; we detail later which corollaries we prove in which
+case.
+The proof for untyped $\lambda$-calculus is the most
+interesting, but the others can serve as stepping stones.
+Yann Régis-Gianas, in collaboration with me, recently mechanized a similar proof
+for untyped $\lambda$-calculus in Coq, which appears in
+\cref{sec:formalization}.\footnote{Mechanizing the proof for untyped
+  $\lambda$-calculus is harder for purely technical reasons:
+  mechanizing well-founded induction in Agda is harder than
+  mechanizing structural induction.}
+
+Using operational semantics and step-indexed logical relations
+simplifies extending the proofs to more expressive languages,
+where denotational semantics or other forms of logical relations
+would require more sophistication, as argued by
+\citet{Ahmed2006stepindexed}.
+
+Proofs by (step-indexed) logical relations also promise to be
+scalable. All these proofs appear to be slight variants of
+proof techniques for logical program equivalence and
+parametricity, which are well-studied topics, suggesting the
+approach might scale to more expressive type systems. Hence, we
+believe these proofs clarify the relation with parametricity that
+has been noticed earlier \citep{Atkey2015ILC}. However, actually
+proving ILC correct for a polymorphic language (such as System F)
+is left as future work.
+
+We also expect that from our logical relations, one might derive a logical
+\emph{partial equivalence relation} among changes, similarly to
+\cref{sec:change-equivalence}, but we leave a development for future work.
+
+Compared to earlier chapters, this one will be more technical and
+concise, because we already introduced the ideas behind both ILC
+and logical relation proofs.
+
+\paragraph{Binding and environments}
+On the technical side, we are able to mechanize our proof without
+needing any technical lemmas about binding or weakening, thanks
+to a number of choices we mention later.
+
+Among other reasons, we avoid lemmas on binding because instead of substituting
+variables with arbitrary terms, we record mappings from variables to closed
+values via environments. We also used environments in \cref{sec:preliminaries},
+but this time we use syntactic values rather than semantic ones.
+As a downside, on paper, using environments makes for
+more and bigger definitions, because we need to carry around both an environment
+and a term, instead of merging them into a single term via substitution, and
+because values are not a subset of terms but an entirely separate category.
+But on paper the extra work is straightforward, and in a mechanized setting it
+is simpler than substitution, especially in a setting with an intrinsically
+typed term representation (see \cref{sec:sem-style-and-rw}).
+
+\paragraph{Background/related work}
+Our development is inspired significantly by the use of
+step-indexed logical relations by \citet{Ahmed2006stepindexed}
+and \citet*{Acar08}. We refer to
+those works and to Ahmed's lectures at OPLSS 2013%
+\footnote{\url{https://www.cs.uoregon.edu/research/summerschool/summer13/curriculum.html}.}
+for an introduction to (step-indexed) logical relations.
+
+\paragraph{Intensional and extensional validity}
+Until this point, change validity only specifies how function
+changes behave, that is, their \emph{extension}.
+Using operational semantics, we can specify how valid function
+changes are concretely defined, that is, their \emph{intension}.
+To distinguish the two concepts, we contrast extensional validity
+and intensional validity.
+Some extensionally valid changes are not intensionally valid, but
+such changes are never created by derivation.
+Defining intensional validity helps to understand function
+changes:
+function changes are produced from changes to values in
+environments or from functions being replaced altogether.
+Requiring intensional validity helps to implement
+change operations such as \ensuremath{\oplus } more efficiently, by
+operating on environments.
+Later, in \cref{ch:defunc-fun-changes},
+we use similar ideas to implement change operations on
+\emph{defunctionalized} function changes: intensional validity
+helps put such efforts on more robust foundations, even though we
+do not account formally for defunctionalization but only for
+the use of closures in the semantics.
+
+We use operational semantics to define extensional validity in
+\cref{sec:typed-proof} (using plain logical relations) and
+\cref{sec:silr-typed-proof} (using step-indexed logical
+relations). We switch to intensional validity definition in
+\cref{sec:intensional-step-indexed-validity}.
+
+% Thanks to operational semantics, we can choose to define change
+% validity \emph{intensionally} rather than \emph{extensionally},
+% that is, based on how changes are defined internally, rather than
+% just how they behave.
+
+% Our earlier definition of validity is based on behavior, hence
+% \emph{extensional}. We present a step-indexed definition of
+% extensional validity in \cref{sec:silr-typed-proof}.
+% We introduce a concept of intensional validity, that captures
+% formally that function changes arise from changing environments
+% or functions being replaced altogether
+% (\cref{sec:intensional-step-indexed-validity}).
+% which introduces
+% intensional validity as a variant of extensional validity,
+% defined in
+
+% According to earlier definitions, functions
+% We earlier defined va
+% Also, using operational semantics, we can show more formally how
+% function changes arise: we model function values as closures, and
+% in the model we show in
+% \cref{sec:intensional-step-indexed-validity}, function change
+% values are either closure changes (which only modify
+% environments) or replacement closures, that is replacement
+% changes for closures that produce replacement changes as result.
+
+\paragraph{Non-termination and general recursion}
+This proof implies correctness of ILC in the presence of general recursion,
+because untyped $\lambda$-calculus supports general recursion via
+fixpoint combinators. However, the proof only applies to
+terminating executions of base programs, like for earlier
+authors~\citep*{Acar08}: we prove that if a function terminates
+against both a base input \ensuremath{\Varid{v}_{1}} and an updated one \ensuremath{\Varid{v}_{2}}, its derivative
+terminates against the base input and a valid input change \ensuremath{\Varid{dv}}
+from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}}.
+
+We can also add a fixpoint construct to
+our \emph{typed} $\lambda$-calculus and to our mechanization,
+without significant changes to our relations. However, a
+mechanical proof would require use of well-founded induction,
+which our current mechanization avoids.
+We return to this point in \cref{sec:bos-fixpoints}.
+
+While this support for general recursion is effective in some
+scenarios, other scenarios can still be incrementalized better
+using structural recursion.
+More efficient support for general recursion is
+a separate problem that we do not tackle here and leave for
+future work. We refer to discussion in
+\cref{sec:general-recursion}.
+
+\paragraph{Correctness statement}
+Our final correctness theorem is a variant of
+\cref{thm:derive-correct-oplus}, that we repeat for comparison:
+
+\begin{fullCompile}
+\deriveCorrectOplus*
+\end{fullCompile}
+\begin{partCompile}
+\begin{restatable*}[\ensuremath{\Derive{\text{\textendash}}} is correct, corollary]{corollary}{deriveCorrectOplus}
+  \label{thm:derive-correct-oplus}
+  If \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} and \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}} then
+  \ensuremath{\Eval{\Varid{t}}\;\rho_{1}\oplus \Eval{\Derive{\Varid{t}}}\;\D\rho\mathrel{=}\Eval{\Varid{t}}\;\rho_{2}}.
+\end{restatable*}
+\end{partCompile}
+
+We present our final correctness theorem statement in
+\cref{sec:intensional-step-indexed-validity}. We anticipate it
+here for illustration: the new statement is more explicit about
+evaluation, but otherwise broadly similar.
+
+\begin{restatable*}[\ensuremath{\Derive{\text{\textendash}}} is correct, corollary]{corollary}{deriveCorrectOplusSI}
+  \label{thm:derive-correct-types-si-intensional}
+  Take any term \ensuremath{\Varid{t}} that is well-typed (\ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}) and
+  any suitable environments \ensuremath{\rho_{1},\D\rho,\rho_{2}}, intensionally
+  valid at any step count (\ensuremath{\forall \Varid{k}\hsforall \hsdot{\circ }{\mathpunct{.}}(\Varid{k},\rho_{1},\D\rho,\rho_{2})\in \mathcal{RG}\mean{\Gamma}}).
+  Assume \ensuremath{\Varid{t}} terminates in both the old environment \ensuremath{\rho_{1}} and
+  the new environment \ensuremath{\rho_{2}}, evaluating to output values \ensuremath{\Varid{v}_{1}} and
+  \ensuremath{\Varid{v}_{2}} (\ensuremath{\rho_{1}\vdash\Varid{t}\Downarrow\Varid{v}_{1}} and \ensuremath{\rho_{2}\vdash\Varid{t}\Downarrow\Varid{v}_{2}}).
+  Then \ensuremath{\Derive{\Varid{t}}} evaluates in environment \ensuremath{\rho} and change environment \ensuremath{\D\rho}
+  to a change value \ensuremath{\Varid{dv}} (\ensuremath{\rho_{1}\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{t}\Downarrow\Varid{dv}}),
+  and \ensuremath{\Varid{dv}} is a valid change from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}}, so that \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}\mathrel{=}\Varid{v}_{2}}.
+\end{restatable*}
+
+Overall, in this chapter we present the following contributions:
+\begin{itemize}
+\item We give an alternative presentation of derivation, that can
+  be mechanized without any binding-related lemmas, not even
+  weakening-related ones, by introducing a separate syntax for
+  change terms (\cref{sec:bsos-formalization}).
+\item We prove formally ILC correct for STLC
+  using big-step semantics and logical relations (\cref{sec:typed-proof}).
+\item We show formally (with pen-and-paper proofs) that our
+  semantics is equivalent to small-step semantics definitions
+  (\cref{sec:sanity-check-big-step}).
+\item We introduce a formalized step-indexed variant of our definitions and
+  proofs for simply-typed $\lambda$-calculus
+  (\cref{sec:typed-proof}), which scales directly to definitions
+  and proofs for \emph{untyped} $\lambda$-calculus.
+\item For typed $\lambda$-calculus, we also mechanize our
+  step-indexed proof.
+\item In addition to (extensional) validity, we introduce a
+concept of intensional validity, that captures formally that
+function changes arise from changing environments or functions
+being replaced altogether
+(\cref{sec:intensional-step-indexed-validity}).
+\end{itemize}
+
+\section{Formalization}
+\label{sec:bsos-formalization}
+To present the proofs, we first describe our formal model of CBV
+ANF $\lambda$-calculus.
+We define an untyped ANF language, called \ensuremath{\ilcUntau}.
+We also define a simply-typed variant, called \ensuremath{\ilcTau}, by adding on top
+of \ensuremath{\ilcUntau} a separate Curry-style type system.
+
+In our mechanization of \ensuremath{\ilcTau}, however, we find it more
+convenient to define a Church-style type system (that
+is, a syntax that only describes typing derivations for
+well-typed terms) separately from the untyped language.
+
+Terms resulting from differentiation satisfy additional
+invariants, and exploiting those invariants helps simplify the
+proof. Hence we define separate languages for change terms
+produced from differentiation, again in untyped (\ensuremath{\dilcUntau}) and
+typed (\ensuremath{\dilcTau}) variants.
+
+The syntax is summarized in \cref{fig:anf-lambda-calculus}, the
+type systems in \cref{fig:anf-lambda-calculus-typing}, and the
+semantics in \cref{fig:anf-lambda-calculus-semantics}. The base
+languages are mostly standard, while the change languages are slightly more
+unusual.
+
+\input{fig-syntactic-ilc}
+
+\subsection{Types and contexts}
+\label{sec:bsos-anf-types}
+%
+We show the syntax of types, contexts and change types in
+\cref{sfig:anf-types}.
+We introduce types for functions, binary products and naturals.
+Tuples can be encoded as usual through nested pairs.
+Change types are mostly like earlier, but this time we use
+naturals as change for naturals (hence, we cannot define a total
+\ensuremath{\ominus } operation).
+
+We modify the definition of change contexts and environment
+changes to \emph{not} contain entries for base values: in this
+presentation we use separate environments for base variables and
+change variables. This choice avoids the need to define weakening
+lemmas.
+
+\subsection{Base syntax for \ilcUntau}
+\label{sec:bsos-anf-syntax}
+For convenience, we consider a $\lambda$-calculus in
+A-normal form. We do not parameterize this calculus over language
+plugins to reduce mechanization overhead, but we define separate syntactic
+categories for possible extension points.
+
+We show the syntax of terms in \cref{sfig:anf-syntax}.
+
+Meta-variable \ensuremath{\Varid{v}} ranges over (closed) syntactic values, that is
+evaluation results. Values are numbers, pairs of values or
+closures. A closure is a pair of a function and an environment as
+usual.
+Environments \ensuremath{\rho} are finite maps from variables to syntactic
+values; in our mechanization using de Bruijn indexes,
+environments are in particular finite lists of syntactic values.
+
+Meta-variable \ensuremath{\Varid{t}} ranges over arbitrary terms and \ensuremath{\Varid{w}}
+ranges over neutral forms. Neutral forms evaluate to values in
+zero steps, but unlike values they can be open: a neutral form is
+either a variable, a constant value \ensuremath{\Varid{c}}, a $\lambda$-abstraction or a
+pair of neutral forms.
+
+A term is either a neutral form, an application of neutral forms,
+a let expression or an application of a primitive function \ensuremath{\Varid{p}} to
+a neutral form. Multi-argument primitives are encoded as
+primitives taking (nested) tuples of arguments. Here we use
+literal numbers as constants and +1 and addition as primitives (to illustrate
+different arities), but further primitives are possible.
+
+\begin{notation}
+  We use subscripts ${}_a {}_b$ for pair components, ${}_f {}_a$ for
+  function and argument, and keep using ${}_1 {}_2$ for old and new
+  values.
+\end{notation}
+\subsection{Change syntax for \dilcUntau}
+\label{sec:bsos-anf-change-syntax}
+Next, we consider a separate language for change terms, which can
+be transformed into the base language. This language supports
+directly the structure of change terms: base variables and change
+variables live in separate namespaces. As we show later, for the typed language
+those namespaces are represented by typing contexts \ensuremath{\Gamma} and
+\ensuremath{\Delta \Gamma}: that is, the typing context for change variables is
+always the change context for \ensuremath{\Gamma}.
+
+We show the syntax of change terms in \cref{sfig:anf-change-syntax}.
+
+Change terms often take or bind two parameters at once, one for a
+base value and one for its change.
+Since a function change is applied to a base input
+and a change for it at once, the syntax for change term has a
+special binary application node \ensuremath{\Varid{dw}_f\;\Varid{w}_a\;\Varid{dw}_a}; otherwise, in ANF,
+such syntax must be encoded through separate applications via
+\ensuremath{\mathbf{let}\;\Varid{df}_a\mathrel{=}\Varid{dw}_f\;\Varid{w}_a\;\mathbf{in}\;\Varid{df}_a\;\Varid{dw}_a}. In the same way, closure changes
+\ensuremath{\rho\mathrel{\filleddiamond}\D\rho\;[\mskip1.5mu \lambda \Varid{x}\;\Varid{dx}\to \Varid{dt}\mskip1.5mu]} bind two variables at once and
+close over separate environments for base and change variables.
+Various other changes in the same spirit simplify similar
+formalization and mechanization details.
+
+% In particular, values for
+% function changes are again closures, but we require they bind
+% two variables at the out
+%
+In change terms, we write \ensuremath{\NilC{\Varid{p}}} as syntax for the derivative of \ensuremath{\Varid{p}}, evaluated
+as such by the semantics.
+Strictly speaking, differentiation \emph{must} map
+primitives to standard terms, so that the resulting programs can
+be executed by a standard semantics; hence, we should replace \ensuremath{\NilC{\Varid{p}}} by a
+concrete implementation of the derivative of \ensuremath{\Varid{p}}.
+However, doing so in a new
+formalization yields little additional insight, and requires
+writing concrete derivatives of primitives as de Bruijn terms.
+
+\subsection{Differentiation}
+\label{sec:bsos-anf-derive}
+We show differentiation in \cref{sfig:anf-derive}.
+Differentiation maps constructs in the language of base terms
+one-to-one to constructs in the language of change terms.
+
+\subsection{Typing \ilcTau{} and \dilcTau}
+\label{sec:bsos-anf-typing}
+
+We define typing judgement for \ensuremath{\ilcTau} base terms and for \ensuremath{\dilcTau} change
+terms. We show typing rules in
+\cref{sfig:anf-change-typing}.
+
+Typing for base terms is mostly standard. We use judgements \ensuremath{\vdash_{\mathcal{P}}\Varid{p}} and
+\ensuremath{\vdash_{\CONST}\Varid{c}} to specify typing of primitive functions and constant values.
+%
+For change terms, one could expect a type system only proving
+judgements with shape \ensuremath{\Gamma,\Delta \Gamma\vdash\Varid{dt}\typcolon\Delta \tau} (where
+\ensuremath{\Gamma,\Delta \Gamma} stands for the concatenation of \ensuremath{\Gamma} and
+\ensuremath{\Delta \Gamma}). To simplify inversion on such judgements (especially
+in Agda), we write instead \ensuremath{\Gamma\vdash_{\Delta}\Varid{dt}\typcolon\tau}, so that
+one can verify the following derived typing rule for \ensuremath{\Derive{\text{\textendash}}}:
+\begin{typing}
+  \Rule[T-Derive]
+  {\ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}}
+  {\ensuremath{\Gamma\vdash_{\Delta}\Derive{\Varid{t}}\typcolon\tau}}
+\end{typing}
+
+We also use mutually recursive typing judgment \ensuremath{\vDash\Varid{v}\typcolon\tau} for values and \ensuremath{\vDash\rho\typcolon\Gamma} for environments, and similarly \ensuremath{\vDash_{\Delta}\Varid{dv}\typcolon\tau} for change values
+and \ensuremath{\vDash_{\Delta}\D\rho\typcolon\Gamma} for change environments.
+We only show the (unsurprising) rules for \ensuremath{\vDash\Varid{v}\typcolon\tau} and omit the others. One
+could alternatively and equivalently define typing on syntactic values \ensuremath{\Varid{v}} by
+translating them to neutral forms \ensuremath{\Varid{w}\mathrel{=}\Varid{v}\mathbin{*}} (using unsurprising definitions in
+\cref{sec:sanity-check-big-step}) and reusing typing on terms, but as usual we
+prefer to avoid substitution.
+\begin{typing}
+\Axiom[TV-Nat]{\ensuremath{\vDash\Varid{n}\typcolon\mathbb{N}}}
+
+\Rule[TV-Pair]
+  {\ensuremath{\vDash\Varid{v}_a\typcolon\tau_a}\\
+  \ensuremath{\vDash\Varid{v}_b\typcolon\tau_b}}
+  {\ensuremath{\vDash\langle\Varid{v}_a,\Varid{v}_b\rangle\typcolon\tau_a\times\tau_b}}
+
+\raisebox{0.5\baselineskip}{\fbox{\ensuremath{\vDash\Varid{v}\typcolon\tau}}}
+
+\Rule[TV-Lam]
+{\ensuremath{\Gamma,\Varid{x}\typcolon\sigma\vdash\Varid{t}\typcolon\tau}\\
+  \ensuremath{\vDash\rho\typcolon\Gamma}}
+{\ensuremath{\vDash\rho\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu]\typcolon\sigma\to \tau}}
+\end{typing}
+
+\subsection{Semantics}
+\label{sec:bsos-anf-semantics}
+We present our semantics for base terms in \cref{sfig:anf-base-semantics}.
+Our semantics gives meaning to pairs of a environment \ensuremath{\rho} and term \ensuremath{\Varid{t}},
+consistent with each other, that we write \ensuremath{\rho\vdash\Varid{t}}. By ``consistent'' we mean that
+\ensuremath{\rho} contains values for all free variables of \ensuremath{\Varid{t}}, and (in a typed language)
+values with compatible values (if \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} then \ensuremath{\vDash\rho\typcolon\Gamma}).
+Judgement \ensuremath{\rho\vdash\Varid{t}\;\negthickspace\Downarrow_{\Varid{n}}\negthickspace\;\Varid{v}} says that \ensuremath{\rho\vdash\Varid{t}} evaluates to
+value \ensuremath{\Varid{v}} in \ensuremath{\Varid{n}} steps. The definition is given via a CBV big-step semantics.
+Following \citet*{Acar08}, we index our evaluation judgements via a step count,
+which counts in essence $\beta$-reduction steps; we use such step counts later,
+to define step-indexed logical relations.
+Since our semantics uses environments, $\beta$-reduction steps are implemented
+not via substitution but via environment extension, but the resulting
+step-counts are the same (\cref{sec:sanity-check-big-step}).
+Applying closure \ensuremath{\Varid{v}_f\mathrel{=}\rho\myquote\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu]} to argument \ensuremath{\Varid{v}_a} produces environment-term
+pair \ensuremath{(\rho\myquote,\Varid{x}\mathbin{:=}\Varid{v}_a)\vdash\Varid{t}}, which we abbreviate as \ensuremath{\mathsf{app}\;\Varid{v}_f\;\Varid{v}_a}. We'll
+reuse this syntax later to define logical relations.
+
+In our mechanized formalization, we have additionally proved
+lemmas to ensure that this semantics is sound relative to our
+earlier denotational semantics (adapted for the ANF syntax).
+
+Evaluation of primitives is delegated to function \ensuremath{\mathcal{P}\mean{\text{\textendash}}\text{\textendash}}. We show
+complete equations for the typed case; for the untyped case, we
+must turn \ensuremath{\mathcal{P}\mean{\text{\textendash}}\text{\textendash}} and \ensuremath{\mathcal{P}_{\Delta}\mean{\text{\textendash}}\text{\textendash}} into relations (or add explicit error
+results), but we omit the standard details (see also
+\cref{sec:silr-untyped-proof}).
+For simplicity, we assume evaluation of primitives takes one step.
+We conjecture higher-order primitives might need to be assigned
+different costs, but leave details for future work.
+
+We can evaluate neutral forms \ensuremath{\Varid{w}} to syntactic values \ensuremath{\Varid{v}} using a simple
+evaluation function \ensuremath{\mathcal{V}\mean{\Varid{w}}\rho}, and use \ensuremath{\mathcal{P}\mean{\Varid{p}}\Varid{v}} to
+evaluate primitives.
+When we need to omit indexes, we write \ensuremath{\rho\vdash\Varid{t}\Downarrow\Varid{v}} to mean
+that for some \ensuremath{\Varid{n}} we have \ensuremath{\rho\vdash\Varid{t}\Downarrow_{\Varid{n}}\Varid{v}}.
+
+We can also define an analogous non-indexed big-step
+semantics for change terms, and we present it in \cref{sfig:anf-change-semantics}.
+
+\subsection{Type soundness}
+\label{sec:bsos-anf-soundness}
+
+Evaluation preserves types in the expected way.
+\begin{lemma}[Big-step preservation]
+  \begin{enumerate}
+  \item If \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}, \ensuremath{\vDash\rho\typcolon\Gamma} and \ensuremath{\rho\vdash\Varid{t}\Downarrow_{\Varid{n}}\Varid{v}} then
+\ensuremath{\vDash\Varid{v}\typcolon\tau}.
+\item If \ensuremath{\Gamma\vdash_{\Delta}\Varid{dt}\typcolon\tau}, \ensuremath{\vDash\rho\typcolon\Gamma}, \ensuremath{\vDash_{\Delta}\D\rho\typcolon\Gamma} and
+\ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt}\Downarrow\Varid{dv}} then \ensuremath{\vDash_{\Delta}\Varid{dv}\typcolon\tau}.
+   \end{enumerate}
+\end{lemma}
+\begin{proof}
+  By structural induction on evaluation judgements. In our intrinsically typed
+  mechanization, this is actually part of the definition of values and big-step
+  evaluation rules.
+\end{proof}
+
+To ensure that our semantics for \ilcTau{} is complete for the typed language,
+instead of proving a small-step progress lemma or extending the semantics with
+errors, we just prove that all typed terms normalize in the standard way.
+As usual, this fails if we add fixpoints or for untyped terms. If we wanted to
+ensure type safety in such a case, we could switch to functional big-step
+semantics or definitional interpreters~\citep{Amin2017Type,Owens2016functional}.
+
+\begin{theorem}[CBV normalization]
+  \label{thm:bsos-normalization}
+For any well-typed and closed term \ensuremath{\vdash\Varid{t}\typcolon\tau}, there exist a step count \ensuremath{\Varid{n}} and value \ensuremath{\Varid{v}} such that \ensuremath{\vdash\Varid{t}\;\negthickspace\Downarrow_{\Varid{n}}\negthickspace\;\Varid{v}}.
+\end{theorem}
+\begin{proof}
+A variant of standard proofs of normalization for
+STLC~\citep[Ch.~12]{Pierce02TAPL}, adapted for big-step semantics rather than
+small-step semantics (similarly to \cref{sec:typed-proof}).
+We omit needed definitions and refer interested readers to our Agda
+mechanization.
+\end{proof}
+
+We haven't attempted to prove this lemma for arbitrary change terms (though we
+expect we could prove it by defining an erasure to the base language and
+relating evaluation results), but we prove it for the result of differentiating
+well-typed terms in \cref{thm:bsos-derive-normalization}.
+
+\section{Validating our step-indexed semantics}
+\label{sec:sanity-check-big-step}
+In this section, we show how we ensure the step counts in our
+base semantics are set correctly, and how we can relate this
+environment-based semantics to more conventional semantics, based
+on substitution and/or small-step. We only
+consider the core calculus, without primitives, constants and
+pairs. Results from this section are not needed later and we have
+proved them formally on paper but not mechanized them, as our
+goal is to use environment-based big-step semantics in our
+mechanization.
+
+To this end we relate our semantics first with
+a big-step semantics based on substitution (rather than
+environments) and then relating this alternative semantics to a
+small-step semantics. Results in this section are useful to
+understand better our semantics and as a design aide to modify
+it, but are not necessary to the proof, so we have not mechanized
+them.
+
+As a consequence, we also conjecture that our logical relations
+and proofs could be adapted to small-step semantics, along the lines
+of \citet{Ahmed2006stepindexed}. We however do
+not find that necessary. While small-step
+semantics gives meaning to non-terminating programs, and that is
+important for type soundness proofs, it does not seem useful (or
+possible) to try to incrementalize them, or to ensure we do so
+correctly.
+
+In proofs using step-indexed logical relations, the use of
+step-counts in definitions is often delicate and tricky to get
+right.
+But \citeauthor*{Acar08} provide a robust recipe to ensure
+correct step-indexing in the semantics.
+To be able to prove the fundamental property of logical relations,
+we ensure step-counts agree with the ones induced by small-step
+semantics (which counts $\beta$-reductions). Such a lemma is not
+actually needed in other proofs, but only useful as a sanity
+check.
+We also attempted using the style of step-indexing
+used by \citet{Amin2017Type}, but were unable to produce a proof. To
+the best of our knowledge all proofs using step-indexed logical
+relations, even with functional big-step semantics
+\citep{Owens2016functional}, use step-indexing that agrees with
+small-step semantics.
+
+Unlike \citeauthor*{Acar08} we use environments in our big-step
+semantics; this avoids the need to define substitution in our
+mechanized proof. Nevertheless, one can show the two semantics
+correspond to each other.
+Our environments \ensuremath{\rho} can be regarded as closed value
+substitutions, as long as we also substitute away environments in values.
+Formally,
+we write \ensuremath{\rho^*(\Varid{t})} for the ``homomorphic extension'' of
+substitution \ensuremath{\rho} to terms, which produces other terms.
+If \ensuremath{\Varid{v}} is a value using environments, we write \ensuremath{\Varid{w}\mathrel{=}\Varid{v}^*} for the
+result of translating that value to not use environments; this
+operation produces a closed neutral form \ensuremath{\Varid{w}}. Operations \ensuremath{\rho^*(\Varid{t})} and \ensuremath{\Varid{v}^*} can be defined in a mutually recursive way:
+\begin{align*}
+  \ensuremath{\rho^*(\Varid{x})} &= \ensuremath{(\rho\;(\Varid{x}))^*}\\
+  \ensuremath{\rho^*(\lambda \Varid{x}\to \Varid{t})} &= \ensuremath{\lambda \Varid{x}\to \rho^*(\Varid{t})}\\
+  \ensuremath{\rho^*(\Varid{w}_{1}\;\Varid{w}_{2})} &= \ensuremath{\rho^*(\Varid{w}_{1})\;\rho^*(\Varid{w}_{2})}\\
+  \ensuremath{\rho^*(\mathbf{let}\;\Varid{x}\mathrel{=}\Varid{t}_{1}\;\mathbf{in}\;\Varid{t}_{2})} &= \ensuremath{\mathbf{let}\;\Varid{x}\mathrel{=}\rho^*(\Varid{t}_{1})\;\mathbf{in}\;\rho^*(\Varid{t}_{2})}\\
+  \\
+  \ensuremath{(\rho\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu])^*} &= \ensuremath{\lambda \Varid{x}\to \rho^*(\Varid{t})}
+\end{align*}
+If \ensuremath{\rho\vdash\Varid{t}\Downarrow_{\Varid{n}}\Varid{v}} in our semantics,
+a standard induction over the derivation of \ensuremath{\rho\vdash\Varid{t}\Downarrow_{\Varid{n}}\Varid{v}}
+shows that \ensuremath{\rho^*(\Varid{t})\Downarrow_{\Varid{n}}\Varid{v}^*}
+%$|star rho t| \Downarrow_n |starv v|$
+in a more conventional big-step
+semantics using substitution rather than environments (also
+following \citeauthor*{Acar08}):
+
+\begin{typing}
+  \Axiom[Var']{\ensuremath{\Varid{x}\Downarrow_{\mathrm{0}}\Varid{x}}}
+
+  \Axiom[Lam']{\ensuremath{\lambda \Varid{x}\to \Varid{t}\Downarrow_{\mathrm{0}}\lambda \Varid{x}\to \Varid{t}}}
+
+  \Rule[App']{
+    \ensuremath{\Varid{t}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{w}_{2}\mskip1.5mu]\Downarrow_{\Varid{n}}\Varid{w'}}}
+  {\ensuremath{(\lambda \Varid{x}\to \Varid{t})\;\Varid{w}_{2}\Downarrow_{\mathrm{1}\mathbin{+}\Varid{n}}\Varid{w'}}}
+
+  \Rule[Let']{\ensuremath{\Varid{t}_{1}\Downarrow_{\Varid{n}_{1}}\Varid{w}_{1}}\\
+    \ensuremath{\Varid{t}_{2}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{w}_{1}\mskip1.5mu]\Downarrow_{\Varid{n}_{2}}\Varid{w}_{2}}}
+  {\ensuremath{\mathbf{let}\;\Varid{x}\mathrel{=}\Varid{t}_{1}\;\mathbf{in}\;\Varid{t}_{2}\Downarrow_{\mathrm{1}\mathbin{+}\Varid{n}_{1}\mathbin{+}\Varid{n}_{2}}\Varid{w}_{2}}}
+\end{typing}
+In this form, it is more apparent that the step indexes count
+steps of $\beta$-reduction or substitution.
+
+It's also easy to see that this big-step semantics agrees with a
+standard small-step semantics $\mapsto$ (which we omit):
+if \ensuremath{\Varid{t}\Downarrow_{\Varid{n}}\Varid{w}} then $\ensuremath{\Varid{t}} \mapsto^{n} \ensuremath{\Varid{w}}$.
+Overall, the two statements can be composed, so our original
+semantics agrees with small-step semantics:
+if \ensuremath{\rho\vdash\Varid{t}\Downarrow_{\Varid{n}}\Varid{v}} then \ensuremath{\rho^*(\Varid{t})\Downarrow_{\Varid{n}}\Varid{v}^*}
+and finally
+$\ensuremath{\rho^*(\Varid{t})} \mapsto^{n} \ensuremath{\Varid{v}^*}$.
+Hence, we can translate evaluation derivations using big-step
+semantics to derivations using small-step semantics \emph{with
+  the same step count}.
+
+However, to state and prove the fundamental property we need not
+prove that our semantics is sound relative to some other
+semantics. We simply define the appropriate logical relation for
+validity and show it agrees with a suitable definition for \ensuremath{\oplus }.
+
+Having defined our semantics, we proceed to define extensional validity.
+
+\section{Validity, syntactically (\ilcTau{}, \dilcTau)}
+\label{sec:typed-proof}
+For our typed language \ensuremath{\ilcTau}, at least as long as we do not add
+fixpoint operators, we can define logical
+relations using big-step semantics but without using
+step-indexes. The resulting relations are well-founded only
+because they use structural recursion on types.
+We present in \cref{fig:big-step-validity-ext-nosi}
+the needed definitions as a stepping stone to the
+definitions using step-indexed logical relations.
+
+Following \citet{Ahmed2006stepindexed} and \citet*{Acar08}, we
+encode extensional validity
+through two mutually recursive type-indexed families of ternary
+logical relations, \ensuremath{\mathcal{RV}\mean{\tau}} over closed values and \ensuremath{\mathcal{RC}\mean{\tau}} over terms (and environments).
+
+These relations are analogous to notions we considered earlier
+and express similar informal notions.
+\begin{itemize}
+\item With denotational semantics, we write \ensuremath{\validfromto{\tau}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}} to say
+  that change value \ensuremath{\Varid{dv}\in \Eval{\Delta \tau}} is a valid change from
+  \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}} at type \ensuremath{\tau}. With operational semantics instead we
+  write \ensuremath{(\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\tau}}, where \ensuremath{\Varid{v}_{1}}, \ensuremath{\Varid{dv}} and \ensuremath{\Varid{v}_{2}}
+  are now closed syntactic values.
+\item For terms, with denotational semantics we write \ensuremath{\validfromto{\tau}{\Eval{\Varid{t}_{1}}\;\rho_{1}}{\Eval{\Varid{dt}}\;\D\rho}{\Eval{\Varid{t}_{2}}\;\rho_{2}}} to say that \ensuremath{\Varid{dt}} is a
+  valid change from \ensuremath{\Varid{t}_{1}} and \ensuremath{\Varid{t}_{2}}, considering the respective
+  environments. With operational semantics instead we write
+  \ensuremath{(\rho_{1}\vdash\Varid{t}_{1},\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt},\rho_{2}\vdash\Varid{t}_{2})\in \mathcal{RC}\mean{\tau}}.
+\end{itemize}
+
+Since we use Church typing and only mechanize typed terms, we
+must include in all cases appropriate typing assumptions.
+
+Relation \ensuremath{\mathcal{RC}\mean{\tau}} relates tuples of environments and
+computations,
+\ensuremath{\rho_{1}\vdash\Varid{t}_{1}}, \ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt}} and \ensuremath{\rho_{2}\vdash\Varid{t}_{2}}: it holds
+if \ensuremath{\Varid{t}_{1}} evaluates in environment \ensuremath{\rho_{1}} to \ensuremath{\Varid{v}_{1}},
+and \ensuremath{\Varid{t}_{2}} evaluates in environment \ensuremath{\rho_{2}} to \ensuremath{\Varid{v}_{2}}, then
+\ensuremath{\Varid{dt}} must evaluate in environments \ensuremath{\rho} and \ensuremath{\D\rho} to a change
+value \ensuremath{\Varid{dv}}, with \ensuremath{\Varid{v}_{1},\Varid{dv},\Varid{v}_{2}} related by \ensuremath{\mathcal{RV}\mean{\tau}}.
+The environments themselves need not be related: this definition
+characterizes validity \emph{extensionally}, that is, it can relate
+\ensuremath{\Varid{t}_{1}}, \ensuremath{\Varid{dt}} and \ensuremath{\Varid{t}_{2}} that have unrelated implementations and
+unrelated environments---in fact, even unrelated typing contexts.
+This flexibility is useful to when relating closures of type
+\ensuremath{\sigma\to \tau}: two closures might be related even if they have
+close over environments of different shape. For instance,
+closures \ensuremath{\Varid{v}_{1}\mathrel{=}\EmptyEnv\;[\mskip1.5mu \lambda \Varid{x}\to \mathrm{0}\mskip1.5mu]} and \ensuremath{\Varid{v}_{2}\mathrel{=}(\Varid{y}\mathbin{:=}\mathrm{0})\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{y}\mskip1.5mu]} are
+related by a nil change such as \ensuremath{\Varid{dv}\mathrel{=}\EmptyEnv\;[\mskip1.5mu \lambda \Varid{x}\;\Varid{dx}\to \mathrm{0}\mskip1.5mu]}.
+In \cref{sec:intensional-step-indexed-validity}, we discuss instead
+an \emph{intensional} definition of validity.
+
+In particular, for function types the relation \ensuremath{\mathcal{RV}\mean{\sigma\to \tau}} relates function values \ensuremath{\Varid{f}_{1}}, \ensuremath{\Varid{df}} and \ensuremath{\Varid{f}_{2}} if they map
+\emph{related input values} (and for \ensuremath{\Varid{df}} input changes) to
+\emph{related output computations}.
+
+We also extend the relation on values to environments via \ensuremath{\mathcal{RG}\mean{\Gamma}}: environments are related if their corresponding entries
+are related values.
+\begin{figure}[h!]
+\begin{align*}
+  \ensuremath{\mathcal{RV}\mean{\mathbb{N}}} ={}& \{ \, \ensuremath{(\Varid{n}_{1},\Varid{dn},\Varid{n}_{2})\mid\Varid{n}_{1},\Varid{dn},\Varid{n}_{2}\in \mathbb{N}\text{ and }\Varid{n}_{1}\mathbin{+}\Varid{dn}\mathrel{=}\Varid{n}_{2}}\, \}\\
+  \ensuremath{\mathcal{RV}\mean{\tau_a\times\tau_b}} ={} & \{ \, \ensuremath{(\langle\Varid{v}_{a1},\Varid{v}_{b1}\rangle,\langle\Varid{dv}_a,\Varid{dv}_b\rangle,\langle\Varid{v}_{a2},\Varid{v}_{b2}\rangle)\mid\\&(\Varid{v}_{a1},\Varid{dv}_a,\Varid{v}_{a2})\in \mathcal{RV}\mean{\tau_a}\;\text{ and }\;(\Varid{v}_{b1},\Varid{dv}_b,\Varid{v}_{b2})\in \mathcal{RV}\mean{\tau_b}} \, \}\\
+  \ensuremath{\mathcal{RV}\mean{\sigma\to \tau}} ={}
+                  \ensuremath{&}\{ \, \ensuremath{(\Varid{v}_{f1},\Varid{dv}_f,\Varid{v}_{f2})\mid\\&\vDash\Varid{v}_{f1}\typcolon\sigma\to \tau\text{ and }\vDash_{\Delta}\Varid{dv}_f\typcolon\sigma\to \tau\text{ and }\vDash\Varid{v}_{f2}\typcolon\sigma\to \tau\\&\text{and}\\&\forall (\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\sigma}\hsforall \hsdot{\circ }{\mathpunct{.}}\\&\quad(\mathsf{app}\;\Varid{v}_{f1}\;\Varid{v}_{1},\mathsf{dapp}\;\Varid{dv}_f\;\Varid{v}_{1}\;\Varid{dv},\mathsf{app}\;\Varid{v}_{f2}\;\Varid{v}_{2})\in \mathcal{RC}\mean{\tau}} \, \}\\
+  \ensuremath{\mathcal{RC}\mean{\tau}} ={}&
+                  \{ \, \ensuremath{(\rho_{1}\vdash\Varid{t}_{1},\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt},\rho_{2}\vdash\Varid{t}_{2})\mid\\&(\exists \Gamma_{1}\hsforall \;\Gamma\;\Gamma_{2}\hsdot{\circ }{\mathpunct{.}}\;\Gamma_{1}\vdash\Varid{t}_{1}\typcolon\tau\text{ and }\;\Gamma\vdash_{\Delta}\Varid{dt}\typcolon\tau\text{ and }\Gamma_{2}\vdash\Varid{t}_{2}\typcolon\tau)\\&\text{and}\\&\forall \Varid{v}_{1}\hsforall \;\Varid{v}_{2}\hsdot{\circ }{\mathpunct{.}}\\&\quad(\rho_{1}\vdash\Varid{t}_{1}\Downarrow\Varid{v}_{1}\text{ and }\rho_{2}\vdash\Varid{t}_{2}\Downarrow\Varid{v}_{2})\Rightarrow\\&\quad\exists \Varid{dv}\hsforall \hsdot{\circ }{\mathpunct{.}}\;\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt}\Downarrow\Varid{dv}\text{ and }(\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\tau}} \, \}\\
+                  \\
+  \ensuremath{\mathcal{RG}\mean{\EmptyContext}} ={} & \{ \, \ensuremath{(\EmptyEnv,\EmptyEnv,\EmptyEnv)} \, \} \\
+  \ensuremath{\mathcal{RG}\mean{\Gamma,\Varid{x}\typcolon\tau}} ={} &
+                                  \{ \, \ensuremath{((\rho_{1},\Varid{x}\mathbin{:=}\Varid{v}_{1}),(\D\rho,\Varid{dx}\mathbin{:=}\Varid{dv}),(\rho_{2},\Varid{x}\mathbin{:=}\Varid{v}_{2}))\mid\\&(\rho_{1},\D\rho,\rho_{2})\in \mathcal{RG}\mean{\Gamma}\text{ and }(\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\tau}} \, \} \\
+  \ensuremath{\validfromtosyn{\Gamma}{\tau}{\Varid{t}_{1}}{\Varid{dt}}{\Varid{t}_{2}}} ={}&
+                                      \ensuremath{\forall (\rho_{1},\D\rho,\rho_{2})\in \mathcal{RG}\mean{\Gamma}\hsforall \hsdot{\circ }{\mathpunct{.}}\\&(\rho_{1}\vdash\Varid{t}_{1},\rho_{1}\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt},\rho_{2}\vdash\Varid{t}_{2})\in \mathcal{RC}\mean{\tau}}
+\end{align*}
+\caption{Defining extensional validity via logical relations and big-step semantics.}
+\label{fig:big-step-validity-ext-nosi}
+\end{figure}
+
+Given these definitions, one can prove the fundamental property.
+\begin{theorem}[Fundamental property: correctness of \ensuremath{\Derive{\text{\textendash}}}]
+  \label{thm:fund-lemma-derive-correct-types-nosi}
+  For every well-typed term \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} we have that
+  \ensuremath{\validfromtosyn{\Gamma}{\tau}{\Varid{t}}{\Derive{\Varid{t}}}{\Varid{t}}}.
+\end{theorem}
+\begin{proof}[Proof sketch]
+  By induction on the structure on terms, using ideas similar to
+  \cref{thm:derive-correct}.
+\end{proof}
+
+It also follows that \ensuremath{\Derive{\Varid{t}}} normalizes:
+
+\begin{corollary}[\ensuremath{\Derive{\text{\textendash}}} normalizes to a nil change]
+  \label{thm:bsos-derive-normalization}
+For any well-typed and closed term \ensuremath{\vdash\Varid{t}\typcolon\tau}, there exist value \ensuremath{\Varid{v}} and
+change value \ensuremath{\Varid{dv}} such that \ensuremath{\vdash\Varid{t}\;\negthickspace\Downarrow\negthickspace\;\Varid{v}}, \ensuremath{\vdash_{\Delta}\Derive{\Varid{t}}\;\negthickspace\Downarrow\negthickspace\;\Varid{dv}} and \ensuremath{(\Varid{v},\Varid{dv},\Varid{v})\in \mathcal{RV}\mean{\tau}}.
+\end{corollary}
+\begin{proof}
+A corollary of the fundamental property and of the normalization theorem
+(\cref{thm:bsos-normalization}): since \ensuremath{\Varid{t}} is well-typed and closed it
+normalizes to a value \ensuremath{\Varid{v}} for some step count (\ensuremath{\vdash\Varid{t}\;\negthickspace\Downarrow\negthickspace\;\Varid{v}}).
+The empty environment change is valid: \ensuremath{(\EmptyEnv,\EmptyEnv,\EmptyEnv)\in \mathcal{RG}\mean{\EmptyContext}}, so from the fundamental property we get that \ensuremath{(\vdash\Varid{t},\vdash_{\Delta}\Derive{\Varid{t}},\vdash\Varid{t})\in \mathcal{RC}\mean{\tau}}. From the definition of \ensuremath{\mathcal{RC}\mean{\tau}} and
+\ensuremath{\vdash\Varid{t}\;\negthickspace\Downarrow\negthickspace\;\Varid{v}} it follows that there exists \ensuremath{\Varid{dv}} such that \ensuremath{\vdash_{\Delta}\Derive{\Varid{t}}\;\negthickspace\Downarrow\negthickspace\;\Varid{dv}} and \ensuremath{(\Varid{v},\Varid{dv},\Varid{v})\in \mathcal{RV}\mean{\tau}}.
+\end{proof}
+\begin{remark}
+  Compared to prior work,
+  these relations are unusual for two reasons. First, instead of
+  just relating two executions of a term, we relate two
+  executions of a term with an execution of a change term.
+  Second, most such logical relations (including
+  \citet{Ahmed2006stepindexed}'s one, but except \citet{Acar08}'s
+  one) define a logical relation (sometimes called \emph{logical
+    equivalence}) that characterizes contextual equivalence, while we
+  don't.
+
+  Consider a logical equivalence defined through sets \ensuremath{\mathcal{RC}\mean{\tau}} and \ensuremath{\mathcal{RV}\mean{\tau}}.
+  If \ensuremath{(\Varid{t}_{1},\Varid{t}_{2})\in \mathcal{RC}\mean{\tau}} holds and \ensuremath{\Varid{t}_{1}} terminates
+  (with result \ensuremath{\Varid{v}_{1}}),
+  then \ensuremath{\Varid{t}_{2}} must terminate as well (with result \ensuremath{\Varid{v}_{2}}), and their
+  results \ensuremath{\Varid{v}_{1}} and \ensuremath{\Varid{v}_{2}} must in turn be logically equivalent
+  (\ensuremath{\Varid{v}_{1},\Varid{v}_{2}\in \mathcal{RV}\mean{\tau}}).
+  And at base types like \ensuremath{\mathbb{N}}, \ensuremath{(\Varid{v}_{1},\Varid{v}_{2})\in \mathcal{RV}\mean{\mathbb{N}}}
+  means that \ensuremath{\Varid{v}_{1}\mathrel{=}\Varid{v}_{2}}.
+
+  Here. instead, the fundamental property relates two executions
+  of a term on \emph{different} inputs, which might take
+  different paths during execution. In a suitably extended language,
+  we could even write term \ensuremath{\Varid{t}\mathrel{=}\lambda \Varid{x}\to \mathbf{if}\;\Varid{x}\mathrel{=}\mathrm{0}\;\mathbf{then}\;\mathrm{1}\;\mathbf{else}\;\Varid{loop}}
+  and run it on inputs \ensuremath{\Varid{v}_{1}\mathrel{=}\mathrm{0}} and \ensuremath{\Varid{v}_{2}\mathrel{=}\mathrm{1}}: these inputs are
+  related by change \ensuremath{\Varid{dv}\mathrel{=}\mathrm{1}}, but \ensuremath{\Varid{t}} will converge on \ensuremath{\Varid{v}_{1}} and
+  diverge on \ensuremath{\Varid{v}_{2}}. We must use a semantics that allow such
+  behavioral difference.
+  Hence, at base type \ensuremath{\mathbb{N}}, \ensuremath{(\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\mathbb{N}}}
+  means just that \ensuremath{\Varid{dv}} is a change from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}}, hence that
+  \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}} is equivalent to \ensuremath{\Varid{v}_{2}} because \ensuremath{\oplus } agrees
+  with extensional validity in this context as well. And if \ensuremath{(\rho_{1}\vdash\Varid{t}_{1},\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt},\rho_{2}\vdash\Varid{t}_{2})\in \mathcal{RC}\mean{\tau}}, term \ensuremath{\Varid{t}_{1}} might
+  converge while \ensuremath{\Varid{t}_{2}} diverges: only if both converge must their
+  results be related.
+
+  These subtleties become more relevant in the presence of
+  general recursion and non-terminating programs, as in
+  untyped language \ensuremath{\ilcUntau}, or in a hypothetical extension of
+  \ensuremath{\ilcTau} with fixpoint operators.
+\end{remark}
+
+\section{Step-indexed extensional validity (\ilcTau{}, \dilcTau)}
+\label{sec:silr-typed-proof}
+Step-indexed logical relations define approximations to a
+relation, to enable dealing with non-terminating programs.
+Logical relations relate the behavior of multiple terms during
+evaluation; with step-indexed logical relations, we can take a
+bound $k$ and restrict attention to evaluations that take at most
+$k$ steps overall, as made precise by the definitions.
+Crucially, entities related at step count $k$ are also
+related at any step count $j < k$. Conversely, the higher the step count, the
+more precise the defined relation. In the limit, if entities are related at all
+step counts, we simply say they are related.
+This construction of limits resembles various other approaches to constructing
+relations by approximations, but the entire framework remains elementary. In
+particular, the relations are defined simply because they are well-founded (that
+is, only defined by induction on smaller numbers).
+Proofs of logical relation statement need to deal with step-indexes, but when
+they work (as here) they are otherwise not much harder than other syntactic or
+logical relation proofs.
+
+For instance, if we define equivalence as a step-indexed logical relation, we
+can say that two terms are equivalent for $k$ or fewer steps, even if they might
+have different behavior with more steps available. In our case, we can say that
+a change appears valid at step count $k$ if it behaves like a valid change in
+``observations'' using at most $k$ steps.
+
+Like before, we define a relation on values and one on computations as sets
+\ensuremath{\mathcal{RV}\mean{\tau}} and \ensuremath{\mathcal{RC}\mean{\tau}}.
+Instead of indexing the sets with the step-count, we add the step counts to the
+tuples they contain: so for instance \ensuremath{(\Varid{k},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\tau}} means
+that value \ensuremath{\Varid{v}_{1}}, change value \ensuremath{\Varid{dv}} and value \ensuremath{\Varid{v}_{2}} are related at step count $k$
+(or $k$-related), and similarly for \ensuremath{\mathcal{RC}\mean{\tau}}.
+
+The details or the relation definitions are
+subtle, but follow closely the use of step-indexing by
+\citet*{Acar08}. We add mention of changes, and must decide how to use
+step-indexing for them.
+
+\paragraph{How step-indexing proceeds}
+We explain gradually in words how the definition proceeds.
+
+First, we say $k$-related function values take $j$-related arguments to $j$-related
+results for all $j$ less than $k$. That is reflected in the definition for
+\ensuremath{\mathcal{RV}\mean{\sigma\to \tau}}: it contains \ensuremath{(\Varid{k},\Varid{v}_{f1},\Varid{dv}_f,\Varid{v}_{f2})} if, for all
+\ensuremath{(\Varid{j},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\sigma})} with \ensuremath{\Varid{j}\mathbin{<}\Varid{k}}, the result of
+applications are also \ensuremath{\Varid{j}}-related.
+However, the result of application are not syntactic applications encoding \ensuremath{\Varid{v}_{f1}\;\Varid{v}_{1}}\footnote{That happens to be illegal syntax in this presentation, but can be
+encoded for instance as \ensuremath{\Varid{f}\mathbin{:=}\Varid{v}_{f1},\Varid{x}\mathbin{:=}\Varid{v}_{1}\vdash(\Varid{f}\;\Varid{x})}; and the problem is
+more general.}.
+It is instead necessary to use \ensuremath{\mathsf{app}\;\Varid{v}_{f1}\;\Varid{v}_{1}}, the result of one step of
+reduction. The two definitions are not equivalent because a syntactic
+application would take one extra step to reduce.
+
+The definition for computations takes longer to describe. Roughly speaking, computations are $k$-related if, after $j$
+steps of evaluations (with $j < k$), they produce values related at $k - j$
+steps; in particular, if the computations happen to be neutral forms and
+evaluate in zero steps, they're $k$-related as computations if the values they
+produce are $k$-related.
+In fact, the rule for evaluation has a wrinkle.
+Formally, instead of saying that computations \ensuremath{(\rho_{1}\vdash\Varid{t}_{1},\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt},\rho_{2}\vdash\Varid{t}_{2})} are $k$-related, we say that \ensuremath{(\Varid{k},\rho_{1}\vdash\Varid{t}_{1},\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt},\rho_{2}\vdash\Varid{t}_{2})\in \mathcal{RC}\mean{\tau}}. We do not require
+all three computations to take $j$ steps. Instead, if the first computation
+\ensuremath{\rho_{1}\vdash\Varid{t}_{1}} evaluates to a value in $j < k$ steps, and the second
+computation \ensuremath{\rho_{2}\vdash\Varid{t}_{2}} evaluates to a value in any number of steps,
+\emph{then} the change computation \ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt}} must also terminate to
+a change value \ensuremath{\Varid{dv}} (in an unspecified number of steps), and the resulting
+values must be related at step-count $k-j$ (that is,
+\ensuremath{(\Varid{k}\mathbin{-}\Varid{j},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\tau}}).
+
+What is new in the above definition is the addition of changes, and the choice
+to allow change term \ensuremath{\Varid{dt}} to evaluate to \ensuremath{\Varid{dv}} in an unbounded number of steps
+(like \ensuremath{\Varid{t}_{2}}), as no bound is necessary for our proofs.
+This is why the semantics we defined for change terms has no step counts.
+
+Well-foundedness of step-indexed logical relations has a small wrinkle, because
+\ensuremath{\Varid{k}\mathbin{-}\Varid{j}} need not be strictly less than \ensuremath{\Varid{k}}. But we define the two relations in a
+mutually recursive way, and the pair of relations at step-count \ensuremath{\Varid{k}} is defined
+in terms of the pair of relation at smaller step-count. All other recursive uses
+of relations are at smaller step-indexes.
+
+% Instead of observing the behavior of terms with an unbounded
+% number of computation steps, as we did before, we observe the
+% behavior of terms having a bounded
+% we give a bound $k$, and observe
+% behavior with at most $k$
+
+In this section we index the relation by both types and step-indexes,
+since this is the one we use in our mechanized proof. This
+relation is defined by structural induction on types.
+We show this definition in \cref{fig:big-step-validity-ext-si}.
+Instead, in \cref{sec:silr-untyped-proof} we consider
+untyped $\lambda$-calculus and drop types.
+The resulting definition is very similar, but is defined by
+well-founded recursion on step-indexes.
+
+\begin{figure}[h!]
+\begin{align*}
+  \ensuremath{\mathcal{RV}\mean{\mathbb{N}}} ={}& \{ \, \ensuremath{(\Varid{k},\Varid{n}_{1},\Varid{dn},\Varid{n}_{2})\mid\Varid{n}_{1},\Varid{dn},\Varid{n}_{2}\in \mathbb{N}\text{ and }\Varid{n}_{1}\mathbin{+}\Varid{dn}\mathrel{=}\Varid{n}_{2}} \, \}\\
+  \ensuremath{\mathcal{RV}\mean{\tau_a\times\tau_b}} ={} & \{ \, \ensuremath{(\Varid{k},\langle\Varid{v}_{a1},\Varid{v}_{b1}\rangle,\langle\Varid{dv}_a,\Varid{dv}_b\rangle,\langle\Varid{v}_{a2},\Varid{v}_{b2}\rangle)\mid\\&(\Varid{k},\Varid{v}_{a1},\Varid{dv}_a,\Varid{v}_{a2})\in \mathcal{RV}\mean{\tau_a}\;\text{ and }\;(\Varid{k},\Varid{v}_{b1},\Varid{dv}_b,\Varid{v}_{b2})\in \mathcal{RV}\mean{\tau_b}} \, \}\\
+  \ensuremath{\mathcal{RV}\mean{\sigma\to \tau}} ={}
+                  \ensuremath{&}\{ \, \ensuremath{(\Varid{k},\Varid{v}_{f1},\Varid{dv}_f,\Varid{v}_{f2})\mid\\&\vDash\Varid{v}_{f1}\typcolon\sigma\to \tau\text{ and }\vDash_{\Delta}\Varid{dv}_f\typcolon\sigma\to \tau\text{ and }\vDash\Varid{v}_{f2}\typcolon\sigma\to \tau\\&\text{and}\\&\forall (\Varid{j},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\sigma}\hsforall \hsdot{\circ }{\mathpunct{.}}\;\Varid{j}\mathbin{<}\Varid{k}\Rightarrow\\&\quad(\Varid{j},\mathsf{app}\;\Varid{v}_{f1}\;\Varid{v}_{1},\mathsf{dapp}\;\Varid{dv}_f\;\Varid{v}_{1}\;\Varid{dv},\mathsf{app}\;\Varid{v}_{f2}\;\Varid{v}_{2})\in \mathcal{RC}\mean{\tau}} \, \}\\
+  \ensuremath{\mathcal{RC}\mean{\tau}} ={}&
+                  \{ \, \ensuremath{(\Varid{k},\rho_{1}\vdash\Varid{t}_{1},\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt},\rho_{2}\vdash\Varid{t}_{2})\mid\\&(\exists \Gamma_{1}\hsforall \;\Gamma\;\Gamma_{2}\hsdot{\circ }{\mathpunct{.}}\;\Gamma_{1}\vdash\Varid{t}_{1}\typcolon\tau\text{ and }\;\Gamma\vdash_{\Delta}\Varid{dt}\typcolon\tau\text{ and }\Gamma_{2}\vdash\Varid{t}_{2}\typcolon\tau)\\&\text{and}\\&\forall \Varid{j}\hsforall \;\Varid{v}_{1}\;\Varid{v}_{2}\hsdot{\circ }{\mathpunct{.}}\\&\quad(\Varid{j}\mathbin{<}\Varid{k}\text{ and }\rho_{1}\vdash\Varid{t}_{1}\Downarrow_{\Varid{j}}\Varid{v}_{1}\text{ and }\rho_{2}\vdash\Varid{t}_{2}\Downarrow\Varid{v}_{2})\Rightarrow\\&\quad\exists \Varid{dv}\hsforall \hsdot{\circ }{\mathpunct{.}}\;\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt}\Downarrow\Varid{dv}\text{ and }(\Varid{k}\mathbin{-}\Varid{j},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\tau}} \, \}\\
+                  \\
+  \ensuremath{\mathcal{RG}\mean{\EmptyContext}} ={} & \{ \, \ensuremath{(\Varid{k},\EmptyEnv,\EmptyEnv,\EmptyEnv)} \, \} \\
+  \ensuremath{\mathcal{RG}\mean{\Gamma,\Varid{x}\typcolon\tau}} ={} &
+                                  \{ \, \ensuremath{(\Varid{k},(\rho_{1},\Varid{x}\mathbin{:=}\Varid{v}_{1}),(\D\rho,\Varid{dx}\mathbin{:=}\Varid{dv}),(\rho_{2},\Varid{x}\mathbin{:=}\Varid{v}_{2}))\mid\\&(\Varid{k},\rho_{1},\D\rho,\rho_{2})\in \mathcal{RG}\mean{\Gamma}\text{ and }(\Varid{k},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\tau}} \, \} \\
+  \ensuremath{\validfromtosyn{\Gamma}{\tau}{\Varid{t}_{1}}{\Varid{dt}}{\Varid{t}_{2}}} ={}&
+                                      \ensuremath{\forall (\Varid{k},\rho_{1},\D\rho,\rho_{2})\in \mathcal{RG}\mean{\Gamma}\hsforall \hsdot{\circ }{\mathpunct{.}}\\&(\Varid{k},\rho_{1}\vdash\Varid{t}_{1},\rho_{1}\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt},\rho_{2}\vdash\Varid{t}_{2})\in \mathcal{RC}\mean{\tau}}
+\end{align*}
+\caption{Defining extensional validity via \emph{step-indexed} logical relations and big-step semantics.}
+\label{fig:big-step-validity-ext-si}
+\end{figure}
+
+Again, since we use Church typing and only mechanize typed terms, we
+must include in all cases appropriate typing assumptions. This
+choice does not match \citet{Ahmed2006stepindexed} but is
+one alternative she describes as equivalent. Indeed, while
+adapting the proof the extra typing assumptions and proof
+obligations were not a problem.
+
+At this moment, we do not require that related closures contain
+related environments: again, we are defining \emph{extensional}
+validity.
+
+Given these definitions, we can prove that all relations are
+\emph{downward-closed}: that is, relations at step-count $n$
+imply relations at step-count $k < n$.
+\begin{lemma}[Extensional validity is downward-closed]
+  \label{lem:validity-typed-downward-closed}
+  Assume $k \le n$.
+  \begin{enumerate}
+  \item If \ensuremath{(\Varid{n},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\tau}} then \ensuremath{(\Varid{k},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\tau}}.
+  \item If \ensuremath{(\Varid{n},\rho_{1}\vdash\Varid{t}_{1},\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt},\rho_{2}\vdash\Varid{t}_{2})\in \mathcal{RC}\mean{\tau}} then
+    \[\ensuremath{(\Varid{k},\rho_{1}\vdash\Varid{t}_{1},\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt},\rho_{2}\vdash\Varid{t}_{2})\in \mathcal{RC}\mean{\tau}}.\]
+  \item If \ensuremath{(\Varid{n},\rho_{1},\D\rho,\rho_{2})\in \mathcal{RG}\mean{\Gamma}} then
+    \ensuremath{(\Varid{k},\rho_{1},\D\rho,\rho_{2})\in \mathcal{RG}\mean{\Gamma}}.
+  \end{enumerate}
+\end{lemma}
+\begin{proof}[Proof sketch]
+  For \ensuremath{\mathcal{RV}\mean{\tau}}, case split on \ensuremath{\tau} and expand hypothesis and
+thesis. If \ensuremath{\tau\mathrel{=}\mathbb{N}} they coincide. For \ensuremath{\mathcal{RV}\mean{\sigma\to \tau}}, parts of the hypothesis and thesis match.
+For some relation \ensuremath{\Conid{P}},
+the rest of the hypothesis has shape \ensuremath{\forall \Varid{j}\hsforall \mathbin{<}\Varid{n}\hsdot{\circ }{\mathpunct{.}}\Conid{P}\;(\Varid{j},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})}
+and the rest of the thesis has shape \ensuremath{\forall \Varid{j}\hsforall \mathbin{<}\Varid{k}\hsdot{\circ }{\mathpunct{.}}\Conid{P}\;(\Varid{j},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})}. Assume $j < k$. We must prove \ensuremath{\Conid{P}\;(\Varid{j},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})}, but since
+$j < k \le n$ we can just apply the hypothesis.
+
+The proof for \ensuremath{\mathcal{RC}\mean{\tau}} follows the same idea as
+\ensuremath{\mathcal{RV}\mean{\sigma\to \tau}}.
+
+For \ensuremath{\mathcal{RG}\mean{\Gamma}}, apply the theorem for \ensuremath{\mathcal{RV}\mean{\tau}} to each
+environments entry \ensuremath{\Varid{x}\typcolon\tau}.
+\end{proof}
+
+At this point, we prove the fundamental property.
+\begin{theorem}[Fundamental property: correctness of \ensuremath{\Derive{\text{\textendash}}}]
+  \label{thm:fund-lemma-derive-correct-types-si}
+  For every well-typed term \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} we have that
+  \ensuremath{\validfromtosyn{\Gamma}{\tau}{\Varid{t}}{\Derive{\Varid{t}}}{\Varid{t}}}.
+\end{theorem}
+\begin{proof}[Proof sketch]
+  By structural induction on typing derivations, using ideas
+similar to \cref{thm:fund-lemma-derive-correct-types-nosi} and
+relying on \cref{lem:validity-typed-downward-closed} to reduce
+step counts where needed.
+\end{proof}
+
+\section{Step-indexed intensional validity}
+\label{sec:intensional-step-indexed-validity}
+
+Up to now, we have defined when a function change is valid
+\emph{extensionally}, that is, purely based on its behavior, as
+we have done earlier when using denotational semantics.
+We conjecture that with these one can define \ensuremath{\oplus } and prove
+it agrees with extensional validity. However, we have not done
+so.
+
+Instead, we modify definitions in \cref{sec:silr-typed-proof} to
+define validity \emph{intensionally}.
+To ensure that \ensuremath{\Varid{f}_{1}\oplus \Varid{df}\mathrel{=}\Varid{f}_{2}} (for a suitable \ensuremath{\oplus }) we
+choose to require that closures \ensuremath{\Varid{f}_{1}}, \ensuremath{\Varid{df}} and \ensuremath{\Varid{f}_{2}} close over
+environments of matching shapes. This change does not complicate
+the proof of the fundamental lemma: all the additional proof obligations
+are automatically satisfied.
+
+However, it can still be necessary to replace a function value
+with a different one. Hence we extend our definition of values to
+allow replacement values. Closure replacements produce
+replacements as results, so we make replacement values
+into valid changes for all types. We must also extend the change
+semantics, both to allow evaluating closure replacements, and to
+allow derivatives of primitive to handle replacement values.
+
+We have not added replacement values to the syntax, so currently
+they can just be added to change environments, but we don't
+expect adding them to the syntax would cause any significant trouble.
+
+We present the changes described above for the typed semantics. We have
+successfully mechanized this variant of the semantics as well.
+Adding replacement values \ensuremath{\mathbin{!}\Varid{v}} requires extending the definition
+of change values, evaluation and validity.
+We add replacement values to change values:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{dv}\mathbin{:=}\ldots\mid \mathbin{!}\Varid{v}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Derivatives of primitives, when applied to replacement changes,
+must recompute their output. The required additional equations
+are not interesting, but we show them anyway for completeness:
+
+  %devalPrim add (pair n1 n2) (pair dn1 dn2)  = dn1 + dn2
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{45}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathcal{P}_{\Delta}\mean{\mathbf{succ}}\Varid{n}_{1}\;(\mathbin{!}\Varid{n}_{2}){}\<[45]%
+\>[45]{}\mathrel{=}\mathbin{!}(\Varid{n}_{2}\mathbin{+}\mathrm{1}){}\<[E]%
+\\
+\>[3]{}\mathcal{P}_{\Delta}\mean{\mathbf{add}}\langle\text{\textunderscore},\text{\textunderscore}\rangle\;(\mathbin{!}\langle\Varid{m}_{2},\Varid{n}_{2}\rangle){}\<[45]%
+\>[45]{}\mathrel{=}\mathbin{!}(\Varid{m}_{2}\mathbin{+}\Varid{n}_{2}){}\<[E]%
+\\
+\>[3]{}\mathcal{P}_{\Delta}\mean{\mathbf{add}}\Varid{p}_{1}\;(\Varid{dp}\mathrel{@}\langle\Varid{dm},\mathbin{!}\Varid{n}_{2}\rangle){}\<[45]%
+\>[45]{}\mathrel{=}\mathbin{!}(\mathcal{P}\mean{\mathbf{add}}(\Varid{p}_{1}\oplus \Varid{dp})){}\<[E]%
+\\
+\>[3]{}\mathcal{P}_{\Delta}\mean{\mathbf{add}}\Varid{p}_{1}\;(\Varid{dp}\mathrel{@}\langle\mathbin{!}\Varid{m},\Varid{dv}\rangle){}\<[45]%
+\>[45]{}\mathrel{=}\mathbin{!}(\mathcal{P}\mean{\mathbf{add}}(\Varid{p}_{1}\oplus \Varid{dp})){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+Evaluation requires a new rule, \textsc{E-BangApp}, to evaluate
+change applications where the function change evaluates to a
+replacement change:
+
+{\footnotesize
+\begin{typing}
+   \Rule[E-BangApp]{%
+    %|dbseval dwf rho drho (!(rho'[\x -> t]))|\\
+    \ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dw}_f\Downarrow\mathbin{!}\Varid{v}_f}\\
+    \ensuremath{\rho\vdash\Varid{w}_a\Downarrow\Varid{v}_a}\\
+    \ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dw}_a\Downarrow\Varid{dv}_a}\\
+    %|bseval  t  (rho', x := va `oplus` dva) v|\\
+    \ensuremath{\mathsf{app}\;\Varid{v}_f\;(\Varid{v}_a\oplus \Varid{dv}_a)\;\negthickspace\Downarrow\negthickspace\;\Varid{v}}}
+  {\ensuremath{\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dw}_f\;\Varid{w}_a\;\Varid{dw}_a\Downarrow\mathbin{!}\Varid{v}}}
+\end{typing}
+}
+  %  \Rule[E-BangApp]{%
+  %   |dbseval dw1 rho drho (!(rho'[\x -> t]))|\\
+  %   |bseval  w2  rho v2|\\
+  %   |dbseval dw2 rho drho dv2|\\
+  %   |bseval t  (rho', x := v2 `oplus` dv2) v|}
+  % {|dbseval (dw1 w2 dw2) rho drho (!v)|}
+
+Evaluation rule \textsc{E-BangApp} requires defining \ensuremath{\oplus } on
+syntactic values. We define it \emph{intensionally}:
+\begin{definition}[Update operator \ensuremath{\oplus }]
+  Operator \ensuremath{\oplus } is defined on values by the following
+  equations, where \ensuremath{\mathsf{match\Gamma}\;\rho\;\D\rho} (whose definition we omit) tests if
+  \ensuremath{\rho} and \ensuremath{\D\rho} are environments for the same typing context \ensuremath{\Gamma}.
+  \begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{7}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{26}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{40}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[5]{}\Varid{v}_{1}\oplus \mathbin{!}\Varid{v}_{2}\mathrel{=}\Varid{v}_{2}{}\<[E]%
+\\
+\>[5]{}\rho\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu]\oplus \D\rho\;[\mskip1.5mu \lambda \Varid{x}\;\Varid{dx}\to \Varid{dt}\mskip1.5mu]\mathrel{=}{}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}\mathbf{if}\;\mathsf{match\Gamma}\;\rho\;{}\<[26]%
+\>[26]{}\D\rho\;\mathbf{then}{}\<[E]%
+\\
+\>[7]{}\hsindent{2}{}\<[9]%
+\>[9]{}\mbox{\onelinecomment  If \ensuremath{\rho} and \ensuremath{\D\rho} are environments for the same typing context \ensuremath{\Gamma}:}{}\<[E]%
+\\
+\>[7]{}\hsindent{2}{}\<[9]%
+\>[9]{}(\rho\oplus \D\rho)\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu]{}\<[E]%
+\\
+\>[5]{}\hsindent{2}{}\<[7]%
+\>[7]{}\mathbf{else}{}\<[E]%
+\\
+\>[7]{}\hsindent{2}{}\<[9]%
+\>[9]{}\mbox{\onelinecomment  otherwise, the input change is invalid, so just give}{}\<[E]%
+\\
+\>[7]{}\hsindent{2}{}\<[9]%
+\>[9]{}\mbox{\onelinecomment  any type-correct result:}{}\<[E]%
+\\
+\>[7]{}\hsindent{2}{}\<[9]%
+\>[9]{}\rho\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu]{}\<[E]%
+\\
+\>[5]{}\Varid{n}\oplus \Varid{dn}{}\<[40]%
+\>[40]{}\mathrel{=}\Varid{n}\mathbin{+}\Varid{dn}{}\<[E]%
+\\
+\>[5]{}\langle\Varid{v}_{a1},\Varid{v}_{b1}\rangle\oplus \langle\Varid{dv}_a,\Varid{dv}_b\rangle{}\<[40]%
+\>[40]{}\mathrel{=}\langle\Varid{v}_{a1}\oplus \Varid{dv}_a,\Varid{v}_{b1}\oplus \Varid{dv}_b\rangle{}\<[E]%
+\\
+\>[5]{}\mbox{\onelinecomment  An additional equation is needed in the untyped language,}{}\<[E]%
+\\
+\>[5]{}\mbox{\onelinecomment  not in the typed one. This equation is for invalid}{}\<[E]%
+\\
+\>[5]{}\mbox{\onelinecomment  changes, so we can just return \ensuremath{\Varid{v}_{1}}:}{}\<[E]%
+\\
+\>[5]{}\Varid{v}_{1}\oplus \Varid{dv}\mathrel{=}\Varid{v}_{1}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+  We define \ensuremath{\oplus } on environments for matching contexts
+  to combine values and changes pointwise:
+  \begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[5]{}(\Varid{x}_{1}\mathbin{:=}\Varid{v}_{1},\ldots,\Varid{x}_n\mathbin{:=}v_n)\oplus (\Varid{dx}_{1}\mathbin{:=}\Varid{dv}_{1},\ldots,\Varid{dx}_n\mathbin{:=}\Varid{dv}_n)\mathrel{=}{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}(\Varid{x}_{1}\mathbin{:=}\Varid{v}_{1}\oplus \Varid{dv}_{1},\ldots,\Varid{x}_n\mathbin{:=}v_n\oplus \Varid{dv}_n){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+%
+\end{definition}
+The definition of update for closures can only update them in few cases, but
+this is not a problem: as we show in a moment, we restrict validity to the
+closure changes for which it is correct.
+
+We ensure replacement values are accepted as valid for all types,
+by requiring the following equation holds (hence, modifying all
+equations for \ensuremath{\mathcal{RV}\mean{\text{\textendash}}}; we omit details):
+\begin{align}
+  \label{eq:val-replacement}
+  \ensuremath{\mathcal{RV}\mean{\tau}} \supseteq {}& \{ \, \ensuremath{(\Varid{k},\Varid{v}_{1},\mathbin{!}\Varid{v}_{2},\Varid{v}_{2})\mid\;\vDash\Varid{v}_{1}\typcolon\tau\;\text{ and }\;\vDash\Varid{v}_{2}\typcolon\tau} \, \}
+\end{align}
+where we write \ensuremath{\vDash\Varid{v}\typcolon\tau} to state that value \ensuremath{\Varid{v}} has type
+\ensuremath{\tau}; we omit the unsurprising rules for this judgement.
+
+To restrict valid closure changes,
+\ensuremath{\mathcal{RV}\mean{\sigma\to \tau}} now requires that related elements
+satisfy predicate \ensuremath{\Varid{matchImpl}\;\Varid{v}_{f1}\;\Varid{dv}_f\;\Varid{v}_{f2}}, defined
+by the following equations:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\mathsf{matchImpl}\;{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}(\rho_{1}\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu])\;{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}(\rho_{1}\mathrel{\filleddiamond}\D\rho\;[\mskip1.5mu \lambda \Varid{x}\;\Varid{dx}\to \Derive{\Varid{t}}\mskip1.5mu])\;{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}((\rho_{1}\oplus \D\rho)\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu])\mathrel{=}\Conid{True}{}\<[E]%
+\\
+\>[3]{}\mathsf{matchImpl}\;\text{\textunderscore}\;\text{\textunderscore}\;\text{\textunderscore}\mathrel{=}\Conid{False}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+In other words, validity \ensuremath{(\Varid{k},\Varid{v}_{f1},\Varid{dv}_f,\Varid{v}_{f2})\in \mathcal{RV}\mean{\sigma\to \tau}} now requires
+via \ensuremath{\mathsf{matchImpl}} that the base closure environment \ensuremath{\rho_{1}} and the base environment of the
+closure change \ensuremath{\Varid{dv}_f} coincide, that \ensuremath{\rho_{2}\mathrel{=}\rho_{1}\oplus \D\rho},
+and that \ensuremath{\Varid{v}_{f1}} and \ensuremath{\Varid{v}_{f2}} have \ensuremath{\lambda \Varid{x}\to \Varid{t}} as body while \ensuremath{\Varid{dv}_f} has body \ensuremath{\lambda \Varid{x}\;\Varid{dx}\to \Derive{\Varid{t}}}.
+
+To define intensional validity for function changes, \ensuremath{\mathcal{RV}\mean{\sigma\to \tau}}
+must use \ensuremath{\mathsf{matchImpl}} and explicitly support replacement closures to satisfy
+\cref{eq:val-replacement}. Its definition is as follows:
+\begin{align*}
+  \ensuremath{\mathcal{RV}\mean{\sigma\to \tau}} ={}
+                  \ensuremath{&}\{ \, \ensuremath{(\Varid{k},\Varid{v}_{f1},\Varid{dv}_f,\Varid{v}_{f2})\mid\\&\vDash\Varid{v}_{f1}\typcolon\sigma\to \tau\text{ and }\vDash_{\Delta}\Varid{dv}_f\typcolon\sigma\to \tau\text{ and }\vDash\Varid{v}_{f2}\typcolon\sigma\to \tau\\&\text{and}\\&\mathsf{matchImpl}\;\Varid{v}_{f1}\;\Varid{dv}_f\;\Varid{v}_{f2}\\&\text{and}\\&\forall (\Varid{j},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\sigma}\hsforall \hsdot{\circ }{\mathpunct{.}}\;\Varid{j}\mathbin{<}\Varid{k}\Rightarrow\\&\quad(\Varid{j},\mathsf{app}\;\Varid{v}_{f1}\;\Varid{v}_{1},\mathsf{dapp}\;\Varid{dv}_f\;\Varid{v}_{1}\;\Varid{dv},\mathsf{app}\;\Varid{v}_{f2}\;\Varid{v}_{2})\in \mathcal{RC}\mean{\tau}} \, \}\ensuremath{\;\cup\\&} \{ \, \ensuremath{(\Varid{k},\Varid{v}_{f1},\mathbin{!}\Varid{v}_{f2},\Varid{v}_{f2})\mid\;\vDash\Varid{v}_{f1}\typcolon\sigma\to \tau\;\text{ and }\;\vDash\Varid{v}_{f2}\typcolon\sigma\to \tau} \, \}
+\end{align*}
+Definitions of \ensuremath{\mathcal{RV}\mean{\text{\textendash}}} for other types can be similarly updated to support
+replacement changes and satisfy \cref{eq:val-replacement}.
+
+Using these updated definitions, we can again prove the
+fundamental property, with the same statement as
+\cref{thm:fund-lemma-derive-correct-types-si}. Furthermore, we now
+prove that \ensuremath{\oplus } agrees with validity.
+\begin{theorem}[Fundamental property: correctness of \ensuremath{\Derive{\text{\textendash}}}]
+  \label{thm:fund-lemma-derive-correct-types-si-intensional}
+  For every well-typed term \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} we have that
+  \ensuremath{\validfromtosyn{\Gamma}{\tau}{\Varid{t}}{\Derive{\Varid{t}}}{\Varid{t}}}.
+\end{theorem}
+\begin{theorem}[\ensuremath{\oplus } agrees with step-indexed intensional validity]
+  \label{thm:oplus-validity-intensional}
+If \ensuremath{\forall \Varid{k}\hsforall \hsdot{\circ }{\mathpunct{.}}(\Varid{k},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\tau}} then \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}\mathrel{=}\Varid{v}_{2}}.
+\end{theorem}
+\begin{proof}
+  In this system the thesis holds, in fact, even if we only assume \ensuremath{(\Varid{k},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\mean{\tau}}. So we pick an arbitrary \ensuremath{\Varid{k}}.
+
+  The proof then proceeds by induction on types. For type \ensuremath{\mathbb{N}}, validity coincides with the
+  thesis. For type \ensuremath{\langle\tau_a,\tau_b\rangle}, we must apply the
+  induction hypothesis on both pair components.
+
+  For closures, validity requires that \ensuremath{\Varid{v}_{1}\mathrel{=}\rho_{1}\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu],\Varid{dv}\mathrel{=}\D\rho\;[\mskip1.5mu \lambda \Varid{x}\;\Varid{dx}\to \Derive{\Varid{t}}\mskip1.5mu],\Varid{v}_{2}\mathrel{=}\rho_{2}\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu]} with \ensuremath{\rho_{1}\oplus \D\rho\mathrel{=}\rho_{2}}, and there exists \ensuremath{\Gamma} such that \ensuremath{\Gamma,\Varid{x}\typcolon\sigma\vdash\Varid{t}\typcolon\tau}. Moreover, from validity we can show that \ensuremath{\rho}
+  and \ensuremath{\D\rho} have matching shapes: \ensuremath{\rho} is an environment
+  matching \ensuremath{\Gamma} and \ensuremath{\D\rho} is a change environment matching
+  \ensuremath{\Delta \Gamma}. Hence, \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}} can update the stored
+  environment, and we can show the thesis by the following
+  calculation:
+  \begin{multline*}
+    \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}\mathrel{=}\rho_{1}\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu]\oplus \D\rho\;[\mskip1.5mu \lambda \Varid{x}\;\Varid{dx}\to \Varid{dt}\mskip1.5mu]\mathrel{=}}\\
+    \ensuremath{(\rho_{1}\oplus \D\rho)\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu]\mathrel{=}\rho_{2}\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu]\mathrel{=}\Varid{v}_{2}}
+  \end{multline*}
+\end{proof}
+
+As mentioned, \cref{thm:oplus-validity-intensional} would hold even if it only
+required validity \ensuremath{(\Varid{k},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})} to hold at a particular step-index. But we
+still state a weaker version requiring validity at all step indexes; we
+conjecture that for other systems we consider in this chapter, requiring
+validity at all step-indexes is necessary. For instance, step-indexed
+extensional validity for function types at index $0$ is vacuously true and so
+can't agree with \ensuremath{\oplus }, because it is only defined in terms of validity at
+step-indexes smaller than 0 (which do not exist).
+
+\paragraph{Nil changes} We can define \ensuremath{\NilC{}} intensionally, as a metafunction on values and
+environments, and prove it correct.
+For closures, we differentiate the body and recurse on the environment. The
+definition extends from values to environments variable-wise, so we omit the
+standard formal definition.
+\begin{definition}[Nil changes \ensuremath{\NilC{}}]
+  \label{def:nil-change-operational}
+  Nil changes on values are defined as follows:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\NilC{\rho\;[\mskip1.5mu \lambda \Varid{x}\to \Varid{t}\mskip1.5mu]}\mathrel{=}\rho\mathrel{\filleddiamond}\NilC{\rho}\;[\mskip1.5mu \lambda \Varid{x}\;\Varid{dx}\to \Derive{\Varid{t}}\mskip1.5mu]{}\<[E]%
+\\
+\>[3]{}\NilC{\langle\Varid{a},\Varid{b}\rangle}\mathrel{=}\langle\NilC{\Varid{a}},\NilC{\Varid{b}}\rangle{}\<[E]%
+\\
+\>[3]{}\NilC{\Varid{n}}\mathrel{=}\mathrm{0}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\end{definition}
+\begin{lemma}[\ensuremath{\NilC{}} produces valid changes]
+  For all values \ensuremath{\vDash\Varid{v}\typcolon\tau} and indexes \ensuremath{\Varid{k}}, we have \ensuremath{(\Varid{k},\Varid{v},\NilC{\Varid{v}},\Varid{v})\in \mathcal{RV}\mean{\tau}}.
+\end{lemma}
+\begin{proof}[Proof sketch]
+  By induction on \ensuremath{\Varid{v}}. For closures we must apply the fundamental
+  property
+  (\cref{thm:fund-lemma-derive-correct-types-si-intensional}) to
+  \ensuremath{\Derive{\Varid{t}}}.
+\end{proof}
+Because \ensuremath{\NilC{}} transforms closure bodies, we cannot define it internally to the
+language. This problem can be avoided by defunctionalizing functions and
+function changes, as we do in \cref{ch:defunc-fun-changes}.
+
+We conclude with the overall correctness theorem, analogous to
+\cref{thm:derive-correct-oplus}.
+
+\deriveCorrectOplusSI
+\begin{proof}
+  Follows immediately from
+  \cref{thm:fund-lemma-derive-correct-types-si-intensional} and
+  \cref{thm:oplus-validity-intensional}.
+\end{proof}
+
+\section{Untyped step-indexed validity (\ilcUntau{}, \dilcUntau{})}
+\label{sec:silr-untyped-proof}
+By removing mentions of types from step-indexed validity
+(intensional or extensional, though we show extensional definitions), we can
+adapt it to an untyped language.
+We can still distinguish between functions, numbers and pairs by
+matching on values themselves, instead of matching on types.
+Without types, typing contexts \ensuremath{\Gamma} now degenerate to lists of
+free variables of a term; we still use them to ensure that
+environments contain enough valid entries to evaluate a term.
+Validity applies to terminating executions, hence we need not
+consider executions producing dynamic type errors when proving
+the fundamental property.
+
+We show resulting definitions for extensional validity in
+\cref{fig:big-step-validity-ext-si-untyped}; but we can also define
+intensional validity and prove the fundamental lemma for it.
+As mentioned earlier, for \ilcUntau{} we must turn \ensuremath{\mathcal{P}\mean{\text{\textendash}}\text{\textendash}} and \ensuremath{\mathcal{P}_{\Delta}\mean{\text{\textendash}}\text{\textendash}}
+into relations and update \textsc{E-Prim} accordingly.
+
+The main difference in the proof is that this time, the recursion
+used in the relations can only be proved to be well-founded
+because of the use of step-indexes; we omit
+details~\citep{Ahmed2006stepindexed}.
+
+\begin{figure}[h!]
+\begin{align*}
+  \ensuremath{\mathcal{RV}} ={}& \{ \, \ensuremath{(\Varid{k},\Varid{n}_{1},\Varid{dn},\Varid{n}_{2})\mid\Varid{n}_{1},\Varid{dn},\Varid{n}_{2}\in \mathbb{N}\text{ and }\Varid{n}_{1}\mathbin{+}\Varid{dn}\mathrel{=}\Varid{n}_{2}} \, \} \ensuremath{\;\cup\\&}\{ \, \ensuremath{(\Varid{k},\Varid{v}_{f1},\Varid{dv}_f,\Varid{v}_{f2})\mid\\&\forall (\Varid{j},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}\hsforall \hsdot{\circ }{\mathpunct{.}}\;\Varid{j}\mathbin{<}\Varid{k}\Rightarrow\\&\quad(\Varid{j},\mathsf{app}\;\Varid{v}_{f1}\;\Varid{v}_{1},\mathsf{dapp}\;\Varid{dv}_f\;\Varid{v}_{1}\;\Varid{dv},\mathsf{app}\;\Varid{v}_{f2}\;\Varid{v}_{2})\in \mathcal{RC}} \, \}\ensuremath{\;\cup\\&} \{ \, \ensuremath{(\Varid{k},\langle\Varid{v}_{a1},\Varid{v}_{b1}\rangle,\langle\Varid{dv}_a,\Varid{dv}_b\rangle,\langle\Varid{v}_{a2},\Varid{v}_{b2}\rangle)\mid\\&(\Varid{k},\Varid{v}_{a1},\Varid{dv}_a,\Varid{v}_{a2})\in \mathcal{RV}\;\text{ and }\;(\Varid{k},\Varid{v}_{b1},\Varid{dv}_b,\Varid{v}_{b2})\in \mathcal{RV}} \, \}\\
+  \ensuremath{\mathcal{RC}} ={}&
+                  \{ \, \ensuremath{(\Varid{k},\rho_{1}\vdash\Varid{t}_{1},\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt},\rho_{2}\vdash\Varid{t}_{2})\mid\\&\forall \Varid{j}\hsforall \;\Varid{v}_{1}\;\Varid{v}_{2}\hsdot{\circ }{\mathpunct{.}}\\&\quad(\Varid{j}\mathbin{<}\Varid{k}\text{ and }\rho_{1}\vdash\Varid{t}_{1}\Downarrow_{\Varid{j}}\Varid{v}_{1}\text{ and }\rho_{2}\vdash\Varid{t}_{2}\Downarrow\Varid{v}_{2})\Rightarrow\\&\quad\exists \Varid{dv}\hsforall \hsdot{\circ }{\mathpunct{.}}\rho\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt}\Downarrow\Varid{dv}\text{ and }(\Varid{k}\mathbin{-}\Varid{j},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}} \, \}\\
+  \\
+  \ensuremath{\mathcal{RG}\mean{\EmptyContext}} ={} & \{ \, \ensuremath{(\Varid{k},\EmptyEnv,\EmptyEnv,\EmptyEnv)} \, \} \\
+  \ensuremath{\mathcal{RG}\mean{\Gamma,\Varid{x}}} ={} &
+                                  \{ \, \ensuremath{(\Varid{k},(\rho_{1},\Varid{x}\mathbin{:=}\Varid{v}_{1}),(\D\rho,\Varid{dx}\mathbin{:=}\Varid{dv}),(\rho_{2},\Varid{x}\mathbin{:=}\Varid{v}_{2}))\mid\\&(\Varid{k},\rho_{1},\D\rho,\rho_{2})\in \mathcal{RG}\mean{\Gamma}\text{ and }(\Varid{k},\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})\in \mathcal{RV}} \, \} \\
+  \ensuremath{\validfromtosynunt{\Gamma}{\Varid{t}_{1}}{\Varid{dt}}{\Varid{t}_{2}}} ={}&
+                                      \ensuremath{\forall (\Varid{k},\rho_{1},\D\rho,\rho_{2})\in \mathcal{RG}\mean{\Gamma}\hsforall \hsdot{\circ }{\mathpunct{.}}\\&(\Varid{k},\rho_{1}\vdash\Varid{t}_{1},\rho_{1}\mathrel{\filleddiamond}\D\rho\vdash_{\Delta}\Varid{dt},\rho_{2}\vdash\Varid{t}_{2})\in \mathcal{RC}}
+\end{align*}
+\caption{Defining extensional validity via \emph{untyped step-indexed} logical relations and big-step semantics.}
+\label{fig:big-step-validity-ext-si-untyped}
+\end{figure}
+
+Otherwise, the proof proceeds just as earlier in
+\cref{sec:silr-typed-proof}: We prove that the relations are
+downward-closed, just like in \cref{lem:validity-typed-downward-closed}
+(we omit the new statement), and we prove the new fundamental
+lemma by induction on the structure of terms (not of typing derivations).
+\begin{theorem}[Fundamental property: correctness of \ensuremath{\Derive{\text{\textendash}}}]
+  \label{thm:fund-lemma-derive-correct-untyped-si}
+  If \ensuremath{\Conid{FV}\;(\Varid{t})\subseteq\Gamma} then we have that \ensuremath{\validfromtosynunt{\Gamma}{\Varid{t}}{\Derive{\Varid{t}}}{\Varid{t}}}.
+\end{theorem}
+\begin{proof}[Proof sketch]
+  Similar to the proof of
+\cref{thm:fund-lemma-derive-correct-types-si}, but by structural
+induction on terms and complete induction on step counts, not on
+typing derivations.
+
+However, we can use the induction hypothesis in the same ways as
+in earlier proofs for typed languages: all uses of the induction
+hypothesis in the proof are on smaller terms, and some also at
+smaller step counts.
+\end{proof}
+
+\section{General recursion in \ilcTau{} and \dilcTau}
+\label{sec:bos-fixpoints}
+
+
+We have sketched informally in \cref{sec:general-recursion} how to support
+fixpoint combinators.
+
+We have also extended our typed languages with a
+fixpoint combinators and proved them correct formally (not
+mechanically, yet). In this section, we include the needed
+definitions to make our claim precise. They are mostly
+unsurprising, if long to state.
+
+Since we are in a call-by-value setting, we only add recursive
+functions, not recursive values in general.
+To this end, we replace $\lambda$-abstraction \ensuremath{\lambda \Varid{x}\to \Varid{t}} with recursive
+function \ensuremath{\mathbf{rec}\;\Varid{f}\;\Varid{x}\to \Varid{t}}, which binds both \ensuremath{\Varid{f}} and \ensuremath{\Varid{x}} in \ensuremath{\Varid{t}}, and
+replaces \ensuremath{\Varid{f}} with the function itself upon evaluation.
+
+The associated small-step reduction rule would be
+\ensuremath{(\mathbf{rec}\;\Varid{f}\;\Varid{x}\to \Varid{t})\;\Varid{v}\to \Varid{t}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{v},\Varid{f}\mathbin{:=}\mathbf{rec}\;\Varid{f}\;\Varid{x}\to \Varid{t}\mskip1.5mu]}. As before,
+we formalize reduction using big-step semantics.
+
+Typing rule \textsc{T-Lam} is replaced by a rule for recursive functions:
+\begin{typing}
+  \Rule[T-Rec]{\ensuremath{\Gamma,\Varid{f}\typcolon\sigma\to \tau,\Varid{x}\typcolon\sigma\vdash\Varid{t}\typcolon\tau}}
+  {\ensuremath{\Gamma\vdash\mathbf{rec}\;\Varid{f}\;\Varid{x}\to \Varid{t}\typcolon\sigma\to \tau}}
+\end{typing}
+We replace closures with recursive closures in the definition of values:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{w}\mathbin{::=}\mathbf{rec}\;\Varid{f}\;\Varid{x}\to \Varid{t}\mid \ldots{}\<[E]%
+\\
+\>[3]{}\Varid{v}\mathbin{::=}\rho\;[\mskip1.5mu \mathbf{rec}\;\Varid{f}\;\Varid{x}\to \Varid{t}\mskip1.5mu]\mid \ldots{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+We also modify the semantics for abstraction and application. Rules
+\textsc{E-Val} and \textsc{E-App} are unchanged: it is sufficient to adapt the
+definitions of \ensuremath{\mathcal{V}\mean{\text{\textendash}}\text{\textendash}} and \ensuremath{\mathsf{app}}, so that evaluation of a function value
+\ensuremath{\Varid{v}_f} has access to \ensuremath{\Varid{v}_f} in the environment.
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{32}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathcal{V}\mean{\mathbf{rec}\;\Varid{f}\;\Varid{x}\to \Varid{t}}\rho{}\<[32]%
+\>[32]{}\mathrel{=}\rho\;[\mskip1.5mu \mathbf{rec}\;\Varid{f}\;\Varid{x}\to \Varid{t}\mskip1.5mu]{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathsf{app}\;(\Varid{v}_f\mathrel{@}(\rho\myquote\;[\mskip1.5mu \mathbf{rec}\;\Varid{f}\;\Varid{x}\to \Varid{t}\mskip1.5mu]))\;\Varid{v}_a\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}(\rho\myquote,\Varid{f}\mathbin{:=}\Varid{v}_f,\Varid{x}\mathbin{:=}\Varid{v}_a)\vdash\Varid{t}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Like in Haskell, we write \ensuremath{\Varid{x}\mathrel{@}\Varid{p}} in equations to bind an argument as
+metavariable \ensuremath{\Varid{x}} and match it against pattern \ensuremath{\Varid{p}}.
+
+Similarly, we modify the language of changes, the definition of differentiation,
+and evaluation metafunctions \ensuremath{\mathcal{V}_{\Delta}\mean{\text{\textendash}}\text{\textendash}} and \ensuremath{\mathsf{dapp}}.
+Since the derivative of a recursive function \ensuremath{\Varid{f}\mathrel{=}\mathbf{rec}\;\Varid{f}\;\Varid{x}\to \Varid{t}} can call the base
+function, we remember the original function body \ensuremath{\Varid{t}} in the
+derivative, together with its derivative \ensuremath{\Derive{\Varid{t}}}. This should not be
+surprising: in \cref{sec:general-recursion}, where recursive functions are
+defined using \ensuremath{\Varid{letrec}}, a recursive function \ensuremath{\Varid{f}} is in scope in the body of its
+derivative \ensuremath{\Varid{df}}. Here we use a different syntax, but still ensure that \ensuremath{\Varid{f}} is in
+scope in the body of derivative \ensuremath{\Varid{df}}.
+The definitions are otherwise unsurprising, if long.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{8}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{dw}\mathbin{::=}\mathbf{drec}\;\Varid{f}\;\Varid{df}\;\Varid{x}\;\Varid{dx}\to \Varid{t}\mathrel{\filleddiamond}\Varid{dt}\mid \ldots{}\<[E]%
+\\
+\>[B]{}\Varid{dv}\mathbin{::=}\rho\mathrel{\filleddiamond}\D\rho\;[\mskip1.5mu \mathbf{drec}\;\Varid{f}\;\Varid{df}\;\Varid{x}\;\Varid{dx}\to \Varid{t}\mathrel{\filleddiamond}\Varid{dt}\mskip1.5mu]\mid \ldots{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Derive{\mathbf{rec}\;\Varid{f}\;\Varid{x}\to \Varid{t}}\mathrel{=}\mathbf{drec}\;\Varid{f}\;\Varid{df}\;\Varid{x}\;\Varid{dx}\to \Varid{t}\mathrel{\filleddiamond}\Derive{\Varid{t}}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathcal{V}_{\Delta}\mean{\mathbf{drec}\;\Varid{f}\;\Varid{df}\;\Varid{x}\;\Varid{dx}\to \Varid{dt}}\rho\;\D\rho\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\rho\mathrel{\filleddiamond}\D\rho\;[\mskip1.5mu \mathbf{drec}\;\Varid{f}\;\Varid{df}\;\Varid{x}\;\Varid{dx}\to \Varid{t}\mathrel{\filleddiamond}\Varid{dt}\mskip1.5mu]{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\mathsf{dapp}\;(\Varid{dv}_f\mathrel{@}(\rho\myquote\mathrel{\filleddiamond}\D\rho\myquote\;[\mskip1.5mu \mathbf{rec}\;\Varid{f}\;\Varid{df}\;\Varid{x}\;\Varid{dx}\to \Varid{dt}\mskip1.5mu]))\;\Varid{v}_a\;\Varid{dv}_a\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{let}\;{}\<[8]%
+\>[8]{}\Varid{v}_f\mathrel{=}\rho\myquote\;[\mskip1.5mu \mathbf{rec}\;\Varid{f}\;\Varid{x}\to \Varid{t}\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\mathbf{in}\;{}\<[8]%
+\>[8]{}(\rho\myquote,\Varid{f}\mathbin{:=}\Varid{v}_f,\Varid{x}\mathbin{:=}\Varid{v}_a)\mathrel{\filleddiamond}(\D\rho\myquote,\Varid{df}\mathbin{:=}\Varid{dv}_f,\Varid{dx}\mathbin{:=}\Varid{dv}_a)\vdash_{\Delta}\Varid{dt}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\begin{typing}
+  \Rule[T-DRec]{
+    \ensuremath{\Gamma,\Varid{f}\typcolon\sigma\to \tau,\Varid{x}\typcolon\sigma\vdash\Varid{t}\typcolon\tau}\\
+    \ensuremath{\Gamma,\Varid{f}\typcolon\sigma\to \tau,\Varid{x}\typcolon\sigma\vdash_{\Delta}\Varid{dt}\typcolon\tau}
+  }
+  {\ensuremath{\Gamma\vdash_{\Delta}\mathbf{drec}\;\Varid{f}\;\Varid{df}\;\Varid{x}\;\Varid{dx}\to \Varid{t}\mathrel{\filleddiamond}\Varid{dt}\typcolon\sigma\to \tau}}
+\end{typing}
+
+We can adapt the proof of the fundamental property to the use of recursive functions.
+\begin{theorem}[Fundamental property: correctness of \ensuremath{\Derive{\text{\textendash}}}]
+  \label{thm:fund-lemma-derive-correct-types-si-intensional-rec}
+  For every well-typed term \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} we have that
+  \ensuremath{\validfromtosyn{\Gamma}{\tau}{\Varid{t}}{\Derive{\Varid{t}}}{\Varid{t}}}.
+\end{theorem}
+\begin{proof}[Proof sketch]
+  Mostly as before, modulo one interesting difference:
+  To prove the fundamental property for recursive
+  functions at step-count \ensuremath{\Varid{k}}, this time we must use the
+  fundamental property inductively on the same term, but at
+  step-count \ensuremath{\Varid{j}\mathbin{<}\Varid{k}}.
+  This happens because to evaluate \ensuremath{\Varid{dw}\mathrel{=}\Derive{\mathbf{rec}\;\Varid{f}\;\Varid{x}\to \Varid{t}}} we
+  evaluate \ensuremath{\Derive{\Varid{t}}} with the value \ensuremath{\Varid{dv}} for \ensuremath{\Varid{dw}} in the
+  environment: to show this invocation is valid, we must show \ensuremath{\Varid{dw}}
+  is itself a valid change. But the step-indexed
+  definition to \ensuremath{\mathcal{RV}\mean{\sigma\to \tau}} constrains the evaluation
+  of the body only \ensuremath{\forall \Varid{j}\hsforall \mathbin{<}\Varid{k}}.
+
+  % Consider the case for recursive abstraction |dw' = derive(rec f
+  % x -> t)| at step-count |k|. After unfolding a few definitions
+  % (which we skip here), we must show for any |j < k| and for any
+  % |j|-valid argument change that running the derivative of the
+  % recursive abstraction evaluates (using rule \textsc{E-DApp})
+  % |derive t| with an environment change that is valid. But this
+  % time, the value of the recursive function change |dw'| is itself
+  % in the environment! Luckily, we can show that |dw'| is valid at
+  % step-count |j| by using the fundamental property inductively,
+  % since |j < k|. The proof otherwise proceeds similarly to the
+  % proof for abstraction.
+
+  % In a bit more detail, for recursive abstractions in the end we
+  % must roughly show that for all |j < k| the recursive abstractions
+  % in question, applied to |j|-valid arguments, give |j|-valid
+  % resulting computations. The proof uses the fundamental property
+  % recursively on |t| and on a |j|-valid environment. But this time,
+  % the environment contains closures
+
+  % There is \emph{one} critical difference in the proof
+  % a recursive function is valid at step-count
+\end{proof}
+
+\section{Future work}
+We have shown that \ensuremath{\oplus } and \ensuremath{\NilC{}} agree with validity,
+which we consider a key requirement of a core ILC proof. However,
+change structures support further operators. We leave operator
+\ensuremath{\ominus } for future work, though we are not aware of particular
+difficulties.
+However, \ensuremath{\circledcirc } deserves special attention.
+\subsection{Change composition}
+We have looked into change composition, and it appears that
+composition of change expressions is not always valid, but we
+conjecture that composition of change values preserves validity.
+Showing that change composition is valid appears related to
+showing that \citeauthor{Ahmed2006stepindexed}'s logical equivalence
+is a transitive relation, which is a subtle issue. She only
+proves transitivity in a typed setting and with a stronger
+relation, and her proof does not carry over directly; indeed,
+there is no corresponding proof in the untyped setting of
+\citet*{Acar08}.
+
+However, the failure of transitivity we have verified is not
+overly worrisome: the problem is that transitivity is too strong
+an expectation in general. Assume that \ensuremath{\validfromtosynunt{\Gamma}{\Varid{e}_{1}}{\Varid{de}_{1}}{\Varid{e}_{2}}} and \ensuremath{\validfromtosynunt{\Gamma}{\Varid{e}_{2}}{\Varid{de}_{2}}{\Varid{e}_{3}}}, and try to show
+that \ensuremath{\validfromtosynunt{\Gamma}{\Varid{e}_{1}}{\Varid{de}_{1}\circledcirc \Varid{de}_{2}}{\Varid{e}_{3}}}: that
+is, very roughly and ignoring the environments, we can assume
+that \ensuremath{\Varid{e}_{1}} and \ensuremath{\Varid{e}_{3}} terminate, and have to show that their result
+satisfy some properties. To use both our hypotheses, we need to
+know that \ensuremath{\Varid{e}_{1}}, \ensuremath{\Varid{e}_{2}} and \ensuremath{\Varid{e}_{3}} all terminate, but we have no such
+guaranteed for \ensuremath{\Varid{e}_{2}}. Indeed, if \ensuremath{\Varid{e}_{2}} always diverges (because it
+is, say, the diverging term \ensuremath{\omega\mathrel{=}(\lambda \Varid{x}\to \Varid{x}\;\Varid{x})\;(\lambda \Varid{x}\to \Varid{x}\;\Varid{x})}), then \ensuremath{\Varid{de}_{1}} and \ensuremath{\Varid{de}_{2}}
+are vacuously valid. If \ensuremath{\Varid{e}_{1}} and \ensuremath{\Varid{e}_{3}} terminate, we can't expect
+\ensuremath{\Varid{de}_{1}\circledcirc \Varid{de}_{2}} to be a change between them. To wit, take
+\ensuremath{\Varid{e}_{1}\mathrel{=}\mathrm{0}}, \ensuremath{\Varid{e}_{2}\mathrel{=}\omega}, \ensuremath{\Varid{e}_{3}\mathrel{=}\mathrm{10}}, and \ensuremath{\Varid{de}_{1}\mathrel{=}\Varid{de}_{2}\mathrel{=}\mathrm{0}}. We can
+verify that for any \ensuremath{\Gamma} we have \ensuremath{\validfromtosynunt{\Gamma}{\Varid{e}_{1}}{\Varid{de}_{1}}{\Varid{e}_{2}}} and
+\ensuremath{\validfromtosynunt{\Gamma}{\Varid{e}_{2}}{\Varid{de}_{2}}{\Varid{e}_{3}}}, while \ensuremath{\validfromtosynunt{\Gamma}{\Varid{e}_{1}}{\Varid{de}_{1}\circledcirc \Varid{de}_{2}}{\Varid{e}_{3}}} means the absurd
+\ensuremath{\validfromtosynunt{\Gamma}{\mathrm{0}}{\mathrm{0}\circledcirc \mathrm{0}}{\mathrm{10}}}.
+
+\paragraph{A possible fix}
+Does transitivity hold if \ensuremath{\Varid{e}_{2}} terminates? That is not sufficient: we still
+cannot conclude anything by assuming that \ensuremath{(\Varid{k},\Varid{e}_{1},\Varid{de}_{1},\Varid{e}_{2})\in \mathcal{RC}\mean{\tau}} and
+\ensuremath{(\Varid{k},\Varid{e}_{2},\Varid{de}_{2},\Varid{e}_{3})\in \mathcal{RC}\mean{\tau}}.
+But like in \citet{Ahmed2006stepindexed}, if \ensuremath{\Varid{e}_{2}} and \ensuremath{\Varid{e}_{3}} are
+related at all step counts, that is, if \ensuremath{(\Varid{k},\Varid{e}_{1},\Varid{de}_{1},\Varid{e}_{2})\in \mathcal{RC}\mean{\tau}} and \ensuremath{(\forall \Varid{n}\hsforall \hsdot{\circ }{\mathpunct{.}}(\Varid{n},\Varid{e}_{2},\Varid{de}_{2},\Varid{e}_{3})\in \mathcal{RC}\mean{\tau})}, and if additionally \ensuremath{\Varid{e}_{2}} terminates, we conjecture that
+\citeauthor{Ahmed2006stepindexed}'s proof goes through. We have
+however not yet examined all the details.
+
+% transitivity requires using a typed setting.
+% However, her
+% logical relation is indeed transitive, and we believe
+% We conjecture
+
+% Defining |nil| should not be a a problem: the nil change of a
+% closure just takes nil changes or each environment entry.
+
+% As explained by \citeauthor{Ahmed2006stepindexed}, transitivity
+% of her logical relation is subtle.
+% For us this corresponds to two questions that we leave open:
+% \pg{resume; it's composition and transitivity of change equivalence.}
+
+\section{Development history}
+\label{sec:ilc-bsos-dev-history}
+The proof strategy used in this chapter comes from a
+collaboration between me and Yann Régis-Gianas, who came up with the
+general strategy and the first partial proofs for untyped $\lambda$-calculi.
+After we both struggled for a while to set up step-indexing correctly enough for a
+full proof, I first managed to give the definitions in this chapter and
+complete the proofs here described. Régis-Gianas then mechanized a variant of
+our proof for untyped $\lambda$-calculus in Coq~\citep{Giarrusso2019Incremental},
+that appears here in \cref{sec:formalization}.
+That proof takes a few different choices, and unfortunately strictly speaking neither proof
+subsumes the other. (1) We also give a non-step-indexed syntactic proof for
+simply-typed $\lambda$-calculus, together with proofs defining validity extensionally.
+(2) To support remembering intermediate
+results by conversion to cache-transfer-style (CTS),
+Régis-Gianas' proof uses a lambda-lifted A'NF syntax instead of plain ANF\@.
+(3) Régis-Gianas' formalization adds to change values a single token \ensuremath{\NilC{}},
+which is a valid nil change for all valid values. Hence, if we know a change is
+nil, we can erase it. As a downside, evaluating \ensuremath{\Varid{df}\;\Varid{a}\;\Varid{da}} when \ensuremath{\Varid{df}} is \ensuremath{\NilC{}}
+requires looking up \ensuremath{\Varid{f}}.
+In our presentation, instead, if \ensuremath{\Varid{f}} and \ensuremath{\Varid{g}} are different function values, they
+have different nil changes. Such nil changes carry information, so they can be
+evaluated directly, but they cannot be erased. Techniques in
+\cref{ch:defunc-fun-changes} enable erasing and reconstructing a nil change \ensuremath{\Varid{df}}
+for function value \ensuremath{\Varid{f}} as long as the value of \ensuremath{\Varid{f}} is available.
+% To
+% By making lambda syntax
+% because of different choices in formalizing the language or
+
+\section{Conclusion}
+In this chapter we have shown how to construct novel models for
+ILC by using (step-indexed) logical relations, and have used this
+technique to deliver a new syntactic proof of correctness for ILC
+for simply-typed $lambda$-calculus and to deliver the first proof
+of correctness of ILC for untyped $\lambda$-calculus. Moreover,
+our proof appears rather close to existing
+logical-relations proofs, hence we believe it should be possible
+to translate other results to ILC theorems.
+
+By formally defining intensional validity for closures, we
+provide a solid foundation for the use of defunctionalized
+function changes (\cref{ch:defunc-fun-changes}).
+
+This proof builds on \citet{Ahmed2006stepindexed}'s
+work on step-indexed logical relations, which enable handling of
+powerful semantics feature using rather elementary techniques.
+The only downside is that it can be tricky to set up the correct
+definitions, especially for a slightly non-standard semantics
+like ours.
+As an exercise, we have shown that the our semantics is
+equivalent to more conventional presentations, down to the
+produced step counts.

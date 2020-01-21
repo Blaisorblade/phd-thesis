@@ -1,0 +1,554 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+% Emacs, this is -*- latex -*-!
+
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+
+
+\section{Introduction}
+
+Incremental computation is often desirable: after computing an output from some
+input, we often need to produce new outputs corresponding to changed inputs. One
+can simply rerun the same \emph{base program} on the new input; but instead,
+incremental computation transforms the input change to an output change. This
+can be desirable because more efficient.
+
+Incremental computation could also be desirable because the changes themselves
+are of interest: Imagine a typechecker explaining how some change to input
+source propagates to changes to the typechecking result. More generally, imagine
+a program explaining how some change to its input propagates through a
+computation into changes to the output.
+
+ILC (Incremental $\lambda$-Calculus)~\citep{CaiEtAl2014ILC} is
+a recent approach to incremental computation for higher-order languages.
+ILC represents changes from an old value \ensuremath{\Varid{v}_{1}} to an updated value \ensuremath{\Varid{v}_{2}} as a
+first-class value written \ensuremath{\Varid{dv}}. ILC also transforms statically \emph{base programs}
+to \emph{incremental programs} or \emph{derivatives}: derivatives produce
+output changes from changes to all their inputs. Since functions are first-class
+values, ILC introduces a notion of function changes.
+
+However, as mentioned by \citeauthor{CaiEtAl2014ILC} and as we explain below,
+ILC as currently defined does not allow reusing intermediate results created by the
+base computation during the incremental computation. That restricts ILC to
+supporting efficiently only \emph{self-maintainable computations}, a rather
+restrictive class: for instance, mapping self-maintainable functions on a sequence is
+self-maintainable, but dividing numbers isn't! In this paper, we remove this
+limitation.
+
+% non-blinded
+% In this paper, we address this restriction as we promised in previous work.
+%In keeping with our approach, we try to avoid forcing unnecessary overhead onto
+%the computation.
+
+To remember intermediate results, many incrementalization approaches rely on
+forms of memoization: one uses hashtables to memoize function results, or
+dynamic dependence graphs~\citep{Acar05} to remember the computation trace.
+However, such data structures often remember results that might not be reused;
+moreover, the data structures themselves (as opposed to their values) occupy
+additional memory, looking up intermediate results has a cost in time, and
+typical general-purpose optimizers cannot predict results from memoization
+lookups. Instead, ILC aims to produce purely functional programs that are
+suitable for further optimizations.
+
+We eschew memoization: instead, we transform programs to
+\emph{cache-transfer style (CTS)}, following ideas from \citet{Liu95}. CTS functions
+output \emph{caches} of intermediate results along with their primary results. Caches
+are just nested tuples whose structure is derived from code, and accessing them
+does not involve looking up keys depending on inputs. We also extend
+differentiation to produce \emph{CTS derivatives}, which can extract from caches
+any intermediate results they need.
+%\pg{they can also extract inputs, but I can't explain it here.}
+This approach was inspired and pioneered by \citeauthor{Liu95} for untyped
+first-order functional languages, but we integrate
+it with ILC and extend it to higher-order typed languages.
+
+% \pg{we don't!}
+%and then use program transformation techniques to eliminate unneeded state.
+%
+While CTS functions still produce additional intermediate data structures,
+produced programs can be subject to further optimizations.
+We believe static analysis of a CTS function and its CTS derivative can identify
+and remove unneeded state (similar to what has been done by \citeauthor{Liu95}),
+as we discuss in \cref{sec:cache-pruning}.
+We leave a more careful analysis to future work.
+
+We prove most of our formalization correct in Coq
+To support non-simply-typed programs, all our proofs
+are for untyped $\lambda$-calculus, while previous ILC correctness proofs were
+restricted to simply-typed $\lambda$-calculus.
+Unlike previous ILC proofs, we simply define which changes are valid
+via a \emph{logical relation}, then show the fundamental property for this
+logical relation (see \cref{sec:ilc-background}). To extend this proof to
+untyped $\lambda$-calculus, we switch to \emph{step-indexed} logical relations.
+
+To support differentiation on our case studies, we also represent function changes
+as closures that can be inspected, to support manipulating them more efficiently
+and detecting at runtime when a function change is \emph{nil} hence need not be
+applied. To show this representation is correct, we also use closures in our
+mechanized proof.
+
+Unlike plain ILC, typing programs in CTS is challenging, because the shape of
+caches for a function depends on the function implementation.
+Our case studies show how to non-trivially embed resulting programs in typed
+languages, at least for our case studies, but our proofs support an untyped
+target language.
+
+In sum, we present the following contributions:
+\pg{revise more, add sections; this is getting redundant with the text.}
+\begin{itemize}
+\item via examples, we motivate extending ILC to remember intermediate
+  results (\cref{sec:cts-motivation});
+\item we give a novel proof of correctness for ILC for untyped
+  $\lambda$-calculus, based on step-indexed logical relations
+  (\cref{sec:sound-derive});
+\item building on top of ILC-style differentiation, we show how to transform
+  untyped higher-order programs to \emph{cache-transfer-style}~(CTS)~%
+  (\cref{sec:transformation});
+\item we show that programs and derivatives in cache-transfer style
+  \emph{simulate} correctly their non-CTS variants (\cref{sec:transformation-soundness});
+\item we mechanize in Coq most of our proofs%
+\begin{poplForPopl}
+% PG: I'm commenting this out, assuming that we fix this soon
+%, save for a few straightforward lemmas
+ (see supplementary material)%
+\end{poplForPopl}
+;
+\item we perform performance case studies (in \cref{sec:case-studies}) applying
+  (by hand) extension of this technique to Haskell programs, and incrementalize
+  efficiently also programs that do not admit self-maintainable derivatives.
+\end{itemize}
+
+\pg{Try merging with contributions if we can.}
+The rest of the paper is organized as follows. \Cref{sec:cts-motivation} summarizes
+ILC and motivates the extension to cache-transfer style.
+\Cref{sec:formalization} presents our formalization and proofs.
+\iftoggle{poplForThesis}{
+\Cref{sec:case-studies} presents our case studies and benchmarks.
+\Cref{sec:cts-limitations} discusses limitations and future work.
+}{
+\Cref{sec:case-studies} discusses our case studies, benchmarks,
+limitations and future work.
+}
+\Cref{sec:cts-rw}
+discusses related work and \cref{sec:conclusions} concludes.

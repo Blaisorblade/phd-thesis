@@ -1,0 +1,1526 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+\chapter{Changes and differentiation, formally}
+\label{ch:derive-formally}
+\input{pldi14/fig-differentiation}
+
+To support incrementalization, in this chapter we introduce differentiation and
+formally prove it correct. That is, we prove that \ensuremath{\Eval{\Derive{\Varid{t}}}} produces
+derivatives. As we explain in \cref{sec:derivative-formal}, derivatives
+transform valid input changes into valid output changes (\cref{slogan:derive}).
+Hence, we define what are valid changes (\cref{sec:changes-formally}). As we'll
+explain in \cref{sec:validity-logical}, validity is a logical relation. As we
+explain in \cref{sec:derive-correct-proof}, our correctness theorem is the
+\emph{fundamental property} for the validity logical relation, proved by induction
+over the structure of terms.
+%
+Crucial definitions or derived facts are summarized in \cref{fig:differentiation}.
+%
+Later, in \cref{ch:change-theory} we study consequences of correctness and
+change operations.
+
+All definitions and proofs in this and next chapter is mechanized in Agda,
+except where otherwise indicated. To this writer, given these definitions all
+proofs have become straightforward and unsurprising. Nevertheless, first
+obtaining these proofs took a while. So we typically include full proofs.
+We also believe these proofs clarify the meaning and consequences of our definitions.
+To make proofs as accessible as possible, we try to provide enough detail that
+our target readers can follow along \emph{without} pencil and paper, at the
+expense of making our proofs look longer than they would usually be. As we
+target readers proficient with STLC (but not necessarily proficient with logical
+relations), we'll still omit routine steps needed to reason on STLC, such as
+typing derivations or binding issues.
+
+\section{Changes and validity}
+\label{sec:changes-formally}
+In this section we introduce formally (a) a description of changes; (b) a
+definition of which changes are valid. We have already introduced informally in
+\cref{ch:static-diff-intro} these notions and how they fit together. We next
+define the same notions formally, and deduce their key properties.
+Language plugins extend these definitions for base types and constants that they
+provide.
+
+To formalize the notion of changes for elements of a set \ensuremath{\Conid{V}}, we define the
+notion of \emph{basic change structure} on \ensuremath{\Conid{V}}.
+
+\begin{definition}[Basic change structures]
+  \label{def:bchs}
+  A basic change structure on set \ensuremath{\Conid{V}}, written \ensuremath{\widetilde{\Conid{V}}}, comprises:
+  \begin{subdefinition}
+  \item a change set \ensuremath{\Delta \Conid{V}}
+  \item a ternary \emph{validity} relation \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}}, for \ensuremath{\Varid{v}_{1},\Varid{v}_{2}\in \Conid{V}} and \ensuremath{\Varid{dv}\in \Delta \Conid{V}}, that we read as ``\ensuremath{\Varid{dv}} is a valid change
+    from source \ensuremath{\Varid{v}_{1}} to destination \ensuremath{\Varid{v}_{2}} (on set \ensuremath{\Conid{V}})''.
+  % \item a ternary relation called \emph{validity}.
+  %   We say that
+  %   We write this relation as |fromto V v1 dv
+  %   v2|, where |v1, v2 `elem` V| and |dv `elem` Dt^V|, and say that |dv| is a
+  %   valid change from source |v1| to destination |v2| (on set |V|).
+  % \item a ternary relation called \emph{validity} among |V|, |Dt^V| and |V|.
+  %   When this relation holds
+  %   If |v1, v2
+  %   `elem` V| and |dv `elem` DV|, and this relation holds, we write |fromto V v1
+  %   dv v2| and say that |dv| is a valid change from source |v1| to destination
+  %   |v2| (on set |V|).
+  \end{subdefinition}
+\end{definition}
+
+\begin{example}
+In \cref{ex:valid-bag-int,ex:invalid-nat} we exemplified
+informally change types and validity on naturals, integers and
+bags.\pg{revise if we add more examples.}
+We define formally basic change structures on naturals and integers.
+Compared to validity for integers, validity for naturals ensures that the
+destination \ensuremath{\Varid{v}_{1}\mathbin{+}\Varid{dv}} is again a natural. For instance, given source \ensuremath{\Varid{v}_{1}\mathrel{=}\mathrm{1}}, change \ensuremath{\Varid{dv}\mathrel{=}\mathbin{-}\mathrm{2}} is valid (with destination \ensuremath{\Varid{v}_{2}\mathrel{=}\mathbin{-}\mathrm{1}}) only on integers, not
+on naturals.
+% \footnote{For convenience we're implicitly identifying naturals with
+%   non-negative integers, ignoring the isomorphism between them.}
+\end{example}
+\begin{definition}[Basic change structure on integers]
+  Basic change structure \ensuremath{\widetilde{\mathbb{Z}}} on integers has integers as changes
+  (\ensuremath{\Delta \mathbb{Z}\mathrel{=}\mathbb{Z}}) and the following validity judgment.
+\begin{typing}
+  \Axiom
+  {\validfromto{\ensuremath{\mathbb{Z}}}{\ensuremath{\Varid{v}_{1}}}{\ensuremath{\Varid{dv}}}{\ensuremath{\Varid{v}_{1}\mathbin{+}\Varid{dv}}}}
+\end{typing}
+\end{definition}
+
+\begin{definition}[Basic change structure on naturals]
+  Basic change structure \ensuremath{\widetilde{\mathbb{N}}} on naturals has integers as changes
+  (\ensuremath{\Delta \mathbb{N}\mathrel{=}\mathbb{Z}}) and the following validity judgment.
+\begin{typing}
+  \Rule{\ensuremath{\Varid{v}_{1}\mathbin{+}\Varid{dv}\geq \mathrm{0}}}
+  {\validfromto{\ensuremath{\mathbb{N}}}{\ensuremath{\Varid{v}_{1}}}{\ensuremath{\Varid{dv}}}{\ensuremath{\Varid{v}_{1}\mathbin{+}\Varid{dv}}}}
+\end{typing}
+\end{definition}
+
+Intuitively, we can think of a valid change from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}} as a graph
+\emph{edge} from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}}, so we'll often use graph terminology when
+discussing changes. This intuition is robust and can be made fully
+precise.\footnote{See for instance Robert Atkey's blog post~\citep{Atkey2015ILC}
+  or Yufei Cai's PhD thesis~\citep{CaiPhD}.}
+More specifically, a basic change structure on \ensuremath{\Conid{V}} can
+be seen as a directed multigraph, having as vertexes the elements of \ensuremath{\Conid{V}}, and as
+edges from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}} the valid changes \ensuremath{\Varid{dv}} from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}}. This is a
+multigraph because our definition allows multiple edges between \ensuremath{\Varid{v}_{1}} and \ensuremath{\Varid{v}_{2}}.
+
+A change \ensuremath{\Varid{dv}} can be valid from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}} and from \ensuremath{\Varid{v}_{3}} to \ensuremath{\Varid{v}_{4}}, but we'll
+still want to talk about \emph{the} source and \emph{the} destination of a
+change. When we talk about a change \ensuremath{\Varid{dv}} valid from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}}, value \ensuremath{\Varid{v}_{1}} is
+\ensuremath{\Varid{dv}}'s source and \ensuremath{\Varid{v}_{2}} is \ensuremath{\Varid{dv}}'s destination. Hence we'll systematically quantify
+theorems over valid changes \ensuremath{\Varid{dv}} with their sources \ensuremath{\Varid{v}_{1}} and destination \ensuremath{\Varid{v}_{2}},
+using the following notation.%
+\footnote{If you prefer, you can tag a change with its source and destination by
+  using a triple, and regard the whole triple \ensuremath{(\Varid{v}_{1},\Varid{dv},\Varid{v}_{2})} as a change.
+  Mathematically, this gives the correct results, but we'll typically not use
+  such triples as changes in programs for performance reasons.}
+\begin{notation}[Quantification over valid changes]
+  We write \[\ensuremath{\forall \validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}\hsforall \hsdot{\circ }{\mathpunct{.}}\Conid{P}},\] and say ``for all (valid)
+  changes \ensuremath{\Varid{dv}} from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}} on set \ensuremath{\Conid{V}} we have \ensuremath{\Conid{P}}'', as a shortcut for
+  \[\ensuremath{\forall \Varid{v}_{1}\hsforall ,\Varid{v}_{2}\in } V, \ensuremath{\Varid{dv}\in \Delta \Conid{V},}\text{ if }\ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}}\text{ then }P.\]
+
+  Since we focus on valid changes, we'll omit the word ``valid'' when clear from context.
+  In particular, a change from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}} is necessarily valid.
+\end{notation}
+
+We can have multiple basic change structures on the same set.
+\begin{example}[Replacement changes]
+\label{ex:replacement}
+For instance, for any set \ensuremath{\Conid{V}} we can talk about \emph{replacement changes} on
+\ensuremath{\Conid{V}}: a replacement change \ensuremath{\Varid{dv}\mathrel{=}\mathbin{!}\Varid{v}_{2}} for a value \ensuremath{\Varid{v}_{1}\typcolon\Conid{V}} simply specifies
+directly a new value \ensuremath{\Varid{v}_{2}\typcolon\Conid{V}}, so that \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\mathbin{!}\Varid{v}_{2}}{\Varid{v}_{2}}}. We read \ensuremath{\mathbin{!}} as
+the ``bang'' operator.
+
+A basic change structure can decide to use only replacement changes (which can
+be appropriate for primitive types with values of constant size), or to make
+\ensuremath{\Delta \Conid{V}} a sum type allowing both replacement changes and other ways to describe a
+change (as long as we're using a language plugin that adds sum types).
+\end{example}
+
+\paragraph{Nil changes}
+Just like integers have a null element \ensuremath{\mathrm{0}}, among changes there can be nil
+changes:
+\begin{definition}[Nil changes]
+  \label{def:nil-changes}
+  We say that \ensuremath{\Varid{dv}\typcolon\Delta \Conid{V}} is a nil change for \ensuremath{\Varid{v}\typcolon\Conid{V}} if \ensuremath{\validfromto{\Conid{V}}{\Varid{v}}{\Varid{dv}}{\Varid{v}}}.
+\end{definition}
+
+For instance, \ensuremath{\mathrm{0}} is a nil change for any integer number \ensuremath{\Varid{n}}.
+However, in general a change might be nil for an element but not
+for another. For instance, the replacement change \ensuremath{\mathbin{!}\mathrm{6}} is a nil
+change on \ensuremath{\mathrm{6}} but not on \ensuremath{\mathrm{5}}.
+
+We'll say more on nil changes in \cref{sec:derivative-formal,sec:nil-changes-intro}.
+
+\subsection{Function spaces}
+Next, we define a basic change structure that we call \ensuremath{\widetilde{\Conid{A}}\to \widetilde{\Conid{B}}} for an arbitrary function space \ensuremath{\Conid{A}\to \Conid{B}}, assuming we have basic change
+structures for both \ensuremath{\Conid{A}} and \ensuremath{\Conid{B}}.
+%
+We claimed earlier that valid function changes map valid input changes to valid
+output changes. We make this claim formal through next definition.
+\begin{definition}[Basic change structure on \ensuremath{\Conid{A}\to \Conid{B}}]
+  \label{def:basic-change-structure-funs}
+  Given basic change structures on \ensuremath{\Conid{A}} and \ensuremath{\Conid{B}}, we define a basic change
+  structure on \ensuremath{\Conid{A}\to \Conid{B}} that we write \ensuremath{\widetilde{\Conid{A}}\to \widetilde{\Conid{B}}} as follows:
+  \begin{subdefinition}
+  \item Change set \ensuremath{\Delta (\Conid{A}\to \Conid{B})} is \ensuremath{\Conid{A}\to \Delta \Conid{A}\to \Delta \Conid{B}}.
+  \item Function change \ensuremath{\Varid{df}} is valid from \ensuremath{\Varid{f}_{1}}
+    to \ensuremath{\Varid{f}_{2}} (that is, \ensuremath{\validfromto{\Conid{A}\to \Conid{B}}{\Varid{f}_{1}}{\Varid{df}}{\Varid{f}_{2}}}) if and only if,
+    for all valid input changes \ensuremath{\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}}, value \ensuremath{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}} is a valid
+    output change from \ensuremath{\Varid{f}_{1}\;\Varid{a}_{1}} to \ensuremath{\Varid{f}_{2}\;\Varid{a}_{2}} (that is, \ensuremath{\validfromto{\Conid{B}}{\Varid{f}_{1}\;\Varid{a}_{1}}{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}}{\Varid{f}_{2}\;\Varid{a}_{2}}}).
+  \end{subdefinition}
+\end{definition}
+
+% More precisely, |df| is a valid function change
+% from |f1| to |f2| if, for all changes |da| from |a1| to |a2| on set |A|,
+% value |df a1 da|
+% is a valid change from |f1 a1| to |f2 a2|.
+
+\begin{notation}[Applying function changes to changes]
+  When reading out \ensuremath{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}} we'll often talk for brevity about applying \ensuremath{\Varid{df}}
+  to \ensuremath{\Varid{da}}, leaving \ensuremath{\Varid{da}}'s source \ensuremath{\Varid{a}_{1}} implicit when it can be deduced from
+  context.
+\end{notation}
+
+We'll also consider valid changes \ensuremath{\Varid{df}} for curried $n$-ary functions. We show
+what their validity means for curried binary functions \ensuremath{\Varid{f}\typcolon\Conid{A}\to \Conid{B}\to \Conid{C}}. We
+omit similar statements for higher arities, as they add no new ideas.
+\begin{lemma}[Validity on \ensuremath{\Conid{A}\to \Conid{B}\to \Conid{C}}]
+  \label{lem:validity-binary-functions}
+  For any basic change structures \ensuremath{\widetilde{\Conid{A}}}, \ensuremath{\widetilde{\Conid{B}}} and \ensuremath{\widetilde{\Conid{C}}}, function
+  change \ensuremath{\Varid{df}\typcolon\;\Delta (\Conid{A}\to \Conid{B}\to \Conid{C})} is valid from \ensuremath{\Varid{f}_{1}} to \ensuremath{\Varid{f}_{2}} (that is, \ensuremath{\validfromto{\Conid{A}\to \Conid{B}\to \Conid{C}}{\Varid{f}_{1}}{\Varid{df}}{\Varid{f}_{2}}}) \emph{if and only if} applying \ensuremath{\Varid{df}} to valid input
+  changes \ensuremath{\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}} and \ensuremath{\validfromto{\Conid{B}}{\Varid{b}_{1}}{\Varid{db}}{\Varid{b}_{2}}} gives a valid output change
+  \[\ensuremath{\validfromto{\Conid{C}}{\Varid{f}\;\Varid{a}_{1}\;\Varid{b}_{1}}{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}\;\Varid{b}_{1}\;\Varid{db}}{\Varid{f}\;\Varid{a}_{2}\;\Varid{b}_{2}}}.\]
+\end{lemma}
+\begin{proof}
+  The equivalence follows from applying the definition of function validity of \ensuremath{\Varid{df}} twice.
+
+  That is: function change \ensuremath{\Varid{df}} is valid (\ensuremath{\validfromto{\Conid{A}\to (\Conid{B}\to \Conid{C})}{\Varid{f}_{1}}{\Varid{df}}{\Varid{f}_{2}}}) if
+  and only if it maps valid input change \ensuremath{\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}} to valid output
+  change
+  \[\ensuremath{\validfromto{\Conid{B}\to \Conid{C}}{\Varid{f}_{1}\;\Varid{a}_{1}}{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}}{\Varid{f}_{2}\;\Varid{a}_{2}}}.
+  \]
+  In turn, \ensuremath{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}} is a function change, which is valid if and only if
+  it maps valid input change \ensuremath{\validfromto{\Conid{B}}{\Varid{b}_{1}}{\Varid{db}}{\Varid{b}_{2}}} to
+  \[\ensuremath{\validfromto{\Conid{C}}{\Varid{f}\;\Varid{a}_{1}\;\Varid{b}_{1}}{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}\;\Varid{b}_{1}\;\Varid{db}}{\Varid{f}\;\Varid{a}_{2}\;\Varid{b}_{2}}}\]
+  as required by the lemma.
+\end{proof}
+
+\subsection{Derivatives}
+\label{sec:derivative-formal}
+Among valid function changes, derivatives play a central role, especially in the
+statement of correctness of differentiation.
+
+\begin{definition}[Derivatives]
+  \label{def:derivative-raw}
+  Given function \ensuremath{\Varid{f}\typcolon\;\Conid{A}\to \Conid{B}}, function \ensuremath{\Varid{df}\typcolon\;\Conid{A}\to \Delta \Conid{A}\to \Delta \Conid{B}} is a
+  derivative for \ensuremath{\Varid{f}} if, for all changes \ensuremath{\Varid{da}} from \ensuremath{\Varid{a}_{1}} to \ensuremath{\Varid{a}_{2}} on set \ensuremath{\Conid{A}}, change
+  \ensuremath{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}} is valid from \ensuremath{\Varid{f}\;\Varid{a}_{1}} to \ensuremath{\Varid{f}\;\Varid{a}_{2}}.
+\end{definition}
+
+However, it follows that derivatives are nil function changes:
+
+\begin{lemma}[Derivatives as nil function changes]
+  \label{def:derivative}
+  Given function \ensuremath{\Varid{f}\typcolon\;\Conid{A}\to \Conid{B}}, function \ensuremath{\Varid{df}\typcolon\;\Delta (\Conid{A}\to \Conid{B})} is a derivative
+  of \ensuremath{\Varid{f}} if and only if \ensuremath{\Varid{df}} is a nil change of \ensuremath{\Varid{f}} (\ensuremath{\validfromto{\Conid{A}\to \Conid{B}}{\Varid{f}}{\Varid{df}}{\Varid{f}}}).
+\end{lemma}
+\begin{proof}
+  First we show that nil changes are derivatives.
+  First, a nil change \ensuremath{\validfromto{\Conid{A}\to \Conid{B}}{\Varid{f}}{\Varid{df}}{\Varid{f}}} has the right type to be a derivative, because \ensuremath{\Conid{A}\to \Delta \Conid{A}\to \Delta \Conid{B}\mathrel{=}\Delta (\Conid{A}\to \Conid{B})}.
+  Since \ensuremath{\Varid{df}} is a nil change from \ensuremath{\Varid{f}} to \ensuremath{\Varid{f}}, by definition it maps valid input changes
+  \ensuremath{\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}} to valid output changes
+  \ensuremath{\validfromto{\Conid{B}}{\Varid{f}\;\Varid{a}_{1}}{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}}{\Varid{f}\;\Varid{a}_{2}}}. Hence \ensuremath{\Varid{df}} is a derivative as required.
+
+  In fact, all proof steps are equivalences, and by tracing them backward, we
+  can show that derivatives are nil changes: Since a derivative \ensuremath{\Varid{df}} maps valid
+  input changes \ensuremath{\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}} to valid output changes \ensuremath{\validfromto{\Conid{B}}{\Varid{f}\;\Varid{a}_{1}}{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}}{\Varid{f}\;\Varid{a}_{2}}}, \ensuremath{\Varid{df}} is a change from \ensuremath{\Varid{f}} to \ensuremath{\Varid{f}} as required.
+\end{proof}
+
+Applying derivatives to nil changes gives again nil changes. This fact is useful
+when reasoning on derivatives. Its proof is a useful exercise on validity.
+\begin{lemma}[Derivatives preserve nil changes]
+  \label{lem:derivatives-nil-changes}
+  For any basic change structures \ensuremath{\widetilde{\Conid{A}}} and \ensuremath{\widetilde{\Conid{B}}},
+  if
+  function change \ensuremath{\Varid{df}\typcolon\Delta (\Conid{A}\to \Conid{B})} is a derivative of \ensuremath{\Varid{f}\typcolon\Conid{A}\to \Conid{B}} (\ensuremath{\validfromto{\Conid{A}\to \Conid{B}}{\Varid{f}}{\Varid{df}}{\Varid{f}}}) then applying \ensuremath{\Varid{df}}
+  to an arbitrary input nil change \ensuremath{\validfromto{\Conid{A}}{\Varid{a}}{\Varid{da}}{\Varid{a}}} gives a nil change
+  %
+  \[\ensuremath{\validfromto{\Conid{B}}{\Varid{f}\;\Varid{a}}{\Varid{df}\;\Varid{a}\;\Varid{da}}{\Varid{f}\;\Varid{a}}}.\]
+\end{lemma}
+\begin{proof}
+  Just rewrite the definition of derivatives (\cref{def:derivative}) using the
+  definition of validity of \ensuremath{\Varid{df}}.
+
+  In detail, by definition of validity for function changes
+  (\cref{def:basic-change-structure-funs}), \ensuremath{\validfromto{\Conid{A}\to \Conid{B}}{\Varid{f}_{1}}{\Varid{df}}{\Varid{f}_{2}}} means
+  that from \ensuremath{\validfromto{\Conid{A}}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}} follows \ensuremath{\validfromto{\Conid{B}}{\Varid{f}_{1}\;\Varid{a}_{1}}{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}}{\Varid{f}_{2}\;\Varid{a}_{2}}}.
+  Just substitute \ensuremath{\Varid{f}_{1}\mathrel{=}\Varid{f}_{2}\mathrel{=}\Varid{f}} and \ensuremath{\Varid{a}_{1}\mathrel{=}\Varid{a}_{2}\mathrel{=}\Varid{a}} to get the required
+  implication.
+\end{proof}
+
+Also derivatives of curried $n$-ary functions \ensuremath{\Varid{f}} preserve nil changes. We only
+state this formally for curried binary functions \ensuremath{\Varid{f}\typcolon\Conid{A}\to \Conid{B}\to \Conid{C}}; higher
+arities require no new ideas.
+\begin{lemma}[Derivatives preserve nil changes on \ensuremath{\Conid{A}\to \Conid{B}\to \Conid{C}}]
+  \label{lem:binary-derivatives-nil-changes}
+  For any basic change structures \ensuremath{\widetilde{\Conid{A}}}, \ensuremath{\widetilde{\Conid{B}}} and \ensuremath{\widetilde{\Conid{C}}},
+  if
+  function change \ensuremath{\Varid{df}\typcolon\Delta (\Conid{A}\to \Conid{B}\to \Conid{C})} is a derivative of \ensuremath{\Varid{f}\typcolon\Conid{A}\to \Conid{B}\to \Conid{C}}
+  then
+  applying \ensuremath{\Varid{df}} to nil changes \ensuremath{\validfromto{\Conid{A}}{\Varid{a}}{\Varid{da}}{\Varid{a}}} and \ensuremath{\validfromto{\Conid{B}}{\Varid{b}}{\Varid{db}}{\Varid{b}}} gives a nil change
+  \[\ensuremath{\validfromto{\Conid{C}}{\Varid{f}\;\Varid{a}\;\Varid{b}}{\Varid{df}\;\Varid{a}\;\Varid{da}\;\Varid{b}\;\Varid{db}}{\Varid{f}\;\Varid{a}\;\Varid{b}}}.\]
+\end{lemma}
+\begin{proof}
+  Similarly to validity on \ensuremath{\Conid{A}\to \Conid{B}\to \Conid{C}} (\cref{lem:validity-binary-functions}),
+  the thesis follows by applying twice the fact that derivatives preserve nil
+  changes (\cref{lem:derivatives-nil-changes}).
+
+  In detail, since derivatives preserve nil changes, \ensuremath{\Varid{df}} is a derivative
+  only if for all \ensuremath{\validfromto{\Conid{A}}{\Varid{a}}{\Varid{da}}{\Varid{a}}} we have \ensuremath{\validfromto{\Conid{B}\to \Conid{C}}{\Varid{f}\;\Varid{a}}{\Varid{df}\;\Varid{a}\;\Varid{da}}{\Varid{f}\;\Varid{a}}}. But then, \ensuremath{\Varid{df}\;\Varid{a}\;\Varid{da}} is a nil change, that is a derivative, and since it
+  preserves nil changes, \ensuremath{\Varid{df}} is a derivative only if for all \ensuremath{\validfromto{\Conid{A}}{\Varid{a}}{\Varid{da}}{\Varid{a}}} and \ensuremath{\validfromto{\Conid{B}}{\Varid{b}}{\Varid{db}}{\Varid{b}}} we have \ensuremath{\validfromto{\Conid{C}}{\Varid{f}\;\Varid{a}\;\Varid{b}}{\Varid{df}\;\Varid{a}\;\Varid{da}\;\Varid{b}\;\Varid{db}}{\Varid{f}\;\Varid{a}\;\Varid{b}}}.
+\end{proof}
+
+\subsection{Basic change structures on types}
+After studying basic change structures in the abstract, we apply them to the
+study of our object language.
+
+For each type \ensuremath{\tau}, we can define a basic change structure on domain
+\ensuremath{\Eval{\tau}}, which we write \ensuremath{\widetilde{\tau}}. Language plugins must provide basic
+change structures for base types. To provide basic change structures for
+function types \ensuremath{\sigma\to \tau}, we use the earlier construction for basic change
+structures \ensuremath{\widetilde{\sigma}\to \widetilde{\tau}} on function spaces \ensuremath{\Eval{\sigma\to \tau}}
+(\cref{def:basic-change-structure-funs}).
+\begin{definition}[Basic change structures on types]
+  \label{def:bchs-types}
+  For each type \ensuremath{\tau} we associate a basic change structure on domain
+  \ensuremath{\Eval{\tau}}, written \ensuremath{\widetilde{\tau}} through the following equations:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\widetilde{\iota}\mathrel{=}\ldots{}\<[E]%
+\\
+\>[3]{}\widetilde{\sigma\to \tau}\mathrel{=}\widetilde{\sigma}\to \widetilde{\tau}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+%
+\end{definition}
+\begin{restatable}[Basic change structures on base
+  types]{requirement}{baseBasicChangeStructures}
+  \label{req:base-basic-change-structures}
+  For each base type \ensuremath{\iota}, the plugin defines a basic change structure on
+  \ensuremath{\Eval{\iota}} that we write \ensuremath{\widetilde{\iota}}.
+\end{restatable}
+
+Crucially, for each type \ensuremath{\tau} we can define a type \ensuremath{\Delta \tau} of changes, that we
+call \emph{change type}, such that the change set \ensuremath{\Delta \Eval{\tau}} is just the
+domain \ensuremath{\Eval{\Delta \tau}} associated to change type \ensuremath{\Delta \tau}: \ensuremath{\Delta \Eval{\tau}\mathrel{=}\Eval{\Delta \tau}}. This equation allows writing change terms that evaluate directly
+to change values.%
+\footnote{Instead, in earlier proofs~\citep{CaiEtAl2014ILC} the values of change
+  terms were not change values, but had to be related to change values through a
+  logical relation; see \cref{sec:alt-change-validity}.}
+
+\begin{definition}[Change types]
+  \label{def:change-types}
+  The change type \ensuremath{\Delta \tau} of a type \ensuremath{\tau} is defined as follows:
+  % in \cref{fig:change-types}.
+\begin{align*}
+  \ensuremath{\Delta \iota} &= \ldots\\
+  \ensuremath{\Delta (\sigma\to \tau)} &= \ensuremath{\sigma\to \Delta \sigma\to \Delta \tau}
+\end{align*}
+\end{definition}
+\begin{lemma}[\ensuremath{\Delta} and \ensuremath{\Eval{\text{\textendash}}} commute on types]
+  For each type \ensuremath{\tau}, change set \ensuremath{\Delta \Eval{\tau}} equals the domain of change
+  type \ensuremath{\Eval{\Delta \tau}}.
+\end{lemma}
+\begin{proof}
+  By induction on types. For the case of function types, we simply prove
+  equationally that \ensuremath{\Delta \Eval{\sigma\to \tau}\mathrel{=}\Delta (\Eval{\sigma}\to \Eval{\tau})\mathrel{=}\Eval{\sigma}\to \Delta \Eval{\sigma}\to \Delta \Eval{\tau}\mathrel{=}\Eval{\sigma}\to \Eval{\Delta \sigma}\to \Eval{\Delta \tau}\mathrel{=}\Eval{\sigma\to \Delta \sigma\to \Delta \tau}\mathrel{=}\Eval{\Delta (\sigma\to \tau)}}. The case for base types is delegates to plugins
+  (\cref{req:base-change-types}).
+\end{proof}
+\begin{restatable}[Base change types]{requirement}{baseChangeTypes}
+  \label{req:base-change-types}
+  For each base type \ensuremath{\iota}, the plugin defines a change type \ensuremath{\Delta \iota} such
+  that \ensuremath{\Delta \Eval{\iota}\mathrel{=}\Eval{\Delta \iota}}.
+\end{restatable}
+
+We refer to values of change types as \emph{change values} or just \emph{changes}.
+
+\begin{notation}
+  We write basic change structures for types \ensuremath{\widetilde{\tau}}, not \ensuremath{\widetilde{\Eval{\tau}}},
+  and \ensuremath{\validfromto{\tau}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}}, not \ensuremath{\validfromto{\Eval{\tau}}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}}. We also write
+  consistently \ensuremath{\Eval{\Delta \tau}}, not \ensuremath{\Delta \Eval{\tau}}.
+\end{notation}
+
+% We proceed in four steps: we (a) define a type |Dt^tau| of changes, that we call
+% \emph{change type}, (b) define a logical relation for validity that picks valid
+% changes out of all elements of change types (c) define a basic change structure
+% on each type (d) verify that the basic change structure on \pg{do it and *then*
+%   summarize it.}
+
+%We can also give \emph{equivalent} definitions for changes directly on types.
+
+\subsection{Validity as a logical relation}
+\label{sec:validity-logical}
+
+Next, we show an equivalent definition of validity for values of terms, directly
+by induction on types, as a ternary
+\emph{logical} relation between a change, its source and
+destination. A typical logical relation constrains \emph{functions} to
+map related input to related outputs. In a twist, validity constrains
+\emph{function changes} to map related inputs to related outputs.
+\begin{definition}[Change validity]
+  \label{def:ch-validity}
+We say that \ensuremath{\Varid{dv}} is a (valid) change from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}} (on type \ensuremath{\tau}), and write
+\ensuremath{\validfromto{\tau}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}}, if \ensuremath{\Varid{dv}\typcolon\Eval{\Delta \tau}}, \ensuremath{\Varid{v}_{1},\Varid{v}_{2}\typcolon\Eval{\tau}} and \ensuremath{\Varid{dv}} is a ``valid'' description of the difference
+from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}}, as we define in \cref{fig:validity}.
+\end{definition}
+
+The key equations for function types are:
+\begin{align*}
+  \ensuremath{\Delta (\sigma\to \tau)} &= \ensuremath{\sigma\to \Delta \sigma\to \Delta \tau}\\
+  \ensuremath{\validfromto{\sigma\to \tau}{\Varid{f}_{1}}{\Varid{df}}{\Varid{f}_{2}}} &=
+  \ensuremath{\forall \validfromto{\sigma}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}\hsforall \hsdot{\circ }{\mathpunct{.}}\;\validfromto{\tau}{\Varid{f}_{1}\;\Varid{a}_{1}}{\Varid{df}\;\Varid{a}_{1}\;\Varid{da}}{\Varid{f}_{2}\;\Varid{a}_{2}}}
+\end{align*}
+
+\begin{remark}
+  \label{rem:validity-logical-recursion}
+  We have kept repeating the idea that valid function changes map valid input
+  changes to valid output changes. As seen in
+  \cref{sec:higher-order-intro,lem:validity-binary-functions,lem:binary-derivatives-nil-changes},
+  such valid outputs can in turn be valid function changes. We'll see the same
+  idea at work in \cref{lem:bchs-contexts-types}, in the correctness proof of
+  \ensuremath{\Derive{\text{\textendash}}}.
+
+  As we have finally seen in this section, this definition of validity can be
+  formalized as a logical relation, defined by induction on types. We'll later
+  take for granted the consequences of validity, together with lemmas such as
+  \cref{lem:validity-binary-functions}.
+\end{remark}
+
+\subsection{Change structures on typing contexts}
+To describe changes to the inputs of a term, we now also introduce change
+contexts \ensuremath{\Delta \Gamma}, environment changes \ensuremath{\D\rho\typcolon\Eval{\Delta \Gamma}}, and validity
+for environment changes \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}}.
+
+A valid environment change from \ensuremath{\rho_{1}\typcolon\Eval{\Gamma}} to \ensuremath{\rho_{2}\typcolon\Eval{\Gamma}} is an environment \ensuremath{\D\rho\typcolon\Eval{\Delta \Gamma}} that
+extends environment \ensuremath{\rho_{1}} with valid changes for each entry. We
+first define the shape of environment changes through
+\emph{change contexts}:
+
+\begin{definition}[Change contexts]
+  \label{def:change-contexts}
+  For each context \ensuremath{\Gamma} we define change context \ensuremath{\Delta \Gamma} as
+  follows:
+\begin{align*}
+  \Delta\EmptyContext &= \EmptyContext \\
+  \Delta\Extend*{x}{\tau} &= \Extend[\Extend[\Delta\Gamma]{x}{\tau}]{\D x}{\Delta\tau}\text{.}
+\end{align*}
+\end{definition}
+
+Then, we describe validity of environment changes via a judgment.
+\begin{definition}[Environment change validity]
+  \label{def:env-ch-validity}
+  We define validity for environment changes through judgment \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}}, pronounced ``\ensuremath{\D\rho} is an environment change from \ensuremath{\rho_{1}} to \ensuremath{\rho_{2}}
+  (at context \ensuremath{\Gamma})'', where \ensuremath{\rho_{1},\rho_{2}\typcolon\Eval{\Gamma},\D\rho\typcolon\Eval{\Delta \Gamma}}, via the following inference rules:
+\begin{typing}
+  \Axiom
+  {\validfromto{\EmptyContext}{\EmptyEnv}{\EmptyEnv}{\EmptyEnv}}
+
+  \Rule{\ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}}\\
+    \ensuremath{\validfromto{\tau}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}}}{
+  \validfromto{\Extend{x}{\tau}}
+  {\ExtendEnv*[\rho_1]{x}{a_1}}
+  {\ExtendEnv*[\ExtendEnv[\D\rho]{x}{a_1}]{dx}{\D{a}}}
+  {\ExtendEnv*[\rho_2]{x}{a_2}}}
+\end{typing}
+\end{definition}
+
+\begin{definition}[Basic change structures for contexts]
+  \label{def:bchs-contexts}
+  To each context \ensuremath{\Gamma} we associate a basic change structure on set
+  \ensuremath{\Eval{\Gamma}}. We take \ensuremath{\Eval{\Delta \Gamma}} as change set and reuse validity on
+  environment changes (\cref{def:env-ch-validity}).
+\end{definition}
+\begin{notation}
+  We write \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}} rather than \ensuremath{\validfromto{\Eval{\Gamma}}{\rho_{1}}{\D\rho}{\rho_{2}}}.
+\end{notation}
+
+Finally, to state and prove correctness of differentiation, we are going to need
+to discuss function changes on term semantics. The semantics of a term \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} is a function \ensuremath{\Eval{\Varid{t}}} from environments in \ensuremath{\Eval{\Gamma}} to values in
+\ensuremath{\Eval{\tau}}. To discuss changes to \ensuremath{\Eval{\Varid{t}}} we need a basic change structure on
+function space \ensuremath{\Eval{\Gamma}\to \Eval{\tau}}.
+\begin{lemma}%[Basic change structures for contexts and types]
+  \label{lem:bchs-contexts-types}
+  The construction of basic change structures on function spaces
+  (\cref{def:basic-change-structure-funs}) associates to each context \ensuremath{\Gamma}
+  and type \ensuremath{\tau} a basic change structure \ensuremath{\widetilde{\Gamma}\to \widetilde{\tau}} on function
+  space \ensuremath{\Eval{\Gamma}\to \Eval{\tau}}.
+\end{lemma}
+\begin{notation}
+As usual, we write the change set as \ensuremath{\Delta (\Eval{\Gamma}\to \Eval{\tau})}; for
+validity, we write \ensuremath{\validfromto{\Gamma,\tau}{\Varid{f}_{1}}{\Varid{df}}{\Varid{f}_{2}}} rather than \ensuremath{\validfromto{\Eval{\Gamma}\to \Eval{\tau}}{\Varid{f}_{1}}{\Varid{df}}{\Varid{f}_{2}}}.
+\end{notation}
+
+\section{Correctness of differentiation}
+\label{sec:correct-derive}
+In this section we state and prove correctness of
+differentiation, a term-to-term transformation written
+\ensuremath{\Derive{\Varid{t}}} that produces incremental programs. We recall that
+all our results apply only to well-typed terms (since we
+formalize no other ones).
+
+Earlier, we described how \ensuremath{\Derive{\text{\textendash}}} behaves through
+\cref{slogan:derive}---here is it again, for reference:
+%
+\begin{fullCompile}
+\sloganDerive*
+\end{fullCompile}
+\begin{partCompile}
+\begin{restatable}{slogan}{sloganDerive}
+  \label{slogan:derive}
+  Term \ensuremath{\Derive{\Varid{t}}} maps input changes to output changes.
+  That is, \ensuremath{\Derive{\Varid{t}}} applied to old base inputs and valid \emph{input changes}
+  (from old inputs to new inputs) gives a valid \emph{output change} from \ensuremath{\Varid{t}}
+  applied on old inputs to \ensuremath{\Varid{t}} applied on new inputs.
+\end{restatable}
+\end{partCompile}
+In our slogan we do not specify what we meant by inputs, though we gave examples
+during the discussion. We have now the notions needed for a more precise statement.
+Term \ensuremath{\Derive{\Varid{t}}} must satisfy our slogan for
+two sorts of inputs:
+\begin{enumerate}
+\item Evaluating \ensuremath{\Derive{\Varid{t}}} must map an environment change \ensuremath{\D\rho} from
+\ensuremath{\rho_{1}} to \ensuremath{\rho_{2}} into a valid result change \ensuremath{\Eval{\Derive{\Varid{t}}}\;\D\rho}, going from
+\ensuremath{\Eval{\Varid{t}}\;\rho_{1}} to \ensuremath{\Eval{\Varid{t}}\;\rho_{2}}.
+\item As we learned since stating our slogan, validity is defined by recursion
+over types. If term \ensuremath{\Varid{t}} has type \ensuremath{\sigma\to \tau}, change \ensuremath{\Eval{\Derive{\Varid{t}}}\;\D\rho}
+can in turn be a (valid) function change
+(\cref{rem:validity-logical-recursion}). Function changes map valid changes for
+\emph{their} inputs to valid changes for \emph{their} outputs.
+\end{enumerate}
+
+Instead of saying that \ensuremath{\Eval{\Derive{\Varid{t}}}} maps \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}} to a
+change from \ensuremath{\Eval{\Varid{t}}\;\rho_{1}} to \ensuremath{\Eval{\Varid{t}}\;\rho_{2}}, we can say that function \ensuremath{\EvalInc{\Varid{t}}\mathrel{=}\lambda \rho\;\D\rho\to \Eval{\Derive{\Varid{t}}}\;\D\rho} must be a \emph{nil change} for \ensuremath{\Eval{\Varid{t}}},
+that is, a \emph{derivative} for \ensuremath{\Eval{\Varid{t}}}.
+We give a name to this function change, and state \ensuremath{\Derive{\text{\textendash}}}'s correctness
+theorem.
+
+\begin{definition}[Incremental semantics]
+  \label{def:inc-semantics}
+  We define the \emph{incremental semantics} of a well-typed term
+  \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} in terms of differentiation as:
+  \[\ensuremath{\EvalInc{\Varid{t}}\mathrel{=}(\lambda \rho_{1}\;\D\rho\to \Eval{\Derive{\Varid{t}}}\;\D\rho)\typcolon\Eval{\Gamma}\to \Eval{\Delta \Gamma}\to \Eval{\Delta \tau}}.\]
+\end{definition}
+
+\begin{restatable}[\ensuremath{\Derive{\text{\textendash}}} is correct]{theorem}{deriveCorrect}
+  \label{thm:derive-correct}
+  Function \ensuremath{\EvalInc{\Varid{t}}} is a derivative of \ensuremath{\Eval{\Varid{t}}}. That is, if
+  \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} and \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}} then
+  \ensuremath{\validfromto{\tau}{\Eval{\Varid{t}}\;\rho_{1}}{\Eval{\Derive{\Varid{t}}}\;\D\rho}{\Eval{\Varid{t}}\;\rho_{2}}}.
+\end{restatable}
+
+For now we discuss this statement further; we defer the proof to
+\cref{sec:derive-correct-proof}.
+
+\begin{remark}[Why \ensuremath{\EvalInc{\text{\textendash}}} ignores \ensuremath{\rho_{1}}]
+Incremental semantics \ensuremath{\EvalInc{\Varid{t}}\mathrel{=}\lambda \rho_{1}\;\D\rho\to \Eval{\Derive{\Varid{t}}}\;\D\rho} can safely
+ignore \ensuremath{\rho_{1}} because \ensuremath{\EvalInc{\text{\textendash}}} assumes that change environment \ensuremath{\D\rho} is valid
+(\ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}}), so \ensuremath{\D\rho} extends environment \ensuremath{\rho_{1}} and \ensuremath{\rho_{1}} provides
+no further information.
+\end{remark}
+\begin{remark}[Term derivatives]
+  In \cref{ch:static-diff-intro}, we suggested that \ensuremath{\Derive{\Varid{t}}} only produced a
+  derivative for closed terms, not for open ones. But \ensuremath{\EvalInc{\Varid{t}}\mathrel{=}\lambda \rho\;\D\rho\to \Eval{\Derive{\Varid{t}}}\;\D\rho} is \emph{always} a nil change and derivative of \ensuremath{\Eval{\Varid{t}}}
+  for any \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}. There is no contradiction, because the
+  \emph{value} of \ensuremath{\Derive{\Varid{t}}} is \ensuremath{\Eval{\Derive{\Varid{t}}}\;\D\rho}, which is only a nil
+  change if \ensuremath{\D\rho} is a nil change as well. In particular, for closed terms
+  (\ensuremath{\Gamma\mathrel{=}\EmptyContext}), \ensuremath{\D\rho} must equal the empty environment \ensuremath{\EmptyEnv},
+  hence \ensuremath{\D\rho} is a nil change. If \ensuremath{\tau} is a function type, \ensuremath{\Varid{df}\mathrel{=}\Eval{\Derive{\Varid{t}}}\;\D\rho}
+  accepts further inputs; since \ensuremath{\Varid{df}} must be a valid function change, it will
+  also map them to valid outputs as required by our \cref{slogan:derive}.
+  Finally, if \ensuremath{\Gamma\mathrel{=}\EmptyContext} and \ensuremath{\tau} is a function type, then \ensuremath{\Varid{df}\mathrel{=}\Eval{\Derive{\Varid{t}}}\;\EmptyEnv} is a derivative of \ensuremath{\Varid{f}\mathrel{=}\Eval{\Varid{t}}\;\EmptyEnv}.
+
+  We summarize this remark with the following definition and corollary.
+\end{remark}
+\begin{definition}[Derivatives of terms]
+  For all closed terms of function type \ensuremath{\vdash\Varid{t}\typcolon\sigma\to \tau}, we call \ensuremath{\Derive{\Varid{t}}} the (term) derivative of \ensuremath{\Varid{t}}.
+\end{definition}
+\begin{restatable}[Term derivatives evaluate to
+  derivatives]{corollary}{deriveCorrectClosed}
+  % |derive(param)| on closed terms gives derivatives
+  For all closed terms of function type \ensuremath{\vdash\Varid{t}\typcolon\sigma\to \tau}, function
+  \ensuremath{\Eval{\Derive{\Varid{t}}}\;\EmptyEnv} is a derivative of \ensuremath{\Eval{\Varid{t}}\;\EmptyEnv}.
+\end{restatable}
+\begin{proof}
+  Because \ensuremath{\EvalInc{\Varid{t}}} is a derivative (\cref{thm:derive-correct}), and applying
+  derivative \ensuremath{\EvalInc{\Varid{t}}} to nil change \ensuremath{\EmptyEnv} gives a derivative
+  (\cref{lem:derivatives-nil-changes}).
+\end{proof}
+\begin{remark}
+  We typically talk \emph{a} derivative of a function value \ensuremath{\Varid{f}\typcolon\Conid{A}\to \Conid{B}}, not
+  \emph{the} derivative, since multiple different functions can satisfy the
+  specification of derivatives. We talk about \emph{the derivative} to refer to
+  a canonically chosen derivative. For terms and their semantics, the canonical
+  derivative the one produced by differentiation. For language primitives, the
+  canonical derivative is the one chosen by the language plugin under
+  consideration.
+\end{remark}
+
+\Cref{thm:derive-correct} only makes sense if \ensuremath{\Derive{\text{\textendash}}} has the right
+static semantics:
+
+\begin{restatable}[Typing of \ensuremath{\Derive{\text{\textendash}}}]{lemma}{deriveTyping}
+  \label{lem:derive-typing}
+  Typing rule
+  \begin{typing}
+    \Rule[Derive]
+    {\ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}}
+    {\ensuremath{\Delta \Gamma\vdash\Derive{\Varid{t}}\typcolon\Delta \tau}}
+  \end{typing}
+  is derivable.
+\end{restatable}
+
+After we'll define \ensuremath{\oplus }, in next chapter, we'll be able to relate \ensuremath{\oplus }
+to validity, by proving \cref{thm:valid-oplus}, which we state in advance here:
+\begin{fullCompile}
+\begin{restatable*}[\ensuremath{\oplus } agrees with validity]{lemma}{validOplus}
+  \label{thm:valid-oplus}
+  If \ensuremath{\validfromto{\tau}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}} then \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}\mathrel{=}\Varid{v}_{2}}.
+\end{restatable*}
+\end{fullCompile}
+\begin{partCompile}
+\begin{restatable}[\ensuremath{\oplus } agrees with validity]{lemma}{validOplus}
+  \label{thm:valid-oplus}
+  If \ensuremath{\validfromto{\tau}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}} then \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}\mathrel{=}\Varid{v}_{2}}.
+\end{restatable}
+\end{partCompile}
+
+Hence, updating base result \ensuremath{\Eval{\Varid{t}}\;\rho_{1}} by change
+\ensuremath{\Eval{\Derive{\Varid{t}}}\;\D\rho} via \ensuremath{\oplus } gives the updated result
+\ensuremath{\Eval{\Varid{t}}\;\rho_{2}}.
+\begin{fullCompile}
+\begin{restatable*}[\ensuremath{\Derive{\text{\textendash}}} is correct, corollary]{corollary}{deriveCorrectOplus}
+  \label{thm:derive-correct-oplus}
+  If \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} and \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}} then
+  \ensuremath{\Eval{\Varid{t}}\;\rho_{1}\oplus \Eval{\Derive{\Varid{t}}}\;\D\rho\mathrel{=}\Eval{\Varid{t}}\;\rho_{2}}.
+\end{restatable*}
+\end{fullCompile}
+\begin{partCompile}
+\begin{restatable}[\ensuremath{\Derive{\text{\textendash}}} is correct, corollary]{corollary}{deriveCorrectOplus}
+  \label{thm:derive-correct-oplus}
+  If \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} and \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}} then
+  \ensuremath{\Eval{\Varid{t}}\;\rho_{1}\oplus \Eval{\Derive{\Varid{t}}}\;\D\rho\mathrel{=}\Eval{\Varid{t}}\;\rho_{2}}.
+\end{restatable}
+\end{partCompile}
+We anticipate the proof of this corollary:
+\begin{proof}
+  First, differentiation is correct (\cref{thm:derive-correct}), so under the hypotheses
+  \[\ensuremath{\validfromto{\tau}{\Eval{\Varid{t}}\;\rho_{1}}{\Eval{\Derive{\Varid{t}}}\;\D\rho}{\Eval{\Varid{t}}\;\rho_{2}}};\]
+  that judgement implies the thesis \[\ensuremath{\Eval{\Varid{t}}\;\rho_{1}\oplus \Eval{\Derive{\Varid{t}}}\;\D\rho\mathrel{=}\Eval{\Varid{t}}\;\rho_{2}}\]
+  because \ensuremath{\oplus } agrees with validty (\cref{thm:valid-oplus}).
+\end{proof}
+
+\subsection{Plugin requirements}
+Differentiation is extended by plugins on constants, so plugins
+must prove their extensions correct.
+
+\begin{restatable}[Typing of \ensuremath{\DeriveConst{\text{\textendash}}}]{requirement}{constDifferentiation}
+  \label{req:const-differentiation}
+  For all $\ConstTyping{c}{\tau}$, the plugin defines
+  \ensuremath{\DeriveConst{\Varid{c}}} satisfying \ensuremath{\vdash\DeriveConst{\Varid{c}}\typcolon\Delta \tau}.
+\end{restatable}
+
+\begin{restatable}[Correctness of \ensuremath{\DeriveConst{\text{\textendash}}}]{requirement}{deriveConstCorrect}
+  \label{req:correct-derive-const}
+  For all $\ConstTyping{c}{\tau}$, \ensuremath{\Eval{\DeriveConst{\Varid{c}}}} is a derivative for
+  \ensuremath{\Eval{\Varid{c}}}.
+\end{restatable}
+Since constants are typed in the empty context, and the only change for an empty environment is an empty environment, \cref{req:correct-derive-const} means that for all $\ConstTyping{c}{\tau}$ we have
+\[\ensuremath{\validfromto{\tau}{\Eval{\Varid{c}}\;\EmptyEnv}{\Eval{\DeriveConst{\Varid{c}}}\;\EmptyEnv}{\Eval{\Varid{c}}\;\EmptyEnv}}.\]
+
+\subsection{Correctness proof}
+\label{sec:derive-correct-proof}
+We next recall \ensuremath{\Derive{\text{\textendash}}}'s definition and prove it satisfies
+its correctness statement \cref{thm:derive-correct}.
+%After stating on |derive(param)|, we define |derive(param)| and prove the requirements hold.
+\begin{fullCompile}
+\deriveDef*
+\end{fullCompile}
+\begin{partCompile}
+\begin{restatable}[Differentiation]{definition}{deriveDef}
+  \label{def:derive}
+Differentiation is the following term transformation:
+\deriveDefCore
+where \ensuremath{\DeriveConst{\Varid{c}}} defines differentiation on primitives and
+is provided by language plugins (see \cref{sec:lang-plugins}),
+and \ensuremath{\Varid{dx}} stands for a variable generated by prefixing \ensuremath{\Varid{x}}'s
+name with \ensuremath{\Varid{d}}, so that \ensuremath{\Derive{\Varid{y}}\mathrel{=}\Varid{dy}} and so on.%
+\end{restatable}
+\end{partCompile}
+
+Before correctness, we prove \cref{lem:derive-typing}:
+\deriveTyping*
+\begin{proof}
+  The thesis can be proven by induction on the typing derivation
+  \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}. The case for constants is delegated to plugins in
+  \cref{req:const-differentiation}.
+\end{proof}
+
+We prove \cref{thm:derive-correct} using a typical logical relations strategy.
+We proceed by induction on term \ensuremath{\Varid{t}} and prove for each case that if
+\ensuremath{\Derive{\text{\textendash}}} preserves validity on subterms of \ensuremath{\Varid{t}}, then also \ensuremath{\Derive{\Varid{t}}}
+preserves validity. Hence, if the input environment change \ensuremath{\D\rho} is valid, then
+the result of differentiation evaluates to valid change \ensuremath{\Eval{\Derive{\Varid{t}}}\;\D\rho}.
+
+Readers familiar with logical relations proofs should be able to reproduce this
+proof on their own, as it is rather standard, once one uses the given
+definitions. In particular, this proof resembles closely the proof of the
+abstraction theorem or relational parametricity (as given by
+\citet[Sec.~6]{Wadler1989theorems} or by \citet[Sec.~3.3,
+Theorem~3]{Bernardy2011realizability}) and the proof of the fundamental theorem
+of logical relations by \citet{Statman1985logical}.
+
+Nevertheless, we spell this proof out, and use it to motivate how
+\ensuremath{\Derive{\text{\textendash}}} is defined, more formally than we did in
+\cref{sec:informal-derive}. For each case, we first give a short proof sketch,
+and then redo the proof in more detail to make the proof easier to follow.
+
+\deriveCorrect*
+\begin{proof}
+  By induction on typing derivation \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}.
+  \begin{itemize}
+  \item Case \ensuremath{\Gamma\vdash\Varid{x}\typcolon\tau}. The thesis is that \ensuremath{\Eval{\Derive{\Varid{x}}}}
+    is a derivative for \ensuremath{\Eval{\Varid{x}}}, that is \ensuremath{\validfromto{\tau}{\Eval{\Varid{x}}\;\rho_{1}}{\Eval{\Derive{\Varid{x}}}\;\D\rho}{\Eval{\Varid{x}}\;\rho_{2}}}.
+    Since \ensuremath{\D\rho} is a valid environment change
+    from \ensuremath{\rho_{1}} to \ensuremath{\rho_{2}}, \ensuremath{\Eval{\Varid{dx}}\;\D\rho} is a valid change
+    from \ensuremath{\Eval{\Varid{x}}\;\rho_{1}} to \ensuremath{\Eval{\Varid{x}}\;\rho_{2}}. Hence, defining \ensuremath{\Derive{\Varid{x}}\mathrel{=}\Varid{dx}} satisfies our thesis.
+  \item Case \ensuremath{\Gamma\vdash\Varid{s}\;\Varid{t}\typcolon\tau}.
+    %
+    The thesis is that \ensuremath{\Eval{\Derive{\Varid{s}\;\Varid{t}}}} is a derivative for \ensuremath{\Eval{\Varid{s}\;\Varid{t}}}, that is
+    \ensuremath{\validfromto{\tau}{\Eval{\Varid{s}\;\Varid{t}}\;\rho_{1}}{\Eval{\Derive{\Varid{s}\;\Varid{t}}}\;\D\rho}{\Eval{\Varid{s}\;\Varid{t}}\;\rho_{2}}}.
+    %
+    By inversion of typing, there is some type \ensuremath{\sigma} such that
+    \ensuremath{\Gamma\vdash\Varid{s}\typcolon\sigma\to \tau} and \ensuremath{\Gamma\vdash\Varid{t}\typcolon\sigma}.
+
+    To prove the thesis, in short, you can apply the inductive
+    hypothesis to \ensuremath{\Varid{s}} and \ensuremath{\Varid{t}},
+    obtaining respectively that \ensuremath{\Eval{\Derive{\Varid{s}}}} and \ensuremath{\Eval{\Derive{\Varid{t}}}}
+    are derivatives for \ensuremath{\Eval{\Varid{s}}} and \ensuremath{\Eval{\Varid{t}}}. In particular, \ensuremath{\Eval{\Derive{\Varid{s}}}}
+    evaluates to a validity-preserving function change.
+    Term \ensuremath{\Derive{\Varid{s}\;\Varid{t}}}, that is \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}}, applies
+    validity-preserving function \ensuremath{\Derive{\Varid{s}}} to valid
+    input change \ensuremath{\Derive{\Varid{t}}}, and this produces a valid change for
+    \ensuremath{\Varid{s}\;\Varid{t}} as required.
+
+    In detail, our thesis is that for all \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}} we have
+    \[\ensuremath{\validfromto{\tau}{\Eval{\Varid{s}\;\Varid{t}}\;\rho_{1}}{\Eval{\Derive{\Varid{s}\;\Varid{t}}}\;\D\rho}{\Eval{\Varid{s}\;\Varid{t}}\;\rho_{2}}},\]
+    %
+    where \ensuremath{\Eval{\Varid{s}\;\Varid{t}}\;\rho\mathrel{=}(\Eval{\Varid{s}}\;\rho)\;(\Eval{\Varid{t}}\;\rho)} and
+    \begin{equational}
+      \begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{BE}{@{}l@{}}%
+\column{4}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[4]{}\Eval{\Derive{\Varid{s}\;\Varid{t}}}\;\D\rho{}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[BE]%
+\>[4]{}\Eval{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}}\;\D\rho{}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[BE]%
+\>[4]{}(\Eval{\Derive{\Varid{s}}}\;\D\rho)\;(\Eval{\Varid{t}}\;\D\rho)\;(\Eval{\Derive{\Varid{t}}}\;\D\rho){}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[BE]%
+\>[4]{}(\Eval{\Derive{\Varid{s}}}\;\D\rho)\;(\Eval{\Varid{t}}\;\rho_{1})\;(\Eval{\Derive{\Varid{t}}}\;\D\rho){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+%
+    \end{equational}%
+    The last step relies on \ensuremath{\Eval{\Varid{t}}\;\D\rho\mathrel{=}\Eval{\Varid{t}}\;\rho_{1}}. Since
+    weakening preserves meaning (\cref{lem:weaken-sound}), this
+    follows because \ensuremath{\D\rho\typcolon\Eval{\Delta \Gamma}} extends \ensuremath{\rho_{1}\typcolon\Eval{\Gamma}}, and \ensuremath{\Varid{t}} can be typed in context \ensuremath{\Gamma}.
+
+    Our thesis becomes
+    \[\ensuremath{\validfromto{\tau}{\Eval{\Varid{s}}\;\rho_{1}\;(\Eval{\Varid{t}}\;\rho_{1})}{\Eval{\Derive{\Varid{s}}}\;\D\rho\;(\Eval{\Varid{t}}\;\rho_{1})\;(\Eval{\Derive{\Varid{t}}}\;\D\rho)}{\Eval{\Varid{s}}\;\rho_{2}\;(\Eval{\Varid{t}}\;\rho_{2})}}.\]
+
+    By the inductive
+    hypothesis on \ensuremath{\Varid{s}} and \ensuremath{\Varid{t}} we have
+    \begin{gather*}
+      \ensuremath{\validfromto{\sigma\to \tau}{\Eval{\Varid{s}}\;\rho_{1}}{\Eval{\Derive{\Varid{s}}}\;\D\rho}{\Eval{\Varid{s}}\;\rho_{2}}} \\
+      \ensuremath{\validfromto{\sigma}{\Eval{\Varid{t}}\;\rho_{1}}{\Eval{\Derive{\Varid{t}}}\;\D\rho}{\Eval{\Varid{t}}\;\rho_{2}}}.
+    \end{gather*}
+    Since \ensuremath{\Eval{\Varid{s}}} is a function, its validity
+    means
+    \[\ensuremath{\forall \validfromto{\sigma}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}\hsforall \hsdot{\circ }{\mathpunct{.}}\;\validfromto{\tau}{\Eval{\Varid{s}}\;\rho_{1}\;\Varid{a}_{1}}{\Eval{\Derive{\Varid{s}}}\;\D\rho\;\Varid{a}_{1}\;\Varid{da}}{\Eval{\Varid{s}}\;\rho_{2}\;\Varid{a}_{2}}}.\]
+
+    Instantiating in this statement the hypothesis \ensuremath{\validfromto{\sigma}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}} by
+    \ensuremath{\validfromto{\sigma}{\Eval{\Varid{t}}\;\rho_{1}}{\Eval{\Derive{\Varid{t}}}\;\D\rho}{\Eval{\Varid{t}}\;\rho_{2}}} gives the
+    thesis.
+
+  \item Case \ensuremath{\Gamma\vdash\lambda \Varid{x}\to \Varid{t}\typcolon\sigma\to \tau}. By inversion of typing,
+    \ensuremath{\Gamma,\Varid{x}\typcolon\sigma\vdash\Varid{t}\typcolon\tau}.
+    By typing of \ensuremath{\Derive{\text{\textendash}}} you can show that
+    \[\ensuremath{\Delta \Gamma,\Varid{x}\typcolon\sigma,\Varid{dx}\typcolon\Delta \sigma\vdash\Derive{\Varid{t}}\typcolon\Delta \tau}.\]
+
+    % In short, our thesis is that |eval(derive(\x -> t))| is a derivative
+    % for |eval(\x -> t)|.
+    % Because we pick |derive(\x -> t) = \x dx -> derive(t)|, and because of how validity is defined on functions,
+    % our thesis is equivalent that |eval(derive t)| must be
+    % By induction on |t| we know that
+    % |eval(derive(t))| is a derivative for |eval(t)|.
+    % %
+    % We show that our thesis, that is correctness of |derive(\x ->
+    % t)|, is equivalent to correctness of |derive(t)|, because we
+    % pick |derive(\x -> t) = \x dx -> derive(t)|.
+
+    In short, our thesis is that \ensuremath{\EvalInc{\lambda \Varid{x}\to \Varid{t}}\mathrel{=}\lambda \rho_{1}\;\D\rho\to \Eval{\lambda \Varid{x}\;\Varid{dx}\to \Derive{\Varid{t}}}\;\D\rho} is a
+    derivative of \ensuremath{\Eval{\lambda \Varid{x}\to \Varid{t}}}. After a few simplifications, our thesis reduces to
+    \[\ensuremath{\validfromto{\tau}{\Eval{\Varid{t}}\;(\rho_{1},\Varid{x}\mathrel{=}\Varid{a}_{1})}{\Eval{\Derive{\Varid{t}}}\;(\D\rho,\Varid{x}\mathrel{=}\Varid{a}_{1},\Varid{dx}\mathrel{=}\Varid{da})}{\Eval{\Varid{t}}\;(\rho_{2},\Varid{x}\mathrel{=}\Varid{a}_{2})}}\]
+    for all \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}} and \ensuremath{\validfromto{\sigma}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}}.
+    But then, the thesis is simply that \ensuremath{\EvalInc{\Varid{t}}} is the derivative of \ensuremath{\Eval{\Varid{t}}}, which is true by inductive hypothesis.
+
+    % Now, |eval(\x
+    % dx -> derive(t)) = \drho a da -> eval(derive(t)) (drho, x = a, dx = da)| is just a curried version of |eval(derive(t))|; to wit,
+    % observe their meta-level types: \pg{not because of the types.}
+    % \begin{align*}
+    % |eval(derive(t)) : eval(Dt ^ Gamma , x : sigma,
+    %   dx : Dt^sigma) -> eval(Dt^tau)| \\
+    %   |eval(\x dx -> derive(t)) : eval(Dt^Gamma)
+    %   -> eval(sigma) -> eval(Dt^sigma) -> eval(Dt^tau)|
+    % \end{align*}
+    % Curried functions have equivalent behavior, so both ones give a derivative
+    % for |eval t|, once we apply them to inputs for context |Gamma , x : sigma|
+    % and corresponding valid changes.
+
+    More in detail, our thesis is that \ensuremath{\EvalInc{\lambda \Varid{x}\to \Varid{t}}} is a derivative
+    for \ensuremath{\Eval{\lambda \Varid{x}\to \Varid{t}}}, that is
+    \begin{multline}
+      \label{eq:der-corr-th1}
+      \ensuremath{\forall \validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}\hsforall \hsdot{\circ }{\mathpunct{.}}\\\validfromto{\sigma\to \tau}{\Eval{\lambda \Varid{x}\to \Varid{t}}\;\rho_{1}}{\Eval{\Derive{\lambda \Varid{x}\to \Varid{t}}}\;\D\rho}{\Eval{\lambda \Varid{x}\to \Varid{t}}\;\rho_{2}}}
+    \end{multline}
+  %
+    By simplifying, the thesis \cref{eq:der-corr-th1} becomes
+    % We can simplify the hypothesis |fromto (Gamma, x : sigma)
+    % rho1 drho rho2| using the definition of validity on
+    % environments. This
+    \begin{multline}
+      \label{eq:der-corr-th2}
+      \ensuremath{\forall \validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}\hsforall \hsdot{\circ }{\mathpunct{.}}\\\validfromto{\sigma\to \tau}{\\(\lambda \Varid{a}_{1}\to \Eval{\Varid{t}}\;(\rho_{1},\Varid{x}\mathrel{=}\Varid{a}_{1}))}{\lambda \Varid{a}_{1}\;\Varid{da}\to \Eval{\Derive{\Varid{t}}}\;(\D\rho,\Varid{x}\mathrel{=}\Varid{a}_{1},\Varid{dx}\mathrel{=}\Varid{da})}{(\lambda \Varid{a}_{2}\to \Eval{\Varid{t}}\;(\rho_{2},\Varid{x}\mathrel{=}\Varid{a}_{2}))}}.
+    \end{multline}
+    %
+    By definition of validity of function type, the thesis
+    \cref{eq:der-corr-th2} becomes
+    \begin{multline}
+      \label{eq:der-corr-th3}
+      \ensuremath{\forall \validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}\hsforall \hsdot{\circ }{\mathpunct{.}}\;\forall \validfromto{\sigma}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}\hsforall \hsdot{\circ }{\mathpunct{.}}\\\validfromto{\tau}{\\\Eval{\Varid{t}}\;(\rho_{1},\Varid{x}\mathrel{=}\Varid{a}_{1})}{\Eval{\Derive{\Varid{t}}}\;(\D\rho,\Varid{x}\mathrel{=}\Varid{a}_{1},\Varid{dx}\mathrel{=}\Varid{da})}{\Eval{\Varid{t}}\;(\rho_{2},\Varid{x}\mathrel{=}\Varid{a}_{2})}}.
+    \end{multline}
+
+    To prove the rewritten thesis \cref{eq:der-corr-th3}, take the inductive hypothesis on \ensuremath{\Varid{t}}: it says
+    that \ensuremath{\Eval{\Derive{\Varid{t}}}} is a derivative for \ensuremath{\Eval{\Varid{t}}}, so \ensuremath{\Eval{\Derive{\Varid{t}}}} maps
+    valid environment changes on \ensuremath{\Gamma,\Varid{x}\typcolon\sigma} to valid changes on \ensuremath{\tau}.
+    But by inversion of the validity judgment,
+    all valid environment changes on \ensuremath{\Gamma,\Varid{x}\typcolon\sigma} can be written as
+    %
+    \[
+      \validfromto{\Extend{x}{\sigma}}
+      {\ExtendEnv*[\rho_1]{x}{a_1}}
+      {\ExtendEnv*[\ExtendEnv[\D\rho]{x}{a_1}]{dx}{\D{a}}}
+      {\ExtendEnv*[\rho_2]{x}{a_2}},\]
+    %
+    for valid changes \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}} and \ensuremath{\validfromto{\sigma}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}}.
+    So, the inductive hypothesis is that
+    \begin{multline}
+      \ensuremath{\forall \validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}\hsforall \hsdot{\circ }{\mathpunct{.}}\;\forall \validfromto{\sigma}{\Varid{a}_{1}}{\Varid{da}}{\Varid{a}_{2}}\hsforall \hsdot{\circ }{\mathpunct{.}}\\\validfromto{\tau}{\\\Eval{\Varid{t}}\;(\rho_{1},\Varid{x}\mathrel{=}\Varid{a}_{1})}{\Eval{\Derive{\Varid{t}}}\;(\D\rho,\Varid{x}\mathrel{=}\Varid{a}_{1},\Varid{dx}\mathrel{=}\Varid{da})}{\Eval{\Varid{t}}\;(\rho_{2},\Varid{x}\mathrel{=}\Varid{a}_{2})}}.
+    \end{multline}
+    But that is exactly our thesis \cref{eq:der-corr-th3}, so we're done!
+  \item Case \ensuremath{\Gamma\vdash\Varid{c}\typcolon\tau}. In essence, since weakening
+    preserves meaning, we can rewrite the thesis to match
+    \cref{req:correct-derive-const}.
+
+    In more detail, the thesis is that \ensuremath{\DeriveConst{\Varid{c}}} is a
+    derivative for \ensuremath{\Varid{c}}, that is, if \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}} then \ensuremath{\validfromto{\tau}{\Eval{\Varid{c}}\;\rho_{1}}{\Eval{\Derive{\Varid{c}}}\;\D\rho}{\Eval{\Varid{c}}\;\rho_{2}}}. Since constants don't depend on the
+    environment and weakening preserves meaning
+    (\cref{lem:weaken-sound}), and by the definitions of
+    \ensuremath{\Eval{\text{\textendash}}} and \ensuremath{\Derive{\text{\textendash}}} on constants, the thesis
+    can be simplified to \ensuremath{\validfromto{\tau}{\Eval{\Varid{c}}\;\EmptyEnv}{\Eval{\DeriveConst{\Varid{c}}}\;\EmptyEnv}{\Eval{\Varid{c}}\;\EmptyEnv}}, which is
+    delegated to plugins in \cref{req:correct-derive-const}.
+  \end{itemize}
+\end{proof}
+
+\section{Discussion}
+\subsection{The correctness statement}
+We might have asked for the following
+correctness property:
+
+\begin{theorem}[Incorrect correctness statement]
+If \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau} and \ensuremath{\rho_{1}\oplus \D\rho\mathrel{=}\rho_{2}} then
+\ensuremath{(\Eval{\Varid{t}}\;\rho_{1})\oplus (\Eval{\Derive{\Varid{t}}}\;\D\rho)\mathrel{=}(\Eval{\Varid{t}}\;\rho_{2})}.
+\end{theorem}
+
+However, this property is not quite right. We can only prove correctness
+if we restrict the statement to input changes \ensuremath{\D\rho} that are
+\emph{valid}. Moreover, to prove this
+statement by induction we need to strengthen its conclusion: we
+require that the output change \ensuremath{\Eval{\Derive{\Varid{t}}}\;\D\rho} is also
+valid. To see why, consider term \ensuremath{(\lambda \Varid{x}\to \Varid{s})\;\Varid{t}}: Here the output of \ensuremath{\Varid{t}}
+is an input of \ensuremath{\Varid{s}}. Similarly, in \ensuremath{\Derive{(\lambda \Varid{x}\to \Varid{s})\;\Varid{t}}}, the
+output of \ensuremath{\Derive{\Varid{t}}} becomes an input change for subterm
+\ensuremath{\Derive{\Varid{t}}}, and \ensuremath{\Derive{\Varid{s}}} behaves correctly only if only if
+\ensuremath{\Derive{\Varid{t}}} produces a valid change.
+
+Typically, change types
+contain values that invalid in some sense, but incremental
+programs will \emph{preserve} validity. In particular, valid
+changes between functions are in turn functions that take valid input
+changes to valid output changes. This is why we
+formalize validity as a logical relation.
+
+\subsection{Invalid input changes}
+\label{sec:invalid}
+To see concretely why invalid changes, in general, can cause
+derivatives to produce
+incorrect results, consider again \ensuremath{\Varid{grandTotal}\mathrel{=}\lambda \Varid{xs}\;\Varid{ys}\to \Varid{sum}\;(\Varid{merge}\;\Varid{xs}\;\Varid{ys})} from~\cref{sec:motiv-example}.
+Suppose a bag change \ensuremath{\Varid{dxs}} removes an element
+\ensuremath{\mathrm{20}} from input bag \ensuremath{\Varid{xs}}, while \ensuremath{\Varid{dys}} makes no changes to \ensuremath{\Varid{ys}}:
+in this case, the output should decrease, so \ensuremath{\Varid{dz}\mathrel{=}\Varid{dgrandTotal}\;\Varid{xs}\;\Varid{dxs}\;\Varid{ys}\;\Varid{dys}} should be \ensuremath{\mathbin{-}\mathrm{20}}. However, that is only correct if
+\ensuremath{\mathrm{20}} is actually an element of \ensuremath{\Varid{xs}}. Otherwise, \ensuremath{\Varid{xs}\oplus \Varid{dxs}}
+will make no change to \ensuremath{\Varid{xs}}, hence the correct output change \ensuremath{\Varid{dz}} would be \ensuremath{\mathrm{0}}
+instead of \ensuremath{\mathbin{-}\mathrm{20}}. Similar but trickier issues apply with function
+changes; see also \cref{sec:very-invalid}.
+
+\subsection{Alternative environment changes}
+\label{sec:envs-without-base-inputs-intro}
+Environment changes can also be defined differently. We will use
+this alternative definition later (in
+\cref{sec:defunc-env-changes}).
+
+A change \ensuremath{\D\rho} from \ensuremath{\rho_{1}} to \ensuremath{\rho_{2}} contains a copy of \ensuremath{\rho_{1}}.
+Thanks to this copy, we can use an environment change as
+environment for the result of differentiation, that is, we can
+evaluate \ensuremath{\Derive{\Varid{t}}} with environment \ensuremath{\D\rho}, and
+\cref{def:inc-semantics} can define \ensuremath{\EvalInc{\Varid{t}}} as \ensuremath{\lambda \rho_{1}\;\D\rho\to \Eval{\Derive{\Varid{t}}}\;\D\rho}.
+
+But we could adapt definitions to omit the copy of \ensuremath{\rho_{1}} from
+\ensuremath{\D\rho}, by setting
+
+\[\Delta\Extend*{x}{\tau} = \Extend[\Delta\Gamma]{\D
+    x}{\Delta\tau}\]
+
+\noindent and adapting other definitions. Evaluating \ensuremath{\Derive{\Varid{t}}}
+still requires base inputs; we could then set \ensuremath{\EvalInc{\Varid{t}}\mathrel{=}\lambda \rho_{1}\;\D\rho\to \Eval{\Derive{\Varid{t}}}\;(\rho_{1},\D\rho)}, where \ensuremath{\rho_{1},\D\rho} simply
+merges the two environments appropriately (we omit a formal
+definition). This is the approach taken by
+\citet{CaiEtAl2014ILC}. When proving \cref{thm:derive-correct},
+using one or the other definition for environment changes makes
+little difference; if we embed the base environment in
+environment changes, we reduce noise because we need not define
+environment meging formally.
+
+Later (in \cref{sec:defunc-env-changes}) we will deal with
+environment explicitly, and manipulate them in programs. Then we
+will use this alternative definition for environment changes,
+since it will be convenient to store base environments separately
+from environment changes.
+
+\subsection{Capture avoidance}
+\label{sec:derive-binding-issues}
+Differentiation generates new names, so a correct implementation
+must prevent accidental capture. Till now we have ignored this problem.
+
+\paragraph{Using de Bruijn indexes}
+Our mechanization has no capture
+issues because it uses de Bruijn indexes. Change context just
+alternate variables for base inputs and input changes. A context
+such as \ensuremath{\Gamma\mathrel{=}\Varid{x}\typcolon\mathbb{Z},\Varid{y}\typcolon\Conid{Bool}} is encoded as \ensuremath{\Gamma\mathrel{=}\mathbb{Z},\Conid{Bool}}; its change context is \ensuremath{\Delta \Gamma\mathrel{=}\mathbb{Z},\Delta \mathbb{Z},\Conid{Bool},\Delta \Conid{Bool}}. This solution is correct and robust, and is the one we
+rely on.
+
+Alternatively, we can mechanize ILC using separate syntax for change terms \ensuremath{\Varid{dt}}
+that use separate namespaces for base variables and change variables.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{13}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{13E}{@{}l@{}}%
+\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{ds},\Varid{dt}{}\<[13]%
+\>[13]{}\mathbin{::=}{}\<[13E]%
+\>[18]{}\Varid{dc}{}\<[E]%
+\\
+\>[13]{}\mid {}\<[13E]%
+\>[18]{}\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Varid{dt}{}\<[E]%
+\\
+\>[13]{}\mid {}\<[13E]%
+\>[18]{}\Varid{ds}\;\Varid{t}\;\Varid{dt}{}\<[E]%
+\\
+\>[13]{}\mid {}\<[13E]%
+\>[18]{}\Varid{dx}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+In that case, change variables live in a separate namespace. Example context
+\ensuremath{\Gamma\mathrel{=}\mathbb{Z},\Conid{Bool}} gives rise to a different sort of change context, \ensuremath{\Delta \Gamma\mathrel{=}\Delta \mathbb{Z},\Delta \Conid{Bool}}. And a change term in context \ensuremath{\Gamma} is evaluted with
+separate environments for \ensuremath{\Gamma} and \ensuremath{\Delta \Gamma}.
+This is appealing, because it allows defining differentiation and proving it
+correct without using weakening and applying its proof of soundness.
+We still need to use weakening to convert change terms to their equivalents in
+the base language, but proving that conversion correct is more straightforward.
+
+\paragraph{Using names}
+Next, we discuss issues in implementing this transformation with
+names rather than de Bruijn indexes. Using names rather than de
+Bruijn indexes makes terms more readable; this is also why in
+this thesis we use names in our on-paper formalization.
+
+Unlike the rest of this chapter, we keep this discussion informal, also
+because we have not mechanized any definitions using names (as it
+may be possible using nominal logic), nor attempted formal proofs.
+The rest of the thesis does
+not depend on this material, so readers might want to skip to
+next section.
+
+Using names introduces the risk of capture, as it is common for
+name-generating
+transformations~\citep{Erdweg2014captureavoiding}. For instance,
+differentiating term \ensuremath{\Varid{t}\mathrel{=}\lambda \Varid{x}\to \Varid{f}\;\Varid{dx}} gives \ensuremath{\Derive{\Varid{t}}\mathrel{=}\lambda \Varid{x}\;\Varid{dx}\to \Varid{df}\;\Varid{dx}\;\Varid{ddx}}. Here, variable \ensuremath{\Varid{dx}} represents a base input and is
+free in \ensuremath{\Varid{t}}, yet it is incorrectly captured in \ensuremath{\Derive{\Varid{t}}} by the
+other variable \ensuremath{\Varid{dx}}, the one representing \ensuremath{\Varid{x}}'s change.
+Differentiation gives instead a
+correct result if we $\alpha$-rename \ensuremath{\Varid{x}} in \ensuremath{\Varid{t}} to any other
+name (more on that in a moment).
+
+A few workarounds and fixes are possible.
+\begin{itemize}
+\item As a workaround, we can forbid names starting with the letter \ensuremath{\Varid{d}} for
+  variables in base terms, as we do in our examples; that's
+  formally correct but pretty unsatisfactory and inelegant. With
+  this approach, our term \ensuremath{\Varid{t}\mathrel{=}\lambda \Varid{x}\to \Varid{f}\;\Varid{dx}} is simply forbidden.
+\item As a better workaround, instead of prefixing variable names
+  with \ensuremath{\Varid{d}}, we can add change variables as a separate construct
+  to the syntax of variables and forbid differentiation on terms
+  that containing change variables. This is a variant of the earlier approach
+  using separate change terms.
+  While we used this approach
+  in our prototype implementation in
+  Scala~\citep{CaiEtAl2014ILC}, it makes our output language
+  annoyingly non-standard. Converting to a standard language using names (not
+  de Bruijn indexes) raises again capture issues.
+  % A slight downside is that
+  % this unnecessarily prevents attempting iterated
+  % differentiation, as in |derive(derive(t))|.
+
+  % which other
+  % approaches to finite differencing rely on~\citep{Koch10IQE}.%
+  % \footnote{We explain in }
+  % \footnote{This restriction is
+  %   still unnecessary and slightly unfortunate, since other
+  %   approaches to finite differencing on database languages require
+  %   iterated differentiation~\citep{Koch10IQE}.
+
+  %   In fact,
+  %   we never iterate differentiation, but t
+
+  %   We discuss later~\cref{sec:finite-diff}.}
+\item We can try to $\alpha$-rename \emph{existing} bound
+  variables, as in the implementation of capture-avoiding
+  substitution. As mentioned, in our case, we can rename bound
+  variable \ensuremath{\Varid{x}} to \ensuremath{\Varid{y}} and get \ensuremath{\Varid{t'}\mathrel{=}\lambda \Varid{y}\to \Varid{f}\;\Varid{dx}}. Differentiation
+  gives the correct result \ensuremath{\Derive{\Varid{t'}}\mathrel{=}\lambda \Varid{y}\;\Varid{dy}\to \Varid{df}\;\Varid{dx}\;\Varid{ddx}}. In
+  general we can define \ensuremath{\Derive{\lambda \Varid{x}\to \Varid{t}}\mathrel{=}\lambda \Varid{y}\;\Varid{dy}\to \Derive{\Varid{t}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{y}\mskip1.5mu]}} where neither \ensuremath{\Varid{y}} nor \ensuremath{\Varid{dy}} appears free in \ensuremath{\Varid{t}}; that is,
+  we search for a fresh variable \ensuremath{\Varid{y}} (which, being fresh, does
+  not appear anywhere else) such that also \ensuremath{\Varid{dy}} does not appear
+  free in \ensuremath{\Varid{t}}.
+
+  This solution is however subtle: it reuses ideas from
+  capture-avoiding substitution, which is well-known to be
+  subtle. We have not attempted to formally prove such a solution
+  correct (or even test it) and have no plan to do so.
+\item Finally and most easily we can $\alpha$-rename \emph{new}
+  bound variables, the ones used to refer to changes, or rather,
+  only pick them fresh. But if we pick, say, fresh variable \ensuremath{\Varid{dx}_{1}}
+  to refer to the change of variable \ensuremath{\Varid{x}}, we \emph{must} use
+  \ensuremath{\Varid{dx}_{1}} consistently for every occurrence of \ensuremath{\Varid{x}}, so that
+  \ensuremath{\Derive{\lambda \Varid{x}\to \Varid{x}}} is not \ensuremath{\lambda \Varid{dx}_{1}\to \Varid{dx}_{2}}. Hence, we extend
+  \ensuremath{\Derive{\text{\textendash}}} to also take a map from names to names as
+  follows:
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t},\Varid{m}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t},(\Varid{m}\;[\mskip1.5mu \Varid{x}\to \Varid{dx}\mskip1.5mu])}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t},\Varid{m}}} &= \ensuremath{\Derive{\Varid{s},\Varid{m}}\;\Varid{t}\;\Derive{\Varid{t},\Varid{m}}} \\
+  \ensuremath{\Derive{\Varid{x},\Varid{m}}} &= \ensuremath{\Varid{m} (\Varid{x})} \\
+  \ensuremath{\Derive{\Varid{c},\Varid{m}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+where \ensuremath{\Varid{m} (\Varid{x})} represents lookup of \ensuremath{\Varid{x}} in map \ensuremath{\Varid{m}},
+\ensuremath{\Varid{dx}} is now a fresh variable that does not appear in \ensuremath{\Varid{t}},
+and \ensuremath{\Varid{m}\;[\mskip1.5mu \Varid{x}\to \Varid{dx}\mskip1.5mu]} extend \ensuremath{\Varid{m}} with a new mapping from \ensuremath{\Varid{x}} to \ensuremath{\Varid{dx}}.
+
+  But this approach, that is using a map from base variables to change
+  variables, affects the interface of differentiation. In
+  particular, it affects which variables are free in output terms, hence we must
+  also update the definition of \ensuremath{\Delta \Gamma} and derived typing rule
+  \textsc{Derive}.
+  With this approach, if term \ensuremath{\Varid{s}} is closed then \ensuremath{\Derive{\Varid{s},\Varid{emptyMap}}} gives a result
+  $\alpha$-equivalent to the old \ensuremath{\Derive{\Varid{s}}}, as long
+  as \ensuremath{\Varid{s}} triggers no capture issues. But if instead \ensuremath{\Varid{s}} is open, invoking
+  \ensuremath{\Derive{\Varid{s},\Varid{emptyMap}}} is not meaningful: we must
+  pass an initial map \ensuremath{\Varid{m}} containing mappings from \ensuremath{\Varid{s}}'s free variables to fresh
+  variables for their changes. These change variables appear free in \ensuremath{\Derive{\Varid{s},\Varid{m}}}, hence we must update typing rule \textsc{Derive}, and modify \ensuremath{\Delta \Gamma}
+  to use \ensuremath{\Varid{m}}.
+
+  We define $\Delta_m \Gamma$ by adding \ensuremath{\Varid{m}} as a parameter to
+  \ensuremath{\Delta \Gamma}, and use it in a modified rule \textsc{Derive'}:
+\begin{align*}
+  \Delta_m\EmptyContext &= \EmptyContext \\
+  \Delta_m\Extend*{x}{\tau} &= \Extend[\Extend[\Delta_m\Gamma]{x}{\tau}]{m(x)}{\Delta\tau}\text{.}
+\end{align*}
+  \begin{typing}
+    \Rule[Derive']
+    {\ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}}
+    {\Delta_m \Gamma\ensuremath{\vdash\Derive{\Varid{t},\Varid{m}}\typcolon\Delta \tau}}
+  \end{typing}
+  We conjecture that \textsc{Derive'} holds and that \ensuremath{\Derive{\Varid{t},\Varid{m}}} is correct,
+  but we have attempted no formal proof.
+\end{itemize}
+
+\section{Plugin requirement summary}
+For reference, we repeat here plugin requirements spread through the chapter.
+
+\baseBasicChangeStructures*
+\baseChangeTypes*
+\constDifferentiation*
+\deriveConstCorrect*
+
+\section{Chapter conclusion}
+In this chapter, we have formally defined changes for values and environments of
+our language, and when changes are valid. Through these definitions, we have explained
+that \ensuremath{\Derive{\Varid{t}}} is correct, that is, that it maps changes to the input
+environment to changes to the output environment. All of this assumes, among
+other things, that language plugins define valid changes for their base types
+and derivatives for their primitives.
+
+In next chapter we discuss operations we provide to construct and use
+changes. These operations will be especially useful to provide derivatives of
+primitives.

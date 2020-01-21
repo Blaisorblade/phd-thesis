@@ -1,0 +1,1412 @@
+% Emacs, this is -*- latex -*-!
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%
+%
+% First, let's redefine the forall, and the dot.
+%
+%
+% This is made in such a way that after a forall, the next
+% dot will be printed as a period, otherwise the formatting
+% of `comp_` is used. By redefining `comp_`, as suitable
+% composition operator can be chosen. Similarly, period_
+% is used for the period.
+%
+\ReadOnlyOnce{forall.fmt}%
+\makeatletter
+
+% The HaskellResetHook is a list to which things can
+% be added that reset the Haskell state to the beginning.
+% This is to recover from states where the hacked intelligence
+% is not sufficient.
+
+\let\HaskellResetHook\empty
+\newcommand*{\AtHaskellReset}[1]{%
+  \g@addto@macro\HaskellResetHook{#1}}
+\newcommand*{\HaskellReset}{\HaskellResetHook}
+
+\global\let\hsforallread\empty
+
+\newcommand\hsforall{\global\let\hsdot=\hsperiodonce}
+\newcommand*\hsperiodonce[2]{#2\global\let\hsdot=\hscompose}
+\newcommand*\hscompose[2]{#1}
+
+\AtHaskellReset{\global\let\hsdot=\hscompose}
+
+% In the beginning, we should reset Haskell once.
+\HaskellReset
+
+\makeatother
+\EndFmtInput
+
+
+% https://github.com/conal/talk-2015-essence-and-origins-of-frp/blob/master/mine.fmt
+% Complexity notation:
+
+
+
+
+
+
+% If an argument to a formatting directive starts with let, lhs2TeX likes to
+% helpfully prepend a space to the let, even though that's seldom desirable.
+% Write lett to prevent that.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Hook into forall.fmt:
+% Add proper spacing after forall-generated dots.
+
+
+
+
+
+
+
+
+
+
+
+% We shouldn't use /=, that means not equal (even if it can be overriden)!
+
+
+
+
+
+
+
+% XXX
+
+
+
+%  format `stoup` = "\blackdiamond"
+
+
+
+
+
+
+% Cancel the effect of \; (that is \thickspace)
+
+
+
+% Use as in |vapply vf va (downto n) v|.
+% (downto n) is parsed as an application argument, so we must undo the produced
+% spacing.
+
+% indexed big-step eval
+% without environments
+% big-step eval
+% change big-step eval
+
+
+
+
+
+
+
+
+% \, is 3mu, \! is -3mu, so this is almost \!\!.
+
+
+\def\deriveDefCore{%
+\begin{align*}
+  \ensuremath{\Derive{\lambda (\Varid{x}\typcolon\sigma)\to \Varid{t}}} &= \ensuremath{\lambda (\Varid{x}\typcolon\sigma)\;(\Varid{dx}\typcolon\Delta \sigma)\to \Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{s}\;\Varid{t}}} &= \ensuremath{\Derive{\Varid{s}}\;\Varid{t}\;\Derive{\Varid{t}}} \\
+  \ensuremath{\Derive{\Varid{x}}} &= \ensuremath{\Varid{dx}} \\
+  \ensuremath{\Derive{\Varid{c}}} &= \ensuremath{\DeriveConst{\Varid{c}}}
+\end{align*}
+}
+
+
+% Drop unsightly numbers from function names. The ones at the end could be
+% formatted as subscripts, but not the ones in the middle.
+
+
+\chapter{Equational reasoning on changes}
+\label{sec:term-reasoning}
+\label{ch:term-reasoning}
+
+In this chapter, we formalize equational reasoning
+directly on terms, rather than on semantic values
+(\cref{sec:denot-syntactic-reasoning}), and we discuss
+when two changes can be considered equivalent
+(\cref{sec:change-equivalence}).
+We also show, as an example, a simple change structure on lists
+and a derivative of \ensuremath{\Varid{map}} for it (\cref{ex:syn-changes-map}).
+
+To reason on terms, instead of describing the updated value of a
+term \ensuremath{\Varid{t}} by using an updated environment \ensuremath{\rho_{2}}, we substitute in
+\ensuremath{\Varid{t}} each variable \ensuremath{\Varid{x}_i} with expression \ensuremath{\Varid{x}_i\oplus \Varid{dx}_i}, to
+produce a term that computes the updated value of \ensuremath{\Varid{t}}, so that we
+can say that \ensuremath{\Varid{dx}} is a change from \ensuremath{\Varid{x}} to \ensuremath{\Varid{x}\oplus \Varid{dx}}, or that
+\ensuremath{\Varid{df}\;\Varid{x}\;\Varid{dx}} is a change from \ensuremath{\Varid{f}\;\Varid{x}} to \ensuremath{(\Varid{f}\oplus \Varid{df})\;(\Varid{x}\oplus \Varid{dx})}. Lots of the work in this chapter is needed to modify
+definitions, and go from using an updated environment to using
+substitution in this fashion.
+
+To compare for equivalence terms that use changes, we can't use
+denotational equivalence, but must restrict to consider valid
+changes.
+
+Comparing changes is trickier: most often we are not interested
+in whether two changes produce the same value, but whether two
+changes have the same source and destination. Hence, if two
+changes share source and destination we say they are \emph{equivalent}.
+As we show in this chapter, operations that preserve validity also respect
+\emph{change equivalence}, because for all those operations the source
+and destination of any output changes only depend on source and
+destination of input changes.
+Among the same source and destination there often are multiple
+changes, and the difference among them can affect how long a
+derivative takes, but not whether the result is correct.
+
+We also show that change equivalence is a particular form of
+logical relation, a logical \emph{partial equivalence relation}
+(PER). PERs are well-known to semanticists, and often used to
+study sets with invalid elements together with the appropriate
+equivalence on these sets.
+
+The rest of the chapter expands on the details, even if they are
+not especially surprising.
+% Not all proofs in this chapter are mechanized, but many of them
+% are routine.
+
+\section{Reasoning on changes syntactically}
+\label{sec:denot-syntactic-reasoning}
+To define derivatives of primitives, we will often discuss
+validity of changes directly on programs, for instance saying
+that \ensuremath{\Varid{dx}} is a valid change from \ensuremath{\Varid{x}} to \ensuremath{\Varid{x}\oplus \Varid{dx}}, or that
+\ensuremath{\Varid{f}\;\Varid{x}\oplus \Varid{df}\;\Varid{x}\;\Varid{dx}} is equivalent to \ensuremath{\Varid{f}\;(\Varid{x}\oplus \Varid{dx})} if all
+changes in scope are valid.
+
+In this section we formalize these notions. We have not
+mechanized proofs involving substitutions, but we include them
+here, even though they are not especially interesting.
+
+But first, we exemplify informally these notions.
+\pg{Maybe: We have a derivative we can generate but that is inadequate,
+  we need to write better ones by hand. Or: we can't derive this yet.
+Or: just change motivation.}
+\begin{example}[Deriving \ensuremath{\Varid{map}} on lists]
+  \label{ex:syn-changes-map}
+Let's consider again the example from
+\cref{sec:simple-changes-list-map}, in particular \ensuremath{\Varid{dmap}}.
+Recall that a list change \ensuremath{\Varid{dxs}} is valid for source \ensuremath{\Varid{xs}} if
+they have the same length and each element change is valid for
+its corresponding element.
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{map}\typcolon(\Varid{a}\to \Varid{b})\to \Conid{List}\;\Varid{a}\to \Conid{List}\;\Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{map}\;\Varid{f}\;\Conid{Nil}\mathrel{=}\Conid{Nil}{}\<[E]%
+\\
+\>[B]{}\Varid{map}\;\Varid{f}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\mathrel{=}\Conid{Cons}\;(\Varid{f}\;\Varid{x})\;(\Varid{map}\;\Varid{f}\;\Varid{xs}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{dmap}\typcolon(\Varid{a}\to \Varid{b})\to \Delta (\Varid{a}\to \Varid{b})\to \Conid{List}\;\Varid{a}\to \Delta \Conid{List}\;\Varid{a}\to \Delta \Conid{List}\;\Varid{b}{}\<[E]%
+\\
+\>[B]{}\mbox{\onelinecomment  A valid list change has the same length as the base list:}{}\<[E]%
+\\
+\>[B]{}\Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Conid{Nil}\;\Conid{Nil}\mathrel{=}\Conid{Nil}{}\<[E]%
+\\
+\>[B]{}\Varid{dmap}\;\Varid{f}\;\Varid{df}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\;(\Conid{Cons}\;\Varid{dx}\;\Varid{dxs})\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Conid{Cons}\;(\Varid{df}\;\Varid{x}\;\Varid{dx})\;(\Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Varid{xs}\;\Varid{dxs}){}\<[E]%
+\\
+\>[B]{}\mbox{\onelinecomment  Remaining cases deal with invalid changes, and a dummy}{}\<[E]%
+\\
+\>[B]{}\mbox{\onelinecomment  result is sufficient.}{}\<[E]%
+\\
+\>[B]{}\Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Varid{xs}\;\Varid{dxs}\mathrel{=}\Conid{Nil}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\end{example}
+
+In our example, one can show that \ensuremath{\Varid{dmap}} is a correct derivative
+for \ensuremath{\Varid{map}}. As a consequence, terms \ensuremath{\Varid{map}\;(\Varid{f}\oplus \Varid{df})\;(\Varid{xs}\oplus \Varid{dxs})} and \ensuremath{\Varid{map}\;\Varid{f}\;\Varid{xs}\oplus \Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Varid{xs}\;\Varid{dxs}} are
+interchangeable in all valid contexts, that is, contexts that
+bind \ensuremath{\Varid{df}} and \ensuremath{\Varid{dxs}} to valid changes, respectively, for \ensuremath{\Varid{f}} and
+\ensuremath{\Varid{xs}}.
+
+We sketch an informal proof directly on terms.
+\begin{proof}[Proof sketch]
+We must show that \ensuremath{\Varid{dy}\mathrel{=}\Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Varid{xs}\;\Varid{dxs}} is a change change from
+initial output \ensuremath{\Varid{y}_{1}\mathrel{=}\Varid{map}\;\Varid{f}\;\Varid{xs}} to updated output \ensuremath{\Varid{y}_{2}\mathrel{=}\Varid{map}\;(\Varid{f}\oplus \Varid{df})\;(\Varid{xs}\oplus \Varid{dxs})}, for valid inputs \ensuremath{\Varid{df}} and \ensuremath{\Varid{dxs}}.
+
+We proceed by structural induction on \ensuremath{\Varid{xs}} and \ensuremath{\Varid{dxs}} (technically, on a
+proof of validity of \ensuremath{\Varid{dxs}}). Since \ensuremath{\Varid{dxs}} is valid, those two
+lists have to be of the same length. If \ensuremath{\Varid{xs}} and \ensuremath{\Varid{dxs}} are both
+empty, \ensuremath{\Varid{y}_{1}\mathrel{=}\Varid{dy}\mathrel{=}\Varid{y}_{2}\mathrel{=}\Conid{Nil}} so \ensuremath{\Varid{dy}} is a valid change as required.
+
+For the inductive step, both lists are \ensuremath{\Conid{Cons}} nodes, so we need
+to show that output change
+\[\ensuremath{\Varid{dy}\mathrel{=}\Varid{dmap}\;\Varid{f}\;\Varid{df}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})\;(\Conid{Cons}\;\Varid{dx}\;\Varid{dxs})}\]
+is a valid change from
+\[\ensuremath{\Varid{y}_{1}\mathrel{=}\Varid{map}\;\Varid{f}\;(\Conid{Cons}\;\Varid{x}\;\Varid{xs})}\] to
+\[\ensuremath{\Varid{y}_{2}\mathrel{=}\Varid{map}\;(\Varid{f}\oplus \Varid{df})\;(\Conid{Cons}\;(\Varid{x}\oplus \Varid{dx})\;(\Varid{xs}\oplus \Varid{dxs}))}.\]
+
+To restate validity we name heads and tails of \ensuremath{\Varid{dy},\Varid{y}_{1},\Varid{y}_{2}}.
+If we write \ensuremath{\Varid{dy}\mathrel{=}\Conid{Cons}\;\Varid{dh}\;\Varid{dt}}, \ensuremath{\Varid{y}_{1}\mathrel{=}\Conid{Cons}\;\Varid{h}_{1}\;\Varid{t}_{1}} and \ensuremath{\Varid{y}_{2}\mathrel{=}\Conid{Cons}\;\Varid{h}_{2}\;\Varid{t}_{2}}, we need to show that \ensuremath{\Varid{dh}} is a change from \ensuremath{\Varid{h}_{1}} to \ensuremath{\Varid{h}_{2}}
+and \ensuremath{\Varid{dt}} is a change from \ensuremath{\Varid{t}_{1}} to \ensuremath{\Varid{t}_{2}}.
+
+Indeed, head change \ensuremath{\Varid{dh}\mathrel{=}\Varid{df}\;\Varid{x}\;\Varid{dx}} is a valid change from
+\ensuremath{\Varid{h}_{1}\mathrel{=}\Varid{f}\;\Varid{x}} to \ensuremath{\Varid{h}_{2}\mathrel{=}\Varid{f}\;(\Varid{x}\oplus \Varid{dx})}.
+And tail change \ensuremath{\Varid{dt}\mathrel{=}\Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Varid{xs}\;\Varid{dxs}} is a valid change from \ensuremath{\Varid{t}_{1}\mathrel{=}\Varid{map}\;\Varid{f}\;\Varid{xs}} to
+\ensuremath{\Varid{t}_{2}\mathrel{=}\Varid{map}\;(\Varid{f}\oplus \Varid{df})\;(\Varid{xs}\oplus \Varid{dxs})} by
+induction. Hence \ensuremath{\Varid{dy}} is a valid change from \ensuremath{\Varid{y}_{1}} to \ensuremath{\Varid{y}_{2}}.
+\end{proof}
+Hopefully this proof is already convincing, but it relies on
+undefined concepts. On a metalevel function, we could already
+make this proof formal, but not so on terms yet. In this section,
+we define the required concepts.
+
+\subsection{Denotational equivalence for valid changes}
+\label{sec:denot-equivalence-valid}
+This example uses the notion of denotational equivalence for valid
+changes. We now proceed to formalize it.
+For reference, we recall denotational equivalence of terms, and then
+introduce its restriction:
+\begin{restatable*}[Denotational equivalence]{definition}{denotEqual}
+  \label{def:denot-equivalence}
+  We say that two terms \ensuremath{\Gamma\vdash\Varid{t}_{1}\typcolon\tau} and \ensuremath{\Gamma\vdash\Varid{t}_{2}\typcolon\tau} are denotationally equal, and write \ensuremath{\Gamma\vDash\Varid{t}_{1}\cong\Varid{t}_{2}\typcolon\tau} (or sometimes \ensuremath{\Varid{t}_{1}\cong\Varid{t}_{2}}), if for all environments
+  \ensuremath{\rho\typcolon\Eval{\Gamma}} we have that \ensuremath{\Eval{\Varid{t}_{1}}\;\rho\mathrel{=}\Eval{\Varid{t}_{2}}\;\rho}.
+\end{restatable*}
+
+For open terms \ensuremath{\Varid{t}_{1},\Varid{t}_{2}} that depend on changes,
+denotational equivalence is too restrictive, since it
+requires \ensuremath{\Varid{t}_{1}} and \ensuremath{\Varid{t}_{2}} to also be equal when the changes they
+depend on are not valid.
+By restricting denotational equivalence to valid environment
+changes, and terms to depend on contexts, we obtain the following definition.
+\begin{definition}[Denotational equivalence for valid changes]
+  \label{def:denot-equivalence-valid-changes}
+  For any context \ensuremath{\Gamma} and type \ensuremath{\tau},
+  we say that two terms \ensuremath{\Delta \Gamma\vdash\Varid{t}_{1}\typcolon\tau} and \ensuremath{\Delta \Gamma\vdash\Varid{t}_{2}\typcolon\tau} are \emph{denotationally equal for valid changes} and
+  write \ensuremath{\Delta \Gamma\vDash\Varid{t}_{1}\mathrel{\cong_\Delta}\Varid{t}_{2}\typcolon\tau} if, for all valid
+  environment changes \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}} we have that
+  \ensuremath{\Varid{t}_{1}} and \ensuremath{\Varid{t}_{2}} evaluate in environment \ensuremath{\D\rho} to the same value,
+  that is, \ensuremath{\Eval{\Varid{t}_{1}}\;\D\rho\mathrel{=}\Eval{\Varid{t}_{2}}\;\D\rho}.
+\end{definition}
+
+\begin{example}
+  Terms \ensuremath{\Varid{f}\;\Varid{x}\oplus \Varid{df}\;\Varid{x}\;\Varid{dx}} and \ensuremath{\Varid{f}\;(\Varid{x}\oplus \Varid{dx})} are
+denotationally equal for valid changes (for any types
+\ensuremath{\sigma,\tau}):
+\ensuremath{\Delta (\Varid{f}\typcolon\sigma\to \tau,\Varid{x}\typcolon\sigma)\vDash\Varid{f}\;\Varid{x}\oplus \Varid{df}\;\Varid{x}\;\Varid{dx}\mathrel{\cong_\Delta}\Varid{f}\;(\Varid{x}\oplus \Varid{dx})\typcolon\tau}.
+\end{example}
+\begin{example}
+One of our claims in \cref{ex:syn-changes-map} can now be written
+as
+\[\ensuremath{\Delta \Gamma\vDash\Varid{map}\;(\Varid{f}\oplus \Varid{df})\;(\Varid{xs}\oplus \Varid{dxs})\mathrel{\cong_\Delta}\Varid{map}\;\Varid{f}\;\Varid{xs}\oplus \Varid{dmap}\;\Varid{f}\;\Varid{df}\;\Varid{xs}\;\Varid{dxs}\typcolon\Conid{List}\;\Varid{b}}\]
+for a suitable context \ensuremath{\Gamma\mathrel{=}\Varid{f}\typcolon\Conid{List}\;\sigma\to \Conid{List}\;\tau,\Varid{xs}\typcolon\Conid{List}\;\sigma,\Varid{map}\typcolon(\sigma\to \tau)\to \Conid{List}\;\sigma\to \Conid{List}\;\tau} (and for
+any types \ensuremath{\sigma,\tau}).
+\end{example}
+
+Arguably, the need for a special equivalence is a defect in our
+semantics of change programs; it might be more preferable to make the type of
+changes abstract throughout the program (except for derivatives of primitives,
+which must inspect derivatives), but this is not immediate, especially in a
+module system like Haskell.
+Other possible alternatives are discussed in \cref{sec:alt-change-validity}.
+
+\subsection{Syntactic validity}
+\label{sec:denot-syntactic-validity}
+Next, we define \emph{syntactic validity}, that is,
+when a change \emph{term} \ensuremath{\Varid{dt}} is a (valid) change
+from source term \ensuremath{\Varid{t}_{1}} to destination \ensuremath{\Varid{t}_{2}}. Intuitively, \ensuremath{\Varid{dt}} is valid
+from \ensuremath{\Varid{t}_{1}} to \ensuremath{\Varid{t}_{2}} if \ensuremath{\Varid{dt}}, \ensuremath{\Varid{t}_{1}} and \ensuremath{\Varid{t}_{2}}, evaluated all
+against the same valid environment change \ensuremath{\D\rho}, produce a
+valid change, its source and destination. Formally:
+\begin{definition}[Syntactic validity]
+  \label{def:syntactic-validity}
+  We say that term \ensuremath{\Delta \Gamma\vdash\Varid{dt}\typcolon\Delta \tau} is a (syntactic)
+  change from \ensuremath{\Delta \Gamma\vdash\Varid{t}_{1}\typcolon\tau} to \ensuremath{\Delta \Gamma\vdash\Varid{t}_{2}\typcolon\tau}, and write
+  \ensuremath{\validfromtosyn{\Gamma}{\tau}{\Varid{t}_{1}}{\Varid{dt}}{\Varid{t}_{2}}}, if
+  \[\ensuremath{\forall \validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}\hsforall \hsdot{\circ }{\mathpunct{.}}\validfromto{\tau}{\Eval{\Varid{t}_{1}}\;\D\rho}{\Eval{\Varid{dt}}\;\D\rho}{\Eval{\Varid{t}_{2}}\;\D\rho}}.\]
+\end{definition}
+\begin{notation}
+  We often simply say that \ensuremath{\Varid{dt}} is a change from \ensuremath{\Varid{t}_{1}} to \ensuremath{\Varid{t}_{2}},
+  leaving everything else implicit when not important.
+\end{notation}
+
+Using syntactic validity, we can show for instance that \ensuremath{\Varid{dx}} is a
+change from \ensuremath{\Varid{x}} to \ensuremath{\Varid{x}\oplus \Varid{dx}}, that \ensuremath{\Varid{df}\;\Varid{x}\;\Varid{dx}} is a change
+from \ensuremath{\Varid{f}\;\Varid{x}} to \ensuremath{(\Varid{f}\oplus \Varid{df})\;(\Varid{x}\oplus \Varid{dx})}; both examples
+follow from a general statement about \ensuremath{\Derive{\text{\textendash}}}
+(\cref{thm:derive-correct-syntactic}). Our earlier informal proof
+of the correctness of \ensuremath{\Varid{dmap}} (\cref{ex:syn-changes-map}) can also
+be justified in terms of syntactic validity.
+
+Just like (semantic) \ensuremath{\oplus } agrees with validity, term-level
+(or syntactic) \ensuremath{\oplus } agrees with syntactic validity, up to
+denotational equivalence for valid changes.
+\begin{lemma}[Term-level \ensuremath{\oplus } agrees with syntactic validity]
+If \ensuremath{\Varid{dt}} is a change from \ensuremath{\Varid{t}_{1}} to \ensuremath{\Varid{t}_{2}} (\ensuremath{\validfromtosyn{\Gamma}{\tau}{\Varid{t}_{1}}{\Varid{dt}}{\Varid{t}_{2}}}) then \ensuremath{\Varid{t}_{1}\oplus \Varid{dt}} and \ensuremath{\Varid{t}_{2}} are denotationally equal for
+valid changes (\ensuremath{\Delta \Gamma\vDash\Varid{t}_{1}\oplus \Varid{dt}\mathrel{\cong_\Delta}\Varid{t}_{2}\typcolon\tau}).
+\end{lemma}
+\begin{proof}
+  Follows because term-level \ensuremath{\oplus } agrees with semantic \ensuremath{\oplus }
+  (\cref{lem:chops-coherent}) and \ensuremath{\oplus } agrees with validity.
+  In more detail: fix an arbitrary valid environment change
+  \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}}.
+  First, we have \ensuremath{\validfromto{\tau}{\Eval{\Varid{t}_{1}}\;\D\rho}{\Eval{\Varid{dt}}\;\D\rho}{\Eval{\Varid{t}_{2}}\;\D\rho}} because of syntactic validity.
+  Then we conclude with this calculation:
+\begin{equational}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{BE}{@{}l@{}}%
+\column{4}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[4]{}\Eval{\Varid{t}_{1}\oplus \Varid{dt}}\;\D\rho{}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[BE]%
+\>[4]{}\mbox{\commentbegin  term-level \ensuremath{\oplus } agrees with \ensuremath{\oplus } (\cref{lem:chops-coherent})  \commentend}{}\<[E]%
+\\
+\>[4]{}\Eval{\Varid{t}_{1}}\;\D\rho\oplus \Eval{\Varid{dt}}\;\D\rho{}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[BE]%
+\>[4]{}\mbox{\commentbegin  \ensuremath{\oplus } agrees with validity  \commentend}{}\<[E]%
+\\
+\>[4]{}\Eval{\Varid{t}_{2}}\;\D\rho{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\end{equational}
+\end{proof}
+
+Beware that the definition of \ensuremath{\validfromtosyn{\Gamma}{\tau}{\Varid{t}_{1}}{\Varid{dt}}{\Varid{t}_{2}}}
+evaluates all terms against change environment \ensuremath{\D\rho}, containing
+separately base values and changes. In contrast, if we use
+validity in the change structure for \ensuremath{\Eval{\Gamma}\to \Eval{\tau}}, we
+evaluate different terms against different environments. That is
+why we have that \ensuremath{\Varid{dx}} is a change from \ensuremath{\Varid{x}} to \ensuremath{\Varid{x}\oplus \Varid{dx}}
+(where \ensuremath{\Varid{x}\oplus \Varid{dx}} is evaluated in environment \ensuremath{\D\rho}),
+while \ensuremath{\Eval{\Varid{dx}}} is a valid change from \ensuremath{\Eval{\Varid{x}}} to \ensuremath{\Eval{\Varid{x}}}
+(where the destination \ensuremath{\Eval{\Varid{x}}} gets applied to environment \ensuremath{\rho_{2}}).
+
+\paragraph{Is syntactic validity trivial?}
+Without needing syntactic validity, based on earlier chapters one
+can show that
+\ensuremath{\Varid{dv}} is a valid change from \ensuremath{\Varid{v}} to \ensuremath{\Varid{v}\oplus \Varid{dv}}, or that \ensuremath{\Varid{df}\;\Varid{v}\;\Varid{dv}} is a valid change from \ensuremath{\Varid{f}\;\Varid{v}} to \ensuremath{(\Varid{f}\oplus \Varid{df})\;(\Varid{v}\oplus \Varid{dv})}, or further examples.
+But that's all about values. In this section we are just translating these
+notions to the level of terms, and formalize them.
+
+Our semantics is arguably (intuitively) a trivial one, similar to
+a metainterpreter interpreting object-language functions in terms of
+metalanguage functions: our semantics simply embeds an
+object-level $\lambda$-calculus into a meta-level and more
+expressive $\lambda$-calculus, mapping for instance \ensuremath{\lambda \Varid{f}\;\Varid{x}\to \Varid{f}\;\Varid{x}}
+(an AST) into \ensuremath{\lambda \Varid{f}\;\Varid{v}\to \Varid{f}\;\Varid{v}} (syntax for a metalevel function).
+Hence, proofs in this section about syntactic validity deal
+mostly with this translation. We don't expect the proofs to give
+special insights, and we expect most development would keep such
+issues informal (which is certainly reasonable).
+
+Nevertheless, we write out the statements to help readers refer
+to them, and write out (mostly) full proofs to help ourselves
+(and readers) verify them. Proofs are mostly standard but
+with a few twists, since we must often consider and relate
+\emph{three} computations: the computation on initial values and
+the ones on the change and on updated values.
+
+We're also paying a proof debt. Had we used substitution and
+small step semantics, we'd have directly simple statements on terms,
+instead of trickier ones involving terms and environments. We
+produce those statements now.
+% \emph{except} that
+% we must always require and propagate validity of changes, or
+% substitute variables producing initial values |xi| with terms
+% producing updated values
+% updated values |xi `oplus` dxi|.
+
+\subsubsection{Differentiation and syntactic validity}
+We can also show that \ensuremath{\Derive{\Varid{t}}} produces a syntactically valid
+change from \ensuremath{\Varid{t}}, but we need to specify its destination.
+In general, \ensuremath{\Derive{\Varid{t}}} is not a change from \ensuremath{\Varid{t}} to \ensuremath{\Varid{t}}. The
+destination must evaluate to the updated value of \ensuremath{\Varid{t}}; to produce
+a term that evaluates to the right value, we use substitution. If
+the only free variable in \ensuremath{\Varid{t}} is \ensuremath{\Varid{x}}, then \ensuremath{\Derive{\Varid{t}}} is a
+syntactic change from \ensuremath{\Varid{t}} to \ensuremath{\Varid{t}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{x}\oplus \Varid{dx}\mskip1.5mu]}.
+To repeat the same for all variables in context \ensuremath{\Gamma}, we use
+the following notation.
+\begin{notation}
+We write \ensuremath{\Varid{t}\;[\mskip1.5mu \Gamma\mathbin{:=}\Gamma\oplus \Delta \Gamma\mskip1.5mu]} to mean \ensuremath{\Varid{t}\;[\mskip1.5mu \Varid{x}_{1}\mathbin{:=}\Varid{x}_{1}\oplus \Varid{dx}_{1},\Varid{x}_{2}\mathbin{:=}\Varid{x}_{2}\oplus \Varid{dx}_{2},\ldots,\Varid{x}_n\mathbin{:=}\Varid{x}_n\oplus \Varid{dx}_n\mskip1.5mu]}.
+\end{notation}
+\begin{theorem}[\ensuremath{\Derive{\text{\textendash}}} is correct, syntactically]
+  \label{thm:derive-correct-syntactic}
+  For any well-typed term \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}, term \ensuremath{\Derive{\Varid{t}}} is
+  a syntactic change from \ensuremath{\Varid{t}} to \ensuremath{\Varid{t}\;[\mskip1.5mu \Gamma\mathbin{:=}\Gamma\oplus \Delta \Gamma\mskip1.5mu]}.
+\end{theorem}
+We present the following straightforward (if tedious) proof (formal but not mechanized).
+\begin{proof}
+  Let \ensuremath{\Varid{t}_{2}\mathrel{=}\Varid{t}\;[\mskip1.5mu \Gamma\mathbin{:=}\Gamma\oplus \Delta \Gamma\mskip1.5mu]}.
+  Take any \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}}. We must show that
+  \ensuremath{\validfromto{\tau}{\Eval{\Varid{t}}\;\D\rho}{\Eval{\Derive{\Varid{t}}}\;\D\rho}{\Eval{\Varid{t}_{2}}\;\D\rho}}.
+
+  Because \ensuremath{\D\rho} extend \ensuremath{\rho_{1}} and \ensuremath{\Varid{t}} only needs entries
+  in \ensuremath{\rho_{1}}, we can show that \ensuremath{\Eval{\Varid{t}}\;\D\rho\mathrel{=}\Eval{\Varid{t}}\;\rho_{1}}, so
+  our thesis becomes \ensuremath{\validfromto{\tau}{\Eval{\Varid{t}}\;\rho_{1}}{\Eval{\Derive{\Varid{t}}}\;\D\rho}{\Eval{\Varid{t}_{2}}\;\D\rho}}.
+
+  Because \ensuremath{\Derive{\text{\textendash}}} is correct (\cref{thm:derive-correct}) we know
+  that \ensuremath{\validfromto{\tau}{\Eval{\Varid{t}}\;\rho_{1}}{\Eval{\Derive{\Varid{t}}}\;\D\rho}{\Eval{\Varid{t}}\;\rho_{2}}}; that's almost our thesis, so we must only show that
+  \ensuremath{\Eval{\Varid{t}_{2}}\;\D\rho\mathrel{=}\Eval{\Varid{t}}\;\rho_{2}}.
+  Since \ensuremath{\oplus } agrees with
+  validity and \ensuremath{\D\rho} is valid, we have that \ensuremath{\rho_{2}\mathrel{=}\rho_{1}\oplus \D\rho}, so our thesis is now the following equation, which we
+  leave to \cref{thm:derive-correct-syntactic-env-lemma}:
+  \[\ensuremath{\Eval{\Varid{t}}\;[\mskip1.5mu \Gamma\mathbin{:=}\Gamma\oplus \Delta \Gamma\mskip1.5mu]\;\D\rho\mathrel{=}\Eval{\Varid{t}}\;(\rho_{1}\oplus \D\rho)}.\]
+\end{proof}
+
+Here's the technical lemma to complete the proof.
+\begin{lemma}
+  \label{thm:derive-correct-syntactic-env-lemma}
+  For any \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}, and \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}}
+  we have
+  \[\ensuremath{\Eval{\Varid{t}}\;[\mskip1.5mu \Gamma\mathbin{:=}\Gamma\oplus \Delta \Gamma\mskip1.5mu]\;\D\rho\mathrel{=}\Eval{\Varid{t}}\;(\rho_{1}\oplus \D\rho)}.\]
+\end{lemma}
+\begin{proof}
+  This follows from the structure of valid environment changes,
+  because term-level \ensuremath{\oplus } (used on the left-hand side) agrees with
+  value-level \ensuremath{\oplus } (used on the right-hand side) by
+  \cref{lem:chops-coherent}, and because of the substitution lemma.
+
+  More formally, we can show the thesis by induction over environments:
+  for empty environments, the equations reduces to \ensuremath{\Eval{\Varid{t}}\;\EmptyEnv\mathrel{=}\Eval{\Varid{t}}\;\EmptyEnv}. For the case of \ensuremath{\Gamma,\Varid{x}\typcolon\sigma} (where $x \not\in \Gamma$), the thesis can be rewritten as
+  \[
+    \ensuremath{\Eval{(\Varid{t}\;[\mskip1.5mu \Gamma\mathbin{:=}\Gamma\oplus \Delta \Gamma\mskip1.5mu])\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{x}\oplus \Varid{dx}\mskip1.5mu]}\;(\D\rho,\Varid{x}\mathrel{=}\Varid{v}_{1},\Varid{dx}\mathrel{=}\Varid{dv})\mathrel{=}\Eval{\Varid{t}}\;(\rho_{1}\oplus \D\rho,\Varid{x}\mathrel{=}\Varid{v}_{1}\oplus \Varid{dv})}.
+  \]
+  We prove it via the following calculation.
+\begin{equational}
+  \begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}c<{\hspost}@{}}%
+\column{BE}{@{}l@{}}%
+\column{4}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[4]{}\Eval{(\Varid{t}\;[\mskip1.5mu \Gamma\mathbin{:=}\Gamma\oplus \Delta \Gamma\mskip1.5mu])\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{x}\oplus \Varid{dx}\mskip1.5mu]}\;(\D\rho,\Varid{x}\mathrel{=}\Varid{v}_{1},\Varid{dx}\mathrel{=}\Varid{dv}){}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[BE]%
+\>[4]{}\mbox{\commentbegin  Substitution lemma on \ensuremath{\Varid{x}}.  \commentend}{}\<[E]%
+\\
+\>[4]{}\Eval{(\Varid{t}\;[\mskip1.5mu \Gamma\mathbin{:=}\Gamma\oplus \Delta \Gamma\mskip1.5mu])}\;(\D\rho,\Varid{x}\mathrel{=}(\Eval{\Varid{x}\oplus \Varid{dx}}\;(\D\rho,\Varid{x}\mathrel{=}\Varid{v}_{1},\Varid{dx}\mathrel{=}\Varid{dv})),\Varid{dx}\mathrel{=}\Varid{dv}){}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[BE]%
+\>[4]{}\mbox{\commentbegin  Term-level \ensuremath{\oplus } agrees with \ensuremath{\oplus }
+      (\cref{lem:chops-coherent}).  \commentend}{}\<[E]%
+\\[\blanklineskip]%
+\>[4]{}\mbox{\commentbegin  Then simplify \ensuremath{\Eval{\Varid{x}}} and \ensuremath{\Eval{\Varid{dx}}}.  \commentend}{}\<[E]%
+\\
+\>[4]{}\Eval{(\Varid{t}\;[\mskip1.5mu \Gamma\mathbin{:=}\Gamma\oplus \Delta \Gamma\mskip1.5mu])}\;(\D\rho,\Varid{x}\mathrel{=}\Varid{v}_{1}\oplus \Varid{dv},\Varid{dx}\mathrel{=}\Varid{dv}){}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[BE]%
+\>[4]{}\mbox{\commentbegin  \ensuremath{\Varid{t}\;[\mskip1.5mu \Gamma\mathbin{:=}\Gamma\oplus \Delta \Gamma\mskip1.5mu]} does not mention \ensuremath{\Varid{dx}}.  \commentend}{}\<[E]%
+\\
+\>[4]{}\mbox{\commentbegin  So we can modify the environment entry for \ensuremath{\Varid{dx}}.  \commentend}{}\<[E]%
+\\
+\>[4]{}\mbox{\commentbegin  This makes the environment into a valid environment change.  \commentend}{}\<[E]%
+\\
+\>[4]{}\Eval{(\Varid{t}\;[\mskip1.5mu \Gamma\mathbin{:=}\Gamma\oplus \Delta \Gamma\mskip1.5mu])}\;(\D\rho,\Varid{x}\mathrel{=}\Varid{v}_{1}\oplus \Varid{dv},\Varid{dx}\mathrel{=}\NilC{\Varid{v}_{1}\oplus \Varid{dv}}){}\<[E]%
+\\
+\>[B]{}\mathrel{=}{}\<[BE]%
+\>[4]{}\mbox{\commentbegin  By applying the induction hypothesis and simplifying \ensuremath{\NilC{}} away.  \commentend}{}\<[E]%
+\\
+\>[4]{}\Eval{\Varid{t}}\;(\rho_{1}\oplus \D\rho,\Varid{x}\mathrel{=}\Varid{v}_{1}\oplus \Varid{dv}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\end{equational}
+\end{proof}
+
+% \paragraph{Discussion}
+% We defined earlier a change structure on the domain of the
+% \emph{denotations} of terms, that is |eval Gamma -> eval tau|.
+% We could use this as a change structure on terms, but the
+% resulting change structure is far less useful.
+% In particular, if |\rho drho -> eval dt drho| is a change from |eval t1|
+% to |eval t2|, it does not follow that |t1 `oplus` dt `cong`
+% t2|.\pg{never true, define another cong relation?}
+% Indeed, in the latter statement, all terms are evaluated in the
+% same environment; instead, when we say that |\rho drho -> eval dt
+% drho| is a change from |eval t1| to |eval t2|, we in fact
+% evaluate |t2| according to an updated environment.
+% So we can satisfy |t1 `oplus` dt `cong` t2| with |t1 = x|, |dt =
+% dx| and |t2 = x `oplus` dx|. Yet, |\rho drho -> eval dx drho| is
+% a change from |eval x| to |eval x|, not to |eval (x `oplus` dx)|.
+
+% %but rather that |eval t1 rho `oplus` eval dt (nil rho) = eval t2 rho|
+% Let us see why in more detail by recalling earlier notions.
+% When we state correctness of differentiation using the change
+% structure on |eval Gamma -> eval tau|, we say that |evalInc t =
+% \rho drho -> eval (derive t) drho| is a change from |eval t| to
+% |eval t|. Recall that, according to validity as defined by this
+% change structure, we say that |\rho1 drho -> eval dt drho| is a
+% valid change from |eval t1| to |eval t2| if for all valid
+% environment changes |fromto Gamma rho1 drho rho2| we have that
+% |eval dt drho| is a valid change from |eval t1 rho1| and |eval t2
+% rho2|. Hence we have
+% \begin{equation}
+%   \label{eq:sem-validity-oplus-eval}
+% |forall (fromto Gamma rho1 drho rho2). eval t1 rho1 `oplus` eval dt drho = eval t2 rho2|.
+% \end{equation}
+% For instance, applying correctness of differentiation to term |t
+% = x|, we have that |eval x rho1 `oplus` eval dx drho = eval x
+% rho2|.
+
+% However, we seek to define validity on terms in a different way.
+% We want to say when term |dt| is a valid change from term |t1| to
+% term |t2|, so that as a corollary |t1 `oplus` dt `cong` t2| and
+% |t1 `oplus` dt| and |t2| are interchangeable in all \emph{valid
+%   contexts}, that is, context where all changes are valid.
+% \pg{Uh! Not all contexts! Only contexts with valid environments!}
+% \pg{where's the statement/lemma/theorem?}
+% That is,
+% \begin{equation}
+% |forall (fromto Gamma rho1 drho rho2). eval (t1 `oplus` dt) drho = eval t2 drho|.
+% \end{equation}
+% Because evaluation commutes with |`oplus`|
+% (\cref{lem:chops-coherent}), and because a valid environment
+% change |drho| extends its source |rho1|, this equation is
+% equivalent to
+% \begin{equation}
+%   \label{eq:syn-equiv-envs}
+% |forall (fromto Gamma rho1 drho rho2). eval t1 rho1 `oplus` eval dt drho = eval t2 rho1|.
+% \end{equation}
+% This statement evaluates |t1| and |t2| in \emph{the same}
+% environment |rho1|, while instead
+% \cref{eq:sem-validity-oplus-eval} evaluates |t2| against |rho2|.
+% Hence, we incorporate \cref{eq:syn-equiv-envs} into a new definition.
+% \pg{Continue.}
+
+% Earlier equations evaluate |t2| against |rho2|.
+% \pg{revise}
+% Consider the equations that must hold for all |fromto Gamma rho1
+% drho rho2|
+% for validity in the change structure for |eval Gamma -> eval tau|\pg{cref}:
+% |eval t1 rho1 `oplus` eval dt drho = eval t2 rho2|
+% % \pg{cite this from earlier!}
+% and
+% for correctness of differentiation (\cref{thm:derive-correct-oplus}):
+% |eval t rho1 `oplus` eval (derive t) drho = eval t rho2|.
+% \pg{any other ones?}
+% Unlike equations we have seen before, in this equation all terms
+% are evaluated with respect to the same environment.
+
+% \pg{Earlier attempt...}
+% \pg{Bad transition.}
+% We might be tempted to say,
+% then, that |derive t| is a change from |t| to |t|. But such a
+% notion does not imply that |t `oplus` derive t = t|.
+% Indeed, if we try to show \cref{eq:syn-equiv-envs} from
+% |fromtosem Gamma tau (eval t) (evalInc t) (eval t)|, we obtain a
+% different equation, namely
+% \begin{equation}
+% |forall (fromto Gamma rho1 drho rho2). eval t1 rho1 `oplus` eval dt drho = eval t2 rho2|.
+% \end{equation}
+% \pg{cite this from earlier!}
+
+
+% or to term |t1 `oplus` dt|, that |dx| is a
+% change from |x| to |x `oplus` dx|, and so on.
+
+% But currently we lack the language to do so. We can use the
+% change structure on |eval Gamma -> eval tau|, and write |fromto
+% () t1 dt t2|.\pg{How to write Gamma, tau there?}
+% But in such a statement means that for all
+
+% We write substitution as |t [x := s]|, and parallel substitution
+% as
+% |t [Gamma := Gamma `oplus` Dt^Gamma]|
+% \begin{theorem}[Syntactic correctness for |derive(param)|]
+%   |fromtosyn Gamma tau t (derive t) (t [Gamma := Gamma `oplus` Dt^Gamma])|.
+% \end{theorem}
+% \begin{lemma}[Substitution lemma]
+%   Take terms |Gamma /- s : sigma| and |Gamma , x : sigma /- t :
+%   tau|. Then for all environments |rho : eval(Gamma)|
+%   substitution commutes with evaluation:
+%   |eval (t [x := s]) rho = eval t (rho, x = eval(s) rho)|.
+% \end{lemma}
+
+% This
+% We will discuss changes on terms directly, without referencing
+% explicitly a denotational semantics.
+% Up to now, we have only discussed what
+
+% We can also prove a different corollary.
+% \begin{corollary}
+% If |Gamma /- t : tau| then |eval t `oplus` evalInc t = eval t|. That is,
+% |eval t rho `oplus` evalInc t rho (nil rho) = eval t rho|.
+% \end{corollary}
+% \begin{proof}
+%   The proof is similar to the one of \cref{thm:derive-correct-oplus}.
+%   Again, differentiation is correct (\cref{thm:derive-correct}), and |`oplus`|
+%   agrees with validity. But this time we write correctness of differentiation as
+%   |fromto (Gamma -> tau) (eval t) (evalInc t) (eval t)|, so that we obtain
+%   |eval t `oplus` evalInc t = eval t|. Recalling that |(f `oplus` df) v = f v `oplus` f
+%   v (nil v)|, that is equivalent to
+%   |eval t rho `oplus` evalInc t rho (nil rho) = eval t rho|.
+% \end{proof}
+
+% \begin{remark}
+%   We'll later define a polymorphic term |/- `oplus` : t -> Dt^t -> t| which
+% represents the semantic |`oplus`| inside the calculus, that is, such that
+% |eval(`oplus`) emptyRho = `oplus`|. One might try to conclude that
+% \end{remark}
+% Our \cref{thm:derive-correct-oplus} on |derive(t)| can also be written through
+% the equation
+% \begin{equation}
+%   \label{eq:derive-correct-oplus-higher-order}
+% |eval t `oplus` evalInc t = eval t|.
+% \end{equation}
+% \pg{move into theorem.}
+% But we need to be
+% careful. We later define |`oplus`| also as a family of terms (one for each type),
+% but it does not follow in general from
+% \cref{eq:derive-correct-oplus-higher-order} that |t `oplus` derive t `cong` t|.
+
+\section{Change equivalence}
+\label{sec:change-equivalence}
+To optimize programs manipulate changes, we often want to replace a
+change-producing term by another one, while preserving the overall program
+meaning. Hence, we define an equivalence on valid changes that is preserved by
+change operations, that is (in spirit) a \emph{congruence}. We call this relation
+\emph{(change) equivalence}, and refrain from using other
+equivalences on changes.
+
+Earlier (say, in \cref{ssec:pointwise-changes}) we have sometimes required that
+changes be equal, but that's often too restrictive.
+
+Change equivalence is defined in terms of validity, to ensure that
+validity-preserving operations preserve change equivalence: If two changes \ensuremath{\Varid{dv}_{1}}
+and \ensuremath{\Varid{dv}_{2}} are equivalent, one can be substituted for the other in a
+validity-preserving context. We can define this once for all change
+structures, hence in particular for values and environments.
+
+\begin{definition}[Change equivalence]
+  Given a change structure \ensuremath{\ChangeStruct{\Conid{V}}},
+  changes \ensuremath{\Varid{dv}_a,\Varid{dv}_b\typcolon\Delta \Conid{V}} are equivalent relative to source
+  \ensuremath{\Varid{v}_{1}\typcolon\Conid{V}} (written \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}_a\Doe\Varid{dv}_b}{\Varid{v}_{2}}})
+  if and only if there exists \ensuremath{\Varid{v}_{2}} such that both \ensuremath{\Varid{dv}_a} and
+  \ensuremath{\Varid{dv}_b} are valid from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{2}} (that is \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}_a}{\Varid{v}_{2}}}, \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}_b}{\Varid{v}_{2}}}).
+\end{definition}
+\begin{notation}
+When not ambiguous we often abbreviate \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}_a\Doe\Varid{dv}_b}{\Varid{v}_{2}}} as \ensuremath{\Varid{dv}_a\;\negthickspace\DoeIdx{\Varid{v}_{1}}\negthickspace\;\Varid{dv}_b} or \ensuremath{\Varid{dv}_a\Doe\Varid{dv}_b}.
+
+Two changes are often equivalent relative to a source but not
+others. Hence \ensuremath{\Varid{dv}_a\Doe\Varid{dv}_b} is always an abbreviation for
+change equivalence for a specific source.
+\end{notation}
+
+\begin{example}
+For instance, we later use a change structure for integers using
+both replacement changes and differences (\cref{ex:replacement}).
+In this structure, change \ensuremath{\mathrm{0}} is nil for all numbers, while
+change \ensuremath{\mathbin{!}\mathrm{5}} (``bang 5'') replaces any number with 5. Hence,
+changes \ensuremath{\mathrm{0}} and \ensuremath{\mathbin{!}\mathrm{5}} are equivalent only relative to source 5,
+and we write \ensuremath{\mathrm{0}\;\negthickspace\DoeIdx{\mathrm{5}}\negthickspace\mathbin{!}\mathrm{5}}.
+\end{example}
+
+By applying definitions, one can verify that change equivalence
+relative to a source \ensuremath{\Varid{v}} is a symmetric and transitive relation on \ensuremath{\Delta \Conid{V}}.
+However, it is not an equivalence relation on \ensuremath{\Delta \Conid{V}}, because it is only
+reflexive on changes valid for source \ensuremath{\Varid{v}}. Using the set-theoretic concept of
+subset we can then state the following lemma (whose proof we omit as it is
+brief):
+\begin{lemma}[\ensuremath{\Doe} is an equivalence on valid changes]
+  \label{doe:equiv-valid}
+  For each set \ensuremath{\Conid{V}} and source \ensuremath{\Varid{v}\in \Conid{V}}, change equivalence
+  relative to source \ensuremath{\Varid{v}} is an equivalence relation over the set
+  of changes \[\{\ensuremath{\Varid{dv}\in \Delta \Conid{V}\mid\Varid{dv}} \text{ is valid with source } \ensuremath{\Varid{v}}\}.\]
+\end{lemma}
+We elaborate on this peculiar sort of equivalence in \cref{sec:doe-per}.
+
+\subsection{Preserving change equivalence}
+Change equivalence relative to a source \ensuremath{\Varid{v}} is respected, in an appropriate
+sense, by all validity-preserving expression contexts that accept changes with
+source \ensuremath{\Varid{v}}.
+To explain what this means we study an example lemma: we show that because valid
+function changes preserve validity, they also respect change equivalence.
+At first, we use ``(expression) context'' informally to refer to
+expression contexts in the metalanguage. Later, we'll extend our
+discussion to actual expression contexts in the object language.
+
+\begin{lemma}[Valid function changes respect change equivalence]
+  \label{lem:ch-respect-doe}
+Any valid function change
+\[\ensuremath{\validfromto{\Conid{A}\to \Conid{B}}{\Varid{f}_{1}}{\Varid{df}}{\Varid{f}_{2}}}\]
+respects change equivalence: if \ensuremath{\validfromto{\Conid{A}}{\Varid{v}_{1}}{\Varid{dv}_a\Doe\Varid{dv}_b}{\Varid{v}_{2}}} then
+\ensuremath{\validfromto{\Conid{B}}{\Varid{f}_{1}\;\Varid{v}_{1}}{\Varid{df}\;\Varid{v}_{1}\;\Varid{dv}_a\Doe\Varid{df}\;\Varid{v}_{1}\;\Varid{dv}_b}{\Varid{f}_{2}\;\Varid{v}_{2}}}.
+We also say that (expression) \emph{context} \ensuremath{\Varid{df}\;\Varid{v}_{1}\;\text{\textendash}}
+respects change equivalence.
+\end{lemma}
+\begin{proof}
+The thesis means that \ensuremath{\validfromto{\Conid{B}}{\Varid{f}_{1}\;\Varid{v}_{1}}{\Varid{df}\;\Varid{v}_{1}\;\Varid{dv}_a}{\Varid{f}_{2}\;\Varid{v}_{2}}} and \ensuremath{\validfromto{\Conid{B}}{\Varid{f}_{1}\;\Varid{v}_{1}}{\Varid{df}\;\Varid{v}_{1}\;\Varid{dv}_b}{\Varid{f}_{2}\;\Varid{v}_{2}}}. Both equivalences follow in one step from validity of
+\ensuremath{\Varid{df}}, \ensuremath{\Varid{dv}_a} and \ensuremath{\Varid{dv}_b}.
+\end{proof}
+
+This lemma holds because the source and destination of \ensuremath{\Varid{df}\;\Varid{v}_{1}\;\Varid{dv}}
+don't depend on \ensuremath{\Varid{dv}}, only on its source and destination. Source
+and destination are shared by equivalent changes. Hence,
+validity-preserving functions map equivalent changes to
+equivalent changes.
+
+In general, all operations that preserve validity also respect
+\emph{change equivalence}, because for all those operations, the
+source and destination of any output changes, and the resulting
+value, only depend on source and destination of input changes.
+
+However, \cref{lem:ch-respect-doe} does \emph{not} mean that \ensuremath{\Varid{df}\;\Varid{v}_{1}\;\Varid{dv}_a\mathrel{=}\Varid{df}\;\Varid{v}_{1}\;\Varid{dv}_b},
+because there can be multiple changes with the same source and destination.
+For instance, say that \ensuremath{\Varid{dv}_a} is a list change that removes an element and readds it,
+and \ensuremath{\Varid{dv}_b} is a list change that describes no modification. They are both nil
+changes, but a function change might handle them differently.
+
+Moreover, we only proved that context \ensuremath{\Varid{df}\;\Varid{v}_{1}\;\text{\textendash}} respects change equivalence
+relative to
+source \ensuremath{\Varid{v}_{1}}. If value \ensuremath{\Varid{v}_{3}} differs from \ensuremath{\Varid{v}_{1}}, \ensuremath{\Varid{df}\;\Varid{v}_{3}\;\Varid{dv}_a} and \ensuremath{\Varid{df}\;\Varid{v}_{3}\;\Varid{dv}_b} need
+not be equivalent. Hence, we say that context \ensuremath{\Varid{df}\;\Varid{v}_{1}} \emph{accepts changes}
+with source \ensuremath{\Varid{v}_{1}}. More in general, a context accepts changes with source \ensuremath{\Varid{v}_{1}}
+if it preserves validity for changes with source \ensuremath{\Varid{v}_{1}}; we can say informally
+that all such contexts also respect change equivalence.
+
+Another example: context \ensuremath{\Varid{v}_{1}\oplus \text{\textendash}} also accepts changes
+with source \ensuremath{\Varid{v}_{1}}. Since this context produces a base value and not a change, it
+maps equivalent changes to equal results:
+\begin{lemma}[\ensuremath{\oplus } respects change equivalence]
+  \label{lem:oplus-respect-doe}
+  If \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}_a\Doe\Varid{dv}_b}{\Varid{v}_{2}}} then \ensuremath{\Varid{v}_{1}\oplus \text{\textendash}} respects the
+  equivalence between \ensuremath{\Varid{dv}_a} and \ensuremath{\Varid{dv}_b}, that is, \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}_a\mathrel{=}\Varid{v}_{1}\oplus \Varid{dv}_b}.
+\end{lemma}
+\begin{proof}
+  \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}_a\mathrel{=}\Varid{v}_{2}\mathrel{=}\Varid{v}_{1}\oplus \Varid{dv}_b}.
+\end{proof}
+
+There are more contexts that preserve equivalence. As discussed, function
+changes preserve contexts, and \ensuremath{\Derive{\text{\textendash}}} produces functions changes, so \ensuremath{\Derive{\Varid{t}}} preserves equivalence on its environment, and on any of its free variables.
+
+\begin{lemma}[\ensuremath{\Derive{\text{\textendash}}} preserves change equivalence]
+  \label{lem:eval-derive-preserve-doe}
+For any term \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}, \ensuremath{\Derive{\Varid{t}}} preserves change
+equivalence of environments:
+for all \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho_a\Doe\D\rho_b}{\rho_{2}}} we have
+\ensuremath{\validfromto{\Gamma\to \tau}{\Eval{\Varid{t}}\;\rho_{1}}{\Eval{\Derive{\Varid{t}}}\;\D\rho_a\Doe\Eval{\Derive{\Varid{t}}}\;\D\rho_b}{\Eval{\Varid{t}}\;\rho_{2}}}.
+% that is |fromto (Gamma
+% -> tau) (eval t) (eval (derive t) `doe` eval (derive t)) (eval
+% t)|, that is,
+\end{lemma}
+\begin{proof}
+  To verify this, just apply correctness of differentiation to
+  both changes \ensuremath{\D\rho_a} and \ensuremath{\D\rho_b}.
+\end{proof}
+
+To show more formally in what sense change equivalence is a
+congruence, we first lift change equivalence to terms (\cref{def:syn-doe}),
+similarly to syntactic change validity in \cref{sec:denot-syntactic-validity}.
+To do so, we first need a notation for \emph{one-sided}
+or \emph{source-only} validity:
+\begin{notation}[One-sided validity]
+  We write \ensuremath{\validfrom{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}}} to mean there exists \ensuremath{\Varid{v}_{2}} such that
+  \ensuremath{\validfromto{\Conid{V}}{\Varid{v}_{1}}{\Varid{dv}}{\Varid{v}_{2}}}. We will reuse existing conventions and
+  write \ensuremath{\validfrom{\tau}{\Varid{v}_{1}}{\Varid{dv}}} instead of \ensuremath{\validfrom{\Eval{\tau}}{\Varid{v}_{1}}{\Varid{dv}}}
+  and \ensuremath{\validfrom{\Gamma}{\rho_{1}}{\D\rho}} instead of \ensuremath{\validfrom{\Eval{\Gamma}}{\rho_{1}}{\D\rho}}.
+\end{notation}
+
+\begin{definition}[Syntactic change equivalence]
+  \label{def:syn-doe}
+Two change terms \ensuremath{\Delta \Gamma\vdash\Varid{dt}_a\typcolon\Delta \tau} and \ensuremath{\Delta \Gamma\vdash\Varid{dt}_b\typcolon\Delta \tau} are change equivalent, relative to source \ensuremath{\Gamma\vdash\Varid{t}\typcolon\tau}, if for all valid environment changes
+\ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}} we have that
+\[\ensuremath{\validfrom{\tau}{\Eval{\Varid{t}}\;\rho_{1}}{\Eval{\Varid{dt}_a}\;\D\rho\Doe\Eval{\Varid{dt}_b}\;\D\rho}}.\]
+We write then
+\ensuremath{\validfromsyn{\Gamma}{\tau}{\Varid{t}}{\Varid{dt}_a\Doe\Varid{dt}_b}}
+or \ensuremath{\Varid{dt}_a\;\negthickspace\DoeIdx{\Varid{t}}\negthickspace\;\Varid{dt}_b}, or simply \ensuremath{\Varid{dt}_a\Doe\Varid{dt}_b}.
+%|fromto tau v1 (dv1 `doe` dv2) v2|,
+\end{definition}
+Saying that \ensuremath{\Varid{dt}_a} and \ensuremath{\Varid{dt}_b} are equivalent relative to \ensuremath{\Varid{t}} does
+not specify the destination of \ensuremath{\Varid{dt}_a} and \ensuremath{\Varid{dt}_b}, only their
+source. The only reason is to simplify the statement and proof of
+\cref{thm:derive-preserve-doe}.
+
+% If there exists a destination and we want to specify it,
+% we can use the following stronger definition:
+% \begin{definition}[Syntactic change equivalence, two sided]
+% Two change terms |Dt^Gamma /- dta : Dt^tau| and |Dt^Gamma /- dtb :
+% Dt^tau| are change equivalent, from source |Gamma /- t1 :
+% tau| to destination |Gamma /- t2 : tau|, if for all |fromto Gamma rho1 drho rho2| we have that
+% \[|fromto V (eval t1 rho1) (eval dta drho `doe` eval dtb drho)
+%   (eval t2 rho2)|\]
+% %\[|eval dta drho|\, |(doeIdx(eval t rho1))| |eval dtb drho|.\]
+% We write then \[|fromtosyn Gamma tau t1 (dta `doe` dtb) t2|.\]
+% %|fromto tau v1 (dv1 `doe` dv2) v2|,
+% \end{definition}
+% \begin{fact}
+%   Two-sided change equivalence implies source-only change
+%   equivalence: if
+% \[|fromtosyn Gamma tau t1 (dta `doe` dtb) t2|\] then
+% |dta (doeIdx t1) dtb|.
+% \end{fact}
+
+% % Unlike in other similar definition, when changes |dta| and |dtb| are equivalent
+% % relative to |t| and given equivalent contexts |fromto Gamma rho1 drho rho2|,
+% % they need
+% % The equivalence of |dta| and |dtb| relative to |t| does not
+% % require that the destination is again |t|.
+% \pg{Use \cref{def:syntactic-validity} to also state the destination.}
+% \pg{Introduce this earlier}
+
+If two change terms are change equivalent with respect to the
+right source, we can replace one for the other in an expression
+context to optimize a program, as long as the expression context
+is validity-preserving and accepts the change.
+
+In particular, substituting into \ensuremath{\Derive{\Varid{t}}} preserves syntactic
+change equivalence, according to the following theorem (for which
+we have only a pen-and-paper formal proof).
+\begin{theorem}[\ensuremath{\Derive{\text{\textendash}}} preserves syntactic change equivalence]
+  \label{thm:derive-preserve-doe}
+  For any equivalent changes \ensuremath{\validfromsyn{\Gamma}{\sigma}{\Varid{ds}_a\Doe\Varid{ds}_b}{\Varid{s}}}, and for any term \ensuremath{\Varid{t}} typed as
+  \ensuremath{\Gamma,\Varid{x}\typcolon\sigma\vdash\Varid{t}\typcolon\tau},
+  we can produce equivalent results by substituting into \ensuremath{\Derive{\Varid{t}}} either \ensuremath{\Varid{s}} and \ensuremath{\Varid{ds}_a} or \ensuremath{\Varid{s}} and \ensuremath{\Varid{ds}_b}:
+\[\ensuremath{\validfromsyn{\Gamma}{\tau}{\Varid{t}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{s}\mskip1.5mu]}{\Derive{\Varid{t}}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{s},\Varid{dx}\mathbin{:=}\Varid{ds}_a\mskip1.5mu]\Doe\Derive{\Varid{t}}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{s},\Varid{dx}\mathbin{:=}\Varid{ds}_b\mskip1.5mu]}}.\]
+\end{theorem}
+\begin{proof}[Proof sketch]
+  The thesis holds because \ensuremath{\Derive{\text{\textendash}}} preserves change equivalence
+  \cref{lem:eval-derive-preserve-doe}.
+  A formal proof follows through routine (and tedious)
+  manipulations of bindings. In essence, we can extend a change environment
+  \ensuremath{\D\rho} for context \ensuremath{\Gamma} to
+  equivalent environment changes for context \ensuremath{\Gamma,\Varid{x}\typcolon\sigma}
+  with the values of \ensuremath{\Varid{ds}_a} and \ensuremath{\Varid{ds}_b}. The tedious calculations
+  follow.
+\end{proof}
+
+\begin{proof}
+  % A corollary of \cref{lem:eval-derive-preserve-doe} and of a substitution lemma
+  % relating substitution and denotational semantics: |eval (t) (x = eval s rho,
+  % rho) = eval(t [x := s]) rho|.
+
+  Assume \ensuremath{\validfromto{\Gamma}{\rho_{1}}{\D\rho}{\rho_{2}}}.
+  Because \ensuremath{\Varid{ds}_a} and \ensuremath{\Varid{ds}_b} are change-equivalent we have
+  % By definition of |dsa (doeIdx(s)) dsb| we have that
+  % |eval dsa drho (doeIdx(eval s rho1)) (eval dsb drho)|.
+  %
+  % Because |`oplus`| respects validity also syntactically \pg{?}
+  % we can show that |dsa, dsb| have destination |s `oplus` dsa|, that is
+  \[\ensuremath{\validfrom{\sigma}{\Eval{\Varid{s}}\;\rho_{1}}{\Eval{\Varid{ds}_a}\;\D\rho\Doe\Eval{\Varid{ds}_b}\;\D\rho}}.\]
+  Moreover, \ensuremath{\Eval{\Varid{s}}\;\rho_{1}\mathrel{=}\Eval{\Varid{s}}\;\D\rho} because \ensuremath{\D\rho} extends
+  \ensuremath{\rho_{1}}. We'll use this equality without explicit mention.
+  % \[|fromto sigma (eval s rho1) (eval dsa drho `doe` eval dsb drho) (eval (s `oplus` ds) rho1)|.\]
+  % \[| (eval dsa drho) (doeIdx(eval s rho1)) (eval dsb drho) |.\]
+
+  Hence, we can construct change-equivalent environments for
+  evaluating \ensuremath{\Derive{\Varid{t}}}, by combining \ensuremath{\D\rho} and the values of
+  respectively \ensuremath{\Varid{ds}_a} and \ensuremath{\Varid{ds}_b}:
+  \begin{multline}
+  \ensuremath{\validfrom{(\Gamma,\Varid{x}\typcolon\sigma)}{(\rho_{1},\Varid{x}\mathrel{=}\Eval{\Varid{s}}\;\rho_{1})}{(\D\rho,\Varid{x}\mathrel{=}\Eval{\Varid{s}}\;\D\rho,\Varid{dx}\mathrel{=}\Eval{\Varid{ds}_a}\;\D\rho)\Doe\\(\D\rho,\Varid{x}\mathrel{=}\Eval{\Varid{s}}\;\D\rho,\Varid{dx}\mathrel{=}\Eval{\Varid{ds}_b}\;\D\rho)\\}}.
+  \end{multline}
+  This environment change equivalence is respected by \ensuremath{\Derive{\Varid{t}}}, hence:
+  \begin{multline}
+    \label{eq:derive-preserve-doe-1}
+  \ensuremath{\validfrom{\Gamma\to \tau}{\Eval{\Varid{t}}\;(\rho_{1},\Varid{x}\mathrel{=}\Eval{\Varid{s}}\;\rho_{1})}{\Eval{\Derive{\Varid{t}}}\;(\D\rho,\Varid{x}\mathrel{=}\Eval{\Varid{s}}\;\D\rho,\Varid{dx}\mathrel{=}\Eval{\Varid{ds}_a}\;\D\rho)\Doe\\\Eval{\Derive{\Varid{t}}}\;(\D\rho,\Varid{x}\mathrel{=}\Eval{\Varid{s}}\;\D\rho,\Varid{dx}\mathrel{=}\Eval{\Varid{ds}_b}\;\D\rho)\\}}.
+  \end{multline}
+  We want to deduce the thesis by applying to this statement the substitution
+  lemma for denotational semantics:
+  \ensuremath{\Eval{\Varid{t}}\;(\rho,\Varid{x}\mathrel{=}\Eval{\Varid{s}}\;\rho)\mathrel{=}\Eval{\Varid{t}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{s}\mskip1.5mu]}\;\rho}.
+
+  To apply the substitution lemma to the substitution of \ensuremath{\Varid{dx}}, we
+  must adjust \cref{eq:derive-preserve-doe-1} using soundness of
+  weakening. We get:
+  \begin{multline}
+    \label{eq:derive-preserve-doe-2}
+  \ensuremath{\validfrom{\Gamma\to \tau}{\Eval{\Varid{t}}\;(\rho_{1},\Varid{x}\mathrel{=}\Eval{\Varid{s}}\;\rho_{1})}{\Eval{\Derive{\Varid{t}}}\;(\D\rho,\Varid{x}\mathrel{=}\Eval{\Varid{s}}\;\D\rho,\Varid{dx}\mathrel{=}\Eval{\Varid{ds}_a}\;(\D\rho,\Varid{x}\mathrel{=}\Eval{\Varid{s}}\;\D\rho))\Doe\\\Eval{\Derive{\Varid{t}}}\;(\D\rho,\Varid{x}\mathrel{=}\Eval{\Varid{s}}\;\D\rho,\Varid{dx}\mathrel{=}\Eval{\Varid{ds}_b}\;(\D\rho,\Varid{x}\mathrel{=}\Eval{\Varid{s}}\;\D\rho))\\}}.
+  \end{multline}
+
+  This equation can now be rewritten (by applying the
+  substitution lemma to the substitutions of \ensuremath{\Varid{dx}} and \ensuremath{\Varid{x}}) to the following one:
+  \begin{multline}
+    \label{eq:derive-preserve-doe-3}
+  \ensuremath{\validfrom{\Gamma\to \tau}{\Eval{\Varid{t}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{s}\mskip1.5mu]}\;\rho_{1}}{\Eval{(\Derive{\Varid{t}}\;[\mskip1.5mu \Varid{dx}\mathbin{:=}\Varid{ds}_a\mskip1.5mu]\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{s}\mskip1.5mu])}\;\D\rho\Doe\\\Eval{(\Derive{\Varid{t}}\;[\mskip1.5mu \Varid{dx}\mathbin{:=}\Varid{ds}_b\mskip1.5mu]\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{s}\mskip1.5mu])}\;\D\rho\\}}.
+  \end{multline}
+
+  Since \ensuremath{\Varid{x}} is not in scope in \ensuremath{\Varid{s},\Varid{ds}_a,\Varid{ds}_b}, we can permute
+  substitutions to conclude that:
+\[\ensuremath{\validfromsyn{\Gamma}{\tau}{\Varid{t}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{s}\mskip1.5mu]}{\Derive{\Varid{t}}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{s},\Varid{dx}\mathbin{:=}\Varid{ds}_a\mskip1.5mu]\Doe\Derive{\Varid{t}}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{s},\Varid{dx}\mathbin{:=}\Varid{ds}_b\mskip1.5mu]}}\]
+as required.
+\end{proof}
+In this theorem, if \ensuremath{\Varid{x}} appears once in \ensuremath{\Varid{t}}, then \ensuremath{\Varid{dx}} appears once in \ensuremath{\Derive{\Varid{t}}} (this follows by induction on \ensuremath{\Varid{t}}), hence \ensuremath{\Derive{\Varid{t}}\;[\mskip1.5mu \Varid{x}\mathbin{:=}\Varid{s},\Varid{dx}\mathbin{:=}\text{\textendash}\mskip1.5mu]}
+produces a one-hole expression context.
+
+\paragraph{Further validity-preserving contexts}
+There are further operations that preserve validity. To represent terms with
+``holes'' where other terms can be inserted, we can define \emph{one-level
+contexts} \ensuremath{\Conid{F}}, and contexts \ensuremath{\Conid{E}}, as is commonly done:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Conid{F}\mathbin{::=}[\mskip1.5mu \mskip1.5mu]\;\Varid{t}\;\Varid{dt}\mid \Varid{ds}\;\Varid{t}\;[\mskip1.5mu \mskip1.5mu]\mid \lambda \Varid{x}\;\Varid{dx}\to [\mskip1.5mu \mskip1.5mu]\mid \Varid{t}\oplus [\mskip1.5mu \mskip1.5mu]\mid \Varid{dt}_{1}\circledcirc [\mskip1.5mu \mskip1.5mu]\mid [\mskip1.5mu \mskip1.5mu]\circledcirc \Varid{dt}_{2}{}\<[E]%
+\\
+\>[3]{}\Conid{E}\mathbin{::=}[\mskip1.5mu \mskip1.5mu]\mid \Conid{F}\;[\mskip1.5mu \Conid{E}\mskip1.5mu]{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+If \ensuremath{\validfromto{\tau}{\Varid{t}_{1}}{\Varid{dt}_{1}\Doe\Varid{dt}_{2}}{\Varid{t}_{2}}} and our context \ensuremath{\Conid{E}}
+accepts changes from \ensuremath{\Varid{t}_{1}}, then \ensuremath{\Conid{F}\;[\mskip1.5mu \Varid{dt}_{1}\mskip1.5mu]} and \ensuremath{\Conid{F}\;[\mskip1.5mu \Varid{dt}_{2}\mskip1.5mu]}
+are change equivalent. It is easy to prove such a lemma for each possible shape
+of one-level context \ensuremath{\Conid{F}}, both on values (like
+\cref{lem:ch-respect-doe,lem:oplus-respect-doe}) and on terms. We have been
+unable to state a more general theorem because it's not clear how to formalize
+the notion of a context accepting a change in general: the syntax of a context
+does not always hint at the validity proofs embedded.
+
+\pg{explain this type system elsewhere}
+\citet{CaiEtAl2014ILC} solve this problem for metalevel contexts by typing them
+with dependent types, but as discussed the overall proof is more awkward.
+Alternatively, it appears that the use of dependent types in
+\cref{ch:diff-parametricity-system-f} also ensures that change equivalence is a
+congruence (though at present this is still a conjecture), without overly
+complicating correctness proofs.
+However, it is not clear whether such a type system can be
+expressive enough without requiring additional coercions.
+Consider a change \ensuremath{\Varid{dv}_{1}} from \ensuremath{\Varid{v}_{1}} to \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}_{1}}, a
+value \ensuremath{\Varid{v}_{2}} which is known to be (propositionally) equal to \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}_{1}}, and
+a change \ensuremath{\Varid{dv}_{2}} from \ensuremath{\Varid{v}_{2}} to \ensuremath{\Varid{v}_{3}}. Then, term \ensuremath{\Varid{dv}_{1}\circledcirc \Varid{dv}_{2}} is not type
+correct (for instance in Agda): the typechecker will complain that \ensuremath{\Varid{dv}_{1}} has
+destination \ensuremath{\Varid{v}_{1}\oplus \Varid{dv}_{1}} while \ensuremath{\Varid{dv}_{2}} has source \ensuremath{\Varid{v}_{2}}. When working in Agda,
+to solve this problem we can explicitly coerce terms through propositional
+equalities, and can use Agda to prove such equalities in the first place.
+We leave the design of a sufficiently expressive object language where change
+equivalence is a congruence for future work.
+
+\subsection{Sketching an alternative syntax}
+If we exclude composition, we can sketch an alternative syntax
+which helps construct a congruence on changes.
+The idea is to manipulate, instead of changes alone, pairs of
+sources \ensuremath{\Varid{v}\in \Conid{V}} and valid changes $\{\ensuremath{\Varid{dv}\mid\validfrom{\Conid{V}}{\Varid{v}}{\Varid{dv}}}\}$.
+\pg{Move notation for one-sided validity.}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Varid{t}\mathbin{::=}\mathbf{src}\;\Varid{dt}\mid \mathbf{dst}\;\Varid{dt}\mid \Varid{x}\mid \Varid{t}\;\Varid{t}\mid \lambda \Varid{x}\to \Varid{t}{}\<[E]%
+\\
+\>[3]{}\Varid{dt}\mathbin{::=}\Varid{dt}\;\Varid{dt}\mid \mathbf{src}\;\Varid{dt}\mid \lambda \Varid{dx}\to \Varid{dt}\mid \Varid{dx}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Adapting differentiation to this syntax is easy:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Derive{\Varid{x}}\mathrel{=}\Varid{dx}{}\<[E]%
+\\
+\>[3]{}\Derive{\Varid{s}\;\Varid{t}}\mathrel{=}\Derive{\Varid{s}}\;\Derive{\Varid{t}}{}\<[E]%
+\\
+\>[3]{}\Derive{\lambda \Varid{x}\to \Varid{t}}\mathrel{=}\Derive{\lambda \Varid{dx}\to \Varid{dt}}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Derivatives of
+primitives only need to use \ensuremath{\Varid{dst}\;\Varid{dt}} instead of \ensuremath{\Varid{t}\oplus \Varid{dt}}
+and \ensuremath{\Varid{src}\;\Varid{dt}} instead of \ensuremath{\Varid{t}} whenever \ensuremath{\Varid{dt}} is a change for \ensuremath{\Varid{t}}.
+
+With this syntax, we can define change expression contexts, which
+can be filled in by change expressions:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\Conid{E}\mathbin{::=}\Varid{src}\;\Varid{dE}\mid \Varid{dst}\;\Varid{dE}\mid \Conid{E}\;\Varid{t}\mid \Varid{t}\;\Conid{E}\mid \lambda \Varid{x}\to \Conid{E}{}\<[E]%
+\\
+\>[3]{}\Varid{dE}\mathbin{::=}\Varid{dt}\;\Varid{dE}\mid \Varid{dE}\;\Varid{dt}\mid \lambda \Varid{dx}\to \Varid{dE}\mid [\mskip1.5mu \mskip1.5mu]{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+We conjecture change equivalence is a congruence with respect to
+contexts \ensuremath{\Varid{dE}}, and that contexts \ensuremath{\Conid{E}} map change-equivalent
+changes to results that are denotationally equivalent for valid
+changes. We leave a proof to future work, but we expect it to be
+straightforward. It also appears straightforward to provide an
+isomorphism between this syntax and the standard one.
+
+However, extending such contexts with composition does not appear
+trivial: contexts such as \ensuremath{\Varid{dt}\circledcirc \Varid{dE}} or \ensuremath{\Varid{dE}\circledcirc \Varid{dt}} only respect validity when the changes sources and
+destinations align correctly.
+
+We make no further use of this alternative syntax in this work.
+
+\subsection{Change equivalence is a PER}
+\label{sec:doe-per}
+Readers with relevant experience will recognize that change
+equivalence is a partial equivalence relation
+(PER)~\citep[Ch.~5]{Mitchell1996foundations}. It is standard to use PERs to
+identify valid elements in a
+model~\citep{Harper1992constructing}. In this section, we state
+the connection, showing that change equivalence is not an ad-hoc
+construction, so that mathematical constructions using PERs can
+be adapted to use change equivalence.
+
+We recall the definition of a PER:
+\begin{definition}[Partial equivalence relation (PER)]
+  A relation $R \subseteq S \times S$ is a partial equivalence
+  relation if it is symmetric (if $a R b$ then $b R a$) and
+  transitive (if $a R b$ and $b R c$ then $a R c$).
+\end{definition}
+Elements related to another are also related to themselves: If
+$aRb$ then $aRa$ (by transitivity: $aRb$, $bRa$, hence $aRa$). So
+a PER on \ensuremath{\Conid{S}} identifies a subset of valid elements of \ensuremath{\Conid{S}}. Since
+PERs are equivalence relations on that subset, they also induce a
+(partial) partition of elements of \ensuremath{\Conid{S}} into equivalence classes
+of change-equivalent elements.
+
+\begin{lemma}[\ensuremath{\Doe} is a PER]
+  Change equivalence relative to a source \ensuremath{\Varid{a}\typcolon\Conid{A}} is a PER on set \ensuremath{\Delta \Conid{A}}.
+\end{lemma}
+\begin{proof}
+A restatement of \cref{doe:equiv-valid}.
+\end{proof}
+
+Typically, one studies \emph{logical PERs}, which are logical
+relations and PERs at the same time~\citep[Ch.~8]{Mitchell1996foundations}.
+In particular, with a logical PER two functions are related if they map related
+inputs to related outputs. This helps showing that a PERs is a congruence.
+Luckily, our PER is equivalent to such a definition.
+
+\begin{lemma}[Alternative definition for \ensuremath{\Doe}]
+Change equivalence is equivalent to the following logical relation:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{48}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}\validfromto{\iota}{\Varid{v}_{1}}{\Varid{dv}_a\Doe\Varid{dv}_b}{\Varid{v}_{2}}{}\<[48]%
+\>[48]{}\eqdef{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\validfromto{\iota}{\Varid{v}_{1}}{\Varid{dv}_a}{\Varid{v}_{2}}\text{ and }\validfromto{\iota}{\Varid{v}_{1}}{\Varid{dv}_a}{\Varid{v}_{2}}{}\<[E]%
+\\[\blanklineskip]%
+\>[3]{}\validfromto{\sigma\to \tau}{\Varid{f}_{1}}{\Varid{df}_a\Doe\Varid{df}_b}{\Varid{f}_{2}}{}\<[48]%
+\>[48]{}\eqdef{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\forall \validfromto{\sigma}{\Varid{v}_{1}}{\Varid{dv}_a\Doe\Varid{dv}_b}{\Varid{v}_{2}}\hsforall \hsdot{\circ }{\mathpunct{.}}{}\<[E]%
+\\
+\>[3]{}\hsindent{2}{}\<[5]%
+\>[5]{}\validfromto{\tau}{\Varid{f}_{1}\;\Varid{v}_{1}}{\Varid{df}_a\;\Varid{v}_{1}\;\Varid{dv}_a\Doe\Varid{df}_b\;\Varid{v}_{2}\;\Varid{dv}_b}{\Varid{f}_{2}\;\Varid{v}_{2}}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\end{lemma}
+\begin{proof}
+  By induction on types.
+\end{proof}
+
+% A limitation of our PERs is that, compared to more typical
+% examples, our PERs are constructed over an existing type system
+% in the meta-theory (a semantics for simply-typed
+% $\lambda$-calculus, together with separate domains for each
+% type), rather than a partial combinatory algebra containing codes
+% for all values.
+% Since ILC can be proved correct also for untyped languages
+% (\cref{sec:silr-untyped-proof}), it's unce
+
+\section{Chapter conclusion}
+\label{sec:term-reasoning-concl}
+In this chapter, we have put on a more solid foundation
+forms of reasoning about changes on terms, and defined an
+appropriate equivalence on changes.
